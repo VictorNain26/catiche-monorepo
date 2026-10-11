@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import type { z } from '../lib/zod';
 import { CheckboxField, Field, SelectField } from '../components/field';
 import { Notice } from '../components/notice';
-import { Page } from '../components/page';
+import { HeaderLink, Page } from '../components/page';
 import { api, parseResponse } from '../lib/api';
 import { LEVEL_LABELS, householdMessage, newStudentSchema, studentsQuery, type Student } from '../lib/household';
 import { meQuery } from '../lib/me';
@@ -32,10 +32,9 @@ function Household() {
     <Page
       title={`Bonjour ${me?.name ?? ''}`}
       action={
-        <Link to="/foyer/compte" className="inline-flex min-h-11 items-center gap-1 text-sm text-primary underline underline-offset-4">
-          <UserRoundIcon aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
+        <HeaderLink to="/foyer/compte" icon={UserRoundIcon}>
           Mon compte
-        </Link>
+        </HeaderLink>
       }
     >
       <section aria-labelledby="children" className="flex flex-col gap-3">

@@ -183,6 +183,8 @@ test('« Mon compte » holds the passkeys and the sign-out, out of the home', as
     return link && title ? link.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING : 0;
   });
   expect(order).toBeTruthy();
+  // It leads away from this page: never announced as the current one.
+  await expect(back).not.toHaveAttribute('aria-current');
 });
 
 // page.route never sees what the service worker answers.
