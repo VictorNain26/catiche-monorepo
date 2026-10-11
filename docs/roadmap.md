@@ -31,10 +31,11 @@ Retention sont demandées à Mistral (2026-10-11) ; la réponse décide du lot 4
 ## Ensuite
 
 - **Lot 2**, une refonte complète, parcours par parcours, pensée à la place du parent et de
-  l'enfant : l'entrée et l'accueil du parent, l'ajout d'un enfant, les profils sur l'appareil de
-  la famille, l'accueil de l'élève, l'apparence de la séance, le résumé de la semaine, le compte ; puis le double consentement sous 15 ans et le
-  second parent ; puis le paiement, avec son fournisseur et le statut juridique tranchés avant.
-  Le comportement de Tom dans la séance reste au lot 4.
+  l'enfant, en dix PR : les composants, l'entrée du parent, l'ajout d'un enfant, les profils et
+  le jumelage, l'arrivée de l'élève, la séance, la semaine, le compte, le second parent et le
+  double consentement, le paiement, avec son fournisseur et le statut juridique tranchés avant
+  (`etudes/2026-10-11/refonte-interface.md`). Le comportement de Tom dans la séance reste au
+  lot 4.
 - **Lot 3**, dès la charte choisie, en parallèle du lot 2 : la landing reçoit les tokens et la
   fonte de l'app, `landing.css` se supprime, le texte se réécrit sur la vision ; le domaine du
   nouveau nom.
