@@ -76,10 +76,23 @@ test('a birth month the server would refuse is refused at its own step, and a do
   await expect(page).toHaveURL(/\/foyer\/ajouter$/);
 });
 
+test('the child’s page: their class, the next step first, then the week, the rest folded', async ({ page }) => {
+  await guardian(page, 'fiche');
+  await addChild(page, 'Léo');
+  await expect(page.locator('main > header').getByText('Quatrième', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Prochaine étape', 'Sa semaine']);
+  for (const fold of ['Ses appareils', 'Ce que Tom retient', 'Son prénom et sa classe', 'Supprimer son compte']) {
+    await expect(page.getByText(fold, { exact: true })).toBeVisible();
+  }
+  await expect(page.getByRole('button', { name: 'Ouvrir l’espace de Léo sur cet appareil' })).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Supprimer le compte de Léo' })).toBeHidden();
+});
+
 test('a guardian adds a child, changes their class, then deletes their account', async ({ page }) => {
   await guardian(page, 'foyer');
   await addChild(page, 'Léa');
 
+  await page.getByText('Son prénom et sa classe', { exact: true }).click();
   await page.getByLabel('Sa classe', { exact: true }).selectOption({ label: 'Troisième' });
   await page.getByRole('button', { name: 'Enregistrer' }).click();
   // The page of a child just added says the next step too.
@@ -88,6 +101,7 @@ test('a guardian adds a child, changes their class, then deletes their account',
   await expect(page.getByText('Enregistré.')).toBeHidden();
   await page.getByLabel('Son prénom', { exact: true }).fill('Léa');
 
+  await page.getByText('Supprimer son compte', { exact: true }).click();
   await page.getByRole('button', { name: 'Supprimer le compte de Léa' }).click();
   await expect(page.getByRole('alert')).toContainText('C’est définitif');
   await page.getByRole('button', { name: 'Supprimer définitivement' }).click();
@@ -98,7 +112,7 @@ test('a guardian adds a child, changes their class, then deletes their account',
 test('a QR code on the parent’s phone opens the pairing on the child’s, the code filled in', async ({ page, browser }, testInfo) => {
   await guardian(page, 'qr');
   await addChild(page, 'Nina');
-  await page.getByRole('button', { name: 'Relier un appareil' }).click();
+  await page.getByRole('button', { name: 'Relier le téléphone de Nina' }).click();
   await expect(page.getByRole('img', { name: 'QR code pour relier l’appareil de Nina' })).toBeVisible();
   const code = (await page.getByText(/^[0-9A-Z]{4}-[0-9A-Z]{4}$/).textContent()) ?? '';
 
@@ -118,8 +132,10 @@ test('a QR code on the parent’s phone opens the pairing on the child’s, the 
 test('a code pairs the child’s phone, which sees it, and the guardian disconnects it', async ({ page, browser }, testInfo) => {
   await guardian(page, 'jumelage');
   await addChild(page, 'Noé');
-  await expect(page.getByText('Aucun appareil relié.')).toBeVisible();
-  await page.getByRole('button', { name: 'Relier un appareil' }).click();
+  // In 4e, the next step is the child's own phone.
+  const step = page.getByRole('region', { name: 'Prochaine étape' });
+  await expect(step).toContainText('Noé fait ses devoirs sur son téléphone');
+  await step.getByRole('button', { name: 'Relier le téléphone de Noé' }).click();
   const code = await page.getByText(/^[0-9A-Z]{4}-[0-9A-Z]{4}$/).textContent();
 
   const phone = await childPhone(browser, testInfo);
@@ -134,16 +150,34 @@ test('a code pairs the child’s phone, which sees it, and the guardian disconne
   await child.getByText('Tes appareils reliés').click();
   await expect(child.getByRole('listitem')).toHaveCount(1);
 
-  // The guardian's list follows the pairing on its own.
-  await expect(page.getByRole('button', { name: 'Déconnecter' })).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByText('L’appareil de Noé est relié.')).toBeVisible();
+  // The guardian's page follows the pairing on its own, said where the code was.
+  await expect(step.getByRole('status')).toHaveText('L’appareil de Noé est relié.', { timeout: 10_000 });
+  await expect(step.getByRole('button')).toHaveCount(0);
   await expect(page.getByText(/^[0-9A-Z]{4}-[0-9A-Z]{4}$/)).toBeHidden();
+  await page.getByText('Ses appareils', { exact: true }).click();
   await page.getByRole('button', { name: 'Déconnecter' }).click();
-  await expect(page.getByText('Aucun appareil relié.')).toBeVisible();
+  // Unpaired, the step comes back, without the code already spent.
+  await expect(step.getByRole('button', { name: 'Relier le téléphone de Noé' })).toBeVisible();
+  await expect(page.getByText(/^[0-9A-Z]{4}-[0-9A-Z]{4}$/)).toBeHidden();
+  await expect(page.getByText('L’appareil de Noé est relié.')).toBeHidden();
 
   await child.reload();
   await expect(child).toHaveURL(/\/connexion$/);
   await phone.close();
+});
+
+test('a pairing code leaves the screen when it expires, and another can be asked', async ({ page }) => {
+  await page.clock.install();
+  await guardian(page, 'code-expire');
+  await addChild(page, 'Tim');
+  const step = page.getByRole('region', { name: 'Prochaine étape' });
+  await step.getByRole('button', { name: 'Relier le téléphone de Tim' }).click();
+  await expect(page.getByText(/^[0-9A-Z]{4}-[0-9A-Z]{4}$/)).toBeVisible();
+
+  // Ten minutes (platform/auth/pairing.ts), and a second.
+  await page.clock.fastForward('10:01');
+  await expect(page.getByText(/^[0-9A-Z]{4}-[0-9A-Z]{4}$/)).toBeHidden();
+  await expect(step.getByRole('button', { name: 'Relier le téléphone de Tim' })).toBeVisible();
 });
 
 // page.route never sees what the service worker answers.
@@ -165,7 +199,9 @@ test.describe('with the session gone', () => {
 test('on the family phone, the parent opens the child’s space without a code, and enters back by their own', async ({ page }) => {
   const email = await guardian(page, 'famille');
   await addChild(page, 'Zoé');
+  const devices = page.getByText('Ses appareils', { exact: true });
   const openZoe = page.getByRole('button', { name: 'Ouvrir l’espace de Zoé sur cet appareil' });
+  await devices.click();
   await openZoe.click();
   await expect(page.getByRole('heading', { name: 'Bonjour Zoé' })).toBeVisible();
   // A child does not cut themselves off by mistake: their parent unpairs a device.
@@ -190,6 +226,11 @@ test('on the family phone, the parent opens the child’s space without a code, 
   await signIn(page, email);
   await expect(page).toHaveURL(/\/foyer$/);
   await page.getByRole('link', { name: /^Zoé/ }).click();
+  // A device holds Zoé's space: no step left, the week first.
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Sa semaine']);
+  await devices.click();
+  await expect(page.getByText('Un code à usage unique relie un autre appareil de Zoé à son compte')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Relier un autre appareil' })).toBeVisible();
   await openZoe.click();
   await expect(page.getByRole('heading', { name: 'Bonjour Zoé' })).toBeVisible();
   // The same session, switched back to: no second pairing.
@@ -199,6 +240,7 @@ test('on the family phone, the parent opens the child’s space without a code, 
 test('a parent first entering on a device that holds a child’s space is offered no passkey its lock would open', async ({ page }) => {
   await guardian(page, 'appareil-partage');
   await addChild(page, 'Zoé');
+  await page.getByText('Ses appareils', { exact: true }).click();
   await page.getByRole('button', { name: 'Ouvrir l’espace de Zoé sur cet appareil' }).click();
   await expect(page.getByRole('heading', { name: 'Bonjour Zoé' })).toBeVisible();
   await page.getByRole('link', { name: 'Changer de profil' }).click();
@@ -215,10 +257,14 @@ test('a parent first entering on a device that holds a child’s space is offere
 test('in 5e, the parent does the homework with the child on the family phone, and pairs no device of the child’s', async ({ page }) => {
   await guardian(page, 'accompagne');
   await addChild(page, 'Lou', { level: 'Cinquième' });
-  await expect(page.getByRole('button', { name: 'Relier un appareil' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Prochaine étape', 'Sa semaine']);
+  const step = page.getByRole('region', { name: 'Prochaine étape' });
+  await expect(step).toContainText('À chaque séance, Lou choisit');
+  await page.getByText('Ses appareils', { exact: true }).click();
+  await expect(page.getByRole('button', { name: /^Relier/ })).toHaveCount(0);
   await expect(page.getByText('En 6e et 5e, Lou travaille sur l’appareil de la famille')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Faire les devoirs avec Lou' }).click();
+  await step.getByRole('button', { name: 'Faire les devoirs avec Lou' }).click();
   await expect(page.getByRole('heading', { name: 'Bonjour Lou' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Avec mon parent à côté' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Sans mon parent ce soir' })).toBeVisible();
@@ -234,7 +280,7 @@ test('the parent’s home: a card per child with their week, the adding a link a
   // No child yet: the adding is open.
   await expect(page.getByLabel('Son prénom', { exact: true })).toBeVisible();
   await addChild(page, 'Léo');
-  await expect(page.getByRole('status')).toHaveText('Prochaine étape : relier son appareil, avec un code.');
+  await expect(page.getByRole('region', { name: 'Prochaine étape' })).toContainText('Léo fait ses devoirs sur son téléphone');
 
   await page.getByRole('link', { name: 'Retour au foyer' }).click();
   const card = page.getByRole('link', { name: /^Léo/ });
@@ -242,7 +288,7 @@ test('the parent’s home: a card per child with their week, the adding a link a
   await expect(card).toContainText('Pas de séance ces sept derniers jours');
   await expect(page.getByLabel('Son prénom', { exact: true })).toBeHidden();
   await addChild(page, 'Lou', { level: 'Cinquième' });
-  await expect(page.getByRole('status')).toHaveText('Prochaine étape : faire les devoirs avec Lou sur cet appareil.');
+  await expect(page.getByRole('region', { name: 'Prochaine étape' })).toContainText('À chaque séance, Lou choisit');
   // Done once a device holds the child's space, the step goes.
   await page.getByRole('button', { name: 'Faire les devoirs avec Lou' }).click();
   await page.getByRole('link', { name: 'Changer de profil' }).click();
@@ -321,7 +367,7 @@ test.describe('with a week of work', () => {
     await expect(page.getByRole('region', { name: 'Sa semaine' })).toContainText('Le résumé de la semaine n’a pas pu se charger.', {
       timeout: 15_000,
     });
-    await expect(page.getByRole('button', { name: 'Relier un appareil' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Relier le téléphone de Léo' })).toBeVisible();
   });
 });
 

@@ -4,6 +4,7 @@ import { addChild, guardian, pairedStudent } from '../guardian';
 test('a guardian proposes the memory when adding the child, sees its state, and withdraws it', async ({ page }) => {
   await guardian(page, 'memoire');
   await addChild(page, 'Lou', { memory: true });
+  await page.getByText('Ce que Tom retient', { exact: true }).click();
   await expect(page.getByText('Proposée : Lou répondra à sa prochaine visite.')).toBeVisible();
 
   await page.getByRole('button', { name: 'Retirer la mémoire' }).click();
