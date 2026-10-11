@@ -9,9 +9,9 @@ paths:
 
 # Design system
 
-La direction artistique est rouverte (`docs/decisions.md`, 2026-10-11) : « Cahier du soir »
-(`packages/tokens/theme.css`, clair et sombre, fonte Andika) reste en place jusqu'au choix de
-Victor, au lot 1. La landing garde l'identité rejetée (`packages/tokens/landing.css`) jusqu'au
+La direction « Grands carreaux » aux fontes d'« Instrument » est choisie (`docs/decisions.md`,
+2026-10-11) ; la charte du lot 1 la pose dans `packages/tokens/theme.css`, où « Cahier du soir »
+(fonte Andika) reste jusque-là. La landing garde l'identité rejetée (`packages/tokens/landing.css`) jusqu'au
 lot 3, qui lui donne `theme.css` et supprime `landing.css`. Les composants ne dépendent de
 l'identité que par les tokens.
 

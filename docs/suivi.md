@@ -8,8 +8,10 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 - **Mis à jour le** 2026-10-11.
 - **Nouvel ordre** (`decisions.md`, 2026-10-11) : l'identité et l'app d'abord, Tom ensuite ; les
   lots sont renumérotés (`roadmap.md`).
-- **Lot en cours : 1, l'identité** : l'étude du nom et celle de trois directions artistiques
-  sont en cours ; ensuite Victor choisit, puis la charte.
+- **Lot en cours : 1, l'identité** : Victor a choisi le nom, « De sa main », et la direction,
+  « Grands carreaux » aux fontes d'« Instrument » (`decisions.md`, 2026-10-11), après les études
+  (`etudes/2026-10-11/`) et l'essai sur les vrais écrans
+  ([comparatif](https://claude.ai/artifact/8x3Qm6x1NiQiVMrJhyYbJ8)) ; prochaine étape, la charte.
 - **Déjà dans l'app** : la direction provisoire « Cahier du soir », le mode accompagné en 6e et
   5e, la séance, les accueils élève et parent, l'écran du résumé, le jumelage par QR code, la
   photo de l'exercice. Le lot 2 refait ces écrans sur la charte choisie.
@@ -26,17 +28,19 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 
 | Bloquant | Effet | Comment lever |
 |---|---|---|
-| Mistral en mode gratuit : 100 000 tokens par minute, une fiche d'exercice en prend environ 78 000 | Le harnais et deux élèves dans la même minute voient la fiche échouer | Victor active le paiement à l'usage avec un plafond, puis relit Admin › Limites |
-| Zero Data Retention non demandé | Mistral peut garder textes et audio d'élèves | Demande au support, après le paiement à l'usage |
-| Clause des mineurs de Mistral (2.2(c), version du 2026-09-25) | Aucun utilisateur réel de moins de 15 ans | Réponse écrite de Mistral, demandée avec le ZDR |
+| Mistral en mode gratuit : 100 000 tokens par minute, une fiche d'exercice en prend environ 78 000 | Le harnais et deux élèves dans la même minute voient la fiche échouer | Le paiement à l'usage, que Victor reporte au lot 4 (2026-10-11) ; puis relire Admin › Limites |
+| Zero Data Retention non accordé | Mistral peut garder textes et audio d'élèves | Ouvert seulement en paiement à l'usage ([centre d'aide](https://help.mistral.ai/en/articles/347612-can-i-activate-zero-data-retention-zdr)) ; sa recevabilité est demandée au support (ticket « legal request/GDPR » du 2026-10-11) |
+| Clause des mineurs de Mistral (2.2(c), version du 2026-09-25) | Aucun utilisateur réel de moins de 15 ans | Réponse écrite de Mistral, demandée le 2026-10-11 dans le même ticket ; réponse attendue par e-mail |
+| La marque TOM ([FR 4873204](https://data.inpi.fr/marques/FR4873204)), en vigueur en classes 9, 41 et 42 | Tout nom de produit bâti sur Tom, et peut-être Tom comme mascotte | Avis d'un conseil en propriété industrielle (`etudes/2026-10-11/nom.md`) |
 
 ## À faire par Victor
 
-- **Mistral** : activer le paiement à l'usage avec un plafond ; puis une seule demande au support
-  pour le Zero Data Retention (justification : mineurs, RGPD,
-  [centre d'aide](https://help.mistral.ai/en/articles/347612-can-i-activate-zero-data-retention-zdr))
-  et pour la clause 2.2(c) : un service pour des 10-15 ans, avec l'accord de leurs parents,
-  est-il permis ? Vérifier ensuite Admin › API › Confidentialité.
+- **« De sa main »** : une recherche de similarité INPI, puis le dépôt de la marque (classes 9,
+  41 et 42) et les domaines `desamain.fr` et `desamain.com` ; l'avis d'un conseil en propriété
+  industrielle sur Tom face à la marque TOM.
+- **Mistral** : lire la réponse du support (ticket du 2026-10-11) ; au lot 4, activer le paiement
+  à l'usage avec un plafond, demander le Zero Data Retention, vérifier Admin › API ›
+  Confidentialité.
 - **Comptes à fermer** : le projet Vercel et l'application GitHub Vercel (son check échoue sur
   chaque PR), l'organisation Sentry `home-drx`, le projet Langfuse « tomai » ; vérifier que Koyeb
   ne facture plus rien ; supprimer les secrets de dépôt `KOYEB_API_TOKEN` et `DATABASE_URL`.

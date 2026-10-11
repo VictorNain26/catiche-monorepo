@@ -128,8 +128,9 @@ Victor a choisi de ne pas mener d'entretiens (`decisions.md`) : ces hypothèses
 
 ## Marque
 
-Tom est la loutre, le tuteur. Le nom du produit, puis la direction artistique et sa charte, se
-choisissent en premier (lot 1) : chaque écran et le site se construisent dessus. Une app que
+Le produit s'appelle **De sa main** : c'est l'enfant qui fait. Tom est la loutre, le tuteur. La
+direction « Grands carreaux » et sa charte se posent en premier (lot 1) : chaque écran et le site
+se construisent dessus. Une app que
 l'enfant ouvre de lui-même le soir et que le parent trouve sérieuse fait partie du pari, sans
 jamais passer par le jeu ni par un compagnon.
 

@@ -67,15 +67,26 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
   écrans les ferait refaire deux fois. Aucun élève réel avant que Tom soit mesuré : l'ordre ne
   change pas la porte. Remplace « les fondations de la direction artistique au lot 3, le nom et
   la landing au lot 4 » (2026-10-08). Source : `roadmap.md`.
-- **Le nom avant la charte** (2026-10-11). Le logo et la landing en dépendent ; une étude des
-  candidats, domaines et marques, puis Victor tranche.
-- **La direction artistique rouverte** (2026-10-11). Victor choisit parmi trois directions
-  nettement différentes, appliquées aux vrais écrans à largeur de téléphone. Tom reste la loutre
-  et le tuteur, son style suit la direction ; il se dit IA et jamais ami. « Cahier du soir »
-  (2026-10-08 : papier neutre, accent bleu du pull de Tom, Andika) reste dans
-  `packages/tokens/theme.css` jusqu'au choix, et peut être l'une des trois. Écartées le
-  2026-10-08 et qui le restent : une direction qui jouait la relation (« ta loutre des devoirs »),
-  une direction sombre seulement au jaune, qui se lisait comme un avertissement.
+- **Le produit s'appelle « De sa main »** (2026-10-11, choix de Victor). Le nom le plus sûr de
+  l'étude : domaines .fr et .com libres, aucune marque ni société homonyme ; il dit au parent que
+  c'est l'enfant qui fait. Tom reste le nom de la loutre, le tuteur. Avant toute communication :
+  la recherche de similarité INPI, le dépôt de la marque et les domaines ; l'avis d'un conseil
+  sur Tom face à la marque TOM (FR 4873204). Remplace TomIA, provisoire. Source :
+  `etudes/2026-10-11/nom.md`.
+- **La direction « Grands carreaux », aux fontes d'« Instrument »** (2026-10-11, choix de Victor
+  après l'essai de trois directions sur les cinq vrais écrans, en clair et en sombre). Le cahier
+  à réglure Seyès : papier, encre bleue du pull de Tom, marge rouge, la tête de Tom à chacun de
+  ses messages ; Inclusive Sans pour le texte et les titres, Atkinson Hyperlegible Mono pour les
+  codes et les chiffres, à la place d'Andika, qui faisait « primaire » en 4e et 3e (I, l et 1
+  distincts, zéro barré, vérifiés à l'écran). Le bleu est celui de la catégorie : la différence
+  vient du nom, de Tom et de la marge. Écartées : « Instrument » entière, froide pour le parent
+  d'un élève de 6e ; « Colophon », sans Tom à côté de ses messages ; et, depuis le 2026-10-08, une
+  direction qui jouait la relation et une direction sombre seulement au jaune. Remplace « Cahier
+  du soir ». Source : `etudes/2026-10-11/direction-artistique.md`.
+- **Une refonte complète de l'interface** (2026-10-11). Le lot 2 ne repeint pas les écrans
+  actuels : il repense chaque parcours du parent et de l'élève et refait chaque écran, sa
+  structure, ses composants et ses mots, sur la charte ; rien de l'interface actuelle n'est
+  gardé par principe.
 - **La landing réécrite avec l'identité** (2026-10-11). Elle n'attend plus l'ouverture : dès la
   charte choisie, elle reçoit les tokens et la fonte de l'app et se réécrit sur la vision, sans
   rien promettre que l'app ne fait déjà. Jusque-là, seuls des correctifs d'honnêteté ou
@@ -107,9 +118,10 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
   vérifier le harnais et lister les cas qui fuient ; ensuite, une nouvelle mesure seulement après
   un changement du tuteur, jamais deux fois sur le même code, sur au moins 150 conversations de
   pression comparées cas par cas (McNemar).
-- **Mistral en paiement à l'usage** (2026-10-08). Le mode gratuit plafonne à 100 000 tokens par
-  minute, et une fiche d'exercice en prend environ 78 000 : ni le harnais ni deux élèves dans la
-  même minute n'y tiennent. Le même geste ouvre la demande de Zero Data Retention.
+- **Mistral en paiement à l'usage, au lot 4** (2026-10-08, reporté par Victor le 2026-10-11).
+  Le mode gratuit plafonne à 100 000 tokens par minute, et une fiche d'exercice en prend environ
+  78 000 : ni le harnais ni deux élèves dans la même minute n'y tiennent. Le même geste ouvre la
+  demande de Zero Data Retention. Les lots 1 à 3 n'en ont pas besoin.
 - **Langfuse abandonné** (2026-10-08). Aucun code ne s'en servait ; le harnais écrit ses
   transcriptions dans `eval-results/`, que la page de jugement lira.
 
@@ -163,8 +175,6 @@ Tranchées au moment du lot qui en dépend, doc d'abord :
 
 | Décision | Lot | Ce qui la tranche |
 |---|---|---|
-| Nom du produit | 1 | L'étude des candidats, domaines et marques ; candidat « De sa main » |
-| Direction artistique | 1 | Trois directions sur les vrais écrans, Victor choisit |
 | Fournisseur de paiement | 2 | Conformité UE, abonnement familial, facturation sans piège |
 | Statut juridique (micro-entreprise ou société), TVA | 2 | Une consultation d'un expert-comptable, avant le paiement |
 | Canal du message au parent après une détresse | 4 | Un canal garanti (l'e-mail), avec la revue humaine |
