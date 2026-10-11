@@ -8,10 +8,10 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 - **Mis à jour le** 2026-10-11.
 - **Nouvel ordre** (`decisions.md`, 2026-10-11) : l'identité et l'app d'abord, Tom ensuite ; les
   lots sont renumérotés (`roadmap.md`).
-- **Lot en cours : 1, l'identité** : les études du nom (`etudes/2026-10-11/nom.md`) et de la
-  direction artistique (`etudes/2026-10-11/direction-artistique.md`) sont faites ; les trois
-  directions s'essaient sur les vrais écrans, puis Victor choisit le nom et la direction, puis la
-  charte.
+- **Lot en cours : 1, l'identité** : Victor a choisi le nom, « De sa main », et la direction,
+  « Grands carreaux » aux fontes d'« Instrument » (`decisions.md`, 2026-10-11), après les études
+  (`etudes/2026-10-11/`) et l'essai sur les vrais écrans
+  ([comparatif](https://claude.ai/artifact/8x3Qm6x1NiQiVMrJhyYbJ8)) ; prochaine étape, la charte.
 - **Déjà dans l'app** : la direction provisoire « Cahier du soir », le mode accompagné en 6e et
   5e, la séance, les accueils élève et parent, l'écran du résumé, le jumelage par QR code, la
   photo de l'exercice. Le lot 2 refait ces écrans sur la charte choisie.
@@ -35,9 +35,9 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 
 ## À faire par Victor
 
-- **Le nom** : choisir parmi les finalistes de `etudes/2026-10-11/nom.md` ; puis une recherche de
-  similarité INPI sur le nom retenu, le dépôt de la marque et les domaines ; l'avis d'un conseil
-  en propriété industrielle sur Tom face à la marque TOM.
+- **« De sa main »** : une recherche de similarité INPI, puis le dépôt de la marque (classes 9,
+  41 et 42) et les domaines `desamain.fr` et `desamain.com` ; l'avis d'un conseil en propriété
+  industrielle sur Tom face à la marque TOM.
 - **Mistral** : lire la réponse du support (ticket du 2026-10-11) ; au lot 4, activer le paiement
   à l'usage avec un plafond, demander le Zero Data Retention, vérifier Admin › API ›
   Confidentialité.

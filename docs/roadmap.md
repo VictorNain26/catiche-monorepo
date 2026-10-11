@@ -12,29 +12,27 @@ Chaque PR précise son périmètre dans son plan, au moment où elle démarre
 |---|---|---|
 | 0 — Refonte | Une codebase reconstruite sur des pratiques publiées | Fait : étapes 1 à 7 (`etudes/2026-10-06/refonte-architecture.md`) |
 | 1 — Identité | Un nom, une direction artistique choisie par Victor, une charte complète | Le nom vérifié et retenu ; la charte vit dans le code (`packages/tokens`, `@repo/ui`) et dans `charte.md` |
-| 2 — L'app | Chaque écran refait sur la charte, du premier code au paiement | Les parcours du parent et de l'élève marchent de bout en bout au staging, sur téléphone, et Victor les utilise |
+| 2 — L'app | Une refonte complète de l'interface sur la charte, du premier code au paiement | Les parcours du parent et de l'élève marchent de bout en bout au staging, sur téléphone, et Victor les utilise |
 | 3 — Le site | La landing réécrite sur l'identité et la vision | En production sous le nouveau nom ; chaque phrase renvoie à une source ou à ce que l'app fait déjà |
 | 4 — Tom | Un tuteur mesuré qui ne cède pas, avec la voix | Au harnais, la réponse presque jamais donnée sous pression, une aide jugée bonne par Victor, la mémoire mesurée |
 | 5 — Bêta et ouverture | Des familles réelles, puis le public | Les deux portes ci-dessous franchies ; mesures publiées |
 
 ## Maintenant
 
-**Lot 1, dans cet ordre :**
-1. **Le nom** : une étude (candidats, domaines, marques INPI et EUIPO, homonymes), Victor
-   tranche. Le dépôt de la marque et le domaine sont des gestes de Victor.
-2. **La direction artistique**, rouverte : trois directions nettement différentes, appliquées
-   aux vrais écrans à largeur de téléphone, montrées dans Chrome ; Victor choisit.
-3. **La charte** : logo, couleurs, typographie, formes, Tom (poses, place dans l'écran),
-   iconographie, mouvement, ton des mots, composants, états (désactivé, erreur, attente).
+**Lot 1** : le nom (« De sa main ») et la direction (« Grands carreaux » aux fontes
+d'« Instrument ») sont choisis (`decisions.md`, 2026-10-11). Reste **la charte** : logo, couleurs,
+typographie, formes, Tom (poses, place dans l'écran, rendu dans Blender), iconographie,
+mouvement, ton des mots, composants, états (désactivé, erreur, attente). Le dépôt de la marque
+et les domaines sont des gestes de Victor.
 
 **Hors IA, sans attendre** : la clause 2.2(c) des mineurs et la recevabilité du Zero Data
 Retention sont demandées à Mistral (2026-10-11) ; la réponse décide du lot 4.
 
 ## Ensuite
 
-- **Lot 2**, écran par écran, sur la charte : l'entrée et l'accueil du parent, l'ajout d'un
-  enfant, les profils sur l'appareil de la famille, l'accueil de l'élève, l'apparence de la
-  séance, le résumé de la semaine, le compte ; puis le double consentement sous 15 ans et le
+- **Lot 2**, une refonte complète, parcours par parcours, pensée à la place du parent et de
+  l'enfant : l'entrée et l'accueil du parent, l'ajout d'un enfant, les profils sur l'appareil de
+  la famille, l'accueil de l'élève, l'apparence de la séance, le résumé de la semaine, le compte ; puis le double consentement sous 15 ans et le
   second parent ; puis le paiement, avec son fournisseur et le statut juridique tranchés avant.
   Le comportement de Tom dans la séance reste au lot 4.
 - **Lot 3**, dès la charte choisie, en parallèle du lot 2 : la landing reçoit les tokens et la
