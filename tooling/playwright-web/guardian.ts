@@ -88,7 +88,7 @@ export async function pairedStudent(page: Page, browser: Browser, testInfo: Test
   const parent = await phone.newPage();
   const parentEmail = await guardian(parent, `parent-${name}`);
   await addChild(parent, name, { memory });
-  await parent.getByRole('button', { name: 'Relier un appareil' }).click();
+  await parent.getByRole('button', { name: `Relier le téléphone de ${name}` }).click();
   const code = (await parent.getByText(/^[0-9A-Z]{4}-[0-9A-Z]{4}$/).textContent()) ?? '';
   await phone.close();
 

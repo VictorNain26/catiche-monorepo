@@ -28,6 +28,8 @@ export function BackLink(props: Omit<ComponentProps<typeof HeaderLink>, 'icon'>)
 
 interface PageProps {
   title: string;
+  /** A line that says more of the title, under it. */
+  subtitle?: string;
   back?: ReactNode;
   action?: ReactNode;
   /** A screen reached by a step of a form, not a link: its title takes the focus, so it is read out. */
@@ -39,7 +41,7 @@ interface PageProps {
  * A screen at phone width first, in one column; its header holds the way back, read before the
  * title, and an action of the space on the right, when it has them.
  */
-export function Page({ title, back, action, announce = false, children }: PageProps) {
+export function Page({ title, subtitle, back, action, announce = false, children }: PageProps) {
   const links = back !== undefined || action !== undefined;
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -57,6 +59,7 @@ export function Page({ title, back, action, announce = false, children }: PagePr
         <h1 ref={headingRef} tabIndex={-1} className={cn('text-3xl font-bold text-foreground outline-none', !links && 'pt-4')}>
           {title}
         </h1>
+        {subtitle !== undefined && <p className="text-muted-foreground">{subtitle}</p>}
       </header>
       {children}
     </main>
