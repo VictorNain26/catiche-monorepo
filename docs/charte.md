@@ -1,15 +1,14 @@
-# Charte de « De sa main »
+# Charte
 
-La direction « Grands carreaux » (`decisions.md`, 2026-10-11) : le cahier à réglure Seyès, où
-l'élève écrit sur la ligne et Tom dans la marge. Les valeurs vivent dans le code,
+La direction « Grands carreaux » (`decisions.md`, 2026-10-11) : un cahier d'écolier, où l'élève
+écrit sur la ligne et Tom parle depuis la marge. Les valeurs vivent dans le code,
 `packages/tokens/theme.css` pour les tokens, `@repo/ui` pour les composants ; ce document dit
 comment s'en servir. L'étude qui l'a fondée : `etudes/2026-10-11/direction-artistique.md`.
 
 ## Le nom
 
-**De sa main**, avec une majuscule au premier mot seulement, jamais abrégé ni en capitales. Il
-parle au parent : c'est l'enfant qui fait. Tom est le tuteur, une loutre, et garde son nom ;
-l'élève dit qu'il fait ses devoirs « avec Tom ». Le logo reste à dessiner.
+Le nom du produit se cherche ; son écriture et le logo s'ajoutent ici une fois choisi. Tom est le
+tuteur, une loutre, et garde son nom ; l'élève dit qu'il fait ses devoirs « avec Tom ».
 
 ## Couleurs
 
