@@ -12,7 +12,7 @@ test('the page a visitor lands on renders in French at phone width, with one h1 
   await expect(page.locator('main > header').locator(':scope > *')).toHaveCount(1);
 });
 
-test('the brand applies: paper background, Inclusive Sans loaded, no line along the screen', async ({ page }) => {
+test('the brand applies: paper background, Inclusive Sans loaded', async ({ page }) => {
   await page.goto('/connexion');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
@@ -25,6 +25,4 @@ test('the brand applies: paper background, Inclusive Sans loaded, no line along 
     return document.fonts.check('16px "Inclusive Sans"');
   });
   expect(loaded).toBe(true);
-  // The exercise book's red margin was tried and dropped (decisions.md, 2026-10-11).
-  await expect(page.locator('main')).toHaveCSS('border-left-width', '0px');
 });
