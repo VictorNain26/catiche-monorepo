@@ -9,8 +9,8 @@ contrainte de rétrocompatibilité, on vise directement la cible.
 ## Serveur
 
 Monolithe modulaire ; sa structure et ses règles de dépendance viennent de
-`etudes/2026-10-06/refonte-architecture.md`. Les fichiers, la voix et la facturation arrivent
-au lot 3.
+`etudes/2026-10-06/refonte-architecture.md`. La facturation arrive au lot 2,
+la voix au lot 4.
 
 En place (`apps/server/src`) :
 - `main.ts`, seule racine de composition, et `migrate.ts` ; `config.ts`, un seul schéma de
