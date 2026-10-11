@@ -20,10 +20,14 @@ import type { HouseholdService } from './service';
 const MIN_AGE_YEARS = 5;
 const MAX_AGE_YEARS = 20;
 // A student's own routes, and the guardian's ways in: a guardian enters on their child's device,
-// which keeps the child's session (multi-session).
+// which keeps the child's session (multi-session). On the family's phone, a child switches to a
+// brother's or sister's session: a device a child uses holds no guardian session to switch to
+// (platform/auth/pairing.ts).
 const STUDENT_AUTH_PATHS = new Set([
   '/api/auth/device-pairing/redeem',
   '/api/auth/get-session',
+  '/api/auth/multi-session/list-device-sessions',
+  '/api/auth/multi-session/set-active',
   '/api/auth/sign-out',
   '/api/auth/email-otp/send-verification-otp',
   '/api/auth/sign-in/email-otp',

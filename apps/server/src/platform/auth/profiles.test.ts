@@ -146,8 +146,21 @@ describe('a device handed to the child', () => {
     expect(multi).toHaveLength(2);
   });
 
-  it("does not let the child switch to another account's session", async () => {
+  it("lets the child switch to a brother's or sister's session the device holds", async () => {
+    const { guardian, lea, tablet } = await family('fratrie@example.com');
+    const tom = await api.student(guardian);
+    expect((await tablet.redeem(await api.pairingCode(guardian, tom.id))).status).toBe(200);
+    expect((await api.sessionUser(tablet.cookie()))?.id).toBe(tom.id);
+
+    const sessions = await held(tablet);
+    expect(sessions.map(({ user }) => user.id).sort()).toEqual([lea.id, tom.id].sort());
+    const leas = sessions.find(({ user }) => user.id === lea.id)?.session.token ?? '';
+    expect((await tablet.send('POST', '/api/auth/multi-session/set-active', { sessionToken: leas })).status).toBe(200);
+    expect((await api.sessionUser(tablet.cookie()))?.id).toBe(lea.id);
+  });
+
+  it('does not let the child switch to a session the device does not hold', async () => {
     const { tablet } = await family('pas-de-bascule@example.com');
-    expect((await tablet.send('POST', '/api/auth/multi-session/set-active', { sessionToken: 'any' })).status).toBe(403);
+    expect((await tablet.send('POST', '/api/auth/multi-session/set-active', { sessionToken: 'any' })).status).toBe(401);
   });
 });
