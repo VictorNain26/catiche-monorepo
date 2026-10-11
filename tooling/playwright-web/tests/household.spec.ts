@@ -2,9 +2,82 @@ import { expect, test } from '@playwright/test';
 import { invite } from '../database';
 import { addChild, address, birthMonthAged, childPhone, guardian, pairedStudent, signIn } from '../guardian';
 
+test('adding a child asks one question per screen, the birth month in two menus, then says what Tom does before the memory', async ({ page }) => {
+  await guardian(page, 'etapes');
+  // A household without a child opens on its adding.
+  await expect(page).toHaveURL(/\/foyer\/ajouter$/);
+  await expect(page.getByText('Étape 1 sur 4')).toBeVisible();
+  await expect(page.getByLabel('Sa classe', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Continuer' }).click();
+  await expect(page.getByText('Son prénom.')).toBeVisible();
+  await page.getByLabel('Son prénom', { exact: true }).fill('Inès');
+  await page.getByRole('button', { name: 'Continuer' }).click();
+
+  await expect(page.getByText('Étape 2 sur 4')).toBeVisible();
+  await page.getByLabel('Sa classe', { exact: true }).selectOption({ label: 'Cinquième' });
+  await page.getByRole('button', { name: 'Continuer' }).click();
+
+  await expect(page.getByText('Étape 3 sur 4')).toBeVisible();
+  // No native month field: two menus every browser shows filled in.
+  await expect(page.locator('input[type="month"]')).toHaveCount(0);
+  const birth = page.getByRole('group', { name: 'Son mois de naissance' });
+  await birth.getByLabel('Mois').selectOption({ label: 'Mars' });
+  await page.getByRole('button', { name: 'Précédent' }).click();
+  // Going back loses nothing.
+  await expect(page.getByLabel('Sa classe', { exact: true })).toHaveValue('cinquieme');
+  await page.getByRole('button', { name: 'Continuer' }).click();
+  await expect(birth.getByLabel('Mois')).toHaveValue('03');
+  const [year] = birthMonthAged(12).split('-');
+  await birth.getByLabel('Année').selectOption(year ?? '');
+  await page.getByRole('button', { name: 'Continuer' }).click();
+
+  await expect(page.getByText('Étape 4 sur 4')).toBeVisible();
+  await expect(page.getByText('Tom pose des questions à Inès')).toBeVisible();
+  await page.getByLabel('Proposer que Tom retienne ce qui a résisté').check();
+  await page.getByRole('button', { name: 'Ajouter Inès' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Inès' })).toBeVisible();
+
+  // With a child, the adding is a step away, and its way back leads home.
+  await page.getByRole('link', { name: 'Retour au foyer' }).click();
+  await page.getByRole('link', { name: 'Ajouter un enfant' }).click();
+  await expect(page).toHaveURL(/\/foyer\/ajouter$/);
+  await page.getByRole('link', { name: 'Retour au foyer' }).click();
+  await expect(page).toHaveURL(/\/foyer$/);
+});
+
+test('a birth month the server would refuse is refused at its own step, and a double click never adds the child', async ({ page }) => {
+  await guardian(page, 'trop-jeune');
+  // The server takes 5 to 20 years, in UTC: on 15 June 2026, from 2006-01 to 2021-06. The screen
+  // reads the date as it opens.
+  await page.clock.setFixedTime(new Date('2026-06-15T12:00:00Z'));
+  await page.reload();
+  await page.getByLabel('Son prénom', { exact: true }).fill('Noé');
+  await page.getByRole('button', { name: 'Continuer' }).click();
+  await page.getByLabel('Sa classe', { exact: true }).selectOption({ label: 'Sixième' });
+  await page.getByRole('button', { name: 'Continuer' }).click();
+
+  const birth = page.getByRole('group', { name: 'Son mois de naissance' });
+  const years = birth.getByLabel('Année');
+  await expect(years.locator('option', { hasText: '2006' })).toHaveCount(1);
+  await expect(years.locator('option', { hasText: '2005' })).toHaveCount(0);
+  await expect(years.locator('option', { hasText: '2022' })).toHaveCount(0);
+  await birth.getByLabel('Mois').selectOption({ label: 'Juillet' });
+  await years.selectOption('2021');
+  await page.getByRole('button', { name: 'Continuer' }).click();
+  await expect(page.getByText('Votre enfant a entre 5 et 20 ans')).toBeVisible();
+  await expect(page.getByText('Étape 3 sur 4')).toBeVisible();
+  await expect(years).toHaveAttribute('aria-invalid', 'true');
+
+  await birth.getByLabel('Mois').selectOption({ label: 'Juin' });
+  // The second click lands where « Ajouter Noé » appears: it must not add the child unread.
+  await page.getByRole('button', { name: 'Continuer' }).dblclick();
+  await expect(page.getByText('Étape 4 sur 4')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Ajouter Noé' })).toBeVisible();
+  await expect(page).toHaveURL(/\/foyer\/ajouter$/);
+});
+
 test('a guardian adds a child, changes their class, then deletes their account', async ({ page }) => {
   await guardian(page, 'foyer');
-  await expect(page.getByText('Ajoutez votre enfant')).toBeVisible();
   await addChild(page, 'Léa');
 
   await page.getByLabel('Sa classe', { exact: true }).selectOption({ label: 'Troisième' });
@@ -18,8 +91,8 @@ test('a guardian adds a child, changes their class, then deletes their account',
   await page.getByRole('button', { name: 'Supprimer le compte de Léa' }).click();
   await expect(page.getByRole('alert')).toContainText('C’est définitif');
   await page.getByRole('button', { name: 'Supprimer définitivement' }).click();
-  await expect(page).toHaveURL(/\/foyer$/);
-  await expect(page.getByText('Ajoutez votre enfant')).toBeVisible();
+  // No child left: the household opens on the adding of one.
+  await expect(page).toHaveURL(/\/foyer\/ajouter$/);
 });
 
 test('a QR code on the parent’s phone opens the pairing on the child’s, the code filled in', async ({ page, browser }, testInfo) => {
@@ -84,10 +157,7 @@ test.describe('with the session gone', () => {
         ? route.fulfill({ status: 401, contentType: 'application/problem+json', json: { status: 401, code: 'UNAUTHENTICATED' } })
         : route.fallback(),
     );
-    await page.getByLabel('Son prénom', { exact: true }).fill('Léo');
-    await page.getByLabel('Sa classe', { exact: true }).selectOption({ label: 'Sixième' });
-    await page.getByLabel('Son mois de naissance').fill(birthMonthAged(11));
-    await page.getByRole('button', { name: 'Ajouter', exact: true }).click();
+    await addChild(page, 'Léo', { level: 'Sixième', lands: false });
     await expect(page).toHaveURL(/\/connexion$/);
   });
 });
@@ -138,7 +208,7 @@ test('a parent first entering on a device that holds a child’s space is offere
   await signIn(page, other);
   await page.getByLabel('Votre prénom').fill('Sam');
   await page.getByRole('button', { name: 'Continuer' }).click();
-  await expect(page).toHaveURL(/\/foyer$/);
+  await expect(page).toHaveURL(/\/foyer\/ajouter$/);
   await expect(page.getByRole('heading', { name: 'Entrer plus vite la prochaine fois' })).toHaveCount(0);
 });
 
@@ -159,9 +229,9 @@ test('in 5e, the parent does the homework with the child on the family phone, an
   ).toBeVisible();
 });
 
-test('the parent’s home: a card per child with their week, the adding folded, the next step until it is done', async ({ page }) => {
+test('the parent’s home: a card per child with their week, the adding a link away, the next step until it is done', async ({ page }) => {
   await guardian(page, 'accueil');
-  // No child yet: the form is open.
+  // No child yet: the adding is open.
   await expect(page.getByLabel('Son prénom', { exact: true })).toBeVisible();
   await addChild(page, 'Léo');
   await expect(page.getByRole('status')).toHaveText('Prochaine étape : relier son appareil, avec un code.');

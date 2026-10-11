@@ -21,9 +21,8 @@ test('an invited parent gets in by the code their address received, names themse
   await page.reload();
   await expect(offer).toBeVisible();
   await page.getByRole('button', { name: 'Plus tard' }).click();
-  await expect(page).toHaveURL(/\/foyer$/);
-  await expect(page.getByRole('heading', { name: 'Bonjour Claire' })).toBeVisible();
-  // A household without a child opens on the adding of the first one.
+  // A household without a child opens on the adding of the first one, « Mon compte » at hand.
+  await expect(page).toHaveURL(/\/foyer\/ajouter$/);
   await expect(page.getByLabel('Son prénom')).toBeVisible();
 
   await page.getByRole('link', { name: 'Mon compte' }).click();
@@ -33,7 +32,7 @@ test('an invited parent gets in by the code their address received, names themse
   await expect(page).toHaveURL(/\/connexion$/);
 
   await signIn(page, email);
-  await expect(page).toHaveURL(/\/foyer$/);
+  await expect(page).toHaveURL(/\/foyer\/ajouter$/);
 });
 
 test('the sign-in says the beta is closed, checks the address and the code, and refuses a wrong one in French', async ({ page }) => {

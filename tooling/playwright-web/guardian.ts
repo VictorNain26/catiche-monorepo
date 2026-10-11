@@ -38,7 +38,10 @@ export async function signIn(page: Page, email: string) {
   await page.getByRole('button', { name: 'Entrer' }).click();
 }
 
-/** A guardian at home, on their household, named Claire, the passkey left for later: their address. */
+/**
+ * A guardian just in, named Claire, the passkey left for later, on the adding of their first
+ * child, where a household without one opens: their address.
+ */
 export async function guardian(page: Page, name: string) {
   const email = address(name);
   invite(email);
@@ -46,7 +49,7 @@ export async function guardian(page: Page, name: string) {
   await page.getByLabel('Votre prénom').fill('Claire');
   await page.getByRole('button', { name: 'Continuer' }).click();
   await page.getByRole('button', { name: 'Plus tard' }).click();
-  await expect(page).toHaveURL(/\/foyer$/);
+  await expect(page).toHaveURL(/\/foyer\/ajouter$/);
   return email;
 }
 
@@ -55,21 +58,28 @@ export const childPhone = (browser: Browser, testInfo: TestInfo) =>
   browser.newContext({ ...devices[testInfo.project.name === 'iphone' ? 'iPhone 15' : 'Pixel 7'] });
 
 /**
- * A child added to the household, the learner memory proposed or not, the guardian left on their
- * page. In 4e by default: a device of their own pairs from the 4e on.
+ * A child added to the household, step by step, the learner memory proposed or not, the guardian
+ * left on their page unless `lands` is false. In 4e by default: a device of their own pairs from
+ * the 4e on. Twelve years old, born in December.
  */
-export async function addChild(page: Page, name: string, { memory = false, level = 'Quatrième' } = {}) {
-  // Folded once a child exists: wait for the household to show one or the other.
-  const unfold = page.getByRole('button', { name: 'Ajouter un enfant' });
+export async function addChild(page: Page, name: string, { memory = false, level = 'Quatrième', lands = true } = {}) {
+  // The adding opens by itself on a household without a child; from the household, by its link.
+  const link = page.getByRole('link', { name: 'Ajouter un enfant' });
   const firstName = page.getByLabel('Son prénom', { exact: true });
-  await expect(unfold.or(firstName)).toBeVisible();
-  if (await unfold.isVisible()) await unfold.click();
+  await expect(link.or(firstName)).toBeVisible();
+  if (await link.isVisible()) await link.click();
   await firstName.fill(name);
-  if (memory) await page.getByLabel('Proposer que Tom retienne ce qui a résisté').check();
+  await page.getByRole('button', { name: 'Continuer' }).click();
   await page.getByLabel('Sa classe', { exact: true }).selectOption({ label: level });
-  await page.getByLabel('Son mois de naissance').fill(birthMonthAged(12));
-  await page.getByRole('button', { name: 'Ajouter', exact: true }).click();
-  await expect(page.getByRole('heading', { level: 1, name })).toBeVisible();
+  await page.getByRole('button', { name: 'Continuer' }).click();
+  const [year, month] = birthMonthAged(12).split('-');
+  const birth = page.getByRole('group', { name: 'Son mois de naissance' });
+  await birth.getByLabel('Mois').selectOption(month ?? '');
+  await birth.getByLabel('Année').selectOption(year ?? '');
+  await page.getByRole('button', { name: 'Continuer' }).click();
+  if (memory) await page.getByLabel('Proposer que Tom retienne ce qui a résisté').check();
+  await page.getByRole('button', { name: `Ajouter ${name}` }).click();
+  if (lands) await expect(page.getByRole('heading', { level: 1, name })).toBeVisible();
 }
 
 /** A student whose device `page` is, paired by a guardian on a phone of their own: the guardian's address. */

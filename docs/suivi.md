@@ -20,7 +20,8 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 - **Lot 2, en dix PR** (`etudes/2026-10-11/refonte-interface.md`) : faites, la PR 1 (l'en-tête
   des écrans, `Card` dans `@repo/ui`) et la PR 2 (l'entrée du parent : Catiche dit en une phrase,
   le code en grand, la clé d'accès proposée après le prénom ; le nom dans l'onglet, le manifeste,
-  les e-mails et la clé d'accès) ; la suivante, l'ajout d'un enfant (parcours 2).
+  les e-mails et la clé d'accès) et la PR 3 (l'ajout d'un enfant, une question par écran, le mois
+  de naissance en deux menus) ; la suivante, la fiche de l'enfant (fin du parcours 2).
 - **Lot 4 en attente** : le harnais `bun run eval` est mergé ; son passage unique attend le
   paiement à l'usage de Mistral (bloquant ci-dessous). Le premier essai s'est arrêté à 3
   conversations sur 104 et ne compte pas comme mesure. Référence de comparaison : 11 fuites sur
@@ -85,8 +86,6 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
 - Mémoire : les 1 053 libellés du référentiel restent ceux du programme (« Il utilise… »),
   présentés « Au programme » ; leur réécriture dans les mots de l'élève demande une relecture
   de Victor entrée par entrée, avant la bêta fermée.
-- Le champ du mois de naissance montre « --------- ---- » vide sur Chrome de bureau (contrôle
-  natif, un sélecteur sur téléphone) : à revoir avec le consentement, qui touche ce formulaire.
 - Résumé de la semaine : son arrêt à la demande de l'élève, avec le consentement ; un envoi par
   e-mail n'est pas décidé.
 - Appareils de l'élève : le prévenir quand un nouvel appareil est relié.

@@ -45,8 +45,8 @@ test('a parent makes a passkey on their phone, filed under their address, and th
   expect(await lock.filedUnder()).toEqual([email]);
 
   await page.getByRole('button', { name: 'Se déconnecter' }).click();
-  await expect(page).toHaveURL(/\/foyer$/);
-  await expect(page.getByRole('heading', { name: 'Bonjour Claire' })).toBeVisible();
+  // Back in at once, on a household still without a child: its adding.
+  await expect(page).toHaveURL(/\/foyer\/ajouter$/);
 });
 
 test('a new parent makes their passkey from the offer that follows their first name, and lands on the household', async ({ page }) => {
@@ -57,7 +57,7 @@ test('a new parent makes their passkey from the offer that follows their first n
   await page.getByLabel('Votre prénom').fill('Claire');
   await page.getByRole('button', { name: 'Continuer' }).click();
   await page.getByRole('button', { name: 'Créer ma clé d’accès' }).click();
-  await expect(page).toHaveURL(/\/foyer$/);
+  await expect(page).toHaveURL(/\/foyer\/ajouter$/);
   expect(await lock.filedUnder()).toEqual([email]);
 });
 
@@ -73,7 +73,7 @@ test('the button gets a parent in with their passkey, without a code', async ({ 
   await expect(page.getByLabel('Adresse e-mail')).toHaveAttribute('autocomplete', 'username webauthn');
   await page.getByRole('button', { name: 'Entrer avec une clé d’accès' }).click();
   await lock.present(true);
-  await expect(page).toHaveURL(/\/foyer$/);
+  await expect(page).toHaveURL(/\/foyer\/ajouter$/);
 });
 
 test('a passkey the parent deleted no longer gets them in, and the screen sends them to the code', async ({ page }) => {
