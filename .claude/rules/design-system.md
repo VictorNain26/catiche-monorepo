@@ -9,16 +9,18 @@ paths:
 
 # Design system
 
-La direction « Grands carreaux » aux fontes d'« Instrument » est choisie (`docs/decisions.md`,
-2026-10-11) ; la charte du lot 1 la pose dans `packages/tokens/theme.css`, où « Cahier du soir »
-(fonte Andika) reste jusque-là. La landing garde l'identité rejetée (`packages/tokens/landing.css`) jusqu'au
-lot 3, qui lui donne `theme.css` et supprime `landing.css`. Les composants ne dépendent de
-l'identité que par les tokens.
+La direction « Grands carreaux » (`docs/decisions.md`, 2026-10-11) : `packages/tokens/theme.css`,
+clair et sombre, Inclusive Sans et Atkinson Hyperlegible Mono ; son usage, `docs/charte.md`. La
+landing garde l'identité rejetée (`packages/tokens/landing.css`) jusqu'au lot 3, qui lui donne
+`theme.css` et supprime `landing.css`. Les composants ne dépendent de l'identité que par les
+tokens.
 
 ## Interdits
 
 - Aucune nouvelle direction visuelle que Victor n'a pas validée.
-- Aucun token ajouté au clair sans sa valeur sombre, ni à `landing.css`, gelé.
+- Aucun token ajouté au clair sans sa valeur sombre, ni à `landing.css`, gelé, sauf celui qu'un
+  composant partagé avec la landing prend, à la valeur qui garde son rendu.
+- Aucune opacité pour un état désactivé : `disabled` et `disabled-foreground`.
 - Aucun « ami », sentiment ou souvenir personnel prêté à Tom dans un texte de l'interface.
 - Aucune couleur, durée, rayon ou taille littérale dans un composant : une classe issue de
   `@repo/tokens`, ou un token ajouté à `theme.css`. Seule exception : les valeurs que Motion

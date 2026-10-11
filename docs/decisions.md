@@ -67,12 +67,11 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
   écrans les ferait refaire deux fois. Aucun élève réel avant que Tom soit mesuré : l'ordre ne
   change pas la porte. Remplace « les fondations de la direction artistique au lot 3, le nom et
   la landing au lot 4 » (2026-10-08). Source : `roadmap.md`.
-- **Le produit s'appelle « De sa main »** (2026-10-11, choix de Victor). Le nom le plus sûr de
-  l'étude : domaines .fr et .com libres, aucune marque ni société homonyme ; il dit au parent que
-  c'est l'enfant qui fait. Tom reste le nom de la loutre, le tuteur. Avant toute communication :
-  la recherche de similarité INPI, le dépôt de la marque et les domaines ; l'avis d'un conseil
-  sur Tom face à la marque TOM (FR 4873204). Remplace TomIA, provisoire. Source :
-  `etudes/2026-10-11/nom.md`.
+- **Le nom rouvert, aucun finaliste retenu** (2026-10-11, Victor). Après avoir choisi « De sa
+  main », Victor n'est convaincu par aucun nom de la première étude (`etudes/2026-10-11/nom.md`) ;
+  une nouvelle recherche, avec l'audit de la première, la remplace. Restent acquis : TomIA est
+  abandonné, et aucun nom ne se bâtit sur Tom (marque TOM, FR 4873204). Tom reste le nom de la
+  loutre, le tuteur.
 - **La direction « Grands carreaux », aux fontes d'« Instrument »** (2026-10-11, choix de Victor
   après l'essai de trois directions sur les cinq vrais écrans, en clair et en sombre). Le cahier
   à réglure Seyès : papier, encre bleue du pull de Tom, marge rouge, la tête de Tom à chacun de
@@ -175,6 +174,7 @@ Tranchées au moment du lot qui en dépend, doc d'abord :
 
 | Décision | Lot | Ce qui la tranche |
 |---|---|---|
+| Nom du produit | 1 | La nouvelle recherche, avec domaines, marques et homonymes vérifiés ; Victor tranche |
 | Fournisseur de paiement | 2 | Conformité UE, abonnement familial, facturation sans piège |
 | Statut juridique (micro-entreprise ou société), TVA | 2 | Une consultation d'un expert-comptable, avant le paiement |
 | Canal du message au parent après une détresse | 4 | Un canal garanti (l'e-mail), avec la revue humaine |

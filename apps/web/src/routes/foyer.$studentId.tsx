@@ -136,7 +136,7 @@ function Devices({ child }: { child: Student }) {
       ) : (
         <ul className="flex flex-col gap-2">
           {devices.map((device) => (
-            <li key={device.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-4 text-card-foreground">
+            <li key={device.id} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-card-foreground">
               <span className="flex flex-col">
                 <span className="font-bold">{deviceName(device.userAgent)}</span>
                 <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>

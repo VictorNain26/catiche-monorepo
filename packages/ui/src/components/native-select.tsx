@@ -10,7 +10,7 @@ type NativeSelectProps = React.ComponentProps<'select'> & VariantProps<typeof in
 
 function NativeSelect({ className, variant, ...props }: NativeSelectProps) {
   return (
-    <div className="relative w-full has-[select:disabled]:opacity-50">
+    <div className="relative w-full">
       <select className={cn(inputVariants({ variant }), 'appearance-none pr-10', className)} {...props} />
       <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
     </div>

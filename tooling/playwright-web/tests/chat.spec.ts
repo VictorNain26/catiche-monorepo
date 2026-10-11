@@ -39,8 +39,14 @@ test('a paired student opens a session, writes to Tom and reads his reply', asyn
 
   await page.getByRole('button', { name: 'Nouvelle séance' }).click();
   await expect(page.getByRole('heading', { name: 'Séance avec Tom' })).toBeVisible();
+  // Nothing to send yet: the button says so with its own colors, readable, not half faded.
+  const send = page.getByRole('button', { name: 'Envoyer' });
+  await expect(send).toBeDisabled();
+  await expect(send).toHaveCSS('opacity', '1');
+  await expect(send).toHaveCSS('background-color', 'rgb(230, 228, 236)');
+  await expect(send).toHaveCSS('color', 'rgb(79, 84, 102)');
   await page.getByLabel('Ton message').fill('Je bloque sur 3x + 5 = 20');
-  await page.getByRole('button', { name: 'Envoyer' }).click();
+  await send.click();
 
   // AI Act art. 50(1): the student is told they talk to an AI before their first message is answered,
   // by a mark under the field, in sight all through the session and read with the field.

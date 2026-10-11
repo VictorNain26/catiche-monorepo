@@ -114,7 +114,7 @@ function Sessions() {
               <Link
                 to="/seance/$sessionId"
                 params={{ sessionId: session.id }}
-                className="flex min-h-11 flex-col rounded-lg border border-border bg-card p-4 text-card-foreground"
+                className="flex min-h-11 flex-col rounded-2xl border border-border bg-card p-4 text-card-foreground"
               >
                 <span className="font-bold">{session.title ?? 'Séance sans titre'}</span>
                 <span className="text-sm text-muted-foreground">{formatDay(session.createdAt)}</span>
@@ -138,7 +138,7 @@ function Devices() {
         <div className="flex flex-col gap-3">
           <ul className="flex flex-col gap-2">
             {devices.map((device) => (
-              <li key={device.id} className="flex flex-col rounded-lg border border-border bg-card p-4 text-card-foreground">
+              <li key={device.id} className="flex flex-col rounded-2xl border border-border bg-card p-4 text-card-foreground">
                 <span className="font-bold">{deviceName(device.userAgent)}</span>
                 <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
               </li>

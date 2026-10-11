@@ -63,7 +63,7 @@ function Week({ week, name, reader }: { week: Week; name: string; reader: 'guard
       ) : (
         <ul className="flex flex-col gap-2">
           {week.resisting.map((notion) => (
-            <li key={notion.notionId} className="flex flex-col gap-1 rounded-lg border border-border bg-card p-4 text-card-foreground">
+            <li key={notion.notionId} className="flex flex-col gap-1 rounded-2xl border border-border bg-card p-4 text-card-foreground">
               <span className="font-bold">{notion.label}</span>
               <span className="text-sm text-muted-foreground">{lastTime(notion)}</span>
             </li>

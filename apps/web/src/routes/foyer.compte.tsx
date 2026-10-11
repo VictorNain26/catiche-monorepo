@@ -79,7 +79,10 @@ function Passkeys() {
       {passkeys.length > 0 && (
         <ul className="flex flex-col gap-2">
           {passkeys.map((passkey) => (
-            <li key={passkey.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-4 text-card-foreground">
+            <li
+              key={passkey.id}
+              className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-card-foreground"
+            >
               <span className="flex flex-col">
                 <span className="font-bold">{deviceName(passkey.name)}</span>
                 <span className="text-sm text-muted-foreground">Créée le {formatDay(passkey.createdAt)}</span>
