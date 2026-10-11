@@ -75,12 +75,12 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
   bâtit sur Tom (marque TOM, FR 4873204). Remplace TomIA, puis « De sa main », que Victor n'a pas
   gardé. Source : `etudes/2026-10-11/nom-seconde-etude.md`.
 - **La direction « Grands carreaux », aux fontes d'« Instrument »** (2026-10-11, choix de Victor
-  après l'essai de trois directions sur les cinq vrais écrans, en clair et en sombre). Le cahier
-  à réglure Seyès : papier, encre bleue du pull de Tom, marge rouge, la tête de Tom à chacun de
-  ses messages ; Inclusive Sans pour le texte et les titres, Atkinson Hyperlegible Mono pour les
-  codes et les chiffres, à la place d'Andika, qui faisait « primaire » en 4e et 3e (I, l et 1
-  distincts, zéro barré, vérifiés à l'écran). Le bleu est celui de la catégorie : la différence
-  vient du nom, de Tom et de la marge. Écartées : « Instrument » entière, froide pour le parent
+  après l'essai de trois directions sur les cinq vrais écrans, en clair et en sombre). Papier,
+  encre bleue du pull de Tom, la tête de Tom à chacun de ses messages ; Inclusive Sans pour le
+  texte et les titres, Atkinson Hyperlegible Mono pour les codes et les chiffres, à la place
+  d'Andika, qui faisait « primaire » en 4e et 3e (I, l et 1 distincts, zéro barré, vérifiés à
+  l'écran). La marge rouge du cahier, essayée, est retirée : Victor ne la veut pas (2026-10-11).
+  Le bleu est celui de la catégorie : la différence vient du nom et de Tom. Écartées : « Instrument » entière, froide pour le parent
   d'un élève de 6e ; « Colophon », sans Tom à côté de ses messages ; et, depuis le 2026-10-08, une
   direction qui jouait la relation et une direction sombre seulement au jaune. Remplace « Cahier
   du soir ». Source : `etudes/2026-10-11/direction-artistique.md`.

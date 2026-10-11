@@ -4,9 +4,9 @@
  * Importer APRÈS l'import de Tailwind de l'app.
  * Contrastes AA vérifiés par contrast.test.mjs, dans les deux modes. */
 
-/* Direction « Grands carreaux » (docs/decisions.md, docs/charte.md) : un cahier d'écolier, papier,
- * encre bleue du pull de Tom, marge rouge. Inclusive Sans pour lire, au I, l et 1 distincts et au
- * zéro barré ; Atkinson Hyperlegible Mono pour les codes et les chiffres. */
+/* Direction « Grands carreaux » (docs/decisions.md, docs/charte.md) : papier et encre bleue du pull
+ * de Tom. Inclusive Sans pour lire, au I, l et 1 distincts et au zéro barré ; Atkinson Hyperlegible
+ * Mono pour les codes et les chiffres. */
 @theme {
   --font-sans: 'Inclusive Sans', ui-sans-serif, system-ui, sans-serif;
   --font-heading: 'Inclusive Sans', ui-sans-serif, system-ui, sans-serif;
@@ -21,7 +21,7 @@
   --shadow-control: 0 1px 0 rgb(28 32 51 / 0.25);
   --shadow-control-hover: var(--shadow-control);
 
-  /* Couleurs sémantiques (clair) — papier, encre bleue, marge rouge */
+  /* Couleurs sémantiques (clair) — papier, encre bleue */
   --color-background: #faf8f2;
   --color-foreground: #1c2033;
   --color-primary: #24409a;
@@ -54,8 +54,6 @@
   /* Un contrôle désactivé reste lisible : un fond et un texte à lui, pas une opacité. */
   --color-disabled: #e6e4ec;
   --color-disabled-foreground: #4f5466;
-  /* La marge du cahier, en décor : aucun texte ne s'y lit. */
-  --color-margin: #e8a0a0;
 
   /* Motion — fast: micro-feedback (press, toggle) ; base: transitions
    * standard ; slow: entrées d'écran ; pulse: demi-cycle skeleton. */
@@ -99,6 +97,5 @@
     --color-qr-background: #ffffff;
     --color-disabled: #2a2e3d;
     --color-disabled-foreground: #a9adbd;
-    --color-margin: #6b3a44;
   }
 }
