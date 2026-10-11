@@ -63,6 +63,12 @@ export function createHouseholdService({ repository, createPairingCode }: Deps) 
       return (await repository.roleOf(userId)) === 'student';
     },
 
+    /** A student in 6e or 5e, whose profile lives on the family's phone. */
+    async isAccompanied(userId: string) {
+      const student = await repository.findProfile(userId);
+      return student !== undefined && isAccompaniedLevel(student.level);
+    },
+
     /** A student reaches none of the guardian's routes. */
     async assertNotStudent(userId: string) {
       if ((await repository.roleOf(userId)) === 'student') throw new Problem('FORBIDDEN');

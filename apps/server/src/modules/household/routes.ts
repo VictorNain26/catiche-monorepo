@@ -65,9 +65,33 @@ export function studentAuthGuard({ auth, service }: { auth: Auth; service: House
         if (c.req.method === 'GET') return c.redirect('/connexion');
         throw new Problem('FORBIDDEN');
       }
+    } else if (c.req.path === SWITCH_PATH) {
+      await assertSiblingSwitch(auth, service, c.req.raw);
     }
     return next();
   });
+}
+
+const SWITCH_PATH = '/api/auth/multi-session/set-active';
+const switchBody = z.object({ sessionToken: z.string() });
+
+/**
+ * A child switches only to a brother's or sister's profile in 6e or 5e: from the 4e, a child's
+ * space opens on no family device (docs/decisions.md), even one that kept it from the 5e. A token
+ * the device does not hold is better-auth's to refuse.
+ */
+async function assertSiblingSwitch(auth: Auth, service: HouseholdService, request: Request) {
+  const session = await auth.api.getSession({ headers: request.headers, query: { disableRefresh: true } });
+  if (!session || !(await service.isStudent(session.user.id))) return;
+  const body = switchBody.safeParse(
+    await request
+      .clone()
+      .json()
+      .catch(() => null),
+  );
+  if (!body.success) return;
+  const target = await (await auth.$context).internalAdapter.findSession(body.data.sessionToken);
+  if (target && !(await service.isAccompanied(target.user.id))) throw new Problem('FORBIDDEN');
 }
 
 /**

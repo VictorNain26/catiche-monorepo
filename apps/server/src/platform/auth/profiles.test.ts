@@ -159,6 +159,17 @@ describe('a device handed to the child', () => {
     expect((await api.sessionUser(tablet.cookie()))?.id).toBe(lea.id);
   });
 
+  it('does not let the child switch to a sibling past the 5e, whose space opens on no family device', async () => {
+    const { guardian, lea, tablet } = await family('frere-en-4e@example.com');
+    const tom = await api.student(guardian);
+    expect((await tablet.redeem(await api.pairingCode(guardian, tom.id))).status).toBe(200);
+    expect((await api.request('PATCH', `/api/household/students/${lea.id}`, { cookie: guardian, body: { level: 'quatrieme' } })).status).toBe(200);
+
+    const leas = (await held(tablet)).find(({ user }) => user.id === lea.id)?.session.token ?? '';
+    expect((await tablet.send('POST', '/api/auth/multi-session/set-active', { sessionToken: leas })).status).toBe(403);
+    expect((await api.sessionUser(tablet.cookie()))?.id).toBe(tom.id);
+  });
+
   it('does not let the child switch to a session the device does not hold', async () => {
     const { tablet } = await family('pas-de-bascule@example.com');
     expect((await tablet.send('POST', '/api/auth/multi-session/set-active', { sessionToken: 'any' })).status).toBe(401);
