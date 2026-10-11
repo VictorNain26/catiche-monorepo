@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Card, Fold } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from '../lib/zod';
 import { Field, SelectField } from '../components/field';
@@ -42,16 +42,14 @@ function StudentPage() {
   const pairing = usePairing(studentId);
   const child = students.find(({ id }) => id === studentId);
   if (!child) return null;
-  const firstStep = pairing.devices.length === 0;
 
   return (
     <Page title={child.name} subtitle={LEVEL_LABELS[child.level]} back={<BackLink to="/foyer">Retour au foyer</BackLink>}>
-      {firstStep ? <NextStep child={child} pairing={pairing} /> : child.accompanied && <OpenHere child={child} />}
-      {pairing.redeemed && <Notice tone="info">L’appareil de {child.name} est relié.</Notice>}
+      {pairing.firstStep ? <NextStep child={child} pairing={pairing} /> : child.accompanied && <OpenHere child={child} />}
       <WeekSummary week={week.data} failed={week.isError} name={child.name} reader="guardian" />
       <div className="flex flex-col">
         <Fold title="Ses appareils">
-          <Devices child={child} pairing={pairing} firstStep={firstStep} />
+          <Devices child={child} pairing={pairing} />
         </Fold>
         <Fold title="Ce que Tom retient">
           <Memory child={child} />
@@ -69,15 +67,32 @@ function StudentPage() {
 
 /**
  * The pairing of a device of the child's: a code asked, then their devices watched until one more
- * holds their space. A code a device spent never shows again, even once that device is disconnected.
+ * holds their space. A code leaves the screen once spent or expired, and a code a device spent
+ * never shows again, even once that device is disconnected. The first step stays, said done, until
+ * the page is left: the parent reads it where the code was.
  */
 function usePairing(studentId: string) {
   const queryClient = useQueryClient();
   // The devices paired when the code was asked for: one more, and the code is spent.
   const [before, setBefore] = useState<ReadonlySet<string> | null>(null);
+  const [expired, setExpired] = useState<string | null>(null);
   const pairing = useMutation({ mutationFn: () => parseResponse(student['pairing-code'].$post({ param: { id: studentId } })) });
+  // Nothing else renders the page when a code expires.
+  useEffect(() => {
+    if (!pairing.data) return;
+    const { code, expiresAt } = pairing.data;
+    const timer = setTimeout(
+      () => {
+        setExpired(code);
+      },
+      Date.parse(expiresAt) - Date.now(),
+    );
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [pairing.data]);
   const spent = (list: readonly { id: string }[]) => before !== null && list.some(({ id }) => !before.has(id));
-  const pending = (list: readonly { id: string }[]) => pairing.data !== undefined && !spent(list) && Date.now() < Date.parse(pairing.data.expiresAt);
+  const pending = (list: readonly { id: string }[]) => pairing.data !== undefined && pairing.data.code !== expired && !spent(list);
   // While a code waits on the child's device, the list shows it the moment it is redeemed.
   const { data: devices } = useSuspenseQuery({
     ...devicesQuery(studentId),
@@ -94,10 +109,12 @@ function usePairing(studentId: string) {
     },
   });
 
+  const redeemed = spent(devices);
   return {
     devices,
+    firstStep: devices.length === 0 || (redeemed && before?.size === 0),
     code: pending(devices) ? pairing.data : undefined,
-    redeemed: spent(devices),
+    redeemed,
     ask: () => {
       setBefore(new Set(devices.map(({ id }) => id)));
       pairing.mutate();
@@ -121,7 +138,11 @@ function NextStep({ child, pairing }: { child: Student; pairing: Pairing }) {
       ) : (
         <>
           <p>{child.name} fait ses devoirs sur son téléphone : un code à usage unique le relie à son compte, sans mot de passe.</p>
-          <PairingCode child={child} pairing={pairing} label={`Relier le téléphone de ${child.name}`} />
+          {pairing.redeemed ? (
+            <Notice tone="info">L’appareil de {child.name} est relié.</Notice>
+          ) : (
+            <PairingCode pairing={pairing} device="son téléphone" label={`Relier le téléphone de ${child.name}`} name={child.name} />
+          )}
         </>
       )}
     </section>
@@ -170,16 +191,17 @@ function OpenHere({ child }: { child: Student }) {
   );
 }
 
-function PairingCode({ child, pairing, label }: { child: Student; pairing: Pairing; label: string }) {
+/** A code for the child's device: `device` says which, « son téléphone » or « son autre appareil ». */
+function PairingCode({ pairing, device, label, name }: { pairing: Pairing; device: string; label: string; name: string }) {
   const { code } = pairing;
   return (
     <>
       {code && (
         <>
-          <p>Avec l’appareil photo du téléphone de {child.name}, visez ce code :</p>
-          <QrCode text={pairingLink(window.location.origin, code.code)} label={`QR code pour relier l’appareil de ${child.name}`} />
+          <p>Avec l’appareil photo de {device}, visez ce code :</p>
+          <QrCode text={pairingLink(window.location.origin, code.code)} label={`QR code pour relier l’appareil de ${name}`} />
           <Notice tone="info">
-            Ou, sur son téléphone, ouvrez {window.location.origin}/jumeler et saisissez le code{' '}
+            Ou, sur {device}, ouvrez {window.location.origin}/jumeler et saisissez le code{' '}
             <strong className="font-mono text-lg tracking-widest">{formatCode(code.code)}</strong> avant {formatHour(code.expiresAt)}. Il ne sert
             qu’une fois.
           </Notice>
@@ -193,7 +215,7 @@ function PairingCode({ child, pairing, label }: { child: Student; pairing: Pairi
   );
 }
 
-function Devices({ child, pairing, firstStep }: { child: Student; pairing: Pairing; firstStep: boolean }) {
+function Devices({ child, pairing }: { child: Student; pairing: Pairing }) {
   const { devices, revoke } = pairing;
   return (
     <>
@@ -230,7 +252,20 @@ function Devices({ child, pairing, firstStep }: { child: Student; pairing: Pairi
       ) : (
         <>
           {/* Until a device holds the child's space, the code is asked for in the next step. */}
-          {!firstStep && <PairingCode child={child} pairing={pairing} label="Relier un autre appareil" />}
+          {!pairing.firstStep && (
+            <>
+              {pairing.redeemed ? (
+                <Notice tone="info">L’appareil de {child.name} est relié.</Notice>
+              ) : (
+                !pairing.code && (
+                  <p className="text-muted-foreground">
+                    Un code à usage unique relie un autre appareil de {child.name} à son compte, sans mot de passe.
+                  </p>
+                )
+              )}
+              <PairingCode pairing={pairing} device="son autre appareil" label="Relier un autre appareil" name={child.name} />
+            </>
+          )}
           <OpenHere child={child} />
         </>
       )}

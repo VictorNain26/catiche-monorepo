@@ -150,9 +150,9 @@ test('a code pairs the child’s phone, which sees it, and the guardian disconne
   await child.getByText('Tes appareils reliés').click();
   await expect(child.getByRole('listitem')).toHaveCount(1);
 
-  // The guardian's page follows the pairing on its own: the step done, the week comes first.
-  await expect(page.getByRole('status')).toHaveText('L’appareil de Noé est relié.', { timeout: 10_000 });
-  await expect(step).toBeHidden();
+  // The guardian's page follows the pairing on its own, said where the code was.
+  await expect(step.getByRole('status')).toHaveText('L’appareil de Noé est relié.', { timeout: 10_000 });
+  await expect(step.getByRole('button')).toHaveCount(0);
   await expect(page.getByText(/^[0-9A-Z]{4}-[0-9A-Z]{4}$/)).toBeHidden();
   await page.getByText('Ses appareils', { exact: true }).click();
   await page.getByRole('button', { name: 'Déconnecter' }).click();
@@ -164,6 +164,20 @@ test('a code pairs the child’s phone, which sees it, and the guardian disconne
   await child.reload();
   await expect(child).toHaveURL(/\/connexion$/);
   await phone.close();
+});
+
+test('a pairing code leaves the screen when it expires, and another can be asked', async ({ page }) => {
+  await page.clock.install();
+  await guardian(page, 'code-expire');
+  await addChild(page, 'Tim');
+  const step = page.getByRole('region', { name: 'Prochaine étape' });
+  await step.getByRole('button', { name: 'Relier le téléphone de Tim' }).click();
+  await expect(page.getByText(/^[0-9A-Z]{4}-[0-9A-Z]{4}$/)).toBeVisible();
+
+  // Ten minutes (platform/auth/pairing.ts), and a second.
+  await page.clock.fastForward('10:01');
+  await expect(page.getByText(/^[0-9A-Z]{4}-[0-9A-Z]{4}$/)).toBeHidden();
+  await expect(step.getByRole('button', { name: 'Relier le téléphone de Tim' })).toBeVisible();
 });
 
 // page.route never sees what the service worker answers.
@@ -215,6 +229,8 @@ test('on the family phone, the parent opens the child’s space without a code, 
   // A device holds Zoé's space: no step left, the week first.
   await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Sa semaine']);
   await devices.click();
+  await expect(page.getByText('Un code à usage unique relie un autre appareil de Zoé à son compte')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Relier un autre appareil' })).toBeVisible();
   await openZoe.click();
   await expect(page.getByRole('heading', { name: 'Bonjour Zoé' })).toBeVisible();
   // The same session, switched back to: no second pairing.
