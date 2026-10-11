@@ -84,8 +84,11 @@ test('the child’s page: their class, the next step first, then the week, the r
   for (const fold of ['Ses appareils', 'Ce que Tom retient', 'Son prénom et sa classe', 'Supprimer son compte']) {
     await expect(page.getByText(fold, { exact: true })).toBeVisible();
   }
-  await expect(page.getByRole('button', { name: 'Ouvrir l’espace de Léo sur cet appareil' })).toBeHidden();
   await expect(page.getByRole('button', { name: 'Supprimer le compte de Léo' })).toBeHidden();
+  // In 4e, the parent does not open the child's space on their own phone (decisions.md).
+  await page.getByText('Ses appareils', { exact: true }).click();
+  await expect(page.getByText('Aucun appareil relié.')).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Ouvrir l’espace/ })).toHaveCount(0);
 });
 
 test('a guardian adds a child, changes their class, then deletes their account', async ({ page }) => {
@@ -114,7 +117,11 @@ test('a QR code on the parent’s phone opens the pairing on the child’s, the 
   await addChild(page, 'Nina');
   await page.getByRole('button', { name: 'Relier le téléphone de Nina' }).click();
   await expect(page.getByRole('img', { name: 'QR code pour relier l’appareil de Nina' })).toBeVisible();
-  const code = (await page.getByText(/^[0-9A-Z]{4}-[0-9A-Z]{4}$/).textContent()) ?? '';
+  // The code alone, in large mono, and until when it holds.
+  const shown = page.getByText(/^[0-9A-Z]{4}-[0-9A-Z]{4}$/);
+  await expect(shown).toHaveCSS('font-size', '30px');
+  await expect(page.getByText(/^Valable jusqu’à \d{2}:\d{2}, une seule fois\.$/)).toBeVisible();
+  const code = (await shown.textContent()) ?? '';
 
   const phone = await childPhone(browser, testInfo);
   const child = await phone.newPage();
@@ -127,6 +134,13 @@ test('a QR code on the parent’s phone opens the pairing on the child’s, the 
   await child.getByRole('button', { name: 'Relier' }).click();
   await expect(child.getByRole('heading', { name: 'Bonjour Nina' })).toBeVisible();
   await phone.close();
+
+  // Back on the page, the step done: another device of Nina's pairs from « Ses appareils ».
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Sa semaine']);
+  await page.getByText('Ses appareils', { exact: true }).click();
+  await expect(page.getByText('Un code à usage unique relie un autre appareil de Nina à son compte')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Relier un autre appareil' })).toBeVisible();
 });
 
 test('a code pairs the child’s phone, which sees it, and the guardian disconnects it', async ({ page, browser }, testInfo) => {
@@ -142,9 +156,15 @@ test('a code pairs the child’s phone, which sees it, and the guardian disconne
   const child = await phone.newPage();
   await child.goto('/connexion');
   await child.getByRole('link', { name: 'Tu es élève ? Relie cet appareil' }).click();
+  // Before pairing, the child reads what their parent sees.
+  await expect(child.getByText('Ton parent voit le résumé de ta semaine')).toContainText('pas tes conversations avec Tom');
+  await expect(child.getByText('Chaque appareil relié à ton compte paraît dans ta liste')).toBeVisible();
+  await expect(child.getByLabel('Le code')).toHaveCSS('font-family', /Atkinson Hyperlegible Mono/);
   await child.getByLabel('Le code').fill(code ?? '');
   await child.getByRole('button', { name: 'Relier' }).click();
   await expect(child.getByRole('heading', { name: 'Bonjour Noé' })).toBeVisible();
+  // The profile shows in the header, the way to change it with it, and only there.
+  await expect(child.getByRole('link', { name: /changer de profil/i })).toHaveAccessibleName('Noé, changer de profil');
   // The sessions first; the devices folded, a tap away.
   await expect(child.getByText('Un appareil que tu ne reconnais pas ?')).toBeHidden();
   await child.getByText('Tes appareils reliés').click();
@@ -198,10 +218,8 @@ test.describe('with the session gone', () => {
 
 test('on the family phone, the parent opens the child’s space without a code, and enters back by their own', async ({ page }) => {
   const email = await guardian(page, 'famille');
-  await addChild(page, 'Zoé');
-  const devices = page.getByText('Ses appareils', { exact: true });
-  const openZoe = page.getByRole('button', { name: 'Ouvrir l’espace de Zoé sur cet appareil' });
-  await devices.click();
+  await addChild(page, 'Zoé', { level: 'Cinquième' });
+  const openZoe = page.getByRole('button', { name: 'Faire les devoirs avec Zoé' });
   await openZoe.click();
   await expect(page.getByRole('heading', { name: 'Bonjour Zoé' })).toBeVisible();
   // A child does not cut themselves off by mistake: their parent unpairs a device.
@@ -212,7 +230,7 @@ test('on the family phone, the parent opens the child’s space without a code, 
   // A choice of who uses Tom, not the generic sign-in.
   await expect(page.getByRole('heading', { level: 1, name: 'Qui utilise Tom ?' })).toBeVisible();
   await expect(page.getByText('Catiche est en bêta fermée')).toBeHidden();
-  await page.getByRole('link', { name: 'C’est Zoé' }).click();
+  await page.getByRole('button', { name: 'C’est Zoé' }).click();
   await expect(page.getByRole('heading', { name: 'Bonjour Zoé' })).toBeVisible();
   await page.getByRole('link', { name: 'Changer de profil' }).click();
   await signIn(page, email);
@@ -226,22 +244,36 @@ test('on the family phone, the parent opens the child’s space without a code, 
   await signIn(page, email);
   await expect(page).toHaveURL(/\/foyer$/);
   await page.getByRole('link', { name: /^Zoé/ }).click();
-  // A device holds Zoé's space: no step left, the week first.
+  // A device holds Zoé's space: no step left, the way in first, then the week.
   await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Sa semaine']);
-  await devices.click();
-  await expect(page.getByText('Un code à usage unique relie un autre appareil de Zoé à son compte')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Relier un autre appareil' })).toBeVisible();
   await openZoe.click();
   await expect(page.getByRole('heading', { name: 'Bonjour Zoé' })).toBeVisible();
   // The same session, switched back to: no second pairing.
   await expect(page.getByText(/^Relié le /)).toHaveCount(1);
 });
 
+test('on the family phone, « Qui utilise Tom ? » offers every child it holds', async ({ page }) => {
+  const email = await guardian(page, 'fratrie');
+  await addChild(page, 'Lou', { level: 'Sixième' });
+  await page.getByRole('button', { name: 'Faire les devoirs avec Lou' }).click();
+  await expect(page.getByRole('heading', { name: 'Bonjour Lou' })).toBeVisible();
+  await page.getByRole('link', { name: 'Lou, changer de profil' }).click();
+  await signIn(page, email);
+  await expect(page).toHaveURL(/\/foyer$/);
+  await addChild(page, 'Zoé', { level: 'Cinquième' });
+  await page.getByRole('button', { name: 'Faire les devoirs avec Zoé' }).click();
+  await expect(page.getByRole('heading', { name: 'Bonjour Zoé' })).toBeVisible();
+
+  await page.getByRole('link', { name: 'Zoé, changer de profil' }).click();
+  await expect(page.getByRole('button', { name: 'C’est Zoé' })).toBeVisible();
+  await page.getByRole('button', { name: 'C’est Lou' }).click();
+  await expect(page.getByRole('heading', { name: 'Bonjour Lou' })).toBeVisible();
+});
+
 test('a parent first entering on a device that holds a child’s space is offered no passkey its lock would open', async ({ page }) => {
   await guardian(page, 'appareil-partage');
-  await addChild(page, 'Zoé');
-  await page.getByText('Ses appareils', { exact: true }).click();
-  await page.getByRole('button', { name: 'Ouvrir l’espace de Zoé sur cet appareil' }).click();
+  await addChild(page, 'Zoé', { level: 'Cinquième' });
+  await page.getByRole('button', { name: 'Faire les devoirs avec Zoé' }).click();
   await expect(page.getByRole('heading', { name: 'Bonjour Zoé' })).toBeVisible();
   await page.getByRole('link', { name: 'Changer de profil' }).click();
 

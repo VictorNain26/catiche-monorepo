@@ -5,7 +5,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router';
 import { DefaultChatTransport } from 'ai';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Notice } from '../components/notice';
-import { BackLink, Page } from '../components/page';
+import { BackLink, Page, ProfileLink } from '../components/page';
 import { TomHead } from '../components/tom';
 import { TomText } from '../components/tom-text';
 import { api, isProblem } from '../lib/api';
@@ -108,7 +108,7 @@ function Session() {
   };
 
   return (
-    <Page title="Séance avec Tom" back={<BackLink to="/">Retour à tes séances</BackLink>}>
+    <Page title="Séance avec Tom" back={<BackLink to="/">Retour à tes séances</BackLink>} action={<ProfileLink />}>
       <p className="flex items-center gap-3 text-sm text-muted-foreground">
         <TomHead className="size-8 shrink-0" />
         Tom t’aide à trouver, il ne fait pas à ta place.

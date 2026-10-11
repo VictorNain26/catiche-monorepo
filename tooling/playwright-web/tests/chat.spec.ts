@@ -39,6 +39,7 @@ test('a paired student opens a session, writes to Tom and reads his reply', asyn
 
   await page.getByRole('button', { name: 'Nouvelle séance' }).click();
   await expect(page.getByRole('heading', { name: 'Séance avec Tom' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Inès, changer de profil' })).toBeVisible();
   // Nothing to send yet: the button says so with its own colors, readable, not half faded.
   const send = page.getByRole('button', { name: 'Envoyer' });
   await expect(send).toBeDisabled();

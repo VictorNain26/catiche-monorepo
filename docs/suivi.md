@@ -22,8 +22,10 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
   le code en grand, la clé d'accès proposée après le prénom ; le nom dans l'onglet, le manifeste,
   les e-mails et la clé d'accès) et la PR 3 (l'ajout d'un enfant, une question par écran, le mois
   de naissance en deux menus ; puis la fiche de l'enfant, ouverte sur la prochaine étape, le reste
-  replié par `Fold` de `@repo/ui`) ; la suivante, la PR 4, les profils sur l'appareil de la
-  famille et le jumelage. La marge rouge du cahier est retirée (`decisions.md`) : la tête de Tom,
+  replié par `Fold` de `@repo/ui`) et la PR 4 (le profil de l'élève dans l'en-tête, « Qui
+  utilise Tom ? » avec chaque enfant que l'appareil tient, le jumelage des deux côtés ; en 4e et
+  3e, plus d'ouverture de l'espace de l'enfant par le parent) ; la suivante, la PR 5, l'élève
+  arrive et ce que Tom retient. La marge rouge du cahier est retirée (`decisions.md`) : la tête de Tom,
   que l'étude place « dans la marge » à la séance, se pose à côté de ses messages.
 - **Lot 4 en attente** : le harnais `bun run eval` est mergé ; son passage unique attend le
   paiement à l'usage de Mistral (bloquant ci-dessous). Le premier essai s'est arrêté à 3

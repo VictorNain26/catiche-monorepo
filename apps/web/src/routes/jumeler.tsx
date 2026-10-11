@@ -46,12 +46,15 @@ function PairForm({ scanned }: { scanned: string | undefined }) {
   return (
     <Page title="Relier cet appareil">
       <p className="text-muted-foreground">Ton parent obtient un code dans son espace. Saisis-le ici : cet appareil ouvrira ton compte.</p>
+      <p>Ton parent voit le résumé de ta semaine : les matières, le temps passé, ce qui résiste ; pas tes conversations avec Tom.</p>
+      <p className="text-muted-foreground">Chaque appareil relié à ton compte paraît dans ta liste, « Tes appareils reliés ».</p>
       <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-4">
         <Field
           label="Le code"
           autoComplete="one-time-code"
           autoCapitalize="characters"
           spellCheck={false}
+          className="h-14 font-mono text-2xl tracking-widest md:text-2xl"
           {...form.register('code')}
           error={form.formState.errors.code?.message}
         />

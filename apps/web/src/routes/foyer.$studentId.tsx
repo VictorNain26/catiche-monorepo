@@ -150,9 +150,10 @@ function NextStep({ child, pairing }: { child: Student; pairing: Pairing }) {
 }
 
 /**
- * The family's phone, handed to the child: their session if the device holds it, otherwise one
- * paired here by the app, no code to copy. The server then closes the guardian's session on it
- * (platform/auth/pairing.ts): coming back takes the guardian's passkey or a code.
+ * The family's phone, handed to a child in 6e or 5e: their session if the device holds it,
+ * otherwise one paired here by the app, no code to copy. The server then closes the guardian's
+ * session on it (platform/auth/pairing.ts): coming back takes the guardian's passkey or a code.
+ * From the 4e, the child's space opens on no device of the guardian's (`decisions.md`).
  */
 function OpenHere({ child }: { child: Student }) {
   const navigate = useNavigate();
@@ -172,19 +173,16 @@ function OpenHere({ child }: { child: Student }) {
   return (
     <section className="flex flex-col gap-3">
       <Button
-        variant={child.accompanied ? 'default' : 'outline'}
         disabled={open.isPending}
         onClick={() => {
           open.mutate();
         }}
       >
-        {child.accompanied ? `Faire les devoirs avec ${child.name}` : `Ouvrir l’espace de ${child.name} sur cet appareil`}
+        Faire les devoirs avec {child.name}
       </Button>
-      {child.accompanied && (
-        <p className="text-sm text-muted-foreground">
-          À chaque séance, {child.name} choisit : avec vous à côté, ou sans vous ce soir. À côté, Tom vous propose quoi dire, jamais la réponse.
-        </p>
-      )}
+      <p className="text-sm text-muted-foreground">
+        À chaque séance, {child.name} choisit : avec vous à côté, ou sans vous ce soir. À côté, Tom vous propose quoi dire, jamais la réponse.
+      </p>
       <p className="text-sm text-muted-foreground">Pour revenir au vôtre, il vous faudra votre clé d’accès ou un code.</p>
       {open.error && <Notice tone="error">{open.error.message}</Notice>}
     </section>
@@ -200,11 +198,11 @@ function PairingCode({ pairing, device, label, name }: { pairing: Pairing; devic
         <>
           <p>Avec l’appareil photo de {device}, visez ce code :</p>
           <QrCode text={pairingLink(window.location.origin, code.code)} label={`QR code pour relier l’appareil de ${name}`} />
-          <Notice tone="info">
-            Ou, sur {device}, ouvrez {window.location.origin}/jumeler et saisissez le code{' '}
-            <strong className="font-mono text-lg tracking-widest">{formatCode(code.code)}</strong> avant {formatHour(code.expiresAt)}. Il ne sert
-            qu’une fois.
-          </Notice>
+          <p>
+            Ou, sur {device}, ouvrez {window.location.origin}/jumeler et saisissez :
+          </p>
+          <p className="self-center font-mono text-3xl tracking-widest">{formatCode(code.code)}</p>
+          <p className="text-sm text-muted-foreground">Valable jusqu’à {formatHour(code.expiresAt)}, une seule fois.</p>
         </>
       )}
       {pairing.error && <Notice tone="error">{householdMessage(pairing.error)}</Notice>}
@@ -250,24 +248,21 @@ function Devices({ child, pairing }: { child: Student; pairing: Pairing }) {
           En 6e et 5e, {child.name} travaille sur l’appareil de la famille ; relier son propre appareil devient possible en 4e.
         </p>
       ) : (
-        <>
-          {/* Until a device holds the child's space, the code is asked for in the next step. */}
-          {!pairing.firstStep && (
-            <>
-              {pairing.redeemed ? (
-                <Notice tone="info">L’appareil de {child.name} est relié.</Notice>
-              ) : (
-                !pairing.code && (
-                  <p className="text-muted-foreground">
-                    Un code à usage unique relie un autre appareil de {child.name} à son compte, sans mot de passe.
-                  </p>
-                )
-              )}
-              <PairingCode pairing={pairing} device="son autre appareil" label="Relier un autre appareil" name={child.name} />
-            </>
-          )}
-          <OpenHere child={child} />
-        </>
+        // Until a device holds the child's space, the code is asked for in the next step.
+        !pairing.firstStep && (
+          <>
+            {pairing.redeemed ? (
+              <Notice tone="info">L’appareil de {child.name} est relié.</Notice>
+            ) : (
+              !pairing.code && (
+                <p className="text-muted-foreground">
+                  Un code à usage unique relie un autre appareil de {child.name} à son compte, sans mot de passe.
+                </p>
+              )
+            )}
+            <PairingCode pairing={pairing} device="son autre appareil" label="Relier un autre appareil" name={child.name} />
+          </>
+        )
       )}
     </>
   );

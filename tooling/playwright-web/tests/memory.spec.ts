@@ -39,4 +39,5 @@ test('a child whose parent did not propose it is not asked', async ({ page, brow
   await expect(page.getByRole('region', { name: 'Tom peut retenir ce qui a résisté' })).toBeHidden();
   await page.getByRole('link', { name: 'Ce que Tom retient' }).click();
   await expect(page.getByText('Tom ne retient rien d’une séance à l’autre.')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Ana, changer de profil' })).toBeVisible();
 });

@@ -14,7 +14,7 @@ export function QrCode({ text, label }: { text: string; label: string }) {
       role="img"
       aria-label={label}
       viewBox={`0 0 ${String(size)} ${String(size)}`}
-      className="size-48 self-center bg-qr-background fill-qr"
+      className="size-64 self-center bg-qr-background fill-qr"
       shapeRendering="crispEdges"
     >
       <path d={path} />

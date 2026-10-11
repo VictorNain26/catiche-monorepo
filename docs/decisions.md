@@ -48,9 +48,12 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
 - **Entrée sans mot de passe** (2026-10-08). Le parent entre par un code envoyé à son adresse,
   puis par une clé d'accès ; pas de connexion Google, qui ferait savoir à une société américaine
   qui utilise Tom.
-- **Les profils sur l'appareil de la famille** (2026-10-08). Le parent ouvre l'espace de son
-  enfant sur son propre téléphone sans code et revient au sien par sa clé ou un code ; l'enfant
-  n'a pas de déconnexion, mais « Changer de profil ».
+- **Les profils sur l'appareil de la famille** (2026-10-08, précisé le 2026-10-12). En 6e et 5e,
+  le parent ouvre l'espace de son enfant sur son propre téléphone sans code et revient au sien
+  par sa clé ou un code ; l'enfant n'a pas de déconnexion, mais « Changer de profil ». À partir
+  de la 4e, l'espace de l'enfant ne s'ouvre sur aucun appareil du parent : un appareil de la
+  famille se relie par un code, comme les autres, et paraît dans la liste de l'enfant (choix de
+  Victor le 2026-10-12, la vision réservant cette ouverture à la 6e et à la 5e).
 - **Fiches de révision hors V1** (2026-10-08). Le Complet, c'est plus d'échanges par jour ; ni le
   site ni la vision ne promettent de fiches.
 - **Le résumé parent dit les matières, le temps passé et ce qui résiste** (2026-10-08). Jamais

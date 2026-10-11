@@ -4,7 +4,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router';
 import { useState } from 'react';
 import { MemoryAnswer } from '../components/memory-answer';
 import { Notice } from '../components/notice';
-import { BackLink, Page } from '../components/page';
+import { BackLink, Page, ProfileLink } from '../components/page';
 import { api, parseResponse } from '../lib/api';
 import { meQuery } from '../lib/me';
 import { memoryMessage, memoryQuery, notionSummary, useMemoryAnswer } from '../lib/memory';
@@ -33,7 +33,7 @@ function Memory() {
   const failure = understood.error ?? erase.error ?? answer.error;
 
   return (
-    <Page title="Ce que Tom retient" back={<BackLink to="/">Retour à tes séances</BackLink>}>
+    <Page title="Ce que Tom retient" back={<BackLink to="/">Retour à tes séances</BackLink>} action={<ProfileLink />}>
       {failure && <Notice tone="error">{memoryMessage(failure)}</Notice>}
       {memory.state === 'active' ? (
         <>
