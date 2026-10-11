@@ -17,7 +17,7 @@ test('the manifest makes the app installable, in the colors of the page', async 
   const href = await page.locator('link[rel="manifest"]').getAttribute('href');
   expect(href).not.toBeNull();
   const manifest = (await (await request.get(href ?? '')).json()) as Manifest;
-  expect(manifest).toMatchObject({ name: 'Tom', short_name: 'Tom', lang: 'fr', start_url: '/', display: 'standalone' });
+  expect(manifest).toMatchObject({ name: 'Catiche', short_name: 'Catiche', lang: 'fr', start_url: '/', display: 'standalone' });
   expect(manifest.icons.map((icon) => icon.sizes).sort()).toEqual(['192x192', '512x512']);
   for (const icon of manifest.icons) {
     const response = await request.get(icon.src);

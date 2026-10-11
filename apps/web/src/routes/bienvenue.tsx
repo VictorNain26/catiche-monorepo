@@ -13,7 +13,9 @@ import { meQuery } from '../lib/me';
 
 /**
  * A new guardian's first name: their account was created by their first code, nameless. A screen
- * of its own, which the household sends them to until they give it, whatever they reloaded.
+ * of its own, which the household sends them to until they give it, whatever they reloaded. Then
+ * the passkey's offer, while the session is fresh, except on a device that holds a child's space:
+ * a passkey there would open to the lock the child knows.
  */
 export const Route = createFileRoute('/bienvenue')({
   beforeLoad: async ({ context }) => {
@@ -40,7 +42,9 @@ function Welcome() {
       return;
     }
     await queryClient.invalidateQueries({ queryKey: meQuery.queryKey });
-    await navigate({ to: '/foyer' });
+    // The guardian's own session, and a child's if the device holds one.
+    const { data: held } = await authClient.multiSession.listDeviceSessions();
+    await navigate({ to: (held?.length ?? 0) > 1 ? '/foyer' : '/foyer/cle' });
   });
 
   return (

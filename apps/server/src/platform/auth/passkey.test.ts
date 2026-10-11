@@ -53,7 +53,7 @@ describe('passkey registration', () => {
     const res = await registerOptions(parent);
     expect(res.status).toBe(200);
     const options = (await res.json()) as RegistrationOptions;
-    expect(options.rp).toEqual({ id: new URL(ORIGIN).hostname, name: 'Tom' });
+    expect(options.rp).toEqual({ id: new URL(ORIGIN).hostname, name: 'Catiche' });
     expect(options.user.name).toBe('cle@example.com');
     expect(options.authenticatorSelection.residentKey).toBe('required');
   });

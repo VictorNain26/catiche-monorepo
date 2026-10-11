@@ -54,6 +54,7 @@ export function CodeForm({ email, submitLabel, onEntered }: { email: string; sub
           inputMode="numeric"
           autoComplete="one-time-code"
           maxLength={6}
+          className="h-14 font-mono text-2xl tracking-widest md:text-2xl"
           {...form.register('otp')}
           error={form.formState.errors.otp?.message}
         />

@@ -69,8 +69,8 @@ export function createAuth(db: Db, config: Pick<Config, 'publicUrl' | 'authSecre
         afterDelete: ({ email }) => {
           const notice = send({
             to: email,
-            subject: 'Votre compte Tom est supprimé',
-            text: `Bonjour,\n\nVotre compte Tom est supprimé, et avec lui votre foyer et les comptes de vos enfants si vous en étiez le seul parent.\n\nSi vous n'avez rien demandé, écrivez-nous en répondant à ce message.`,
+            subject: 'Votre compte Catiche est supprimé',
+            text: `Bonjour,\n\nVotre compte Catiche est supprimé, et avec lui votre foyer et les comptes de vos enfants si vous en étiez le seul parent.\n\nSi vous n'avez rien demandé, écrivez-nous en répondant à ce message.`,
           });
           background(
             notice.catch((error: unknown) => {
@@ -128,7 +128,7 @@ export function createAuth(db: Db, config: Pick<Config, 'publicUrl' | 'authSecre
       // guardian's address the passkey is filed under.
       passkey({
         rpID,
-        rpName: 'Tom',
+        rpName: 'Catiche',
         origin,
         authenticatorSelection: { residentKey: 'required', userVerification: 'preferred' },
         registration: { afterVerification: ({ ctx }) => ({ name: ctx.headers?.get('user-agent') ?? 'Clé d’accès' }) },
@@ -146,15 +146,15 @@ export function createAuth(db: Db, config: Pick<Config, 'publicUrl' | 'authSecre
           if (known || (await invited(ctx, email))) {
             await send({
               to: email,
-              subject: `Votre code Tom : ${otp}`,
-              text: `Bonjour,\n\nVotre code pour entrer dans Tom : ${otp}\n\nIl est valable 5 minutes. Si vous n'avez rien demandé, ignorez ce message : personne n'entre sans ce code.`,
+              subject: `Votre code Catiche : ${otp}`,
+              text: `Bonjour,\n\nVotre code pour entrer dans Catiche : ${otp}\n\nIl est valable 5 minutes. Si vous n'avez rien demandé, ignorez ce message : personne n'entre sans ce code.`,
             });
             return;
           }
           await send({
             to: email,
-            subject: 'Tom est en bêta fermée',
-            text: `Bonjour,\n\nQuelqu'un, sans doute vous, a demandé à entrer dans Tom avec cette adresse. Tom est en bêta fermée : un compte ne se crée que sur invitation, et cette adresse n'en a pas, ou elle a expiré.\n\nSi vous attendiez une invitation, demandez-la à la personne qui vous a parlé de Tom. Sinon, ignorez ce message.`,
+            subject: 'Catiche est en bêta fermée',
+            text: `Bonjour,\n\nQuelqu'un, sans doute vous, a demandé à entrer dans Catiche avec cette adresse. Catiche est en bêta fermée : un compte ne se crée que sur invitation, et cette adresse n'en a pas, ou elle a expiré.\n\nSi vous attendiez une invitation, demandez-la à la personne qui vous a parlé de Catiche. Sinon, ignorez ce message.`,
           });
         },
       }),

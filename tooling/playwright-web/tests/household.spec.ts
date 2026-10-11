@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { addChild, birthMonthAged, childPhone, guardian, pairedStudent, signIn } from '../guardian';
+import { invite } from '../database';
+import { addChild, address, birthMonthAged, childPhone, guardian, pairedStudent, signIn } from '../guardian';
 
 test('a guardian adds a child, changes their class, then deletes their account', async ({ page }) => {
   await guardian(page, 'foyer');
@@ -104,7 +105,7 @@ test('on the family phone, the parent opens the child’s space without a code, 
   await expect(page).toHaveURL(/\/connexion$/);
   // A choice of who uses Tom, not the generic sign-in.
   await expect(page.getByRole('heading', { level: 1, name: 'Qui utilise Tom ?' })).toBeVisible();
-  await expect(page.getByText('Tom est en bêta fermée')).toBeHidden();
+  await expect(page.getByText('Catiche est en bêta fermée')).toBeHidden();
   await page.getByRole('link', { name: 'C’est Zoé' }).click();
   await expect(page.getByRole('heading', { name: 'Bonjour Zoé' })).toBeVisible();
   await page.getByRole('link', { name: 'Changer de profil' }).click();
@@ -123,6 +124,22 @@ test('on the family phone, the parent opens the child’s space without a code, 
   await expect(page.getByRole('heading', { name: 'Bonjour Zoé' })).toBeVisible();
   // The same session, switched back to: no second pairing.
   await expect(page.getByText(/^Relié le /)).toHaveCount(1);
+});
+
+test('a parent first entering on a device that holds a child’s space is offered no passkey its lock would open', async ({ page }) => {
+  await guardian(page, 'appareil-partage');
+  await addChild(page, 'Zoé');
+  await page.getByRole('button', { name: 'Ouvrir l’espace de Zoé sur cet appareil' }).click();
+  await expect(page.getByRole('heading', { name: 'Bonjour Zoé' })).toBeVisible();
+  await page.getByRole('link', { name: 'Changer de profil' }).click();
+
+  const other = address('autre-parent');
+  invite(other);
+  await signIn(page, other);
+  await page.getByLabel('Votre prénom').fill('Sam');
+  await page.getByRole('button', { name: 'Continuer' }).click();
+  await expect(page).toHaveURL(/\/foyer$/);
+  await expect(page.getByRole('heading', { name: 'Entrer plus vite la prochaine fois' })).toHaveCount(0);
 });
 
 test('in 5e, the parent does the homework with the child on the family phone, and pairs no device of the child’s', async ({ page }) => {

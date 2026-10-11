@@ -18,6 +18,7 @@ import { Route as JumelerRouteImport } from './routes/jumeler'
 import { Route as MemoireRouteImport } from './routes/memoire'
 import { Route as FoyerIndexRouteImport } from './routes/foyer.index'
 import { Route as FoyerStudentIdRouteImport } from './routes/foyer.$studentId'
+import { Route as FoyerCleRouteImport } from './routes/foyer.cle'
 import { Route as FoyerCompteRouteImport } from './routes/foyer.compte'
 import { Route as SeanceSessionIdRouteImport } from './routes/seance.$sessionId'
 
@@ -66,6 +67,11 @@ const FoyerStudentIdRoute = FoyerStudentIdRouteImport.update({
   path: '/$studentId',
   getParentRoute: () => FoyerRoute,
 } as any)
+const FoyerCleRoute = FoyerCleRouteImport.update({
+  id: '/cle',
+  path: '/cle',
+  getParentRoute: () => FoyerRoute,
+} as any)
 const FoyerCompteRoute = FoyerCompteRouteImport.update({
   id: '/compte',
   path: '/compte',
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/jumeler': typeof JumelerRoute
   '/memoire': typeof MemoireRoute
   '/foyer/$studentId': typeof FoyerStudentIdRoute
+  '/foyer/cle': typeof FoyerCleRoute
   '/foyer/compte': typeof FoyerCompteRoute
   '/seance/$sessionId': typeof SeanceSessionIdRoute
   '/foyer/': typeof FoyerIndexRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/jumeler': typeof JumelerRoute
   '/memoire': typeof MemoireRoute
   '/foyer/$studentId': typeof FoyerStudentIdRoute
+  '/foyer/cle': typeof FoyerCleRoute
   '/foyer/compte': typeof FoyerCompteRoute
   '/seance/$sessionId': typeof SeanceSessionIdRoute
   '/foyer': typeof FoyerIndexRoute
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/jumeler': typeof JumelerRoute
   '/memoire': typeof MemoireRoute
   '/foyer/$studentId': typeof FoyerStudentIdRoute
+  '/foyer/cle': typeof FoyerCleRoute
   '/foyer/compte': typeof FoyerCompteRoute
   '/seance/$sessionId': typeof SeanceSessionIdRoute
   '/foyer/': typeof FoyerIndexRoute
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/jumeler'
     | '/memoire'
     | '/foyer/$studentId'
+    | '/foyer/cle'
     | '/foyer/compte'
     | '/seance/$sessionId'
     | '/foyer/'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/jumeler'
     | '/memoire'
     | '/foyer/$studentId'
+    | '/foyer/cle'
     | '/foyer/compte'
     | '/seance/$sessionId'
     | '/foyer'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/jumeler'
     | '/memoire'
     | '/foyer/$studentId'
+    | '/foyer/cle'
     | '/foyer/compte'
     | '/seance/$sessionId'
     | '/foyer/'
@@ -233,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FoyerStudentIdRouteImport
       parentRoute: typeof FoyerRoute
     }
+    '/foyer/cle': {
+      id: '/foyer/cle'
+      path: '/cle'
+      fullPath: '/foyer/cle'
+      preLoaderRoute: typeof FoyerCleRouteImport
+      parentRoute: typeof FoyerRoute
+    }
     '/foyer/compte': {
       id: '/foyer/compte'
       path: '/compte'
@@ -252,12 +271,14 @@ declare module '@tanstack/react-router' {
 
 interface FoyerRouteChildren {
   FoyerStudentIdRoute: typeof FoyerStudentIdRoute
+  FoyerCleRoute: typeof FoyerCleRoute
   FoyerCompteRoute: typeof FoyerCompteRoute
   FoyerIndexRoute: typeof FoyerIndexRoute
 }
 
 const FoyerRouteChildren: FoyerRouteChildren = {
   FoyerStudentIdRoute: FoyerStudentIdRoute,
+  FoyerCleRoute: FoyerCleRoute,
   FoyerCompteRoute: FoyerCompteRoute,
   FoyerIndexRoute: FoyerIndexRoute,
 }

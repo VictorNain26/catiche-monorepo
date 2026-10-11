@@ -2,11 +2,11 @@ import { Button, Card } from '@repo/ui';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { CodeForm, sendCode } from '../components/code-form';
 import { Notice } from '../components/notice';
 import { BackLink, Page } from '../components/page';
+import { PasskeyCreate } from '../components/passkey-create';
 import { SignOut } from '../components/sign-out';
-import { authClient, authMessage, hasCode, isCancelled } from '../lib/auth';
+import { authClient, authMessage } from '../lib/auth';
 import { deviceName, formatDay } from '../lib/device';
 import { passkeysQuery } from '../lib/passkey';
 
@@ -25,37 +25,13 @@ function Account() {
   );
 }
 
-/**
- * A passkey opens Tom with the phone's own lock, instead of a code by email. It is made within
- * minutes of entering (the server's freshAge); past them, a code confirms who is there first.
- */
+/** A passkey opens Catiche with the device's own lock, instead of a code by email. */
 function Passkeys() {
   const queryClient = useQueryClient();
   const { data: passkeys } = useSuspenseQuery(passkeysQuery);
   const [failure, setFailure] = useState<string | null>(null);
-  const [stale, setStale] = useState(false);
-  const [codeSentTo, setCodeSentTo] = useState<string | null>(null);
   const refresh = () => queryClient.invalidateQueries({ queryKey: passkeysQuery.queryKey });
 
-  const add = useMutation({
-    mutationFn: async () => {
-      setFailure(null);
-      const { error } = await authClient.passkey.addPasskey();
-      if (!error) return refresh();
-      if (hasCode(error, 'SESSION_NOT_FRESH')) setStale(true);
-      else if (!isCancelled(error)) setFailure(authMessage(error));
-    },
-  });
-  const askCode = useMutation({
-    mutationFn: async () => {
-      setFailure(null);
-      const { data } = await authClient.getSession();
-      if (!data) return;
-      const { error } = await sendCode(data.user.email);
-      if (error) setFailure(authMessage(error));
-      else setCodeSentTo(data.user.email);
-    },
-  });
   const remove = useMutation({
     mutationFn: async (id: string) => {
       setFailure(null);
@@ -97,39 +73,7 @@ function Passkeys() {
         </ul>
       )}
       {failure && <Notice tone="error">{failure}</Notice>}
-      {codeSentTo ? (
-        <CodeForm
-          email={codeSentTo}
-          submitLabel="Confirmer"
-          onEntered={() => {
-            setCodeSentTo(null);
-            setStale(false);
-          }}
-        />
-      ) : stale ? (
-        <>
-          <Notice tone="info">
-            Par sécurité, une clé d’accès se crée dans les 10 minutes qui suivent votre entrée. Confirmez d’abord avec un code reçu par e-mail.
-          </Notice>
-          <Button
-            disabled={askCode.isPending}
-            onClick={() => {
-              askCode.mutate();
-            }}
-          >
-            Recevoir un code
-          </Button>
-        </>
-      ) : (
-        <Button
-          disabled={add.isPending}
-          onClick={() => {
-            add.mutate();
-          }}
-        >
-          Créer une clé d’accès sur cet appareil
-        </Button>
-      )}
+      <PasskeyCreate label="Créer une clé d’accès sur cet appareil" onCreated={refresh} />
     </section>
   );
 }

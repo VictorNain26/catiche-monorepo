@@ -20,8 +20,8 @@ export default defineConfig({
       // registration is a registerSW.js file, never an inline script the server's CSP would block.
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Tom',
-        short_name: 'Tom',
+        name: 'Catiche',
+        short_name: 'Catiche',
         lang: 'fr',
         start_url: '/',
         scope: '/',

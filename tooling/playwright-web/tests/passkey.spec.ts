@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { codeSince, logMark } from '../server-log';
-import { guardian } from '../guardian';
+import { invite } from '../database';
+import { address, guardian, signIn } from '../guardian';
 
 // The browser's ceremony, against Chromium's virtual authenticator, a DevTools domain WebKit lacks.
 test.skip(({ browserName }) => browserName !== 'chromium', 'The virtual authenticator is Chromium’s');
@@ -48,6 +49,18 @@ test('a parent makes a passkey on their phone, filed under their address, and th
   await expect(page.getByRole('heading', { name: 'Bonjour Claire' })).toBeVisible();
 });
 
+test('a new parent makes their passkey from the offer that follows their first name, and lands on the household', async ({ page }) => {
+  const lock = await phoneLock(page);
+  const email = address('cle-accueil');
+  invite(email);
+  await signIn(page, email);
+  await page.getByLabel('Votre prénom').fill('Claire');
+  await page.getByRole('button', { name: 'Continuer' }).click();
+  await page.getByRole('button', { name: 'Créer ma clé d’accès' }).click();
+  await expect(page).toHaveURL(/\/foyer$/);
+  expect(await lock.filedUnder()).toEqual([email]);
+});
+
 test('the button gets a parent in with their passkey, without a code', async ({ page }) => {
   const lock = await phoneLock(page);
   await guardian(page, 'cle-bouton');
@@ -71,7 +84,7 @@ test('a passkey the parent deleted no longer gets them in, and the screen sends 
   await expect(page.getByText(/^Créée le /)).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Se déconnecter' }).click();
-  await expect(page.getByRole('alert')).toHaveText('Tom ne connaît plus cette clé d’accès : entrez avec un code reçu par e-mail.');
+  await expect(page.getByRole('alert')).toHaveText('Catiche ne connaît plus cette clé d’accès : entrez avec un code reçu par e-mail.');
   await expect(page).toHaveURL(/\/connexion$/);
 });
 
@@ -99,5 +112,20 @@ test.describe('past the minutes after entering', () => {
 
     await makePasskey(page);
     await expect(page.getByText(/^Créée le /)).toBeVisible();
+  });
+
+  test('the offer after the first name, too old to make a passkey, asks for a code instead of failing', async ({ page }) => {
+    await phoneLock(page);
+    const email = address('cle-accueil-tardive');
+    invite(email);
+    await signIn(page, email);
+    await page.getByLabel('Votre prénom').fill('Claire');
+    await page.getByRole('button', { name: 'Continuer' }).click();
+    await page.route('**/api/auth/passkey/generate-register-options*', (route) =>
+      route.fulfill({ status: 403, json: { code: 'SESSION_NOT_FRESH', message: 'Session is not fresh' } }),
+    );
+    await page.getByRole('button', { name: 'Créer ma clé d’accès' }).click();
+    await expect(page.getByText('Par sécurité, une clé d’accès se crée dans les 10 minutes')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Recevoir un code' })).toBeVisible();
   });
 });

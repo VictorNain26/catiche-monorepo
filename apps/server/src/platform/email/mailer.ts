@@ -40,7 +40,7 @@ export function scalewayMailer({ accessKey, secretKey, projectId, from, apiURL }
   return async ({ to, subject, text }) => {
     await tem.createEmail(
       {
-        from: { email: from, name: 'Tom' },
+        from: { email: from, name: 'Catiche' },
         to: [{ email: to }],
         subject,
         text,

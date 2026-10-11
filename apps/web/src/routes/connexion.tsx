@@ -88,8 +88,8 @@ function EmailStep({ onSent, onEntered }: { onSent: (email: string) => void; onE
 
   const child = me?.role === 'student' ? me.name : null;
   return (
-    // On a device that holds a child's space, a choice of who uses Tom; elsewhere, the sign-in.
-    <Page title={child ? 'Qui utilise Tom ?' : 'Entrer dans Tom'}>
+    // On a device that holds a child's space, a choice of who uses it; elsewhere, the sign-in.
+    <Page title={child ? 'Qui utilise Tom ?' : 'Entrer dans Catiche'}>
       {child ? (
         <>
           <Button asChild>
@@ -99,7 +99,13 @@ function EmailStep({ onSent, onEntered }: { onSent: (email: string) => void; onE
           <p className="text-muted-foreground">Entrez avec votre clé d’accès ou un code : l’espace de {child} reste sur l’appareil.</p>
         </>
       ) : (
-        <Notice tone="info">Tom est en bêta fermée : un compte se crée avec l’adresse e-mail qui a reçu une invitation.</Notice>
+        <>
+          <p className="text-foreground">
+            Le soir, Tom, un programme, aide votre enfant à faire ses devoirs : il lui pose des questions pour qu’il trouve lui-même, il n’est pas là
+            pour donner la réponse.
+          </p>
+          <Notice tone="info">Catiche est en bêta fermée : un compte se crée avec l’adresse e-mail qui a reçu une invitation.</Notice>
+        </>
       )}
       <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-4">
         <Field
