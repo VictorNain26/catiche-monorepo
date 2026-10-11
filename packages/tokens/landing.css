@@ -12,9 +12,12 @@
 }
 
 @theme {
-  /* Rayon des cartes ; boutons, champs et badges prennent rounded-full
-   * (utilitaire Tailwind). */
+  /* Rayon des cartes ; les boutons et les champs partagés avec l'app gardent leur rendu de
+   * toujours : rond, l'ombre md puis lg au survol de Tailwind. */
   --radius-2xl: 20px;
+  --radius-control: 9999px;
+  --shadow-control: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-control-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 
   /* Couleurs sémantiques (light) — stylo Bic quatre couleurs sur papier crème */
   --color-background: #faf7f0;

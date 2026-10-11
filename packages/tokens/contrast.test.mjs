@@ -6,7 +6,7 @@ const read = (file) => readFileSync(new URL(file, import.meta.url), 'utf8');
 const colors = (css) => Object.fromEntries([...css.matchAll(/--color-([a-z-]+):\s*(#[0-9A-Fa-f]{6})/g)].map(([, name, hex]) => [name, hex]));
 
 // The dark block wherever it sits in the file; every other color is light. The landing keeps its
-// own palette until lot 4.
+// own palette until lot 3.
 const theme = read('./theme.css');
 const darkBlock = /@media\s*\(prefers-color-scheme:\s*dark\)\s*\{([\s\S]*?)\n\}/.exec(theme);
 const light = colors(theme.replace(darkBlock?.[0] ?? '', ''));
@@ -59,8 +59,11 @@ const PAIRS = [
 ];
 
 // Tokens the app added after the landing froze: checked in each palette that defines them, which
-// the app's light one must (landing.css takes none until lot 4).
-const APP_PAIRS = [['qr', 'qr-background']];
+// the app's light one must (landing.css takes none until lot 3).
+const APP_PAIRS = [
+  ['qr', 'qr-background'],
+  ['disabled-foreground', 'disabled'],
+];
 
 test('the app’s palette defines the tokens it added after the landing froze', () => {
   for (const [fg, bg] of APP_PAIRS) assert.ok(light[fg] && light[bg], `missing --color-${fg} or --color-${bg}`);

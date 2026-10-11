@@ -77,7 +77,8 @@
       "dependencies": {
         "@ai-sdk/react": "4.0.131",
         "@better-auth/passkey": "^1.7.7",
-        "@fontsource/andika": "^5.3.0",
+        "@fontsource/atkinson-hyperlegible-mono": "^5.3.0",
+        "@fontsource/inclusive-sans": "^5.3.0",
         "@hookform/resolvers": "^5.9.1",
         "@repo/tokens": "workspace:*",
         "@repo/ui": "workspace:*",
@@ -588,7 +589,9 @@
 
     "@evilmartians/lefthook": ["@evilmartians/lefthook@2.1.14", "", { "os": [ "linux", "win32", "darwin", ], "cpu": [ "x64", "ia32", "arm64", ], "bin": { "lefthook": "bin/index.js" } }, "sha512-kaj3I6cl5jNxjD1T1ewpjjLaeqQdFwROdx5pWpiQzOEUI3ra/Kj6nS6x1wPucesGbXwAIx2vshCQbkC9OjJVLw=="],
 
-    "@fontsource/andika": ["@fontsource/andika@5.3.0", "", {}, "sha512-m15/VavWcrOhTJr4xXVKTKrJgI8Ny4fI52ZwcoYH3kH6IyLpAfuYUuFouI223WFbDP0kwvKsOOankklFNyMvNw=="],
+    "@fontsource/atkinson-hyperlegible-mono": ["@fontsource/atkinson-hyperlegible-mono@5.3.0", "", {}, "sha512-7Iha5azCRXJVk4NdxbVdKAE+4p/rMJoW6dslvhktugDFPSp7kxFRGAavBtwtSTrnyNhKXW8w1NHgMnrh/6OshA=="],
+
+    "@fontsource/inclusive-sans": ["@fontsource/inclusive-sans@5.3.0", "", {}, "sha512-DSnSommqBXS25QPYACA2FqabNIgMDW93sBXVAHM7TETFVOHo18zltPslzeKguWCUa60dD9wqG79FwLxpNsKPJQ=="],
 
     "@fontsource/nunito": ["@fontsource/nunito@5.3.0", "", {}, "sha512-vw9TaTQJ/zpEpKrsODuPmOvaVjXgdda6B+xXA4YqjrdeJ62MLgVoDerdRXFQHyBnSCt2yQ2nHKCHPP/Pv7Xq4Q=="],
 
