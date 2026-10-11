@@ -1,7 +1,7 @@
 import { cn } from '@repo/ui/classes';
 import { createLink } from '@tanstack/react-router';
 import { ChevronLeftIcon, type LucideIcon } from 'lucide-react';
-import type { ComponentProps, ReactNode } from 'react';
+import { useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
 
 function HeaderAnchor({ icon: Icon, className, children, ...anchor }: ComponentProps<'a'> & { icon: LucideIcon }) {
   return (
@@ -30,6 +30,8 @@ interface PageProps {
   title: string;
   back?: ReactNode;
   action?: ReactNode;
+  /** A screen reached by a step of a form, not a link: its title takes the focus, so it is read out. */
+  announce?: boolean;
   children: ReactNode;
 }
 
@@ -37,8 +39,12 @@ interface PageProps {
  * A screen at phone width first: one column on the exercise book's red margin; its header holds the
  * way back, read before the title, and an action of the space on the right, when it has them.
  */
-export function Page({ title, back, action, children }: PageProps) {
+export function Page({ title, back, action, announce = false, children }: PageProps) {
   const links = back !== undefined || action !== undefined;
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (announce) headingRef.current?.focus();
+  }, [announce]);
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 border-l-2 border-margin p-4">
       <header className="flex flex-col gap-2 pt-4">
@@ -48,7 +54,9 @@ export function Page({ title, back, action, children }: PageProps) {
             {action}
           </div>
         ) : null}
-        <h1 className={cn('text-3xl font-bold text-foreground', !links && 'pt-4')}>{title}</h1>
+        <h1 ref={headingRef} tabIndex={-1} className={cn('text-3xl font-bold text-foreground outline-none', !links && 'pt-4')}>
+          {title}
+        </h1>
       </header>
       {children}
     </main>

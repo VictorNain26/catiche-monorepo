@@ -13,8 +13,13 @@ test('an invited parent gets in by the code their address received, names themse
   await page.getByLabel('Votre prénom').fill('Claire');
   await page.getByRole('button', { name: 'Continuer' }).click();
   // Just in, the session is fresh: the passkey is offered once, with what it changes; later is fine.
-  await expect(page.getByRole('heading', { level: 1, name: 'Entrer plus vite la prochaine fois' })).toBeVisible();
+  // A screen of its own: read out from its title, and still there after a reload.
+  const offer = page.getByRole('heading', { level: 1, name: 'Entrer plus vite la prochaine fois' });
+  await expect(offer).toBeVisible();
+  await expect(offer).toBeFocused();
   await expect(page.getByText('sans code par e-mail')).toBeVisible();
+  await page.reload();
+  await expect(offer).toBeVisible();
   await page.getByRole('button', { name: 'Plus tard' }).click();
   await expect(page).toHaveURL(/\/foyer$/);
   await expect(page.getByRole('heading', { name: 'Bonjour Claire' })).toBeVisible();

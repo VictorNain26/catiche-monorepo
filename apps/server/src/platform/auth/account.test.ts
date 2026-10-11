@@ -202,7 +202,9 @@ describe('account deletion', () => {
     ).toEqual([]);
     expect(await api.sessionUser(device)).toBeUndefined();
     expect(await api.sessionUser(parent)).toBeUndefined();
-    expect((await notice).subject).toContain('supprimé');
+    const sent = await notice;
+    expect(sent.subject).toBe('Votre compte Catiche est supprimé');
+    expect(sent.text).toContain('Votre compte Catiche est supprimé');
   });
 
   it('refuses a session opened more than ten minutes ago, and keeps the account', async () => {

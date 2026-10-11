@@ -113,4 +113,19 @@ test.describe('past the minutes after entering', () => {
     await makePasskey(page);
     await expect(page.getByText(/^Créée le /)).toBeVisible();
   });
+
+  test('the offer after the first name, too old to make a passkey, asks for a code instead of failing', async ({ page }) => {
+    await phoneLock(page);
+    const email = address('cle-accueil-tardive');
+    invite(email);
+    await signIn(page, email);
+    await page.getByLabel('Votre prénom').fill('Claire');
+    await page.getByRole('button', { name: 'Continuer' }).click();
+    await page.route('**/api/auth/passkey/generate-register-options*', (route) =>
+      route.fulfill({ status: 403, json: { code: 'SESSION_NOT_FRESH', message: 'Session is not fresh' } }),
+    );
+    await page.getByRole('button', { name: 'Créer ma clé d’accès' }).click();
+    await expect(page.getByText('Par sécurité, une clé d’accès se crée dans les 10 minutes')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Recevoir un code' })).toBeVisible();
+  });
 });
