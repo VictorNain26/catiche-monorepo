@@ -60,7 +60,7 @@ function ChildCard({ child }: { child: Student }) {
     <Link
       to="/foyer/$studentId"
       params={{ studentId: child.id }}
-      className="flex min-h-11 flex-col gap-1 rounded-lg border border-border bg-card p-4 text-card-foreground"
+      className="flex min-h-11 flex-col gap-1 rounded-2xl border border-border bg-card p-4 text-card-foreground"
     >
       <span className="flex items-center justify-between gap-3">
         <span className="font-bold">{child.name}</span>

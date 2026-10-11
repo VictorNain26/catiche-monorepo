@@ -4,15 +4,13 @@
  * Importer APRÈS l'import de Tailwind de l'app.
  * Contrastes AA vérifiés par contrast.test.mjs, dans les deux modes. */
 
-/* Direction « Grands carreaux » (docs/decisions.md, docs/charte.md) : le cahier à réglure Seyès,
- * papier, encre bleue du pull de Tom, marge rouge. Inclusive Sans pour lire, au I, l et 1
- * distincts et au zéro barré ; Atkinson Hyperlegible Mono pour les codes et les chiffres. */
+/* Direction « Grands carreaux » (docs/decisions.md, docs/charte.md) : un cahier d'écolier, papier,
+ * encre bleue du pull de Tom, marge rouge. Inclusive Sans pour lire, au I, l et 1 distincts et au
+ * zéro barré ; Atkinson Hyperlegible Mono pour les codes et les chiffres. */
 @theme {
   --font-sans: 'Inclusive Sans', ui-sans-serif, system-ui, sans-serif;
   --font-heading: 'Inclusive Sans', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Atkinson Hyperlegible Mono', ui-monospace, monospace;
-  /* Inclusive Sans s'arrête au gras : les titres (font-extrabold, base.css) le prennent. */
-  --font-weight-extrabold: 700;
 }
 
 @theme {
@@ -21,7 +19,7 @@
   --radius-2xl: 10px;
   --radius-control: 10px;
   --shadow-control: 0 1px 0 rgb(28 32 51 / 0.25);
-  --shadow-control-hover: 0 1px 0 rgb(28 32 51 / 0.25);
+  --shadow-control-hover: var(--shadow-control);
 
   /* Couleurs sémantiques (clair) — papier, encre bleue, marge rouge */
   --color-background: #faf8f2;

@@ -49,7 +49,7 @@ function Memory() {
           ) : (
             <ul className="flex flex-col gap-2">
               {memory.notions.map((notion) => (
-                <li key={notion.notionId} className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4 text-card-foreground">
+                <li key={notion.notionId} className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-4 text-card-foreground">
                   <span className="text-sm text-muted-foreground">Au programme</span>
                   <span className="font-bold">{notion.label}</span>
                   <span className="text-sm text-muted-foreground">{notionSummary(notion)}</span>

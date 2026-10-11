@@ -7,7 +7,6 @@ import { isProblem } from './lib/api';
 import { routeTree } from './routeTree.gen';
 import '@fontsource/inclusive-sans/400.css';
 import '@fontsource/inclusive-sans/700.css';
-import '@fontsource/atkinson-hyperlegible-mono/400.css';
 import '@fontsource/atkinson-hyperlegible-mono/700.css';
 import './styles.css';
 

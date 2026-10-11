@@ -8,7 +8,7 @@ import { Notice } from './notice';
  */
 export function MemoryAnswer({ answer }: { answer: ReturnType<typeof useMemoryAnswer> }) {
   return (
-    <section aria-labelledby="memory-offer" className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 text-card-foreground">
+    <section aria-labelledby="memory-offer" className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 text-card-foreground">
       <h2 id="memory-offer" className="text-lg font-bold">
         Tom peut retenir ce qui a résisté
       </h2>

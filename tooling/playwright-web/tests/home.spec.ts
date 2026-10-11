@@ -10,7 +10,7 @@ test('the page a visitor lands on renders in French at phone width, with one h1 
   expect(overflows).toBe(false);
 });
 
-test('the brand applies: Seyès paper, Inclusive Sans loaded, the red margin on the screen', async ({ page }) => {
+test('the brand applies: paper background, Inclusive Sans loaded, the red margin on the screen', async ({ page }) => {
   await page.goto('/connexion');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
