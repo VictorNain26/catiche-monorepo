@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { authClient, authMessage } from '../lib/auth';
 import { meQuery } from '../lib/me';
 import { z } from '../lib/zod';
-import { Field } from './field';
+import { CODE_INPUT_CLASS, Field } from './field';
 import { Notice } from './notice';
 
 const codeSchema = z.object({
@@ -54,7 +54,7 @@ export function CodeForm({ email, submitLabel, onEntered }: { email: string; sub
           inputMode="numeric"
           autoComplete="one-time-code"
           maxLength={6}
-          className="h-14 font-mono text-2xl tracking-widest md:text-2xl"
+          className={CODE_INPUT_CLASS}
           {...form.register('otp')}
           error={form.formState.errors.otp?.message}
         />

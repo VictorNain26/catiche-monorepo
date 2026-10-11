@@ -1,6 +1,7 @@
 /** better-auth's client, on the server's own origin (`/api/auth`), its session in a cookie. */
 
 import { passkeyClient } from '@better-auth/passkey/client';
+import { queryOptions } from '@tanstack/react-query';
 import type { BetterAuthClientPlugin } from 'better-auth/client';
 import { emailOTPClient, multiSessionClient } from 'better-auth/client/plugins';
 import { createAuthClient } from 'better-auth/react';
@@ -10,6 +11,16 @@ import type { DevicePairing } from 'tomai-server/contract';
 const devicePairing = { id: 'device-pairing', $InferServerPlugin: {} as DevicePairing } satisfies BetterAuthClientPlugin;
 
 export const authClient = createAuthClient({ plugins: [devicePairing, emailOTPClient(), passkeyClient(), multiSessionClient()] });
+
+/** The sessions this device holds, one per account, as better-auth's multi-session lists them. */
+export const deviceSessionsQuery = queryOptions({
+  queryKey: ['device-sessions'],
+  queryFn: async () => {
+    const { data, error } = await authClient.multiSession.listDeviceSessions();
+    if (error) throw new Error(authMessage(error));
+    return data;
+  },
+});
 
 interface AuthError {
   code?: string | undefined;

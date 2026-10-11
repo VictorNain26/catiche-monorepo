@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Route } from '@playwright/test';
 import { invite } from '../database';
 import { addChild, address, birthMonthAged, childPhone, guardian, pairedStudent, signIn } from '../guardian';
 
@@ -157,8 +157,12 @@ test('a code pairs the child’s phone, which sees it, and the guardian disconne
   await child.goto('/connexion');
   await child.getByRole('link', { name: 'Tu es élève ? Relie cet appareil' }).click();
   // Before pairing, the child reads what their parent sees.
-  await expect(child.getByText('Ton parent voit le résumé de ta semaine')).toContainText('pas tes conversations avec Tom');
-  await expect(child.getByText('Chaque appareil relié à ton compte paraît dans ta liste')).toBeVisible();
+  await expect(child.getByText('Ton parent voit le résumé de ta semaine : les matières, le temps passé, ce qui résiste.')).toBeVisible();
+  // Nothing the app cannot hold to: a parent may pair a device of their own with a code.
+  await expect(
+    child.getByText('Tes conversations avec Tom restent dans ton espace : chaque appareil qui l’ouvre paraît dans ta liste'),
+  ).toBeVisible();
+  await expect(child.getByText('pas tes conversations')).toHaveCount(0);
   await expect(child.getByLabel('Le code')).toHaveCSS('font-family', /Atkinson Hyperlegible Mono/);
   await child.getByLabel('Le code').fill(code ?? '');
   await child.getByRole('button', { name: 'Relier' }).click();
@@ -252,22 +256,52 @@ test('on the family phone, the parent opens the child’s space without a code, 
   await expect(page.getByText(/^Relié le /)).toHaveCount(1);
 });
 
-test('on the family phone, « Qui utilise Tom ? » offers every child it holds', async ({ page }) => {
-  const email = await guardian(page, 'fratrie');
-  await addChild(page, 'Lou', { level: 'Sixième' });
-  await page.getByRole('button', { name: 'Faire les devoirs avec Lou' }).click();
-  await expect(page.getByRole('heading', { name: 'Bonjour Lou' })).toBeVisible();
-  await page.getByRole('link', { name: 'Lou, changer de profil' }).click();
-  await signIn(page, email);
-  await expect(page).toHaveURL(/\/foyer$/);
-  await addChild(page, 'Zoé', { level: 'Cinquième' });
-  await page.getByRole('button', { name: 'Faire les devoirs avec Zoé' }).click();
-  await expect(page.getByRole('heading', { name: 'Bonjour Zoé' })).toBeVisible();
+// page.route never sees what the service worker answers.
+test.describe('on the family phone', () => {
+  test.use({ serviceWorkers: 'block' });
+  const later = (route: Route) => new Promise((resolve) => setTimeout(resolve, 1000)).then(() => route.continue());
 
-  await page.getByRole('link', { name: 'Zoé, changer de profil' }).click();
-  await expect(page.getByRole('button', { name: 'C’est Zoé' })).toBeVisible();
-  await page.getByRole('button', { name: 'C’est Lou' }).click();
-  await expect(page.getByRole('heading', { name: 'Bonjour Lou' })).toBeVisible();
+  test('« Qui utilise Tom ? » offers every child it holds', async ({ page }) => {
+    const email = await guardian(page, 'fratrie');
+    await addChild(page, 'Lou', { level: 'Sixième' });
+    await page.getByRole('button', { name: 'Faire les devoirs avec Lou' }).click();
+    await expect(page.getByRole('heading', { name: 'Bonjour Lou' })).toBeVisible();
+    await page.getByRole('link', { name: 'Lou, changer de profil' }).click();
+    await signIn(page, email);
+    await expect(page).toHaveURL(/\/foyer$/);
+    await addChild(page, 'Zoé', { level: 'Cinquième' });
+    await page.getByRole('button', { name: 'Faire les devoirs avec Zoé' }).click();
+    await expect(page.getByRole('heading', { name: 'Bonjour Zoé' })).toBeVisible();
+
+    // The profiles come with the screen, not after it: nothing moves under a finger.
+    await page.route('**/api/auth/multi-session/list-device-sessions', later);
+    await page.getByRole('link', { name: 'Zoé, changer de profil' }).click();
+    await expect(page.getByRole('heading', { name: 'Qui utilise Tom ?' })).toBeVisible();
+    expect(await page.getByRole('button', { name: 'C’est Lou' }).count()).toBe(1);
+    // A sibling past the 5e is refused by the server (platform/auth/profiles.test.ts), and told so.
+    await page.route('**/api/auth/multi-session/set-active', (route) => route.fulfill({ status: 403, json: { status: 403, code: 'FORBIDDEN' } }), {
+      times: 1,
+    });
+    await page.getByRole('button', { name: 'C’est Lou' }).click();
+    await expect(page.getByRole('alert')).toHaveText('Ce profil ne s’ouvre plus sur cet appareil.');
+    // While a switch goes on, no other choice takes.
+    await page.route('**/api/auth/multi-session/set-active', later);
+    await page.getByRole('button', { name: 'C’est Lou' }).click();
+    await expect(page.getByRole('button', { name: 'C’est Zoé' })).toBeDisabled();
+    await expect(page.getByRole('heading', { name: 'Bonjour Lou' })).toBeVisible();
+  });
+
+  test('profiles that cannot load are said so, and the child still enters', async ({ page }) => {
+    await guardian(page, 'profils-panne');
+    await addChild(page, 'Lou', { level: 'Sixième' });
+    await page.getByRole('button', { name: 'Faire les devoirs avec Lou' }).click();
+    await expect(page.getByRole('heading', { name: 'Bonjour Lou' })).toBeVisible();
+    await page.route('**/api/auth/multi-session/list-device-sessions', (route) => route.fulfill({ status: 500, json: {} }));
+    await page.getByRole('link', { name: 'Lou, changer de profil' }).click();
+    await expect(page.getByRole('alert')).toHaveText('Les autres profils de cet appareil n’ont pas pu se charger.', { timeout: 15_000 });
+    await page.getByRole('button', { name: 'C’est Lou' }).click();
+    await expect(page.getByRole('heading', { name: 'Bonjour Lou' })).toBeVisible();
+  });
 });
 
 test('a parent first entering on a device that holds a child’s space is offered no passkey its lock would open', async ({ page }) => {

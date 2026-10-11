@@ -9,7 +9,7 @@ import { CodeForm, sendCode } from '../components/code-form';
 import { Field } from '../components/field';
 import { Notice } from '../components/notice';
 import { Page } from '../components/page';
-import { authClient, authMessage, hasCode, isCancelled } from '../lib/auth';
+import { authClient, authMessage, deviceSessionsQuery, hasCode, isCancelled } from '../lib/auth';
 import { meQuery } from '../lib/me';
 
 /**
@@ -20,8 +20,11 @@ import { meQuery } from '../lib/me';
  */
 export const Route = createFileRoute('/connexion')({
   // Read before the page shows, so that a device holding a child's space never shows the sign-in
-  // first; a failure of /api/me still leaves the form.
-  loader: ({ context }) => context.queryClient.query(meQuery).catch(() => null),
+  // first, nor its other children after the rest; a failure of either still leaves the form.
+  loader: async ({ context }) => {
+    const me = await context.queryClient.query(meQuery).catch(() => null);
+    if (me?.role === 'student') await context.queryClient.query(deviceSessionsQuery).catch(() => undefined);
+  },
   component: SignIn,
 });
 
@@ -138,19 +141,13 @@ function EmailStep({ onSent, onEntered }: { onSent: (email: string) => void; onE
  */
 function Children({ active }: { active: { id: string; name: string } }) {
   const navigate = useNavigate();
-  const held = useQuery({
-    queryKey: ['device-sessions'],
-    queryFn: async () => {
-      const { data, error } = await authClient.multiSession.listDeviceSessions();
-      if (error) throw new Error(authMessage(error));
-      return data;
-    },
-  });
+  const held = useQuery(deviceSessionsQuery);
   const others = (held.data ?? []).filter(({ user }) => user.id !== active.id);
   const switchTo = useMutation({
     mutationFn: async (sessionToken: string) => {
       const { error } = await authClient.multiSession.setActive({ sessionToken });
-      if (error) throw new Error(authMessage(error));
+      // Refused past the 5e: from the 4e, a child's space opens on no family device.
+      if (error) throw new Error(error.status === 403 ? 'Ce profil ne s’ouvre plus sur cet appareil.' : authMessage(error));
       // Loaded afresh: nothing of the other child's stays in memory.
       await navigate({ to: '/', reloadDocument: true });
     },
@@ -158,7 +155,9 @@ function Children({ active }: { active: { id: string; name: string } }) {
 
   return (
     <>
-      <Button onClick={() => void navigate({ to: '/' })}>C’est {active.name}</Button>
+      <Button disabled={switchTo.isPending} onClick={() => void navigate({ to: '/' })}>
+        C’est {active.name}
+      </Button>
       {others.map(({ user, session }) => (
         <Button
           key={session.token}
@@ -170,6 +169,7 @@ function Children({ active }: { active: { id: string; name: string } }) {
           C’est {user.name}
         </Button>
       ))}
+      {held.isError && <Notice tone="error">Les autres profils de cet appareil n’ont pas pu se charger.</Notice>}
       {switchTo.error && <Notice tone="error">{switchTo.error.message}</Notice>}
     </>
   );
