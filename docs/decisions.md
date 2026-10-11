@@ -80,10 +80,10 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
   texte et les titres, Atkinson Hyperlegible Mono pour les codes et les chiffres, à la place
   d'Andika, qui faisait « primaire » en 4e et 3e (I, l et 1 distincts, zéro barré, vérifiés à
   l'écran). La marge rouge du cahier, essayée, est retirée : Victor ne la veut pas (2026-10-11).
-  Le bleu est celui de la catégorie : la différence vient du nom et de Tom. Écartées : « Instrument » entière, froide pour le parent
-  d'un élève de 6e ; « Colophon », sans Tom à côté de ses messages ; et, depuis le 2026-10-08, une
-  direction qui jouait la relation et une direction sombre seulement au jaune. Remplace « Cahier
-  du soir ». Source : `etudes/2026-10-11/direction-artistique.md`.
+  Le bleu est celui de la catégorie : la différence vient du nom et de Tom. Écartées :
+  « Instrument » entière, froide pour le parent d'un élève de 6e ; « Colophon », sans Tom à côté
+  de ses messages ; et, depuis le 2026-10-08, une direction qui jouait la relation et une
+  direction sombre seulement au jaune. Remplace « Cahier du soir ». Source : `etudes/2026-10-11/direction-artistique.md`.
 - **Une refonte complète de l'interface** (2026-10-11). Le lot 2 ne repeint pas les écrans
   actuels : il repense chaque parcours du parent et de l'élève et refait chaque écran, sa
   structure, ses composants et ses mots, sur la charte ; rien de l'interface actuelle n'est

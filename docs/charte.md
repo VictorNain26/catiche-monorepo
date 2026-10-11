@@ -1,9 +1,8 @@
 # Charte
 
 La direction « Grands carreaux » (`decisions.md`, 2026-10-11) : le papier et l'encre bleue du pull
-de Tom. Les valeurs vivent dans le code,
-`packages/tokens/theme.css` pour les tokens, `@repo/ui` pour les composants ; ce document dit
-comment s'en servir. L'étude qui l'a fondée : `etudes/2026-10-11/direction-artistique.md`.
+de Tom. Les valeurs vivent dans le code, `packages/tokens/theme.css` pour les tokens, `@repo/ui`
+pour les composants ; ce document dit comment s'en servir. L'étude qui l'a fondée : `etudes/2026-10-11/direction-artistique.md`.
 
 ## Le nom
 
