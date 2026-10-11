@@ -1,11 +1,11 @@
 import { useChat } from '@ai-sdk/react';
-import { Button, Input } from '@repo/ui';
+import { Button, Card, Input } from '@repo/ui';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { Link, createFileRoute, redirect } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import { DefaultChatTransport } from 'ai';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Notice } from '../components/notice';
-import { Page } from '../components/page';
+import { BackLink, Page } from '../components/page';
 import { TomHead } from '../components/tom';
 import { TomText } from '../components/tom-text';
 import { api, isProblem } from '../lib/api';
@@ -108,10 +108,7 @@ function Session() {
   };
 
   return (
-    <Page title="Séance avec Tom">
-      <Link to="/" className="min-h-11 py-3 text-sm text-primary underline">
-        Retour à tes séances
-      </Link>
+    <Page title="Séance avec Tom" back={<BackLink to="/">Retour à tes séances</BackLink>}>
       <p className="flex items-center gap-3 text-sm text-muted-foreground">
         <TomHead className="size-8 shrink-0" />
         Tom t’aide à trouver, il ne fait pas à ta place.
@@ -136,12 +133,12 @@ function Session() {
         )}
       </ol>
       {cue && !busy && (
-        <div className="flex flex-col gap-1 rounded-2xl border border-border bg-card p-4 text-card-foreground">
+        <Card className="flex flex-col gap-1">
           <span className="text-sm font-bold text-muted-foreground">Pour vous, parent</span>
           <p role="note" aria-label="Pour vous, parent">
             {cue}
           </p>
-        </div>
+        </Card>
       )}
       {status === 'submitted' && <Notice tone="info">{waitingText(step)}</Notice>}
       {error && <Notice tone="error">{chatMessage(error)}</Notice>}

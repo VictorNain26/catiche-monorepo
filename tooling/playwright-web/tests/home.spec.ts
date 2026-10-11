@@ -8,6 +8,8 @@ test('the page a visitor lands on renders in French at phone width, with one h1 
   await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
   const overflows = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   expect(overflows).toBe(false);
+  // A screen with nowhere to go back to opens on its title, without an empty band above it.
+  await expect(page.locator('main > header').locator(':scope > *')).toHaveCount(1);
 });
 
 test('the brand applies: paper background, Inclusive Sans loaded, the red margin on the screen', async ({ page }) => {

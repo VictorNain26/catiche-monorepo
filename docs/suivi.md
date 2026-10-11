@@ -17,6 +17,9 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 - **Déjà dans l'app**, aux couleurs et aux fontes de la charte : le mode accompagné en 6e et 5e,
   la séance, les accueils élève et parent, l'écran du résumé, le jumelage par QR code, la photo
   de l'exercice. Le lot 2 refait entièrement ces écrans.
+- **Lot 2, en dix PR** (`etudes/2026-10-11/refonte-interface.md`) : la PR 1 est faite (l'en-tête
+  des écrans avec le retour et l'action de l'espace, `Card` dans `@repo/ui`) ; la suivante,
+  l'entrée du parent (parcours 1).
 - **Lot 4 en attente** : le harnais `bun run eval` est mergé ; son passage unique attend le
   paiement à l'usage de Mistral (bloquant ci-dessous). Le premier essai s'est arrêté à 3
   conversations sur 104 et ne compte pas comme mesure. Référence de comparaison : 11 fuites sur

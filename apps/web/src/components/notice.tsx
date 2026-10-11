@@ -1,14 +1,15 @@
+import { Card } from '@repo/ui';
 import type { ReactNode } from 'react';
 
 /** A message of the form as a whole: an error read out at once, or a confirmation. */
 export function Notice({ tone, children }: { tone: 'error' | 'info'; children: ReactNode }) {
   return tone === 'error' ? (
-    <p role="alert" className="rounded-2xl border border-destructive p-4 text-sm text-destructive">
-      {children}
-    </p>
+    <Card asChild className="border-destructive bg-transparent text-sm text-destructive">
+      <p role="alert">{children}</p>
+    </Card>
   ) : (
-    <p role="status" className="rounded-2xl border border-border bg-card p-4 text-sm text-card-foreground">
-      {children}
-    </p>
+    <Card asChild className="text-sm">
+      <p role="status">{children}</p>
+    </Card>
   );
 }

@@ -169,6 +169,22 @@ test('« Mon compte » holds the passkeys and the sign-out, out of the home', as
   await expect(page.getByRole('heading', { level: 1, name: 'Mon compte' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Vos clés d’accès' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Se déconnecter' })).toBeVisible();
+
+  // The way back sits in the screen's header, above the title and read before it, with an icon
+  // that is not read out; a finger reaches it.
+  const back = page.getByRole('link', { name: 'Retour au foyer' });
+  const header = page.locator('main > header');
+  await expect(header.getByRole('link', { name: 'Retour au foyer' })).toBeVisible();
+  await expect(back.locator('svg[aria-hidden="true"]')).toHaveCount(1);
+  expect((await back.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+  const order = await page.evaluate(() => {
+    const link = [...document.querySelectorAll('a')].find((a) => a.textContent === 'Retour au foyer');
+    const title = document.querySelector('h1');
+    return link && title ? link.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING : 0;
+  });
+  expect(order).toBeTruthy();
+  // It leads away from this page: never announced as the current one.
+  await expect(back).not.toHaveAttribute('aria-current');
 });
 
 // page.route never sees what the service worker answers.
