@@ -23,8 +23,8 @@ const AUTH_MESSAGES: Partial<Record<string, string>> = {
   OTP_EXPIRED: 'Ce code a expiré : demandez-en un nouveau.',
   TOO_MANY_ATTEMPTS: 'Trop d’essais avec ce code : demandez-en un nouveau.',
   INVITATION_REQUIRED: 'Cette adresse n’a pas d’invitation, ou elle a expiré.',
-  ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED: 'Cet appareil a déjà une clé d’accès pour Tom.',
-  PASSKEY_NOT_FOUND: 'Tom ne connaît plus cette clé d’accès : entrez avec un code reçu par e-mail.',
+  ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED: 'Cet appareil a déjà une clé d’accès pour Catiche.',
+  PASSKEY_NOT_FOUND: 'Catiche ne connaît plus cette clé d’accès : entrez avec un code reçu par e-mail.',
   AUTHENTICATION_FAILED: 'Cette clé d’accès n’a pas été reconnue : entrez avec un code reçu par e-mail.',
 };
 

@@ -52,7 +52,7 @@ describe('scalewayMailer', () => {
       token: '11111111-2222-4333-8444-555555555555',
     });
     expect(request?.body).toMatchObject({
-      from: { email: 'tom@mail.tom.example', name: 'Tom' },
+      from: { email: 'tom@mail.tom.example', name: 'Catiche' },
       to: [{ email: 'parent@example.com' }],
       subject: 'Sujet',
       text: 'Bonjour,\nun lien : https://tom.example/x?a=1&b=<2>',

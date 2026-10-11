@@ -12,8 +12,14 @@ test('an invited parent gets in by the code their address received, names themse
   await expect(page.getByRole('heading', { name: 'Bienvenue' })).toBeVisible();
   await page.getByLabel('Votre prénom').fill('Claire');
   await page.getByRole('button', { name: 'Continuer' }).click();
+  // Just in, the session is fresh: the passkey is offered once, with what it changes; later is fine.
+  await expect(page.getByRole('heading', { level: 1, name: 'Entrer plus vite la prochaine fois' })).toBeVisible();
+  await expect(page.getByText('sans code par e-mail')).toBeVisible();
+  await page.getByRole('button', { name: 'Plus tard' }).click();
   await expect(page).toHaveURL(/\/foyer$/);
   await expect(page.getByRole('heading', { name: 'Bonjour Claire' })).toBeVisible();
+  // A household without a child opens on the adding of the first one.
+  await expect(page.getByLabel('Son prénom')).toBeVisible();
 
   await page.getByRole('link', { name: 'Mon compte' }).click();
   await page.getByRole('button', { name: 'Se déconnecter' }).click();
@@ -27,7 +33,11 @@ test('an invited parent gets in by the code their address received, names themse
 
 test('the sign-in says the beta is closed, checks the address and the code, and refuses a wrong one in French', async ({ page }) => {
   await page.goto('/connexion');
-  await expect(page.getByRole('status')).toContainText('bêta fermée');
+  // The product's name, what it is in a sentence, and Tom told as a program.
+  await expect(page).toHaveTitle('Catiche');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Entrer dans Catiche');
+  await expect(page.getByText('Tom, un programme')).toBeVisible();
+  await expect(page.getByRole('status')).toContainText('Catiche est en bêta fermée');
   // Under 16 px, iOS Safari zooms on the field it focuses.
   expect(await page.getByLabel('Adresse e-mail').evaluate((field) => getComputedStyle(field).fontSize)).toBe('16px');
   await page.getByRole('button', { name: 'Recevoir mon code' }).click();
@@ -39,6 +49,9 @@ test('the sign-in says the beta is closed, checks the address and the code, and 
   await expect(page.getByRole('status')).toContainText(email);
   const field = page.getByLabel('Le code reçu par e-mail');
   await expect(field).toHaveAttribute('autocomplete', 'one-time-code');
+  // Six digits read at a glance: the codes' typeface, large.
+  await expect(field).toHaveCSS('font-family', /^"?Atkinson Hyperlegible Mono"?,/);
+  expect(Number.parseFloat(await field.evaluate((input) => getComputedStyle(input).fontSize))).toBeGreaterThanOrEqual(24);
   await field.fill('12');
   await page.getByRole('button', { name: 'Entrer' }).click();
   await expect(page.getByText('Le code à 6 chiffres reçu par e-mail.')).toBeVisible();

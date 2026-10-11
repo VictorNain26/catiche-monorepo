@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@repo/ui';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -8,12 +8,13 @@ import { z } from '../lib/zod';
 import { Field } from '../components/field';
 import { Notice } from '../components/notice';
 import { Page } from '../components/page';
-import { authClient, authMessage } from '../lib/auth';
+import { authClient, authMessage, isCancelled } from '../lib/auth';
 import { meQuery } from '../lib/me';
 
 /**
  * A new guardian's first name: their account was created by their first code, nameless. A screen
- * of its own, which the household sends them to until they give it, whatever they reloaded.
+ * of its own, which the household sends them to until they give it, whatever they reloaded. Then,
+ * once, the passkey, while the session is fresh enough to make one without a second code.
  */
 export const Route = createFileRoute('/bienvenue')({
   beforeLoad: async ({ context }) => {
@@ -27,7 +28,19 @@ export const Route = createFileRoute('/bienvenue')({
 const schema = z.object({ name: z.string().trim().min(1, 'Votre prénom.').max(50, '50 caractères au plus.') });
 
 function Welcome() {
-  const navigate = useNavigate();
+  const [named, setNamed] = useState(false);
+  return named ? (
+    <PasskeyOffer />
+  ) : (
+    <FirstName
+      onNamed={() => {
+        setNamed(true);
+      }}
+    />
+  );
+}
+
+function FirstName({ onNamed }: { onNamed: () => void }) {
   const queryClient = useQueryClient();
   const [failure, setFailure] = useState<string | null>(null);
   const form = useForm({ resolver: zodResolver(schema), defaultValues: { name: '' } });
@@ -40,7 +53,7 @@ function Welcome() {
       return;
     }
     await queryClient.invalidateQueries({ queryKey: meQuery.queryKey });
-    await navigate({ to: '/foyer' });
+    onNamed();
   });
 
   return (
@@ -52,6 +65,40 @@ function Welcome() {
           Continuer
         </Button>
       </form>
+    </Page>
+  );
+}
+
+/** The passkey, offered once with what it changes; later is fine, « Mon compte » keeps it. */
+function PasskeyOffer() {
+  const navigate = useNavigate();
+  const home = () => navigate({ to: '/foyer' });
+  const create = useMutation({
+    mutationFn: async () => {
+      const { error } = await authClient.passkey.addPasskey();
+      if (!error) return home();
+      if (!isCancelled(error)) throw new Error(authMessage(error));
+    },
+  });
+
+  return (
+    <Page title="Entrer plus vite la prochaine fois">
+      <p className="text-foreground">
+        Une clé d’accès vous fait entrer par le verrouillage de ce téléphone, sans code par e-mail. Elle reste sur cet appareil ; vous pourrez la
+        supprimer depuis « Mon compte ».
+      </p>
+      {create.error && <Notice tone="error">{create.error.message}</Notice>}
+      <Button
+        disabled={create.isPending}
+        onClick={() => {
+          create.mutate();
+        }}
+      >
+        Créer ma clé d’accès
+      </Button>
+      <Button variant="outline" onClick={() => void home()}>
+        Plus tard
+      </Button>
     </Page>
   );
 }

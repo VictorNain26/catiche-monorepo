@@ -68,7 +68,11 @@ const expire = (email: string) =>
 describe('sign-in by code', () => {
   it("creates an invited address's account at its first code, the address proven, the invitation spent", async () => {
     await invite(db, ' Nouvelle@Example.com ');
-    const res = await signIn('nouvelle@example.com', mail.codeIn(await asked('nouvelle@example.com')));
+    const email = await asked('nouvelle@example.com');
+    // The parent reads the product's name, Catiche; Tom is the tutor inside it.
+    expect(email.subject).toMatch(/^Votre code Catiche : \d{6}$/);
+    expect(email.text).toContain('pour entrer dans Catiche');
+    const res = await signIn('nouvelle@example.com', mail.codeIn(email));
     expect(res.status).toBe(200);
     expect((await accounts('nouvelle@example.com'))[0]?.emailVerified).toBe(true);
     expect(await invitations('nouvelle@example.com')).toEqual([]);
@@ -98,7 +102,8 @@ describe('sign-in by code', () => {
 
   it('tells an address without account nor invitation of the closed beta, with no code, and creates nothing', async () => {
     const email = await asked('inconnu@example.com');
-    expect(email.subject).toBe('Tom est en bêta fermée');
+    expect(email.subject).toBe('Catiche est en bêta fermée');
+    expect(email.text).not.toContain('Tom');
     expect(email.subject + email.text).not.toMatch(/\b\d{6}\b/);
     expect((await signIn('inconnu@example.com', '000000')).status).toBe(400);
     expect(await accounts('inconnu@example.com')).toEqual([]);
@@ -107,7 +112,7 @@ describe('sign-in by code', () => {
   it('tells an expired invitation of the closed beta', async () => {
     await invite(db, 'en-retard@example.com');
     await expire('en-retard@example.com');
-    expect((await asked('en-retard@example.com')).subject).toBe('Tom est en bêta fermée');
+    expect((await asked('en-retard@example.com')).subject).toBe('Catiche est en bêta fermée');
   });
 
   it('creates no account once the invitation has expired, even with a valid code', async () => {

@@ -38,13 +38,14 @@ export async function signIn(page: Page, email: string) {
   await page.getByRole('button', { name: 'Entrer' }).click();
 }
 
-/** A guardian at home, on their household, named Claire: their address. */
+/** A guardian at home, on their household, named Claire, the passkey left for later: their address. */
 export async function guardian(page: Page, name: string) {
   const email = address(name);
   invite(email);
   await signIn(page, email);
   await page.getByLabel('Votre prénom').fill('Claire');
   await page.getByRole('button', { name: 'Continuer' }).click();
+  await page.getByRole('button', { name: 'Plus tard' }).click();
   await expect(page).toHaveURL(/\/foyer$/);
   return email;
 }
