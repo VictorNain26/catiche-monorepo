@@ -11,10 +11,12 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 - **Lot en cours : 1, l'identité** : Victor a choisi le nom, « De sa main », et la direction,
   « Grands carreaux » aux fontes d'« Instrument » (`decisions.md`, 2026-10-11), après les études
   (`etudes/2026-10-11/`) et l'essai sur les vrais écrans
-  ([comparatif](https://claude.ai/artifact/8x3Qm6x1NiQiVMrJhyYbJ8)) ; prochaine étape, la charte.
-- **Déjà dans l'app** : la direction provisoire « Cahier du soir », le mode accompagné en 6e et
-  5e, la séance, les accueils élève et parent, l'écran du résumé, le jumelage par QR code, la
-  photo de l'exercice. Le lot 2 refait ces écrans sur la charte choisie.
+  ([comparatif](https://claude.ai/artifact/8x3Qm6x1NiQiVMrJhyYbJ8)). Les fondations de la charte
+  sont posées (`charte.md`, tokens, composants, état désactivé) ; restent le logo, les rendus de
+  Tom dans Blender et les icônes.
+- **Déjà dans l'app**, aux couleurs et aux fontes de la charte : le mode accompagné en 6e et 5e,
+  la séance, les accueils élève et parent, l'écran du résumé, le jumelage par QR code, la photo
+  de l'exercice. Le lot 2 refait entièrement ces écrans.
 - **Lot 4 en attente** : le harnais `bun run eval` est mergé ; son passage unique attend le
   paiement à l'usage de Mistral (bloquant ci-dessous). Le premier essai s'est arrêté à 3
   conversations sur 104 et ne compte pas comme mesure. Référence de comparaison : 11 fuites sur
@@ -71,9 +73,6 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
 - `platform/http/client-address.ts` n'est exercé par aucun test, faute d'un vrai `Bun.serve`.
 - Le préfixe `__Host-` des cookies, quand better-auth le livre
   ([#10806](https://github.com/better-auth/better-auth/issues/10806)).
-
-**Lot 1, la charte**
-- Le bouton désactivé, à 50 % d'opacité, perd son contraste : un état désactivé dans les tokens.
 
 **Lot 2, l'app**
 - Les formules de Tom : sur Chrome de bureau, chaque formule montre des flèches de défilement
