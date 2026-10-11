@@ -1,42 +1,52 @@
 # Roadmap V1
 
-Le fil : prouver avant de vendre (`vision.md`). Les lots sont des résultats à atteindre, pas des
-dates ; ils avancent en parallèle quand rien ne les bloque. Chaque PR précise son périmètre dans
-son plan, au moment où elle démarre (`.claude/rules/plans-and-agents.md`). L'état du jour :
-`suivi.md`.
+Le fil : prouver avant de vendre (`vision.md`). L'ordre (`decisions.md`, 2026-10-11) : l'identité
+et l'app d'abord, Tom ensuite ; aucun élève réel avant que Tom soit mesuré. Les lots sont des
+résultats à atteindre, pas des dates ; ils avancent en parallèle quand rien ne les bloque.
+Chaque PR précise son périmètre dans son plan, au moment où elle démarre
+(`.claude/rules/plans-and-agents.md`). L'état du jour : `suivi.md`.
 
 ## Lots
 
 | Lot | Résultat | Repère de fin |
 |---|---|---|
 | 0 — Refonte | Une codebase reconstruite sur des pratiques publiées | Fait : étapes 1 à 7 (`etudes/2026-10-06/refonte-architecture.md`) |
-| 1 — Mesurer | Un harnais crédible et rejouable | Des mesures avec leur marge d'erreur, un juge vérifié contre Victor, un garde-fou en CI |
-| 2 — Un tuteur qui ne cède pas | Guider sans donner la réponse, sans se tromper, bien réagir à la détresse | Au harnais, la réponse presque jamais donnée sous pression, une aide jugée bonne par Victor, la mémoire mesurée |
-| 3 — L'app entre les mains des familles | L'app sur téléphone, de la direction artistique au paiement | Les parcours marchent de bout en bout au staging, Victor les utilise, puis la bêta fermée |
-| 4 — Marque et lancement | Nom, logo, site qui ne dit que le prouvé, mesures publiées | Chaque phrase publique renvoie à une source ou à une mesure |
+| 1 — Identité | Un nom, une direction artistique choisie par Victor, une charte complète | Le nom vérifié et retenu ; la charte vit dans le code (`packages/tokens`, `@repo/ui`) et dans `charte.md` |
+| 2 — L'app | Chaque écran refait sur la charte, du premier code au paiement | Les parcours du parent et de l'élève marchent de bout en bout au staging, sur téléphone, et Victor les utilise |
+| 3 — Le site | La landing réécrite sur l'identité et la vision | En production sous le nouveau nom ; chaque phrase renvoie à une source ou à ce que l'app fait déjà |
+| 4 — Tom | Un tuteur mesuré qui ne cède pas, avec la voix | Au harnais, la réponse presque jamais donnée sous pression, une aide jugée bonne par Victor, la mémoire mesurée |
+| 5 — Bêta et ouverture | Des familles réelles, puis le public | Les deux portes ci-dessous franchies ; mesures publiées |
 
 ## Maintenant
 
-**Lot 3**, dans cet ordre (`etudes/2026-10-08/interfaces.md` pour les constats) :
-1. **Le consentement** : double consentement sous 15 ans, second parent ; **photo et voix** ;
-   **revue humaine de la détresse** ; **paiement**.
+**Lot 1, dans cet ordre :**
+1. **Le nom** : une étude (candidats, domaines, marques INPI et EUIPO, homonymes), Victor
+   tranche. Le dépôt de la marque et le domaine sont des gestes de Victor.
+2. **La direction artistique**, rouverte : trois directions nettement différentes, appliquées
+   aux vrais écrans à largeur de téléphone, montrées dans Chrome ; Victor choisit.
+3. **La charte** : logo, couleurs, typographie, formes, Tom (poses, place dans l'écran),
+   iconographie, mouvement, ton des mots, composants, états (désactivé, erreur, attente).
 
-**Lot 1**, dès que le paiement à l'usage de Mistral est actif : le passage unique du harnais sur
-le code actuel, puis le rapport et la comparaison cas par cas (McNemar), le juge, sa vérification
-par Victor sur une page de jugement, le garde-fou en CI.
+**Hors IA, sans attendre** : Victor écrit à Mistral (paiement à l'usage, Zero Data Retention,
+clause 2.2(c) des mineurs). La réponse prend du temps et décide du lot 4.
 
 ## Ensuite
 
-- **Lot 2** : fermer les fuites que le passage a listées, mesurées sur au moins 150 conversations
-  de pression ; mesurer la mémoire avec et sans elle, sur des scénarios à plusieurs séances.
-- **La bêta fermée** : Victor d'abord, puis quelques familles invitées, une fois la porte
-  ci-dessous franchie. Elle tranche les questions ouvertes de la vision, dont le mode accompagné :
-  qui s'en sert, avec ou sans parent, selon les familles.
-
-## Plus tard
-
-- **Lot 4** : nom et logo, site réécrit sur la vision et la direction artistique, avec la page des
-  mesures et l'accès à l'app ; ouverture.
+- **Lot 2**, écran par écran, sur la charte : l'entrée et l'accueil du parent, l'ajout d'un
+  enfant, les profils sur l'appareil de la famille, l'accueil de l'élève, l'apparence de la
+  séance, le résumé de la semaine, le compte ; puis le double consentement sous 15 ans et le
+  second parent ; puis le paiement, avec son fournisseur et le statut juridique tranchés avant.
+  Le comportement de Tom dans la séance reste au lot 4.
+- **Lot 3**, dès la charte choisie, en parallèle du lot 2 : la landing reçoit les tokens et la
+  fonte de l'app, `landing.css` se supprime, le texte se réécrit sur la vision ; le domaine du
+  nouveau nom.
+- **Lot 4**, dès Mistral en paiement à l'usage : le passage unique du harnais sur le code actuel,
+  le rapport et la comparaison cas par cas (McNemar), le juge et sa vérification par Victor, le
+  garde-fou en CI ; les fuites fermées, mesurées sur au moins 150 conversations de pression ; la
+  mémoire mesurée avec et sans elle ; la revue humaine de la détresse ; la voix (Voxtral) ; Tom
+  qui se dit IA dès le premier message ; la première réponse plus rapide.
+- **Lot 5** : Victor d'abord, puis quelques familles invitées, une fois la première porte
+  franchie. La bêta tranche les questions ouvertes de la vision, dont le mode accompagné.
 
 ## Porte avant le premier élève réel
 
@@ -55,7 +65,7 @@ Obligations, pas des repères :
 ## Porte avant l'ouverture publique
 
 - Mesures publiées et rejouables, après un regard pédagogique humain sur un échantillon des
-  exercices du jeu ;
+  exercices du jeu ; la page des mesures sur le site ;
 - avis d'un conseil sur l'art. 50(2) (marquage des sorties) et sur la détresse comme donnée de
   santé (RGPD art. 9) ;
 - statut juridique tranché avec un expert-comptable, avant le paiement.

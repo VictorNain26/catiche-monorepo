@@ -47,7 +47,7 @@ tooling/
 | Web | Vite 8, React 19, TanStack Router, TailwindCSS 4 ; tests Playwright à largeur de téléphone (`docs/etudes/2026-10-06/client-web.md`) |
 | Auth | Better Auth 1.7 : le gardien entre par un code envoyé à son adresse ou par une clé d'accès, sans mot de passe, sur invitation pendant la bêta fermée ; l'appareil de l'élève est relié par un code |
 | IA | Mistral Small 4, endpoint UE (`docs/tuteur.md`) |
-| Paiements | Aucun branché. Paiement web prévu au lot 3 |
+| Paiements | Aucun branché. Paiement web prévu au lot 2 |
 | Observabilité | Logs pino ; Bugsink, auto-hébergé, pour les erreurs avant la première famille (`docs/etudes/2026-10-07/hebergement.md`). Pas d'analytics installée |
 | Monorepo | Turborepo, workspaces Bun |
 | Déploiement | Clever Cloud, région Paris, par la CI à chaque merge sur `main` (`docs/architecture.md`, « Environnements et livraison »). Landing : une application statique servie par Caddy (`apps/landing/Caddyfile`). Serveur : l'image `apps/server/Dockerfile`, qui embarque le build du web, publiée sur GHCR au SHA, déployée en staging ; la production suivra, sur approbation. Web : servi par le serveur, sur la même origine que l'API ; en dev, par le proxy de Vite |

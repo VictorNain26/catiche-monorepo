@@ -9,9 +9,8 @@ paths:
 Vitrine marketing et SEO, statique, en Astro 7, servie par Caddy dans une application statique
 Clever Cloud (`apps/landing/Caddyfile`).
 
-- **Gelée jusqu'au lot 4** (`docs/roadmap.md`) : seuls des correctifs d'honnêteté ou techniques
-  y entrent, pas de nouvelle section. Au lot 4, elle reçoit la direction artistique du lot 3 et
-  le nom du produit.
+- **Gelée jusqu'au lot 3** (`docs/roadmap.md`) : seuls des correctifs d'honnêteté ou techniques
+  y entrent, pas de nouvelle section. Au lot 3, elle reçoit le nom et la charte du lot 1.
 - **On n'affirme que ce qu'on peut prouver** (`docs/vision.md`) : chaque chiffre a une source
   primaire datée, chaque différence face à un concurrent est mesurée, ce qui n'est pas construit
   ne se promet pas. Une phrase qu'on ne peut adosser à une source ou à une mesure se retire.

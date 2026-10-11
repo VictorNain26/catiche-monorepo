@@ -128,9 +128,10 @@ Victor a choisi de ne pas mener d'entretiens (`decisions.md`) : ces hypothèses
 
 ## Marque
 
-Tom est la loutre, le tuteur ; le nom du produit est ouvert (candidat « De sa main »), vérifié et
-choisi au lot 4. La direction artistique se fonde au lot 3, autour de Tom ; le nom, le logo et
-le site suivent au lot 4.
+Tom est la loutre, le tuteur. Le nom du produit, puis la direction artistique et sa charte, se
+choisissent en premier (lot 1) : chaque écran et le site se construisent dessus. Une app que
+l'enfant ouvre de lui-même le soir et que le parent trouve sérieuse fait partie du pari, sans
+jamais passer par le jeu ni par un compagnon.
 
 ## Critères de succès de la V1
 

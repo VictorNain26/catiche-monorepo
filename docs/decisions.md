@@ -57,27 +57,36 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
   les conversations ; l'élève voit le même résumé. Calculé par le code, sans modèle : rien
   d'inventé, rien à payer ; sur les sept derniers jours. Le parent ne voit rien d'autre de la
   mémoire d'apprentissage, qui reste à l'élève (tranché le 2026-10-08).
-- **Le second parent au lot 3, avec le consentement** (2026-10-08). Il rejoint le foyer et peut
+- **Le second parent avec le consentement** (2026-10-08, au lot 2 depuis le 2026-10-11). Il rejoint le foyer et peut
   s'opposer, parce que le double consentement sous 15 ans engage les titulaires de l'autorité
   parentale.
-- **Les fondations de la direction artistique au lot 3, avant les écrans** (2026-10-08).
-  Couleurs, typographie, place de Tom la loutre dans l'interface et ton, construites autour de
-  Tom, sans dépendre du nom ; le nom, le logo et la réécriture de la landing restent au lot 4.
-  Raison : ne pas refaire deux fois les écrans que les familles de la bêta verront.
-- **La direction « Cahier du soir »** (2026-10-08, choix délégué par Victor après l'essai de trois
-  directions sur les vrais écrans). Un écran de lecture calme, un seul accent, le bleu du pull de
-  Tom, et un sombre qui suit le réglage du téléphone ; la fonte Andika (SIL), conçue pour
-  l'apprentissage de la lecture, au zéro plein et aux 1, l et I distincts ; la tête de Tom à côté
-  de ses messages, Tom qui se dit IA et jamais ami. Écartées : une direction chaleureuse qui
-  jouait la relation (« ta loutre des devoirs »), une direction sombre seulement au jaune qui se
-  lisait comme un avertissement. Les valeurs vivent dans `packages/tokens/theme.css`.
+- **L'identité et l'app d'abord, Tom ensuite** (2026-10-11). Le nom, la direction artistique et
+  sa charte, puis chaque écran de l'app et la landing, avant le travail sur le tuteur (harnais,
+  fuites, voix, mémoire mesurée). Raisons : le tuteur attend le paiement à l'usage de Mistral
+  pour être mesuré ; les écrans et le site avancent sans lui ; refaire l'identité après les
+  écrans les ferait refaire deux fois. Aucun élève réel avant que Tom soit mesuré : l'ordre ne
+  change pas la porte. Remplace « les fondations de la direction artistique au lot 3, le nom et
+  la landing au lot 4 » (2026-10-08). Source : `roadmap.md`.
+- **Le nom avant la charte** (2026-10-11). Le logo et la landing en dépendent ; une étude des
+  candidats, domaines et marques, puis Victor tranche.
+- **La direction artistique rouverte** (2026-10-11). Victor choisit parmi trois directions
+  nettement différentes, appliquées aux vrais écrans à largeur de téléphone. Tom reste la loutre
+  et le tuteur, son style suit la direction ; il se dit IA et jamais ami. « Cahier du soir »
+  (2026-10-08 : papier neutre, accent bleu du pull de Tom, Andika) reste dans
+  `packages/tokens/theme.css` jusqu'au choix, et peut être l'une des trois. Écartées le
+  2026-10-08 et qui le restent : une direction qui jouait la relation (« ta loutre des devoirs »),
+  une direction sombre seulement au jaune, qui se lisait comme un avertissement.
+- **La landing réécrite avec l'identité** (2026-10-11). Elle n'attend plus l'ouverture : dès la
+  charte choisie, elle reçoit les tokens et la fonte de l'app et se réécrit sur la vision, sans
+  rien promettre que l'app ne fait déjà. Jusque-là, seuls des correctifs d'honnêteté ou
+  techniques y entrent.
 - **Des formules, pas de schémas, dans la séance** (2026-10-08, choix délégué par Victor). Le
   texte de Tom est rendu en Markdown et ses formules en MathML (KaTeX) ; ni HTML, ni lien, ni
   image venus du modèle. Pas de schémas Mermaid : lourds sur téléphone, et refusés par la CSP ;
   le prompt ne les annonce plus. À reprendre si la bêta montre qu'ils manquent.
 - **Tom se présente comme un programme** (2026-10-08). La loutre reste l'identité visuelle ; Tom
   dit qu'il est une IA, le redit quand l'élève parle de lui, ne se dit jamais ami et n'exprime
-  pas de sentiments ; l'interface le tient, le prompt à l'étape de la séance (`roadmap.md`). Raison : AI Act art. 50, UNICEF (2025), et un ton relationnel attire surtout
+  pas de sentiments ; l'interface le tient, le prompt au lot 4 (`roadmap.md`). Raison : AI Act art. 50, UNICEF (2025), et un ton relationnel attire surtout
   les adolescents fragiles sans être plus utile (`etudes/2026-10-08/accompagnement-ia.md`).
 
 ## Tuteur et évaluation
@@ -154,8 +163,9 @@ Tranchées au moment du lot qui en dépend, doc d'abord :
 
 | Décision | Lot | Ce qui la tranche |
 |---|---|---|
-| Canal du message au parent après une détresse | 3 | Un canal garanti (l'e-mail), avec la revue humaine |
-| Fournisseur de paiement | 3 | Conformité UE, abonnement familial, facturation sans piège |
-| Statut juridique (micro-entreprise ou société), TVA | 3 | Une consultation d'un expert-comptable, avant le paiement |
+| Nom du produit | 1 | L'étude des candidats, domaines et marques ; candidat « De sa main » |
+| Direction artistique | 1 | Trois directions sur les vrais écrans, Victor choisit |
+| Fournisseur de paiement | 2 | Conformité UE, abonnement familial, facturation sans piège |
+| Statut juridique (micro-entreprise ou société), TVA | 2 | Une consultation d'un expert-comptable, avant le paiement |
+| Canal du message au parent après une détresse | 4 | Un canal garanti (l'e-mail), avec la revue humaine |
 | Hébergement de données de santé | Avant la première famille | La réponse de la CNIL |
-| Nom du produit | 4 | Marques et domaines ; candidat « De sa main » |

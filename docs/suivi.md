@@ -5,19 +5,21 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 
 ## Où on en est
 
-- **Mis à jour le** 2026-10-09.
-- **Lot en cours : 3** : la direction artistique « Cahier du soir » est posée, le mode accompagné
-  en 6e et 5e, la séance, les accueils élève et parent, l'écran du résumé, le jumelage par QR
-  code, les petits textes et la photo de l'exercice faits ; ensuite la voix, puis le
-  consentement (`roadmap.md`, « Maintenant »).
-- **Cascade de PR** : chacune part de la précédente et la vise ; Victor les merge dans l'ordre,
-  la suivante reciblée sur `main` après chaque merge.
-- **Lot 1 en pause** : le harnais `bun run eval` est mergé ; son passage unique attend le paiement
-  à l'usage de Mistral (bloquant ci-dessous). Le premier essai s'est arrêté à 3 conversations sur
-  104 et ne compte pas comme mesure. Référence de comparaison : 11 fuites sur 106, le 2026-10-06
-  (`etudes/2026-10-06/passage-de-fin.md`, données dans `etudes/2026-10-06/donnees/results.json`).
+- **Mis à jour le** 2026-10-11.
+- **Nouvel ordre** (`decisions.md`, 2026-10-11) : l'identité et l'app d'abord, Tom ensuite ; les
+  lots sont renumérotés (`roadmap.md`).
+- **Lot en cours : 1, l'identité** : l'étude du nom et celle de trois directions artistiques
+  sont en cours ; ensuite Victor choisit, puis la charte.
+- **Déjà dans l'app** : la direction provisoire « Cahier du soir », le mode accompagné en 6e et
+  5e, la séance, les accueils élève et parent, l'écran du résumé, le jumelage par QR code, la
+  photo de l'exercice. Le lot 2 refait ces écrans sur la charte choisie.
+- **Lot 4 en attente** : le harnais `bun run eval` est mergé ; son passage unique attend le
+  paiement à l'usage de Mistral (bloquant ci-dessous). Le premier essai s'est arrêté à 3
+  conversations sur 104 et ne compte pas comme mesure. Référence de comparaison : 11 fuites sur
+  106, le 2026-10-06 (`etudes/2026-10-06/passage-de-fin.md`, données dans
+  `etudes/2026-10-06/donnees/results.json`).
 - **En ligne** : le staging, https://staging.tomia.fr, déployé à chaque merge ; la landing,
-  https://tomia.fr, gelée jusqu'au lot 4 sauf correctif d'honnêteté ou technique.
+  https://tomia.fr, gelée jusqu'au lot 3 sauf correctif d'honnêteté ou technique.
 - **PR ouvertes** : `gh pr list`.
 
 ## Bloquants
@@ -66,7 +68,30 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
 - Le préfixe `__Host-` des cookies, quand better-auth le livre
   ([#10806](https://github.com/better-auth/better-auth/issues/10806)).
 
-**Lot 1**
+**Lot 1, la charte**
+- Le bouton désactivé, à 50 % d'opacité, perd son contraste : un état désactivé dans les tokens.
+
+**Lot 2, l'app**
+- Les formules de Tom : sur Chrome de bureau, chaque formule montre des flèches de défilement
+  vertical, son conteneur (`[&_.katex]:overflow-x-auto`, `components/tom-text.tsx`) débordant de
+  6 px en hauteur ; vu le 2026-10-11, KaTeX 0.16 comme 0.19.
+- Mémoire : les 1 053 libellés du référentiel restent ceux du programme (« Il utilise… »),
+  présentés « Au programme » ; leur réécriture dans les mots de l'élève demande une relecture
+  de Victor entrée par entrée, avant la bêta fermée.
+- Le champ du mois de naissance montre « --------- ---- » vide sur Chrome de bureau (contrôle
+  natif, un sélecteur sur téléphone) : à revoir avec le consentement, qui touche ce formulaire.
+- Résumé de la semaine : son arrêt à la demande de l'élève, avec le consentement ; un envoi par
+  e-mail n'est pas décidé.
+- Appareils de l'élève : le prévenir quand un nouvel appareil est relié.
+- Client web : mesures sur un vrai iPhone et un Android.
+
+**Lot 3, le site**
+- La landing reçoit `packages/tokens/theme.css` et la fonte de la charte ; `landing.css` se
+  supprime.
+- Image Open Graph, tests de la landing qui gardent l'identité rejetée (`signs.spec.ts`,
+  `type.spec.ts`, `hero.spec.ts`), une application de preview par PR.
+
+**Lot 4, Tom**
 - Tom qui se dit programme : un scénario où l'élève demande s'il est humain ou parle de lui ; la
   grille de Victor a quatre questions, une cinquième se décide avec lui avant le passage.
 - Référentiel : sciences, histoire-géographie et anglais ; des exercices inspirés des sujets du
@@ -76,28 +101,10 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
 - Le juge : l'échantillon d'accord et les cas construits de l'ancien juge sont supprimés ; ils se
   récupèrent dans git (`apps/server/src/eval/`, avant le 2026-10-08) si le nouveau juge en a
   l'usage.
-
-**Lot 3**
-- Mémoire : les 1 053 libellés du référentiel restent ceux du programme (« Il utilise… »),
-  présentés « Au programme » ; leur réécriture dans les mots de l'élève demande une relecture
-  de Victor entrée par entrée, avant la bêta fermée.
-- Le champ du mois de naissance montre « --------- ---- » vide sur Chrome de bureau (contrôle
-  natif, un sélecteur sur téléphone) : à revoir avec le consentement (étape 1), qui touche ce
-  formulaire.
-- Résumé de la semaine : son arrêt à la demande de l'élève, avec le consentement (étape 1 de
-  `roadmap.md`) ; un envoi par e-mail n'est pas décidé.
 - Après une détresse : la revue humaine, son délai et sa trace ; ce que voit l'élève ensuite ; le
   canal du message au parent (`decisions.md`, « Ouvertes »), avec une table d'envois idempotente.
 - Voix : la `Permissions-Policy` interdit le micro, à ouvrir à `self` ; la transcription impose le
   français, un oral de langue déclare sa langue.
-- Appareils de l'élève : le prévenir quand un nouvel appareil est relié.
-- Client web : mesures sur un vrai iPhone et un Android.
-- Le bouton désactivé, à 50 % d'opacité, perd son contraste : un état désactivé dans les tokens.
-
-**Lot 4**
-- La landing reçoit `packages/tokens/theme.css` et Andika ; `landing.css` se supprime.
-- Image Open Graph, tests de la landing qui gardent l'identité rejetée (`signs.spec.ts`,
-  `type.spec.ts`, `hero.spec.ts`), une application de preview par PR.
 
 ## Surveillance
 

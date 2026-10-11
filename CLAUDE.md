@@ -25,7 +25,7 @@ change (Postgres de `docker compose` requis). Formatage : `bun run format`.
 ## Interdits
 
 - La landing n'appelle jamais le serveur, ni l'auth : `apps/web` est le seul client produit.
-- Rien n'entre dans la landing en ligne avant le lot 4, sauf un correctif d'honnêteté ou
+- Rien n'entre dans la landing en ligne avant le lot 3, sauf un correctif d'honnêteté ou
   technique (`.claude/rules/landing.md`).
 - Jamais de push sur `main` : une branche courte, puis une PR, mergée en merge commit (le
   squash est désactivé).

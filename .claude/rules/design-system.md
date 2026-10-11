@@ -9,10 +9,11 @@ paths:
 
 # Design system
 
-La direction « Cahier du soir » (`docs/decisions.md`) : `packages/tokens/theme.css`, clair et
-sombre, fonte Andika. La landing garde l'identité rejetée (`packages/tokens/landing.css`) jusqu'au
-lot 4, qui lui donne `theme.css` et supprime `landing.css` ; le nom et le logo attendent aussi le
-lot 4. Les composants ne dépendent de l'identité que par les tokens.
+La direction artistique est rouverte (`docs/decisions.md`, 2026-10-11) : « Cahier du soir »
+(`packages/tokens/theme.css`, clair et sombre, fonte Andika) reste en place jusqu'au choix de
+Victor, au lot 1. La landing garde l'identité rejetée (`packages/tokens/landing.css`) jusqu'au
+lot 3, qui lui donne `theme.css` et supprime `landing.css`. Les composants ne dépendent de
+l'identité que par les tokens.
 
 ## Interdits
 
