@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Field } from '../components/field';
+import { CODE_INPUT_CLASS, Field } from '../components/field';
 import { Notice } from '../components/notice';
 import { Page } from '../components/page';
 import { authClient, authMessage } from '../lib/auth';
@@ -46,12 +46,17 @@ function PairForm({ scanned }: { scanned: string | undefined }) {
   return (
     <Page title="Relier cet appareil">
       <p className="text-muted-foreground">Ton parent obtient un code dans son espace. Saisis-le ici : cet appareil ouvrira ton compte.</p>
+      <p>Ton parent voit le résumé de ta semaine : les matières, le temps passé, ce qui résiste.</p>
+      <p className="text-muted-foreground">
+        Tes conversations avec Tom restent dans ton espace : chaque appareil qui l’ouvre paraît dans ta liste, « Tes appareils reliés ».
+      </p>
       <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-4">
         <Field
           label="Le code"
           autoComplete="one-time-code"
           autoCapitalize="characters"
           spellCheck={false}
+          className={CODE_INPUT_CLASS}
           {...form.register('code')}
           error={form.formState.errors.code?.message}
         />

@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@repo/ui';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -9,7 +9,7 @@ import { CodeForm, sendCode } from '../components/code-form';
 import { Field } from '../components/field';
 import { Notice } from '../components/notice';
 import { Page } from '../components/page';
-import { authClient, authMessage, hasCode, isCancelled } from '../lib/auth';
+import { authClient, authMessage, deviceSessionsQuery, hasCode, isCancelled } from '../lib/auth';
 import { meQuery } from '../lib/me';
 
 /**
@@ -20,8 +20,11 @@ import { meQuery } from '../lib/me';
  */
 export const Route = createFileRoute('/connexion')({
   // Read before the page shows, so that a device holding a child's space never shows the sign-in
-  // first; a failure of /api/me still leaves the form.
-  loader: ({ context }) => context.queryClient.query(meQuery).catch(() => null),
+  // first, nor its other children after the rest; a failure of either still leaves the form.
+  loader: async ({ context }) => {
+    const me = await context.queryClient.query(meQuery).catch(() => null);
+    if (me?.role === 'student') await context.queryClient.query(deviceSessionsQuery).catch(() => undefined);
+  },
   component: SignIn,
 });
 
@@ -86,17 +89,15 @@ function EmailStep({ onSent, onEntered }: { onSent: (email: string) => void; onE
     else if (!isCancelled(error)) setFailure(authMessage(error));
   };
 
-  const child = me?.role === 'student' ? me.name : null;
+  const child = me?.role === 'student' ? me : null;
   return (
     // On a device that holds a child's space, a choice of who uses it; elsewhere, the sign-in.
     <Page title={child ? 'Qui utilise Tom ?' : 'Entrer dans Catiche'}>
       {child ? (
         <>
-          <Button asChild>
-            <Link to="/">C’est {child}</Link>
-          </Button>
-          <h2 className="text-xl font-bold text-foreground">Vous êtes son parent</h2>
-          <p className="text-muted-foreground">Entrez avec votre clé d’accès ou un code : l’espace de {child} reste sur l’appareil.</p>
+          <Children active={child} />
+          <h2 className="text-xl font-bold text-foreground">Vous êtes le parent</h2>
+          <p className="text-muted-foreground">Entrez avec votre clé d’accès ou un code : les profils de vos enfants restent sur l’appareil.</p>
         </>
       ) : (
         <>
@@ -116,7 +117,8 @@ function EmailStep({ onSent, onEntered }: { onSent: (email: string) => void; onE
           error={form.formState.errors.email?.message}
         />
         {failure && <Notice tone="error">{failure}</Notice>}
-        <Button type="submit" disabled={form.formState.isSubmitting}>
+        {/* On the family's phone, the child's own space is the screen's first way. */}
+        <Button type="submit" variant={child ? 'outline' : 'default'} disabled={form.formState.isSubmitting}>
           Recevoir mon code
         </Button>
       </form>
@@ -129,5 +131,46 @@ function EmailStep({ onSent, onEntered }: { onSent: (email: string) => void; onE
         </Link>
       )}
     </Page>
+  );
+}
+
+/**
+ * Every child the device holds, the one in use first: each opens their own space. A device the
+ * guardian handed to a child holds no guardian session (platform/auth/pairing.ts), so each session
+ * here is a child's.
+ */
+function Children({ active }: { active: { id: string; name: string } }) {
+  const navigate = useNavigate();
+  const held = useQuery(deviceSessionsQuery);
+  const others = (held.data ?? []).filter(({ user }) => user.id !== active.id);
+  const switchTo = useMutation({
+    mutationFn: async (sessionToken: string) => {
+      const { error } = await authClient.multiSession.setActive({ sessionToken });
+      // Refused past the 5e: from the 4e, a child's space opens on no family device.
+      if (error) throw new Error(error.status === 403 ? 'Ce profil ne s’ouvre plus sur cet appareil.' : authMessage(error));
+      // Loaded afresh: nothing of the other child's stays in memory.
+      await navigate({ to: '/', reloadDocument: true });
+    },
+  });
+
+  return (
+    <>
+      <Button disabled={switchTo.isPending} onClick={() => void navigate({ to: '/' })}>
+        C’est {active.name}
+      </Button>
+      {others.map(({ user, session }) => (
+        <Button
+          key={session.token}
+          disabled={switchTo.isPending}
+          onClick={() => {
+            switchTo.mutate(session.token);
+          }}
+        >
+          C’est {user.name}
+        </Button>
+      ))}
+      {held.isError && <Notice tone="error">Les autres profils de cet appareil n’ont pas pu se charger.</Notice>}
+      {switchTo.error && <Notice tone="error">{switchTo.error.message}</Notice>}
+    </>
   );
 }

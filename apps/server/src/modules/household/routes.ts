@@ -20,10 +20,14 @@ import type { HouseholdService } from './service';
 const MIN_AGE_YEARS = 5;
 const MAX_AGE_YEARS = 20;
 // A student's own routes, and the guardian's ways in: a guardian enters on their child's device,
-// which keeps the child's session (multi-session).
+// which keeps the child's session (multi-session). On the family's phone, a child switches to a
+// brother's or sister's session: a device a child uses holds no guardian session to switch to
+// (platform/auth/pairing.ts).
 const STUDENT_AUTH_PATHS = new Set([
   '/api/auth/device-pairing/redeem',
   '/api/auth/get-session',
+  '/api/auth/multi-session/list-device-sessions',
+  '/api/auth/multi-session/set-active',
   '/api/auth/sign-out',
   '/api/auth/email-otp/send-verification-otp',
   '/api/auth/sign-in/email-otp',
@@ -61,9 +65,33 @@ export function studentAuthGuard({ auth, service }: { auth: Auth; service: House
         if (c.req.method === 'GET') return c.redirect('/connexion');
         throw new Problem('FORBIDDEN');
       }
+    } else if (c.req.path === SWITCH_PATH) {
+      await assertSiblingSwitch(auth, service, c.req.raw);
     }
     return next();
   });
+}
+
+const SWITCH_PATH = '/api/auth/multi-session/set-active';
+const switchBody = z.object({ sessionToken: z.string() });
+
+/**
+ * A child switches only to a brother's or sister's profile in 6e or 5e: from the 4e, a child's
+ * space opens on no family device (docs/decisions.md), even one that kept it from the 5e. A token
+ * the device does not hold is better-auth's to refuse.
+ */
+async function assertSiblingSwitch(auth: Auth, service: HouseholdService, request: Request) {
+  const session = await auth.api.getSession({ headers: request.headers, query: { disableRefresh: true } });
+  if (!session || !(await service.isStudent(session.user.id))) return;
+  const body = switchBody.safeParse(
+    await request
+      .clone()
+      .json()
+      .catch(() => null),
+  );
+  if (!body.success) return;
+  const target = await (await auth.$context).internalAdapter.findSession(body.data.sessionToken);
+  if (target && !(await service.isAccompanied(target.user.id))) throw new Problem('FORBIDDEN');
 }
 
 /**

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { MemoryAnswer } from '../components/memory-answer';
 import { Notice } from '../components/notice';
-import { Page } from '../components/page';
+import { Page, ProfileLink } from '../components/page';
 import { TomHead } from '../components/tom';
 import { WeekSummary } from '../components/week-summary';
 import { api, parseResponse } from '../lib/api';
@@ -42,7 +42,7 @@ function StudentHome() {
   const week = useQuery(ownSummaryQuery);
 
   return (
-    <Page title={`Bonjour ${me?.name ?? ''}`}>
+    <Page title={`Bonjour ${me?.name ?? ''}`} action={<ProfileLink />}>
       {memory?.state === 'asked' && <MemoryAnswer answer={answer} />}
       {answer.isSuccess && <Notice tone="info">{ANSWERED[answer.variables]}</Notice>}
       <Sessions />
@@ -129,24 +129,19 @@ function Devices() {
   const { data: devices } = useSuspenseQuery(devicesQuery);
 
   return (
-    <section className="flex flex-col gap-3">
-      <Fold title="Tes appareils reliés">
-        <ul className="flex flex-col gap-2">
-          {devices.map((device) => (
-            <Card asChild key={device.id} className="flex flex-col">
-              <li>
-                <span className="font-bold">{deviceName(device.userAgent)}</span>
-                <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
-              </li>
-            </Card>
-          ))}
-        </ul>
-        <p className="text-sm text-muted-foreground">Un appareil que tu ne reconnais pas ? Dis-le à ton parent, qui peut le déconnecter.</p>
-        <p className="text-sm text-muted-foreground">Sur un appareil partagé, ton parent passe sur son profil sans te déconnecter.</p>
-      </Fold>
-      <Link to="/connexion" className="min-h-11 py-3 text-sm text-primary underline">
-        Changer de profil
-      </Link>
-    </section>
+    <Fold title="Tes appareils reliés">
+      <ul className="flex flex-col gap-2">
+        {devices.map((device) => (
+          <Card asChild key={device.id} className="flex flex-col">
+            <li>
+              <span className="font-bold">{deviceName(device.userAgent)}</span>
+              <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
+            </li>
+          </Card>
+        ))}
+      </ul>
+      <p className="text-sm text-muted-foreground">Un appareil que tu ne reconnais pas ? Dis-le à ton parent, qui peut le déconnecter.</p>
+      <p className="text-sm text-muted-foreground">Sur un appareil partagé, ton parent passe sur son profil sans te déconnecter.</p>
+    </Fold>
   );
 }

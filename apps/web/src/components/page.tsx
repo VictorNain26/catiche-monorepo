@@ -1,7 +1,9 @@
 import { cn } from '@repo/ui/classes';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createLink } from '@tanstack/react-router';
-import { ChevronLeftIcon, type LucideIcon } from 'lucide-react';
+import { ChevronLeftIcon, UsersRoundIcon, type LucideIcon } from 'lucide-react';
 import { useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
+import { meQuery } from '../lib/me';
 
 function HeaderAnchor({ icon: Icon, className, children, ...anchor }: ComponentProps<'a'> & { icon: LucideIcon }) {
   return (
@@ -24,6 +26,20 @@ export const HeaderLink = createLink(HeaderAnchor);
 /** The way back to the screen above. */
 export function BackLink(props: Omit<ComponentProps<typeof HeaderLink>, 'icon'>) {
   return <HeaderLink {...props} icon={ChevronLeftIcon} />;
+}
+
+/**
+ * The student's profile, on each of their screens: on the family's phone, who uses Tom shows, and
+ * changing it is a tap on it, to « Qui utilise Tom ? ».
+ */
+export function ProfileLink() {
+  const { data: me } = useSuspenseQuery(meQuery);
+  if (!me) return null;
+  return (
+    <HeaderLink to="/connexion" icon={UsersRoundIcon} aria-label={`${me.name}, changer de profil`}>
+      {me.name}
+    </HeaderLink>
+  );
 }
 
 interface PageProps {
