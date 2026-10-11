@@ -1,4 +1,4 @@
-import { Button, Card } from '@repo/ui';
+import { Button, Card, Fold } from '@repo/ui';
 import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { MemoryAnswer } from '../components/memory-answer';
@@ -130,24 +130,20 @@ function Devices() {
 
   return (
     <section className="flex flex-col gap-3">
-      {/* The flex column on a div: WebKit does not lay out a details element as flex. */}
-      <details>
-        <summary className="min-h-11 cursor-pointer py-3 font-bold text-foreground">Tes appareils reliés</summary>
-        <div className="flex flex-col gap-3">
-          <ul className="flex flex-col gap-2">
-            {devices.map((device) => (
-              <Card asChild key={device.id} className="flex flex-col">
-                <li>
-                  <span className="font-bold">{deviceName(device.userAgent)}</span>
-                  <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
-                </li>
-              </Card>
-            ))}
-          </ul>
-          <p className="text-sm text-muted-foreground">Un appareil que tu ne reconnais pas ? Dis-le à ton parent, qui peut le déconnecter.</p>
-          <p className="text-sm text-muted-foreground">Sur un appareil partagé, ton parent passe sur son profil sans te déconnecter.</p>
-        </div>
-      </details>
+      <Fold title="Tes appareils reliés">
+        <ul className="flex flex-col gap-2">
+          {devices.map((device) => (
+            <Card asChild key={device.id} className="flex flex-col">
+              <li>
+                <span className="font-bold">{deviceName(device.userAgent)}</span>
+                <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
+              </li>
+            </Card>
+          ))}
+        </ul>
+        <p className="text-sm text-muted-foreground">Un appareil que tu ne reconnais pas ? Dis-le à ton parent, qui peut le déconnecter.</p>
+        <p className="text-sm text-muted-foreground">Sur un appareil partagé, ton parent passe sur son profil sans te déconnecter.</p>
+      </Fold>
       <Link to="/connexion" className="min-h-11 py-3 text-sm text-primary underline">
         Changer de profil
       </Link>
