@@ -36,8 +36,8 @@ interface PageProps {
 }
 
 /**
- * A screen at phone width first: one column on the exercise book's red margin; its header holds the
- * way back, read before the title, and an action of the space on the right, when it has them.
+ * A screen at phone width first, in one column; its header holds the way back, read before the
+ * title, and an action of the space on the right, when it has them.
  */
 export function Page({ title, back, action, announce = false, children }: PageProps) {
   const links = back !== undefined || action !== undefined;
@@ -46,7 +46,7 @@ export function Page({ title, back, action, announce = false, children }: PagePr
     if (announce) headingRef.current?.focus();
   }, [announce]);
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 border-l-2 border-margin p-4">
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-4">
       <header className="flex flex-col gap-2 pt-4">
         {links ? (
           <div className="flex min-h-11 items-center justify-between gap-3">

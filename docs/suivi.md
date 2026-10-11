@@ -21,7 +21,9 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
   des écrans, `Card` dans `@repo/ui`) et la PR 2 (l'entrée du parent : Catiche dit en une phrase,
   le code en grand, la clé d'accès proposée après le prénom ; le nom dans l'onglet, le manifeste,
   les e-mails et la clé d'accès) et la PR 3 (l'ajout d'un enfant, une question par écran, le mois
-  de naissance en deux menus) ; la suivante, la fiche de l'enfant (fin du parcours 2).
+  de naissance en deux menus) ; la suivante, la fiche de l'enfant (fin du parcours 2). La marge
+  rouge du cahier est retirée (`decisions.md`) : la tête de Tom, que l'étude place « dans la
+  marge » à la séance, se pose à côté de ses messages.
 - **Lot 4 en attente** : le harnais `bun run eval` est mergé ; son passage unique attend le
   paiement à l'usage de Mistral (bloquant ci-dessous). Le premier essai s'est arrêté à 3
   conversations sur 104 et ne compte pas comme mesure. Référence de comparaison : 11 fuites sur

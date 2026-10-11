@@ -1,9 +1,8 @@
 # Charte
 
-La direction « Grands carreaux » (`decisions.md`, 2026-10-11) : un cahier d'écolier, où l'élève
-écrit sur la ligne et Tom parle depuis la marge. Les valeurs vivent dans le code,
-`packages/tokens/theme.css` pour les tokens, `@repo/ui` pour les composants ; ce document dit
-comment s'en servir. L'étude qui l'a fondée : `etudes/2026-10-11/direction-artistique.md`.
+La direction « Grands carreaux » (`decisions.md`, 2026-10-11) : le papier et l'encre bleue du pull
+de Tom. Les valeurs vivent dans le code, `packages/tokens/theme.css` pour les tokens, `@repo/ui`
+pour les composants ; ce document dit comment s'en servir. L'étude qui l'a fondée : `etudes/2026-10-11/direction-artistique.md`.
 
 ## Le nom
 
@@ -22,13 +21,13 @@ Chaque couleur a un rôle, et un rôle n'en prend pas une autre.
 | Encre | `foreground`, `muted-foreground` | Le texte ; le texte secondaire |
 | Encre bleue | `primary` | L'action principale, les liens, le focus : le bleu du pull de Tom, seul accent |
 | Bulle de l'élève | `secondary` | Ce que l'élève a écrit |
-| Marge | `margin` | Le filet rouge à gauche de chaque écran, en décor ; aucun texte ne s'y lit |
 | Surligneur | `highlight` | Ce qui se relit : une notion qui résiste |
 | États | `success`, `destructive`, `warning`, `disabled` | Réussi, erreur, attention, désactivé |
 
 Le sombre suit le réglage du téléphone, avec la même encre éclaircie sur un bleu nuit ; il ne se
 présente jamais comme bon pour le sommeil. Le bleu est celui de la catégorie (Kartable, Le Prof
-IA, Dinobot) : la différence vient du nom, de Tom et de la marge, pas d'un deuxième accent.
+IA, Dinobot) : la différence vient du nom et de Tom, pas d'un deuxième accent. Aucun filet ni
+réglure décorative : la marge rouge du cahier, essayée, est retirée (`decisions.md`).
 
 ## Typographie
 
