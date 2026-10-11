@@ -19,11 +19,11 @@ Chaque PR précise son périmètre dans son plan, au moment où elle démarre
 
 ## Maintenant
 
-**Lot 1** : la direction (« Grands carreaux » aux fontes d'« Instrument ») est choisie
-(`decisions.md`, 2026-10-11) ; **le nom** se cherche à nouveau, Victor tranche. Reste **la
-charte** : logo, une fois le nom choisi, couleurs, typographie, formes, Tom (poses, place dans
-l'écran, rendu dans Blender), iconographie, mouvement, ton des mots, composants, états
-(désactivé, erreur, attente). Le dépôt de la marque et les domaines sont des gestes de Victor.
+**Lot 1** : le nom (« Catiche ») et la direction (« Grands carreaux » aux fontes
+d'« Instrument ») sont choisis, les fondations de la charte posées (`decisions.md`, `charte.md`,
+2026-10-11). Restent le logo de Catiche et Tom au trait pour les icônes ; les poses de Tom et les
+icônes viennent avec les écrans du lot 2. Le dépôt de la marque et les domaines sont des gestes
+de Victor.
 
 **Hors IA, sans attendre** : la clause 2.2(c) des mineurs et la recevabilité du Zero Data
 Retention sont demandées à Mistral (2026-10-11) ; la réponse décide du lot 4.

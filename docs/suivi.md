@@ -8,12 +8,12 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 - **Mis à jour le** 2026-10-11.
 - **Nouvel ordre** (`decisions.md`, 2026-10-11) : l'identité et l'app d'abord, Tom ensuite ; les
   lots sont renumérotés (`roadmap.md`).
-- **Lot en cours : 1, l'identité** : Victor a choisi la direction, « Grands carreaux » aux fontes
-  d'« Instrument » (`decisions.md`, 2026-10-11), après l'étude (`etudes/2026-10-11/`) et l'essai
-  sur les vrais écrans ([comparatif](https://claude.ai/artifact/8x3Qm6x1NiQiVMrJhyYbJ8)). Les
-  fondations de la charte sont posées (`charte.md`, tokens, composants, état désactivé). Le nom
-  se cherche à nouveau : aucun finaliste de la première étude n'a convaincu. Restent ensuite le
-  logo, les rendus de Tom dans Blender et les icônes.
+- **Lot en cours : 1, l'identité, et le lot 2 commence** : Victor a choisi le nom, « Catiche »,
+  et la direction, « Grands carreaux » aux fontes d'« Instrument » (`decisions.md`, 2026-10-11),
+  après les études (`etudes/2026-10-11/`) et l'essai sur les vrais écrans
+  ([comparatif](https://claude.ai/artifact/8x3Qm6x1NiQiVMrJhyYbJ8)). Les fondations de la charte
+  sont posées (`charte.md`). Restent le logo de Catiche et Tom au trait. Le lot 2 suit
+  `etudes/2026-10-11/refonte-interface.md`, en dix PR.
 - **Déjà dans l'app**, aux couleurs et aux fontes de la charte : le mode accompagné en 6e et 5e,
   la séance, les accueils élève et parent, l'écran du résumé, le jumelage par QR code, la photo
   de l'exercice. Le lot 2 refait entièrement ces écrans.
@@ -37,9 +37,9 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 
 ## À faire par Victor
 
-- **Le nom**, une fois choisi : une recherche de similarité INPI, le dépôt de la marque (classes
-  9, 41 et 42) et les domaines ; l'avis d'un conseil en propriété industrielle sur Tom face à la
-  marque TOM, quel que soit le nom.
+- **Catiche** : acheter catiche.fr et catiche.app ; une recherche de similarité INPI, puis le
+  dépôt de la marque (classes 9, 41 et 42) ; des identifiants Instagram et TikTok (@catiche est
+  pris) ; l'avis d'un conseil en propriété industrielle sur Tom face à la marque TOM.
 - **Mistral** : lire la réponse du support (ticket du 2026-10-11) ; au lot 4, activer le paiement
   à l'usage avec un plafond, demander le Zero Data Retention, vérifier Admin › API ›
   Confidentialité.

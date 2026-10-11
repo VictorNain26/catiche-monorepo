@@ -7,8 +7,10 @@ comment s'en servir. L'étude qui l'a fondée : `etudes/2026-10-11/direction-art
 
 ## Le nom
 
-Le nom du produit se cherche ; son écriture et le logo s'ajoutent ici une fois choisi. Tom est le
-tuteur, une loutre, et garde son nom ; l'élève dit qu'il fait ses devoirs « avec Tom ».
+**Catiche**, le gîte de la loutre, avec une majuscule, jamais en capitales ni abrégé. Le produit
+est le lieu ; Tom est le tuteur qui s'y trouve, une loutre, et garde son nom : l'élève fait ses
+devoirs « sur Catiche, avec Tom ». Jamais « Tom t'attend à la Catiche » : Tom n'est pas un
+compagnon. Le logo reste à dessiner.
 
 ## Couleurs
 
