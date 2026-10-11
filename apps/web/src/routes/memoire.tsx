@@ -1,10 +1,10 @@
-import { Button } from '@repo/ui';
+import { Button, Card } from '@repo/ui';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
-import { Link, createFileRoute, redirect } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import { useState } from 'react';
 import { MemoryAnswer } from '../components/memory-answer';
 import { Notice } from '../components/notice';
-import { Page } from '../components/page';
+import { BackLink, Page } from '../components/page';
 import { api, parseResponse } from '../lib/api';
 import { meQuery } from '../lib/me';
 import { memoryMessage, memoryQuery, notionSummary, useMemoryAnswer } from '../lib/memory';
@@ -33,10 +33,7 @@ function Memory() {
   const failure = understood.error ?? erase.error ?? answer.error;
 
   return (
-    <Page title="Ce que Tom retient">
-      <Link to="/" className="min-h-11 py-3 text-sm text-primary underline">
-        Retour à tes séances
-      </Link>
+    <Page title="Ce que Tom retient" back={<BackLink to="/">Retour à tes séances</BackLink>}>
       {failure && <Notice tone="error">{memoryMessage(failure)}</Notice>}
       {memory.state === 'active' ? (
         <>
@@ -49,20 +46,22 @@ function Memory() {
           ) : (
             <ul className="flex flex-col gap-2">
               {memory.notions.map((notion) => (
-                <li key={notion.notionId} className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-4 text-card-foreground">
-                  <span className="text-sm text-muted-foreground">Au programme</span>
-                  <span className="font-bold">{notion.label}</span>
-                  <span className="text-sm text-muted-foreground">{notionSummary(notion)}</span>
-                  <Button
-                    variant="outline"
-                    disabled={understood.isPending}
-                    onClick={() => {
-                      understood.mutate(notion.notionId);
-                    }}
-                  >
-                    J’ai compris
-                  </Button>
-                </li>
+                <Card asChild key={notion.notionId} className="flex flex-col gap-2">
+                  <li>
+                    <span className="text-sm text-muted-foreground">Au programme</span>
+                    <span className="font-bold">{notion.label}</span>
+                    <span className="text-sm text-muted-foreground">{notionSummary(notion)}</span>
+                    <Button
+                      variant="outline"
+                      disabled={understood.isPending}
+                      onClick={() => {
+                        understood.mutate(notion.notionId);
+                      }}
+                    >
+                      J’ai compris
+                    </Button>
+                  </li>
+                </Card>
               ))}
             </ul>
           )}

@@ -1,10 +1,10 @@
-import { Button } from '@repo/ui';
+import { Button, Card } from '@repo/ui';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
-import { Link, createFileRoute } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { CodeForm, sendCode } from '../components/code-form';
 import { Notice } from '../components/notice';
-import { Page } from '../components/page';
+import { BackLink, Page } from '../components/page';
 import { SignOut } from '../components/sign-out';
 import { authClient, authMessage, hasCode, isCancelled } from '../lib/auth';
 import { deviceName, formatDay } from '../lib/device';
@@ -18,10 +18,7 @@ export const Route = createFileRoute('/foyer/compte')({
 
 function Account() {
   return (
-    <Page title="Mon compte">
-      <Link to="/foyer" className="min-h-11 py-3 text-sm text-primary underline">
-        Retour au foyer
-      </Link>
+    <Page title="Mon compte" back={<BackLink to="/foyer">Retour au foyer</BackLink>}>
       <Passkeys />
       <SignOut label="Se déconnecter" />
     </Page>
@@ -79,24 +76,23 @@ function Passkeys() {
       {passkeys.length > 0 && (
         <ul className="flex flex-col gap-2">
           {passkeys.map((passkey) => (
-            <li
-              key={passkey.id}
-              className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-card-foreground"
-            >
-              <span className="flex flex-col">
-                <span className="font-bold">{deviceName(passkey.name)}</span>
-                <span className="text-sm text-muted-foreground">Créée le {formatDay(passkey.createdAt)}</span>
-              </span>
-              <Button
-                variant="outline"
-                disabled={remove.isPending}
-                onClick={() => {
-                  remove.mutate(passkey.id);
-                }}
-              >
-                Supprimer
-              </Button>
-            </li>
+            <Card asChild key={passkey.id} className="flex items-center justify-between gap-3">
+              <li>
+                <span className="flex flex-col">
+                  <span className="font-bold">{deviceName(passkey.name)}</span>
+                  <span className="text-sm text-muted-foreground">Créée le {formatDay(passkey.createdAt)}</span>
+                </span>
+                <Button
+                  variant="outline"
+                  disabled={remove.isPending}
+                  onClick={() => {
+                    remove.mutate(passkey.id);
+                  }}
+                >
+                  Supprimer
+                </Button>
+              </li>
+            </Card>
           ))}
         </ul>
       )}

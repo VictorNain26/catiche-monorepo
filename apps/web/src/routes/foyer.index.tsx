@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@repo/ui';
+import { Button, Card } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
+import { UserRoundIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from '../lib/zod';
@@ -28,10 +29,15 @@ function Household() {
   const { data: students } = useSuspenseQuery(studentsQuery);
 
   return (
-    <Page title={`Bonjour ${me?.name ?? ''}`}>
-      <Link to="/foyer/compte" className="min-h-11 self-end py-3 text-sm text-primary underline">
-        Mon compte
-      </Link>
+    <Page
+      title={`Bonjour ${me?.name ?? ''}`}
+      action={
+        <Link to="/foyer/compte" className="inline-flex min-h-11 items-center gap-1 text-sm text-primary underline underline-offset-4">
+          <UserRoundIcon aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
+          Mon compte
+        </Link>
+      }
+    >
       <section aria-labelledby="children" className="flex flex-col gap-3">
         <h2 id="children" className="text-xl font-bold text-foreground">
           Vos enfants
@@ -57,25 +63,23 @@ function Household() {
 function ChildCard({ child }: { child: Student }) {
   const week = useQuery(summaryQuery(child.id));
   return (
-    <Link
-      to="/foyer/$studentId"
-      params={{ studentId: child.id }}
-      className="flex min-h-11 flex-col gap-1 rounded-2xl border border-border bg-card p-4 text-card-foreground"
-    >
-      <span className="flex items-center justify-between gap-3">
-        <span className="font-bold">{child.name}</span>
-        <span className="text-sm text-muted-foreground">{LEVEL_LABELS[child.level]}</span>
-      </span>
-      <span className="text-sm text-muted-foreground">
-        {week.data
-          ? week.data.sessions === 0
-            ? 'Pas de séance ces sept derniers jours'
-            : `Ces sept derniers jours : ${minutesText(week.data.minutes)}`
-          : week.isError
-            ? 'Sa semaine n’a pas pu se charger'
-            : 'Chargement…'}
-      </span>
-    </Link>
+    <Card asChild className="flex min-h-11 flex-col gap-1">
+      <Link to="/foyer/$studentId" params={{ studentId: child.id }}>
+        <span className="flex items-center justify-between gap-3">
+          <span className="font-bold">{child.name}</span>
+          <span className="text-sm text-muted-foreground">{LEVEL_LABELS[child.level]}</span>
+        </span>
+        <span className="text-sm text-muted-foreground">
+          {week.data
+            ? week.data.sessions === 0
+              ? 'Pas de séance ces sept derniers jours'
+              : `Ces sept derniers jours : ${minutesText(week.data.minutes)}`
+            : week.isError
+              ? 'Sa semaine n’a pas pu se charger'
+              : 'Chargement…'}
+        </span>
+      </Link>
+    </Card>
   );
 }
 

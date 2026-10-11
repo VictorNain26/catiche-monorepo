@@ -1,4 +1,4 @@
-import { Button } from '@repo/ui';
+import { Button, Card } from '@repo/ui';
 import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { MemoryAnswer } from '../components/memory-answer';
@@ -111,14 +111,12 @@ function Sessions() {
         <ul className="flex flex-col gap-2">
           {sessions.map((session) => (
             <li key={session.id}>
-              <Link
-                to="/seance/$sessionId"
-                params={{ sessionId: session.id }}
-                className="flex min-h-11 flex-col rounded-2xl border border-border bg-card p-4 text-card-foreground"
-              >
-                <span className="font-bold">{session.title ?? 'Séance sans titre'}</span>
-                <span className="text-sm text-muted-foreground">{formatDay(session.createdAt)}</span>
-              </Link>
+              <Card asChild className="flex min-h-11 flex-col">
+                <Link to="/seance/$sessionId" params={{ sessionId: session.id }}>
+                  <span className="font-bold">{session.title ?? 'Séance sans titre'}</span>
+                  <span className="text-sm text-muted-foreground">{formatDay(session.createdAt)}</span>
+                </Link>
+              </Card>
             </li>
           ))}
         </ul>
@@ -138,10 +136,12 @@ function Devices() {
         <div className="flex flex-col gap-3">
           <ul className="flex flex-col gap-2">
             {devices.map((device) => (
-              <li key={device.id} className="flex flex-col rounded-2xl border border-border bg-card p-4 text-card-foreground">
-                <span className="font-bold">{deviceName(device.userAgent)}</span>
-                <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
-              </li>
+              <Card asChild key={device.id} className="flex flex-col">
+                <li>
+                  <span className="font-bold">{deviceName(device.userAgent)}</span>
+                  <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
+                </li>
+              </Card>
             ))}
           </ul>
           <p className="text-sm text-muted-foreground">Un appareil que tu ne reconnais pas ? Dis-le à ton parent, qui peut le déconnecter.</p>

@@ -1,13 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@repo/ui';
+import { Button, Card } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
-import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from '../lib/zod';
 import { Field, SelectField } from '../components/field';
 import { Notice } from '../components/notice';
-import { Page } from '../components/page';
+import { BackLink, Page } from '../components/page';
 import { QrCode } from '../components/qr-code';
 import { WeekSummary } from '../components/week-summary';
 import { api, isProblem, parseResponse } from '../lib/api';
@@ -44,10 +44,7 @@ function StudentPage() {
   if (!child) return null;
 
   return (
-    <Page title={child.name}>
-      <Link to="/foyer" className="min-h-11 py-3 text-sm text-primary underline">
-        Retour au foyer
-      </Link>
+    <Page title={child.name} back={<BackLink to="/foyer">Retour au foyer</BackLink>}>
       {devices.length === 0 && (
         <Notice tone="info">
           Prochaine étape : {child.accompanied ? `faire les devoirs avec ${child.name} sur cet appareil.` : 'relier son appareil, avec un code.'}
@@ -136,21 +133,23 @@ function Devices({ child }: { child: Student }) {
       ) : (
         <ul className="flex flex-col gap-2">
           {devices.map((device) => (
-            <li key={device.id} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-card-foreground">
-              <span className="flex flex-col">
-                <span className="font-bold">{deviceName(device.userAgent)}</span>
-                <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
-              </span>
-              <Button
-                variant="outline"
-                disabled={revoke.isPending}
-                onClick={() => {
-                  revoke.mutate(device.id);
-                }}
-              >
-                Déconnecter
-              </Button>
-            </li>
+            <Card asChild key={device.id} className="flex items-center justify-between gap-3">
+              <li>
+                <span className="flex flex-col">
+                  <span className="font-bold">{deviceName(device.userAgent)}</span>
+                  <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
+                </span>
+                <Button
+                  variant="outline"
+                  disabled={revoke.isPending}
+                  onClick={() => {
+                    revoke.mutate(device.id);
+                  }}
+                >
+                  Déconnecter
+                </Button>
+              </li>
+            </Card>
           ))}
         </ul>
       )}
