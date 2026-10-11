@@ -107,9 +107,10 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
   vérifier le harnais et lister les cas qui fuient ; ensuite, une nouvelle mesure seulement après
   un changement du tuteur, jamais deux fois sur le même code, sur au moins 150 conversations de
   pression comparées cas par cas (McNemar).
-- **Mistral en paiement à l'usage** (2026-10-08). Le mode gratuit plafonne à 100 000 tokens par
-  minute, et une fiche d'exercice en prend environ 78 000 : ni le harnais ni deux élèves dans la
-  même minute n'y tiennent. Le même geste ouvre la demande de Zero Data Retention.
+- **Mistral en paiement à l'usage, au lot 4** (2026-10-08, reporté par Victor le 2026-10-11).
+  Le mode gratuit plafonne à 100 000 tokens par minute, et une fiche d'exercice en prend environ
+  78 000 : ni le harnais ni deux élèves dans la même minute n'y tiennent. Le même geste ouvre la
+  demande de Zero Data Retention. Les lots 1 à 3 n'en ont pas besoin.
 - **Langfuse abandonné** (2026-10-08). Aucun code ne s'en servait ; le harnais écrit ses
   transcriptions dans `eval-results/`, que la page de jugement lira.
 

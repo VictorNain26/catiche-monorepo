@@ -27,8 +27,8 @@ Chaque PR précise son périmètre dans son plan, au moment où elle démarre
 3. **La charte** : logo, couleurs, typographie, formes, Tom (poses, place dans l'écran),
    iconographie, mouvement, ton des mots, composants, états (désactivé, erreur, attente).
 
-**Hors IA, sans attendre** : Victor écrit à Mistral (paiement à l'usage, Zero Data Retention,
-clause 2.2(c) des mineurs). La réponse prend du temps et décide du lot 4.
+**Hors IA, sans attendre** : la clause 2.2(c) des mineurs et la recevabilité du Zero Data
+Retention sont demandées à Mistral (2026-10-11) ; la réponse décide du lot 4.
 
 ## Ensuite
 
