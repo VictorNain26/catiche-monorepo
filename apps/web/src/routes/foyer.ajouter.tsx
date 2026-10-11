@@ -1,16 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button, NativeSelect, NativeSelectOption } from '@repo/ui';
+import { Button } from '@repo/ui';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { UserRoundIcon } from 'lucide-react';
-import { useEffect, useId, useRef, useState, type RefObject } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
-import type { z } from '../lib/zod';
+import { useEffect, useState } from 'react';
+import { useForm, useWatch, type FieldPath } from 'react-hook-form';
 import { CheckboxField, Field, SelectField } from '../components/field';
 import { Notice } from '../components/notice';
 import { BackLink, HeaderLink, Page } from '../components/page';
 import { api, parseResponse } from '../lib/api';
-import { LEVEL_LABELS, householdMessage, newStudentSchema, studentsQuery } from '../lib/household';
+import { LEVEL_LABELS, birthYears, householdMessage, newChildSchema, studentsQuery } from '../lib/household';
+import type { z } from '../lib/zod';
 
 /**
  * The adding of a child, one question per screen: their first name, their class, their birth
@@ -18,29 +18,33 @@ import { LEVEL_LABELS, householdMessage, newStudentSchema, studentsQuery } from 
  * here; then the child's page, which says the next step.
  */
 export const Route = createFileRoute('/foyer/ajouter')({
-  loader: ({ context }) => context.queryClient.query(studentsQuery),
+  // The household's redirect has just read the list: the cache serves it.
+  loader: ({ context }) => context.queryClient.query({ ...studentsQuery, staleTime: 'static' }),
   component: AddChild,
 });
 
-const STEPS = 4;
-const MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-
-/** The years of a child from 5 to 20, the ages the server accepts, the youngest last. */
-const birthYears = (now = new Date()) => Array.from({ length: 16 }, (_, index) => String(now.getFullYear() - 20 + index));
+/** What each step asks, in order: the step is done when they are valid. */
+const STEP_FIELDS: FieldPath<z.input<ReturnType<typeof newChildSchema>>>[][] = [['name'], ['level'], ['month', 'year'], ['memoryProposed']];
+const STEPS = STEP_FIELDS.length;
+const MONTHS: Record<string, string> = Object.fromEntries(
+  ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'].map((label, index) => [
+    String(index + 1).padStart(2, '0'),
+    label,
+  ]),
+);
 
 function AddChild() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: students } = useSuspenseQuery(studentsQuery);
   const [step, setStep] = useState(1);
-  const [month, setMonth] = useState('');
-  const [year, setYear] = useState('');
-  const monthRef = useRef<HTMLSelectElement>(null);
-  const form = useForm({ resolver: zodResolver(newStudentSchema), defaultValues: { name: '', birthMonth: '', memoryProposed: false } });
+  const [schema] = useState(() => newChildSchema());
+  const [years] = useState(() => Object.fromEntries(birthYears().map((year) => [year, year])));
+  const form = useForm({ resolver: zodResolver(schema), defaultValues: { name: '', month: '', year: '', memoryProposed: false } });
   const name = useWatch({ control: form.control, name: 'name' }).trim();
 
   const create = useMutation({
-    mutationFn: (json: z.output<typeof newStudentSchema>) => parseResponse(api.household.students.$post({ json })),
+    mutationFn: (json: z.output<typeof schema>) => parseResponse(api.household.students.$post({ json })),
     onSuccess: async (created) => {
       queryClient.setQueryData(studentsQuery.queryKey, (list) => [...(list ?? []), created]);
       await navigate({ to: '/foyer/$studentId', params: { studentId: created.id } });
@@ -49,25 +53,15 @@ function AddChild() {
 
   // Each step opens on its question.
   useEffect(() => {
-    if (step === 1) form.setFocus('name');
-    else if (step === 2) form.setFocus('level');
-    else if (step === 3) monthRef.current?.focus();
-    else form.setFocus('memoryProposed');
+    const [first] = STEP_FIELDS[step - 1] ?? [];
+    if (first) form.setFocus(first);
   }, [step, form]);
 
   const next = async () => {
-    if (step === 3) {
-      if (month === '' || year === '') {
-        form.setError('birthMonth', { message: 'Son mois et son année de naissance.' });
-        return;
-      }
-      form.setValue('birthMonth', `${year}-${month}`);
-    }
-    const field = step === 1 ? 'name' : step === 2 ? 'level' : 'birthMonth';
-    if (await form.trigger(field)) setStep(step + 1);
+    if (await form.trigger(STEP_FIELDS[step - 1])) setStep(step + 1);
   };
-  const submit = form.handleSubmit((values) => {
-    create.mutate(values);
+  const submit = form.handleSubmit((child) => {
+    create.mutate(child);
   });
 
   return (
@@ -86,8 +80,7 @@ function AddChild() {
         noValidate
         onSubmit={(event) => {
           event.preventDefault();
-          if (step < STEPS) void next();
-          else void submit(event);
+          void next();
         }}
         className="flex flex-col gap-4"
       >
@@ -99,14 +92,17 @@ function AddChild() {
           <SelectField label="Sa classe" options={LEVEL_LABELS} {...form.register('level')} error={form.formState.errors.level?.message} />
         )}
         {step === 3 && (
-          <BirthMonth
-            month={month}
-            year={year}
-            monthRef={monthRef}
-            error={form.formState.errors.birthMonth?.message}
-            onMonth={setMonth}
-            onYear={setYear}
-          />
+          <fieldset className="flex flex-col gap-2">
+            <legend className="text-sm font-bold text-foreground">Son mois de naissance</legend>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <SelectField label="Mois" options={MONTHS} {...form.register('month')} error={form.formState.errors.month?.message} />
+              </div>
+              <div className="flex-1">
+                <SelectField label="Année" options={years} {...form.register('year')} error={form.formState.errors.year?.message} />
+              </div>
+            </div>
+          </fieldset>
         )}
         {step === 4 && (
           <>
@@ -126,9 +122,20 @@ function AddChild() {
             )}
           </>
         )}
-        <Button type="submit" disabled={create.isPending}>
-          {step < STEPS ? 'Continuer' : `Ajouter ${name}`}
-        </Button>
+        {step < STEPS ? (
+          <Button type="submit">Continuer</Button>
+        ) : (
+          <Button
+            type="button"
+            disabled={create.isPending}
+            onClick={(event) => {
+              // The second click of a double click on « Continuer » lands here: it adds nothing unread.
+              if (event.detail <= 1) void submit();
+            }}
+          >
+            Ajouter {name}
+          </Button>
+        )}
         {step > 1 && (
           <Button
             type="button"
@@ -142,68 +149,5 @@ function AddChild() {
         )}
       </form>
     </Page>
-  );
-}
-
-interface BirthMonthProps {
-  month: string;
-  year: string;
-  monthRef: RefObject<HTMLSelectElement | null>;
-  error: string | undefined;
-  onMonth: (month: string) => void;
-  onYear: (year: string) => void;
-}
-
-/** The birth month in two plain menus, which every browser shows filled in, unlike a month field. */
-function BirthMonth({ month, year, monthRef, error, onMonth, onYear }: BirthMonthProps) {
-  const id = useId();
-  const errorId = `${id}-error`;
-  const described = error ? errorId : undefined;
-  return (
-    <fieldset className="flex flex-col gap-2" aria-describedby={described}>
-      <legend className="text-sm font-bold text-foreground">Son mois de naissance</legend>
-      <div className="flex gap-3">
-        <label className="flex flex-1 flex-col gap-1 text-sm text-muted-foreground">
-          Mois
-          <NativeSelect
-            ref={monthRef}
-            value={month}
-            variant={error ? 'error' : 'default'}
-            onChange={(event) => {
-              onMonth(event.target.value);
-            }}
-          >
-            <NativeSelectOption value="">Choisir</NativeSelectOption>
-            {MONTHS.map((label, index) => (
-              <NativeSelectOption key={label} value={String(index + 1).padStart(2, '0')}>
-                {label}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
-        </label>
-        <label className="flex flex-1 flex-col gap-1 text-sm text-muted-foreground">
-          Année
-          <NativeSelect
-            value={year}
-            variant={error ? 'error' : 'default'}
-            onChange={(event) => {
-              onYear(event.target.value);
-            }}
-          >
-            <NativeSelectOption value="">Choisir</NativeSelectOption>
-            {birthYears().map((option) => (
-              <NativeSelectOption key={option} value={option}>
-                {option}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
-        </label>
-      </div>
-      {error && (
-        <p id={errorId} className="text-sm text-destructive">
-          {error}
-        </p>
-      )}
-    </fieldset>
   );
 }

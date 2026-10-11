@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test';
 import { Hono } from 'hono';
 import { hc } from 'hono/client';
 import { parseResponse } from './api';
-import { householdMessage, isLevel, memoryStatus, newStudentSchema } from './household';
+import { birthYears, householdMessage, isLevel, memoryStatus, newChildSchema } from './household';
 
 const problem = (code: string, status: 400 | 404 | 429 | 500) =>
   new Hono().get('/', (c) => c.json({ status, code }, status, { 'Content-Type': 'application/problem+json' }));
@@ -38,20 +38,42 @@ describe('isLevel', () => {
   });
 });
 
-describe('newStudentSchema', () => {
-  it('takes a trimmed first name, a level and a month', () => {
-    expect(newStudentSchema.parse({ name: '  Léa ', level: 'sixieme', birthMonth: '2014-03', memoryProposed: true })).toEqual({
-      name: 'Léa',
-      level: 'sixieme',
-      birthMonth: '2014-03',
-      memoryProposed: true,
-    });
+describe('newChildSchema', () => {
+  // The server's rule (modules/household/routes.ts): 5 to 20 years, in UTC. On 15 June 2026, from 2006-01 to 2021-06.
+  const now = new Date('2026-06-15T12:00:00Z');
+  const child = (month: string, year: string) => ({ name: '  Léa ', level: 'sixieme', month, year, memoryProposed: true });
+
+  it('gives the server a trimmed first name, a level and the month the two menus make', () => {
+    expect(newChildSchema(now).parse(child('03', '2014'))).toEqual({ name: 'Léa', level: 'sixieme', birthMonth: '2014-03', memoryProposed: true });
   });
 
-  it('refuses an empty name, no level, or a month out of the calendar', () => {
-    expect(newStudentSchema.safeParse({ name: ' ', level: 'sixieme', birthMonth: '2014-03', memoryProposed: false }).success).toBe(false);
-    expect(newStudentSchema.safeParse({ name: 'Léa', level: '', birthMonth: '2014-03', memoryProposed: false }).success).toBe(false);
-    expect(newStudentSchema.safeParse({ name: 'Léa', level: 'sixieme', birthMonth: '2014-13', memoryProposed: false }).success).toBe(false);
+  it('takes the ages the server takes, to the month, and no other', () => {
+    expect(newChildSchema(now).safeParse(child('06', '2021')).success).toBe(true);
+    expect(newChildSchema(now).safeParse(child('01', '2006')).success).toBe(true);
+    const tooYoung = newChildSchema(now).safeParse(child('07', '2021'));
+    expect(tooYoung.error?.issues).toEqual([
+      expect.objectContaining({ path: ['year'], message: 'Votre enfant a entre 5 et 20 ans : vérifiez son année.' }),
+    ]);
+    expect(newChildSchema(now).safeParse(child('12', '2005')).success).toBe(false);
+  });
+
+  it('asks for each menu, and refuses an empty name or no level', () => {
+    const empty = newChildSchema(now).safeParse({ name: ' ', level: '', month: '', year: '', memoryProposed: false });
+    expect(empty.error?.issues.map(({ path, message }) => [path[0], message])).toEqual([
+      ['name', 'Son prénom.'],
+      ['level', 'Sa classe.'],
+      ['month', 'Son mois.'],
+      ['year', 'Son année.'],
+    ]);
+  });
+});
+
+describe('birthYears', () => {
+  it('lists the years of a child of 5 to 20, the youngest last, in UTC', () => {
+    const years = birthYears(new Date('2026-12-31T23:30:00Z'));
+    expect(years[0]).toBe('2006');
+    expect(years.at(-1)).toBe('2021');
+    expect(years).toHaveLength(16);
   });
 });
 

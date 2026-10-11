@@ -1,6 +1,6 @@
 import { Button, Card } from '@repo/ui';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
-import { Link, createFileRoute, redirect } from '@tanstack/react-router';
+import { Link, Navigate, createFileRoute, redirect } from '@tanstack/react-router';
 import { UserRoundIcon } from 'lucide-react';
 import { HeaderLink, Page } from '../components/page';
 import { LEVEL_LABELS, studentsQuery, type Student } from '../lib/household';
@@ -21,6 +21,8 @@ export const Route = createFileRoute('/foyer/')({
 function Household() {
   const { data: me } = useSuspenseQuery(meQuery);
   const { data: students } = useSuspenseQuery(studentsQuery);
+  // The last child gone while the page is open, from another device say: the adding, as on arrival.
+  if (students.length === 0) return <Navigate to="/foyer/ajouter" />;
 
   return (
     <Page

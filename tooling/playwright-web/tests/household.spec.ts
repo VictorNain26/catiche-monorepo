@@ -45,6 +45,37 @@ test('adding a child asks one question per screen, the birth month in two menus,
   await expect(page).toHaveURL(/\/foyer$/);
 });
 
+test('a birth month the server would refuse is refused at its own step, and a double click never adds the child', async ({ page }) => {
+  await guardian(page, 'trop-jeune');
+  // The server takes 5 to 20 years, in UTC: on 15 June 2026, from 2006-01 to 2021-06. The screen
+  // reads the date as it opens.
+  await page.clock.setFixedTime(new Date('2026-06-15T12:00:00Z'));
+  await page.reload();
+  await page.getByLabel('Son prénom', { exact: true }).fill('Noé');
+  await page.getByRole('button', { name: 'Continuer' }).click();
+  await page.getByLabel('Sa classe', { exact: true }).selectOption({ label: 'Sixième' });
+  await page.getByRole('button', { name: 'Continuer' }).click();
+
+  const birth = page.getByRole('group', { name: 'Son mois de naissance' });
+  const years = birth.getByLabel('Année');
+  await expect(years.locator('option', { hasText: '2006' })).toHaveCount(1);
+  await expect(years.locator('option', { hasText: '2005' })).toHaveCount(0);
+  await expect(years.locator('option', { hasText: '2022' })).toHaveCount(0);
+  await birth.getByLabel('Mois').selectOption({ label: 'Juillet' });
+  await years.selectOption('2021');
+  await page.getByRole('button', { name: 'Continuer' }).click();
+  await expect(page.getByText('Votre enfant a entre 5 et 20 ans')).toBeVisible();
+  await expect(page.getByText('Étape 3 sur 4')).toBeVisible();
+  await expect(years).toHaveAttribute('aria-invalid', 'true');
+
+  await birth.getByLabel('Mois').selectOption({ label: 'Juin' });
+  // The second click lands where « Ajouter Noé » appears: it must not add the child unread.
+  await page.getByRole('button', { name: 'Continuer' }).dblclick();
+  await expect(page.getByText('Étape 4 sur 4')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Ajouter Noé' })).toBeVisible();
+  await expect(page).toHaveURL(/\/foyer\/ajouter$/);
+});
+
 test('a guardian adds a child, changes their class, then deletes their account', async ({ page }) => {
   await guardian(page, 'foyer');
   await addChild(page, 'Léa');

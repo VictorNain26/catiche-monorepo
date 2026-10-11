@@ -44,10 +44,33 @@ const level = z.custom<Level>(isLevel, 'Sa classe.');
 
 export const studentSchema = z.object({ name, level });
 
-export const newStudentSchema = studentSchema.extend({
-  birthMonth: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Son mois de naissance, au format AAAA-MM : 2014-03.'),
-  memoryProposed: z.boolean(),
-});
+// The ages the server takes (modules/household/routes.ts), in UTC as it counts them: a contract
+// the server does not export as a value, held by the e2e « a birth month the server would refuse ».
+const MIN_AGE_YEARS = 5;
+const MAX_AGE_YEARS = 20;
+
+/** The years a child of 5 to 20 was born in, the youngest last. */
+export const birthYears = (now = new Date()) =>
+  Array.from({ length: MAX_AGE_YEARS - MIN_AGE_YEARS + 1 }, (_, index) => String(now.getUTCFullYear() - MAX_AGE_YEARS + index));
+
+/** A new child as the adding asks it, month and year in two menus, as the server takes it. */
+export const newChildSchema = (now = new Date()) =>
+  studentSchema
+    .extend({
+      month: z.string().regex(/^(0[1-9]|1[0-2])$/, 'Son mois.'),
+      year: z.string().regex(/^\d{4}$/, 'Son année.'),
+      memoryProposed: z.boolean(),
+    })
+    .refine(
+      ({ month, year }) => {
+        const birth = `${year}-${month}`;
+        const youngest = `${String(now.getUTCFullYear() - MIN_AGE_YEARS)}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+        const oldest = `${String(now.getUTCFullYear() - MAX_AGE_YEARS)}-01`;
+        return birth >= oldest && birth <= youngest;
+      },
+      { path: ['year'], message: 'Votre enfant a entre 5 et 20 ans : vérifiez son année.' },
+    )
+    .transform(({ month, year, ...child }) => ({ ...child, birthMonth: `${year}-${month}` }));
 
 /** What the guardian reads of the learner memory of their child. */
 export function memoryStatus({ name, memory }: Pick<Student, 'name' | 'memory'>): string {
