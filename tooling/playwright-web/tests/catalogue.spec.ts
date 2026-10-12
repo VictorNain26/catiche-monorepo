@@ -1,4 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import scales from '@repo/tokens/scales.json' with { type: 'json' };
+import { computedColor } from '../colors';
 import { recordCspViolations } from '../csp';
 
 // The catalogue of @repo/ui (apps/web/src/routes/catalogue.tsx): every component in its states,
@@ -43,9 +45,9 @@ for (const scheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('figure')).toHaveCount(2);
       expect(await overflows(page)).toBe(false);
 
-      // The device's setting decides the mode: the mist in light, the dark water otherwise.
+      // The device's setting decides the mode: the mist of that mode's scale.
       const background = await page.locator('body').evaluate((body) => getComputedStyle(body).backgroundColor);
-      expect(background === 'rgb(239, 243, 241)').toBe(scheme === 'light');
+      expect(background).toBe(await computedColor(page, scales[scheme]['mist-1']));
     });
   }
 }
