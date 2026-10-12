@@ -1,7 +1,9 @@
 # Roadmap V1
 
-Le fil : prouver avant de vendre (`vision.md`). L'ordre (`decisions.md`, 2026-10-11) : l'identité
-et l'app d'abord, Tom ensuite ; aucun élève réel avant que Tom soit mesuré. Les lots sont des
+Le fil : prouver avant de vendre (`vision.md`). L'ordre (`decisions.md`, 2026-10-11 et
+2026-10-12) : le produit d'abord, le site et l'app ensemble, Tom ensuite ; aucun élève réel avant
+que Tom soit mesuré. Les anciens lots 1 à 3 (identité, app, site) forment le lot 1 ; les lots 4
+et 5 gardent leur numéro. Les lots sont des
 résultats à atteindre, pas des dates ; ils avancent en parallèle quand rien ne les bloque.
 Chaque PR précise son périmètre dans son plan, au moment où elle démarre
 (`.claude/rules/plans-and-agents.md`). L'état du jour : `suivi.md`.
@@ -11,34 +13,32 @@ Chaque PR précise son périmètre dans son plan, au moment où elle démarre
 | Lot | Résultat | Repère de fin |
 |---|---|---|
 | 0 — Refonte | Une codebase reconstruite sur des pratiques publiées | Fait : étapes 1 à 7 (`etudes/2026-10-06/refonte-architecture.md`) |
-| 1 — Identité | Un nom, une direction artistique choisie par Victor, une charte complète | Le nom vérifié et retenu ; la charte vit dans le code (`packages/tokens`, `@repo/ui`) et dans `charte.md` |
-| 2 — L'app | Une refonte complète de l'interface sur la charte, du premier code au paiement | Les parcours du parent et de l'élève marchent de bout en bout au staging, sur téléphone, et Victor les utilise |
-| 3 — Le site | La landing réécrite sur l'identité et la vision | En production sous le nouveau nom ; chaque phrase renvoie à une source ou à ce que l'app fait déjà |
+| 1 — Le produit | Une identité, le site et l'app refaits ensemble comme décrits dans `experience.md`, du premier écran au paiement | Le site en production sous le nouveau nom, menant à l'app ; les espaces du parent et de l'élève marchent de bout en bout au staging, au téléphone et à l'ordinateur, et Victor les utilise ; chaque phrase publique renvoie à une source ou à ce que l'app fait déjà |
 | 4 — Tom | Un tuteur mesuré qui ne cède pas, avec la voix | Au harnais, la réponse presque jamais donnée sous pression, une aide jugée bonne par Victor, la mémoire mesurée |
 | 5 — Bêta et ouverture | Des familles réelles, puis le public | Les deux portes ci-dessous franchies ; mesures publiées |
 
 ## Maintenant
 
-**Lot 1** : le nom (« Catiche ») et la direction (« Grands carreaux » aux fontes
-d'« Instrument ») sont choisis, les fondations de la charte posées (`decisions.md`, `charte.md`,
-2026-10-11). Restent le logo de Catiche et Tom au trait pour les icônes ; les poses de Tom et les
-icônes viennent avec les écrans du lot 2. Le dépôt de la marque et les domaines sont des gestes
-de Victor.
+**Lot 1, le produit** (`etudes/2026-10-12/refonte-produit.md`), dans cet ordre :
+1. La nouvelle direction artistique, essayée dans le vrai code sur le haut du site, la connexion
+   et le tableau de bord du parent ; Victor choisit.
+2. La charte complète : tokens, composition, navigation, iconographie, graphiques, Tom en 2D au
+   trait, le logo de Catiche (`charte.md`).
+3. Le site et l'entrée : la landing refaite sur l'identité, « Se connecter » vers l'app ; la
+   connexion, la première entrée du parent, « Qui utilise Catiche ? ».
+4. Les deux espaces : le tableau de bord du parent et son point hebdomadaire par e-mail ; l'espace
+   de l'élève, ses séances, « Mon programme », sa semaine ; ce qu'il leur faut côté serveur.
+5. La séance, le compte et les données, le second parent et le double consentement, le paiement,
+   son fournisseur et le statut juridique tranchés avant.
+Ce qui est construit depuis le 2026-10-11 (ajout d'un enfant, fiche, profils, jumelage) garde ses
+flux, ses tests et sa sécurité ; son habillage se refait aux étapes 3 et 4. Le comportement de Tom
+dans la séance reste au lot 4. Le dépôt de la marque et les domaines sont des gestes de Victor.
 
 **Hors IA, sans attendre** : la clause 2.2(c) des mineurs et la recevabilité du Zero Data
 Retention sont demandées à Mistral (2026-10-11) ; la réponse décide du lot 4.
 
 ## Ensuite
 
-- **Lot 2**, une refonte complète, parcours par parcours, pensée à la place du parent et de
-  l'enfant, en dix PR : les composants, l'entrée du parent, l'ajout d'un enfant, les profils et
-  le jumelage, l'arrivée de l'élève, la séance, la semaine, le compte, le second parent et le
-  double consentement, le paiement, avec son fournisseur et le statut juridique tranchés avant
-  (`etudes/2026-10-11/refonte-interface.md`). Le comportement de Tom dans la séance reste au
-  lot 4.
-- **Lot 3**, dès la charte choisie, en parallèle du lot 2 : la landing reçoit les tokens et la
-  fonte de l'app, `landing.css` se supprime, le texte se réécrit sur la vision ; le domaine du
-  nouveau nom.
 - **Lot 4**, dès Mistral en paiement à l'usage : le passage unique du harnais sur le code actuel,
   le rapport et la comparaison cas par cas (McNemar), le juge et sa vérification par Victor, le
   garde-fou en CI ; les fuites fermées, mesurées sur au moins 150 conversations de pression ; la
@@ -57,7 +57,8 @@ Obligations, pas des repères :
 - détresse et modération mesurées au harnais ; la détresse relue par un humain, avec un délai
   tenu, avant tout message au parent ;
 - double consentement sous 15 ans, mémoire comprise, et son analyse d'impact (AIPD) ;
-- pages légales alignées sur l'app réelle (mémoire, résumé, consentement) ;
+- pages légales alignées sur l'app réelle (mémoire, tableau de bord et point hebdomadaire du
+  parent, consentement) ;
 - réponse de la CNIL sur l'hébergement de données de santé ; base dans un réseau privé ; erreurs
   remontées dans Bugsink ; la production, avec l'approbation de Victor.
 

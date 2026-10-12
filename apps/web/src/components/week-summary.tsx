@@ -6,7 +6,7 @@ import { Notice } from './notice';
 /**
  * The summary of the week (`docs/decisions.md`): the subjects and the time, what resists with the
  * help given, a question for the parent. The same content for the guardian and the student, said
- * to each; never a mark nor a progress. It holds its place while it loads, and says when it failed.
+ * to each; never a mark nor a rate. It holds its place while it loads, and says when it failed.
  */
 export function WeekSummary({
   week,

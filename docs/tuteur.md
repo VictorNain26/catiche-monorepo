@@ -40,7 +40,7 @@ d'agent reste la nôtre ([regional inference](https://docs.mistral.ai/inference/
 | Diagnostic d'une proposition (`modules/tutor/core/diagnosis.ts`) | Mistral Small 4 `mistral-small-2603` | `reasoningEffort: 'none'`, température 0, contre la fiche ; mathjs tranche quand il sait lire ; sortie structurée stricte |
 | Modération entrée/sortie | `mistral-moderation-2603` | Catégories par sens (§4) |
 | STT / TTS (à construire, avec la voix) | Voxtral via `@mistralai/mistralai` (`audio.*`) | Timeout explicite ; français imposé à la transcription ; voix `fr_marie_*` |
-| Juge d'évaluation (à construire, lot 1) | Mistral Small 4 `mistral-small-2603` | Questions oui/non en JSON strict, référence fournie |
+| Juge d'évaluation (à construire, lot 4) | Mistral Small 4 `mistral-small-2603` | Questions oui/non en JSON strict, référence fournie |
 
 Small 4 : 256k de contexte, function calling, sorties structurées, raisonnement
 ([fiche](https://docs.mistral.ai/models/mistral-small-4-0-26-03), prix dans
@@ -221,7 +221,7 @@ rejouables par un tiers.
   programmes.
 - **Concurrents** : même jeu, mêmes scénarios, même grille, limites écrites.
 - **Non-régression** : un garde-fou en CI sur les changements du tuteur, centré sur la fuite
-  (à construire, lot 1).
+  (à construire, lot 4).
 - **Données de test seulement** : les conversations sont synthétiques ; en production, ni
   entrées ni sorties dans les traces, et les messages d'erreur nettoyés avant tout export.
 
@@ -242,8 +242,10 @@ rejouables par un tiers.
   intermédiaire »). L'élève voit le même résumé (`GET /api/summary`), son parent par
   `GET /api/summary/:studentId`. L'écran (`components/week-summary.tsx` du web) dit la même
   semaine au parent et à l'élève, avec une question à poser à l'enfant tirée de ce qui résiste.
-  À construire au lot 2 : l'arrêt à la demande de l'élève ; à partir de 15 ans, sa demande
-  s'applique, le parent prévenu.
+  À construire au lot 1 : le tableau de bord du parent et le point hebdomadaire par e-mail, qui
+  étendent ce résumé aux semaines précédentes et aux notions du programme, toujours calculés par
+  le code (`experience.md`) ; l'arrêt du résumé à la demande de l'élève ; à partir de 15 ans, sa
+  demande s'applique, le parent prévenu.
 - **En 6e et 5e, le mode accompagné** (`decisions.md`) : le parent lance la séance par « Faire les
   devoirs avec … », l'appareil passe au profil de l'enfant, qui choisit « Avec mon parent à
   côté » ou « Sans mon parent ce soir » (`study_session.accompanied`, refusé en 4e et 3e). À
@@ -257,7 +259,7 @@ rejouables par un tiers.
   garde le code de jumelage, dont se sert l'ouverture sur l'appareil de la famille. Sources :
   `etudes/2026-10-08/aide-parentale.md`, § 6 (c).
 - **La détresse n'alerte pas le parent d'office** : un humain relit l'événement et décide (§4).
-- **Un second parent** peut rejoindre le foyer et s'opposer (à construire, lot 2, avec le
+- **Un second parent** peut rejoindre le foyer et s'opposer (à construire, lot 1, avec le
   consentement).
 - La façon d'accompagner suit le niveau : accompagné du CP à la 5e, guidé en 4e et 3e, autonome
   au lycée (`decisions.md`, revu le 2026-10-08 ; le modèle d'origine :
@@ -272,7 +274,7 @@ Cartographie de risque, à valider par un conseil avant l'ouverture.
 | AI Act art. 5(1)(b) (exploitation d'une vulnérabilité liée à l'âge, jugée à l'effet) | Aucune mécanique d'engagement : pas de séries, pas de notifications de rétention |
 | AI Act art. 50(1), applicable depuis le 2026-08-02 | Divulgation IA dans le prompt et dans l'interface dès la première interaction : l'interface le dit sous le champ de la séance (`routes/seance.$sessionId.tsx` du web), le prompt pas encore (lot 4) ; condition du premier élève réel |
 | AI Act art. 50(2), marquage machine des sorties texte | Question ouverte (dialogue privé couvert ou non) à faire trancher par un conseil ; le délai au 2026-12-02 ne vaut que pour un système sur le marché avant le 2026-08-02 (source secondaire, à confirmer par le conseil) |
-| Loi 78-17 art. 45 | Double consentement sous 15 ans pour ce qui repose sur le consentement ; le parent conclut le contrat (lot 2) |
+| Loi 78-17 art. 45 | Double consentement sous 15 ans pour ce qui repose sur le consentement ; le parent conclut le contrat (lot 1) |
 | Conditions commerciales de Mistral, 2.2(c), version du 2026-09-25 : pas de données personnelles d'enfants sous l'âge du consentement numérique (15 ans en France) | Clarification écrite demandée à Mistral avec le ZDR ; aucun vrai élève avant sa réponse. Le prénom et la mémoire d'apprentissage partent dans le prompt ; si Mistral refuse, ils en sortent (Victor, 2026-10-07) |
 | RGPD art. 9 (la détresse est une donnée de santé) ; Code pénal art. 434-3 | Base légale et conduite à tenir à faire trancher par un conseil (`etudes/2026-10-07/foyer-eleve-age.md`, § 8) |
 | Cadre d'usage de l'IA du ministère (2025) : usage autonome à partir de la 4e | Pèse sur une recommandation par un collège en 6e et 5e ; texte complet à lire |

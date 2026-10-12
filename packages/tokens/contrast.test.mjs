@@ -6,7 +6,7 @@ const read = (file) => readFileSync(new URL(file, import.meta.url), 'utf8');
 const colors = (css) => Object.fromEntries([...css.matchAll(/--color-([a-z-]+):\s*(#[0-9A-Fa-f]{6})/g)].map(([, name, hex]) => [name, hex]));
 
 // The dark block wherever it sits in the file; every other color is light. The landing keeps its
-// own palette until lot 3.
+// own palette until the site and the app share one (docs/roadmap.md, lot 1).
 const theme = read('./theme.css');
 const darkBlock = /@media\s*\(prefers-color-scheme:\s*dark\)\s*\{([\s\S]*?)\n\}/.exec(theme);
 const light = colors(theme.replace(darkBlock?.[0] ?? '', ''));
@@ -59,7 +59,7 @@ const PAIRS = [
 ];
 
 // Tokens the app added after the landing froze: checked in each palette that defines them, which
-// the app's light one must (landing.css takes none until lot 3).
+// the app's light one must (landing.css takes none until it goes).
 const APP_PAIRS = [
   ['qr', 'qr-background'],
   ['disabled-foreground', 'disabled'],

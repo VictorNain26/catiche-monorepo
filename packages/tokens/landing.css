@@ -1,5 +1,6 @@
-/* @repo/tokens — l'identité rejetée, que la landing garde, gelée jusqu'au lot 4 : elle reçoit
- * alors theme.css, et ce fichier se supprime (docs/roadmap.md).
+/* @repo/tokens — l'identité précédente, que la landing garde jusqu'à la nouvelle direction du
+ * site et de l'app (docs/roadmap.md, lot 1) : elle reçoit alors ses tokens, et ce fichier se
+ * supprime.
  * Importer APRÈS l'import de Tailwind de la landing.
  * Contrastes AA vérifiés par contrast.test.mjs. */
 

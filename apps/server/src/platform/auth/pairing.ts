@@ -103,7 +103,7 @@ export function devicePairing() {
       ],
     },
     // Keyed by the client's address, which better-auth reads behind the host's proxy once its
-    // trusted hops are set (docs/suivi.md, preproduction step).
+    // trusted hops are set (docs/architecture.md, « Hébergement », TRUSTED_PROXY_HOPS).
     rateLimit: [{ pathMatcher: (path: string) => path === '/device-pairing/redeem', window: 60, max: 5 }],
   } satisfies BetterAuthPlugin;
 }

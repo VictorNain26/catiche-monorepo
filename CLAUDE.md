@@ -1,11 +1,12 @@
-# Monorepo Tom
+# Monorepo Catiche
 
-Tuteur IA des devoirs pour collégiens, avec un résumé pour le parent.
+Catiche : un tuteur IA des devoirs pour collégiens, Tom, et un tableau de bord pour le parent.
 
 ## Carte
 
 - Pour qui, promesse, principes, périmètre : `docs/vision.md`, qui prime sur tout ; on n'affirme
   que ce qu'on peut prouver.
+- Les espaces et les écrans visés : `docs/experience.md` ; l'identité : `docs/charte.md`.
 - Le pourquoi de chaque choix : `docs/decisions.md` ; une décision de Victor y entre dans la PR
   qui la suit, jamais seulement dans une mémoire d'agent.
 - **Où on en est : `docs/suivi.md`**, à lire avant de reprendre et à réécrire dans la PR qui fait
@@ -24,9 +25,12 @@ change (Postgres de `docker compose` requis). Formatage : `bun run format`.
 
 ## Interdits
 
-- La landing n'appelle jamais le serveur, ni l'auth : `apps/web` est le seul client produit.
-- Rien n'entre dans la landing en ligne avant le lot 3, sauf un correctif d'honnêteté ou
-  technique (`.claude/rules/landing.md`).
+- La landing n'appelle jamais le serveur, ni l'auth : `apps/web` est le seul client produit ; elle
+  y mène par un simple lien.
+- Rien n'entre dans la landing en ligne avant sa refonte avec l'app (lot 1, étape 3), sauf un
+  correctif d'honnêteté ou technique (`.claude/rules/landing.md`).
+- Jamais un écran construit sans `docs/experience.md` ni la charte : un écran du lot 1 est
+  composé au téléphone et à l'ordinateur, pas une colonne de boutons.
 - Jamais de push sur `main` : une branche courte, puis une PR, mergée en merge commit (le
   squash est désactivé).
 - Jamais deux versions d'une même chose, ni un fichier sans usage : ce qu'une PR remplace, elle

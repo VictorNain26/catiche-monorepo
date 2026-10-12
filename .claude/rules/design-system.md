@@ -10,10 +10,11 @@ paths:
 # Design system
 
 La direction « Grands carreaux » (`docs/decisions.md`, 2026-10-11) : `packages/tokens/theme.css`,
-clair et sombre, Inclusive Sans et Atkinson Hyperlegible Mono ; son usage, `docs/charte.md`. La
-landing garde l'identité rejetée (`packages/tokens/landing.css`) jusqu'au lot 3, qui lui donne
-`theme.css` et supprime `landing.css`. Les composants ne dépendent de l'identité que par les
-tokens.
+clair et sombre, Inclusive Sans et Atkinson Hyperlegible Mono ; son usage, `docs/charte.md`. Une
+nouvelle direction, pour le site et l'app ensemble, se choisit au lot 1 (`docs/decisions.md`,
+2026-10-12) ; d'ici là, la landing garde son identité précédente (`packages/tokens/landing.css`),
+que la nouvelle remplace, `landing.css` supprimé. Les composants ne dépendent de l'identité que
+par les tokens.
 
 ## Interdits
 

@@ -5,35 +5,28 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 
 ## Où on en est
 
-- **Mis à jour le** 2026-10-11.
-- **Nouvel ordre** (`decisions.md`, 2026-10-11) : l'identité et l'app d'abord, Tom ensuite ; les
-  lots sont renumérotés (`roadmap.md`).
-- **Lot en cours : 1, l'identité, et le lot 2 commence** : Victor a choisi le nom, « Catiche »,
-  et la direction, « Grands carreaux » aux fontes d'« Instrument » (`decisions.md`, 2026-10-11),
-  après les études (`etudes/2026-10-11/`) et l'essai sur les vrais écrans
-  ([comparatif](https://claude.ai/artifact/8x3Qm6x1NiQiVMrJhyYbJ8)). Les fondations de la charte
-  sont posées (`charte.md`). Restent le logo de Catiche et Tom au trait. Le lot 2 suit
-  `etudes/2026-10-11/refonte-interface.md`, en dix PR.
-- **Déjà dans l'app**, aux couleurs et aux fontes de la charte : le mode accompagné en 6e et 5e,
-  la séance, les accueils élève et parent, l'écran du résumé, le jumelage par QR code, la photo
-  de l'exercice. Le lot 2 refait entièrement ces écrans.
-- **Lot 2, en dix PR** (`etudes/2026-10-11/refonte-interface.md`) : faites, la PR 1 (l'en-tête
-  des écrans, `Card` dans `@repo/ui`) et la PR 2 (l'entrée du parent : Catiche dit en une phrase,
-  le code en grand, la clé d'accès proposée après le prénom ; le nom dans l'onglet, le manifeste,
-  les e-mails et la clé d'accès) et la PR 3 (l'ajout d'un enfant, une question par écran, le mois
-  de naissance en deux menus ; puis la fiche de l'enfant, ouverte sur la prochaine étape, le reste
-  replié par `Fold` de `@repo/ui`) et la PR 4 (le profil de l'élève dans l'en-tête, « Qui
-  utilise Tom ? » avec chaque enfant que l'appareil tient, le jumelage des deux côtés ; en 4e et
-  3e, plus d'ouverture de l'espace de l'enfant par le parent) ; la suivante, la PR 5, l'élève
-  arrive et ce que Tom retient. La marge rouge du cahier est retirée (`decisions.md`) : la tête de Tom,
-  que l'étude place « dans la marge » à la séance, se pose à côté de ses messages.
+- **Mis à jour le** 2026-10-12.
+- **La refonte du produit** (`decisions.md`, 2026-10-12 ; `etudes/2026-10-12/refonte-produit.md`) :
+  la vision, les décisions et la roadmap réécrites ; les anciens lots 1 à 3 forment le lot 1,
+  « Le produit » ; les espaces et les écrans visés sont dans `experience.md`.
+- **Lot en cours : 1, le produit, étape 1** : une nouvelle direction artistique, essayée dans le
+  vrai code sur le haut du site, la connexion et le tableau de bord du parent ; Victor choisit.
+  D'ici là, le code garde « Grands carreaux » (`charte.md`) et le site son identité précédente.
+- **Déjà construit**, aux couleurs de « Grands carreaux », sans composition : le nom Catiche dans
+  l'app ; l'entrée du parent (code, clé d'accès, prénom) ; l'ajout d'un enfant, une question par
+  écran ; la fiche de l'enfant ; le profil de l'élève dans l'en-tête et « Qui utilise Tom ? » avec
+  chaque enfant que l'appareil tient ; le jumelage des deux côtés ; en 4e et 3e, plus d'ouverture
+  de l'espace de l'enfant par le parent ; le mode accompagné, la séance, la photo, le résumé de la
+  semaine. Ces flux, leurs tests et leur sécurité restent ; leur habillage se refait aux étapes 3
+  et 4 du lot 1, et « Qui utilise Tom ? » y devient « Qui utilise Catiche ? » (`experience.md`).
 - **Lot 4 en attente** : le harnais `bun run eval` est mergé ; son passage unique attend le
   paiement à l'usage de Mistral (bloquant ci-dessous). Le premier essai s'est arrêté à 3
   conversations sur 104 et ne compte pas comme mesure. Référence de comparaison : 11 fuites sur
   106, le 2026-10-06 (`etudes/2026-10-06/passage-de-fin.md`, données dans
   `etudes/2026-10-06/donnees/results.json`).
 - **En ligne** : le staging, https://staging.tomia.fr, déployé à chaque merge ; la landing,
-  https://tomia.fr, gelée jusqu'au lot 3 sauf correctif d'honnêteté ou technique.
+  https://tomia.fr, qui ne change qu'avec la nouvelle identité (lot 1, étape 3) ou par un
+  correctif d'honnêteté ou technique ; elle n'a pas encore de lien vers l'app.
 - **PR ouvertes** : `gh pr list`.
 
 ## Bloquants
@@ -84,23 +77,24 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
 - Le préfixe `__Host-` des cookies, quand better-auth le livre
   ([#10806](https://github.com/better-auth/better-auth/issues/10806)).
 
-**Lot 2, l'app**
+**Lot 1, le produit**
 - Les formules de Tom : sur Chrome de bureau, chaque formule montre des flèches de défilement
   vertical, son conteneur (`[&_.katex]:overflow-x-auto`, `components/tom-text.tsx`) débordant de
   6 px en hauteur ; vu le 2026-10-11, KaTeX 0.16 comme 0.19.
 - Mémoire : les 1 053 libellés du référentiel restent ceux du programme (« Il utilise… »),
   présentés « Au programme » ; leur réécriture dans les mots de l'élève demande une relecture
   de Victor entrée par entrée, avant la bêta fermée.
-- Résumé de la semaine : son arrêt à la demande de l'élève, avec le consentement ; un envoi par
-  e-mail n'est pas décidé.
+- Résumé de la semaine : son arrêt à la demande de l'élève, avec le consentement (le point
+  hebdomadaire par e-mail au parent est décidé, `decisions.md`).
 - Appareils de l'élève : le prévenir quand un nouvel appareil est relié.
-- Client web : mesures sur un vrai iPhone et un Android.
-
-**Lot 3, le site**
-- La landing reçoit `packages/tokens/theme.css` et la fonte de la charte ; `landing.css` se
-  supprime.
-- Image Open Graph, tests de la landing qui gardent l'identité rejetée (`signs.spec.ts`,
-  `type.spec.ts`, `hero.spec.ts`), une application de preview par PR.
+- Client web : mesures sur un vrai iPhone et un Android ; un projet Playwright à l'ordinateur,
+  avec les premiers écrans composés pour lui (`experience.md`).
+- Le réglage « Lecture aérée » (`charte.md`, `experience.md`).
+- Le site : la landing reçoit les tokens et la fonte de la nouvelle charte, `landing.css` se
+  supprime ; l'image Open Graph ; les tests de la landing qui gardent l'identité précédente
+  (`signs.spec.ts`, `type.spec.ts`, `hero.spec.ts`) ; une application de preview par PR.
+- Trois appels à `listDeviceSessions` (`foyer.$studentId.tsx`, `sign-out.tsx`, `bienvenue.tsx`)
+  gèrent chacun l'erreur à leur façon : passer par `deviceSessionsQuery` (`lib/auth.ts`).
 
 **Lot 4, Tom**
 - Tom qui se dit programme : un scénario où l'élève demande s'il est humain ou parle de lui ; la

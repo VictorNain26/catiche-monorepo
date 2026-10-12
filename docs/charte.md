@@ -4,6 +4,11 @@ La direction « Grands carreaux » (`decisions.md`, 2026-10-11) : le papier et l
 de Tom. Les valeurs vivent dans le code, `packages/tokens/theme.css` pour les tokens, `@repo/ui`
 pour les composants ; ce document dit comment s'en servir. L'étude qui l'a fondée : `etudes/2026-10-11/direction-artistique.md`.
 
+Elle reste celle du code jusqu'au choix d'une nouvelle direction pour le site et l'app
+(`decisions.md`, 2026-10-12) ; ce document se réécrit alors, et règle aussi la composition, la
+navigation, l'iconographie, les graphiques et le logo. Le nom, Tom, les mots et l'accessibilité
+ci-dessous restent.
+
 ## Le nom
 
 **Catiche**, le gîte de la loutre, avec une majuscule, jamais en capitales ni abrégé. Le produit
@@ -51,8 +56,9 @@ réglure décorative : la marge rouge du cahier, essayée, est retirée (`decisi
   d'émotion à montrer.
 - Il reste petit et loin de l'énoncé : un détail décoratif près de l'exercice gêne
   l'apprentissage.
-- Le Tom en entier et en mouvement (`apps/landing/public/tom/`) est pour le site. Les rendus de
-  l'app se font dans Blender, depuis `tom.blend`.
+- Dans l'app, Tom est en 2D au trait, plus utile qu'un agent en 3D (`etudes/2026-10-12/refonte-produit.md`) ;
+  le Tom en 3D, entier et en mouvement (`apps/landing/public/tom/`), est pour le site. Tous ses
+  rendus se font dans Blender, depuis `tom.blend`.
 
 ## Les mots
 
@@ -71,5 +77,5 @@ rebond. Rien ne bouge sous le mouvement réduit.
 ## Accessibilité
 
 Les règles de `.claude/rules/design-system.md` : contrastes AA testés dans les deux modes, cibles
-de 44 px, aucun défilement horizontal. À venir au lot 2 : un réglage « Lecture aérée », aux
+de 44 px, aucun défilement horizontal. À venir au lot 1 : un réglage « Lecture aérée », aux
 espacements de WCAG 1.4.12.

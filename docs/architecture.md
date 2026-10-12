@@ -3,13 +3,13 @@
 Ce qui est en place, et comment. Le pourquoi de chaque choix : `decisions.md` ; le produit :
 `vision.md` ; le tuteur : `tuteur.md`.
 
-Tom est le nom de l'IA, pas du produit, dont le nom est ouvert. Aucun utilisateur réel : aucune
+Tom est le nom de l'IA, pas du produit, qui s'appelle Catiche (`decisions.md`). Aucun utilisateur réel : aucune
 contrainte de rétrocompatibilité, on vise directement la cible.
 
 ## Serveur
 
 Monolithe modulaire ; sa structure et ses règles de dépendance viennent de
-`etudes/2026-10-06/refonte-architecture.md`. La facturation arrive au lot 2,
+`etudes/2026-10-06/refonte-architecture.md`. La facturation arrive au lot 1,
 la voix au lot 4.
 
 En place (`apps/server/src`) :
@@ -47,8 +47,8 @@ En place (`apps/server/src`) :
 ## Client web
 
 Choix et options comparées : `etudes/2026-10-06/client-web.md`. **Pensé d'abord pour le
-téléphone** : chaque parcours se conçoit et se prouve à largeur de téléphone, le bureau s'en
-déduit.
+téléphone** : chaque parcours se conçoit et se prouve à largeur de téléphone ; l'ordinateur a sa
+propre mise en page, pas une colonne étirée (`experience.md`).
 
 En place (`apps/web`) :
 - Application monopage Vite + React + TanStack Router, Tailwind sur les tokens `@repo/tokens`,
