@@ -33,6 +33,18 @@ async function tutorReplies(page: Page, reply: string) {
   return sent;
 }
 
+/** A color token as the page computes it, so that a test never copies a value of the palette. */
+function token(page: Page, name: string) {
+  return page.evaluate((variable) => {
+    const probe = document.createElement('div');
+    probe.style.color = `var(${variable})`;
+    document.body.append(probe);
+    const color = getComputedStyle(probe).color;
+    probe.remove();
+    return color;
+  }, `--color-${name}`);
+}
+
 test('a paired student opens a session, writes to Tom and reads his reply', async ({ page, browser }, testInfo) => {
   await pairedStudent(page, browser, testInfo, 'Inès');
   const sent = await tutorReplies(page, 'Que fais-tu du + 5 ?');
@@ -44,8 +56,8 @@ test('a paired student opens a session, writes to Tom and reads his reply', asyn
   const send = page.getByRole('button', { name: 'Envoyer' });
   await expect(send).toBeDisabled();
   await expect(send).toHaveCSS('opacity', '1');
-  await expect(send).toHaveCSS('background-color', 'rgb(230, 228, 236)');
-  await expect(send).toHaveCSS('color', 'rgb(79, 84, 102)');
+  await expect(send).toHaveCSS('background-color', await token(page, 'disabled'));
+  await expect(send).toHaveCSS('color', await token(page, 'disabled-foreground'));
   await page.getByLabel('Ton message').fill('Je bloque sur 3x + 5 = 20');
   await send.click();
 

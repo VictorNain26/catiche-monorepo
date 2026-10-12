@@ -4,8 +4,9 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// Manifest colors can't read CSS variables: --color-background in packages/tokens/theme.css.
-const PAPER = '#FAF8F2';
+// Manifest colors can't read CSS variables: --color-background in packages/tokens/theme.css,
+// --mist-1 of scales.css.
+const MIST = '#EFF3F1';
 
 const DEV_PORT = 3002;
 const API = 'http://localhost:3000';
@@ -26,8 +27,8 @@ export default defineConfig({
         start_url: '/',
         scope: '/',
         display: 'standalone',
-        background_color: PAPER,
-        theme_color: PAPER,
+        background_color: MIST,
+        theme_color: MIST,
         icons: [
           { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },

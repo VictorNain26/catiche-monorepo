@@ -1,101 +1,95 @@
-/* @repo/tokens — source unique de vérité des tokens de marque, clair puis sombre.
- * Consommé en CSS par les apps Tailwind v4 via :
- *   @import "@repo/tokens/theme.css";
- * Importer APRÈS l'import de Tailwind de l'app.
- * Contrastes AA vérifiés par contrast.test.mjs, dans les deux modes. */
+/* @repo/tokens — source unique des tokens de la marque, pour le site et l'app.
+ * Consommé par les apps Tailwind v4 : @import "@repo/tokens/theme.css", APRÈS Tailwind.
+ * Direction « Rive » (docs/charte.md) : la catiche au bord de l'eau. Les échelles de scales.css
+ * (générées par scales.mjs) changent d'elles-mêmes en sombre ; les rôles ci-dessous pointent vers
+ * leurs pas, et le sombre ne redéfinit que les rôles qui changent de pas. Contrastes vérifiés par
+ * contrast.test.mjs, dans les deux modes. */
 
-/* Direction « Grands carreaux » (docs/decisions.md, docs/charte.md) : papier et encre bleue du pull
- * de Tom. Inclusive Sans pour lire, au I, l et 1 distincts et au zéro barré ; Atkinson Hyperlegible
- * Mono pour les codes et les chiffres. */
-@theme {
-  --font-sans: 'Inclusive Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-heading: 'Inclusive Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'Atkinson Hyperlegible Mono', ui-monospace, monospace;
+@import './scales.css';
+
+/* inline : chaque app pose les familles (fontsource dans l'app, l'API de fontes d'Astro sur le
+ * site) ; sans inline, la variable se résoudrait là où le token est défini. */
+@theme inline {
+  --font-sans: var(--font-brand-text), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-brand-heading), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-brand-mono), ui-monospace, monospace;
 }
 
 @theme {
-  /* Rayon des cartes et des bulles, puis des boutons et des champs ; le liseré du bouton
-   * principal, comme le bord d'une feuille. */
-  --radius-2xl: 10px;
-  --radius-control: 10px;
-  --shadow-control: 0 1px 0 rgb(28 32 51 / 0.25);
-  --shadow-control-hover: var(--shadow-control);
+  /* Le corps à 17 px : jamais moins au téléphone (charte, « Typographie »). */
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.5;
 
-  /* Couleurs sémantiques (clair) — papier, encre bleue */
-  --color-background: #faf8f2;
-  --color-foreground: #1c2033;
-  --color-primary: #24409a;
-  --color-primary-foreground: #ffffff;
-  --color-secondary: #ece9f6;
-  --color-secondary-foreground: #1c2033;
-  --color-muted: #ece9f6;
-  --color-muted-foreground: #555b6e;
-  --color-accent: #ece9f6;
-  --color-accent-foreground: #1c2033;
+  /* Deux rayons, les cartes et les bulles puis les boutons et les champs ; une ombre légère pour
+   * ce qui se pose sur le fond. */
+  --radius-2xl: 20px;
+  --radius-control: 12px;
+  --shadow-control: 0 1px 2px rgb(19 37 43 / 0.18);
+  --shadow-control-hover: 0 2px 6px rgb(19 37 43 / 0.2);
+
+  --color-background: var(--mist-1);
+  --color-foreground: var(--mist-12);
+  --color-primary: var(--water-11);
+  --color-primary-foreground: var(--mist-1);
+  /* La bulle de l'élève, les fonds discrets, puis le survol. */
+  --color-secondary: var(--mist-2);
+  --color-secondary-foreground: var(--mist-12);
+  --color-muted: var(--mist-2);
+  --color-muted-foreground: var(--mist-10);
+  --color-accent: var(--mist-3);
+  --color-accent-foreground: var(--mist-12);
+  /* Une carte se détache en blanc sur la brume ; en sombre, un pas plus clair que le fond. */
   --color-card: #ffffff;
-  --color-card-foreground: #1c2033;
+  --color-card-foreground: var(--mist-12);
   --color-popover: #ffffff;
-  --color-popover-foreground: #1c2033;
-  --color-destructive: #b42318;
-  --color-destructive-foreground: #ffffff;
-  --color-success: #1b6e35;
-  --color-success-foreground: #ffffff;
-  --color-warning: #f6d58a;
-  --color-warning-foreground: #1c2033;
-  --color-highlight: #fbe58a;
-  --color-annotation: #c0282d;
-  --color-border: #d9dbe9;
-  --color-input: #7d7a70;
-  --color-ring: #24409a;
+  --color-popover-foreground: var(--mist-12);
+  --color-destructive: var(--red-10);
+  --color-destructive-foreground: var(--mist-1);
+  --color-success: var(--green-10);
+  --color-success-foreground: var(--mist-1);
+  --color-warning: var(--amber-4);
+  --color-warning-foreground: var(--mist-12);
+  /* Le jonc, derrière le texte de l'encre ; jamais en texte ni en bordure. */
+  --color-highlight: var(--reed-4);
+  /* Le pelage, une note, un accent rare. */
+  --color-annotation: var(--fur-10);
+  --color-border: var(--mist-4);
+  --color-input: var(--mist-9);
+  --color-ring: var(--water-11);
   --color-overlay: #000000;
   /* A QR code stays dark on light in both modes: not every reader takes it inverted. */
   --color-qr: #000000;
   --color-qr-background: #ffffff;
   /* Un contrôle désactivé reste lisible : un fond et un texte à lui, pas une opacité. */
-  --color-disabled: #e6e4ec;
-  --color-disabled-foreground: #4f5466;
+  --color-disabled: var(--mist-3);
+  --color-disabled-foreground: var(--mist-11);
+  /* Le panneau de marque, à l'entrée de l'app : l'eau profonde. */
+  --color-panel: var(--water-11);
+  --color-panel-foreground: var(--mist-1);
+  /* Les graphiques, dans cet ordre, chaque série à 3:1 du fond et de la carte ; jamais le pelage
+   * contre l'eau. */
+  --color-chart-1: var(--water-11);
+  --color-chart-2: var(--reed-9);
+  --color-chart-3: var(--mist-9);
+  --color-chart-4: var(--fur-9);
 
-  /* Motion — fast: micro-feedback (press, toggle) ; base: transitions
-   * standard ; slow: entrées d'écran ; pulse: demi-cycle skeleton. */
+  /* Mouvement — fast : un retour de pression ; base : une transition ; slow : l'entrée d'un
+   * écran ; pulse : le demi-cycle d'un squelette. Une seule courbe, sans rebond. */
   --duration-fast: 150ms;
   --duration-base: 250ms;
   --duration-slow: 400ms;
   --duration-pulse: 1000ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
 }
 
-/* Sombre, suivi du réglage de l'appareil : la même encre, éclaircie, sur un bleu nuit. */
+/* Sombre, suivi du réglage de l'appareil ; il ne se dit jamais bon pour le sommeil. */
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --color-background: #13151d;
-    --color-foreground: #e8e9ef;
-    --color-primary: #aab8ff;
-    --color-primary-foreground: #13151d;
-    --color-secondary: #262a3a;
-    --color-secondary-foreground: #e8e9ef;
-    --color-muted: #262a3a;
-    --color-muted-foreground: #a4a8b8;
-    --color-accent: #262a3a;
-    --color-accent-foreground: #e8e9ef;
-    --color-card: #1b1e29;
-    --color-card-foreground: #e8e9ef;
-    --color-popover: #1b1e29;
-    --color-popover-foreground: #e8e9ef;
-    --color-destructive: #f4978e;
-    --color-destructive-foreground: #13151d;
-    --color-success: #7fd49e;
-    --color-success-foreground: #13151d;
-    --color-warning: #f0c36b;
-    --color-warning-foreground: #13151d;
-    --color-highlight: #4a3d10;
-    --color-annotation: #f4978e;
-    --color-border: #2c3142;
-    --color-input: #7a8094;
-    --color-ring: #aab8ff;
-    --color-overlay: #000000;
-    --color-qr: #000000;
-    --color-qr-background: #ffffff;
-    --color-disabled: #2a2e3d;
-    --color-disabled-foreground: #a9adbd;
+    --color-card: var(--mist-2);
+    --color-popover: var(--mist-2);
+    --color-highlight: var(--reed-6);
+    --color-panel: var(--water-4);
+    --color-panel-foreground: var(--mist-12);
   }
 }

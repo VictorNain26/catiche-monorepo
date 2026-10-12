@@ -1,4 +1,11 @@
 @import 'tailwindcss';
 @import '@repo/tokens/theme.css';
 @import '@repo/tokens/base.css';
+
+/* The families main.tsx loads from fontsource, under the names the tokens read. */
+:root {
+  --font-brand-text: 'Atkinson Hyperlegible Next Variable';
+  --font-brand-heading: 'Bricolage Grotesque Variable';
+  --font-brand-mono: 'Atkinson Hyperlegible Mono';
+}
 @source '../../../packages/ui/src';

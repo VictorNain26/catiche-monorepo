@@ -43,7 +43,7 @@ test('the sign-in says the beta is closed, checks the address and the code, and 
   await expect(page.getByText('Tom, un programme')).toBeVisible();
   await expect(page.getByRole('status')).toContainText('Catiche est en bêta fermée');
   // Under 16 px, iOS Safari zooms on the field it focuses.
-  expect(await page.getByLabel('Adresse e-mail').evaluate((field) => getComputedStyle(field).fontSize)).toBe('16px');
+  expect(Number.parseFloat(await page.getByLabel('Adresse e-mail').evaluate((field) => getComputedStyle(field).fontSize))).toBeGreaterThanOrEqual(16);
   await page.getByRole('button', { name: 'Recevoir mon code' }).click();
   await expect(page.getByText('Une adresse e-mail valide.')).toBeVisible();
 

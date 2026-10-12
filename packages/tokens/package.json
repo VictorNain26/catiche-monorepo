@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "test": "bun test"
+    "test": "bun test",
+    "scales": "bun scales.mjs"
   },
   "exports": {
     "./theme.css": "./theme.css",
-    "./landing.css": "./landing.css",
     "./base.css": "./base.css"
+  },
+  "devDependencies": {
+    "@adobe/leonardo-contrast-colors": "1.1.0"
   }
 }

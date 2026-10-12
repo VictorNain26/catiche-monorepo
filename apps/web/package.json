@@ -14,8 +14,9 @@
   "dependencies": {
     "@ai-sdk/react": "4.0.139",
     "@better-auth/passkey": "^1.7.7",
+    "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
     "@fontsource/atkinson-hyperlegible-mono": "^5.3.0",
-    "@fontsource/inclusive-sans": "^5.3.0",
     "@hookform/resolvers": "^5.9.1",
     "@repo/tokens": "workspace:*",
     "@repo/ui": "workspace:*",

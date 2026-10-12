@@ -20,8 +20,8 @@ for (const path of PAGES) {
         if (heading.querySelectorAll('mark').length > 1) found.push(`several highlights in: ${heading.textContent}`);
       }
       for (const section of document.querySelectorAll('main section')) {
-        if (section.querySelectorAll('.font-hand').length > 1) {
-          found.push(`several hand notes in: ${section.querySelector('h1, h2')?.textContent ?? section.id}`);
+        if (section.querySelectorAll('[data-note]').length > 1) {
+          found.push(`several notes in: ${section.querySelector('h1, h2')?.textContent ?? section.id}`);
         }
       }
       return found;
