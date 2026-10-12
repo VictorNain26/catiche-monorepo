@@ -34,6 +34,8 @@ numéro de ligne.
 - Jamais un fait recopié : la doc renvoie au code qui le porte (`apps/server/src/config.ts`
   pour l'environnement, par exemple).
 - Jamais une règle en prose quand un contrôle automatique peut la tenir.
+- Jamais un chiffre cité au-delà de ce que sa source mesure (un site, un échantillon), ni un
+  contraste écrit sans être recalculé sur les valeurs du document qui le porte.
 
 ## La boucle d'apprentissage
 

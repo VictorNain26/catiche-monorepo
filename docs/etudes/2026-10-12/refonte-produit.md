@@ -12,8 +12,8 @@ décisions de la dernière section ; la vision, les décisions et la roadmap se 
    décrivent ce qu'il faut garantir (le tuteur qui ne cède pas, les données, le juridique) et
    presque rien de ce que le parent et l'enfant vivent chaque soir dans l'app. Aucun document ne
    décrit un écran réussi.
-2. **Les principes de l'interface ont produit le minimalisme.** L'étude du 2026-10-11
-   (`etudes/2026-10-11/refonte-interface.md`) pose « peu de destinations, pas de barre
+2. **Les principes de l'interface ont produit le minimalisme.** Le plan de l'interface du
+   2026-10-11 (supprimé depuis, git le garde) pose « peu de destinations, pas de barre
    d'onglets », « une action principale par écran », « Tom sur l'accueil de l'élève ; ailleurs,
    rien ». Appliqués à la lettre, ils donnent une colonne de texte et de boutons.
 3. **Le parent ne voit presque rien.** La décision du 2026-10-08 limite le résumé aux sept
@@ -142,8 +142,7 @@ réagit à l'élève.
 2. **Une charte complète** : en plus des tokens, la grille et les mises en page, la navigation,
    l'iconographie, Tom en 2D, le logo, les graphiques (temps, notions).
 3. **Un document d'expérience** (`docs/experience.md`) qui décrit chaque espace et chaque écran,
-   ce qu'il montre et d'où vient chaque donnée ; il remplace `etudes/2026-10-11/refonte-interface.md`
-   comme plan des écrans.
+   ce qu'il montre et d'où vient chaque donnée ; il remplace le plan de l'interface du 2026-10-11.
 4. **Les écrans construits dans l'ordre où on les voit** : la landing et l'entrée, les deux
    tableaux de bord avec ce qu'il leur faut côté serveur, la séance, le compte et les données, le
    second parent, le paiement. Chaque écran vu dans Chrome au téléphone et à l'ordinateur, en
@@ -161,8 +160,9 @@ profils, jumelage) ; seul l'habillage se refait.
   cette refonte.
 - `roadmap.md` : les lots 1 à 3 fondus en un seul, « Le produit », dans l'ordre de la méthode ;
   Tom (lot 4) et les portes inchangés.
-- `charte.md` réécrite avec la nouvelle direction ; `experience.md` créé ;
-  `etudes/2026-10-11/refonte-interface.md` reste comme étude datée.
+- `charte.md` réécrite avec la nouvelle direction ; `experience.md` créé ; le plan de
+  l'interface du 2026-10-11 supprimé (git le garde), à la demande de Victor : rien de l'ancien
+  plan ne reste.
 - `suivi.md` mis à jour dans la même PR.
 
 ## À trancher par Victor

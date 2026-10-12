@@ -9,12 +9,11 @@ paths:
 
 # Design system
 
-La direction « Grands carreaux » (`docs/decisions.md`, 2026-10-11) : `packages/tokens/theme.css`,
-clair et sombre, Inclusive Sans et Atkinson Hyperlegible Mono ; son usage, `docs/charte.md`. Une
-nouvelle direction, pour le site et l'app ensemble, se choisit au lot 1 (`docs/decisions.md`,
-2026-10-12) ; d'ici là, la landing garde son identité précédente (`packages/tokens/landing.css`),
-que la nouvelle remplace, `landing.css` supprimé. Les composants ne dépendent de l'identité que
-par les tokens.
+La direction « Rive » (`docs/decisions.md`, 2026-10-12), pour le site et l'app ensemble ; son
+usage, `docs/charte.md` ; ce que montre chaque écran, `docs/experience.md`. Elle entre dans
+`packages/tokens/theme.css` au lot 1, étape 2.1 (`docs/roadmap.md`), qui supprime
+`packages/tokens/landing.css` ; d'ici là, le code garde l'identité précédente. Les composants ne
+dépendent de l'identité que par les tokens.
 
 ## Interdits
 
@@ -33,3 +32,15 @@ par les tokens.
   ([1.4.11](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html)).
 - Aucune cible tactile sous 44 px, aucun défilement horizontal à largeur de téléphone, aucune
   animation qui ignore le mouvement réduit.
+- Aucune primitive interactive hors de Radix (dialogue, onglets, menu ; le tiroir est un dialogue
+  de Radix), sauf les toasts, par `sonner` : une seule famille dans `@repo/ui`.
+- Aucun graphique en anneau, en camembert ou en 3D, aucune couleur seule porteuse d'une
+  information, aucun graphique sans sa phrase et son tableau de valeurs.
+- Aucune arche ailleurs que derrière Tom, sur le haut du site et à l'entrée de l'app.
+
+## Un écran n'est pas fini
+
+- sans ses états : vide, chargement, erreur, et hors ligne ou quota quand ils le concernent ;
+- sans être vu au téléphone (deux largeurs) et à l'ordinateur, en clair et en sombre ;
+- sans `@axe-core/playwright` vert sur chacun de ses états, ni un passage au clavier ;
+- sans ses captures de référence relues, une fois l'étape 2.2 du lot 1 faite (`docs/roadmap.md`).
