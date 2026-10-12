@@ -28,10 +28,12 @@ demandent le Postgres de `docker compose` (`DATABASE_URL`).
   `mock.module` : une dépendance se remplace en la passant.
 - **Web, de bout en bout** : le paquet `@repo/playwright-web` dépend du web et du serveur, que
   turbo construit d'abord ; Playwright lance le serveur construit, qui sert le web construit, sur
-  sa propre base recréée à chaque lancement (`E2E_DATABASE_URL`, par défaut `tom_e2e` du
-  Postgres local). Projets `iphone` (WebKit) et `android` (Chromium) ; prérequis :
-  `cd tooling/playwright-web && bunx playwright install chromium webkit`, puis les
-  bibliothèques système de WebKit, `bunx playwright install-deps webkit`.
+  sa propre base recréée à chaque lancement (`tom_e2e`, sur le Postgres de `docker compose`).
+  Projets `iphone` (WebKit) et `android` (Chromium).
+- **Navigateurs des deux suites** : ceux de l'image officielle de Playwright, servis par le
+  service `playwright` de `docker-compose.yml` ; prérequis en local comme en CI,
+  `docker compose up -d --wait postgres playwright`. Jamais un navigateur installé sur l'host :
+  le rendu doit être celui de la CI.
 - **Landing** : servie par le Caddy de production (`apps/landing/Caddyfile`, en conteneur, Docker
   requis) ; mise en page (hiérarchie des titres, aucun défilement horizontal, cibles de 44 px,
   lignes légales, liens soulignés), rendu sans JavaScript et sous mouvement réduit, absence de

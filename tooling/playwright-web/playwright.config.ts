@@ -16,7 +16,14 @@ export default defineConfig({
   forbidOnly: !!process.env['CI'],
   retries: process.env['CI'] ? 2 : 0,
   reporter: process.env['CI'] ? [['list'], ['html', { open: 'never' }]] : 'list',
-  use: { baseURL, trace: 'on-first-retry' },
+  // The browsers are the official image's, served by `docker compose` (service `playwright`); they
+  // reach the suite's server through the host's loopback. Without a timeout, a stopped service hangs
+  // the run.
+  use: {
+    baseURL,
+    trace: 'on-first-retry',
+    connectOptions: { wsEndpoint: 'ws://127.0.0.1:3030/', exposeNetwork: '<loopback>', timeout: 10_000 },
+  },
   projects: [
     { name: 'iphone', use: { ...devices['iPhone 15'] } },
     { name: 'android', use: { ...devices['Pixel 7'] } },

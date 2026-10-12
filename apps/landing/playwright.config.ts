@@ -11,6 +11,9 @@ export default defineConfig({
   use: {
     baseURL,
     reducedMotion: 'reduce',
+    // The browsers are the official image's, served by `docker compose` (service `playwright`);
+    // they reach Caddy through the host's loopback. Without a timeout, a stopped service hangs the run.
+    connectOptions: { wsEndpoint: 'ws://127.0.0.1:3030/', exposeNetwork: '<loopback>', timeout: 10_000 },
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   // The Caddy that Clever Cloud runs, with the same Caddyfile: headers, redirects and the 404 are tested as served.

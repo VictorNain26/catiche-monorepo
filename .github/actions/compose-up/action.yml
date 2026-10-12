@@ -1,0 +1,35 @@
+# Composite action: the services of docker-compose.yml a job needs, as on a developer's machine.
+# A job's `container:` or `services:` is pulled with no time limit: on 2026-10-12, one layer of
+# Playwright's image hung 13 minutes on mcr.microsoft.com. Here each pull attempt is bounded and
+# retried, and a stalled layer starts again on a new connection.
+
+name: Compose up
+description: Pull the named docker compose services, each attempt bounded, then start them and wait until healthy
+
+inputs:
+  services:
+    description: Services of docker-compose.yml, separated by spaces
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Pull the images
+      shell: bash
+      env:
+        SERVICES: ${{ inputs.services }}
+      run: |
+        read -ra services <<< "$SERVICES"
+        for attempt in 1 2 3; do
+          if timeout 180 docker compose pull --quiet "${services[@]}"; then exit 0; fi
+          echo "::warning::docker compose pull failed or ran past 3 minutes (attempt $attempt of 3)"
+        done
+        exit 1
+
+    - name: Start the services
+      shell: bash
+      env:
+        SERVICES: ${{ inputs.services }}
+      run: |
+        read -ra services <<< "$SERVICES"
+        docker compose up --detach --wait --wait-timeout 120 "${services[@]}"
