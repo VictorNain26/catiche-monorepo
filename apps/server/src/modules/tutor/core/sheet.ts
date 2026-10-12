@@ -243,7 +243,7 @@ export type PreparedSheet = (VotedSheet | { sheet: null; uncertain: true; mathCh
  * 2026-10-04): the timeout bounds the draws.
  */
 export async function prepareSheet({ ai, logger }: { ai: Ai; logger: Logger }, request: SheetRequest): Promise<PreparedSheet | null> {
-  const startTime = Date.now();
+  const startTime = performance.now();
   const notions = notionsFor(request.level, request.subject, schoolYearOf(request.now));
   const [system, user] = sheetMessages(request.level, notions, request.studentText, request.attachedFilesBlock);
   const draws = await Promise.allSettled(
@@ -283,7 +283,7 @@ export async function prepareSheet({ ai, logger }: { ai: Ai; logger: Logger }, r
       uncertain: voted?.uncertain,
       mathCheck: voted?.mathCheck,
       droppedNotions: kept.reduce((sum, { dropped }) => sum + dropped, 0),
-      durationMs: Date.now() - startTime,
+      durationMs: Math.round(performance.now() - startTime),
     },
     'Exercise sheet prepared',
   );

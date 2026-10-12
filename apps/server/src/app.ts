@@ -4,6 +4,7 @@
 
 import { Hono } from 'hono';
 import { contextStorage } from 'hono/context-storage';
+import { csrf } from 'hono/csrf';
 import { requestId } from 'hono/request-id';
 import type { Logger } from 'pino';
 import type { Config } from './config';
@@ -52,6 +53,9 @@ export function createApp({ config, logger, db, auth, ai, moderation, lifecycle,
     .use(clientAddress(config.trustedProxyHops))
     .use('/api/*', budget)
     .use('/health/*', budget)
+    // The client sends JSON only, so a form sent to the API can only come from a page: one of
+    // another origin is refused. SameSite=Lax does not stop it from a sibling subdomain.
+    .use('/api/*', csrf())
     // A response of the API is a user's own data: no cache keeps it (OWASP REST Security Cheat Sheet).
     .use('/api/*', async (c, next) => {
       await next();

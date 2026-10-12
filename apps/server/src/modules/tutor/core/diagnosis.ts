@@ -124,7 +124,7 @@ export async function diagnose(
   sheet: ExerciseSheet,
   turn: { studentId: string; studentText: string; lastTutorText: string | null },
 ): Promise<Diagnosis> {
-  const startTime = Date.now();
+  const startTime = performance.now();
   try {
     const { object } = await ai.generateStructured({
       operation: 'exercise-diagnosis',
@@ -156,13 +156,13 @@ ${wrapUserMessage(turn.studentText)}`,
         errorType: diagnosis.errorType,
         decidedBy: diagnosis.decidedBy,
         modelVerdict: object.verdict,
-        durationMs: Date.now() - startTime,
+        durationMs: Math.round(performance.now() - startTime),
       },
       'Proposal diagnosed',
     );
     return diagnosis;
   } catch (err) {
-    logger.error({ err, durationMs: Date.now() - startTime }, 'Diagnosis failed');
+    logger.error({ err, durationMs: Math.round(performance.now() - startTime) }, 'Diagnosis failed');
     return { ...UNCLEAR, error: err instanceof Error ? err.message : String(err) };
   }
 }

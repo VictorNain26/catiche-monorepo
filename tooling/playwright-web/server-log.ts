@@ -25,8 +25,8 @@ export const logMark = () => lines().length;
 export function codeSince(mark: number, to: string): string | undefined {
   for (const line of lines().slice(mark)) {
     if (!line.startsWith('{')) continue;
-    const { email } = JSON.parse(line) as { email?: { to: string; subject: string } };
-    const code = email?.to === to ? /\b\d{6}\b/.exec(email.subject)?.[0] : undefined;
+    const { email } = JSON.parse(line) as { email?: { to: string; text: string } };
+    const code = email?.to === to ? /\b\d{6}\b/.exec(email.text)?.[0] : undefined;
     if (code) return code;
   }
   return undefined;

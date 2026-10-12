@@ -69,8 +69,9 @@ describe('sign-in by code', () => {
   it("creates an invited address's account at its first code, the address proven, the invitation spent", async () => {
     await invite(db, ' Nouvelle@Example.com ');
     const email = await asked('nouvelle@example.com');
-    // The parent reads the product's name, Catiche; Tom is the tutor inside it.
-    expect(email.subject).toMatch(/^Votre code Catiche : \d{6}$/);
+    // The parent reads the product's name, Catiche; Tom is the tutor inside it. The code stays out of
+    // the subject, which a locked phone shows in its notifications.
+    expect(email.subject).toBe('Votre code pour entrer dans Catiche');
     expect(email.text).toContain('pour entrer dans Catiche');
     const res = await signIn('nouvelle@example.com', mail.codeIn(email));
     expect(res.status).toBe(200);
