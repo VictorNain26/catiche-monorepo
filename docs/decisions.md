@@ -20,7 +20,8 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
   du CP à la 5e, guidé en 4e et 3e, autonome au lycée (l'étude du 2026-10-07 plaçait la 6e et la
   5e en guidé). Avant la 4e, pas d'appareil propre à l'enfant : le parent lance la séance sur
   l'appareil de la famille, qui passe au profil de l'enfant (« Les profils sur l'appareil de la
-  famille »), avec « Je reste à côté » ou « Il travaille seul ce soir » ; le profil reste ouvert
+  famille »), où l'enfant choisit « Avec mon parent à côté » ou « Sans mon parent ce soir » ; le
+  profil reste ouvert
   pour les soirs suivants, et revenir au parent demande sa clé ou un code. À côté, le parent écoute
   et reste disponible, il ne corrige pas au fil de l'eau ; Tom lui propose au plus trois ou quatre
   pistes par séance, de vingt mots au plus, au lancement, à un blocage, à une frustration et à la
@@ -56,15 +57,22 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
   Victor le 2026-10-12, la vision réservant cette ouverture à la 6e et à la 5e).
 - **Fiches de révision hors V1** (2026-10-08). Le Complet, c'est plus d'échanges par jour ; ni le
   site ni la vision ne promettent de fiches.
-- **Le résumé parent dit les matières, le temps passé et ce qui résiste** (2026-10-08). Jamais
-  les conversations ; l'élève voit le même résumé. Calculé par le code, sans modèle : rien
-  d'inventé, rien à payer ; sur les sept derniers jours. Le parent ne voit rien d'autre de la
-  mémoire d'apprentissage, qui reste à l'élève (tranché le 2026-10-08).
-- **Le second parent avec le consentement** (2026-10-08, au lot 2 depuis le 2026-10-11). Il rejoint le foyer et peut
+- **Le parent a un tableau de bord, jamais les conversations** (2026-10-08, élargi le
+  2026-10-12). Par enfant : le temps jour par jour et semaine après semaine, les matières, les
+  notions du programme travaillées, qui résistent ou ont cédé, une question à poser tournée vers
+  sa façon de chercher, la prochaine étape ; le même contenu en point hebdomadaire par e-mail, que
+  le parent coupe d'un clic. Jamais les conversations, qui restent à l'enfant, ni un taux de
+  réussite, ni une comparaison entre enfants ; la mémoire d'apprentissage reste à l'élève.
+  L'élève voit ce que voit son parent. Calculé par le code, sans modèle, depuis les séances et
+  les exercices : rien d'inventé, rien de nouveau collecté. Raisons : informer le parent de ce
+  qu'il peut faire a un effet mesuré, la surveillance nuit à l'adolescent. Remplace « le résumé
+  des sept derniers jours, le parent ne voit rien d'autre ». Source :
+  `etudes/2026-10-12/refonte-produit.md`.
+- **Le second parent avec le consentement** (2026-10-08, au lot 1 depuis le 2026-10-12). Il rejoint le foyer et peut
   s'opposer, parce que le double consentement sous 15 ans engage les titulaires de l'autorité
   parentale.
 - **L'identité et l'app d'abord, Tom ensuite** (2026-10-11). Le nom, la direction artistique et
-  sa charte, puis chaque écran de l'app et la landing, avant le travail sur le tuteur (harnais,
+  sa charte, puis le site et l'app ensemble, dans l'ordre de `roadmap.md`, avant le travail sur le tuteur (harnais,
   fuites, voix, mémoire mesurée). Raisons : le tuteur attend le paiement à l'usage de Mistral
   pour être mesuré ; les écrans et le site avancent sans lui ; refaire l'identité après les
   écrans les ferait refaire deux fois. Aucun élève réel avant que Tom soit mesuré : l'ordre ne
@@ -77,24 +85,27 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
   toute communication : la recherche de similarité INPI, le dépôt, les domaines. Aucun nom ne se
   bâtit sur Tom (marque TOM, FR 4873204). Remplace TomIA, puis « De sa main », que Victor n'a pas
   gardé. Source : `etudes/2026-10-11/nom-seconde-etude.md`.
-- **La direction « Grands carreaux », aux fontes d'« Instrument »** (2026-10-11, choix de Victor
-  après l'essai de trois directions sur les cinq vrais écrans, en clair et en sombre). Papier,
-  encre bleue du pull de Tom, la tête de Tom à chacun de ses messages ; Inclusive Sans pour le
-  texte et les titres, Atkinson Hyperlegible Mono pour les codes et les chiffres, à la place
-  d'Andika, qui faisait « primaire » en 4e et 3e (I, l et 1 distincts, zéro barré, vérifiés à
-  l'écran). La marge rouge du cahier, essayée, est retirée : Victor ne la veut pas (2026-10-11).
-  Le bleu est celui de la catégorie : la différence vient du nom et de Tom. Écartées :
-  « Instrument » entière, froide pour le parent d'un élève de 6e ; « Colophon », sans Tom à côté
-  de ses messages ; et, depuis le 2026-10-08, une direction qui jouait la relation et une
-  direction sombre seulement au jaune. Remplace « Cahier du soir ». Source : `etudes/2026-10-11/direction-artistique.md`.
-- **Une refonte complète de l'interface** (2026-10-11). Le lot 2 ne repeint pas les écrans
-  actuels : il repense chaque parcours du parent et de l'élève et refait chaque écran, sa
-  structure, ses composants et ses mots, sur la charte ; rien de l'interface actuelle n'est
-  gardé par principe.
-- **La landing réécrite avec l'identité** (2026-10-11). Elle n'attend plus l'ouverture : dès la
-  charte choisie, elle reçoit les tokens et la fonte de l'app et se réécrit sur la vision, sans
-  rien promettre que l'app ne fait déjà. Jusque-là, seuls des correctifs d'honnêteté ou
-  techniques y entrent.
+- **La refonte du produit** (2026-10-12, à la demande de Victor : « pas un vrai design », ni
+  harmonisé avec le site, ni de vraies pages d'entrée et de vrais tableaux de bord). Le soin
+  devient un principe (`vision.md`, principe 7) ; le site et l'app ont une seule identité et se
+  refont ensemble, le site menant à l'app par « Se connecter » ; l'entrée, le tableau de bord du
+  parent et l'espace de l'élève (ses séances, « Mon programme ») se construisent comme décrits
+  dans `experience.md`, composés au téléphone et à l'ordinateur, avec des onglets ; Tom en 2D au
+  trait dans l'app, la 3D sur le site. Les anciens lots 1 à 3 deviennent un lot, « Le produit »
+  (`roadmap.md`) ; ce qui est construit depuis le 2026-10-11 garde ses flux, ses tests et sa sécurité, et
+  seul son habillage se refait. Remplace « une refonte complète de l'interface » et « la landing
+  réécrite avec l'identité » (2026-10-11), et les principes de
+  `etudes/2026-10-11/refonte-interface.md` (« peu de destinations », « une action principale par
+  écran », « Tom ailleurs, rien »). Source : `etudes/2026-10-12/refonte-produit.md`.
+- **Une nouvelle direction artistique, pour le site et l'app** (2026-10-12, choix de Victor).
+  Deux ou trois directions, essayées dans le vrai code sur le haut du site, la connexion et le
+  tableau de bord du parent, au téléphone et à l'ordinateur, en clair et en sombre ; Victor
+  choisit. Jusque-là, le code garde « Grands carreaux » (2026-10-11 : papier, encre bleue du
+  pull de Tom, Inclusive Sans et Atkinson Hyperlegible Mono, sans la marge rouge), que décrit
+  `charte.md`, et le site son identité précédente. Ce que les essais du 2026-10-11 ont appris
+  reste : Andika fait « primaire » en 4e et 3e, une direction trop froide perd le parent d'un
+  élève de 6e, le bleu seul est celui de la catégorie. Source :
+  `etudes/2026-10-11/direction-artistique.md`, `etudes/2026-10-12/refonte-produit.md`.
 - **Des formules, pas de schémas, dans la séance** (2026-10-08, choix délégué par Victor). Le
   texte de Tom est rendu en Markdown et ses formules en MathML (KaTeX) ; ni HTML, ni lien, ni
   image venus du modèle. Pas de schémas Mermaid : lourds sur téléphone, et refusés par la CSP ;
@@ -125,7 +136,7 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
 - **Mistral en paiement à l'usage, au lot 4** (2026-10-08, reporté par Victor le 2026-10-11).
   Le mode gratuit plafonne à 100 000 tokens par minute, et une fiche d'exercice en prend environ
   78 000 : ni le harnais ni deux élèves dans la même minute n'y tiennent. Le même geste ouvre la
-  demande de Zero Data Retention. Les lots 1 à 3 n'en ont pas besoin.
+  demande de Zero Data Retention. Le lot 1 n'en a pas besoin.
 - **Langfuse abandonné** (2026-10-08). Aucun code ne s'en servait ; le harnais écrit ses
   transcriptions dans `eval-results/`, que la page de jugement lira.
 
@@ -179,7 +190,8 @@ Tranchées au moment du lot qui en dépend, doc d'abord :
 
 | Décision | Lot | Ce qui la tranche |
 |---|---|---|
-| Fournisseur de paiement | 2 | Conformité UE, abonnement familial, facturation sans piège |
-| Statut juridique (micro-entreprise ou société), TVA | 2 | Une consultation d'un expert-comptable, avant le paiement |
+| Fournisseur de paiement | 1 | Conformité UE, abonnement familial, facturation sans piège |
+| Statut juridique (micro-entreprise ou société), TVA | 1 | Une consultation d'un expert-comptable, avant le paiement |
+| Le domaine de l'app (par exemple `app.catiche.fr`) | 1 | Les domaines achetés par Victor ; le staging en attendant |
 | Canal du message au parent après une détresse | 4 | Un canal garanti (l'e-mail), avec la revue humaine |
 | Hébergement de données de santé | Avant la première famille | La réponse de la CNIL |

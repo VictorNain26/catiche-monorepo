@@ -1,7 +1,8 @@
 # Vision
 
 Ce qu'on construit, pour qui, et ce qui tranche un arbitrage. Le pourquoi de chaque choix daté :
-`decisions.md` ; l'ordre : `roadmap.md` ; où on en est : `suivi.md`. Les faits viennent des
+`decisions.md` ; les espaces et les écrans : `experience.md` ; l'ordre : `roadmap.md` ; où on en
+est : `suivi.md`. Les faits viennent des
 études (`etudes/`), qui portent leurs sources.
 
 ## En une phrase
@@ -36,19 +37,26 @@ Ils tranchent quand deux choix se valent.
 2. **On n'affirme que ce qu'on peut prouver.** Chaque chiffre public a une source primaire
    datée, chaque différence revendiquée est mesurée, ce qui n'est pas construit ne se promet pas.
    On ne dit pas qu'il fait progresser : aucune mesure ne le montre à ce jour.
-3. **Le parent voit sans surveiller.** Un résumé, jamais les conversations envoyées au parent ;
-   l'élève voit ce que voit son parent. En 6e et 5e, la séance se fait sur l'appareil de la
-   famille, où le parent peut être à côté et rouvrir le profil de l'enfant : Tom l'aide à
-   accompagner sans faire à la place, et l'enfant le sait.
+3. **Le parent voit sans surveiller, et sait quoi faire.** Son tableau de bord montre le temps,
+   les matières et les notions du programme travaillées, qui résistent ou ont cédé, semaine après
+   semaine, avec une question à poser à l'enfant sur sa façon de chercher ; jamais les
+   conversations, qui restent à l'enfant, ni un taux de réussite. L'élève voit ce que voit son
+   parent. En 6e et 5e, la séance se fait sur l'appareil de la famille, où le parent peut être à
+   côté et rouvrir le profil de l'enfant : Tom l'aide à accompagner sans faire à la place, et
+   l'enfant le sait.
 4. **Les données d'un enfant restent en Europe, et au minimum.** Mistral sur son endpoint UE,
    hébergement en France ; aucune donnée réutilisée pour entraîner ; ni nom de famille ni
    identifiant pour l'enfant.
-5. **Ni jeu, ni compagnon.** Pas de séries, de points, de classement ni de notification de
-   rétention ; Tom ne retient rien de la vie de l'enfant, seulement ce qui a résisté dans ses
-   exercices, et seulement si le parent et l'enfant l'acceptent.
+5. **Ni jeu, ni compagnon.** Pas de séries, de points, de classement, de comparaison entre élèves
+   ni de notification de rétention ; le progrès se montre sur la tâche (les notions de son
+   programme), jamais sur l'élève. Tom ne retient rien de la vie de l'enfant, seulement ce qui a
+   résisté dans ses exercices, et seulement si le parent et l'enfant l'acceptent.
 6. **Pensé depuis la soirée réelle.** Chaque parcours se conçoit à la place de l'enfant et du
-   parent, sur le téléphone de la famille, avant les choix techniques.
-7. **Un budget serré.** Mistral Small 4 pour tout ; la fiabilité vient des garde-fous du code,
+   parent, sur le téléphone de la famille comme sur l'ordinateur, avant les choix techniques.
+7. **Le soin fait partie de la promesse.** Le parent juge le sérieux du produit en un coup d'œil,
+   l'adolescent le quitte s'il fait « enfant » : chaque écran est composé, dans une seule
+   identité, du site à l'app (`etudes/2026-10-12/refonte-produit.md`).
+8. **Un budget serré.** Mistral Small 4 pour tout ; la fiabilité vient des garde-fous du code,
    pas d'un modèle plus cher.
 
 ## Ce qu'on promet, ce qu'on prouve
@@ -59,7 +67,7 @@ Ils tranchent quand deux choix se valent.
 | **Il explique bien** | Il repère l'erreur, pose une question à la fois, monte d'un cran seulement si l'élève bloque, ne se trompe pas, parle comme au collège ; jugé par Victor |
 | **Il reprend là où ça a résisté** | D'une séance à l'autre, son aide s'appuie sur les notions qui ont résisté ; mesuré avec et sans mémoire, annoncé seulement après |
 | **Le parent accompagne sans faire à la place** | En 6e et 5e, les pistes de Tom au parent ne donnent jamais plus que le cran de l'enfant, au harnais ; en bêta, ce que l'enfant et le parent disent du rôle du parent pendant la séance, en deux questions, et qui s'en sert, selon les familles |
-| **Le parent voit sans surveiller** | Un résumé de la semaine : matières, temps passé, ce qui résiste ; une détresse relue par un humain avant tout message au parent, qui n'en reçoit que le motif |
+| **Le parent voit sans surveiller** | Un tableau de bord et un point hebdomadaire par e-mail, calculés par le code depuis les séances : temps, matières, notions du programme, une question à poser ; jamais les conversations ; une détresse relue par un humain avant tout message au parent, qui n'en reçoit que le motif. Aucun effet sur les résultats n'est promis : aucune étude ne le montre pour un tableau de bord parent |
 | **Les données restent en Europe** | Endpoint UE, hébergement à Paris, Zero Data Retention accordé par Mistral |
 | **On publie nos mesures** | Protocole, jeu d'exercices et résultats, y compris face aux concurrents, publics et rejouables, avec leur marge d'erreur et le nom de qui a jugé |
 
@@ -77,7 +85,11 @@ Le pari : **l'exécution prouvée et publiée**, que personne ne montre aujourd'
 - Une mesure de fuite publiée et rejouable, sous pression.
 - Une aide au niveau du meilleur diagnostic observé chez les concurrents.
 - Un gratuit utilisable chaque soir, avec l'IA et les données en Europe.
-- Un résumé qui ne lit pas les conversations, et que l'élève voit aussi.
+- Un tableau de bord qui ne lit pas les conversations, et que l'élève voit aussi ; Khanmigo les
+  montre au parent et les fait résumer par l'IA (vérifié le 2026-10-12,
+  `etudes/2026-10-12/refonte-produit.md`).
+- Un produit soigné, du site à l'app, quand la catégorie promet un tableau de bord sans le
+  montrer.
 
 La place est étroite : elle tient si la qualité est réellement meilleure et si on le montre,
 pas sur un slogan. Le harnais dira si on y est.
@@ -98,9 +110,12 @@ Chiffres et modèle : `etudes/2026-10-07/rentabilite.md`.
 
 - **Dedans** : le collège, en mode accompagné en 6e et 5e (la séance s'ouvre depuis l'espace du
   parent, qui peut rester à côté) et guidé en 4e et 3e (l'élève relie son appareil par un code du
-  parent) ; un client web pensé d'abord pour le téléphone ; texte, photo et voix ; la mémoire
-  d'apprentissage, si elle est acceptée ; le résumé parent ; le second parent ; la détresse
-  relue par un humain ; Gratuit et Complet ; une direction artistique construite autour de Tom.
+  parent) ; un client web pensé d'abord pour le téléphone, composé aussi pour l'ordinateur ;
+  texte, photo et voix ; la mémoire d'apprentissage, si elle est acceptée ; le tableau de bord du
+  parent et son point hebdomadaire par e-mail ; l'espace de l'élève, avec ses séances et son
+  programme ; le second parent ; la détresse relue par un humain ; Gratuit et Complet ; une
+  identité construite autour de Tom, la même du site à l'app, et le site qui mène à l'app
+  (`experience.md`).
 - **Dehors** : les fiches de révision ; Pronote, tant qu'aucune convention avec Index Éducation
   n'existe ; les enseignants et les établissements ; le primaire et le lycée, après la V1 ;
   l'application native.
@@ -128,11 +143,12 @@ Victor a choisi de ne pas mener d'entretiens (`decisions.md`) : ces hypothèses
 
 ## Marque
 
-Le produit s'appelle **Catiche**, le gîte de la loutre ; Tom est la loutre, le tuteur. La
-direction « Grands carreaux » et sa charte se posent en premier : chaque écran et le site se
-construisent dessus. Une app que
-l'enfant ouvre de lui-même le soir et que le parent trouve sérieuse fait partie du pari, sans
-jamais passer par le jeu ni par un compagnon.
+Le produit s'appelle **Catiche**, le gîte de la loutre ; Tom est la loutre, le tuteur : en 2D
+au trait dans l'app, en 3D sur le site. La direction artistique se rechoisit (2026-10-12) sur les
+vrais écrans du site et de l'app ; sa charte (`charte.md`) règle les couleurs et les fontes, et
+aussi la composition, la navigation, l'iconographie et Tom. Une app que l'enfant ouvre de
+lui-même le soir et que le parent trouve sérieuse fait partie du pari, sans jamais passer par le
+jeu ni par un compagnon.
 
 ## Critères de succès de la V1
 
@@ -140,7 +156,8 @@ Des repères, pas des seuils figés :
 - au harnais, sous pression, la réponse n'est presque jamais donnée, mesure publiée avec sa marge
   d'erreur, et aucune solution n'est montrée par accident ;
 - une aide au moins aussi bonne que celle du meilleur concurrent, jugée par Victor ;
-- en bêta, l'enfant revient de lui-même plusieurs semaines, et le parent lit le résumé ;
+- en bêta, l'enfant revient de lui-même plusieurs semaines, et le parent lit son tableau de bord
+  ou son point de la semaine ;
 - un gratuit qui couvre une soirée de devoirs normale, et un élève payant qui coûte moins qu'il
   ne rapporte ;
 - chaque phrase publique adossée à une source ou à une mesure publiée.
