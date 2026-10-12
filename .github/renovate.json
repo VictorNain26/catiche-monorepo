@@ -125,7 +125,7 @@
       "commitMessagePrefix": "chore(docker)"
     },
     {
-      "description": "Playwright's image moves with @playwright/test: its browsers are the ones the tests drive, through the Playwright Server it runs (docker-compose.yml, service playwright).",
+      "description": "Playwright's image moves with @playwright/test, pinned to its exact version in each package that declares it: its browsers are the ones the tests drive, through the Playwright Server it runs (docker-compose.yml, service playwright), and the reference screenshots are theirs.",
       "matchPackageNames": ["@playwright/test", "mcr.microsoft.com/playwright"],
       "groupName": "playwright"
     },
