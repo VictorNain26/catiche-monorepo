@@ -50,7 +50,7 @@ demandent le Postgres de `docker compose` (`DATABASE_URL`).
   requis) ; mise en page (hiérarchie des titres, aucun défilement horizontal, cibles de 44 px,
   lignes légales, liens soulignés), rendu sans JavaScript et sous mouvement réduit, absence de
   formulaire et de liste d'attente, menu mobile, page 404, en-têtes, redirections, canonical,
-  CSP sans refus, axe sur chaque page, haut de l'accueil en capture.
+  CSP sans refus, axe sur chaque page en clair et en sombre, haut de l'accueil en capture.
 
 Les suites Playwright tournent en CI (jobs `E2E web (Playwright)` et `E2E landing (Playwright)`,
 tâche turbo `test:e2e`, sur les paquets touchés), pas avant un commit.
