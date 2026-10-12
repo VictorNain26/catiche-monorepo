@@ -39,7 +39,8 @@ tient dans le cercle central.
   modes. Un bouton ne se désactive pas pour un formulaire incomplet : l'envoi dit ce qui manque ;
   un contrôle désactivé garde un texte lisible, jamais une opacité.
 - Les graphiques ont leur palette, `chart-1` à `chart-4` dans cet ordre, chaque série à 3:1 du
-  fond et de la carte, et toujours un libellé ou une forme en plus de la couleur.
+  fond et de la carte, deux voisines séparées par leur clarté (1,4:1 au moins), et toujours un
+  libellé ou une forme en plus de la couleur.
 - Contrastes WCAG 2.2 AA dans les deux modes, testés (`contrast.test.mjs`) ; APCA en contrôle de
   plus, jamais en norme.
 

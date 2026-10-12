@@ -8,11 +8,13 @@
 @import './scales.css';
 
 /* inline : chaque app pose les familles (fontsource dans l'app, l'API de fontes d'Astro sur le
- * site) ; sans inline, la variable se résoudrait là où le token est défini. */
+ * site) ; sans inline, la variable se résoudrait là où le token est défini. Le repli dans var() :
+ * une famille qu'une app ne pose pas (le site n'a pas de mono) laisserait sinon toute la
+ * déclaration invalide, et le texte hériterait de la fonte du parent. */
 @theme inline {
-  --font-sans: var(--font-brand-text), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-brand-heading), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-brand-mono), ui-monospace, monospace;
+  --font-sans: var(--font-brand-text, ui-sans-serif), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-brand-heading, ui-sans-serif), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-brand-mono, ui-monospace), ui-monospace, monospace;
 }
 
 @theme {
@@ -66,12 +68,12 @@
   /* Le panneau de marque, à l'entrée de l'app : l'eau profonde. */
   --color-panel: var(--water-11);
   --color-panel-foreground: var(--mist-1);
-  /* Les graphiques, dans cet ordre, chaque série à 3:1 du fond et de la carte ; jamais le pelage
-   * contre l'eau. */
+  /* Les graphiques, dans cet ordre, chaque série à 3:1 du fond et de la carte, deux voisines
+   * séparées par leur clarté (pas 11, 9, 10, 12), jamais le pelage contre l'eau. */
   --color-chart-1: var(--water-11);
   --color-chart-2: var(--reed-9);
-  --color-chart-3: var(--mist-9);
-  --color-chart-4: var(--fur-9);
+  --color-chart-3: var(--fur-10);
+  --color-chart-4: var(--mist-12);
 
   /* Mouvement — fast : un retour de pression ; base : une transition ; slow : l'entrée d'un
    * écran ; pulse : le demi-cycle d'un squelette. Une seule courbe, sans rebond. */

@@ -3,18 +3,19 @@ import { fileURLToPath } from 'node:url';
 import type { APIRoute } from 'astro';
 import satori from 'satori';
 import sharp from 'sharp';
+import { light } from '@repo/tokens/scales.json';
 import { BRAND_NAME } from '@/lib/brand';
 import { OG_IMAGE } from '@/lib/open-graph';
 
 // Drawn at build time, the image follows the brand name: satori lays it out as next/og did.
 
-// satori reads no CSS variable: the light steps of packages/tokens/scales.css that theme.css's
-// roles point at (background, foreground, primary, highlight, muted-foreground).
-const MIST = '#EFF3F1';
-const INK = '#13252B';
-const PRIMARY = '#0F5361';
-const HIGHLIGHT = '#D7E077';
-const MUTED = '#5B6A6C';
+// satori reads no CSS variable: the light steps that theme.css's roles point at (background,
+// foreground, primary, highlight, muted-foreground).
+const MIST = light['mist-1'];
+const INK = light['mist-12'];
+const PRIMARY = light['water-11'];
+const HIGHLIGHT = light['reed-4'];
+const MUTED = light['mist-10'];
 
 // satori takes React's element shape, without React.
 const node = (type: string, style: Record<string, unknown>, children: unknown) => ({ type, key: null, props: { style, children } });

@@ -1,7 +1,8 @@
+import { light } from '@repo/tokens/scales.json';
 import { BRAND_NAME } from '@/lib/brand';
 
-// A manifest can't read CSS variables: --mist-1 of packages/tokens/scales.css, the background.
-const MIST = '#EFF3F1';
+// A manifest can't read CSS variables: the step theme.css's background points at.
+const MIST = light['mist-1'];
 
 export function GET() {
   return Response.json({
