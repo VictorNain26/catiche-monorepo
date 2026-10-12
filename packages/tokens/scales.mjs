@@ -1,7 +1,8 @@
 /* The Rive scales (docs/charte.md): twelve steps per color, each at a target contrast with the
  * page background, light and dark, interpolated in OKLCH by Leonardo
  * (https://github.com/adobe/leonardo/tree/main/packages/contrast-colors). `bun scales.mjs` writes
- * scales.css; contrast.test.mjs checks the file matches. The roles of theme.css point at the steps:
+ * scales.css, and scales.json for what reads no CSS (a manifest, the Open Graph image);
+ * contrast.test.mjs checks both files match. The roles of theme.css point at the steps:
  * 1-2 backgrounds, 3-5 component fills, 6-8 borders, 9 non-text marks (3:1 and up), 10-11 text and
  * solids (4.5:1 and up), 12 the ink. */
 
@@ -52,4 +53,12 @@ ${block(scale(LIGHTNESS.dark), '    ')}
 `;
 }
 
-if (import.meta.main) writeFileSync(new URL('./scales.css', import.meta.url), scalesCss());
+export function scalesJson() {
+  const values = (lightness) => Object.fromEntries(scale(lightness));
+  return `${JSON.stringify({ light: values(LIGHTNESS.light), dark: values(LIGHTNESS.dark) }, null, 2)}\n`;
+}
+
+if (import.meta.main) {
+  writeFileSync(new URL('./scales.css', import.meta.url), scalesCss());
+  writeFileSync(new URL('./scales.json', import.meta.url), scalesJson());
+}

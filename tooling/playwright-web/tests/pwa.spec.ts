@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { computedColor } from '../colors';
 
 interface Manifest {
   name: string;
@@ -27,35 +28,32 @@ test('the manifest makes the app installable, in the colors of the page', async 
 
   // The manifest can't read the tokens: its colors must stay those the page computes.
   const pageBackground = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  const toRgb = (color: string) =>
-    page.evaluate((value) => {
-      const probe = document.createElement('div');
-      probe.style.color = value;
-      document.body.append(probe);
-      return getComputedStyle(probe).color;
-    }, color);
-  expect(await toRgb(manifest.background_color)).toBe(pageBackground);
-  expect(await toRgb(manifest.theme_color)).toBe(pageBackground);
+  expect(await computedColor(page, manifest.background_color)).toBe(pageBackground);
+  expect(await computedColor(page, manifest.theme_color)).toBe(pageBackground);
 });
 
 test.describe('in dark mode', () => {
   test.use({ colorScheme: 'dark' });
 
-  test('the page turns to the night background, and the browser bar with it', async ({ page }) => {
+  test('the page turns to the night background', async ({ page }) => {
     await page.goto('/');
-    const pageBackground = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-    expect(pageBackground).toBe('rgb(12, 30, 36)');
-    // index.html can't read the tokens: its dark theme color must stay the background the page computes.
-    const themeColor = await page.locator('meta[name="theme-color"][media="(prefers-color-scheme: dark)"]').getAttribute('content');
-    const rgb = await page.evaluate((value) => {
-      const probe = document.createElement('div');
-      probe.style.color = value;
-      document.body.append(probe);
-      return getComputedStyle(probe).color;
-    }, themeColor ?? '');
-    expect(rgb).toBe(pageBackground);
+    await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(12, 30, 36)');
   });
 });
+
+for (const colorScheme of ['light', 'dark'] as const) {
+  test.describe(`in ${colorScheme} mode`, () => {
+    test.use({ colorScheme });
+
+    test('the browser bar takes the background the page computes', async ({ page }) => {
+      await page.goto('/');
+      const pageBackground = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+      // index.html can't read the tokens: its theme colors must stay the background the page computes.
+      const themeColor = await page.locator(`meta[name="theme-color"][media="(prefers-color-scheme: ${colorScheme})"]`).getAttribute('content');
+      expect(await computedColor(page, themeColor ?? '')).toBe(pageBackground);
+    });
+  });
+}
 
 test('the service worker takes the app, and never an /api navigation', async ({ page }) => {
   await page.goto('/');

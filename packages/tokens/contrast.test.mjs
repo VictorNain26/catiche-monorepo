@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { scalesCss } from './scales.mjs';
+import { scalesCss, scalesJson } from './scales.mjs';
 
 const read = (file) => readFileSync(new URL(file, import.meta.url), 'utf8');
 const DARK = /@media\s*\(prefers-color-scheme:\s*dark\)\s*\{([\s\S]*?)\n\}/;
@@ -30,8 +30,9 @@ const modes = ['light', 'dark'].map((mode) => {
   return [mode, (role) => resolve(vars, `color-${role}`)];
 });
 
-test('scales.css is what scales.mjs writes', () => {
+test('scales.css and scales.json are what scales.mjs writes', () => {
   assert.equal(read('./scales.css'), scalesCss());
+  assert.equal(read('./scales.json'), scalesJson());
 });
 
 test('every scale step has a value of its own in the dark mode', () => {
@@ -99,6 +100,32 @@ const MARKS = [
     [`chart-${String(n)}`, 'card'],
   ]),
 ];
+
+// A color the same in both modes on purpose: a QR code reads dark on light, an overlay is black.
+const FIXED = ['qr', 'qr-background', 'overlay'];
+
+test('every role follows the dark mode: it points at a scale step, is redefined in the dark block, or is fixed', () => {
+  const roles = Object.keys(theme.light).filter((name) => name.startsWith('color-'));
+  const left = roles.filter((name) => {
+    const role = name.slice('color-'.length);
+    return !/^var\(--[a-z]+-\d+\)$/.test(theme.light[name]) && theme.dark[name] === theme.light[name] && !FIXED.includes(role);
+  });
+  assert.deepEqual(left, []);
+});
+
+// Next to each other in a stacked bar, two series must differ in lightness, not only in hue: a
+// reader who confuses the hues, or a grayscale print, tells them apart by it. 1.4:1 is ours, no
+// norm sets one; the charte asks for a label or a shape on top.
+const CHART_STEP = 1.4;
+
+for (const [mode, color] of modes) {
+  for (const n of [1, 2, 3]) {
+    test(`${mode}: chart-${String(n)} and chart-${String(n + 1)} differ in lightness by ${String(CHART_STEP)}:1`, () => {
+      const ratio = contrast(color(`chart-${String(n)}`), color(`chart-${String(n + 1)}`));
+      assert.ok(ratio >= CHART_STEP, `${color(`chart-${String(n)}`)} next to ${color(`chart-${String(n + 1)}`)} = ${ratio.toFixed(2)}`);
+    });
+  }
+}
 
 for (const [mode, color] of modes) {
   for (const [pairs, minimum, criterion] of [

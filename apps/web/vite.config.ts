@@ -3,10 +3,10 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { light } from '@repo/tokens/scales.json';
 
-// Manifest colors can't read CSS variables: --color-background in packages/tokens/theme.css,
-// --mist-1 of scales.css.
-const MIST = '#EFF3F1';
+// Manifest colors can't read CSS variables: the step theme.css's background points at.
+const MIST = light['mist-1'];
 
 const DEV_PORT = 3002;
 const API = 'http://localhost:3000';

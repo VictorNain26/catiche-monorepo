@@ -8,7 +8,8 @@
   },
   "exports": {
     "./theme.css": "./theme.css",
-    "./base.css": "./base.css"
+    "./base.css": "./base.css",
+    "./scales.json": "./scales.json"
   },
   "devDependencies": {
     "@adobe/leonardo-contrast-colors": "1.1.0"

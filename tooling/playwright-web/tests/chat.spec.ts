@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { createUIMessageStream, createUIMessageStreamResponse } from 'ai';
+import { token } from '../colors';
 import { addChild, guardian, pairedStudent } from '../guardian';
 
 // page.route never sees what the service worker answers.
@@ -31,18 +32,6 @@ async function tutorReplies(page: Page, reply: string) {
     return route.fulfill({ status: 200, headers: Object.fromEntries(response.headers), body });
   });
   return sent;
-}
-
-/** A color token as the page computes it, so that a test never copies a value of the palette. */
-function token(page: Page, name: string) {
-  return page.evaluate((variable) => {
-    const probe = document.createElement('div');
-    probe.style.color = `var(${variable})`;
-    document.body.append(probe);
-    const color = getComputedStyle(probe).color;
-    probe.remove();
-    return color;
-  }, `--color-${name}`);
 }
 
 test('a paired student opens a session, writes to Tom and reads his reply', async ({ page, browser }, testInfo) => {

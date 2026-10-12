@@ -113,7 +113,7 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
 - **Les tokens Rive sur le site dès l'étape 2.1** (2026-10-12, choix de Victor). Le site prend les
   couleurs et les fontes de Rive en même temps que l'app, en ligne sur sa composition actuelle
   jusqu'à sa refonte (étape 3) ; `landing.css`, Nunito et Caveat partent, la note manuscrite
-  devient une note en pelage. Les échelles de douze pas viennent de Leonardo
+  devient une note en pelage, et le site gagne le mode sombre de la charte, qu'il n'avait pas. Les échelles de douze pas viennent de Leonardo
   (`@adobe/leonardo-contrast-colors`), à des contrastes cibles sur le fond, plutôt que des échelles
   toutes faites de Radix, qui ne tombent pas sur les couleurs de la charte.
 - **Des formules, pas de schémas, dans la séance** (2026-10-08, choix délégué par Victor). Le

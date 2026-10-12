@@ -6,8 +6,9 @@
     @apply border-border;
   }
 
+  /* text-base: the body at 17 px, never less on a phone (docs/charte.md). */
   body {
-    @apply bg-background font-sans text-foreground antialiased;
+    @apply bg-background font-sans text-base text-foreground antialiased;
   }
 
   h1,
