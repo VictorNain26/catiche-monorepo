@@ -1,11 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@repo/ui';
+import { Banner, Button } from '@repo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { CODE_INPUT_CLASS, Field } from '../components/field';
-import { Notice } from '../components/notice';
 import { Page } from '../components/page';
 import { authClient, authMessage } from '../lib/auth';
 import { pairingSchema } from '../lib/pairing';
@@ -60,7 +59,7 @@ function PairForm({ scanned }: { scanned: string | undefined }) {
           {...form.register('code')}
           error={form.formState.errors.code?.message}
         />
-        {failure && <Notice tone="error">{failure}</Notice>}
+        {failure && <Banner tone="error" title={failure} />}
         <Button type="submit" disabled={form.formState.isSubmitting}>
           Relier
         </Button>

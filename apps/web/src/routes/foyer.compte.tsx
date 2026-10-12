@@ -1,8 +1,7 @@
-import { Button, Card } from '@repo/ui';
+import { Banner, Button, Card } from '@repo/ui';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { Notice } from '../components/notice';
 import { BackLink, Page } from '../components/page';
 import { PasskeyCreate } from '../components/passkey-create';
 import { SignOut } from '../components/sign-out';
@@ -52,27 +51,25 @@ function Passkeys() {
       {passkeys.length > 0 && (
         <ul className="flex flex-col gap-2">
           {passkeys.map((passkey) => (
-            <Card asChild key={passkey.id} className="flex items-center justify-between gap-3">
-              <li>
-                <span className="flex flex-col">
-                  <span className="font-bold">{deviceName(passkey.name)}</span>
-                  <span className="text-sm text-muted-foreground">Créée le {formatDay(passkey.createdAt)}</span>
-                </span>
-                <Button
-                  variant="outline"
-                  disabled={remove.isPending}
-                  onClick={() => {
-                    remove.mutate(passkey.id);
-                  }}
-                >
-                  Supprimer
-                </Button>
-              </li>
+            <Card render={<li />} key={passkey.id} className="flex items-center justify-between gap-3">
+              <span className="flex flex-col">
+                <span className="font-bold">{deviceName(passkey.name)}</span>
+                <span className="text-sm text-muted-foreground">Créée le {formatDay(passkey.createdAt)}</span>
+              </span>
+              <Button
+                variant="outline"
+                disabled={remove.isPending}
+                onClick={() => {
+                  remove.mutate(passkey.id);
+                }}
+              >
+                Supprimer
+              </Button>
             </Card>
           ))}
         </ul>
       )}
-      {failure && <Notice tone="error">{failure}</Notice>}
+      {failure && <Banner tone="error" title={failure} />}
       <PasskeyCreate label="Créer une clé d’accès sur cet appareil" onCreated={refresh} />
     </section>
   );

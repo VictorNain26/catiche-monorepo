@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@repo/ui';
+import { Banner, Button } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useCallback, useEffect, useState } from 'react';
@@ -7,7 +7,6 @@ import { useForm } from 'react-hook-form';
 import { z } from '../lib/zod';
 import { CodeForm, sendCode } from '../components/code-form';
 import { Field } from '../components/field';
-import { Notice } from '../components/notice';
 import { Page } from '../components/page';
 import { authClient, authMessage, deviceSessionsQuery, hasCode, isCancelled } from '../lib/auth';
 import { meQuery } from '../lib/me';
@@ -105,7 +104,9 @@ function EmailStep({ onSent, onEntered }: { onSent: (email: string) => void; onE
             Le soir, Tom, un programme, aide votre enfant à faire ses devoirs : il lui pose des questions pour qu’il trouve lui-même, il n’est pas là
             pour donner la réponse.
           </p>
-          <Notice tone="info">Catiche est en bêta fermée : un compte se crée avec l’adresse e-mail qui a reçu une invitation.</Notice>
+          <Banner tone="info" title="Catiche est en bêta fermée">
+            Un compte se crée avec l’adresse e-mail qui a reçu une invitation.
+          </Banner>
         </>
       )}
       <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-4">
@@ -116,7 +117,7 @@ function EmailStep({ onSent, onEntered }: { onSent: (email: string) => void; onE
           {...form.register('email')}
           error={form.formState.errors.email?.message}
         />
-        {failure && <Notice tone="error">{failure}</Notice>}
+        {failure && <Banner tone="error" title={failure} />}
         {/* On the family's phone, the child's own space is the screen's first way. */}
         <Button type="submit" variant={child ? 'outline' : 'default'} disabled={form.formState.isSubmitting}>
           Recevoir mon code
@@ -169,8 +170,8 @@ function Children({ active }: { active: { id: string; name: string } }) {
           C’est {user.name}
         </Button>
       ))}
-      {held.isError && <Notice tone="error">Les autres profils de cet appareil n’ont pas pu se charger.</Notice>}
-      {switchTo.error && <Notice tone="error">{switchTo.error.message}</Notice>}
+      {held.isError && <Banner tone="error" title="Les autres profils de cet appareil n’ont pas pu se charger." />}
+      {switchTo.error && <Banner tone="error" title={switchTo.error.message} />}
     </>
   );
 }

@@ -99,10 +99,8 @@ test('a guardian adds a child, changes their class, then deletes their account',
   await page.getByLabel('Sa classe', { exact: true }).selectOption({ label: 'Troisième' });
   await page.getByRole('button', { name: 'Enregistrer' }).click();
   // The page of a child just added says the next step too.
-  await expect(page.getByRole('status').filter({ hasText: 'Enregistré.' })).toHaveText('Enregistré.');
-  await page.getByLabel('Son prénom', { exact: true }).fill('Léa-Rose');
-  await expect(page.getByText('Enregistré.')).toBeHidden();
-  await page.getByLabel('Son prénom', { exact: true }).fill('Léa');
+  // A save is said by a toast, read out from the notifications region.
+  await expect(page.getByRole('region', { name: 'Notifications' })).toContainText('Enregistré.');
 
   await page.getByText('Supprimer son compte', { exact: true }).click();
   await page.getByRole('button', { name: 'Supprimer le compte de Léa' }).click();
@@ -175,7 +173,8 @@ test('a code pairs the child’s phone, which sees it, and the guardian disconne
   await expect(child.getByRole('listitem')).toHaveCount(1);
 
   // The guardian's page follows the pairing on its own, said where the code was.
-  await expect(step.getByRole('status')).toHaveText('L’appareil de Noé est relié.', { timeout: 10_000 });
+  await expect(step.getByRole('region', { name: 'L’appareil de Noé est relié.' })).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByRole('region', { name: 'Notifications' })).toContainText('L’appareil de Noé est relié.');
   await expect(step.getByRole('button')).toHaveCount(0);
   await expect(page.getByText(/^[0-9A-Z]{4}-[0-9A-Z]{4}$/)).toBeHidden();
   await page.getByText('Ses appareils', { exact: true }).click();

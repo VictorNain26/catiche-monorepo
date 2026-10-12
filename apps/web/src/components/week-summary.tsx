@@ -1,7 +1,6 @@
-import { Card } from '@repo/ui';
+import { Banner, Card } from '@repo/ui';
 import { lastTime } from '../lib/memory';
 import { minutesText, questionFor, subjectLabel, type WeekSummary as Week } from '../lib/summary';
-import { Notice } from './notice';
 
 /**
  * The summary of the week (`docs/decisions.md`): the subjects and the time, what resists with the
@@ -27,7 +26,7 @@ export function WeekSummary({
       {week ? (
         <Week week={week} name={name} reader={reader} />
       ) : failed ? (
-        <Notice tone="error">Le résumé de la semaine n’a pas pu se charger. Réessayez dans un instant.</Notice>
+        <Banner tone="error" title="Le résumé de la semaine n’a pas pu se charger. Réessayez dans un instant." />
       ) : (
         <p className="text-muted-foreground">Chargement…</p>
       )}
@@ -64,11 +63,9 @@ function Week({ week, name, reader }: { week: Week; name: string; reader: 'guard
       ) : (
         <ul className="flex flex-col gap-2">
           {week.resisting.map((notion) => (
-            <Card asChild key={notion.notionId} className="flex flex-col gap-1">
-              <li>
-                <span className="font-bold">{notion.label}</span>
-                <span className="text-sm text-muted-foreground">{lastTime(notion)}</span>
-              </li>
+            <Card render={<li />} key={notion.notionId} className="flex flex-col gap-1">
+              <span className="font-bold">{notion.label}</span>
+              <span className="text-sm text-muted-foreground">{lastTime(notion)}</span>
             </Card>
           ))}
         </ul>

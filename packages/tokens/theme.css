@@ -40,6 +40,8 @@
   --color-muted-foreground: var(--mist-10);
   --color-accent: var(--mist-3);
   --color-accent-foreground: var(--mist-12);
+  /* Le texte secondaire sur le survol : muted-foreground y tomberait à 4,3:1. */
+  --color-accent-muted-foreground: var(--mist-11);
   /* Une carte se détache en blanc sur la brume ; en sombre, un pas plus clair que le fond. */
   --color-card: #ffffff;
   --color-card-foreground: var(--mist-12);
@@ -76,12 +78,68 @@
   --color-chart-4: var(--mist-12);
 
   /* Mouvement — fast : un retour de pression ; base : une transition ; slow : l'entrée d'un
-   * écran ; pulse : le demi-cycle d'un squelette. Une seule courbe, sans rebond. */
+   * écran ; pulse : le demi-cycle d'un squelette ; wait : l'attente sous laquelle rien ne
+   * s'affiche, au-delà un squelette. Une seule courbe, sans rebond. */
   --duration-fast: 150ms;
   --duration-base: 250ms;
   --duration-slow: 400ms;
   --duration-pulse: 1000ms;
+  --duration-wait: 1000ms;
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Un dialogue arrive en fondu, un tiroir glisse depuis son bord ; ils repartent plus vite. */
+  --animate-fade-in: fade-in var(--duration-base) var(--ease-standard);
+  --animate-fade-out: fade-out var(--duration-fast) var(--ease-standard);
+  --animate-slide-in-bottom: slide-in-bottom var(--duration-slow) var(--ease-standard);
+  --animate-slide-out-bottom: slide-out-bottom var(--duration-base) var(--ease-standard);
+  --animate-slide-in-right: slide-in-right var(--duration-slow) var(--ease-standard);
+  --animate-slide-out-right: slide-out-right var(--duration-base) var(--ease-standard);
+  /* Un squelette reste caché pendant l'attente, puis pulse ; sous le mouvement réduit, il paraît
+   * sans pulser. */
+  --animate-skeleton:
+    appear 0s linear var(--duration-wait) both, pulse-surface var(--duration-pulse) var(--ease-standard) var(--duration-wait) infinite alternate;
+  --animate-skeleton-still: appear 0s linear var(--duration-wait) both;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes slide-in-bottom {
+    from {
+      transform: translateY(100%);
+    }
+  }
+  @keyframes slide-out-bottom {
+    to {
+      transform: translateY(100%);
+    }
+  }
+  @keyframes slide-in-right {
+    from {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes slide-out-right {
+    to {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes appear {
+    from {
+      visibility: hidden;
+    }
+  }
+  @keyframes pulse-surface {
+    to {
+      background-color: var(--color-accent);
+    }
+  }
 }
 
 /* Sombre, suivi du réglage de l'appareil ; il ne se dit jamais bon pour le sommeil. */

@@ -1,9 +1,8 @@
-import { Button } from '@repo/ui';
+import { Banner, Button } from '@repo/ui';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { authClient, authMessage, hasCode, isCancelled } from '../lib/auth';
 import { CodeForm, sendCode } from './code-form';
-import { Notice } from './notice';
 
 /**
  * The making of a passkey on this device. It is made within minutes of entering (the server's
@@ -36,7 +35,7 @@ export function PasskeyCreate({ label, onCreated }: { label: string; onCreated: 
 
   return (
     <>
-      {failure && <Notice tone="error">{failure}</Notice>}
+      {failure && <Banner tone="error" title={failure} />}
       {codeSentTo ? (
         <CodeForm
           email={codeSentTo}
@@ -48,9 +47,9 @@ export function PasskeyCreate({ label, onCreated }: { label: string; onCreated: 
         />
       ) : stale ? (
         <>
-          <Notice tone="info">
-            Par sécurité, une clé d’accès se crée dans les 10 minutes qui suivent votre entrée. Confirmez d’abord avec un code reçu par e-mail.
-          </Notice>
+          <Banner tone="info" title="Confirmez d’abord avec un code reçu par e-mail">
+            Par sécurité, une clé d’accès se crée dans les 10 minutes qui suivent votre entrée.
+          </Banner>
           <Button
             disabled={askCode.isPending}
             onClick={() => {
