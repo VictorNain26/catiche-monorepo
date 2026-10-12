@@ -85,6 +85,22 @@ test.describe('the shell', () => {
     expect(nav.x + nav.width).toBeLessThanOrEqual(main.x);
     expect(nav.height).toBeGreaterThan(DESKTOP.height / 2);
   });
+
+  test('keeps its header above the side navigation once the page scrolls', async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto('/catalogue');
+    await page.evaluate(() => {
+      window.scrollTo(0, window.innerHeight);
+    });
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+
+    const logo = await box(page.getByRole('banner').getByText('Catiche'));
+    const onTop = await page.evaluate(
+      ([x, y]) => document.elementFromPoint(x ?? 0, y ?? 0)?.closest('header') !== null,
+      [logo.x + logo.width / 2, logo.y + logo.height / 2],
+    );
+    expect(onTop).toBe(true);
+  });
 });
 
 test('every button of the catalogue is a target of 44 px at least', async ({ page }) => {

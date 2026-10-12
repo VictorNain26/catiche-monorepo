@@ -34,7 +34,7 @@ interface AppShellProps {
 function AppShell({ logo, profile, navigationLabel, destinations, children }: AppShellProps) {
   return (
     <div className="min-h-dvh sm:grid sm:grid-cols-[auto_1fr] sm:grid-rows-[auto_1fr]">
-      <header className="sticky top-0 z-10 flex min-h-14 items-center justify-between gap-4 border-b border-border bg-background px-4 sm:col-span-2">
+      <header className="sticky top-0 z-20 flex min-h-14 items-center justify-between gap-4 border-b border-border bg-background px-4 sm:col-span-2">
         <div className="flex items-center">{logo}</div>
         {profile}
       </header>
