@@ -13,7 +13,7 @@ export const buttonVariants = cva(
       size: {
         default: 'h-11 px-6 text-sm rounded-control',
         sm: 'h-11 px-4 text-sm rounded-control',
-        lg: 'h-12 px-8 text-base rounded-control [&_svg]:size-5',
+        lg: 'h-12 px-8 text-base rounded-control',
         icon: 'size-11 rounded-control',
       },
     },
