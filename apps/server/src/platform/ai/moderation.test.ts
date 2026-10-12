@@ -85,10 +85,10 @@ describe('an unavailable Mistral', () => {
   it('is retried, a hung attempt cut, within the call deadline', async () => {
     const patient = createModeration({ mistral: mistral.config({ retryAttempts: 2 }), logger });
     mistral.moderations.push({ status: 503 }, 'hang', {});
-    const start = Date.now();
+    const start = performance.now();
     expect(await patient.texts(['a'])).toEqual([[]]);
     expect(mistral.received).toHaveLength(3);
-    expect(Date.now() - start).toBeLessThan(5_000);
+    expect(performance.now() - start).toBeLessThan(5_000);
   }, 10_000);
 
   it('gives up when the retries run out', async () => {

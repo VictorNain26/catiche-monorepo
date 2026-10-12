@@ -13,7 +13,7 @@ const admin = maintenance();
 const leftovers = await admin<{ datname: string }[]>`SELECT datname FROM pg_database WHERE starts_with(datname, ${PREFIX})`;
 for (const { datname } of leftovers) {
   const createdAt = Number(/_(\d+)_[0-9a-f]{8}$/.exec(datname)?.[1]);
-  if (Date.now() - createdAt > STALE_MS) await admin.unsafe(`DROP DATABASE IF EXISTS ${datname} WITH (FORCE)`);
+  if (createdAt < Date.now() - STALE_MS) await admin.unsafe(`DROP DATABASE IF EXISTS ${datname} WITH (FORCE)`);
 }
 await admin.unsafe(`CREATE DATABASE ${TEMPLATE}`);
 await admin.end();

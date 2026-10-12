@@ -73,7 +73,7 @@ export async function analyseTurn(
   turn: { studentId: string; studentText: string; lastTutorText: string | null; currentStatement: string | null },
 ): Promise<TurnAnalysis> {
   if (turn.studentText.trim() === '') return NOTHING;
-  const startTime = Date.now();
+  const startTime = performance.now();
   try {
     const { object } = await ai.generateStructured({
       operation: 'turn-analysis',
@@ -107,7 +107,7 @@ ${clip(turn.studentText)}
     });
     return object;
   } catch (err) {
-    logger.error({ err, durationMs: Date.now() - startTime }, 'Turn analysis failed');
+    logger.error({ err, durationMs: Math.round(performance.now() - startTime) }, 'Turn analysis failed');
     return { ...NOTHING, error: err instanceof Error ? err.message : String(err) };
   }
 }
