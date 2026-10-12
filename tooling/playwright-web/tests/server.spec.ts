@@ -71,6 +71,8 @@ test.describe('after a deployment', () => {
     await page.goto('/');
 
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    // The heading can show before the reloaded page's own load event reaches the test.
+    await page.waitForLoadState('load');
     expect(failed()).toBe(1);
     expect(loads).toBe(2);
   });
@@ -83,6 +85,7 @@ test.describe('after a deployment', () => {
     await page.goto('/');
 
     await expect(page.getByRole('heading', { name: 'Une erreur est survenue' })).toBeVisible();
+    await page.waitForLoadState('load');
     // One reload, not a loop. WebKit asks no second time for a module it failed to load.
     expect(failed()).toBeGreaterThanOrEqual(1);
     expect(loads).toBe(2);
