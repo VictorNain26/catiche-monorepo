@@ -107,9 +107,11 @@ export default [
           message: 'Les imports dynamiques dans les types sont interdits. Utilisez des imports statiques en haut de fichier.',
         },
         {
-          // A start kept to measure a duration. The wall clock jumps (NTP, WSL resyncing): a test once
-          // measured 5.6 s for 2.7 s.
-          selector: "VariableDeclarator > CallExpression.init[callee.object.name='Date'][callee.property.name='now']",
+          // A duration: now minus a start kept in a variable. The wall clock jumps (NTP, WSL
+          // resyncing): a test once measured 5.6 s for 2.7 s. A date computed from now minus a
+          // constant (`Date.now() - DAY_MS`) is no duration.
+          selector:
+            "BinaryExpression[operator='-'][right.type='Identifier'][right.name=/^[a-z]/] > CallExpression.left[callee.object.name='Date'][callee.property.name='now']",
           message: 'Une durée se mesure sur une horloge monotone : performance.now(), pas Date.now().',
         },
       ],
