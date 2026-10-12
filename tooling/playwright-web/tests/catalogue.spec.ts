@@ -89,10 +89,16 @@ test.describe('the shell', () => {
   test('keeps its header above the side navigation once the page scrolls', async ({ page }) => {
     await page.setViewportSize(DESKTOP);
     await page.goto('/catalogue');
-    await page.evaluate(() => {
-      window.scrollTo(0, window.innerHeight);
-    });
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    // The router restores the scroll once the page is in: scroll until it stays.
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          window.scrollTo(0, window.innerHeight);
+          return window.scrollY;
+        }),
+      )
+      .toBeGreaterThan(0);
 
     const logo = await box(page.getByRole('banner').getByText('Catiche'));
     const onTop = await page.evaluate(
