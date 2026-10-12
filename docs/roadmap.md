@@ -31,7 +31,7 @@ est une PR, ses pratiques dans `etudes/2026-10-12/bonnes-pratiques.md` :
    2. La qualité : `@playwright/test` à une version exacte ; les captures de référence
       (`toHaveScreenshot`) générées et comparées dans l'image officielle de Playwright, en local
       comme en CI ; `@axe-core/playwright` sur chaque état ; un projet à l'ordinateur dans la suite ;
-      la définition de « fini » d'un écran (`.claude/rules/design-system.md`).
+      la définition de « fini » d'un écran (`.claude/rules/design-system.md`). Fait.
    3. Les composants de `@repo/ui`, sur Radix, les toasts mis à part : la coquille de l'app (en-tête, onglets en bas,
       navigation sur le côté à l'ordinateur), section, liste, carte, état vide, squelette, bandeau,
       dialogue et tiroir, toast (`sonner`), graphique en barres en SVG accessible ; une page de

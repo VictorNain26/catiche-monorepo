@@ -35,6 +35,7 @@ packages/
 └── eslint-config/   # Config ESLint partagée
 
 tooling/
+├── playwright/      # Ce que les suites de bout en bout partagent : axe, captures, base et ports du checkout
 └── playwright-web/  # Suite de bout en bout du web, contre le serveur construit
 ```
 

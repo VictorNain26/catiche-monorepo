@@ -13,8 +13,10 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
   `charte.md`), le plan du lot tiré des pratiques des métiers (`roadmap.md`,
   `etudes/2026-10-12/bonnes-pratiques.md`). Les tokens Rive (2.1) sont dans le site et l'app :
   échelles générées par Leonardo, rôles, graphiques, mouvement, Bricolage Grotesque et Atkinson
-  Hyperlegible Next. En cours en parallèle : 2.2, la qualité (captures, axe, projet à
-  l'ordinateur) ; puis 2.3, les composants de `@repo/ui` ; puis 2.4, le logo et Tom en 2D. L'essai
+  Hyperlegible Next. La qualité (2.2) tient les écrans : captures de référence par projet, axe
+  (WCAG 2.2 A et AA) sur chaque état en clair et en sombre, un projet `desktop` dans la suite
+  web, chaque checkout sur sa propre base et ses propres ports d'e2e. En cours : 2.3, les
+  composants de `@repo/ui` ; puis 2.4, le logo et Tom en 2D. L'essai
   de Rive est sur la branche locale `da2/rive`, jamais poussée : une référence pour le hero du
   site, pas un code à reprendre ; sa composition des écrans n'est pas retenue.
 - **Déjà construit**, aux couleurs de Rive mais sans composition : le nom Catiche dans
@@ -129,10 +131,6 @@ Conditions à guetter, sans PR tant qu'elles ne se déclenchent pas.
   « the button gets a parent in with their passkey » et « a paired student opens a session » ont
   échoué une fois chacun, puis passé seuls à chaque relance. Si la CI les voit échouer, en
   chercher la cause (attente, charge).
-- **Suites e2e web en parallèle en local** (2026-10-12) : deux checkouts (worktrees) partagent la
-  base `tom_e2e` et le port 3012 ; un lancement recrée la base sous l'autre, qui voit « relation
-  does not exist » et peut en tirer une fausse capture de référence. Une seule suite web à la
-  fois ; si les worktrees deviennent la règle, une base et un port par checkout.
 - **Tirage des images en CI** (`.github/actions/compose-up`, depuis le 2026-10-12) : si
   l'avertissement d'un essai dépassé revient souvent, regarder le registre en cause avant
   d'allonger le délai.

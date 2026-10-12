@@ -45,5 +45,5 @@ l'app. Les composants ne dépendent de l'identité que par les rôles.
 - sans être vu au téléphone (deux largeurs) et à l'ordinateur, en clair et en sombre ;
 - sans `expectAccessible(page)` (axe, WCAG 2.2 A et AA) vert sur chacun de ses états dans la
   suite e2e, ni un passage au clavier ;
-- sans sa capture de référence (`toHaveScreenshot`) relue à chaque projet, régénérée par
-  `bunx turbo run test:e2e --filter=<suite> -- --update-snapshots` (`.claude/rules/testing.md`).
+- sans sa capture de référence (`toHaveScreenshot`) relue à chaque projet
+  (`.claude/rules/testing.md`, « Captures de référence »).
