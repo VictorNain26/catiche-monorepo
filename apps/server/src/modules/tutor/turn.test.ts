@@ -266,9 +266,9 @@ describe('a turn', () => {
     const sessionId = await newSession();
     mistral.chat.push('hang');
     mistral.moderations.push({ flagged: ['selfharm'] });
-    const start = Date.now();
+    const start = performance.now();
     expect((await say(sessionId, "j'en peux plus")).reply).toBe(DISTRESS_REPLY);
-    expect(Date.now() - start).toBeLessThan(1_000);
+    expect(performance.now() - start).toBeLessThan(1_000);
   });
 
   it('reads the session closed by the statement that locks the turn', async () => {

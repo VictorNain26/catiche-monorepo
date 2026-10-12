@@ -106,6 +106,12 @@ export default [
           selector: "TSTypeReference[typeName.type='ImportExpression']",
           message: 'Les imports dynamiques dans les types sont interdits. Utilisez des imports statiques en haut de fichier.',
         },
+        {
+          // A start kept to measure a duration. The wall clock jumps (NTP, WSL resyncing): a test once
+          // measured 5.6 s for 2.7 s.
+          selector: "VariableDeclarator > CallExpression.init[callee.object.name='Date'][callee.property.name='now']",
+          message: 'Une durée se mesure sur une horloge monotone : performance.now(), pas Date.now().',
+        },
       ],
     },
   },

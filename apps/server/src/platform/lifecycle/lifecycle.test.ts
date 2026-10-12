@@ -38,11 +38,11 @@ describe('shutdown', () => {
   it('fails readiness, waits for the probe, stops the server, then closes the resources, and exits 0', async () => {
     const lifecycle = createLifecycle();
     const steps: string[] = [];
-    const started = Date.now();
+    const started = performance.now();
     const code = await shutdown({
       lifecycle,
       stopServer: async () => {
-        steps.push(`stop after ${String(Date.now() - started >= 50)}, draining=${String(lifecycle.draining)}`);
+        steps.push(`stop after ${String(performance.now() - started >= 50)}, draining=${String(lifecycle.draining)}`);
       },
       close: [
         async () => {
