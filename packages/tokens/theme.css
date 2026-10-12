@@ -40,6 +40,8 @@
   --color-muted-foreground: var(--mist-10);
   --color-accent: var(--mist-3);
   --color-accent-foreground: var(--mist-12);
+  /* Le texte secondaire sur le survol : muted-foreground y tomberait à 4,3:1. */
+  --color-accent-muted-foreground: var(--mist-11);
   /* Une carte se détache en blanc sur la brume ; en sombre, un pas plus clair que le fond. */
   --color-card: #ffffff;
   --color-card-foreground: var(--mist-12);

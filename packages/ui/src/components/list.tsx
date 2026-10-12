@@ -31,14 +31,15 @@ function ListItem({ title, meta, render, className, children }: ListItemProps) {
     props: {
       className: cn(
         'flex min-h-14 items-center gap-3 px-4 py-3',
-        link && 'transition-colors duration-fast ease-standard hover:bg-accent focus-visible:ring-inset focus-visible:ring-offset-0',
+        link &&
+          'group transition-colors duration-fast ease-standard hover:bg-accent hover:text-accent-foreground focus-visible:ring-inset focus-visible:ring-offset-0',
         className,
       ),
       children: (
         <>
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="font-bold">{title}</span>
-            {meta !== undefined && <span className="text-sm text-muted-foreground">{meta}</span>}
+            {meta !== undefined && <span className="text-sm text-muted-foreground group-hover:text-accent-muted-foreground">{meta}</span>}
           </span>
           {children}
           {link && <ChevronRightIcon aria-hidden="true" nonScalingStroke className="size-6 shrink-0 text-muted-foreground" />}

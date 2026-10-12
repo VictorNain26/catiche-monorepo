@@ -65,6 +65,8 @@ const TEXT = [
   ['popover-foreground', 'popover'],
   ['secondary-foreground', 'secondary'],
   ['accent-foreground', 'accent'],
+  // The secondary words of a hovered line of a list: muted-foreground would fall to 4.3:1 there.
+  ['accent-muted-foreground', 'accent'],
   ['muted-foreground', 'background'],
   ['muted-foreground', 'card'],
   ['muted-foreground', 'secondary'],
