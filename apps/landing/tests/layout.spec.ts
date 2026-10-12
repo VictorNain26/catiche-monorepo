@@ -26,17 +26,23 @@ for (const path of PAGES) {
   });
 }
 
-for (const path of PAGES) {
-  for (const width of [375, 1441]) {
-    test(`${path} at ${width}px breaks no WCAG 2.2 A or AA rule axe checks`, async ({ page }) => {
-      await page.setViewportSize({ width, height: HEIGHT });
-      await page.goto(path);
-      await settle(page);
-      // A block still fading in would be judged on a contrast it only passes through.
-      await expect.poll(() => hiddenReveals(page)).toEqual([]);
-      await expectAccessible(page);
-    });
-  }
+for (const colorScheme of ['light', 'dark'] as const) {
+  test.describe(`in ${colorScheme} mode`, () => {
+    test.use({ colorScheme });
+
+    for (const path of PAGES) {
+      for (const width of [375, 1441]) {
+        test(`${path} at ${width}px breaks no WCAG 2.2 A or AA rule axe checks`, async ({ page }) => {
+          await page.setViewportSize({ width, height: HEIGHT });
+          await page.goto(path);
+          await settle(page);
+          // A block still fading in would be judged on a contrast it only passes through.
+          await expect.poll(() => hiddenReveals(page)).toEqual([]);
+          await expectAccessible(page);
+        });
+      }
+    }
+  });
 }
 
 function inspectBounds(page: Page) {
