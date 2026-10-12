@@ -76,7 +76,8 @@ tient dans le cercle central.
 
 ## Icônes
 
-Lucide, trait de 2 px à 24 px (`absoluteStrokeWidth`), toujours avec un libellé visible.
+Lucide, trait de 2 px à 24 px (`nonScalingStroke`, qui remplace `absoluteStrokeWidth` dans
+`lucide-react` 1), toujours avec un libellé visible.
 
 ## Graphiques
 
