@@ -35,7 +35,7 @@ est une PR, ses pratiques dans `etudes/2026-10-12/bonnes-pratiques.md` :
    3. Les composants de `@repo/ui`, sur Radix, les toasts mis à part : la coquille de l'app (en-tête, onglets en bas,
       navigation sur le côté à l'ordinateur), section, liste, carte, état vide, squelette, bandeau,
       dialogue et tiroir, toast (`sonner`), graphique en barres en SVG accessible ; une page de
-      catalogue en développement, capturée.
+      catalogue, visitée par la suite e2e. Fait.
    4. L'identité : le logo de Catiche et ses icônes (favicon, PWA) ; Tom en 2D au trait, tiré de
       `tom.blend` par le Line Art de Blender, et sa planche de référence.
 3. **Le site et l'entrée** : la landing refaite sur la charte, « Se connecter » vers l'app, l'app en
