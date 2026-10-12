@@ -143,8 +143,9 @@ describe('web client — compression and revalidation', () => {
 });
 
 describe('security headers', () => {
-  it('sets a CSP that allows this origin only, on pages as on the API', async () => {
-    const csp = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'";
+  it('sets a CSP that allows this origin only, on pages as on the API, and <style> elements written at run time', async () => {
+    const csp =
+      "default-src 'self'; style-src-elem 'self' 'unsafe-inline'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'";
     expect((await navigate('/')).headers.get('content-security-policy')).toBe(csp);
     expect((await get('/api/ping')).headers.get('content-security-policy')).toBe(csp);
   });
