@@ -95,7 +95,7 @@ describe('BarChart', () => {
       { label: 'Il y a trois semaines', values: [4, 5] },
     ] as const;
     const html = renderToStaticMarkup(
-      <BarChart message="m" orientation="vertical" categoryLabel="Jour" categories={['lun.', 'mar.']} series={series} />,
+      <BarChart message="m" orientation="horizontal" categoryLabel="Matière" categories={['Français', 'Anglais']} series={series} />,
     );
     const fills = bars(html).map((bar) => /fill-chart-\d/.exec(bar.className)?.[0]);
     expect(fills).toEqual([
@@ -110,6 +110,46 @@ describe('BarChart', () => {
     ]);
     const legend = /<ul[^>]*data-legend[^>]*>(.*?)<\/ul>/.exec(html)?.[1] ?? '';
     expect([...legend.matchAll(/<li[^>]*>.*?<span>(.*?)<\/span><\/li>/g)].map(([, label]) => label)).toEqual(series.map((s) => s.label));
+  });
+
+  it('draws the weeks one under the other, each named above its days, rather than bars side by side', () => {
+    const html = renderToStaticMarkup(
+      <BarChart
+        message="m"
+        orientation="vertical"
+        categoryLabel="Jour"
+        categories={['lun.', 'mar.', 'mer.']}
+        series={[
+          { label: 'Cette semaine', values: [1, 2, 3] },
+          { label: 'Semaine dernière', values: [3, 2, 1] },
+        ]}
+      />,
+    );
+    expect([...html.matchAll(/<svg/g)]).toHaveLength(2);
+    expect([...html.matchAll(/data-series-title="">(.*?)</g)].map(([, title]) => title)).toEqual(['Cette semaine', 'Semaine dernière']);
+    expect(bars(html).map((bar) => /fill-chart-\d/.exec(bar.className)?.[0])).toEqual([
+      'fill-chart-1',
+      'fill-chart-1',
+      'fill-chart-1',
+      'fill-chart-2',
+      'fill-chart-2',
+      'fill-chart-2',
+    ]);
+    expect(html).not.toContain('data-legend');
+  });
+
+  it('refuses values that do not match the categories, rather than draw a missing one as zero', () => {
+    const render = () =>
+      renderToStaticMarkup(
+        <BarChart
+          message="m"
+          orientation="vertical"
+          categoryLabel="Jour"
+          categories={['lun.', 'mar.']}
+          series={[{ label: 'Minutes', values: [5] }]}
+        />,
+      );
+    expect(render).toThrow('Minutes: 1 value for 2 categories');
   });
 
   it('shows no legend for a single series, whose name the table header carries', () => {
