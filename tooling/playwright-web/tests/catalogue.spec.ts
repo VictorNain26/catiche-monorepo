@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { expectAccessible } from '@repo/playwright/accessibility';
 import scales from '@repo/tokens/scales.json' with { type: 'json' };
 import { computedColor, token } from '../colors';
 import { recordCspViolations } from '../csp';
@@ -48,16 +49,43 @@ for (const scheme of ['light', 'dark'] as const) {
       // The device's setting decides the mode: the mist of that mode's scale.
       const background = await page.locator('body').evaluate((body) => getComputedStyle(body).backgroundColor);
       expect(background).toBe(await computedColor(page, scales[scheme]['mist-1']));
+      await expectAccessible(page);
     });
   }
+
+  test(`the dialog, the drawer and a toast break no rule in ${scheme}`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: scheme });
+    await page.goto('/catalogue');
+
+    await page.getByRole('button', { name: 'Ouvrir le dialogue' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Supprimer cette séance ?' });
+    await expect(dialog).toBeVisible();
+    await expectAccessible(page);
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+
+    await page.getByRole('button', { name: 'Ouvrir le tiroir' }).click();
+    const drawer = page.getByRole('dialog', { name: 'Trier les séances' });
+    await expect(drawer).toBeVisible();
+    await expectAccessible(page);
+    await page.keyboard.press('Escape');
+    await expect(drawer).toBeHidden();
+
+    await page.getByRole('button', { name: 'Afficher un toast' }).click();
+    await expect(page.getByRole('region', { name: /^Notifications/ }).getByText('Le lien est copié.')).toBeVisible();
+    await expectAccessible(page);
+  });
 }
 
 test.describe('the shell', () => {
-  test('puts its destinations at the bottom of a phone, each an icon and a word of 44 px at least', async ({ page }) => {
+  test('puts its destinations at the bottom of a phone, each an icon and a word of 44 px at least', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'A computer puts them on the side: the next test.');
     await page.goto('/catalogue');
     const nav = page.getByRole('navigation', { name: 'Navigation principale' });
     const links = nav.getByRole('link');
 
+    // Counted once the shell is in: count() does not wait for it.
+    await expect(links.first()).toBeVisible();
     const count = await links.count();
     expect(count).toBeGreaterThanOrEqual(2);
     expect(count).toBeLessThanOrEqual(5);
