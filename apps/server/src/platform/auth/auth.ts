@@ -146,7 +146,7 @@ export function createAuth(db: Db, config: Pick<Config, 'publicUrl' | 'authSecre
           if (known || (await invited(ctx, email))) {
             await send({
               to: email,
-              subject: `Votre code Catiche : ${otp}`,
+              subject: 'Votre code pour entrer dans Catiche',
               text: `Bonjour,\n\nVotre code pour entrer dans Catiche : ${otp}\n\nIl est valable 5 minutes. Si vous n'avez rien demandé, ignorez ce message : personne n'entre sans ce code.`,
             });
             return;
