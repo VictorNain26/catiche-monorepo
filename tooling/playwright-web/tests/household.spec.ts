@@ -1,4 +1,5 @@
 import { expect, test, type Route } from '@playwright/test';
+import { expectAccessible } from '../accessibility';
 import { invite } from '../database';
 import { addChild, address, birthMonthAged, childPhone, guardian, pairedStudent, signIn } from '../guardian';
 
@@ -33,6 +34,7 @@ test('adding a child asks one question per screen, the birth month in two menus,
 
   await expect(page.getByText('Étape 4 sur 4')).toBeVisible();
   await expect(page.getByText('Tom pose des questions à Inès')).toBeVisible();
+  await expectAccessible(page);
   await page.getByLabel('Proposer que Tom retienne ce qui a résisté').check();
   await page.getByRole('button', { name: 'Ajouter Inès' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Inès' })).toBeVisible();
@@ -67,6 +69,7 @@ test('a birth month the server would refuse is refused at its own step, and a do
   await expect(page.getByText('Votre enfant a entre 5 et 20 ans')).toBeVisible();
   await expect(page.getByText('Étape 3 sur 4')).toBeVisible();
   await expect(years).toHaveAttribute('aria-invalid', 'true');
+  await expectAccessible(page);
 
   await birth.getByLabel('Mois').selectOption({ label: 'Juin' });
   // The second click lands where « Ajouter Noé » appears: it must not add the child unread.
@@ -85,6 +88,7 @@ test('the child’s page: their class, the next step first, then the week, the r
     await expect(page.getByText(fold, { exact: true })).toBeVisible();
   }
   await expect(page.getByRole('button', { name: 'Supprimer le compte de Léo' })).toBeHidden();
+  await expectAccessible(page);
   // In 4e, the parent does not open the child's space on their own phone (decisions.md).
   await page.getByText('Ses appareils', { exact: true }).click();
   await expect(page.getByText('Aucun appareil relié.')).toBeVisible();
@@ -107,6 +111,7 @@ test('a guardian adds a child, changes their class, then deletes their account',
   await page.getByText('Supprimer son compte', { exact: true }).click();
   await page.getByRole('button', { name: 'Supprimer le compte de Léa' }).click();
   await expect(page.getByRole('alert')).toContainText('C’est définitif');
+  await expectAccessible(page);
   await page.getByRole('button', { name: 'Supprimer définitivement' }).click();
   // No child left: the household opens on the adding of one.
   await expect(page).toHaveURL(/\/foyer\/ajouter$/);
@@ -121,6 +126,7 @@ test('a QR code on the parent’s phone opens the pairing on the child’s, the 
   const shown = page.getByText(/^[0-9A-Z]{4}-[0-9A-Z]{4}$/);
   await expect(shown).toHaveCSS('font-size', '30px');
   await expect(page.getByText(/^Valable jusqu’à \d{2}:\d{2}, une seule fois\.$/)).toBeVisible();
+  await expectAccessible(page);
   const code = (await shown.textContent()) ?? '';
 
   const phone = await childPhone(browser, testInfo);
@@ -164,6 +170,7 @@ test('a code pairs the child’s phone, which sees it, and the guardian disconne
   ).toBeVisible();
   await expect(child.getByText('pas tes conversations')).toHaveCount(0);
   await expect(child.getByLabel('Le code')).toHaveCSS('font-family', /Atkinson Hyperlegible Mono/);
+  await expectAccessible(child);
   await child.getByLabel('Le code').fill(code ?? '');
   await child.getByRole('button', { name: 'Relier' }).click();
   await expect(child.getByRole('heading', { name: 'Bonjour Noé' })).toBeVisible();
@@ -234,6 +241,7 @@ test('on the family phone, the parent opens the child’s space without a code, 
   // A choice of who uses Tom, not the generic sign-in.
   await expect(page.getByRole('heading', { level: 1, name: 'Qui utilise Tom ?' })).toBeVisible();
   await expect(page.getByText('Catiche est en bêta fermée')).toBeHidden();
+  await expectAccessible(page);
   await page.getByRole('button', { name: 'C’est Zoé' }).click();
   await expect(page.getByRole('heading', { name: 'Bonjour Zoé' })).toBeVisible();
   await page.getByRole('link', { name: 'Changer de profil' }).click();
@@ -335,6 +343,7 @@ test('in 5e, the parent does the homework with the child on the family phone, an
   await expect(page.getByRole('button', { name: 'Avec mon parent à côté' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Sans mon parent ce soir' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Nouvelle séance' })).toHaveCount(0);
+  await expectAccessible(page);
   // The child knows what their parent can see on this device.
   await expect(
     page.getByText('Quand tu travailles sur l’appareil de ta famille, ton parent peut ouvrir ton espace et relire tes séances.'),
@@ -353,6 +362,8 @@ test('the parent’s home: a card per child with their week, the adding a link a
   await expect(card).toContainText('Quatrième');
   await expect(card).toContainText('Pas de séance ces sept derniers jours');
   await expect(page.getByLabel('Son prénom', { exact: true })).toBeHidden();
+  await expectAccessible(page);
+  await expect(page).toHaveScreenshot('foyer.png');
   await addChild(page, 'Lou', { level: 'Cinquième' });
   await expect(page.getByRole('region', { name: 'Prochaine étape' })).toContainText('À chaque séance, Lou choisit');
   // Done once a device holds the child's space, the step goes.
@@ -368,6 +379,7 @@ test('« Mon compte » holds the passkeys and the sign-out, out of the home', as
   await expect(page.getByRole('heading', { level: 1, name: 'Mon compte' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Vos clés d’accès' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Se déconnecter' })).toBeVisible();
+  await expectAccessible(page);
 
   // The way back sits in the screen's header, above the title and read before it, with an icon
   // that is not read out; a finger reaches it.
@@ -411,6 +423,7 @@ test.describe('with a week of work', () => {
     await expect(summary).toContainText('Résoudre une équation');
     await expect(summary).toContainText('La dernière fois : pas encore résolue, avec un indice. À surveiller : mal lire la consigne.');
     await expect(summary).toContainText('Demandez à Léo de vous montrer un exercice sur « Résoudre une équation », et où ça coince.');
+    await expectAccessible(page);
   });
 
   test('the child reads the same week, told to them, and knows their parent sees it', async ({ page, browser }, testInfo) => {
@@ -424,6 +437,7 @@ test.describe('with a week of work', () => {
     await expect(summary).toContainText('Ton parent peut te demander de lui montrer un exercice sur « Résoudre une équation », et où ça coince.');
     await expect(summary).not.toContainText('Demandez à');
     await expect(summary).toContainText('Ton parent voit ce même résumé.');
+    await expectAccessible(page);
   });
 
   test('a week that cannot load says so, and leaves the child’s page', async ({ page }) => {
@@ -434,6 +448,7 @@ test.describe('with a week of work', () => {
       timeout: 15_000,
     });
     await expect(page.getByRole('button', { name: 'Relier le téléphone de Léo' })).toBeVisible();
+    await expectAccessible(page);
   });
 });
 

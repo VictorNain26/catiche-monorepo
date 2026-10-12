@@ -53,7 +53,7 @@ export async function guardian(page: Page, name: string) {
   return email;
 }
 
-/** The child's own phone, of the same kind as the guardian's. */
+/** The child's own phone: an iPhone beside the guardian's iPhone, an Android beside their Android or their computer. */
 export const childPhone = (browser: Browser, testInfo: TestInfo) =>
   browser.newContext({ ...devices[testInfo.project.name === 'iphone' ? 'iPhone 15' : 'Pixel 7'] });
 

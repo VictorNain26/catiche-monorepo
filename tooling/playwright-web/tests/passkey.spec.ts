@@ -36,11 +36,14 @@ async function makePasskey(page: Page) {
   await page.getByRole('button', { name: 'Créer une clé d’accès sur cet appareil' }).click();
 }
 
-test('a parent makes a passkey on their phone, filed under their address, and the address field lets them in with it', async ({ page }) => {
+test('a parent makes a passkey on their device, filed under their address, and the address field lets them in with it', async ({
+  page,
+}, testInfo) => {
   const lock = await phoneLock(page);
   const email = await guardian(page, 'cle');
   await makePasskey(page);
-  await expect(page.getByText('Android · Chrome')).toBeVisible();
+  // Named after the device it was made on, as its browser tells it: the computer's is Windows.
+  await expect(page.getByText(testInfo.project.name === 'desktop' ? 'Windows · Chrome' : 'Android · Chrome')).toBeVisible();
   await expect(page.getByText(/^Créée le /)).toBeVisible();
   expect(await lock.filedUnder()).toEqual([email]);
 

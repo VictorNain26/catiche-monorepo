@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { expectAccessible } from '../accessibility';
 import { invite } from '../database';
 import { address, askCode, guardian, signIn } from '../guardian';
 
@@ -7,6 +8,7 @@ test('an invited parent gets in by the code their address received, names themse
   invite(email);
   await signIn(page, email);
   await expect(page.getByRole('heading', { name: 'Bienvenue' })).toBeVisible();
+  await expectAccessible(page);
   // Signed in but nameless: the household sends them back until they give it.
   await page.goto('/foyer');
   await expect(page.getByRole('heading', { name: 'Bienvenue' })).toBeVisible();
@@ -18,12 +20,14 @@ test('an invited parent gets in by the code their address received, names themse
   await expect(offer).toBeVisible();
   await expect(offer).toBeFocused();
   await expect(page.getByText('sans code par e-mail')).toBeVisible();
+  await expectAccessible(page);
   await page.reload();
   await expect(offer).toBeVisible();
   await page.getByRole('button', { name: 'Plus tard' }).click();
   // A household without a child opens on the adding of the first one, « Mon compte » at hand.
   await expect(page).toHaveURL(/\/foyer\/ajouter$/);
   await expect(page.getByLabel('Son prénom')).toBeVisible();
+  await expectAccessible(page);
 
   await page.getByRole('link', { name: 'Mon compte' }).click();
   await page.getByRole('button', { name: 'Se déconnecter' }).click();
@@ -35,22 +39,26 @@ test('an invited parent gets in by the code their address received, names themse
   await expect(page).toHaveURL(/\/foyer\/ajouter$/);
 });
 
-test('the sign-in says the beta is closed, checks the address and the code, and refuses a wrong one in French', async ({ page }) => {
+test('the sign-in says the beta is closed, checks the address and the code, and refuses a wrong one in French', async ({ page, isMobile }) => {
   await page.goto('/connexion');
   // The product's name, what it is in a sentence, and Tom told as a program.
   await expect(page).toHaveTitle('Catiche');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Entrer dans Catiche');
   await expect(page.getByText('Tom, un programme')).toBeVisible();
   await expect(page.getByRole('status')).toContainText('Catiche est en bêta fermée');
-  // Under 16 px, iOS Safari zooms on the field it focuses.
-  expect(await page.getByLabel('Adresse e-mail').evaluate((field) => getComputedStyle(field).fontSize)).toBe('16px');
+  await expectAccessible(page);
+  await expect(page).toHaveScreenshot('connexion.png');
+  // Under 16 px, iOS Safari zooms on the field it focuses: a phone's concern, a computer's field is smaller.
+  if (isMobile) expect(await page.getByLabel('Adresse e-mail').evaluate((field) => getComputedStyle(field).fontSize)).toBe('16px');
   await page.getByRole('button', { name: 'Recevoir mon code' }).click();
   await expect(page.getByText('Une adresse e-mail valide.')).toBeVisible();
+  await expectAccessible(page);
 
   const email = address('maladroit');
   invite(email);
   const code = await askCode(page, email);
   await expect(page.getByRole('status')).toContainText(email);
+  await expectAccessible(page);
   const field = page.getByLabel('Le code reçu par e-mail');
   await expect(field).toHaveAttribute('autocomplete', 'one-time-code');
   // Six digits read at a glance: the codes' typeface, large.
@@ -62,6 +70,7 @@ test('the sign-in says the beta is closed, checks the address and the code, and 
   await field.fill(code === '111111' ? '222222' : '111111');
   await page.getByRole('button', { name: 'Entrer' }).click();
   await expect(page.getByRole('alert')).toHaveText('Ce code ne correspond pas. Vérifiez-le, ou demandez-en un nouveau.');
+  await expectAccessible(page);
 });
 
 test('an address without an invitation is answered as any other, and gets no code', async ({ page }) => {
@@ -95,6 +104,7 @@ test.describe('with the server failing', () => {
     );
     await page.goto('/');
     await expect(page.getByRole('heading', { name: 'Une erreur est survenue' })).toBeVisible();
+    await expectAccessible(page);
 
     await page.unroute('**/api/me');
     await page.getByRole('button', { name: 'Réessayer' }).click();

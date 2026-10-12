@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { expectAccessible } from '../accessibility';
 import { addChild, guardian, pairedStudent } from '../guardian';
 
 test('a guardian proposes the memory when adding the child, sees its state, and withdraws it', async ({ page }) => {
@@ -6,6 +7,7 @@ test('a guardian proposes the memory when adding the child, sees its state, and 
   await addChild(page, 'Lou', { memory: true });
   await page.getByText('Ce que Tom retient', { exact: true }).click();
   await expect(page.getByText('Proposée : Lou répondra à sa prochaine visite.')).toBeVisible();
+  await expectAccessible(page);
 
   await page.getByRole('button', { name: 'Retirer la mémoire' }).click();
   await expect(page.getByRole('alert')).toContainText('Tom oubliera ce qu’il retient de Lou');
@@ -19,6 +21,7 @@ test('the child is asked on their home, accepts, sees what Tom keeps, then stops
   await pairedStudent(page, browser, testInfo, 'Max', { memory: true });
   const offer = page.getByRole('region', { name: 'Tom peut retenir ce qui a résisté' });
   await expect(offer).toContainText('Il ne garde rien de ce que tu écris');
+  await expectAccessible(page);
   await offer.getByRole('button', { name: 'D’accord' }).click();
   await expect(offer).toBeHidden();
   // The yes is answered, not only taken.
@@ -27,6 +30,7 @@ test('the child is asked on their home, accepts, sees what Tom keeps, then stops
   await page.getByRole('link', { name: 'Ce que Tom retient' }).click();
   await expect(page.getByRole('heading', { name: 'Ce que Tom retient' })).toBeVisible();
   await expect(page.getByText('Rien pour l’instant')).toBeVisible();
+  await expectAccessible(page);
 
   await page.getByRole('button', { name: 'Arrêter la mémoire' }).click();
   await expect(page.getByRole('alert')).toContainText('ne retiendra plus rien');

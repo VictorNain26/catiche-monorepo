@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { expectAccessible } from '../accessibility';
 
 interface Manifest {
   name: string;
@@ -54,6 +55,8 @@ test.describe('in dark mode', () => {
       return getComputedStyle(probe).color;
     }, themeColor ?? '');
     expect(rgb).toBe(pageBackground);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expectAccessible(page);
   });
 });
 

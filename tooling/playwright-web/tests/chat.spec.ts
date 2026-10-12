@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { createUIMessageStream, createUIMessageStreamResponse } from 'ai';
+import { expectAccessible } from '../accessibility';
 import { addChild, guardian, pairedStudent } from '../guardian';
 
 // page.route never sees what the service worker answers.
@@ -46,6 +47,7 @@ test('a paired student opens a session, writes to Tom and reads his reply', asyn
   await expect(send).toHaveCSS('opacity', '1');
   await expect(send).toHaveCSS('background-color', 'rgb(230, 228, 236)');
   await expect(send).toHaveCSS('color', 'rgb(79, 84, 102)');
+  await expectAccessible(page);
   await page.getByLabel('Ton message').fill('Je bloque sur 3x + 5 = 20');
   await send.click();
 
@@ -61,6 +63,8 @@ test('a paired student opens a session, writes to Tom and reads his reply', asyn
   await expect(conversation.getByRole('listitem').first().locator('img')).toHaveCount(0);
   // The server keeps the conversation: the turn carries the new message only.
   expect(sent).toEqual([{ text: 'Je bloque sur 3x + 5 = 20', inputMode: 'text' }]);
+  await expectAccessible(page);
+  await expect(page).toHaveScreenshot('seance.png');
 
   await page.getByRole('link', { name: 'Retour à tes séances' }).click();
   await expect(page.getByRole('link', { name: /Séance sans titre/ })).toBeVisible();
@@ -248,6 +252,7 @@ test('with the parent beside, Tom’s cue for them shows under the reply, and le
   await page.getByRole('button', { name: 'Envoyer' }).click();
   const forParent = page.getByRole('note', { name: 'Pour vous, parent' });
   await expect(forParent).toHaveText(cue);
+  await expectAccessible(page);
   // Never in the conversation.
   await expect(page.getByRole('list', { name: 'Conversation' })).not.toContainText(cue);
 
@@ -283,6 +288,7 @@ test('a photo of the homework goes with the message, cut down to JPEG, and the c
     (window as unknown as { photoReady: () => void }).photoReady();
   });
   await expect(page.getByText('Photo prête')).toBeVisible();
+  await expectAccessible(page);
   await page.getByLabel('Ton message').fill('');
   await page.getByRole('button', { name: 'Envoyer' }).click();
 
@@ -335,6 +341,7 @@ test('a day past the quota is told in French, without the server’s message', a
   await page.getByLabel('Ton message').fill('Bonjour');
   await page.getByRole('button', { name: 'Envoyer' }).click();
   await expect(page.getByRole('alert')).toHaveText('Le temps avec Tom est fini pour aujourd’hui. Reviens demain !');
+  await expectAccessible(page);
   // Nothing was stored: the message leaves the conversation and comes back to the field.
   await expect(page.getByRole('list', { name: 'Conversation' }).getByRole('listitem')).toHaveCount(0);
   await expect(page.getByLabel('Ton message')).toHaveValue('Bonjour');
