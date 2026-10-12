@@ -55,6 +55,8 @@ test.describe('in dark mode', () => {
     await expect(offer).toContainText('Il ne garde rien de ce que tu écris');
     await expectAccessible(page);
     await offer.getByRole('button', { name: 'D’accord' }).click();
+    await expect(page.getByRole('status')).toContainText('C’est noté : Tom retiendra ce qui a résisté.');
+    await expectAccessible(page);
     await page.getByRole('link', { name: 'Ce que Tom retient' }).click();
     await expect(page.getByText('Rien pour l’instant')).toBeVisible();
     await expectAccessible(page);
