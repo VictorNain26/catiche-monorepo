@@ -7,7 +7,7 @@ const baseURL = `http://localhost:${PORT}`;
 export default defineConfig({
   testDir: './tests',
   forbidOnly: !!process.env['CI'],
-  reporter: 'list',
+  reporter: process.env['CI'] ? [['list'], ['html', { open: 'never' }]] : 'list',
   // The image's browsers render a screenshot alike on every host: the host's platform stays out of its
   // name. Animations stopped, caret hidden and fonts loaded are toHaveScreenshot's own defaults.
   expect: { toHaveScreenshot: { pathTemplate: '{testDir}/__screenshots__{/projectName}/{testFilePath}/{arg}{ext}' } },

@@ -141,6 +141,13 @@ jobs:
           services: playwright
       - if: steps.affected.outputs.run == 'true'
         run: bunx --no-install turbo run test:e2e --filter=landing
+      - name: Keep the suite's report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-landing-report
+          path: apps/landing/playwright-report/
+          retention-days: 7
 
   migrations:
     name: Migration Sync
