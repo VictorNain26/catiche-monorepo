@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import scales from '@repo/tokens/scales.json' with { type: 'json' };
-import { computedColor } from '../colors';
+import { computedColor, token } from '../colors';
 import { recordCspViolations } from '../csp';
 
 // The catalogue of @repo/ui (apps/web/src/routes/catalogue.tsx): every component in its states,
@@ -42,7 +42,7 @@ for (const scheme of ['light', 'dark'] as const) {
 
       await expect(page.getByRole('heading', { level: 1, name: 'Catalogue des composants' })).toBeVisible();
       for (const name of SECTIONS) await expect(page.getByRole('heading', { level: 2, name, exact: true })).toBeVisible();
-      await expect(page.getByRole('figure')).toHaveCount(2);
+      await expect(page.getByRole('figure')).toHaveCount(3);
       expect(await overflows(page)).toBe(false);
 
       // The device's setting decides the mode: the mist of that mode's scale.
@@ -170,7 +170,122 @@ test('a chart gives its message and every value to a screen reader', async ({ pa
   await expect(page.getByRole('figure', { name: message })).toBeVisible();
   const table = page.getByRole('table', { name: message });
   await expect(table.getByRole('row')).toHaveCount(8);
-  await expect(table.getByRole('row').nth(3)).toHaveText('mer.45 min');
+  await expect(table.getByRole('row').nth(3)).toHaveText('mer.45');
+  await expect(table.getByRole('columnheader').nth(1)).toHaveText('Temps (minutes)');
+});
+
+// The narrowest phone of WCAG 1.4.10, where a card is about 250 px wide.
+test.describe('on a phone of 320 px', () => {
+  test.use({ viewport: { width: 320, height: 640 } });
+
+  const textBoxes = (figure: Locator) =>
+    figure.evaluate((element) =>
+      [...element.querySelectorAll('svg text, [data-chart-label]')].map((text) => {
+        const { left, right, top, bottom } = text.getBoundingClientRect();
+        return { text: text.textContent, left, right, top, bottom };
+      }),
+    );
+
+  test('the labels of a chart never overlap, with two series of days as with one', async ({ page }) => {
+    await page.goto('/catalogue');
+    const figures = page.getByRole('figure');
+    await expect(figures).toHaveCount(3);
+
+    for (const figure of await figures.all()) {
+      const boxes = await textBoxes(figure);
+      for (const [i, a] of boxes.entries()) {
+        for (const b of boxes.slice(i + 1)) {
+          const overlap = a.left < b.right - 0.5 && b.left < a.right - 0.5 && a.top < b.bottom - 0.5 && b.top < a.bottom - 0.5;
+          expect(overlap, `« ${a.text} » over « ${b.text} »`).toBe(false);
+        }
+      }
+    }
+  });
+
+  test('no label of a chart passes the inner edge of its card', async ({ page }) => {
+    await page.goto('/catalogue');
+    for (const figure of await page.getByRole('figure').all()) {
+      const edge = await figure
+        .locator('xpath=..')
+        .evaluate((card) => card.getBoundingClientRect().right - Number.parseFloat(getComputedStyle(card).paddingRight));
+      for (const label of await textBoxes(figure)) {
+        expect(label.right, label.text).toBeLessThanOrEqual(edge + 0.5);
+      }
+    }
+    expect(await overflows(page)).toBe(false);
+  });
+});
+
+test('a card sized by its content keeps the width of its content', async ({ page }) => {
+  await page.goto('/catalogue');
+  const content = page.getByText('À la taille de son contenu');
+  const card = await box(content.locator('xpath=..'));
+
+  // The width the words take, even when their box is squeezed to nothing.
+  expect(card.width).toBeGreaterThanOrEqual(await content.evaluate((text) => text.scrollWidth));
+});
+
+test('a card that is a container lays out its inside by its own width', async ({ page }) => {
+  await page.setViewportSize(DESKTOP);
+  await page.goto('/catalogue');
+  const side = async (name: string) => {
+    const title = await box(page.getByRole('heading', { level: 3, name }));
+    const link = await box(page.getByRole('link', { name: 'Voir la fiche' }).and(page.locator(`[href="#fiche-${name}"]`)));
+    return link.x > title.x + title.width ? 'beside' : 'under';
+  };
+
+  expect(await side('Léa')).toBe('under');
+  expect(await side('Noé')).toBe('beside');
+});
+
+test('a banner is a region named by its title, and an error banner an alert', async ({ page }) => {
+  await page.goto('/catalogue');
+
+  await expect(page.getByRole('region', { name: 'La bêta est fermée' })).toContainText('Les inscriptions ouvrent');
+  await expect(page.getByRole('alert').filter({ hasText: 'La séance n’a pas pu s’ouvrir' })).toBeVisible();
+});
+
+test('the notifications region is in every page from its load, before any toast', async ({ page }) => {
+  await page.goto('/connexion');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+
+  await expect(page.getByRole('region', { name: 'Notifications' })).toBeAttached();
+});
+
+test('an icon is 24 px, in a large button as in a fold, its stroke 2 px whatever its size', async ({ page }) => {
+  await page.goto('/catalogue');
+  const icons = [page.getByRole('button', { name: 'Ajouter un enfant' }).locator('svg'), page.getByText('Ce que Tom retient').locator('svg')];
+
+  for (const icon of icons) {
+    const { width, height } = await box(icon);
+    expect([width, height]).toEqual([24, 24]);
+    await expect(icon).toHaveAttribute('stroke-width', '2');
+    await expect(icon.locator(':scope > *').first()).toHaveAttribute('vector-effect', 'non-scaling-stroke');
+  }
+});
+
+test.describe('with a mouse', () => {
+  test.use({ hasTouch: false, isMobile: false, viewport: DESKTOP });
+
+  test('a line of a list hovered keeps its words readable', async ({ page }) => {
+    await page.goto('/catalogue');
+    const line = page.getByRole('link', { name: /Les fractions égales/ });
+    await line.hover();
+
+    await expect(line).toHaveCSS('background-color', await token(page, 'accent'));
+    await expect(line.getByText('Mathématiques · mardi')).toHaveCSS('color', await token(page, 'accent-muted-foreground'));
+  });
+
+  test('the drawer comes from the right edge of a desktop', async ({ page }) => {
+    await page.goto('/catalogue');
+    await page.getByRole('button', { name: 'Ouvrir le tiroir' }).click();
+    const drawer = page.getByRole('dialog', { name: 'Trier les séances' });
+    await expect.poll(async () => drawer.evaluate((element) => element.getAnimations().length)).toBe(0);
+
+    const bounds = await box(drawer);
+    expect(Math.round(bounds.x + bounds.width)).toBe(DESKTOP.width);
+    expect(Math.round(bounds.height)).toBe(DESKTOP.height);
+  });
 });
 
 test.describe('a skeleton', () => {

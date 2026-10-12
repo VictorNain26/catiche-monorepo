@@ -19,7 +19,6 @@ import {
   NativeSelectOption,
   Section,
   Skeleton,
-  Toaster,
   toast,
   type Destination,
 } from '@repo/ui';
@@ -41,7 +40,8 @@ const DESTINATIONS: readonly [Destination, Destination, Destination, Destination
 ];
 
 const DAYS = ['lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.'];
-const minutes = (value: number) => `${String(value)} min`;
+const duration = (minutes: number) =>
+  minutes < 60 ? `${String(minutes)} min` : `${String(Math.floor(minutes / 60))} h ${String(minutes % 60).padStart(2, '0')} min`;
 
 function Catalogue() {
   return (
@@ -82,7 +82,6 @@ function Catalogue() {
           </Fold>
         </Section>
       </div>
-      <Toaster />
     </AppShell>
   );
 }
@@ -165,8 +164,8 @@ function Cards() {
     <Section title="Carte" description="Un bloc à part, qui mène à un détail ; son contenu suit sa propre largeur.">
       <div className="grid gap-4 sm:grid-cols-[1fr_2fr]">
         {['Léa', 'Noé'].map((name) => (
-          <Card key={name}>
-            <div className="flex flex-col gap-3 @md:flex-row @md:items-center @md:justify-between">
+          <Card key={name} className="@container">
+            <div className="flex flex-col gap-3 @2xs:flex-row @2xs:items-center @2xs:justify-between">
               <div className="flex flex-col gap-1">
                 <h3 className="text-lg text-foreground">{name}</h3>
                 <p className="text-muted-foreground">5e · 3 séances cette semaine</p>
@@ -178,6 +177,9 @@ function Cards() {
           </Card>
         ))}
       </div>
+      <Card className="w-fit">
+        <p className="whitespace-nowrap">À la taille de son contenu</p>
+      </Card>
     </Section>
   );
 }
@@ -285,8 +287,21 @@ function Charts() {
             orientation="vertical"
             categoryLabel="Jour"
             categories={DAYS}
+            unit="minutes"
             series={[{ label: 'Temps', values: [20, 0, 45, 25, 15, 25, 0] }]}
-            format={minutes}
+          />
+        </Card>
+        <Card>
+          <BarChart
+            message="Léa a travaillé 2 h 10 cette semaine, contre 1 h 55 la semaine dernière."
+            orientation="vertical"
+            categoryLabel="Jour"
+            categories={DAYS}
+            unit="minutes"
+            series={[
+              { label: 'Cette semaine', values: [20, 0, 45, 25, 15, 25, 0] },
+              { label: 'Semaine dernière', values: [35, 10, 30, 25, 10, 0, 5] },
+            ]}
           />
         </Card>
         <Card>
@@ -299,7 +314,7 @@ function Charts() {
               { label: 'Cette semaine', values: [30, 65, 20, 15] },
               { label: 'Semaine dernière', values: [45, 35, 20, 5] },
             ]}
-            format={minutes}
+            format={duration}
           />
         </Card>
       </div>
