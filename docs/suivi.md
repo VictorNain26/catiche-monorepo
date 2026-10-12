@@ -13,7 +13,8 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
   `charte.md`), le plan du lot tiré des pratiques des métiers (`roadmap.md`,
   `etudes/2026-10-12/bonnes-pratiques.md`). Les tokens Rive (2.1) sont dans le site et l'app :
   échelles générées par Leonardo, rôles, graphiques, mouvement, Bricolage Grotesque et Atkinson
-  Hyperlegible Next. Les composants de `@repo/ui` (2.3) sont là : la coquille, section, liste,
+  Hyperlegible Next. Les composants de `@repo/ui` (2.3) sont là, sur Base UI, sous une CSP
+  stricte (`decisions.md`) : la coquille, section, liste,
   carte, état vide, squelette, bandeau, dialogue et tiroir, toast, graphique en barres, montrés
   par le catalogue `/catalogue` de l'app que la suite e2e visite. En cours en parallèle : 2.2, la
   qualité (captures, axe, projet à l'ordinateur) ; puis 2.4, le logo et Tom en 2D. L'essai

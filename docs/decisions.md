@@ -163,6 +163,19 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
 - **Refonte complète du code** (2026-10-06), sur des pratiques publiées, sans rien garder de
   l'ancienne architecture ; faite aux étapes 1 à 7. Source :
   `etudes/2026-10-06/refonte-architecture.md`, instantané de la cible d'alors.
+- **`@repo/ui` sur Base UI** (2026-10-12, choix de Victor). Une seule famille de primitives
+  interactives, toasts compris : Base UI (`@base-ui/react`), à la place de Radix et de `sonner`,
+  pour garder la CSP stricte, sans exception pour les styles. Son dialogue verrouille le défilement
+  par `element.style`, que la CSP ne bloque pas
+  ([MDN, style-src](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/style-src)) ;
+  il n'écrit une balise `<style>` que pour ScrollArea et Select (`utils/styles.js`), dont l'app ne
+  se sert pas. Le dialogue de Radix en écrit toujours une (`react-remove-scroll-bar`), et `sonner`
+  insère sa feuille au chargement et refuse une CSP stricte
+  ([sonner#449](https://github.com/emilkowalski/sonner/issues/449)). Un nonce n'y répond pas : le
+  service worker sert un `index.html` mis en cache, dont le nonce ne changerait jamais. Santé
+  vérifiée le 2026-10-12 : `mui/base-ui` non archivé, versions 1.9.0 (2026-10-09), 1.8.0
+  (2026-09-04) et 1.7.0 (2026-08-04), issues fermées avec réponse le 2026-10-12, 11,1k étoiles,
+  17,2 millions de téléchargements par semaine.
 - **Pronote hors V1** (2026-10-01). L'accès passe aujourd'hui par une bibliothèque non
   officielle, archivée et cassée par la version 2026 de Pronote ; il ne revient que par une
   convention de connecteur avec Index Éducation, sur un produit qui marche déjà sans lui.
