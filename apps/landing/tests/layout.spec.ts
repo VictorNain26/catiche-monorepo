@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { HEIGHT, PAGES, settle, WIDTHS } from './support';
+import { expectAccessible, HEIGHT, hiddenReveals, PAGES, settle, WIDTHS } from './support';
 
 function headingLevels(page: Page) {
   return page.evaluate(() =>
@@ -24,6 +24,19 @@ for (const path of PAGES) {
     });
     expect(skips).toEqual([]);
   });
+}
+
+for (const path of PAGES) {
+  for (const width of [375, 1441]) {
+    test(`${path} at ${width}px breaks no WCAG 2.2 A or AA rule axe checks`, async ({ page }) => {
+      await page.setViewportSize({ width, height: HEIGHT });
+      await page.goto(path);
+      await settle(page);
+      // A block still fading in would be judged on a contrast it only passes through.
+      await expect.poll(() => hiddenReveals(page)).toEqual([]);
+      await expectAccessible(page);
+    });
+  }
 }
 
 function inspectBounds(page: Page) {

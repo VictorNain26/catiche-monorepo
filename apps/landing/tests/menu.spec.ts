@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { HEIGHT, waitForHydration } from './support';
+import { expectAccessible, HEIGHT, waitForHydration } from './support';
 
 test('the mobile menu opens, lists the sections and closes on Escape', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: HEIGHT });
@@ -13,6 +13,7 @@ test('the mobile menu opens, lists the sections and closes on Escape', async ({ 
   for (const name of ['Comment ça marche', 'Parents', 'Tarifs']) {
     await expect(nav.getByRole('link', { name })).toBeVisible();
   }
+  await expectAccessible(page);
   await page.keyboard.press('Escape');
   await expect(menu).toBeHidden();
   await expect(trigger).toBeFocused();

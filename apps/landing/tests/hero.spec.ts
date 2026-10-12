@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { HEIGHT, settle, waitForHydration } from './support';
+import { HEIGHT, hiddenReveals, settle, waitForHydration } from './support';
 
 test('the hero shows the sample session in the first screen, Tom beside it, on desktop', async ({ page }) => {
   await page.setViewportSize({ width: 1441, height: HEIGHT });
@@ -16,6 +16,8 @@ test('the hero shows the sample session in the first screen, Tom beside it, on d
   await expect(tom).toBeVisible();
   const image = tom.locator('img');
   await expect.poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+  await expect.poll(() => hiddenReveals(page)).toEqual([]);
+  await expect(page).toHaveScreenshot('home-desktop.png');
 });
 
 test('the hero puts the sample session under the text and leaves Tom out on mobile', async ({ page }) => {
@@ -29,6 +31,8 @@ test('the hero puts the sample session under the text and leaves Tom out on mobi
   if (!session || !signals) return;
   expect(session.y).toBeGreaterThanOrEqual(signals.y + signals.height);
   await expect(page.getByTestId('tom')).toBeHidden();
+  await expect.poll(() => hiddenReveals(page)).toEqual([]);
+  await expect(page).toHaveScreenshot('home-phone.png');
 });
 
 test.describe('on mobile with motion allowed', () => {
