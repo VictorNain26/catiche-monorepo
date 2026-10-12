@@ -20,9 +20,9 @@ export function memoryMailer() {
    */
   const next = (to: string) => new Promise<Email>((resolve) => waiting.push({ to, resolve }));
 
-  /** The sign-in code an email carries in its subject. */
-  const codeIn = ({ subject }: Email) => {
-    const code = /\b\d{6}\b/.exec(subject)?.[0];
+  /** The sign-in code an email carries in its text. */
+  const codeIn = ({ subject, text }: Email) => {
+    const code = /\b\d{6}\b/.exec(text)?.[0];
     if (!code) throw new Error(`No code in "${subject}"`);
     return code;
   };

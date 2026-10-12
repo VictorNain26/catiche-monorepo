@@ -36,7 +36,7 @@ const EVAL_DOMAIN = '@eval.test';
 export function harnessInbox() {
   const codes = new Map<string, string>();
   const mailer: Mailer = (email) => {
-    const code = /\b\d{6}\b/.exec(email.subject)?.[0];
+    const code = /\b\d{6}\b/.exec(email.text)?.[0];
     if (code) codes.set(email.to, code);
     return Promise.resolve();
   };
