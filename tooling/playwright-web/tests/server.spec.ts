@@ -63,28 +63,36 @@ test.describe('after a deployment', () => {
     return () => failed;
   }
 
+  // The documents the page asks for, not its load events: the router can reload before the first
+  // page's load event, which then never fires.
+  function countDocuments(page: Page) {
+    let documents = 0;
+    page.on('request', (request) => {
+      if (request.isNavigationRequest() && request.frame() === page.mainFrame()) documents++;
+    });
+    return () => documents;
+  }
+
   test('a chunk gone after a deployment reloads the page onto the new build', async ({ page }) => {
     const failed = await failRouteChunk(page, 1);
-    let loads = 0;
-    page.on('load', () => loads++);
+    const documents = countDocuments(page);
 
     await page.goto('/');
 
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     expect(failed()).toBe(1);
-    expect(loads).toBe(2);
+    expect(documents()).toBe(2);
   });
 
   test('a chunk missing from the new build too shows the error instead of looping', async ({ page }) => {
     const failed = await failRouteChunk(page, Number.POSITIVE_INFINITY);
-    let loads = 0;
-    page.on('load', () => loads++);
+    const documents = countDocuments(page);
 
     await page.goto('/');
 
     await expect(page.getByRole('heading', { name: 'Une erreur est survenue' })).toBeVisible();
     // One reload, not a loop. WebKit asks no second time for a module it failed to load.
     expect(failed()).toBeGreaterThanOrEqual(1);
-    expect(loads).toBe(2);
+    expect(documents()).toBe(2);
   });
 });
