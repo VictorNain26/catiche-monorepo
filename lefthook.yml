@@ -38,9 +38,13 @@ pre-commit:
       glob: '**/*.ts'
       run: bunx --no-install eslint --max-warnings 0 --no-warn-ignored {staged_files}
 
+    # `root` filters by prefix, which tooling/playwright-web/ shares; globs start at the repo root,
+    # and `**` there spans one directory or more.
     - name: lint-playwright
       root: 'tooling/playwright/'
-      glob: '**/*.ts'
+      glob:
+        - 'tooling/playwright/*.ts'
+        - 'tooling/playwright/**/*.ts'
       run: bunx --no-install eslint --max-warnings 0 --no-warn-ignored {staged_files}
 
     - name: typecheck
