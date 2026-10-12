@@ -19,20 +19,40 @@ Chaque PR précise son périmètre dans son plan, au moment où elle démarre
 
 ## Maintenant
 
-**Lot 1, le produit** (`etudes/2026-10-12/refonte-produit.md`), dans cet ordre :
-1. La nouvelle direction artistique, essayée dans le vrai code sur le haut du site, la connexion
-   et le tableau de bord du parent ; Victor choisit.
-2. La charte complète : tokens, composition, navigation, iconographie, graphiques, Tom en 2D au
-   trait, le logo de Catiche (`charte.md`).
-3. Le site et l'entrée : la landing refaite sur l'identité, « Se connecter » vers l'app ; la
-   connexion, la première entrée du parent, « Qui utilise Catiche ? ».
-4. Les deux espaces : le tableau de bord du parent et son point hebdomadaire par e-mail ; l'espace
-   de l'élève, ses séances, « Mon programme », sa semaine ; ce qu'il leur faut côté serveur.
-5. La séance, le compte et les données, le second parent et le double consentement, le paiement,
-   son fournisseur et le statut juridique tranchés avant.
+**Lot 1, le produit** (`etudes/2026-10-12/refonte-produit.md`), dans cet ordre ; chaque ligne
+est une PR, ses pratiques dans `etudes/2026-10-12/bonnes-pratiques.md` :
+1. **La direction** : « Rive », choisie le 2026-10-12 (`decisions.md`, `charte.md`). Fait.
+2. **Les fondations**, avant tout écran :
+   1. Les tokens Rive : une échelle de douze pas par couleur en OKLCH, clair et sombre, les rôles,
+      la palette des graphiques, le mouvement ; Bricolage Grotesque (axe de graisse seul) et
+      Atkinson Hyperlegible Next, chargées par les mêmes variables dans le site et l'app ; le site
+      prend `theme.css`, `landing.css` et ses fontes partent ; les tests de contraste couvrent les
+      graphiques (3:1) et le jonc.
+   2. La qualité : `@playwright/test` à une version exacte ; les captures de référence
+      (`toHaveScreenshot`) générées et comparées dans l'image officielle de Playwright, en local
+      comme en CI ; `@axe-core/playwright` sur chaque état ; un projet à l'ordinateur dans la suite ;
+      la définition de « fini » d'un écran (`.claude/rules/design-system.md`).
+   3. Les composants de `@repo/ui`, sur Radix seul : la coquille de l'app (en-tête, onglets en bas,
+      navigation sur le côté à l'ordinateur), section, liste, carte, état vide, squelette, bandeau,
+      dialogue et tiroir, toast (`sonner`), graphique en barres en SVG accessible ; une page de
+      catalogue en développement, capturée.
+   4. L'identité : le logo de Catiche et ses icônes (favicon, PWA) ; Tom en 2D au trait, tiré de
+      `tom.blend` par le Line Art de Blender, et sa planche de référence.
+3. **Le site et l'entrée** : la landing refaite sur la charte, « Se connecter » vers l'app, l'app en
+   `noindex` ; la connexion, la première entrée du parent, « Qui utilise Catiche ? », « Relier cet
+   appareil ».
+4. **Les deux espaces** : côté serveur, le temps jour par jour, les semaines précédentes, les
+   notions du programme et le point hebdomadaire par e-mail ; le tableau de bord du parent et la
+   fiche d'un enfant ; l'espace de l'élève (accueil, séances, « Mon programme », semaine, ce que
+   Tom retient, appareils).
+5. **Le reste** : la séance ; le compte et les données (résiliation en ligne comprise) ; le second
+   parent et le double consentement ; le paiement, son fournisseur et le statut juridique tranchés
+   avant.
+
 Ce qui est construit depuis le 2026-10-11 (ajout d'un enfant, fiche, profils, jumelage) garde ses
 flux, ses tests et sa sécurité ; son habillage se refait aux étapes 3 et 4. Le comportement de Tom
-dans la séance reste au lot 4. Le dépôt de la marque et les domaines sont des gestes de Victor.
+dans la séance reste au lot 4. Le dépôt de la marque et les domaines sont des gestes de Victor ;
+le domaine des clés d'accès (`catiche.fr` ou `app.catiche.fr`) se choisit avant la production.
 
 **Hors IA, sans attendre** : la clause 2.2(c) des mineurs et la recevabilité du Zero Data
 Retention sont demandées à Mistral (2026-10-11) ; la réponse décide du lot 4.

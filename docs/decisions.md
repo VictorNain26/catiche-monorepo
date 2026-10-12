@@ -94,18 +94,22 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
   trait dans l'app, la 3D sur le site. Les anciens lots 1 à 3 deviennent un lot, « Le produit »
   (`roadmap.md`) ; ce qui est construit depuis le 2026-10-11 garde ses flux, ses tests et sa sécurité, et
   seul son habillage se refait. Remplace « une refonte complète de l'interface » et « la landing
-  réécrite avec l'identité » (2026-10-11), et les principes de
-  `etudes/2026-10-11/refonte-interface.md` (« peu de destinations », « une action principale par
-  écran », « Tom ailleurs, rien »). Source : `etudes/2026-10-12/refonte-produit.md`.
-- **Une nouvelle direction artistique, pour le site et l'app** (2026-10-12, choix de Victor).
-  Deux ou trois directions, essayées dans le vrai code sur le haut du site, la connexion et le
-  tableau de bord du parent, au téléphone et à l'ordinateur, en clair et en sombre ; Victor
-  choisit. Jusque-là, le code garde « Grands carreaux » (2026-10-11 : papier, encre bleue du
-  pull de Tom, Inclusive Sans et Atkinson Hyperlegible Mono, sans la marge rouge), que décrit
-  `charte.md`, et le site son identité précédente. Ce que les essais du 2026-10-11 ont appris
-  reste : Andika fait « primaire » en 4e et 3e, une direction trop froide perd le parent d'un
-  élève de 6e, le bleu seul est celui de la catégorie. Source :
-  `etudes/2026-10-11/direction-artistique.md`, `etudes/2026-10-12/refonte-produit.md`.
+  réécrite avec l'identité » (2026-10-11), et l'ancien plan de l'interface (« peu de
+  destinations », « une action principale par écran », « Tom ailleurs, rien »), supprimé (git le
+  garde). Source : `etudes/2026-10-12/refonte-produit.md`.
+- **La direction « Rive », pour le site et l'app** (2026-10-12, choix de Victor parmi trois
+  directions essayées dans le vrai code sur le haut du site, la connexion et le tableau de bord du
+  parent, au téléphone et à l'ordinateur, en clair et en sombre :
+  [comparatif](https://claude.ai/artifact/JrKtG7Zd48J7BE9irjoVrY)). La catiche au bord de l'eau :
+  brume, eau profonde, jonc, pelage ; Bricolage Grotesque pour les titres, Atkinson Hyperlegible
+  Next pour le texte ; l'arche, l'entrée du gîte, en signature, seulement derrière Tom sur le haut
+  du site et à l'entrée de l'app (Victor n'en voulait pas partout). Raisons : aucune direction de
+  la catégorie n'est bleu-vert, le nom y prend son sens, rien d'enfantin pour un élève de 4e, et le
+  pull bleu de Tom ressort. Écartées : « Copie » (le site actuel rendu adulte : son stylo rouge
+  évoque la correction et la note) et « Veilleuse » (nuit indigo et ambre, empattement). La
+  composition des écrans essayés n'est pas retenue : elle se refait sur la charte complète. Remplace
+  « Grands carreaux » (2026-10-11). Sources : `charte.md`, `etudes/2026-10-12/bonnes-pratiques.md`,
+  `etudes/2026-10-11/direction-artistique.md` pour la catégorie.
 - **Des formules, pas de schémas, dans la séance** (2026-10-08, choix délégué par Victor). Le
   texte de Tom est rendu en Markdown et ses formules en MathML (KaTeX) ; ni HTML, ni lien, ni
   image venus du modèle. Pas de schémas Mermaid : lourds sur téléphone, et refusés par la CSP ;

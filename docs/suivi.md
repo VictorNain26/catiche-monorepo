@@ -9,10 +9,13 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 - **La refonte du produit** (`decisions.md`, 2026-10-12 ; `etudes/2026-10-12/refonte-produit.md`) :
   la vision, les décisions et la roadmap réécrites ; les anciens lots 1 à 3 forment le lot 1,
   « Le produit » ; les espaces et les écrans visés sont dans `experience.md`.
-- **Lot en cours : 1, le produit, étape 1** : une nouvelle direction artistique, essayée dans le
-  vrai code sur le haut du site, la connexion et le tableau de bord du parent ; Victor choisit.
-  D'ici là, le code garde « Grands carreaux » (`charte.md`) et le site son identité précédente.
-- **Déjà construit**, aux couleurs de « Grands carreaux », sans composition : le nom Catiche dans
+- **Lot en cours : 1, le produit, étape 2** : la direction « Rive » est choisie (`decisions.md`,
+  `charte.md`), le plan du lot tiré des pratiques des métiers (`roadmap.md`,
+  `etudes/2026-10-12/bonnes-pratiques.md`). **Prochaine PR : 2.1, les tokens Rive.** Le code garde
+  l'identité précédente jusque-là. L'essai de Rive dans le code est sur la branche locale
+  `da2/rive`, jamais poussée : une référence pour les palettes et le hero du site, pas un code à
+  reprendre tel quel ; sa composition des écrans n'est pas retenue.
+- **Déjà construit**, à l'identité précédente, sans composition : le nom Catiche dans
   l'app ; l'entrée du parent (code, clé d'accès, prénom) ; l'ajout d'un enfant, une question par
   écran ; la fiche de l'enfant ; le profil de l'élève dans l'en-tête et « Qui utilise Tom ? » avec
   chaque enfant que l'appareil tient ; le jumelage des deux côtés ; en 4e et 3e, plus d'ouverture
