@@ -1,15 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
+import { recordCspViolations } from '../csp';
 
 // The built web as the built server serves it (playwright.config.ts): its CSP, its fallback.
-
-async function recordCspViolations(page: Page) {
-  await page.addInitScript(() => {
-    const violations: string[] = [];
-    Object.assign(window, { cspViolations: violations });
-    document.addEventListener('securitypolicyviolation', (event) => violations.push(`${event.violatedDirective} ${event.blockedURI}`));
-  });
-  return () => page.evaluate(() => (window as unknown as { cspViolations: string[] }).cspViolations);
-}
 
 test('the app runs under the CSP of the server without a single violation', async ({ page }) => {
   const violations = await recordCspViolations(page);
@@ -42,6 +34,30 @@ test('the check catches what the CSP blocks', async ({ page }) => {
   });
 
   await expect.poll(violations).toEqual([expect.stringMatching(/^script-src-elem inline$/)]);
+});
+
+test('the CSP blocks a style element written at run time', async ({ page }) => {
+  const violations = await recordCspViolations(page);
+  await page.goto('/');
+
+  await page.evaluate(() => {
+    const style = document.createElement('style');
+    style.textContent = 'body { color: red; }';
+    document.head.append(style);
+  });
+
+  await expect.poll(violations).toEqual([expect.stringMatching(/^style-src-elem inline$/)]);
+});
+
+test('the CSP blocks a style attribute written into the markup', async ({ page }) => {
+  const violations = await recordCspViolations(page);
+  await page.goto('/');
+
+  await page.evaluate(() => {
+    document.body.insertAdjacentHTML('beforeend', '<p style="color: red">injected</p>');
+  });
+
+  await expect.poll(violations).toEqual([expect.stringMatching(/^style-src-attr inline$/)]);
 });
 
 // An open tab still asks for the chunks of its own build, gone from the server. The router reloads

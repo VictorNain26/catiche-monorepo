@@ -15,6 +15,7 @@
     "@playwright/test": "1.63.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/playwright": "workspace:*",
+    "@repo/tokens": "workspace:*",
     "@types/node": "^24.13.6",
     "ai": "7.0.136",
     "eslint": "^10.11.0",

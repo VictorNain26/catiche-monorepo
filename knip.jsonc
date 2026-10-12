@@ -13,6 +13,7 @@
       "ignoreDependencies": ["@simplewebauthn/server"],
     },
     "packages/ui": {
+      "entry": ["src/**/*.test.tsx"],
       "project": ["src/**/*.{ts,tsx}"],
     },
     "packages/tokens": {

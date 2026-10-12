@@ -13,10 +13,13 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
   `charte.md`), le plan du lot tiré des pratiques des métiers (`roadmap.md`,
   `etudes/2026-10-12/bonnes-pratiques.md`). Les tokens Rive (2.1) sont dans le site et l'app :
   échelles générées par Leonardo, rôles, graphiques, mouvement, Bricolage Grotesque et Atkinson
-  Hyperlegible Next. La qualité (2.2) tient les écrans : captures de référence par projet, axe
-  (WCAG 2.2 A et AA) sur chaque état en clair et en sombre, un projet `desktop` dans la suite
-  web, chaque checkout sur sa propre base et ses propres ports d'e2e. En cours : 2.3, les
-  composants de `@repo/ui` ; puis 2.4, le logo et Tom en 2D. L'essai
+  Hyperlegible Next. Les composants de `@repo/ui` (2.3) sont là, sur Base UI, sous une CSP
+  stricte (`decisions.md`) : la coquille, section, liste,
+  carte, état vide, squelette, bandeau, dialogue et tiroir, toast, graphique en barres, montrés
+  par le catalogue `/catalogue` de l'app que la suite e2e visite. La qualité (2.2) tient les
+  écrans : captures de référence par projet, axe (WCAG 2.2 A et AA) sur chaque état en clair et
+  en sombre, un projet `desktop` dans la suite web, chaque checkout sur sa propre base et ses
+  propres ports d'e2e. Prochaine PR : 2.4, le logo et Tom en 2D. L'essai
   de Rive est sur la branche locale `da2/rive`, jamais poussée : une référence pour le hero du
   site, pas un code à reprendre ; sa composition des écrans n'est pas retenue.
 - **Déjà construit**, aux couleurs de Rive mais sans composition : le nom Catiche dans
@@ -107,6 +110,7 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
   `hero.spec.ts` ; une application de preview par PR.
 - Trois appels à `listDeviceSessions` (`foyer.$studentId.tsx`, `sign-out.tsx`, `bienvenue.tsx`)
   gèrent chacun l'erreur à leur façon : passer par `deviceSessionsQuery` (`lib/auth.ts`).
+- Aux étapes 3 et 4, avec les écrans : les cartes en `li` des listes deviennent `List`.
 
 **Lot 4, Tom**
 - Tom qui se dit programme : un scénario où l'élève demande s'il est humain ou parle de lui ; la

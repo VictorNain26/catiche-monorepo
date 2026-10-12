@@ -1,8 +1,7 @@
-import { Button } from '@repo/ui';
+import { Banner, Button } from '@repo/ui';
 import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { authClient, authMessage } from '../lib/auth';
-import { Notice } from './notice';
 
 /**
  * Signs the guardian out of this device, then loads the app afresh: on a device the family shares,
@@ -30,7 +29,7 @@ export function SignOut({ label }: { label: string }) {
 
   return (
     <>
-      {failure && <Notice tone="error">{failure}</Notice>}
+      {failure && <Banner tone="error" title={failure} />}
       <Button variant="outline" disabled={pending} onClick={() => void signOut()}>
         {label}
       </Button>

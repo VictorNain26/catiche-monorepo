@@ -149,6 +149,12 @@ describe('security headers', () => {
     expect((await get('/api/ping')).headers.get('content-security-policy')).toBe(csp);
   });
 
+  it('allows nothing inline, neither a script nor a style', async () => {
+    for (const res of [await navigate('/'), await get('/api/ping')]) {
+      expect(res.headers.get('content-security-policy')).not.toContain("'unsafe-inline'");
+    }
+  });
+
   it('keeps resources and the browsing context to this origin', async () => {
     const res = await navigate('/');
     expect(res.headers.get('cross-origin-resource-policy')).toBe('same-origin');

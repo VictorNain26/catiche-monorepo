@@ -1,12 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@repo/ui';
+import { Banner, Button } from '@repo/ui';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { UserRoundIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm, useWatch, type FieldPath } from 'react-hook-form';
 import { CheckboxField, Field, SelectField } from '../components/field';
-import { Notice } from '../components/notice';
 import { BackLink, HeaderLink, Page } from '../components/page';
 import { api, parseResponse } from '../lib/api';
 import { LEVEL_LABELS, birthYears, householdMessage, newChildSchema, studentsQuery } from '../lib/household';
@@ -116,9 +115,10 @@ function AddChild() {
               {...form.register('memoryProposed')}
             />
             {create.error && (
-              <Notice tone="error">
-                {householdMessage(create.error, 'Vérifiez le prénom et le mois de naissance : votre enfant a entre 5 et 20 ans.')}
-              </Notice>
+              <Banner
+                tone="error"
+                title={householdMessage(create.error, 'Vérifiez le prénom et le mois de naissance : votre enfant a entre 5 et 20 ans.')}
+              />
             )}
           </>
         )}

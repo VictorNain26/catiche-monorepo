@@ -45,7 +45,7 @@ test('the sign-in says the beta is closed, checks the address and the code, and 
   await expect(page).toHaveTitle('Catiche');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Entrer dans Catiche');
   await expect(page.getByText('Tom, un programme')).toBeVisible();
-  await expect(page.getByRole('status')).toContainText('Catiche est en bêta fermée');
+  await expect(page.getByRole('region', { name: 'Catiche est en bêta fermée' })).toBeVisible();
   await expectAccessible(page);
   await expect(page).toHaveScreenshot('connexion.png');
   // Under 16 px, iOS Safari zooms on the field it focuses: a phone's concern, a computer's field is smaller.
@@ -61,7 +61,7 @@ test('the sign-in says the beta is closed, checks the address and the code, and 
   const email = address('maladroit');
   invite(email);
   const code = await askCode(page, email);
-  await expect(page.getByRole('status')).toContainText(email);
+  await expect(page.getByRole('region').filter({ hasText: 'vient d’être envoyé' })).toContainText(email);
   await expectAccessible(page);
   const field = page.getByLabel('Le code reçu par e-mail');
   await expect(field).toHaveAttribute('autocomplete', 'one-time-code');

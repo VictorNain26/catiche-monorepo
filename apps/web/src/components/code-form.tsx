@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@repo/ui';
+import { Banner, Button, toast } from '@repo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -7,7 +7,6 @@ import { authClient, authMessage } from '../lib/auth';
 import { meQuery } from '../lib/me';
 import { z } from '../lib/zod';
 import { CODE_INPUT_CLASS, Field } from './field';
-import { Notice } from './notice';
 
 const codeSchema = z.object({
   otp: z
@@ -39,15 +38,19 @@ export function CodeForm({ email, submitLabel, onEntered }: { email: string; sub
   const resend = async () => {
     setFailure(null);
     const { error } = await sendCode(email);
-    if (error) setFailure(authMessage(error));
-    else setResent(true);
+    if (error) {
+      setFailure(authMessage(error));
+      return;
+    }
+    setResent(true);
+    toast(`Un nouveau code vient d’être envoyé à ${email}.`);
   };
 
   return (
     <>
-      <Notice tone="info">
-        {resent ? 'Un nouveau code' : 'Un code à 6 chiffres'} vient d’être envoyé à {email}. Il est valable 5 minutes.
-      </Notice>
+      <Banner tone="info" title={`${resent ? 'Un nouveau code' : 'Un code à 6 chiffres'} vient d’être envoyé à ${email}.`}>
+        Il est valable 5 minutes.
+      </Banner>
       <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-4">
         <Field
           label="Le code reçu par e-mail"
@@ -58,7 +61,7 @@ export function CodeForm({ email, submitLabel, onEntered }: { email: string; sub
           {...form.register('otp')}
           error={form.formState.errors.otp?.message}
         />
-        {failure && <Notice tone="error">{failure}</Notice>}
+        {failure && <Banner tone="error" title={failure} />}
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {submitLabel}
         </Button>

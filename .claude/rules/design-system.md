@@ -33,8 +33,9 @@ l'app. Les composants ne dépendent de l'identité que par les rôles.
   ([1.4.11](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html)).
 - Aucune cible tactile sous 44 px, aucun défilement horizontal à largeur de téléphone, aucune
   animation qui ignore le mouvement réduit.
-- Aucune primitive interactive hors de Radix (dialogue, onglets, menu ; le tiroir est un dialogue
-  de Radix), sauf les toasts, par `sonner` : une seule famille dans `@repo/ui`.
+- Aucune primitive interactive hors de Base UI (`@base-ui/react` : dialogue, toast, onglets, menu ;
+  le tiroir est un dialogue de Base UI), toasts compris : une seule famille dans `@repo/ui`, et
+  aucune qui écrive une balise `<style>` (`docs/decisions.md`, « `@repo/ui` sur Base UI »).
 - Aucun graphique en anneau, en camembert ou en 3D, aucune couleur seule porteuse d'une
   information, aucun graphique sans sa phrase et son tableau de valeurs.
 - Aucune arche ailleurs que derrière Tom, sur le haut du site et à l'entrée de l'app.

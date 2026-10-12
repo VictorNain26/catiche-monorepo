@@ -1,12 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button, Card, Fold } from '@repo/ui';
+import { Banner, Button, Card, Fold, toast } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from '../lib/zod';
 import { Field, SelectField } from '../components/field';
-import { Notice } from '../components/notice';
 import { BackLink, Page } from '../components/page';
 import { QrCode } from '../components/qr-code';
 import { WeekSummary } from '../components/week-summary';
@@ -39,8 +38,8 @@ function StudentPage() {
   const { studentId } = Route.useParams();
   const { data: students } = useSuspenseQuery(studentsQuery);
   const week = useQuery(summaryQuery(studentId));
-  const pairing = usePairing(studentId);
   const child = students.find(({ id }) => id === studentId);
+  const pairing = usePairing(studentId, child?.name ?? '');
   if (!child) return null;
 
   return (
@@ -71,7 +70,7 @@ function StudentPage() {
  * never shows again, even once that device is disconnected. The first step stays, said done, until
  * the page is left: the parent reads it where the code was.
  */
-function usePairing(studentId: string) {
+function usePairing(studentId: string, name: string) {
   const queryClient = useQueryClient();
   // The devices paired when the code was asked for: one more, and the code is spent.
   const [before, setBefore] = useState<ReadonlySet<string> | null>(null);
@@ -110,6 +109,10 @@ function usePairing(studentId: string) {
   });
 
   const redeemed = spent(devices);
+  // The pairing happens on the child's device: read out here when the list shows it.
+  useEffect(() => {
+    if (redeemed) toast(`L’appareil de ${name} est relié.`);
+  }, [redeemed, name]);
   return {
     devices,
     firstStep: devices.length === 0 || (redeemed && before?.size === 0),
@@ -139,7 +142,7 @@ function NextStep({ child, pairing }: { child: Student; pairing: Pairing }) {
         <>
           <p>{child.name} fait ses devoirs sur son téléphone : un code à usage unique le relie à son compte, sans mot de passe.</p>
           {pairing.redeemed ? (
-            <Notice tone="info">L’appareil de {child.name} est relié.</Notice>
+            <Banner tone="success" title={`L’appareil de ${child.name} est relié.`} />
           ) : (
             <PairingCode pairing={pairing} device="son téléphone" label={`Relier le téléphone de ${child.name}`} name={child.name} />
           )}
@@ -184,7 +187,7 @@ function OpenHere({ child }: { child: Student }) {
         À chaque séance, {child.name} choisit : avec vous à côté, ou sans vous ce soir. À côté, Tom vous propose quoi dire, jamais la réponse.
       </p>
       <p className="text-sm text-muted-foreground">Pour revenir au vôtre, il vous faudra votre clé d’accès ou un code.</p>
-      {open.error && <Notice tone="error">{open.error.message}</Notice>}
+      {open.error && <Banner tone="error" title={open.error.message} />}
     </section>
   );
 }
@@ -205,7 +208,7 @@ function PairingCode({ pairing, device, label, name }: { pairing: Pairing; devic
           <p className="text-sm text-muted-foreground">Valable jusqu’à {formatHour(code.expiresAt)}, une seule fois.</p>
         </>
       )}
-      {pairing.error && <Notice tone="error">{householdMessage(pairing.error)}</Notice>}
+      {pairing.error && <Banner tone="error" title={householdMessage(pairing.error)} />}
       <Button disabled={pairing.asking} onClick={pairing.ask}>
         {code ? 'Nouveau code' : label}
       </Button>
@@ -222,27 +225,25 @@ function Devices({ child, pairing }: { child: Student; pairing: Pairing }) {
       ) : (
         <ul className="flex flex-col gap-2">
           {devices.map((device) => (
-            <Card asChild key={device.id} className="flex items-center justify-between gap-3">
-              <li>
-                <span className="flex flex-col">
-                  <span className="font-bold">{deviceName(device.userAgent)}</span>
-                  <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
-                </span>
-                <Button
-                  variant="outline"
-                  disabled={revoke.isPending}
-                  onClick={() => {
-                    revoke.mutate(device.id);
-                  }}
-                >
-                  Déconnecter
-                </Button>
-              </li>
+            <Card render={<li />} key={device.id} className="flex items-center justify-between gap-3">
+              <span className="flex flex-col">
+                <span className="font-bold">{deviceName(device.userAgent)}</span>
+                <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
+              </span>
+              <Button
+                variant="outline"
+                disabled={revoke.isPending}
+                onClick={() => {
+                  revoke.mutate(device.id);
+                }}
+              >
+                Déconnecter
+              </Button>
             </Card>
           ))}
         </ul>
       )}
-      {revoke.error && <Notice tone="error">{householdMessage(revoke.error)}</Notice>}
+      {revoke.error && <Banner tone="error" title={householdMessage(revoke.error)} />}
       {child.accompanied ? (
         <p className="text-muted-foreground">
           En 6e et 5e, {child.name} travaille sur l’appareil de la famille ; relier son propre appareil devient possible en 4e.
@@ -252,7 +253,7 @@ function Devices({ child, pairing }: { child: Student; pairing: Pairing }) {
         !pairing.firstStep && (
           <>
             {pairing.redeemed ? (
-              <Notice tone="info">L’appareil de {child.name} est relié.</Notice>
+              <Banner tone="success" title={`L’appareil de ${child.name} est relié.`} />
             ) : (
               !pairing.code && (
                 <p className="text-muted-foreground">
@@ -285,14 +286,18 @@ function Memory({ child }: { child: Student }) {
     <>
       <p className="text-muted-foreground">{memoryStatus(child)}</p>
       {propose.error && (
-        <Notice tone="error">
-          {isProblem(propose.error, 'FORBIDDEN') ? `À partir de 15 ans, c’est ${child.name} qui décide.` : householdMessage(propose.error)}
-        </Notice>
+        <Banner
+          tone="error"
+          title={isProblem(propose.error, 'FORBIDDEN') ? `À partir de 15 ans, c’est ${child.name} qui décide.` : householdMessage(propose.error)}
+        />
       )}
       {!child.memory.decidesAlone &&
         (withdrawing ? (
           <>
-            <Notice tone="error">Tom oubliera ce qu’il retient de {child.name}, et lui reposera la question si vous la proposez de nouveau.</Notice>
+            <Banner
+              tone="error"
+              title={`Tom oubliera ce qu’il retient de ${child.name}, et lui reposera la question si vous la proposez de nouveau.`}
+            />
             <Button
               disabled={propose.isPending}
               onClick={() => {
@@ -331,7 +336,10 @@ function EditStudent({ child }: { child: Student }) {
   const form = useForm({ resolver: zodResolver(studentSchema), defaultValues: { name: child.name, level: child.level } });
   const update = useMutation({
     mutationFn: (json: z.output<typeof studentSchema>) => parseResponse(student.$patch({ param: { id: child.id }, json })),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey }),
+    onSuccess: () => {
+      toast('Enregistré.');
+      return queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey });
+    },
   });
   const submit = form.handleSubmit((values) => {
     update.mutate(values);
@@ -341,7 +349,7 @@ function EditStudent({ child }: { child: Student }) {
     <form
       noValidate
       onSubmit={(event) => void submit(event)}
-      // A change after a save is not saved yet: its confirmation goes.
+      // A change after a failed save is a new attempt: the error of the last one goes.
       onChange={() => {
         update.reset();
       }}
@@ -349,8 +357,7 @@ function EditStudent({ child }: { child: Student }) {
     >
       <Field label="Son prénom" autoComplete="off" {...form.register('name')} error={form.formState.errors.name?.message} />
       <SelectField label="Sa classe" options={LEVEL_LABELS} {...form.register('level')} error={form.formState.errors.level?.message} />
-      {update.error && <Notice tone="error">{householdMessage(update.error)}</Notice>}
-      {update.isSuccess && <Notice tone="info">Enregistré.</Notice>}
+      {update.error && <Banner tone="error" title={householdMessage(update.error)} />}
       <Button type="submit" variant="outline" disabled={update.isPending}>
         Enregistrer
       </Button>
@@ -372,8 +379,8 @@ function DeleteStudent({ child }: { child: Student }) {
 
   return confirming ? (
     <>
-      <Notice tone="error">Ses séances seront effacées et ses appareils déconnectés. C’est définitif.</Notice>
-      {remove.error && <Notice tone="error">{householdMessage(remove.error)}</Notice>}
+      <Banner tone="error" title="Ses séances seront effacées et ses appareils déconnectés. C’est définitif." />
+      {remove.error && <Banner tone="error" title={householdMessage(remove.error)} />}
       <Button
         disabled={remove.isPending}
         onClick={() => {

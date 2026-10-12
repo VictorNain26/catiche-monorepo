@@ -1,8 +1,7 @@
-import { Button, Card, Fold } from '@repo/ui';
+import { Banner, Button, Card, Fold, toast } from '@repo/ui';
 import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { MemoryAnswer } from '../components/memory-answer';
-import { Notice } from '../components/notice';
 import { Page, ProfileLink } from '../components/page';
 import { TomHead } from '../components/tom';
 import { WeekSummary } from '../components/week-summary';
@@ -43,8 +42,14 @@ function StudentHome() {
 
   return (
     <Page title={`Bonjour ${me?.name ?? ''}`} action={<ProfileLink />}>
-      {memory?.state === 'asked' && <MemoryAnswer answer={answer} />}
-      {answer.isSuccess && <Notice tone="info">{ANSWERED[answer.variables]}</Notice>}
+      {memory?.state === 'asked' && (
+        <MemoryAnswer
+          answer={answer}
+          onAnswered={(choice) => {
+            toast(ANSWERED[choice]);
+          }}
+        />
+      )}
       <Sessions />
       {me && <WeekSummary week={week.data} failed={week.isError} name={me.name} reader="student" />}
       <Link to="/memoire" className="min-h-11 py-3 text-sm text-primary underline">
@@ -106,16 +111,14 @@ function Sessions() {
           Nouvelle séance
         </Button>
       )}
-      {start.error && <Notice tone="error">La séance n’a pas pu s’ouvrir. Réessaie dans un instant.</Notice>}
+      {start.error && <Banner tone="error" title="La séance n’a pas pu s’ouvrir. Réessaie dans un instant." />}
       {sessions.length > 0 && (
         <ul className="flex flex-col gap-2">
           {sessions.map((session) => (
             <li key={session.id}>
-              <Card asChild className="flex min-h-11 flex-col">
-                <Link to="/seance/$sessionId" params={{ sessionId: session.id }}>
-                  <span className="font-bold">{session.title ?? 'Séance sans titre'}</span>
-                  <span className="text-sm text-muted-foreground">{formatDay(session.createdAt)}</span>
-                </Link>
+              <Card render={<Link to="/seance/$sessionId" params={{ sessionId: session.id }} />} className="flex min-h-11 flex-col">
+                <span className="font-bold">{session.title ?? 'Séance sans titre'}</span>
+                <span className="text-sm text-muted-foreground">{formatDay(session.createdAt)}</span>
               </Card>
             </li>
           ))}
@@ -132,11 +135,9 @@ function Devices() {
     <Fold title="Tes appareils reliés">
       <ul className="flex flex-col gap-2">
         {devices.map((device) => (
-          <Card asChild key={device.id} className="flex flex-col">
-            <li>
-              <span className="font-bold">{deviceName(device.userAgent)}</span>
-              <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
-            </li>
+          <Card render={<li />} key={device.id} className="flex flex-col">
+            <span className="font-bold">{deviceName(device.userAgent)}</span>
+            <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
           </Card>
         ))}
       </ul>
