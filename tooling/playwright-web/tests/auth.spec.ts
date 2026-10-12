@@ -49,7 +49,11 @@ test('the sign-in says the beta is closed, checks the address and the code, and 
   await expectAccessible(page);
   await expect(page).toHaveScreenshot('connexion.png');
   // Under 16 px, iOS Safari zooms on the field it focuses: a phone's concern, a computer's field is smaller.
-  if (isMobile) expect(await page.getByLabel('Adresse e-mail').evaluate((field) => getComputedStyle(field).fontSize)).toBe('16px');
+  if (isMobile) {
+    expect(Number.parseFloat(await page.getByLabel('Adresse e-mail').evaluate((field) => getComputedStyle(field).fontSize))).toBeGreaterThanOrEqual(
+      16,
+    );
+  }
   await page.getByRole('button', { name: 'Recevoir mon code' }).click();
   await expect(page.getByText('Une adresse e-mail valide.')).toBeVisible();
   await expectAccessible(page);

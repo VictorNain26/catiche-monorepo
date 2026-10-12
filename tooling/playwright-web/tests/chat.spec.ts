@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { createUIMessageStream, createUIMessageStreamResponse } from 'ai';
 import { expectAccessible } from '../accessibility';
+import { token } from '../colors';
 import { addChild, guardian, pairedStudent } from '../guardian';
 
 // page.route never sees what the service worker answers.
@@ -45,8 +46,8 @@ test('a paired student opens a session, writes to Tom and reads his reply', asyn
   const send = page.getByRole('button', { name: 'Envoyer' });
   await expect(send).toBeDisabled();
   await expect(send).toHaveCSS('opacity', '1');
-  await expect(send).toHaveCSS('background-color', 'rgb(230, 228, 236)');
-  await expect(send).toHaveCSS('color', 'rgb(79, 84, 102)');
+  await expect(send).toHaveCSS('background-color', await token(page, 'disabled'));
+  await expect(send).toHaveCSS('color', await token(page, 'disabled-foreground'));
   await expectAccessible(page);
   await page.getByLabel('Ton message').fill('Je bloque sur 3x + 5 = 20');
   await send.click();

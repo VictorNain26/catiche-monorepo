@@ -110,6 +110,12 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
   composition des écrans essayés n'est pas retenue : elle se refait sur la charte complète. Remplace
   « Grands carreaux » (2026-10-11). Sources : `charte.md`, `etudes/2026-10-12/bonnes-pratiques.md`,
   `etudes/2026-10-11/direction-artistique.md` pour la catégorie.
+- **Les tokens Rive sur le site dès l'étape 2.1** (2026-10-12, choix de Victor). Le site prend les
+  couleurs et les fontes de Rive en même temps que l'app, en ligne sur sa composition actuelle
+  jusqu'à sa refonte (étape 3) ; `landing.css`, Nunito et Caveat partent, la note manuscrite
+  devient une note en pelage, et le site gagne le mode sombre de la charte, qu'il n'avait pas. Les échelles de douze pas viennent de Leonardo
+  (`@adobe/leonardo-contrast-colors`), à des contrastes cibles sur le fond, plutôt que des échelles
+  toutes faites de Radix, qui ne tombent pas sur les couleurs de la charte.
 - **Des formules, pas de schémas, dans la séance** (2026-10-08, choix délégué par Victor). Le
   texte de Tom est rendu en Markdown et ses formules en MathML (KaTeX) ; ni HTML, ni lien, ni
   image venus du modèle. Pas de schémas Mermaid : lourds sur téléphone, et refusés par la CSP ;
