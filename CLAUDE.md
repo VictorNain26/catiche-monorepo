@@ -27,8 +27,8 @@ change (Postgres de `docker compose` requis). Formatage : `bun run format`.
 
 - La landing n'appelle jamais le serveur, ni l'auth : `apps/web` est le seul client produit ; elle
   y mène par un simple lien.
-- Rien n'entre dans la landing en ligne avant sa refonte avec l'app (lot 1, étape 3), sauf un
-  correctif d'honnêteté ou technique (`.claude/rules/landing.md`).
+- Rien n'entre dans la landing en ligne avant sa refonte avec l'app (lot 1, étape 3), sauf les
+  tokens de la charte, un correctif d'honnêteté ou technique (`.claude/rules/landing.md`).
 - Jamais un écran construit sans `docs/experience.md` ni la charte : un écran du lot 1 est
   composé au téléphone et à l'ordinateur, pas une colonne de boutons.
 - Jamais de push sur `main` : une branche courte, puis une PR, mergée en merge commit (le

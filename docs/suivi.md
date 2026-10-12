@@ -11,11 +11,13 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
   « Le produit » ; les espaces et les écrans visés sont dans `experience.md`.
 - **Lot en cours : 1, le produit, étape 2** : la direction « Rive » est choisie (`decisions.md`,
   `charte.md`), le plan du lot tiré des pratiques des métiers (`roadmap.md`,
-  `etudes/2026-10-12/bonnes-pratiques.md`). **Prochaine PR : 2.1, les tokens Rive.** Le code garde
-  l'identité précédente jusque-là. L'essai de Rive dans le code est sur la branche locale
-  `da2/rive`, jamais poussée : une référence pour les palettes et le hero du site, pas un code à
-  reprendre tel quel ; sa composition des écrans n'est pas retenue.
-- **Déjà construit**, à l'identité précédente, sans composition : le nom Catiche dans
+  `etudes/2026-10-12/bonnes-pratiques.md`). Les tokens Rive (2.1) sont dans le site et l'app :
+  échelles générées par Leonardo, rôles, graphiques, mouvement, Bricolage Grotesque et Atkinson
+  Hyperlegible Next. En cours en parallèle : 2.2, la qualité (captures, axe, projet à
+  l'ordinateur) ; puis 2.3, les composants de `@repo/ui` ; puis 2.4, le logo et Tom en 2D. L'essai
+  de Rive est sur la branche locale `da2/rive`, jamais poussée : une référence pour le hero du
+  site, pas un code à reprendre ; sa composition des écrans n'est pas retenue.
+- **Déjà construit**, aux couleurs de Rive mais sans composition : le nom Catiche dans
   l'app ; l'entrée du parent (code, clé d'accès, prénom) ; l'ajout d'un enfant, une question par
   écran ; la fiche de l'enfant ; le profil de l'élève dans l'en-tête et « Qui utilise Tom ? » avec
   chaque enfant que l'appareil tient ; le jumelage des deux côtés ; en 4e et 3e, plus d'ouverture
@@ -93,9 +95,10 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
 - Client web : mesures sur un vrai iPhone et un Android ; un projet Playwright à l'ordinateur,
   avec les premiers écrans composés pour lui (`experience.md`).
 - Le réglage « Lecture aérée » (`charte.md`, `experience.md`).
-- Le site : la landing reçoit les tokens et la fonte de la nouvelle charte, `landing.css` se
-  supprime ; l'image Open Graph ; les tests de la landing qui gardent l'identité précédente
-  (`signs.spec.ts`, `type.spec.ts`, `hero.spec.ts`) ; une application de preview par PR.
+- Le site, à l'étape 3 : sa composition sur la charte (il porte déjà les tokens) ; ses annotations
+  d'école (surligneur, gribouillis) à repenser ; la note « c'est toi qui l'as trouvé ! », qui
+  célèbre et finit par un point d'exclamation, contre la charte ; l'image Open Graph composée ;
+  `hero.spec.ts` ; une application de preview par PR.
 - Trois appels à `listDeviceSessions` (`foyer.$studentId.tsx`, `sign-out.tsx`, `bienvenue.tsx`)
   gèrent chacun l'erreur à leur façon : passer par `deviceSessionsQuery` (`lib/auth.ts`).
 

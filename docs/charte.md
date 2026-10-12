@@ -3,8 +3,8 @@
 La direction « Rive » (`decisions.md`, 2026-10-12) : la catiche, le gîte de la loutre au bord de
 l'eau. Ce document dit comment s'en servir ; les valeurs vivent dans le code,
 `packages/tokens/theme.css` pour les tokens, `@repo/ui` pour les composants. Les pratiques d'où
-viennent ces règles : `etudes/2026-10-12/bonnes-pratiques.md`. Le code la reçoit au lot 1, étape 2
-(`roadmap.md`) ; d'ici là, il garde l'identité précédente.
+viennent ces règles : `etudes/2026-10-12/bonnes-pratiques.md`. Le site et l'app la portent depuis
+le lot 1, étape 2.1 ; leur composition se refait aux étapes 3 et 4 (`roadmap.md`).
 
 ## Le nom et le logo
 
@@ -20,22 +20,26 @@ tient dans le cercle central.
 
 | Rôle | Clair | Sombre | Usage |
 |---|---|---|---|
-| Brume (`background`) | `#eef3f1` | `#0c1a1e` | Le fond |
-| Encre (`foreground`) | `#13252b` | `#e3eeeb` | Le texte |
-| Eau profonde (`primary`) | `#0e5361` | `#79cbc9` | L'action principale, les liens, le focus, le panneau de marque |
-| Jonc (`highlight`) | `#dce57a` | `#4c5320` | Ce qui ressort derrière le texte de l'encre ; jamais en texte ni en bordure (sur la brume, 1,21:1 en clair, 2,17:1 en sombre) |
-| Pelage (`annotation`) | `#8a4f2a` | `#e0a77e` | Une note, un accent rare ; jamais à côté de l'eau profonde dans un graphique (1,33:1 en clair, 1,12:1 en sombre) |
+| Brume (`background`, `mist`) | `#eff3f1` | `#0c1e24` | Le fond |
+| Encre (`foreground`, `mist-12`) | `#13252b` | `#e3e8e6` | Le texte |
+| Eau profonde (`primary`, `water`) | `#0f5361` | `#6ababb` | L'action principale, les liens, le focus, le panneau de marque |
+| Jonc (`highlight`, `reed`) | `#d7e077` | `#3b410b` | Ce qui ressort derrière le texte de l'encre ; jamais en texte ni en bordure (sur la brume, 1,27:1 en clair, 1,59:1 en sombre) |
+| Pelage (`annotation`, `fur`) | `#945934` | `#b77d56` | Une note, un accent rare |
 
-- Chaque couleur se construit en échelle de douze pas, chaque pas à son rôle (fonds, composants,
-  bordures, aplats, texte), en OKLCH ; le sombre a son échelle à lui, pas une inversion. Les rôles
-  pointent vers les pas, ceux des surfaces compris (`card`, `secondary` pour la bulle de l'élève,
-  `muted` et `muted-foreground` pour le texte secondaire).
+- Chaque couleur a son échelle de douze pas, chaque pas à son rôle : 1 et 2 les fonds, 3 à 5 les
+  aplats des composants, 6 à 8 les bordures, 9 ce qui n'est pas du texte (3:1 au moins), 10 et 11
+  le texte et les aplats pleins (4,5:1 au moins), 12 l'encre. Les pas sont générés à des
+  contrastes cibles sur le fond, interpolés en OKLCH, par Leonardo (`packages/tokens/scales.mjs`) ;
+  le sombre a son échelle à lui, pas une inversion. Les rôles pointent vers les pas, ceux des
+  surfaces compris (`card`, `secondary` pour la bulle de l'élève, `muted` et `muted-foreground`
+  pour le texte secondaire). En sombre, l'eau profonde est un peu moins claire que le `#79cbc9`
+  de l'essai : chaque pas garde le même contraste dans les deux modes.
 - Le sombre suit le réglage de l'appareil ; il ne se présente jamais comme bon pour le sommeil.
 - Les états (`success`, `destructive`, `warning`, `disabled`) gardent leur sens dans les deux
   modes. Un bouton ne se désactive pas pour un formulaire incomplet : l'envoi dit ce qui manque ;
   un contrôle désactivé garde un texte lisible, jamais une opacité.
-- Les graphiques ont leur palette, dans un ordre fixe, chaque série à 3:1 du fond, et toujours un
-  libellé ou une forme en plus de la couleur.
+- Les graphiques ont leur palette, `chart-1` à `chart-4` dans cet ordre, chaque série à 3:1 du
+  fond et de la carte, et toujours un libellé ou une forme en plus de la couleur.
 - Contrastes WCAG 2.2 AA dans les deux modes, testés (`contrast.test.mjs`) ; APCA en contrôle de
   plus, jamais en norme.
 

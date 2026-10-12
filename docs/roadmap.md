@@ -23,11 +23,11 @@ Chaque PR précise son périmètre dans son plan, au moment où elle démarre
 est une PR, ses pratiques dans `etudes/2026-10-12/bonnes-pratiques.md` :
 1. **La direction** : « Rive », choisie le 2026-10-12 (`decisions.md`, `charte.md`). Fait.
 2. **Les fondations**, avant tout écran :
-   1. Les tokens Rive : une échelle de douze pas par couleur en OKLCH, clair et sombre, les rôles,
-      la palette des graphiques, le mouvement ; Bricolage Grotesque (axe de graisse seul) et
-      Atkinson Hyperlegible Next, chargées par les mêmes variables dans le site et l'app ; le site
-      prend `theme.css`, `landing.css` et ses fontes partent ; les tests de contraste couvrent les
-      graphiques (3:1) et le jonc.
+   1. Les tokens Rive : une échelle de douze pas par couleur, interpolée en OKLCH par Leonardo,
+      clair et sombre, les rôles, la palette des graphiques, le mouvement ; Bricolage Grotesque
+      (axe de graisse seul) et Atkinson Hyperlegible Next, chargées par les mêmes variables dans le
+      site et l'app ; le site prend `theme.css`, `landing.css` et ses fontes partent ; les tests
+      de contraste couvrent les graphiques (3:1) et le jonc. Fait.
    2. La qualité : `@playwright/test` à une version exacte ; les captures de référence
       (`toHaveScreenshot`) générées et comparées dans l'image officielle de Playwright, en local
       comme en CI ; `@axe-core/playwright` sur chaque état ; un projet à l'ordinateur dans la suite ;
