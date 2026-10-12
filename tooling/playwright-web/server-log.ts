@@ -1,13 +1,12 @@
 /**
  * The suite's server has no Scaleway settings: it logs its emails instead of sending them, into
- * this file, where a test reads the code an address was sent.
+ * this checkout's file, where a test reads the code an address was sent.
  */
 
 import { existsSync, readFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { checkout } from '@repo/playwright/checkout';
 
-export const SERVER_LOG = join(tmpdir(), 'tom-e2e-server.log');
+export const SERVER_LOG = checkout.serverLog;
 
 /** The log's complete lines: one still being written waits for its end. */
 function lines() {

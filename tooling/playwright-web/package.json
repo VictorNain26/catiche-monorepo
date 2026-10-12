@@ -12,9 +12,9 @@
     "web": "workspace:*"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "1.63.0",
     "@repo/eslint-config": "workspace:*",
+    "@repo/playwright": "workspace:*",
     "@types/node": "^24.13.6",
     "ai": "7.0.136",
     "eslint": "^10.11.0",

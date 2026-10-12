@@ -42,8 +42,12 @@ test('a parent makes a passkey on their device, filed under their address, and t
   const lock = await phoneLock(page);
   const email = await guardian(page, 'cle');
   await makePasskey(page);
-  // Named after the device it was made on, as its browser tells it: the computer's is Windows.
-  await expect(page.getByText(testInfo.project.name === 'desktop' ? 'Windows · Chrome' : 'Android · Chrome')).toBeVisible();
+  // Named after the device it was made on, as its browser's user agent tells it: its system, then its browser.
+  const userAgent = testInfo.project.use.userAgent ?? '';
+  expect(await page.evaluate(() => navigator.userAgent)).toBe(userAgent);
+  const system = ['Android', 'Windows'].find((name) => userAgent.includes(name));
+  expect(system, `no system known in ${userAgent}`).toBeDefined();
+  await expect(page.getByText(`${system ?? ''} · Chrome`)).toBeVisible();
   await expect(page.getByText(/^Créée le /)).toBeVisible();
   expect(await lock.filedUnder()).toEqual([email]);
 

@@ -1,5 +1,5 @@
 import { expect, test, type Route } from '@playwright/test';
-import { expectAccessible } from '../accessibility';
+import { expectAccessible } from '@repo/playwright/accessibility';
 import { invite } from '../database';
 import { addChild, address, birthMonthAged, childPhone, guardian, pairedStudent, signIn } from '../guardian';
 
@@ -16,6 +16,7 @@ test('adding a child asks one question per screen, the birth month in two menus,
 
   await expect(page.getByText('Étape 2 sur 4')).toBeVisible();
   await page.getByLabel('Sa classe', { exact: true }).selectOption({ label: 'Cinquième' });
+  await expectAccessible(page);
   await page.getByRole('button', { name: 'Continuer' }).click();
 
   await expect(page.getByText('Étape 3 sur 4')).toBeVisible();
@@ -30,6 +31,7 @@ test('adding a child asks one question per screen, the birth month in two menus,
   await expect(birth.getByLabel('Mois')).toHaveValue('03');
   const [year] = birthMonthAged(12).split('-');
   await birth.getByLabel('Année').selectOption(year ?? '');
+  await expectAccessible(page);
   await page.getByRole('button', { name: 'Continuer' }).click();
 
   await expect(page.getByText('Étape 4 sur 4')).toBeVisible();
@@ -176,6 +178,7 @@ test('a code pairs the child’s phone, which sees it, and the guardian disconne
   await expect(child.getByRole('heading', { name: 'Bonjour Noé' })).toBeVisible();
   // The profile shows in the header, the way to change it with it, and only there.
   await expect(child.getByRole('link', { name: /changer de profil/i })).toHaveAccessibleName('Noé, changer de profil');
+  await expectAccessible(child);
   // The sessions first; the devices folded, a tap away.
   await expect(child.getByText('Un appareil que tu ne reconnais pas ?')).toBeHidden();
   await child.getByText('Tes appareils reliés').click();
@@ -461,4 +464,18 @@ test('a week without a session says so, to the parent and to the child', async (
   await phone.close();
   await pairedStudent(page, browser, testInfo, 'Eva');
   await expect(page.getByRole('region', { name: 'Ta semaine' })).toContainText('Pas de séance ces sept derniers jours.');
+});
+
+test.describe('in dark mode', () => {
+  test.use({ colorScheme: 'dark' });
+
+  test('the child’s page and the household break no rule', async ({ page }) => {
+    await guardian(page, 'sombre');
+    await addChild(page, 'Léo');
+    await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Prochaine étape', 'Sa semaine']);
+    await expectAccessible(page);
+    await page.getByRole('link', { name: 'Retour au foyer' }).click();
+    await expect(page.getByRole('link', { name: /^Léo/ })).toContainText('Pas de séance ces sept derniers jours');
+    await expectAccessible(page);
+  });
 });

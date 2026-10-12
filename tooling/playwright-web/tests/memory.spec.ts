@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible } from '../accessibility';
+import { expectAccessible } from '@repo/playwright/accessibility';
 import { addChild, guardian, pairedStudent } from '../guardian';
 
 test('a guardian proposes the memory when adding the child, sees its state, and withdraws it', async ({ page }) => {
@@ -44,4 +44,19 @@ test('a child whose parent did not propose it is not asked', async ({ page, brow
   await page.getByRole('link', { name: 'Ce que Tom retient' }).click();
   await expect(page.getByText('Tom ne retient rien d’une séance à l’autre.')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Ana, changer de profil' })).toBeVisible();
+});
+
+test.describe('in dark mode', () => {
+  test.use({ colorScheme: 'dark' });
+
+  test('the offer and what Tom keeps break no rule', async ({ page, browser }, testInfo) => {
+    await pairedStudent(page, browser, testInfo, 'Max', { memory: true });
+    const offer = page.getByRole('region', { name: 'Tom peut retenir ce qui a résisté' });
+    await expect(offer).toContainText('Il ne garde rien de ce que tu écris');
+    await expectAccessible(page);
+    await offer.getByRole('button', { name: 'D’accord' }).click();
+    await page.getByRole('link', { name: 'Ce que Tom retient' }).click();
+    await expect(page.getByText('Rien pour l’instant')).toBeVisible();
+    await expectAccessible(page);
+  });
 });

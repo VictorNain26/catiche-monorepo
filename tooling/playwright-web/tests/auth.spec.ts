@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible } from '../accessibility';
+import { expectAccessible } from '@repo/playwright/accessibility';
 import { invite } from '../database';
 import { address, askCode, guardian, signIn } from '../guardian';
 

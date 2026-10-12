@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible } from './support';
+import { expectAccessible } from '@repo/playwright/accessibility';
 
 test('an unknown path answers 404 with a titled page, one h1 and the footer', async ({ page }) => {
   const response = await page.goto('/cette-page-n-existe-pas');

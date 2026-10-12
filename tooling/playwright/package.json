@@ -1,0 +1,30 @@
+{
+  "name": "@repo/playwright",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./accessibility": "./accessibility.ts",
+    "./checkout": "./checkout.ts",
+    "./config": "./config.ts"
+  },
+  "scripts": {
+    "test": "bun test checkout.test.ts",
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0"
+  },
+  "dependencies": {
+    "@axe-core/playwright": "^4.13.0"
+  },
+  "peerDependencies": {
+    "@playwright/test": "1.63.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@repo/eslint-config": "workspace:*",
+    "@types/node": "^24.13.6",
+    "bun-types": "^1.4.2",
+    "eslint": "^10.11.0",
+    "typescript": "6.0.3"
+  }
+}

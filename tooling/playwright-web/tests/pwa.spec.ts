@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible } from '../accessibility';
+import { expectAccessible } from '@repo/playwright/accessibility';
 import { computedColor } from '../colors';
 
 interface Manifest {

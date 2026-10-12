@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible, HEIGHT, waitForHydration } from './support';
+import { expectAccessible } from '@repo/playwright/accessibility';
+import { HEIGHT, waitForHydration } from './support';
 
 test('the mobile menu opens, lists the sections and closes on Escape', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: HEIGHT });

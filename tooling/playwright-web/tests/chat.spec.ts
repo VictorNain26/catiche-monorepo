@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { createUIMessageStream, createUIMessageStreamResponse } from 'ai';
-import { expectAccessible } from '../accessibility';
+import { expectAccessible } from '@repo/playwright/accessibility';
 import { token } from '../colors';
 import { addChild, guardian, pairedStudent } from '../guardian';
 
@@ -69,6 +69,7 @@ test('a paired student opens a session, writes to Tom and reads his reply', asyn
 
   await page.getByRole('link', { name: 'Retour à tes séances' }).click();
   await expect(page.getByRole('link', { name: /Séance sans titre/ })).toBeVisible();
+  await expectAccessible(page);
 });
 
 test('while Tom answers, the student is told what he does, step by step', async ({ page, browser }, testInfo) => {
@@ -107,6 +108,7 @@ test('while Tom answers, the student is told what he does, step by step', async 
   await expect(page.getByText('Tom lit ton message…')).toBeVisible();
   await push({ type: 'data-step', data: 'exercise', transient: true });
   await expect(page.getByText('Tom prépare ton exercice, ça prend quelques secondes…')).toBeVisible();
+  await expectAccessible(page);
   await push({ type: 'data-step', data: 'writing', transient: true });
   await expect(page.getByText('Tom écrit sa réponse…')).toBeVisible();
   await push({ type: 'text-start', id: 'reply' });
@@ -346,4 +348,21 @@ test('a day past the quota is told in French, without the server’s message', a
   // Nothing was stored: the message leaves the conversation and comes back to the field.
   await expect(page.getByRole('list', { name: 'Conversation' }).getByRole('listitem')).toHaveCount(0);
   await expect(page.getByLabel('Ton message')).toHaveValue('Bonjour');
+});
+
+test.describe('in dark mode', () => {
+  test.use({ colorScheme: 'dark' });
+
+  test('a session and Tom’s reply break no rule', async ({ page, browser }, testInfo) => {
+    await pairedStudent(page, browser, testInfo, 'Lina');
+    await tutorReplies(page, 'Que fais-tu du + 5 ?');
+    await page.getByRole('button', { name: 'Nouvelle séance' }).click();
+    await page.getByLabel('Ton message').fill('Je bloque sur 3x + 5 = 20');
+    await page.getByRole('button', { name: 'Envoyer' }).click();
+    await expect(page.getByRole('list', { name: 'Conversation' }).getByRole('listitem')).toHaveText([
+      'Toi : Je bloque sur 3x + 5 = 20',
+      'Tom : Que fais-tu du + 5 ?',
+    ]);
+    await expectAccessible(page);
+  });
 });

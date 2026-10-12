@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
-import { expectAccessible, HEIGHT, hiddenReveals, PAGES, settle, WIDTHS } from './support';
+import { expectAccessible } from '@repo/playwright/accessibility';
+import { HEIGHT, hiddenReveals, PAGES, settle, WIDTHS } from './support';
 
 function headingLevels(page: Page) {
   return page.evaluate(() =>

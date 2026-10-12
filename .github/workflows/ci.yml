@@ -120,7 +120,8 @@ jobs:
           path: tooling/playwright-web/playwright-report/
           retention-days: 7
 
-  # The landing's server is Caddy, started by `docker run` (apps/landing/playwright.config.ts).
+  # The landing's server is Caddy, started by `docker run` (apps/landing/playwright.config.ts). The
+  # shared e2e helpers' own tests need no server either: they run here.
   e2e-landing:
     name: E2E landing (Playwright)
     runs-on: ubuntu-latest
@@ -133,20 +134,22 @@ jobs:
       - name: Is the landing affected
         id: affected
         run: |
-          TASKS=$(bunx --no-install turbo run test:e2e --filter=landing ${AFFECTED:+"$AFFECTED"} --dry=json | jq '[.tasks[] | select(.command != "<NONEXISTENT>")] | length')
+          TASKS=$(bunx --no-install turbo run test:e2e --filter=landing --filter=@repo/playwright ${AFFECTED:+"$AFFECTED"} --dry=json | jq '[.tasks[] | select(.command != "<NONEXISTENT>")] | length')
           echo "run=$([ "$TASKS" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
       - if: steps.affected.outputs.run == 'true'
         uses: ./.github/actions/compose-up
         with:
           services: playwright
       - if: steps.affected.outputs.run == 'true'
-        run: bunx --no-install turbo run test:e2e --filter=landing
-      - name: Keep the suite's report
+        run: bunx --no-install turbo run test:e2e --filter=landing --filter=@repo/playwright
+      - name: Keep the suites' reports
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-landing-report
-          path: apps/landing/playwright-report/
+          path: |
+            apps/landing/playwright-report/
+            tooling/playwright/playwright-report/
           retention-days: 7
 
   migrations:

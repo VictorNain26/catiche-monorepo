@@ -1,23 +1,17 @@
 import { defineConfig, devices } from '@playwright/test';
+import { checkout } from '@repo/playwright/checkout';
+import { browsers, screenshots } from '@repo/playwright/config';
 
-const PORT = 3011;
-const CONTAINER = 'landing-e2e';
-const baseURL = `http://localhost:${PORT}`;
+const PORT = checkout.landingPort;
+const CONTAINER = checkout.landingContainer;
+const baseURL = `http://localhost:${String(PORT)}`;
 
 export default defineConfig({
   testDir: './tests',
   forbidOnly: !!process.env['CI'],
   reporter: process.env['CI'] ? [['list'], ['html', { open: 'never' }]] : 'list',
-  // The image's browsers render a screenshot alike on every host: the host's platform stays out of its
-  // name. Animations stopped, caret hidden and fonts loaded are toHaveScreenshot's own defaults.
-  expect: { toHaveScreenshot: { pathTemplate: '{testDir}/__screenshots__{/projectName}/{testFilePath}/{arg}{ext}' } },
-  use: {
-    baseURL,
-    reducedMotion: 'reduce',
-    // The browsers are the official image's, served by `docker compose` (service `playwright`);
-    // they reach Caddy through the host's loopback. Without a timeout, a stopped service hangs the run.
-    connectOptions: { wsEndpoint: 'ws://127.0.0.1:3030/', exposeNetwork: '<loopback>', timeout: 10_000 },
-  },
+  expect: screenshots,
+  use: { baseURL, reducedMotion: 'reduce', connectOptions: browsers },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   // The Caddy that Clever Cloud runs, with the same Caddyfile: headers, redirects and the 404 are tested as served.
   webServer: {
