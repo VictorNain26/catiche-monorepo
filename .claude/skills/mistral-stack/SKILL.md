@@ -13,7 +13,7 @@ variable `MISTRAL_SERVER_URL`, +10 % sur le prix). Les rôles, les modèles et l
 
 - **Mistral Small 4** (`mistral-small-2603`) pour tout rôle de LLM, juge compris : jamais
   Medium, Large ni Ministral. Restent les modèles spécialisés : `mistral-moderation-2603`
-  (gratuit), et Voxtral pour la voix, à son arrivée au lot 3 (`voxtral-mini-2602` en
+  (gratuit), et Voxtral pour la voix, à son arrivée au lot 4 (`voxtral-mini-2602` en
   transcription, en français imposé ; voix `fr_marie_*`, le champ `language` est refusé).
 - Un seul modèle texte : une seule variable (`MISTRAL_MODEL`), un seul cache, une seule
   configuration à évaluer.
