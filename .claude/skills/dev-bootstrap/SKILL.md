@@ -33,4 +33,6 @@ valeurs de la stack locale.
 
 Ceux du serveur tournent sur le même Postgres : chaque fichier crée sa base et la supprime, ce
 qui demande un utilisateur autorisé à créer des bases (celui de `docker compose` l'est). La
-suite de bout en bout du web utilise sa propre base, `tom_e2e`, recréée à chaque lancement.
+suite de bout en bout du web utilise sa propre base, `tom_e2e`, recréée à chaque lancement. Les
+suites de bout en bout pilotent les navigateurs du service `playwright` : `docker compose up -d
+--wait postgres playwright` avant de les lancer (`.claude/rules/testing.md`).

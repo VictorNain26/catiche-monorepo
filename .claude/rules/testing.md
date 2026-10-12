@@ -32,8 +32,9 @@ demandent le Postgres de `docker compose` (`DATABASE_URL`).
   Projets `iphone` (WebKit) et `android` (Chromium).
 - **Navigateurs des deux suites** : ceux de l'image officielle de Playwright, servis par le
   service `playwright` de `docker-compose.yml` ; prérequis en local comme en CI,
-  `docker compose up -d --wait postgres playwright`. Jamais un navigateur installé sur l'host :
-  le rendu doit être celui de la CI.
+  `docker compose up -d --wait postgres playwright`. Le serveur charge le Playwright installé par
+  bun au démarrage : après une montée de version, `docker compose up -d --force-recreate --wait
+  playwright`. Jamais un navigateur installé sur l'host : le rendu doit être celui de la CI.
 - **Landing** : servie par le Caddy de production (`apps/landing/Caddyfile`, en conteneur, Docker
   requis) ; mise en page (hiérarchie des titres, aucun défilement horizontal, cibles de 44 px,
   lignes légales, liens soulignés), rendu sans JavaScript et sous mouvement réduit, absence de

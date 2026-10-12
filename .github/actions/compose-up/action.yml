@@ -20,9 +20,10 @@ runs:
         SERVICES: ${{ inputs.services }}
       run: |
         read -ra services <<< "$SERVICES"
+        # A whole pull takes under a minute; four minutes leaves a slow registry room to finish.
         for attempt in 1 2 3; do
-          if timeout 180 docker compose pull --quiet "${services[@]}"; then exit 0; fi
-          echo "::warning::docker compose pull failed or ran past 3 minutes (attempt $attempt of 3)"
+          if timeout 240 docker compose pull --quiet "${services[@]}"; then exit 0; fi
+          echo "::warning::docker compose pull failed or ran past 4 minutes (attempt $attempt of 3)"
         done
         exit 1
 
