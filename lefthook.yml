@@ -38,6 +38,11 @@ pre-commit:
       glob: '**/*.ts'
       run: bunx --no-install eslint --max-warnings 0 --no-warn-ignored {staged_files}
 
+    - name: lint-playwright
+      root: 'tooling/playwright/'
+      glob: '**/*.ts'
+      run: bunx --no-install eslint --max-warnings 0 --no-warn-ignored {staged_files}
+
     - name: typecheck
       run: bunx --no-install turbo run typecheck --affected --output-logs=errors-only
 
