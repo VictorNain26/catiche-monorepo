@@ -1,5 +1,6 @@
 ---
 import { Font } from 'astro:assets';
+import scales from '@repo/tokens/scales.json';
 import '@/styles/global.css';
 import Header from '@/components/layout/header.astro';
 import Footer from '@/components/layout/footer.astro';
@@ -63,6 +64,9 @@ const jsonLd = [
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {/* The browser bar takes the page's background, in each mode (the step theme.css's background points at). */}
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content={scales.light['mist-1']} />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content={scales.dark['mist-1']} />
     <title>{title ? `${title} | ${BRAND_NAME}` : TITLE}</title>
     <meta name="description" content={description} />
     <meta name="application-name" content={BRAND_NAME} />
@@ -101,9 +105,8 @@ const jsonLd = [
     <link rel="icon" href="/icon.png" sizes="64x64" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-icon.png" sizes="180x180" type="image/png" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <Font cssVariable="--font-nunito" preload />
-    {/* Not preloaded: only the home page writes by hand. */}
-    <Font cssVariable="--font-caveat" />
+    <Font cssVariable="--font-brand-text" preload />
+    <Font cssVariable="--font-brand-heading" preload />
     {jsonLd.map((schema) => (
       <JsonLd data={schema} />
     ))}

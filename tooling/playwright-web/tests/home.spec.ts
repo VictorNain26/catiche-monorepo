@@ -12,17 +12,22 @@ test('the page a visitor lands on renders in French at phone width, with one h1 
   await expect(page.locator('main > header').locator(':scope > *')).toHaveCount(1);
 });
 
-test('the brand applies: paper background, Inclusive Sans loaded', async ({ page }) => {
+test('the brand applies: the mist background, Atkinson Hyperlegible Next at 17 px for the text, Bricolage Grotesque for the titles', async ({
+  page,
+}) => {
   await page.goto('/connexion');
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  const title = page.getByRole('heading', { level: 1 });
+  await expect(title).toBeVisible();
 
   const body = page.locator('body');
-  await expect(body).toHaveCSS('background-color', 'rgb(250, 248, 242)');
+  await expect(body).toHaveCSS('background-color', 'rgb(239, 243, 241)');
+  await expect(body).toHaveCSS('font-size', '17px');
   // WebKit serialises the computed family unquoted, Chromium quoted.
-  await expect(body).toHaveCSS('font-family', /^"?Inclusive Sans"?,/);
+  await expect(body).toHaveCSS('font-family', /^"?Atkinson Hyperlegible Next Variable"?,/);
+  await expect(title).toHaveCSS('font-family', /^"?Bricolage Grotesque Variable"?,/);
   const loaded = await page.evaluate(async () => {
     await document.fonts.ready;
-    return document.fonts.check('16px "Inclusive Sans"');
+    return ['17px "Atkinson Hyperlegible Next Variable"', '800 32px "Bricolage Grotesque Variable"'].map((font) => document.fonts.check(font));
   });
-  expect(loaded).toBe(true);
+  expect(loaded).toEqual([true, true]);
 });

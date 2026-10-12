@@ -1,0 +1,14 @@
+---
+import { cn } from '@repo/ui/classes';
+
+// A note in the fur color, rare: one per section at most (tests/signs.spec.ts).
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<p data-note class={cn('font-heading text-xl font-bold text-balance text-annotation', className)}>
+  <slot />
+</p>

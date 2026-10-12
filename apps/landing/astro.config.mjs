@@ -12,20 +12,22 @@ export default defineConfig({
   vite: { plugins: [tailwindcss()] },
   // No Markdown here; Shiki's inline styles would only trip the CSP check.
   markdown: { syntaxHighlight: false },
+  // The variables packages/tokens/theme.css reads, as the app sets them from fontsource; the
+  // variable fonts on their weight axis alone. No mono: the site shows no code.
   fonts: [
     {
       provider: fontProviders.fontsource(),
-      name: 'Nunito',
-      cssVariable: '--font-nunito',
-      weights: ['200 1000'],
+      name: 'Atkinson Hyperlegible Next',
+      cssVariable: '--font-brand-text',
+      weights: ['200 800'],
       styles: ['normal'],
       subsets: ['latin'],
     },
     {
       provider: fontProviders.fontsource(),
-      name: 'Caveat',
-      cssVariable: '--font-caveat',
-      weights: ['400 700'],
+      name: 'Bricolage Grotesque',
+      cssVariable: '--font-brand-heading',
+      weights: ['200 800'],
       styles: ['normal'],
       subsets: ['latin'],
     },
