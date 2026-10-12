@@ -43,9 +43,9 @@ demandent le Postgres de `docker compose` (`DATABASE_URL`).
   référence générée hors du service `playwright`, ni une tolérance (`maxDiffPixels`, `threshold`)
   pour faire passer une capture.
 - **Accessibilité** : `expectAccessible(page)` (`tooling/playwright-web/accessibility.ts`,
-  `apps/landing/tests/support.ts`) passe l'état affiché à axe (`@axe-core/playwright`), règles
-  WCAG 2.2 A et AA, et échoue sur chaque violation, par règle et élément. Jamais `disableRules` ni
-  `exclude` pour taire une violation ; jamais axe sur un état encore en transition.
+  `apps/landing/tests/support.ts`) attend la fin des transitions, passe l'état affiché à axe
+  (`@axe-core/playwright`), règles WCAG 2.2 A et AA, et échoue sur chaque violation, par règle et
+  élément. Jamais `disableRules` ni `exclude` pour taire une violation.
 - **Landing** : servie par le Caddy de production (`apps/landing/Caddyfile`, en conteneur, Docker
   requis) ; mise en page (hiérarchie des titres, aucun défilement horizontal, cibles de 44 px,
   lignes légales, liens soulignés), rendu sans JavaScript et sous mouvement réduit, absence de
