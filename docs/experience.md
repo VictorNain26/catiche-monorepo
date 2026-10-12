@@ -12,8 +12,8 @@ PR qui construit un écran précise le reste dans son plan.
 - **Composé au téléphone et à l'ordinateur** : une colonne au téléphone, une vraie mise en page à
   l'ordinateur (tableau de bord sur la largeur, formulaire d'entrée à côté de ce que fait
   Catiche).
-- **Une navigation visible** : chaque espace connecté a un en-tête (le logo, le profil actif, le
-  compte) et ses onglets, deux à cinq, icône et libellé d'un mot, en bas au téléphone, sur le côté
+- **Une navigation visible** : chaque espace connecté a un en-tête (le logo, le profil actif)
+  et ses onglets, deux à cinq, icône et libellé d'un mot, en bas au téléphone, sur le côté
   à l'ordinateur ; chaque écran secondaire a son retour ; jamais de menu caché seul.
 - **Les états conçus avec l'écran** : vide (ce qui viendra et l'action qui le remplit), chargement
   (rien sous une seconde, un squelette au-delà), erreur (au champ, avec quoi faire), hors ligne,
@@ -28,8 +28,9 @@ PR qui construit un écran précise le reste dans son plan.
 - **Un réglage « Lecture aérée »**, aux espacements de WCAG 1.4.12 (`charte.md`).
 - **Prouvé au téléphone et à l'ordinateur** : la suite e2e reçoit un projet à l'ordinateur avec
   les premiers écrans composés pour lui.
-- **Tom en 2D au trait** dans l'app, petit, jamais près de l'énoncé, sans émotion qui réagit à
-  l'élève ; la 3D sur le site.
+- **Tom en 2D au trait** dans l'app, sans émotion qui réagit à l'élève : en grand devant l'arche
+  à l'entrée seulement, petit dans les espaces et la séance, jamais près de l'énoncé ; la 3D sur
+  le site.
 - **Aucune donnée inventée** : chaque chiffre affiché se calcule depuis les séances, les messages
   et les exercices ; rien de nouveau n'est collecté pour les tableaux de bord.
 

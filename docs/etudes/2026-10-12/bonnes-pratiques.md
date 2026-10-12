@@ -14,8 +14,10 @@ quand aucune source primaire n'a été trouvée. Les règles retenues vont dans 
   mot, jamais une action ([Apple HIG](https://developer.apple.com/design/human-interface-guidelines/tab-bars)) ;
   deux à cinq destinations pour une barre, trois à sept pour un rail (Material, cité par
   [SAP Fiori](https://www.sap.com/design-system/fiori-design-android/v26-4/components/m3-standard-components/navigation-bar/usage)).
-- Un menu caché divise l'usage de la navigation par deux : 44 % contre 89 % quand elle est
-  visible ([NN/g 2016](https://www.nngroup.com/articles/find-navigation-mobile-even-hamburger/)) ;
+- Au téléphone, la navigation sert moins quand elle est cachée : dans un même test, 44 % des
+  participants s'en servent sur un site à menu caché (Bloomberg), 89 % sur un site où elle est en
+  partie visible (SupermarketHQ) ; des chiffres par site, pas une loi
+  ([NN/g 2016](https://www.nngroup.com/articles/find-navigation-mobile-even-hamburger/)) ;
   « visible navigation is the gold standard » ([NN/g 2021](https://www.nngroup.com/articles/vertical-nav/)).
 - Du téléphone à l'ordinateur : la barre du bas sous 600 px, un rail ou une barre latérale
   au-delà, à partir de 840 px pour une barre permanente
@@ -122,8 +124,9 @@ bordures, aplats, texte), une échelle sombre à part, pas une inversion
 ([Radix](https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale)) ;
 OKLCH dans Tailwind v4 ([Tailwind](https://tailwindcss.com/docs/colors)) ; WCAG 2.2 reste la
 norme, APCA n'est pas celle de WCAG 3 ([Roselli 2026](https://adrianroselli.com/2026/04/wcag3-contrast-as-of-april-2026.html)).
-Mesuré sur Rive : jonc sur brume 1,21:1, jamais en texte ni en bordure ; bleu-vert et pelage
-1,48:1, jamais côte à côte dans un graphique. Graphiques : une palette catégorielle à part, dans
+Mesuré sur Rive : jonc sur brume 1,21:1 en clair, 2,17:1 en sombre, jamais en texte ni en
+bordure ; bleu-vert et pelage 1,33:1 en clair, 1,12:1 en sombre, jamais côte à côte dans un
+graphique. Graphiques : une palette catégorielle à part, dans
 un ordre fixe ([Carbon](https://carbondesignsystem.com/data-visualization/color-palettes/)).
 
 **Fontes.** Atkinson Hyperlegible Next variable, 34 Ko en latin, avec chiffres tabulaires et
@@ -158,8 +161,9 @@ optionnel, jamais seul porteur d'une information
 ([shadcn](https://ui.shadcn.com/docs)) ; Radix reste maintenu et pris en charge à côté de Base UI,
 devenu le défaut de shadcn en 2026 ([changelog](https://ui.shadcn.com/docs/changelog/2026-07-base-ui-default)) ;
 `radix-ui` 1.8.0 du 2026-10-12. `@repo/ui` part déjà de Radix (`Slot`) : une seule famille de
-primitives, Radix, pour le dialogue, les onglets, le tiroir et le toast. Toasts : `sonner` 2.0.8
-(août 2026), maintenu.
+primitives, Radix, pour le dialogue, les onglets et le menu ; le tiroir est un dialogue de Radix
+posé sur un bord, comme le `Sheet` de shadcn. Seule exception, les toasts : `sonner` 2.0.8 (août
+2026), maintenu.
 
 **Graphiques.** Pour sept barres et une répartition, un SVG écrit dans `@repo/ui` suit le guide
 britannique sans dépendance ; Recharts 3 (accessible par défaut, base du Chart de shadcn) seulement

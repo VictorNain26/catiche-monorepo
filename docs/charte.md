@@ -23,14 +23,17 @@ tient dans le cercle central.
 | Brume (`background`) | `#eef3f1` | `#0c1a1e` | Le fond |
 | Encre (`foreground`) | `#13252b` | `#e3eeeb` | Le texte |
 | Eau profonde (`primary`) | `#0e5361` | `#79cbc9` | L'action principale, les liens, le focus, le panneau de marque |
-| Jonc (`highlight`) | `#dce57a` | `#4c5320` | Ce qui ressort derrière du texte foncé ; jamais en texte ni en bordure sur la brume (1,21:1) |
-| Pelage (`annotation`) | `#8a4f2a` | `#e0a77e` | Une note, un accent rare ; jamais à côté de l'eau profonde dans un graphique (1,48:1) |
+| Jonc (`highlight`) | `#dce57a` | `#4c5320` | Ce qui ressort derrière le texte de l'encre ; jamais en texte ni en bordure (sur la brume, 1,21:1 en clair, 2,17:1 en sombre) |
+| Pelage (`annotation`) | `#8a4f2a` | `#e0a77e` | Une note, un accent rare ; jamais à côté de l'eau profonde dans un graphique (1,33:1 en clair, 1,12:1 en sombre) |
 
 - Chaque couleur se construit en échelle de douze pas, chaque pas à son rôle (fonds, composants,
   bordures, aplats, texte), en OKLCH ; le sombre a son échelle à lui, pas une inversion. Les rôles
-  pointent vers les pas.
+  pointent vers les pas, ceux des surfaces compris (`card`, `secondary` pour la bulle de l'élève,
+  `muted` et `muted-foreground` pour le texte secondaire).
+- Le sombre suit le réglage de l'appareil ; il ne se présente jamais comme bon pour le sommeil.
 - Les états (`success`, `destructive`, `warning`, `disabled`) gardent leur sens dans les deux
-  modes ; un contrôle désactivé garde un texte lisible, jamais une opacité.
+  modes. Un bouton ne se désactive pas pour un formulaire incomplet : l'envoi dit ce qui manque ;
+  un contrôle désactivé garde un texte lisible, jamais une opacité.
 - Les graphiques ont leur palette, dans un ordre fixe, chaque série à 3:1 du fond, et toujours un
   libellé ou une forme en plus de la couleur.
 - Contrastes WCAG 2.2 AA dans les deux modes, testés (`contrast.test.mjs`) ; APCA en contrôle de
