@@ -42,5 +42,7 @@ dépendent de l'identité que par les tokens.
 
 - sans ses états : vide, chargement, erreur, et hors ligne ou quota quand ils le concernent ;
 - sans être vu au téléphone (deux largeurs) et à l'ordinateur, en clair et en sombre ;
-- sans `@axe-core/playwright` vert sur chacun de ses états, ni un passage au clavier ;
-- sans ses captures de référence relues, une fois l'étape 2.2 du lot 1 faite (`docs/roadmap.md`).
+- sans `expectAccessible(page)` (axe, WCAG 2.2 A et AA) vert sur chacun de ses états dans la
+  suite e2e, ni un passage au clavier ;
+- sans sa capture de référence (`toHaveScreenshot`) relue à chaque projet, régénérée par
+  `bunx turbo run test:e2e --filter=<suite> -- --update-snapshots` (`.claude/rules/testing.md`).

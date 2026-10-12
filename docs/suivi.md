@@ -83,15 +83,19 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
 **Lot 1, le produit**
 - Les formules de Tom : sur Chrome de bureau, chaque formule montre des flèches de défilement
   vertical, son conteneur (`[&_.katex]:overflow-x-auto`, `components/tom-text.tsx`) débordant de
-  6 px en hauteur ; vu le 2026-10-11, KaTeX 0.16 comme 0.19.
+  6 px en hauteur ; vu le 2026-10-11, KaTeX 0.16 comme 0.19. Axe y voit une violation WCAG
+  (`scrollable-region-focusable`, 2.1.1) : chaque `.katex` qui défile, la formule trop large sur
+  les trois projets, et toutes à l'ordinateur et sur Android, n'est pas atteignable au clavier.
+  Le test « Tom's formatting and formulas render » (`chat.spec.ts`) prendra `expectAccessible`
+  avec la correction.
 - Mémoire : les 1 053 libellés du référentiel restent ceux du programme (« Il utilise… »),
   présentés « Au programme » ; leur réécriture dans les mots de l'élève demande une relecture
   de Victor entrée par entrée, avant la bêta fermée.
 - Résumé de la semaine : son arrêt à la demande de l'élève, avec le consentement (le point
   hebdomadaire par e-mail au parent est décidé, `decisions.md`).
 - Appareils de l'élève : le prévenir quand un nouvel appareil est relié.
-- Client web : mesures sur un vrai iPhone et un Android ; un projet Playwright à l'ordinateur,
-  avec les premiers écrans composés pour lui (`experience.md`).
+- Client web : mesures sur un vrai iPhone et un Android ; les premiers écrans composés pour
+  l'ordinateur (`experience.md`), que le projet Playwright `desktop` éprouve déjà.
 - Le réglage « Lecture aérée » (`charte.md`, `experience.md`).
 - Le site : la landing reçoit les tokens et la fonte de la nouvelle charte, `landing.css` se
   supprime ; l'image Open Graph ; les tests de la landing qui gardent l'identité précédente
@@ -122,6 +126,10 @@ Conditions à guetter, sans PR tant qu'elles ne se déclenchent pas.
   « the button gets a parent in with their passkey » et « a paired student opens a session » ont
   échoué une fois chacun, puis passé seuls à chaque relance. Si la CI les voit échouer, en
   chercher la cause (attente, charge).
+- **Suites e2e web en parallèle en local** (2026-10-12) : deux checkouts (worktrees) partagent la
+  base `tom_e2e` et le port 3012 ; un lancement recrée la base sous l'autre, qui voit « relation
+  does not exist » et peut en tirer une fausse capture de référence. Une seule suite web à la
+  fois ; si les worktrees deviennent la règle, une base et un port par checkout.
 - **Tirage des images en CI** (`.github/actions/compose-up`, depuis le 2026-10-12) : si
   l'avertissement d'un essai dépassé revient souvent, regarder le registre en cause avant
   d'allonger le délai.
