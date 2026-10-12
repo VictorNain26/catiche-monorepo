@@ -28,7 +28,7 @@
     "knip": "6.37.0",
     "prettier": "^3.9.8",
     "prettier-plugin-astro": "^1.1.0",
-    "turbo": "^2.11.2",
+    "turbo": "^2.11.7",
     "typescript": "6.0.3"
   },
   "engines": {
