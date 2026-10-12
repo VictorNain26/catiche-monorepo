@@ -111,11 +111,9 @@ function Sessions() {
         <ul className="flex flex-col gap-2">
           {sessions.map((session) => (
             <li key={session.id}>
-              <Card asChild className="flex min-h-11 flex-col">
-                <Link to="/seance/$sessionId" params={{ sessionId: session.id }}>
-                  <span className="font-bold">{session.title ?? 'Séance sans titre'}</span>
-                  <span className="text-sm text-muted-foreground">{formatDay(session.createdAt)}</span>
-                </Link>
+              <Card render={<Link to="/seance/$sessionId" params={{ sessionId: session.id }} />} className="flex min-h-11 flex-col">
+                <span className="font-bold">{session.title ?? 'Séance sans titre'}</span>
+                <span className="text-sm text-muted-foreground">{formatDay(session.createdAt)}</span>
               </Card>
             </li>
           ))}
@@ -132,11 +130,9 @@ function Devices() {
     <Fold title="Tes appareils reliés">
       <ul className="flex flex-col gap-2">
         {devices.map((device) => (
-          <Card asChild key={device.id} className="flex flex-col">
-            <li>
-              <span className="font-bold">{deviceName(device.userAgent)}</span>
-              <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
-            </li>
+          <Card render={<li />} key={device.id} className="flex flex-col">
+            <span className="font-bold">{deviceName(device.userAgent)}</span>
+            <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
           </Card>
         ))}
       </ul>

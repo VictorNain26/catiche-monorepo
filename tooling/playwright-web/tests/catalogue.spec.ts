@@ -126,9 +126,11 @@ test('the dialog opens from the keyboard, keeps the focus inside, closes on Esca
   await expect(dialog).toBeVisible();
   await expect(dialog).toHaveAccessibleDescription('Elle disparaît de ton historique. Ce que Tom retient reste.');
   expect(await containsFocus(dialog)).toBe(true);
+  // Past the last control, the focus lands on a guard of Base UI that sends it back inside, on
+  // WebKit a moment later: the trap is what the focus ends on.
   for (let step = 0; step < 6; step++) {
     await page.keyboard.press('Tab');
-    expect(await containsFocus(dialog)).toBe(true);
+    await expect.poll(() => containsFocus(dialog)).toBe(true);
   }
 
   await page.keyboard.press('Escape');

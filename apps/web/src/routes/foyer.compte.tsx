@@ -52,22 +52,20 @@ function Passkeys() {
       {passkeys.length > 0 && (
         <ul className="flex flex-col gap-2">
           {passkeys.map((passkey) => (
-            <Card asChild key={passkey.id} className="flex items-center justify-between gap-3">
-              <li>
-                <span className="flex flex-col">
-                  <span className="font-bold">{deviceName(passkey.name)}</span>
-                  <span className="text-sm text-muted-foreground">Créée le {formatDay(passkey.createdAt)}</span>
-                </span>
-                <Button
-                  variant="outline"
-                  disabled={remove.isPending}
-                  onClick={() => {
-                    remove.mutate(passkey.id);
-                  }}
-                >
-                  Supprimer
-                </Button>
-              </li>
+            <Card render={<li />} key={passkey.id} className="flex items-center justify-between gap-3">
+              <span className="flex flex-col">
+                <span className="font-bold">{deviceName(passkey.name)}</span>
+                <span className="text-sm text-muted-foreground">Créée le {formatDay(passkey.createdAt)}</span>
+              </span>
+              <Button
+                variant="outline"
+                disabled={remove.isPending}
+                onClick={() => {
+                  remove.mutate(passkey.id);
+                }}
+              >
+                Supprimer
+              </Button>
             </Card>
           ))}
         </ul>

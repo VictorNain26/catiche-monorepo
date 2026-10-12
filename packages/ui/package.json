@@ -22,12 +22,10 @@
     "test": "bun test src"
   },
   "dependencies": {
-    "@radix-ui/react-dialog": "^1.2.0",
-    "@radix-ui/react-slot": "^1.4.0",
+    "@base-ui/react": "^1.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.47.0",
-    "sonner": "^2.0.8",
     "tailwind-merge": "^3.7.0"
   },
   "peerDependencies": {

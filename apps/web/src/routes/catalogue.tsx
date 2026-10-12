@@ -48,11 +48,9 @@ function Catalogue() {
     <AppShell
       logo={<span className="font-heading text-2xl font-extrabold text-primary">Catiche</span>}
       profile={
-        <Button asChild variant="ghost" size="sm">
-          <a href="#profil">
-            <UserRoundIcon aria-hidden="true" nonScalingStroke className="size-6" />
-            Léa
-          </a>
+        <Button render={<a href="#profil" />} variant="ghost" size="sm">
+          <UserRoundIcon aria-hidden="true" nonScalingStroke className="size-6" />
+          Léa
         </Button>
       }
       navigationLabel="Navigation principale"
@@ -153,12 +151,8 @@ function Lists() {
     <Section title="Section et liste" description="Une section nomme une partie de l’écran ; une liste range ce qui se ressemble.">
       <Section level={3} title="Tes séances" description="Les plus récentes d’abord." action={<Button variant="outline">Tout voir</Button>}>
         <List>
-          <ListItem asChild title="Les fractions égales" meta="Mathématiques · mardi">
-            <a href="#seance-1" />
-          </ListItem>
-          <ListItem asChild title="Le passé composé" meta="Français · lundi">
-            <a href="#seance-2" />
-          </ListItem>
+          <ListItem render={<a href="#seance-1" />} title="Les fractions égales" meta="Mathématiques · mardi" />
+          <ListItem render={<a href="#seance-2" />} title="Le passé composé" meta="Français · lundi" />
           <ListItem title="Un appareil relié" meta="iPhone · depuis le 3 octobre" />
         </List>
       </Section>
@@ -177,8 +171,8 @@ function Cards() {
                 <h3 className="text-lg text-foreground">{name}</h3>
                 <p className="text-muted-foreground">5e · 3 séances cette semaine</p>
               </div>
-              <Button asChild variant="outline">
-                <a href={`#fiche-${name}`}>Voir la fiche</a>
+              <Button render={<a href={`#fiche-${name}`} />} variant="outline">
+                Voir la fiche
               </Button>
             </div>
           </Card>
@@ -238,29 +232,21 @@ function Overlays() {
     <Section title="Dialogue et tiroir">
       <div className="flex flex-wrap gap-3">
         <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline">Ouvrir le dialogue</Button>
-          </DialogTrigger>
+          <DialogTrigger render={<Button variant="outline" />}>Ouvrir le dialogue</DialogTrigger>
           <DialogContent title="Supprimer cette séance ?" description="Elle disparaît de ton historique. Ce que Tom retient reste.">
             <div className="flex flex-wrap justify-end gap-3">
-              <DialogClose asChild>
-                <Button variant="outline">Garder la séance</Button>
-              </DialogClose>
-              <DialogClose asChild>
-                <Button>Supprimer</Button>
-              </DialogClose>
+              <DialogClose render={<Button variant="outline" />}>Garder la séance</DialogClose>
+              <DialogClose render={<Button />}>Supprimer</DialogClose>
             </div>
           </DialogContent>
         </Dialog>
         <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline">Ouvrir le tiroir</Button>
-          </DialogTrigger>
+          <DialogTrigger render={<Button variant="outline" />}>Ouvrir le tiroir</DialogTrigger>
           <DrawerContent title="Trier les séances">
             <div className="flex flex-col gap-2">
               {['Les plus récentes', 'Par matière'].map((order) => (
-                <DialogClose key={order} asChild>
-                  <Button variant="outline">{order}</Button>
+                <DialogClose key={order} render={<Button variant="outline" />}>
+                  {order}
                 </DialogClose>
               ))}
             </div>

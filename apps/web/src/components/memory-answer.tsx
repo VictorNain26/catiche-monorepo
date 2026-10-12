@@ -8,36 +8,34 @@ import { Notice } from './notice';
  */
 export function MemoryAnswer({ answer }: { answer: ReturnType<typeof useMemoryAnswer> }) {
   return (
-    <Card asChild className="flex flex-col gap-3">
-      <section aria-labelledby="memory-offer">
-        <h2 id="memory-offer" className="text-lg font-bold">
-          Tom peut retenir ce qui a résisté
-        </h2>
-        <p className="text-sm">
-          D’une séance à l’autre, Tom se souviendrait des notions que tu as travaillées et de ce qui a été difficile, pour mieux t’aider. Il ne garde
-          rien de ce que tu écris, et tu pourras tout voir et tout effacer.
-        </p>
-        {answer.error && <Notice tone="error">{memoryMessage(answer.error)}</Notice>}
-        <div className="flex gap-2">
-          <Button
-            disabled={answer.isPending}
-            onClick={() => {
-              answer.mutate('accepted');
-            }}
-          >
-            D’accord
-          </Button>
-          <Button
-            variant="outline"
-            disabled={answer.isPending}
-            onClick={() => {
-              answer.mutate('declined');
-            }}
-          >
-            Non merci
-          </Button>
-        </div>
-      </section>
+    <Card render={<section aria-labelledby="memory-offer" />} className="flex flex-col gap-3">
+      <h2 id="memory-offer" className="text-lg font-bold">
+        Tom peut retenir ce qui a résisté
+      </h2>
+      <p className="text-sm">
+        D’une séance à l’autre, Tom se souviendrait des notions que tu as travaillées et de ce qui a été difficile, pour mieux t’aider. Il ne garde
+        rien de ce que tu écris, et tu pourras tout voir et tout effacer.
+      </p>
+      {answer.error && <Notice tone="error">{memoryMessage(answer.error)}</Notice>}
+      <div className="flex gap-2">
+        <Button
+          disabled={answer.isPending}
+          onClick={() => {
+            answer.mutate('accepted');
+          }}
+        >
+          D’accord
+        </Button>
+        <Button
+          variant="outline"
+          disabled={answer.isPending}
+          onClick={() => {
+            answer.mutate('declined');
+          }}
+        >
+          Non merci
+        </Button>
+      </div>
     </Card>
   );
 }

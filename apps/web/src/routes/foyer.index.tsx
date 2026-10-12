@@ -45,8 +45,8 @@ function Household() {
           ))}
         </ul>
       </section>
-      <Button asChild variant="outline">
-        <Link to="/foyer/ajouter">Ajouter un enfant</Link>
+      <Button render={<Link to="/foyer/ajouter" />} variant="outline">
+        Ajouter un enfant
       </Button>
     </Page>
   );
@@ -56,22 +56,20 @@ function Household() {
 function ChildCard({ child }: { child: Student }) {
   const week = useQuery(summaryQuery(child.id));
   return (
-    <Card asChild className="flex min-h-11 flex-col gap-1">
-      <Link to="/foyer/$studentId" params={{ studentId: child.id }}>
-        <span className="flex items-center justify-between gap-3">
-          <span className="font-bold">{child.name}</span>
-          <span className="text-sm text-muted-foreground">{LEVEL_LABELS[child.level]}</span>
-        </span>
-        <span className="text-sm text-muted-foreground">
-          {week.data
-            ? week.data.sessions === 0
-              ? 'Pas de séance ces sept derniers jours'
-              : `Ces sept derniers jours : ${minutesText(week.data.minutes)}`
-            : week.isError
-              ? 'Sa semaine n’a pas pu se charger'
-              : 'Chargement…'}
-        </span>
-      </Link>
+    <Card render={<Link to="/foyer/$studentId" params={{ studentId: child.id }} />} className="flex min-h-11 flex-col gap-1">
+      <span className="flex items-center justify-between gap-3">
+        <span className="font-bold">{child.name}</span>
+        <span className="text-sm text-muted-foreground">{LEVEL_LABELS[child.level]}</span>
+      </span>
+      <span className="text-sm text-muted-foreground">
+        {week.data
+          ? week.data.sessions === 0
+            ? 'Pas de séance ces sept derniers jours'
+            : `Ces sept derniers jours : ${minutesText(week.data.minutes)}`
+          : week.isError
+            ? 'Sa semaine n’a pas pu se charger'
+            : 'Chargement…'}
+      </span>
     </Card>
   );
 }

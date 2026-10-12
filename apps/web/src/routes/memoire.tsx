@@ -46,21 +46,19 @@ function Memory() {
           ) : (
             <ul className="flex flex-col gap-2">
               {memory.notions.map((notion) => (
-                <Card asChild key={notion.notionId} className="flex flex-col gap-2">
-                  <li>
-                    <span className="text-sm text-muted-foreground">Au programme</span>
-                    <span className="font-bold">{notion.label}</span>
-                    <span className="text-sm text-muted-foreground">{notionSummary(notion)}</span>
-                    <Button
-                      variant="outline"
-                      disabled={understood.isPending}
-                      onClick={() => {
-                        understood.mutate(notion.notionId);
-                      }}
-                    >
-                      J’ai compris
-                    </Button>
-                  </li>
+                <Card render={<li />} key={notion.notionId} className="flex flex-col gap-2">
+                  <span className="text-sm text-muted-foreground">Au programme</span>
+                  <span className="font-bold">{notion.label}</span>
+                  <span className="text-sm text-muted-foreground">{notionSummary(notion)}</span>
+                  <Button
+                    variant="outline"
+                    disabled={understood.isPending}
+                    onClick={() => {
+                      understood.mutate(notion.notionId);
+                    }}
+                  >
+                    J’ai compris
+                  </Button>
                 </Card>
               ))}
             </ul>

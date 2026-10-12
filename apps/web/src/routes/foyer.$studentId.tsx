@@ -222,22 +222,20 @@ function Devices({ child, pairing }: { child: Student; pairing: Pairing }) {
       ) : (
         <ul className="flex flex-col gap-2">
           {devices.map((device) => (
-            <Card asChild key={device.id} className="flex items-center justify-between gap-3">
-              <li>
-                <span className="flex flex-col">
-                  <span className="font-bold">{deviceName(device.userAgent)}</span>
-                  <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
-                </span>
-                <Button
-                  variant="outline"
-                  disabled={revoke.isPending}
-                  onClick={() => {
-                    revoke.mutate(device.id);
-                  }}
-                >
-                  Déconnecter
-                </Button>
-              </li>
+            <Card render={<li />} key={device.id} className="flex items-center justify-between gap-3">
+              <span className="flex flex-col">
+                <span className="font-bold">{deviceName(device.userAgent)}</span>
+                <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
+              </span>
+              <Button
+                variant="outline"
+                disabled={revoke.isPending}
+                onClick={() => {
+                  revoke.mutate(device.id);
+                }}
+              >
+                Déconnecter
+              </Button>
             </Card>
           ))}
         </ul>
