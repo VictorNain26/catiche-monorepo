@@ -22,7 +22,7 @@ test('the child is asked on their home, accepts, sees what Tom keeps, then stops
   await offer.getByRole('button', { name: 'D’accord' }).click();
   await expect(offer).toBeHidden();
   // The yes is answered, not only taken.
-  await expect(page.getByRole('status')).toContainText('C’est noté : Tom retiendra ce qui a résisté.');
+  await expect(page.getByRole('region', { name: 'Notifications' })).toContainText('C’est noté : Tom retiendra ce qui a résisté.');
 
   await page.getByRole('link', { name: 'Ce que Tom retient' }).click();
   await expect(page.getByRole('heading', { name: 'Ce que Tom retient' })).toBeVisible();

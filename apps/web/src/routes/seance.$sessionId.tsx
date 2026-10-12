@@ -1,10 +1,9 @@
 import { useChat } from '@ai-sdk/react';
-import { Button, Card, Input } from '@repo/ui';
+import { Banner, Button, Card, Input } from '@repo/ui';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { DefaultChatTransport } from 'ai';
 import { useEffect, useId, useRef, useState } from 'react';
-import { Notice } from '../components/notice';
 import { BackLink, Page, ProfileLink } from '../components/page';
 import { TomHead } from '../components/tom';
 import { TomText } from '../components/tom-text';
@@ -140,8 +139,9 @@ function Session() {
           </p>
         </Card>
       )}
-      {status === 'submitted' && <Notice tone="info">{waitingText(step)}</Notice>}
-      {error && <Notice tone="error">{chatMessage(error)}</Notice>}
+      {/* In the page before the wait, so that what it says is read out as it comes. */}
+      <div role="status">{status === 'submitted' && <Banner tone="info" title={waitingText(step)} />}</div>
+      {error && <Banner tone="error" title={chatMessage(error)} />}
       <div ref={endRef} />
       <div className="sticky bottom-0 flex flex-col gap-2 bg-background pt-2 pb-3">
         {photo && (
@@ -163,7 +163,7 @@ function Session() {
             Photo en préparation…
           </p>
         )}
-        {photoFailed && <Notice tone="error">La photo n’a pas pu être préparée. Réessaie, ou recopie l’énoncé.</Notice>}
+        {photoFailed && <Banner tone="error" title="La photo n’a pas pu être préparée. Réessaie, ou recopie l’énoncé." />}
         <form
           className="flex gap-2"
           onSubmit={(event) => {

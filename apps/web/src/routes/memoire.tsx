@@ -1,9 +1,8 @@
-import { Button, Card } from '@repo/ui';
+import { Banner, Button, Card } from '@repo/ui';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { useState } from 'react';
 import { MemoryAnswer } from '../components/memory-answer';
-import { Notice } from '../components/notice';
 import { BackLink, Page, ProfileLink } from '../components/page';
 import { api, parseResponse } from '../lib/api';
 import { meQuery } from '../lib/me';
@@ -34,7 +33,7 @@ function Memory() {
 
   return (
     <Page title="Ce que Tom retient" back={<BackLink to="/">Retour à tes séances</BackLink>} action={<ProfileLink />}>
-      {failure && <Notice tone="error">{memoryMessage(failure)}</Notice>}
+      {failure && <Banner tone="error" title={memoryMessage(failure)} />}
       {memory.state === 'active' ? (
         <>
           <p className="text-muted-foreground">
@@ -65,11 +64,14 @@ function Memory() {
           )}
           {confirming ? (
             <>
-              <Notice tone="error">
-                {confirming === 'erase'
-                  ? 'Tom oubliera tout ce qu’il retient de toi. Tes séances restent.'
-                  : 'Tom oubliera tout ce qu’il retient de toi et ne retiendra plus rien. Tes séances restent.'}
-              </Notice>
+              <Banner
+                tone="error"
+                title={
+                  confirming === 'erase'
+                    ? 'Tom oubliera tout ce qu’il retient de toi. Tes séances restent.'
+                    : 'Tom oubliera tout ce qu’il retient de toi et ne retiendra plus rien. Tes séances restent.'
+                }
+              />
               <Button
                 disabled={erase.isPending || answer.isPending}
                 onClick={() => {

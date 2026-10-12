@@ -104,9 +104,7 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
   `hero.spec.ts` ; une application de preview par PR.
 - Trois appels à `listDeviceSessions` (`foyer.$studentId.tsx`, `sign-out.tsx`, `bienvenue.tsx`)
   gèrent chacun l'erreur à leur façon : passer par `deviceSessionsQuery` (`lib/auth.ts`).
-- Aux étapes 3 et 4, avec les écrans : `Notice` (`apps/web/src/components/notice.tsx`) recoupe le
-  bandeau de `@repo/ui` et part ; `Page` laisse la place à la coquille ; les cartes en `li` des
-  listes deviennent `List` ; le `Fold` d'`apps/web` passe ses icônes à `nonScalingStroke`.
+- Aux étapes 3 et 4, avec les écrans : les cartes en `li` des listes deviennent `List`.
 
 **Lot 4, Tom**
 - Tom qui se dit programme : un scénario où l'élève demande s'il est humain ou parle de lui ; la

@@ -1,8 +1,7 @@
-import { Button, Card, Fold } from '@repo/ui';
+import { Banner, Button, Card, Fold, toast } from '@repo/ui';
 import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { MemoryAnswer } from '../components/memory-answer';
-import { Notice } from '../components/notice';
 import { Page, ProfileLink } from '../components/page';
 import { TomHead } from '../components/tom';
 import { WeekSummary } from '../components/week-summary';
@@ -43,8 +42,14 @@ function StudentHome() {
 
   return (
     <Page title={`Bonjour ${me?.name ?? ''}`} action={<ProfileLink />}>
-      {memory?.state === 'asked' && <MemoryAnswer answer={answer} />}
-      {answer.isSuccess && <Notice tone="info">{ANSWERED[answer.variables]}</Notice>}
+      {memory?.state === 'asked' && (
+        <MemoryAnswer
+          answer={answer}
+          onAnswered={(choice) => {
+            toast(ANSWERED[choice]);
+          }}
+        />
+      )}
       <Sessions />
       {me && <WeekSummary week={week.data} failed={week.isError} name={me.name} reader="student" />}
       <Link to="/memoire" className="min-h-11 py-3 text-sm text-primary underline">
@@ -106,7 +111,7 @@ function Sessions() {
           Nouvelle séance
         </Button>
       )}
-      {start.error && <Notice tone="error">La séance n’a pas pu s’ouvrir. Réessaie dans un instant.</Notice>}
+      {start.error && <Banner tone="error" title="La séance n’a pas pu s’ouvrir. Réessaie dans un instant." />}
       {sessions.length > 0 && (
         <ul className="flex flex-col gap-2">
           {sessions.map((session) => (

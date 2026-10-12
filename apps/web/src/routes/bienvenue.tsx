@@ -1,12 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@repo/ui';
+import { Banner, Button } from '@repo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from '../lib/zod';
 import { Field } from '../components/field';
-import { Notice } from '../components/notice';
 import { Page } from '../components/page';
 import { authClient, authMessage } from '../lib/auth';
 import { meQuery } from '../lib/me';
@@ -51,7 +50,7 @@ function Welcome() {
     <Page title="Bienvenue">
       <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-4">
         <Field label="Votre prénom" autoComplete="given-name" {...form.register('name')} error={form.formState.errors.name?.message} />
-        {failure && <Notice tone="error">{failure}</Notice>}
+        {failure && <Banner tone="error" title={failure} />}
         <Button type="submit" disabled={form.formState.isSubmitting}>
           Continuer
         </Button>

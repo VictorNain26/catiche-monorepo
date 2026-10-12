@@ -13,26 +13,46 @@ const TONES: Record<Tone, { icon: LucideIcon; frame: string; mark: string }> = {
 
 interface BannerProps {
   tone: Tone;
-  /** What happened, in a few words: with the icon, the tone never rests on the color alone. */
+  /** What happened or what holds, in a few words: with the icon, the tone never rests on the color alone. */
   title: string;
   children?: React.ReactNode;
   className?: string;
 }
 
 /**
- * What a whole page has to say, at its top: one banner per page. An error is read out at once,
- * the rest when it appears.
+ * What a page has to say as a whole, at its top: one banner per page.
+ *
+ * An error is an alert, read out when it appears with its text
+ * (https://www.w3.org/WAI/ARIA/apg/patterns/alert/). Any other tone is a region
+ * named by its title, read where it stands, not announced: a live region announces a change of
+ * its content only once it is in the page, and a status mounted with its text is not reliably
+ * read out (https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Guides/Live_regions).
+ * A confirmation that must be heard goes through `toast()`, whose region is there from the
+ * page's load.
  */
 function Banner({ tone, title, children, className }: BannerProps) {
+  const titleId = React.useId();
   const { icon: Icon, frame, mark } = TONES[tone];
-  return (
-    <div role={tone === 'error' ? 'alert' : 'status'} className={cn('flex gap-3 rounded-2xl border-2 p-4', frame, className)}>
+  const content = (
+    <>
       <Icon aria-hidden="true" nonScalingStroke className={cn('size-6 shrink-0', mark)} />
       <div className="flex flex-col gap-1">
-        <p className="font-bold">{title}</p>
+        <p id={titleId} className="font-bold">
+          {title}
+        </p>
         {children !== undefined && <div className="text-sm">{children}</div>}
       </div>
+    </>
+  );
+  const classes = cn('flex gap-3 rounded-2xl border-2 p-4', frame, className);
+  return tone === 'error' ? (
+    <div role="alert" className={classes}>
+      {content}
     </div>
+  ) : (
+    <section aria-labelledby={titleId} className={classes}>
+      {content}
+    </section>
   );
 }
 

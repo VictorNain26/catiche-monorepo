@@ -1,8 +1,7 @@
-import { Button, Card } from '@repo/ui';
+import { Banner, Button, Card } from '@repo/ui';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { Notice } from '../components/notice';
 import { BackLink, Page } from '../components/page';
 import { PasskeyCreate } from '../components/passkey-create';
 import { SignOut } from '../components/sign-out';
@@ -70,7 +69,7 @@ function Passkeys() {
           ))}
         </ul>
       )}
-      {failure && <Notice tone="error">{failure}</Notice>}
+      {failure && <Banner tone="error" title={failure} />}
       <PasskeyCreate label="Créer une clé d’accès sur cet appareil" onCreated={refresh} />
     </section>
   );
