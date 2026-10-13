@@ -46,7 +46,7 @@
     "@types/react-dom": "~19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "bun-types": "^1.4.2",
-    "eslint": "^10.11.0",
+    "eslint": "^10.12.0",
     "tailwindcss": "^4.3.3",
     "tomai-server": "workspace:*",
     "typescript": "6.0.3",
