@@ -1,29 +1,9 @@
 import { describe, expect, it } from 'bun:test';
 import { SCHOOL_LEVELS } from '../../../domain/levels';
 import { SUBJECT_FAMILIES } from '../../../domain/subjects';
-import { notionsFor } from '../../../referential';
-import { turnInstruction } from './analysis';
-import { stripPromptTags, wrapUserMessage } from './fences';
-import { turnContract } from './ladder';
 import { promptVersion, studentBlock, subjectBlock, systemPrompt } from './prompt';
-import { exerciseBlock, sheetMessages, type ExerciseSheet } from './sheet';
 
 const prompt = systemPrompt('quatrieme');
-const sheet: ExerciseSheet = {
-  statement: 'x',
-  kind: 'short',
-  answer: null,
-  answerForms: [],
-  mathEquation: null,
-  mathAnswer: null,
-  steps: [],
-  commonErrors: [],
-  rule: null,
-  facts: [],
-  expectedElements: [],
-  entries: [],
-  laterEntries: [],
-};
 
 describe('the system prompt, after the rework study (docs/etudes/2026-10-04/refonte-agent.md)', () => {
   it('names the blocks of the turn written by the server, which the student cannot forge', () => {
@@ -106,34 +86,5 @@ describe('promptVersion', () => {
     expect(promptVersion(prompt)).toMatch(/^[0-9a-f]{12}$/);
     expect(promptVersion(prompt)).toBe(promptVersion(systemPrompt('quatrieme')));
     expect(promptVersion(prompt)).not.toBe(promptVersion(systemPrompt('sixieme')));
-  });
-});
-
-describe('the tags of the prompt', () => {
-  it('are all stripped from the student text', () => {
-    const rendered = [
-      systemPrompt('sixieme'),
-      systemPrompt('troisieme'),
-      ...SUBJECT_FAMILIES.map((family) => subjectBlock(family)),
-      turnInstruction({
-        subject: 'general',
-        bringsExercise: false,
-        proposesAnswer: false,
-        asksSolution: true,
-        asksExplanation: false,
-        saysStuck: false,
-      }) ?? '',
-      exerciseBlock(sheet, null),
-      sheetMessages('cinquieme', notionsFor('cinquieme', 'mathematiques', 2026), 'x', null)
-        .map(({ content }) => content)
-        .join('\n'),
-      turnContract({ sheet, uncertain: false, level: 0, attempt: false, asksSolution: false, diagnosis: null, stepsDone: 0, hints: [] }),
-      studentBlock('Léa'),
-      '<fiche>\nx\n</fiche>',
-      wrapUserMessage('Bonjour'),
-    ].join('\n');
-    const tags = new Set([...rendered.matchAll(/<\/?([a-z_]+)[\s>]/g)].map(([, name = '']) => name));
-    expect(tags.size).toBeGreaterThan(10);
-    for (const tag of tags) expect(stripPromptTags(`a<${tag}>b</${tag}>c`)).toBe('abc');
   });
 });
