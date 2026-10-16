@@ -6,7 +6,9 @@ paths:
 
 # Serveur (`apps/server`)
 
-Cible et sources : `docs/etudes/2026-10-06/refonte-architecture.md`, reconstruite par étapes.
+Ce qui est en place : `docs/architecture.md` ; d'où viennent sa structure et ses règles de
+dépendance :
+`docs/etudes/2026-10-06/refonte-architecture.md`, une étude datée, pas une cible.
 Tuteur : `docs/tuteur.md`. Stack locale : skill `dev-bootstrap`. Appel IA : skill
 `mistral-stack`. Migrations : `.claude/rules/database-migrations.md`. Tests :
 `.claude/rules/testing.md`.
