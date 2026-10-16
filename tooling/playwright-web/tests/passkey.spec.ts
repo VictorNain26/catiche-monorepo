@@ -68,11 +68,24 @@ test('the button gets a parent in with their passkey, without a code', async ({ 
   await expect(page.getByText(/^Créée le /)).toBeVisible();
 
   await lock.present(false);
+  const options = '**/api/auth/passkey/generate-authenticate-options*';
+  const offered = page.waitForResponse(options);
   await page.getByRole('button', { name: 'Se déconnecter' }).click();
   await expect(page).toHaveURL(/\/connexion$/);
   await expect(page.getByLabel('Adresse e-mail')).toHaveAttribute('autocomplete', 'username webauthn');
+  // The address field's offer is out, held back by the locked phone: the button's ceremony comes
+  // after it, never cancelled by it. The phone unlocks before that ceremony starts, as its options
+  // come: a ceremony started while locked waits on it.
+  await offered;
+  await page.route(
+    options,
+    async (route) => {
+      await lock.present(true);
+      await route.continue();
+    },
+    { times: 1 },
+  );
   await page.getByRole('button', { name: 'Entrer avec une clé d’accès' }).click();
-  await lock.present(true);
   await expect(page).toHaveURL(/\/foyer\/ajouter$/);
 });
 
