@@ -2,7 +2,7 @@
   "$schema": "https://turborepo.dev/schema.v2.json",
   "ui": "tui",
   "agentGuidance": false,
-  "globalDependencies": ["tsconfig.base.json", ".github/workflows/ci.yml", ".github/actions/**", "docker-compose.yml"],
+  "globalDependencies": ["tsconfig.base.json", "bunfig.toml", ".github/workflows/ci.yml", ".github/actions/**", "docker-compose.yml"],
   "globalEnv": ["NODE_ENV", "CI"],
   "globalPassThroughEnv": ["GITHUB_ACTIONS"],
   "tasks": {
@@ -23,6 +23,7 @@
       "outputs": []
     },
     "//#lint:scripts": {
+      "dependsOn": ["@repo/eslint-config#transit"],
       "outputs": []
     },
     "typecheck": {

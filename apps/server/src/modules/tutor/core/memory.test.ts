@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'bun:test';
-import { programmeFor } from '../../../referential';
+import { notionText, programmeFor } from '../../../referential';
 import { learnerMemoryBlock, notionMemories, notionView, type PastExercise } from './memory';
-import { notionText } from './sheet';
 
 const [first, second] = programmeFor('quatrieme', 'mathematiques', 2026)?.entries ?? [];
 if (!first || !second) throw new Error('the referential has no maths for the quatrième');

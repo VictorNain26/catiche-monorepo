@@ -74,8 +74,8 @@ En place (`apps/web`) :
   (`apps/web/src/lib/api.ts`). Aucun type du serveur n'est réécrit côté client.
 - Données par TanStack Query, formulaires par react-hook-form et Zod, celui-ci en mode
   `jitless` : sa sonde `new Function` serait une violation de la CSP.
-- Primitives `@repo/ui` (shadcn) ; le chat par `useChat` de `@ai-sdk/react`, qui lit le protocole
-  du serveur (`apps/web/src/lib/chat.ts`).
+- Primitives `@repo/ui`, sur Base UI (`decisions.md`) ; le chat par `useChat` de
+  `@ai-sdk/react`, qui lit le protocole du serveur (`apps/web/src/lib/chat.ts`).
 
 ## Observabilité
 

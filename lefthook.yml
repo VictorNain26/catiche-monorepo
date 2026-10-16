@@ -39,7 +39,7 @@ pre-commit:
       run: bunx --no-install eslint --max-warnings 0 --no-warn-ignored {staged_files}
 
     - name: lint-scripts
-      glob: 'scripts/**/*.mjs'
+      glob: ['scripts/*.mjs', 'scripts/**/*.mjs']
       run: bunx --no-install eslint --max-warnings 0 --no-warn-ignored {staged_files}
 
     - name: lint-playwright-web
