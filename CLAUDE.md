@@ -13,10 +13,8 @@ Catiche : un tuteur IA des devoirs pour collégiens, Tom, et un tableau de bord 
   avancer. Ordre des lots : `docs/roadmap.md`. Études datées, jamais mises à jour :
   `docs/etudes/`.
 - Stack, structure, démarrage : `README.md`. Règles d'une partie du code :
-  `.claude/rules/<sujet>.md`, chargées sur ses chemins.
-
-Lors d'une compaction, préserver : PR en cours, branche, plan en cours, dernière tâche
-terminée, décisions ouvertes.
+  `.claude/rules/<sujet>.md`, chargées sur ses chemins. Les règles valables pour tous les projets
+  (git, TDD, tests, plan de PR, revue) sont dans `~/.claude/` et ne se répètent pas ici.
 
 ## Commandes
 
@@ -31,27 +29,12 @@ change (Postgres de `docker compose` requis). Formatage : `bun run format`.
   tokens de la charte, un correctif d'honnêteté ou technique (`.claude/rules/landing.md`).
 - Jamais un écran construit sans `docs/experience.md` ni la charte : un écran du lot 1 est
   composé au téléphone et à l'ordinateur, pas une colonne de boutons.
-- Jamais de push sur `main` : une branche courte, puis une PR, mergée en merge commit (le
-  squash est désactivé).
-- Jamais deux versions d'une même chose, ni un fichier sans usage : ce qu'une PR remplace, elle
-  le supprime.
+- Jamais une PR mergée autrement qu'en merge commit (le squash est désactivé).
 - Jamais un type du serveur réécrit côté client : il vient du client typé de `hono/client`.
-- Jamais un changement de comportement sans son test écrit et vu en échec d'abord (TDD).
-- Jamais de test décoratif : pas de `mock.module` (refusé au lint), pas d'assertion
-  triviale ; un service, un helper ou une validation modifié a son test, cas nominal et cas
-  limites.
-
-## Revue avant merge
-
-`/code-review` relit la branche dans un contexte neuf. Ne retenir que ce qui touche la
-correction ou les exigences du plan ; un constat retenu se corrige avant le merge
-(`.claude/rules/plans-and-agents.md`).
+- Jamais de `mock.module` (refusé au lint) : une dépendance se remplace en la passant.
 
 ## Garde-fous déterministes
 
-- `.claude/settings.json` : ses `permissions.ask` gardent les commandes qui détruisent une base,
-  ses `permissions.deny` les fichiers de secrets. Une règle porte sur le texte de la commande :
-  une autre forme d'appel y échappe ([doc](https://code.claude.com/docs/en/permissions)).
 - lefthook : format, lint et typecheck avant un commit ; tests et build avant un push.
 - CI (`.github/workflows/ci.yml`) : vérifications, tests, build, e2e, migrations, image, sécurité,
   réunis par `ci-ok`, le seul check à exiger.

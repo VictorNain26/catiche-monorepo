@@ -47,13 +47,10 @@ l'élève (`owner`, `null` hors d'un élève : rien n'est écrit), une réponse 
 La modération, gratuite, n'est pas tracée. Un appel qui ne passera pas par `createAi` (la voix)
 devra écrire son coût lui aussi : jamais un appel facturé hors du quota.
 
-- **Tarif** : `PRICES_USD` (`src/platform/ai/cost.ts`), prix publics en dollars par ID daté. Tokens
-  en cache à 10 % du prix d'entrée, endpoint UE +10 %, conversion au taux que Mistral facture
-  (`MISTRAL_USD_TO_EUR`). Un modèle sans prix fait échouer `createAi`, donc le démarrage :
+- **Tarif** : prix par ID daté, cache, endpoint UE et conversion en euros dans
+  `src/platform/ai/cost.ts`. Un modèle sans prix fait échouer `createAi`, donc le démarrage :
   l'ajouter à la table.
-- **Quota** : 2 c par élève et par jour pour tous tant que le paiement n'existe pas, puis 2 c en
-  Gratuit et 10 c en Complet, voix comprise, remise à zéro
-  à 4 h à Paris (`src/domain/quota.ts`, `docs/etudes/2026-10-07/rentabilite.md`), vérifié à
+- **Quota** : montant et heure de remise à zéro dans `src/domain/quota.ts` ; vérifié à
   l'ouverture de chaque tour sur la somme d'`ai_cost`, un tour à la fois par élève. Un appel
   facturé d'un tour compte tout seul ; une route qui appellera Mistral hors d'un tour (la voix)
   vérifiera le quota à son entrée.
