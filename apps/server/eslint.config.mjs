@@ -1,4 +1,5 @@
 import boundaries from 'eslint-plugin-boundaries';
+import { NO_MOCK_MODULE } from '@repo/eslint-config/base';
 import { nodeConfig } from '@repo/eslint-config/node';
 
 // The dependency rules of docs/etudes/2026-10-06/refonte-architecture.md, « Serveur »:
@@ -36,13 +37,6 @@ const files = [
   // composes. They may read the referential, the data of the programmes.
   { pattern: 'src/modules/*/core/*.ts', category: 'core' },
 ];
-
-// A test passes its doubles in; replacing a module hides the wiring and breaks silently.
-const NO_MOCK_MODULE = {
-  object: 'mock',
-  property: 'module',
-  message: 'Pas de mock.module : passer la dépendance en paramètre (.claude/rules/testing.md).',
-};
 
 // Only the entry points read the environment: everything else receives the config.
 const ENTRY_POINTS = ['src/main.ts', 'src/migrate.ts', 'src/invite.ts', 'src/evaluate.ts'];
@@ -123,7 +117,6 @@ export default [
       ],
       // A file outside every element and descriptor would escape the rules above.
       'boundaries/no-unknown-files': 'error',
-      'no-restricted-properties': ['error', NO_MOCK_MODULE],
       'no-restricted-syntax': [
         'error',
         {

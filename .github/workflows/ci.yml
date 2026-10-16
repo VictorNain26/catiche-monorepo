@@ -35,9 +35,11 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup-monorepo
-      - run: bunx --no-install turbo run typecheck lint ${AFFECTED:+"$AFFECTED"}
+      - run: bunx --no-install turbo run typecheck lint lint:scripts ${AFFECTED:+"$AFFECTED"}
       - run: bunx --no-install prettier --check .
-      - run: bunx --no-install knip
+      # knip reads the server's declarations, which a PR that does not affect it has not built.
+      - run: bunx --no-install turbo run build:types --filter=tomai-server
+      - run: bunx --no-install knip --treat-config-hints-as-errors
       - run: bunx --no-install sherif
       - name: The committed SQL matches the schema
         working-directory: apps/server

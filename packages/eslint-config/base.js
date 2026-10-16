@@ -4,8 +4,18 @@ import turboPlugin from 'eslint-plugin-turbo';
 import tseslint from 'typescript-eslint';
 
 /**
+ * A test passes its doubles in; replacing a module hides the wiring and breaks silently. A
+ * consumer that sets its own `no-restricted-properties` replaces this list: it spreads this entry.
+ */
+export const NO_MOCK_MODULE = {
+  object: 'mock',
+  property: 'module',
+  message: 'Pas de mock.module : passer la dépendance en paramètre (.claude/rules/testing.md).',
+};
+
+/**
  * A shared ESLint configuration for the repository: type-checked strict and
- * stylistic presets, no inline config, unused disable directives as errors.
+ * stylistic presets, no inline config, unused disable directives as errors, no `mock.module`.
  *
  * Each consumer sets `parserOptions.tsconfigRootDir` to its own directory.
  *
@@ -29,6 +39,7 @@ export const config = [
     },
     rules: {
       'turbo/no-undeclared-env-vars': 'error',
+      'no-restricted-properties': ['error', NO_MOCK_MODULE],
       // Past 400 lines of code, a file does too many things.
       'max-lines': ['error', { max: 400, skipBlankLines: true, skipComments: true }],
       // A number renders the same way everywhere; the rule stays on to catch

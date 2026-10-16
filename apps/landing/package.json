@@ -10,8 +10,7 @@
     "preview": "astro preview",
     "lint": "astro sync && eslint . --max-warnings 0",
     "typecheck": "astro check",
-    "test:e2e": "playwright test",
-    "clean": "rm -rf dist .astro"
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
