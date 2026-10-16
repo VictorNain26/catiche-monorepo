@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "tom-monorepo",
+      "name": "catiche",
       "devDependencies": {
         "@evilmartians/lefthook": "^2.1.14",
         "@repo/eslint-config": "workspace:*",
