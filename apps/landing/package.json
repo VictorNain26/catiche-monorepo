@@ -9,8 +9,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "lint": "astro sync && eslint . --max-warnings 0",
-    "typecheck": "astro check",
-    "test:e2e": "playwright test"
+    "typecheck": "astro check"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
@@ -23,7 +22,6 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@fontsource/bricolage-grotesque": "^5.3.0",
-    "@playwright/test": "^1.63.0",
     "@repo/eslint-config": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.6",

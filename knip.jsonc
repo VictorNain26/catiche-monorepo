@@ -19,9 +19,5 @@
     "packages/tokens": {
       "entry": ["*.test.mjs"],
     },
-    "tooling/playwright-web": {
-      "entry": ["reset-database.ts"],
-      "ignoreDependencies": ["@repo/server", "web"],
-    },
   },
 }

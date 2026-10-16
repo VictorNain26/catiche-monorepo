@@ -1,6 +1,4 @@
 # Prettier reads the root .gitignore only: what nested ones hide is repeated here.
-**/test-results/
-**/playwright-report/
 apps/server/eval-results/
 apps/server/test*.json
 apps/landing/.astro/

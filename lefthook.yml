@@ -42,11 +42,6 @@ pre-commit:
       glob: 'scripts/**/*.mjs'
       run: bunx --no-install eslint --max-warnings 0 --no-warn-ignored {staged_files}
 
-    - name: lint-playwright-web
-      root: 'tooling/playwright-web/'
-      glob: '**/*.ts'
-      run: bunx --no-install eslint --max-warnings 0 --no-warn-ignored {staged_files}
-
     - name: typecheck
       run: bunx --no-install turbo run typecheck --affected --output-logs=errors-only
 

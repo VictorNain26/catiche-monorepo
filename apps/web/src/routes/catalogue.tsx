@@ -26,9 +26,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import { BookOpenIcon, CalendarDaysIcon, CopyIcon, HouseIcon, MessagesSquareIcon, PlusIcon, UserRoundIcon } from 'lucide-react';
 
 /**
- * Every component of @repo/ui in its states, on invented data and without the API: what the e2e
- * suite visits (tooling/playwright-web/tests/catalogue.spec.ts), and where a screen starts from.
- * Linked from nowhere.
+ * Every component of @repo/ui in its states, on invented data and without the API: where a
+ * screen starts from. Linked from nowhere.
  */
 export const Route = createFileRoute('/catalogue')({ component: Catalogue });
 
