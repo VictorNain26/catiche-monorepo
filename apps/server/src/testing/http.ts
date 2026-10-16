@@ -99,6 +99,8 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
 
+  const redeem = (code: string) => request('POST', '/api/auth/device-pairing/redeem', { body: { code } });
+
   const api = {
     request,
     /** Invited, then in by the code their address received: the session it opens. */
@@ -133,14 +135,12 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
       return ((await res.json()) as { code: string; expiresAt: string }).code;
     },
     async redeem(code: string) {
-      const res = await request('POST', '/api/auth/device-pairing/redeem', { body: { code } });
+      const res = await redeem(code);
       return { status: res.status, cookie: cookieOf(res) };
     },
     /** A guardian's code, redeemed on a new device: that device's session cookie. */
     async pair(cookie: string, studentId: string) {
-      const { status, cookie: device } = await api.redeem(await api.pairingCode(cookie, studentId));
-      if (status !== 200) throw new Error(`pairing: HTTP ${String(status)}`);
-      return device;
+      return cookieOf(await expectStatus(redeem(await api.pairingCode(cookie, studentId)), 200, 'pairing'));
     },
     /** A session the student opens: its id. */
     async session(cookie: string, accompanied = false) {

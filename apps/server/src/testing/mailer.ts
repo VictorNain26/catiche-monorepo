@@ -2,7 +2,8 @@
 
 import type { Email, Mailer } from '../platform/email/mailer';
 
-export function memoryMailer() {
+/** `waitMs`: longer than any send in the background, shorter than a test's own timeout. */
+export function memoryMailer({ waitMs = 4_000 }: { waitMs?: number } = {}) {
   const sent: Email[] = [];
   const waiting: { to: string; resolve: (email: Email) => void }[] = [];
   const mailer: Mailer = (email) => {
@@ -16,9 +17,19 @@ export function memoryMailer() {
 
   /**
    * The next email to `to`, sent after this call: wait for it before the request that sends it,
-   * since the auth sends in the background, once its answer is out.
+   * since the auth sends in the background, once its answer is out. An email that never comes
+   * fails the wait, which would otherwise hang the harness.
    */
-  const next = (to: string) => new Promise<Email>((resolve) => waiting.push({ to, resolve }));
+  const next = (to: string) =>
+    new Promise<Email>((resolve, reject) => {
+      const waiter = { to, resolve };
+      waiting.push(waiter);
+      setTimeout(() => {
+        if (!waiting.includes(waiter)) return;
+        waiting.splice(waiting.indexOf(waiter), 1);
+        reject(new Error(`No email to ${to}`));
+      }, waitMs).unref();
+    });
 
   /** The sign-in code an email carries in its text. */
   const codeIn = ({ subject, text }: Email) => {
