@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { PROMPT_TAG } from './prompt-tags';
 
-const TEMPLATES = new Bun.Glob('modules/tutor/core/*.ts');
+const TEMPLATES = new Bun.Glob('modules/tutor/**/*.ts');
 const SOURCE = new URL('..', import.meta.url).pathname;
 
 // A closing tag is never TypeScript (a generic opens, it never closes with `</`), so every one in
