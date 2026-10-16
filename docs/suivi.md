@@ -5,7 +5,7 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 
 ## Où on en est
 
-- **Mis à jour le** 2026-10-12.
+- **Mis à jour le** 2026-10-16.
 - **La refonte du produit** (`decisions.md`, 2026-10-12 ; `etudes/2026-10-12/refonte-produit.md`) :
   la vision, les décisions et la roadmap réécrites ; les anciens lots 1 à 3 forment le lot 1,
   « Le produit » ; les espaces et les écrans visés sont dans `experience.md`.
@@ -102,8 +102,6 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
   d'école (surligneur, gribouillis) à repenser ; la note « c'est toi qui l'as trouvé ! », qui
   célèbre et finit par un point d'exclamation, contre la charte ; l'image Open Graph composée ;
   `hero.spec.ts` ; une application de preview par PR.
-- Trois appels à `listDeviceSessions` (`foyer.$studentId.tsx`, `sign-out.tsx`, `bienvenue.tsx`)
-  gèrent chacun l'erreur à leur façon : passer par `deviceSessionsQuery` (`lib/auth.ts`).
 - Aux étapes 3 et 4, avec les écrans : les cartes en `li` des listes deviennent `List`.
 
 **Lot 4, Tom**

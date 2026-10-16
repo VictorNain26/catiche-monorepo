@@ -1,13 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Banner, Button } from '@repo/ui';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from '../lib/zod';
 import { Field } from '../components/field';
 import { Page } from '../components/page';
-import { authClient, authMessage } from '../lib/auth';
+import { authClient, authData, deviceSessionsQuery } from '../lib/auth';
 import { meQuery } from '../lib/me';
 
 /**
@@ -30,28 +29,26 @@ const schema = z.object({ name: z.string().trim().min(1, 'Votre prénom.').max(5
 function Welcome() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [failure, setFailure] = useState<string | null>(null);
   const form = useForm({ resolver: zodResolver(schema), defaultValues: { name: '' } });
-
-  const submit = form.handleSubmit(async ({ name }) => {
-    setFailure(null);
-    const { error } = await authClient.updateUser({ name });
-    if (error) {
-      setFailure(authMessage(error));
-      return;
-    }
-    await queryClient.invalidateQueries({ queryKey: meQuery.queryKey });
-    // The guardian's own session, and a child's if the device holds one.
-    const { data: held } = await authClient.multiSession.listDeviceSessions();
-    await navigate({ to: (held?.length ?? 0) > 1 ? '/foyer' : '/foyer/cle' });
+  const name = useMutation({
+    mutationFn: async (values: z.infer<typeof schema>) => {
+      await authData(authClient.updateUser(values));
+      await queryClient.invalidateQueries({ queryKey: meQuery.queryKey });
+      // The guardian's own session, and a child's if the device holds one.
+      const held = await queryClient.query(deviceSessionsQuery);
+      await navigate({ to: held.length > 1 ? '/foyer' : '/foyer/cle' });
+    },
+  });
+  const submit = form.handleSubmit((values) => {
+    name.mutate(values);
   });
 
   return (
     <Page title="Bienvenue">
       <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-4">
         <Field label="Votre prénom" autoComplete="given-name" {...form.register('name')} error={form.formState.errors.name?.message} />
-        {failure && <Banner tone="error" title={failure} />}
-        <Button type="submit" disabled={form.formState.isSubmitting}>
+        {name.error && <Banner tone="error" title={name.error.message} />}
+        <Button type="submit" disabled={name.isPending}>
           Continuer
         </Button>
       </form>

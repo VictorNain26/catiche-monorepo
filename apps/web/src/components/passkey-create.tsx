@@ -1,7 +1,7 @@
 import { Banner, Button } from '@repo/ui';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
-import { authClient, authMessage, hasCode, isCancelled } from '../lib/auth';
+import { AuthFailure, authClient, authData, hasCode, isCancelled } from '../lib/auth';
 import { CodeForm, sendCode } from './code-form';
 
 /**
@@ -9,33 +9,39 @@ import { CodeForm, sendCode } from './code-form';
  * freshAge); past them, a code confirms who is there first, then the button comes back.
  */
 export function PasskeyCreate({ label, onCreated }: { label: string; onCreated: () => Promise<unknown> }) {
-  const [failure, setFailure] = useState<string | null>(null);
   const [stale, setStale] = useState(false);
   const [codeSentTo, setCodeSentTo] = useState<string | null>(null);
 
   const add = useMutation({
     mutationFn: async () => {
-      setFailure(null);
-      const { error } = await authClient.passkey.addPasskey();
-      if (!error) await onCreated();
-      else if (hasCode(error, 'SESSION_NOT_FRESH')) setStale(true);
-      else if (!isCancelled(error)) setFailure(authMessage(error));
+      try {
+        await authData(authClient.passkey.addPasskey());
+      } catch (error) {
+        // A window the person closed says nothing; a session too old asks for a code first.
+        if (error instanceof AuthFailure && isCancelled(error)) return;
+        if (error instanceof AuthFailure && hasCode(error, 'SESSION_NOT_FRESH')) {
+          setStale(true);
+          return;
+        }
+        throw error;
+      }
+      await onCreated();
     },
   });
   const askCode = useMutation({
     mutationFn: async () => {
-      setFailure(null);
-      const { data } = await authClient.getSession();
-      if (!data) return;
-      const { error } = await sendCode(data.user.email);
-      if (error) setFailure(authMessage(error));
-      else setCodeSentTo(data.user.email);
+      const session = await authData(authClient.getSession());
+      if (!session) return;
+      await authData(sendCode(session.user.email));
+      setCodeSentTo(session.user.email);
     },
   });
+  // One action at a time: each clears the other's error as it starts.
+  const failure = add.error ?? askCode.error;
 
   return (
     <>
-      {failure && <Banner tone="error" title={failure} />}
+      {failure && <Banner tone="error" title={failure.message} />}
       {codeSentTo ? (
         <CodeForm
           email={codeSentTo}
@@ -53,6 +59,7 @@ export function PasskeyCreate({ label, onCreated }: { label: string; onCreated: 
           <Button
             disabled={askCode.isPending}
             onClick={() => {
+              add.reset();
               askCode.mutate();
             }}
           >
@@ -63,6 +70,7 @@ export function PasskeyCreate({ label, onCreated }: { label: string; onCreated: 
         <Button
           disabled={add.isPending}
           onClick={() => {
+            askCode.reset();
             add.mutate();
           }}
         >

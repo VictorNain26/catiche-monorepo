@@ -1,36 +1,37 @@
 import { Banner, Button } from '@repo/ui';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
-import { authClient, authMessage } from '../lib/auth';
+import { authClient, authData, deviceSessionsQuery, signOutOfDevice } from '../lib/auth';
 
 /**
- * Signs the guardian out of this device, then loads the app afresh: on a device the family shares,
- * nothing of theirs stays in memory. Where the device also holds a child's session, only theirs is
- * revoked, and the device goes back to the child: better-auth's sign-out would close them all.
+ * Signs the guardian out of this device (`signOutOfDevice`), then loads the app afresh: on a device
+ * the family shares, nothing of theirs stays in memory.
  */
 export function SignOut({ label }: { label: string }) {
   const navigate = useNavigate();
-  const [pending, setPending] = useState(false);
-  const [failure, setFailure] = useState<string | null>(null);
-
-  const signOut = async () => {
-    setFailure(null);
-    setPending(true);
-    const [{ data: current }, { data: held }] = await Promise.all([authClient.getSession(), authClient.multiSession.listDeviceSessions()]);
-    const shared = held?.some(({ session }) => session.token !== current?.session.token) ?? false;
-    const { error } = current && shared ? await authClient.multiSession.revoke({ sessionToken: current.session.token }) : await authClient.signOut();
-    if (error) {
-      setPending(false);
-      setFailure(authMessage(error));
-      return;
-    }
-    await navigate({ to: '/', reloadDocument: true });
-  };
+  const queryClient = useQueryClient();
+  const signOut = useMutation({
+    mutationFn: async () => {
+      await signOutOfDevice({
+        current: () => authData(authClient.getSession()),
+        held: () => queryClient.query(deviceSessionsQuery),
+        revoke: (sessionToken) => authData(authClient.multiSession.revoke({ sessionToken })),
+        signOut: () => authData(authClient.signOut()),
+      });
+      await navigate({ to: '/', reloadDocument: true });
+    },
+  });
 
   return (
     <>
-      {failure && <Banner tone="error" title={failure} />}
-      <Button variant="outline" disabled={pending} onClick={() => void signOut()}>
+      {signOut.error && <Banner tone="error" title={signOut.error.message} />}
+      <Button
+        variant="outline"
+        disabled={signOut.isPending}
+        onClick={() => {
+          signOut.mutate();
+        }}
+      >
         {label}
       </Button>
     </>

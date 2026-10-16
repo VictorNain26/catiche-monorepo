@@ -8,7 +8,7 @@ import { z } from '../lib/zod';
 import { CodeForm, sendCode } from '../components/code-form';
 import { Field } from '../components/field';
 import { Page } from '../components/page';
-import { authClient, authMessage, deviceSessionsQuery, hasCode, isCancelled } from '../lib/auth';
+import { AuthFailure, authClient, authData, authMessage, deviceSessionsQuery, hasCode, isCancelled } from '../lib/auth';
 import { meQuery } from '../lib/me';
 
 /**
@@ -146,9 +146,10 @@ function Children({ active }: { active: { id: string; name: string } }) {
   const others = (held.data ?? []).filter(({ user }) => user.id !== active.id);
   const switchTo = useMutation({
     mutationFn: async (sessionToken: string) => {
-      const { error } = await authClient.multiSession.setActive({ sessionToken });
-      // Refused past the 5e: from the 4e, a child's space opens on no family device.
-      if (error) throw new Error(error.status === 403 ? 'Ce profil ne s’ouvre plus sur cet appareil.' : authMessage(error));
+      await authData(authClient.multiSession.setActive({ sessionToken })).catch((failure: unknown) => {
+        // Refused past the 5e: from the 4e, a child's space opens on no family device.
+        throw failure instanceof AuthFailure && failure.status === 403 ? new Error('Ce profil ne s’ouvre plus sur cet appareil.') : failure;
+      });
       // Loaded afresh: nothing of the other child's stays in memory.
       await navigate({ to: '/', reloadDocument: true });
     },
