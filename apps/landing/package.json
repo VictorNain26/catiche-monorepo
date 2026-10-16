@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "private": true,
-  "description": "Tom Landing Page - Site vitrine Astro",
+  "description": "Catiche : le site vitrine, en Astro",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",

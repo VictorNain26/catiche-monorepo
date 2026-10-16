@@ -1,10 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    /* ========================================= */
-    /* TOM MONOREPO - BASE TYPESCRIPT CONFIG    */
-    /* 2026 Best Practices - Industry Standard  */
-    /* ========================================= */
+    /* Catiche: the base every workspace extends */
 
     /* Language & Environment */
     "target": "ES2022",

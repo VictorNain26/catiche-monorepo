@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "tom-monorepo",
+      "name": "catiche",
       "devDependencies": {
         "@evilmartians/lefthook": "^2.1.14",
         "@repo/eslint-config": "workspace:*",
@@ -42,7 +42,7 @@
       },
     },
     "apps/server": {
-      "name": "tomai-server",
+      "name": "@repo/server",
       "version": "2.0.0",
       "dependencies": {
         "@ai-sdk/mistral": "^4.0.62",
@@ -105,6 +105,7 @@
       },
       "devDependencies": {
         "@repo/eslint-config": "workspace:*",
+        "@repo/server": "workspace:*",
         "@tailwindcss/vite": "^4.3.3",
         "@tanstack/router-plugin": "^1.168.42",
         "@types/node": "^24.13.6",
@@ -114,7 +115,6 @@
         "bun-types": "^1.4.2",
         "eslint": "^10.12.0",
         "tailwindcss": "^4.3.3",
-        "tomai-server": "workspace:*",
         "typescript": "6.0.3",
         "vite": "^8.3.4",
         "vite-plugin-pwa": "^2.0.0",
@@ -175,7 +175,7 @@
     "tooling/playwright-web": {
       "name": "@repo/playwright-web",
       "dependencies": {
-        "tomai-server": "workspace:*",
+        "@repo/server": "workspace:*",
         "web": "workspace:*",
       },
       "devDependencies": {
@@ -847,6 +847,8 @@
     "@repo/eslint-config": ["@repo/eslint-config@workspace:packages/eslint-config"],
 
     "@repo/playwright-web": ["@repo/playwright-web@workspace:tooling/playwright-web"],
+
+    "@repo/server": ["@repo/server@workspace:apps/server"],
 
     "@repo/tokens": ["@repo/tokens@workspace:packages/tokens"],
 
@@ -2255,8 +2257,6 @@
     "tinyglobby": ["tinyglobby@0.2.17", "", { "dependencies": { "fdir": "6.5.0", "picomatch": "4.0.7" } }, "sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g=="],
 
     "to-regex-range": ["to-regex-range@5.0.1", "", { "dependencies": { "is-number": "7.0.0" } }, "sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ=="],
-
-    "tomai-server": ["tomai-server@workspace:apps/server"],
 
     "trim-lines": ["trim-lines@3.0.1", "", {}, "sha512-kRj8B+YHZCc9kQYdWfJB2/oUl9rA99qbowYYBtr4ui4mZyAQ2JpvVBd/6U2YloATfqBhBTSMhTpgBHtU0Mf3Rg=="],
 

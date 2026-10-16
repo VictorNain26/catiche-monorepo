@@ -21,7 +21,7 @@
     },
     "tooling/playwright-web": {
       "entry": ["reset-database.ts"],
-      "ignoreDependencies": ["tomai-server", "web"],
+      "ignoreDependencies": ["@repo/server", "web"],
     },
   },
 }

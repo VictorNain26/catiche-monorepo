@@ -1,7 +1,7 @@
 # Gitleaks configuration
 # Extends default rules, adds allowlists for known false positives
 
-title = "TomAI Gitleaks Configuration"
+title = "Catiche Gitleaks Configuration"
 
 [extend]
 useDefault = true
@@ -11,7 +11,7 @@ useDefault = true
 description = "Known safe patterns"
 regexTarget = "match"
 regexes = [
-  '''tomai_dev_password''',
+  '''catiche_dev_password''',
   '''(?i)example|placeholder|dummy|fake|your[-_]''',
   # The made-up Scaleway access key of the mailer's test (apps/server/src/platform/email).
   '''SCW0123456789ABCDEFG''',

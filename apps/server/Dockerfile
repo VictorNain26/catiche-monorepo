@@ -34,7 +34,7 @@ COPY package.json bun.lock bunfig.toml ./
 COPY apps/server/package.json ./apps/server/
 COPY packages/eslint-config/package.json ./packages/eslint-config/
 RUN --mount=type=cache,target=/root/.bun/install/cache \
-    bun install --frozen-lockfile --ignore-scripts --filter tomai-server
+    bun install --frozen-lockfile --ignore-scripts --filter @repo/server
 
 COPY apps/server/src/ ./apps/server/src/
 COPY tsconfig.base.json ./
@@ -71,6 +71,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["bun", "--smol", "dist/main.js"]
 
+# The image's published name, kept from before Catiche (why: the IMAGE of .github/workflows/ci.yml).
 LABEL org.opencontainers.image.title="tomai-server" \
       org.opencontainers.image.description="Bun + Hono server, serving the web client on its origin" \
       org.opencontainers.image.source="https://github.com/VictorNain26/tomai-monorepo"
