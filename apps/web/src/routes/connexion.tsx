@@ -37,15 +37,15 @@ function SignIn() {
     return (
       <Page title="Votre code">
         <CodeForm email={email} submitLabel="Entrer" onEntered={enter} />
-        <button
+        <Button
           type="button"
+          variant="link"
           onClick={() => {
             setEmail(null);
           }}
-          className="min-h-11 py-3 text-left text-sm text-primary underline"
         >
           Changer d’adresse
-        </button>
+        </Button>
       </Page>
     );
   }
@@ -126,9 +126,9 @@ function EmailStep({ onSent, onEntered }: { onSent: (email: string) => void; onE
         Entrer avec une clé d’accès
       </Button>
       {!child && (
-        <Link to="/jumeler" className="min-h-11 py-3 text-sm text-primary underline">
+        <Button render={<Link to="/jumeler" />} variant="link">
           Tu es élève ? Relie cet appareil
-        </Link>
+        </Button>
       )}
     </Page>
   );

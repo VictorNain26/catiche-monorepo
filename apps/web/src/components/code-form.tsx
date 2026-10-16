@@ -68,9 +68,9 @@ export function CodeForm({ email, submitLabel, onEntered }: { email: string; sub
           {submitLabel}
         </Button>
       </form>
-      <button type="button" onClick={() => void resend()} className="min-h-11 py-3 text-left text-sm text-primary underline">
+      <Button type="button" variant="link" onClick={() => void resend()}>
         Recevoir un nouveau code
-      </button>
+      </Button>
     </>
   );
 }

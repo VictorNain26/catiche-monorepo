@@ -1,4 +1,4 @@
-import { cn } from '@repo/ui/classes';
+import { buttonVariants, cn } from '@repo/ui/classes';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createLink } from '@tanstack/react-router';
 import { ChevronLeftIcon, UsersRoundIcon, type LucideIcon } from 'lucide-react';
@@ -9,12 +9,8 @@ function HeaderAnchor({ icon: Icon, className, children, ...anchor }: ComponentP
   return (
     // A header link always leads away from the screen: never announced as the current page, which
     // the router's prefix matching would do for a parent route.
-    <a
-      {...anchor}
-      aria-current={undefined}
-      className={cn('inline-flex min-h-11 items-center gap-1 text-sm text-primary underline underline-offset-4', className)}
-    >
-      <Icon aria-hidden="true" strokeWidth={1.75} className="size-4 shrink-0" />
+    <a {...anchor} aria-current={undefined} className={cn(buttonVariants({ variant: 'link' }), 'gap-1 py-0', className)}>
+      <Icon aria-hidden="true" nonScalingStroke className="size-6" />
       {children}
     </a>
   );

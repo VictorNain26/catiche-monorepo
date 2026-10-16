@@ -52,9 +52,9 @@ function StudentHome() {
       )}
       <Sessions />
       {me && <WeekSummary week={week.data} failed={week.isError} name={me.name} reader="student" />}
-      <Link to="/memoire" className="min-h-11 py-3 text-sm text-primary underline">
+      <Button render={<Link to="/memoire" />} variant="link">
         Ce que Tom retient
-      </Link>
+      </Button>
       <Devices />
     </Page>
   );
