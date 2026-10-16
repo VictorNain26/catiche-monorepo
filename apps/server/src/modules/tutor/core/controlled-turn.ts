@@ -7,7 +7,7 @@
 
 import type { ModelMessage } from 'ai';
 import type { Logger } from 'pino';
-import type { Ai, ResponseMessage } from '../../../platform/ai/client';
+import type { Ai, ReasoningEffort, ResponseMessage } from '../../../platform/ai/client';
 import { MODERATION_TIMEOUT_MS, type Moderation } from '../../../platform/ai/moderation';
 import { checkReply, FALLBACK_REPLY, regenerationInstruction, type Finding, type OutputCheckContext } from './output-check';
 
@@ -23,7 +23,7 @@ export interface WriterCall {
   system: string;
   /** The turn's messages, an instruction for the regeneration added to the last one. */
   messages: (extra: string | null) => ModelMessage[];
-  reasoningEffort: 'none' | 'high';
+  reasoningEffort: ReasoningEffort;
 }
 
 export interface CheckedReply {

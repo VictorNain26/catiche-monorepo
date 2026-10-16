@@ -25,6 +25,10 @@ import { insertCost } from './repository';
 /** What a model call answers, as `response.messages` gives it: the assistant's messages and tool results. */
 export type ResponseMessage = AssistantModelMessage | ToolModelMessage;
 
+/** Mistral's reasoning efforts a call may ask, which a turn's record keeps. */
+export const REASONING_EFFORTS = ['none', 'high'] as const;
+export type ReasoningEffort = (typeof REASONING_EFFORTS)[number];
+
 /** Who a call is billed to: a student, or nobody outside a student (evaluation, live tests). */
 type Owner = { studentId: string } | null;
 
@@ -39,7 +43,7 @@ export interface TextCall {
   maxOutputTokens?: number;
   /** Mistral's prompt cache: stable while the start of the prompt is (docs.mistral.ai/api/endpoint/chat). */
   promptCacheKey?: string;
-  reasoningEffort?: 'none' | 'high';
+  reasoningEffort?: ReasoningEffort;
   /** A deadline shorter than the configured one, for a call the turn waits on; never longer. */
   timeoutMs?: number;
 }

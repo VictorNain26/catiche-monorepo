@@ -9,11 +9,11 @@ import { bigint, boolean, index, integer, jsonb, pgEnum, pgTable, primaryKey, te
 import { DISTRESS_SOURCES } from '../../domain/distress';
 import { MATH_CHECKS } from '../../domain/exercise-math';
 import { SUBJECT_FAMILIES } from '../../domain/subjects';
+import { REASONING_EFFORTS } from '../../platform/ai/client';
 import { user } from '../../platform/auth/schema';
 import { DECIDED_BY, DIAGNOSIS_ERROR_TYPES, VERDICTS } from './core/diagnosis';
 import type { Hint } from './core/ladder';
 import { CUE_KINDS } from './core/parent-cues';
-import { REASONING_EFFORTS } from './core/reasoning';
 import type { ExerciseSheet } from './core/sheet';
 
 export const subjectFamily = pgEnum('subject_family', SUBJECT_FAMILIES);
