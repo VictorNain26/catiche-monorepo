@@ -58,6 +58,8 @@ test.describe('the shell', () => {
     const nav = page.getByRole('navigation', { name: 'Navigation principale' });
     const links = nav.getByRole('link');
 
+    // Counted once the shell is in: count() does not wait for it.
+    await expect(links.first()).toBeVisible();
     const count = await links.count();
     expect(count).toBeGreaterThanOrEqual(2);
     expect(count).toBeLessThanOrEqual(5);
