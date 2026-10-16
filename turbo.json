@@ -23,6 +23,7 @@
       "outputs": []
     },
     "//#lint:scripts": {
+      "dependsOn": ["@repo/eslint-config#transit"],
       "outputs": []
     },
     "typecheck": {
