@@ -87,8 +87,11 @@ test('on the code step, the parent goes back to change the address, then gets in
   const email = address('renvoi');
   invite(email);
   await page.getByLabel('Adresse e-mail').fill(email);
+  const first = logMark();
   await page.getByRole('button', { name: 'Recevoir mon code' }).click();
   await expect(page.getByRole('region', { name: `Un code à 6 chiffres vient d’être envoyé à ${email}.` })).toBeVisible();
+  // The first code is sent in the background: logged before the mark, it never counts as the new one.
+  await expect.poll(() => codeSince(first, email)).toBeDefined();
   const mark = logMark();
   await page.getByRole('button', { name: 'Recevoir un nouveau code' }).click();
   await expect(page.getByRole('region', { name: `Un nouveau code vient d’être envoyé à ${email}.` })).toBeVisible();

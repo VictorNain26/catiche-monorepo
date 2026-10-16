@@ -125,7 +125,7 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
 
 Conditions à guetter, sans PR tant qu'elles ne se déclenchent pas.
 
-- **E2E sans relance** (depuis le 2026-10-16, `retries: 0` en CI aussi) : une suite complète
+- **E2E sans relance** (`tooling/playwright-web/playwright.config.ts`) : une suite complète
   locale a vu échouer une fois, sur `iphone`, « the dialog opens from the keyboard… » (le focus
   pas encore dans le dialogue) et « a week without a session says so… » (30 s dépassées sous la
   charge) ; ni l'un ni l'autre n'a échoué en répétition. S'ils reviennent, les répéter

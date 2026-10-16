@@ -27,9 +27,10 @@ export async function exercisesOn(studentId: string, notionIds: readonly string[
   const sql = postgres(DATABASE_URL, { max: 1, onnotice: () => undefined });
   try {
     const [session] = await sql<{ id: string }[]>`insert into study_session (student_id) values (${studentId}) returning id`;
+    if (!session) throw new Error('No session returned by its insert');
     for (const notionId of notionIds) {
       await sql`insert into exercise (session_id, sheet, uncertain, drawn_forms, math_check, prompt_version)
-        values (${session?.id ?? ''}, ${sql.json({ entries: [notionId] })}, false, ${sql.json([])}, 'not-applicable', 'e2e')`;
+        values (${session.id},${sql.json({ entries: [notionId] })}, false, ${sql.json([])}, 'not-applicable', 'e2e')`;
     }
   } finally {
     await sql.end();

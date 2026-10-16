@@ -64,7 +64,7 @@ test('the child marks a notion understood, then erases all Tom keeps, the memory
   await exercisesOn(id, [understood.id, kept.id]);
 
   await page.getByRole('link', { name: 'Ce que Tom retient' }).click();
-  const notions = page.getByRole('listitem');
+  const notions = page.getByRole('main').getByRole('listitem');
   await expect(notions).toHaveCount(2);
   await notions.filter({ hasText: understood.text }).getByRole('button', { name: 'J’ai compris' }).click();
   await expect(notions).toHaveCount(1);
