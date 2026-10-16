@@ -31,6 +31,7 @@ import { routeReasoningEffort } from './core/reasoning';
 import { exerciseBlock, SHEET_PROMPT_VERSION } from './core/sheet';
 import { RECENT_MESSAGES, SUMMARY_BACKLOG, summarize } from './core/summary';
 import { titleFor } from './core/title';
+import { turnDeadlineMs } from './core/turn-deadline';
 import { weekStart, weekSummary } from './core/week-summary';
 import { TURN_PROMPT_VERSION } from './core/version';
 import type { TutorRepository } from './repository';
@@ -98,6 +99,7 @@ const analysisRecord = ({ error, ...analysis }: TurnAnalysis) => (error === unde
 
 export function createTutorService({ repository, students, ai, moderation, logger, background }: Deps) {
   const { model } = ai;
+  const turnDeadline = turnDeadlineMs(ai.timeoutMs);
   const student = async (userId: string) => {
     const profile = await students.find(userId);
     if (!profile) throw new Problem('FORBIDDEN');
@@ -416,7 +418,7 @@ export function createTutorService({ repository, students, ai, moderation, logge
      */
     async openTurn(userId: string, sessionId: string, input: TurnInput): Promise<OpenTurn> {
       const learner = await student(userId);
-      const started = await repository.startTurn(userId, sessionId);
+      const started = await repository.startTurn(userId, sessionId, turnDeadline);
       if (!started) throw new Problem((await repository.findSession(userId, sessionId)) ? 'TURN_IN_PROGRESS' : 'NOT_FOUND');
       const { turnStartedAt } = started;
       if (!turnStartedAt) throw new Error('Turn started without its time');

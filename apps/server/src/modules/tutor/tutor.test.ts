@@ -117,6 +117,8 @@ describe('sessions', () => {
 
 describe('the exercise in progress', () => {
   const repository = createTutorRepository(db);
+  // Under the four minutes the takeover test marks its turn with.
+  const TURN_DEADLINE = 3 * 60_000;
   const sheet = sheetOf();
   const fresh: ExerciseState = {
     sheet,
@@ -202,22 +204,38 @@ describe('the exercise in progress', () => {
     expect(await repository.listMessages(studentA.id, session.id)).toEqual([]);
   });
 
+  it("lets a turn take over a session marked longer ago than a turn's deadline, never within it", async () => {
+    const session = await start(asStudentA);
+    const markedAgo = (seconds: number) =>
+      db
+        .update(studySession)
+        .set({ turnStartedAt: sql`now() - make_interval(secs => ${seconds})` })
+        .where(eq(studySession.id, session.id));
+    expect(await repository.startTurn(studentA.id, session.id, 60_000)).toBeDefined();
+    await markedAgo(50);
+    expect(await repository.startTurn(studentA.id, session.id, 60_000)).toBeUndefined();
+    await markedAgo(70);
+    const taken = await repository.startTurn(studentA.id, session.id, 60_000);
+    expect(taken).toBeDefined();
+    if (taken?.turnStartedAt) await repository.endTurn(session.id, taken.turnStartedAt);
+  });
+
   it('frees a session only from the turn that holds it, never from one whose lock was taken over', async () => {
     const session = await start(asStudentA);
-    const first = await repository.startTurn(studentA.id, session.id);
-    expect(await repository.startTurn(studentA.id, session.id)).toBeUndefined();
+    const first = await repository.startTurn(studentA.id, session.id, TURN_DEADLINE);
+    expect(await repository.startTurn(studentA.id, session.id, TURN_DEADLINE)).toBeUndefined();
     await db
       .update(studySession)
       .set({ turnStartedAt: sql`now() - interval '4 minutes'` })
       .where(eq(studySession.id, session.id));
     const [stale] = await db.select({ at: studySession.turnStartedAt }).from(studySession).where(eq(studySession.id, session.id));
-    const second = await repository.startTurn(studentA.id, session.id);
+    const second = await repository.startTurn(studentA.id, session.id, TURN_DEADLINE);
     expect(second?.turnStartedAt).toBeInstanceOf(Date);
     if (!stale?.at || !second?.turnStartedAt || !first?.turnStartedAt) throw new Error('turns not started');
     await repository.endTurn(session.id, stale.at);
-    expect(await repository.startTurn(studentA.id, session.id)).toBeUndefined();
+    expect(await repository.startTurn(studentA.id, session.id, TURN_DEADLINE)).toBeUndefined();
     await repository.endTurn(session.id, second.turnStartedAt);
-    expect(await repository.startTurn(studentA.id, session.id)).toBeDefined();
+    expect(await repository.startTurn(studentA.id, session.id, TURN_DEADLINE)).toBeDefined();
   });
 
   it('writes one summary of two runs that read the same previous one', async () => {

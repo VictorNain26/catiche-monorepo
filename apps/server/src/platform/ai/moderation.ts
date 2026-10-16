@@ -22,7 +22,7 @@ const MODEL = 'mistral-moderation-2603';
  */
 const ATTEMPT_MS = 1_500;
 const RETRY_WINDOW_MS = 2_500;
-const TIMEOUT_MS = 5_000;
+export const MODERATION_TIMEOUT_MS = 5_000;
 
 /**
  * The categories that hold back what reaches the student. `health`, `financial` and `law` stay
@@ -70,7 +70,7 @@ export function createModeration({ mistral, logger }: { mistral: MistralConfig; 
     // Always passed, even empty: the SDK would otherwise read MISTRAL_API_KEY itself.
     apiKey: mistral.apiKey ?? '',
     serverURL: mistral.serverUrl,
-    timeoutMs: TIMEOUT_MS,
+    timeoutMs: MODERATION_TIMEOUT_MS,
     ...(mistral.retryAttempts > 0
       ? {
           retryConfig: {

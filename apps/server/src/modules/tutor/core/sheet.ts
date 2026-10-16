@@ -200,7 +200,7 @@ export const SHEET_PROMPT_VERSION = promptVersion(
   ].join('\n'),
 );
 const DRAWS = 3;
-const SHEET_TIMEOUT_MS = 20_000;
+export const SHEET_TIMEOUT_MS = 20_000;
 // Small 4's model card: « 0.7 for reasoning_effort="high" » (huggingface.co/mistralai/Mistral-Small-4-119B-2603).
 const REASONING_TEMPERATURE = 0.7;
 
