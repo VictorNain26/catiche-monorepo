@@ -13,6 +13,7 @@ import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { FALLBACK_REPLY } from './core/output-check';
 import { PARENT_CUES } from './core/parent-cues';
+import { SHEET_PROMPT_VERSION } from './core/sheet';
 import { TURN_PROMPT_VERSION } from './core/version';
 import { distressEvent, exercise, message, studySession, turnRecord } from './schema';
 import { analysis, draft as sheetDraft } from './testing';
@@ -280,6 +281,15 @@ describe('a turn', () => {
     await say(sessionId, 'Bonjour');
     expect((await records(sessionId)).at(-1)?.promptVersion).toBe(TURN_PROMPT_VERSION);
     expect(TURN_PROMPT_VERSION).toMatch(/^[0-9a-f]{12}$/);
+  });
+
+  it("records with a new exercise the version of the sheet's prompt, computed as the writer's is", async () => {
+    const sessionId = await newSession();
+    mistral.chat.push(analysis({ bringsExercise: true }), draft, draft, draft, { text: 'Que cherches-tu ?' });
+    await say(sessionId, 'Résous 3x + 5 = 20.');
+    const [stored] = await db.select({ promptVersion: exercise.promptVersion }).from(exercise).where(eq(exercise.sessionId, sessionId));
+    expect(stored?.promptVersion).toBe(SHEET_PROMPT_VERSION);
+    expect(SHEET_PROMPT_VERSION).toMatch(/^[0-9a-f]{12}$/);
   });
 });
 

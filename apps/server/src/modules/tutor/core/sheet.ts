@@ -9,12 +9,13 @@ import type { Logger } from 'pino';
 import { z } from 'zod';
 import { checkAnswer, sameMath, type MathCheck } from '../../../domain/exercise-math';
 import { normalizeForLeak } from '../../../domain/leak';
-import { LEVEL_SHORT_LABELS, type SchoolLevel } from '../../../domain/levels';
+import { LEVEL_SHORT_LABELS, SCHOOL_LEVELS, type SchoolLevel } from '../../../domain/levels';
 import { schoolYearOf } from '../../../domain/school-calendar';
 import type { SubjectFamily } from '../../../domain/subjects';
 import type { Ai } from '../../../platform/ai/client';
 import { notionsFor, notionText, type Entry, type Notions } from '../../../referential';
 import { stripPromptTags, wrapUserMessage } from './fences';
+import { promptVersion } from './prompt';
 
 const ExerciseSheetSchema = z.object({
   statement: z.string().describe("L'énoncé tel que l'élève l'a donné, sans sa réponse ni ses commentaires."),
@@ -186,7 +187,18 @@ export function exerciseBlock(sheet: ExerciseSheet, memory: string | null): stri
     .join('\n');
 }
 
-export const SHEET_PROMPT_VERSION = '2026-10-06.4';
+/**
+ * The version of everything a draw receives besides what the student sent: each class's
+ * instructions, with and without a programme, and the schema it fills, whose descriptions are
+ * instructions too. Hashed as the writer's (`version.ts`): an edit of any of them makes a new
+ * version, which the exercise records and Mistral's cache is keyed by.
+ */
+export const SHEET_PROMPT_VERSION = promptVersion(
+  [
+    ...SCHOOL_LEVELS.flatMap((level) => [null, { entries: [], later: [] }].map((notions) => sheetMessages(level, notions, '', null)[0].content)),
+    JSON.stringify(z.toJSONSchema(ExerciseDraftSchema)),
+  ].join('\n'),
+);
 const DRAWS = 3;
 const SHEET_TIMEOUT_MS = 20_000;
 // Small 4's model card: « 0.7 for reasoning_effort="high" » (huggingface.co/mistralai/Mistral-Small-4-119B-2603).
