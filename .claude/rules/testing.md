@@ -2,6 +2,7 @@
 description: Runners et emplacement des tests du monorepo — chargé en ouvrant un test
 paths:
   - "**/*.test.ts"
+  - "**/*.test.tsx"
   - "**/*.test.mjs"
   - "**/*.spec.ts"
   - "**/playwright.config.*"
@@ -17,6 +18,7 @@ demandent le Postgres de `docker compose` (`DATABASE_URL`).
 |-------|--------|----------|-------------|
 | Serveur | Bun, Postgres | `cd apps/server && bun test` | à côté du code, `<fichier>.test.ts` |
 | Web | Bun | `cd apps/web && bun run test` | `apps/web/src/**/<fichier>.test.ts` |
+| UI | Bun | `cd packages/ui && bun run test` | `packages/ui/src/**/<fichier>.test.tsx` |
 | Tokens | Bun | `bun run test` | `packages/tokens/contrast.test.mjs` |
 | Web, de bout en bout | Playwright | `bunx turbo run test:e2e --filter=@repo/playwright-web` | `tooling/playwright-web/tests/` |
 | Landing | Playwright | `bunx turbo run test:e2e --filter=landing` | `apps/landing/tests/` |

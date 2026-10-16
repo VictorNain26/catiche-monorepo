@@ -56,24 +56,16 @@ mesure d'accord doivent contenir.
 modèle sans prévenir et invalide l'évaluation. Chaque prompt porte une version
 (`PROMPT_VERSION`), journalisée avec l'ID du modèle à chaque tour.
 
-**Pièges vérifiés** :
-- `@ai-sdk/mistral` n'envoie `reasoning_effort` que pour les IDs de sa liste interne : un
-  nouveau modèle s'y vérifie, faute de quoi il ne raisonne jamais.
-- `safePrompt` est déprécié par Mistral au profit des Custom Guardrails
-  ([source](https://docs.mistral.ai/resources/deprecated/guardrailing/safe_prompt)) : on ne
-  l'utilise pas ; ce qui atteint l'élève passe par la modération d'entrée et de sortie.
+**Pièges vérifiés** : ceux de l'appel à Mistral (`reasoning_effort` et la liste interne
+d'`@ai-sdk/mistral`, `safePrompt`, `maxOutputTokens` sur un appel qui raisonne, cache de
+préfixe, endpoint UE, débit du mode gratuit) sont dans le skill `mistral-stack`. **Propres au
+tuteur** :
 - Chaque appel au modèle est entier, sans flux (`generateText`) : son usage, `cacheRead` compris,
   arrive avec sa réponse et se compte au coût (`platform/ai/client.ts`) ; un appel coupé par son
   délai ne rapporte pas d'usage.
-- `reasoning_effort` n'a pas de budget de tokens : un appel qui raisonne n'a pas de
-  `maxOutputTokens`, sa borne est le timeout.
-- Le cache de préfixe se règle par `promptCacheKey` ; les tokens servis par le cache coûtent 10 %.
-- Agents, Batch et Files ne sont pas servis sur l'endpoint UE : la boucle du tour est la nôtre.
-- **Débit** : en mode gratuit, 100 000 tokens par minute pour l'organisation ; une fiche
-  d'exercice en prend environ 78 000 (trois tirages de 26 000 tokens d'entrée), et la première
-  réponse d'un exercice arrive après 12 à 15 s (mesuré le 2026-10-08). Le paiement à l'usage lève
-  le plafond ; pendant l'attente, la séance dit l'étape du tour (lecture, préparation d'un nouvel
-  exercice, écriture).
+- En mode gratuit, dont le plafond de débit est dans le skill, la première réponse d'un exercice
+  arrive après 12 à 15 s (mesuré le 2026-10-08) ; pendant
+  l'attente, la séance dit l'étape du tour (lecture, préparation d'un nouvel exercice, écriture).
 
 ## 3. Pédagogie
 
@@ -301,8 +293,8 @@ succès). Coûts mesurés : `etudes/2026-10-06/passage-de-fin.md` ;
 quotas et rentabilité : `etudes/2026-10-07/rentabilite.md`.
 
 - Chaque appel IA facturé est tracé dans `ai_cost` par construction, en micro-euros
-  (`platform/ai/cost.ts`) : chat, analyse du tour, fiche, diagnostic, titre, résumé ; la lecture
-  d'image et la voix le seront à leur arrivée. La modération, gratuite, ne l'est pas.
+  (`platform/ai/cost.ts`), sous l'`operation` que chaque appel nomme, lecture de la photo
+  comprise ; la voix le sera à son arrivée. La modération, gratuite, ne l'est pas.
 - Le quota est un budget du jour par élève, lu dans `ai_cost` : le coût réel, tokens en cache à
   leur prix (10 %), lecture vocale comprise, jamais des tokens bruts ; 2 c pour tous tant que le
   paiement n'existe pas, puis 2 c en Gratuit et 10 c en Complet, le jour commençant à 4 h à Paris (`domain/quota.ts`). Vérifié à
