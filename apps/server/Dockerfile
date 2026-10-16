@@ -34,7 +34,7 @@ COPY package.json bun.lock bunfig.toml ./
 COPY apps/server/package.json ./apps/server/
 COPY packages/eslint-config/package.json ./packages/eslint-config/
 RUN --mount=type=cache,target=/root/.bun/install/cache \
-    bun install --frozen-lockfile --ignore-scripts --filter tomai-server
+    bun install --frozen-lockfile --ignore-scripts --filter @repo/server
 
 COPY apps/server/src/ ./apps/server/src/
 COPY tsconfig.base.json ./

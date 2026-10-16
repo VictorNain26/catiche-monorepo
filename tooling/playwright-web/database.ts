@@ -7,7 +7,7 @@
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 
-export const DATABASE_URL = 'postgresql://tomai_dev:tomai_dev_password@localhost:5432/tom_e2e';
+export const DATABASE_URL = 'postgresql://catiche_dev:catiche_dev_password@localhost:5432/tom_e2e';
 
 /** Invites the address, as an operator does, by the built server's command. */
 export function invite(email: string) {

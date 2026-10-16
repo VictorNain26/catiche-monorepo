@@ -1,5 +1,5 @@
 {
-  "name": "tomai-server",
+  "name": "@repo/server",
   "version": "2.0.0",
   "type": "module",
   "exports": {

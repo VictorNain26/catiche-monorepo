@@ -8,7 +8,7 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
-    "tomai-server": "workspace:*",
+    "@repo/server": "workspace:*",
     "web": "workspace:*"
   },
   "devDependencies": {

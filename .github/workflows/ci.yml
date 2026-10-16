@@ -40,7 +40,7 @@ jobs:
       - run: bunx --no-install turbo run typecheck lint lint:scripts ${AFFECTED:+"$AFFECTED"}
       - run: bunx --no-install prettier --check .
       # knip reads the server's declarations, which a PR that does not affect it has not built.
-      - run: bunx --no-install turbo run build:types --filter=tomai-server
+      - run: bunx --no-install turbo run build:types --filter=@repo/server
       - run: bunx --no-install knip --treat-config-hints-as-errors
       - run: bunx --no-install sherif
       - name: The committed SQL matches the schema
@@ -177,6 +177,8 @@ jobs:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     env:
+      # The package's name from before Catiche: Clever Cloud pulls it without credentials, which
+      # needs it public, and a package under a new name starts private.
       IMAGE: ghcr.io/${{ github.repository_owner }}/tomai-server
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

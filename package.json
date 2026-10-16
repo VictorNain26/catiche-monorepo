@@ -1,7 +1,7 @@
 {
-  "name": "tom-monorepo",
+  "name": "catiche",
   "private": true,
-  "description": "Tom - Plateforme de tutorat socratique adaptatif",
+  "description": "Catiche : Tom, un tuteur IA des devoirs pour collégiens, et un tableau de bord pour le parent",
   "scripts": {
     "dev": "docker compose up -d --wait --wait-timeout 120 postgres && bun run --cwd apps/server db:migrate && turbo run dev",
     "dev:down": "docker compose down",
