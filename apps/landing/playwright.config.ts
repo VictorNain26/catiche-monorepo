@@ -7,7 +7,8 @@ const baseURL = `http://localhost:${PORT}`;
 export default defineConfig({
   testDir: './tests',
   forbidOnly: !!process.env['CI'],
-  reporter: 'list',
+  // In the CI, an HTML report too, which the job keeps when the suite fails.
+  reporter: process.env['CI'] ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL,
     reducedMotion: 'reduce',

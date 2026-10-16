@@ -99,6 +99,13 @@
       "when": 1791545404799,
       "tag": "0013_message_photo_text",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792154967356,
+      "tag": "0014_closed_columns_as_enums",
+      "breakpoints": true
     }
   ]
 }

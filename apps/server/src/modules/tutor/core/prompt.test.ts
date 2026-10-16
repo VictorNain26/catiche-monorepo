@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'bun:test';
 import { SCHOOL_LEVELS } from '../../../domain/levels';
 import { SUBJECT_FAMILIES } from '../../../domain/subjects';
+import { notionsFor } from '../../../referential';
 import { turnInstruction } from './analysis';
 import { stripPromptTags, wrapUserMessage } from './fences';
 import { turnContract } from './ladder';
 import { promptVersion, studentBlock, subjectBlock, systemPrompt } from './prompt';
-import { exerciseBlock, notionsFor, sheetMessages, type ExerciseSheet } from './sheet';
+import { exerciseBlock, sheetMessages, type ExerciseSheet } from './sheet';
 
 const prompt = systemPrompt('quatrieme');
 const sheet: ExerciseSheet = {

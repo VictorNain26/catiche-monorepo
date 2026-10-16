@@ -7,8 +7,8 @@
 
 import type { ModelMessage } from 'ai';
 import type { Logger } from 'pino';
-import type { Ai, ResponseMessage } from '../../../platform/ai/client';
-import type { Moderation } from '../../../platform/ai/moderation';
+import type { Ai, ReasoningEffort, ResponseMessage } from '../../../platform/ai/client';
+import { MODERATION_TIMEOUT_MS, type Moderation } from '../../../platform/ai/moderation';
 import { checkReply, FALLBACK_REPLY, regenerationInstruction, type Finding, type OutputCheckContext } from './output-check';
 
 // Small 4's model card: 0.7 for reasoning_effort="high", within its range for "none".
@@ -23,7 +23,7 @@ export interface WriterCall {
   system: string;
   /** The turn's messages, an instruction for the regeneration added to the last one. */
   messages: (extra: string | null) => ModelMessage[];
-  reasoningEffort: 'none' | 'high';
+  reasoningEffort: ReasoningEffort;
 }
 
 export interface CheckedReply {
@@ -37,6 +37,9 @@ export interface CheckedReply {
 }
 
 const asText = (text: string): ResponseMessage[] => [{ role: 'assistant', content: [{ type: 'text', text }] }];
+
+/** The longest `writeChecked` may take: two texts, each written within the client's deadline, then moderated. */
+export const writeDeadlineMs = (clientMs: number) => 2 * (clientMs + MODERATION_TIMEOUT_MS);
 
 export async function writeChecked(
   deps: { ai: Ai; moderation: Moderation; logger: Logger },
