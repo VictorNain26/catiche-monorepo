@@ -5,48 +5,21 @@
 
 import { describe, expect, it } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
-import pino from 'pino';
-import { createApp } from '../../app';
 import { DISTRESS_REPLY } from '../../domain/distress';
-import { DAILY_BUDGET_MICRO_EUR, quotaDayStart } from '../../domain/quota';
+import { DAILY_BUDGET_MICRO_EUR } from '../../domain/quota';
+import { quotaDayStart } from '../../domain/school-calendar';
 import { aiCost } from '../../platform/ai/schema';
-import { createAuth } from '../../platform/auth/auth';
-import { createBackgroundTasks } from '../../platform/lifecycle/background';
-import { createLifecycle } from '../../platform/lifecycle/shutdown';
+import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
-import { httpClient, ORIGIN } from '../../testing/http';
-import { memoryMailer } from '../../testing/mailer';
-import { fakeMistral } from '../../testing/mistral';
-import { accountDeletion } from '../household';
-import type { TurnAnalysis } from './core/analysis';
 import { FALLBACK_REPLY } from './core/output-check';
 import { PARENT_CUES } from './core/parent-cues';
+import { SHEET_PROMPT_VERSION } from './core/sheet';
 import { TURN_PROMPT_VERSION } from './core/version';
 import { distressEvent, exercise, message, studySession, turnRecord } from './schema';
+import { analysis, draft as sheetDraft } from './testing';
 
 const { db } = await testDatabase();
-const mistral = fakeMistral();
-const tasks = createBackgroundTasks();
-const mail = memoryMailer();
-const silent = pino({ level: 'silent' });
-const auth = createAuth(
-  db,
-  { publicUrl: ORIGIN, authSecret: 'x'.repeat(32) },
-  { mailer: mail.mailer, logger: silent, background: createBackgroundTasks().run, deleteUser: accountDeletion(db) },
-);
-const api = httpClient(
-  createApp({
-    config: { production: false, webDistDir: undefined, apiRateLimit: 100, trustedProxyHops: 0 },
-    logger: silent,
-    db,
-    ...mistral.deps(db, silent),
-    auth,
-    lifecycle: createLifecycle(),
-    background: tasks.run,
-  }),
-  mail,
-  db,
-);
+const { api, mistral, tasks } = testApp(db);
 
 const guardian = await api.guardian('parent@example.com');
 const student = await api.student(guardian, { name: 'Léa', level: 'quatrieme' });
@@ -56,65 +29,28 @@ const asOther = await api.pair(otherGuardian, (await api.student(otherGuardian))
 
 const companion = await api.student(guardian, { name: 'Sam', level: 'cinquieme' });
 const asCompanion = await api.pair(guardian, companion.id);
-const companionSession = async (accompanied: boolean) =>
-  ((await (await api.request('POST', '/api/sessions', { cookie: asCompanion, body: { accompanied } })).json()) as { id: string }).id;
+const companionSession = (accompanied: boolean) => api.session(asCompanion, accompanied);
 
-const newSession = async () =>
-  ((await (await api.request('POST', '/api/sessions', { cookie: asStudent, body: { accompanied: false } })).json()) as { id: string }).id;
+const newSession = () => api.session(asStudent);
 
 /** The turn's reply as the student reads it, from the UI message stream; or its error. */
 async function say(sessionId: string, text: string, cookie = asStudent) {
-  const res = await api.request('POST', `/api/sessions/${sessionId}/messages`, { cookie, body: { text } });
-  const body = await res.text();
+  const { chunks, ...read } = await api.turn(cookie, sessionId, { text });
   // The title and the summary run after the reply: done before the test queues the next replies.
   await tasks.settled();
-  const chunks = body
-    .split('\n')
-    .filter((line) => line.startsWith('data: {'))
-    .map((line) => JSON.parse(line.slice(6)) as { type: string; delta?: string; errorText?: string; data?: unknown; transient?: boolean });
   // What the student is told while they wait comes before the reply's first word, if any.
   const replyStart = chunks.findIndex((chunk) => chunk.type === 'text-start');
   const beforeReply = replyStart === -1 ? chunks : chunks.slice(0, replyStart);
+  const data = (type: string) => chunks.flatMap((chunk) => (chunk.type === type && 'data' in chunk ? [chunk] : []));
   return {
-    status: res.status,
+    ...read,
     steps: beforeReply.flatMap((chunk) => (chunk.type === 'data-step' ? [chunk.data] : [])),
-    transientSteps: chunks.filter((chunk) => chunk.type === 'data-step').every((chunk) => chunk.transient === true),
-    cues: chunks.filter((chunk) => chunk.type === 'data-cue').map((chunk) => ({ cue: chunk.data, transient: chunk.transient })),
-    reply: chunks.flatMap((chunk) => (chunk.type === 'text-delta' && chunk.delta ? [chunk.delta] : [])).join(''),
-    error: chunks.find((chunk) => chunk.type === 'error')?.errorText,
-    body,
+    transientSteps: data('data-step').every((chunk) => chunk.transient === true),
+    cues: data('data-cue').map((chunk) => ({ cue: chunk.data, transient: chunk.transient })),
   };
 }
 
-const analysis = (overrides: Partial<TurnAnalysis> = {}) => ({
-  json: {
-    subject: 'mathematiques',
-    bringsExercise: false,
-    proposesAnswer: false,
-    asksSolution: false,
-    asksExplanation: false,
-    saysStuck: false,
-    ...overrides,
-  },
-});
-const draft = {
-  json: {
-    hasExercise: true,
-    statement: 'Résous 3x + 5 = 20.',
-    kind: 'short',
-    answer: 'x = 5',
-    answerForms: ['5', 'x = 5'],
-    mathEquation: '3*x + 5 = 20',
-    mathAnswer: 'x = 5',
-    steps: ['Retrancher 5 : 3x = 15', 'Diviser par 3 : x = 5'],
-    commonErrors: [],
-    rule: null,
-    facts: [],
-    expectedElements: [],
-    entries: [],
-    laterEntries: [],
-  },
-};
+const draft = sheetDraft();
 const records = (sessionId: string) => db.select().from(turnRecord).where(eq(turnRecord.sessionId, sessionId)).orderBy(turnRecord.createdAt);
 const messagesOf = async (sessionId: string) =>
   ((await (await api.request('GET', `/api/sessions/${sessionId}/messages`, { cookie: asStudent })).json()) as { role: string; text: string }[]).map(
@@ -179,9 +115,7 @@ describe('a turn', () => {
   it('gives no cue once the child is moved up to the 4e, though the session was opened beside', async () => {
     const moving = await api.student(guardian, { name: 'Ali', level: 'cinquieme' });
     const asMoving = await api.pair(guardian, moving.id);
-    const { id: sessionId } = (await (await api.request('POST', '/api/sessions', { cookie: asMoving, body: { accompanied: true } })).json()) as {
-      id: string;
-    };
+    const sessionId = await api.session(asMoving, true);
     await api.request('PATCH', `/api/household/students/${moving.id}`, { cookie: guardian, body: { level: 'quatrieme' } });
     mistral.chat.push(analysis(), { text: 'Que travailles-tu ?' });
     expect((await say(sessionId, 'Bonjour', asMoving)).cues).toEqual([]);
@@ -292,17 +226,19 @@ describe('a turn', () => {
     ]);
   });
 
-  it('refuses a second turn while one runs, and takes over one left by a crash', async () => {
+  it("refuses a second turn while one runs, and takes over one left by a crash past the turn's deadline", async () => {
     const sessionId = await newSession();
-    await db
-      .update(studySession)
-      .set({ turnStartedAt: sql`now()` })
-      .where(eq(studySession.id, sessionId));
+    // The fake Mistral's 2 s client deadline makes a turn's deadline 55 s (core/turn-deadline.ts).
+    const markedAgo = (seconds: number) =>
+      db
+        .update(studySession)
+        .set({ turnStartedAt: sql`now() - make_interval(secs => ${seconds})` })
+        .where(eq(studySession.id, sessionId));
+    await markedAgo(0);
     expect((await say(sessionId, 'Bonjour')).status).toBe(409);
-    await db
-      .update(studySession)
-      .set({ turnStartedAt: sql`now() - interval '4 minutes'` })
-      .where(eq(studySession.id, sessionId));
+    await markedAgo(50);
+    expect((await say(sessionId, 'Bonjour')).status).toBe(409);
+    await markedAgo(60);
     mistral.chat.push(analysis(), { text: 'Bonjour !' });
     expect((await say(sessionId, 'Bonjour')).reply).toBe('Bonjour !');
   });
@@ -348,6 +284,15 @@ describe('a turn', () => {
     expect((await records(sessionId)).at(-1)?.promptVersion).toBe(TURN_PROMPT_VERSION);
     expect(TURN_PROMPT_VERSION).toMatch(/^[0-9a-f]{12}$/);
   });
+
+  it("records with a new exercise the version of the sheet's prompt, computed as the writer's is", async () => {
+    const sessionId = await newSession();
+    mistral.chat.push(analysis({ bringsExercise: true }), draft, draft, draft, { text: 'Que cherches-tu ?' });
+    await say(sessionId, 'Résous 3x + 5 = 20.');
+    const [stored] = await db.select({ promptVersion: exercise.promptVersion }).from(exercise).where(eq(exercise.sessionId, sessionId));
+    expect(stored?.promptVersion).toBe(SHEET_PROMPT_VERSION);
+    expect(SHEET_PROMPT_VERSION).toMatch(/^[0-9a-f]{12}$/);
+  });
 });
 
 describe('refusals, before any model', () => {
@@ -367,8 +312,7 @@ const spender = await api.student(guardian, { name: 'Noé', level: 'sixieme' });
 const asSpender = await api.pair(guardian, spender.id);
 
 describe('the daily quota', () => {
-  const sessionOf = async () =>
-    ((await (await api.request('POST', '/api/sessions', { cookie: asSpender, body: { accompanied: false } })).json()) as { id: string }).id;
+  const sessionOf = () => api.session(asSpender);
   // Read in each test, at its start: a run that crosses 4 a.m. would otherwise test yesterday.
   const today = () => quotaDayStart(new Date());
   /** The student's spending reset to what the test states. */

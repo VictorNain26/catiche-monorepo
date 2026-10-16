@@ -20,9 +20,6 @@ import { distressEvent, exercise, learnerNotionReset, message, studySession, tur
 /** The tutor's last messages on an exercise that the contract lists, so as not to repeat them. */
 const KEPT_HINTS = 4;
 
-/** Past it, a turn left marked by a crash no longer blocks the session: longer than any turn's calls. */
-const STALE_TURN = sql`interval '3 minutes'`;
-
 type Executor = Db | Parameters<Parameters<Db['transaction']>[0]>[0];
 
 export type TurnRecord = Omit<typeof turnRecord.$inferInsert, 'id' | 'sessionId' | 'exerciseId' | 'createdAt'>;
@@ -291,9 +288,11 @@ export function createTutorRepository(db: Db) {
     /**
      * Marks a turn as running in the student's session, and reads the session in the same
      * statement: a session closed by the turn before is seen closed. Undefined when a turn of the
-     * student already runs, in this session or another, or when the session is not theirs.
+     * student already runs, in this session or another, or when the session is not theirs. A turn
+     * marked longer than `staleAfterMs` ago, longer than any turn's calls, was left by a crash and
+     * no longer counts.
      */
-    async startTurn(studentId: string, sessionId: string) {
+    async startTurn(studentId: string, sessionId: string, staleAfterMs: number) {
       return db.transaction(async (tx) => {
         // One turn at a time for the student, whatever the session: turns in parallel sessions would
         // all pass the same quota check. The lock serialises this student's starts until the commit.
@@ -301,7 +300,9 @@ export function createTutorRepository(db: Db) {
         const [running] = await tx
           .select({ id: studySession.id })
           .from(studySession)
-          .where(and(eq(studySession.studentId, studentId), gte(studySession.turnStartedAt, sql`now() - ${STALE_TURN}`)))
+          .where(
+            and(eq(studySession.studentId, studentId), gte(studySession.turnStartedAt, sql`now() - make_interval(secs => ${staleAfterMs / 1000})`)),
+          )
           .limit(1);
         if (running) return undefined;
         const [started] = await tx

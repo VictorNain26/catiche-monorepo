@@ -13,6 +13,7 @@ import { stripPromptTags, wrapUserMessage } from './fences';
 import type { ExerciseSheet } from './sheet';
 
 const DIAGNOSIS_PROMPT_VERSION = '2026-10-05.2';
+export const DIAGNOSIS_TIMEOUT_MS = 8_000;
 
 const DiagnosisSchema = z.object({
   verdict: z
@@ -147,7 +148,7 @@ ${wrapUserMessage(turn.studentText)}`,
       schema: DiagnosisSchema,
       schemaName: 'exercise_diagnosis',
       promptCacheKey: `exercise-diagnosis-${DIAGNOSIS_PROMPT_VERSION}`,
-      timeoutMs: 8_000,
+      timeoutMs: DIAGNOSIS_TIMEOUT_MS,
     });
     const diagnosis = settle(object, sheet);
     logger.info(

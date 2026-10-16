@@ -10,10 +10,12 @@ import { z } from 'zod';
 import { checkAnswer, sameMath, type MathCheck } from '../../../domain/exercise-math';
 import { normalizeForLeak } from '../../../domain/leak';
 import { LEVEL_SHORT_LABELS, SCHOOL_LEVELS, type SchoolLevel } from '../../../domain/levels';
+import { schoolYearOf } from '../../../domain/school-calendar';
 import type { SubjectFamily } from '../../../domain/subjects';
 import type { Ai } from '../../../platform/ai/client';
-import { programmeFor, programmes, type Entry } from '../../../referential';
+import { notionsFor, notionText, type Entry, type Notions } from '../../../referential';
 import { stripPromptTags, wrapUserMessage } from './fences';
+import { promptVersion } from './prompt';
 
 const ExerciseSheetSchema = z.object({
   statement: z.string().describe("L'énoncé tel que l'élève l'a donné, sans sa réponse ni ses commentaires."),
@@ -61,32 +63,6 @@ const ExerciseDraftSchema = z.object({
     ),
   ...ExerciseSheetSchema.shape,
 });
-
-/** The school year a date belongs to, named after the September that opens it. */
-export function schoolYearOf(date: Date): number {
-  // In Paris: on a server in UTC, the night of 1 September would still be August.
-  const parts = new Intl.DateTimeFormat('en', { timeZone: 'Europe/Paris', year: 'numeric', month: 'numeric' }).formatToParts(date);
-  const year = Number(parts.find((part) => part.type === 'year')?.value);
-  const month = Number(parts.find((part) => part.type === 'month')?.value);
-  return month >= 9 ? year : year - 1;
-}
-
-export interface Notions {
-  entries: Entry[];
-  later: Entry[];
-}
-
-/**
- * The programme of the class and of the later college classes for a subject, or null without a
- * referential: a subject other than mathematics and French.
- */
-export function notionsFor(level: SchoolLevel, subject: SubjectFamily | undefined, schoolYear: number): Notions | null {
-  if (subject !== 'mathematiques' && subject !== 'francais') return null;
-  const entries = programmeFor(level, subject, schoolYear)?.entries ?? [];
-  if (entries.length === 0) return null;
-  const later = SCHOOL_LEVELS.slice(SCHOOL_LEVELS.indexOf(level) + 1).flatMap((next) => programmeFor(next, subject, schoolYear)?.entries ?? []);
-  return { entries, later };
-}
 
 const listing = (entries: readonly Entry[]) => entries.map((entry) => `- ${entry.id} : ${entry.text}`).join('\n');
 
@@ -187,13 +163,9 @@ export function vote(drafts: readonly ExerciseSheet[]): VotedSheet | null {
   return { sheet, uncertain: (supported?.agreeing ?? 0) < 2 || mathCheck === 'failed', mathCheck };
 }
 
-const entryById = new Map(programmes.flatMap(({ entries }) => entries.map((entry) => [entry.id, entry] as const)));
-
-/** A notion of the referential, as its programme words it; undefined for an unknown id. */
-export const notionText = (id: string) => entryById.get(id)?.text;
 const texts = (ids: readonly string[]) =>
   ids
-    .flatMap((id) => entryById.get(id)?.text ?? [])
+    .flatMap((id) => notionText(id) ?? [])
     .map((text) => `- ${text}`)
     .join('\n');
 
@@ -215,9 +187,23 @@ export function exerciseBlock(sheet: ExerciseSheet, memory: string | null): stri
     .join('\n');
 }
 
-export const SHEET_PROMPT_VERSION = '2026-10-06.4';
+/**
+ * The version of the instructions a draw receives: each class's, with and without a programme,
+ * the fence around the student's message, and the schema it fills, whose descriptions are
+ * instructions too. Not the data: the student's message and files, the programme's notions (the
+ * referential pins its sources). Hashed as the writer's (`version.ts`): an edit of any of them
+ * makes a new version, which the exercise records and Mistral's cache is keyed by.
+ */
+export const SHEET_PROMPT_VERSION = promptVersion(
+  [
+    ...SCHOOL_LEVELS.flatMap((level) =>
+      [null, { entries: [], later: [] }].flatMap((notions) => sheetMessages(level, notions, '', null).map((message) => message.content)),
+    ),
+    JSON.stringify(z.toJSONSchema(ExerciseDraftSchema)),
+  ].join('\n'),
+);
 const DRAWS = 3;
-const SHEET_TIMEOUT_MS = 20_000;
+export const SHEET_TIMEOUT_MS = 20_000;
 // Small 4's model card: « 0.7 for reasoning_effort="high" » (huggingface.co/mistralai/Mistral-Small-4-119B-2603).
 const REASONING_TEMPERATURE = 0.7;
 

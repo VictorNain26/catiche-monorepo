@@ -5,79 +5,27 @@
 
 import { describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
-import pino from 'pino';
-import { createApp } from '../../app';
-import { createAuth } from '../../platform/auth/auth';
-import { createBackgroundTasks } from '../../platform/lifecycle/background';
-import { createLifecycle } from '../../platform/lifecycle/shutdown';
+import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
-import { httpClient, ORIGIN } from '../../testing/http';
-import { memoryMailer } from '../../testing/mailer';
-import { fakeMistral } from '../../testing/mistral';
-import { accountDeletion } from '../household';
-import type { TurnAnalysis } from './core/analysis';
 import { message, studySession } from './schema';
+import { analysis } from './testing';
 
 const { db } = await testDatabase();
-const mistral = fakeMistral();
-const tasks = createBackgroundTasks();
-const mail = memoryMailer();
-const silent = pino({ level: 'silent' });
-const auth = createAuth(
-  db,
-  { publicUrl: ORIGIN, authSecret: 'x'.repeat(32) },
-  { mailer: mail.mailer, logger: silent, background: createBackgroundTasks().run, deleteUser: accountDeletion(db) },
-);
-const api = httpClient(
-  createApp({
-    config: { production: false, webDistDir: undefined, apiRateLimit: 100, trustedProxyHops: 0 },
-    logger: silent,
-    db,
-    ...mistral.deps(db, silent),
-    auth,
-    lifecycle: createLifecycle(),
-    background: tasks.run,
-  }),
-  mail,
-  db,
-);
+const { api, mistral, tasks } = testApp(db);
 
 const guardian = await api.guardian('parent@example.com');
 const student = await api.student(guardian, { name: 'Léa', level: 'quatrieme' });
 const asStudent = await api.pair(guardian, student.id);
 
-const newSession = async () =>
-  ((await (await api.request('POST', '/api/sessions', { cookie: asStudent, body: { accompanied: false } })).json()) as { id: string }).id;
+const newSession = () => api.session(asStudent);
 
-/** The turn's reply as the student reads it, from the UI message stream; or its error. */
-async function say(sessionId: string, text: string, cookie = asStudent) {
-  const res = await api.request('POST', `/api/sessions/${sessionId}/messages`, { cookie, body: { text } });
-  const body = await res.text();
+/** A turn of the student, and what runs after its reply. */
+async function say(sessionId: string, text: string) {
+  await api.turn(asStudent, sessionId, { text });
   // The title and the summary run after the reply: done before the test queues the next replies.
   await tasks.settled();
-  const chunks = body
-    .split('\n')
-    .filter((line) => line.startsWith('data: {'))
-    .map((line) => JSON.parse(line.slice(6)) as { type: string; delta?: string; errorText?: string });
-  return {
-    status: res.status,
-    reply: chunks.flatMap((chunk) => (chunk.type === 'text-delta' && chunk.delta ? [chunk.delta] : [])).join(''),
-    error: chunks.find((chunk) => chunk.type === 'error')?.errorText,
-    body,
-  };
 }
 
-const analysis = (overrides: Partial<TurnAnalysis> = {}) => ({
-  json: {
-    subject: 'mathematiques',
-    bringsExercise: false,
-    proposesAnswer: false,
-    asksSolution: false,
-    asksExplanation: false,
-    saysStuck: false,
-    ...overrides,
-  },
-});
 describe('after the reply', () => {
   const sessionRow = async (sessionId: string) =>
     (
@@ -117,13 +65,10 @@ describe('after the reply', () => {
     const sessionId = await newSession();
     const before = chatCalls();
     mistral.chat.push(analysis(), { text: 'Que cherches-tu ?' }, 'hang', analysis(), { text: 'Me voilà.' });
-    const first = await api.request('POST', `/api/sessions/${sessionId}/messages`, { cookie: asStudent, body: { text: 'Bonjour' } });
-    await first.text();
+    await api.turn(asStudent, sessionId, { text: 'Bonjour' });
     // The title's call has reached Mistral, where it hangs: the next turn's calls take the next replies.
     for (let tries = 0; chatCalls() < before + 3 && tries < 500; tries++) await Bun.sleep(10);
-    const next = await api.request('POST', `/api/sessions/${sessionId}/messages`, { cookie: asStudent, body: { text: 'Encore' } });
-    expect(next.status).toBe(200);
-    expect(await next.text()).toContain('Me voilà.');
+    expect(await api.turn(asStudent, sessionId, { text: 'Encore' })).toMatchObject({ status: 200, reply: 'Me voilà.' });
     await tasks.settled();
   });
 

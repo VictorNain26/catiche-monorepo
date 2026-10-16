@@ -5,12 +5,9 @@
  * list.
  */
 
+import { notionText } from '../../../referential';
 import type { Diagnosis } from './diagnosis';
 import { LADDER } from './ladder';
-import { notionText, schoolYearOf } from './sheet';
-
-/** The first of September that opened the school year, at midnight in Paris (summer time, UTC+2). */
-export const schoolYearStart = (now: Date) => new Date(Date.UTC(schoolYearOf(now), 7, 31, 22));
 
 export interface PastExercise {
   /** Its order among all exercises: positions only grow. */
