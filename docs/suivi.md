@@ -80,8 +80,9 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
 - Clever Cloud à éprouver : un tour long à travers le proxy (délai documenté de 180 s), le délai
   de grâce réel au SIGTERM contre `SHUTDOWN_DEADLINE_MS`, la sonde pour `DRAIN_MS`, le PITR et son
   prix, Postgres 18.4 chez eux contre 18.6 en dev et en CI.
-- Le middleware `clientAddress` (`platform/http/client-address.ts`) n'est exercé par aucun test,
-  faute d'un vrai `Bun.serve` : seul `addressOf`, le calcul de l'adresse, est testé.
+- L'adresse de la connexion, que `clientAddress` (`platform/http/client-address.ts`) lit par
+  `getConnInfo`, n'est exercée par aucun test, faute d'un vrai `Bun.serve` : `addressOf` et le
+  middleware sous `app.request` (`rate-limit.test.ts`) le sont.
 - Le préfixe `__Host-` des cookies, quand better-auth le livre
   ([#10806](https://github.com/better-auth/better-auth/issues/10806)).
 
