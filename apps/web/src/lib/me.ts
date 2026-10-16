@@ -16,7 +16,7 @@ export const meQuery = queryOptions({
 });
 
 /** The devices paired to the signed-in account, the newest first. */
-export const devicesQuery = queryOptions({
+export const ownDevicesQuery = queryOptions({
   queryKey: ['me', 'devices'],
   queryFn: () => parseResponse(api.me.devices.$get()),
 });

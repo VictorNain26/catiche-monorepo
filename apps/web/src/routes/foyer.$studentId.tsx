@@ -4,18 +4,27 @@ import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tansta
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import type { z } from '../lib/zod';
 import { BackLink, Page } from '../components/page';
 import { QrCode } from '../components/qr-code';
 import { WeekSummary } from '../components/week-summary';
-import { api, isProblem, parseResponse } from '../lib/api';
+import { isProblem } from '../lib/api';
 import { authClient, authData, deviceSessionsQuery } from '../lib/auth';
 import { deviceName, formatDay, formatHour } from '../lib/device';
 import { formatCode, pairingLink } from '../lib/pairing';
 import { summaryQuery } from '../lib/summary';
-import { LEVEL_LABELS, devicesQuery, householdMessage, memoryStatus, studentSchema, studentsQuery, type Student } from '../lib/household';
-
-const student = api.household.students[':id'];
+import {
+  LEVEL_LABELS,
+  deleteStudent,
+  householdMessage,
+  memoryStatus,
+  pairingCode,
+  revokeDevice,
+  studentDevicesQuery,
+  studentSchema,
+  studentsQuery,
+  updateStudent,
+  type Student,
+} from '../lib/household';
 
 /**
  * One child of the household. Until a device holds their space, the page opens on the next step:
@@ -28,7 +37,7 @@ export const Route = createFileRoute('/foyer/$studentId')({
     void context.queryClient.query(summaryQuery(params.studentId)).catch(() => undefined);
     const students = await context.queryClient.query(studentsQuery);
     if (!students.some(({ id }) => id === params.studentId)) throw redirect({ to: '/foyer' });
-    await context.queryClient.query(devicesQuery(params.studentId));
+    await context.queryClient.query(studentDevicesQuery(params.studentId));
   },
   component: StudentPage,
 });
@@ -74,7 +83,7 @@ function usePairing(studentId: string, name: string) {
   // The devices paired when the code was asked for: one more, and the code is spent.
   const [before, setBefore] = useState<ReadonlySet<string> | null>(null);
   const [expired, setExpired] = useState<string | null>(null);
-  const pairing = useMutation({ mutationFn: () => parseResponse(student['pairing-code'].$post({ param: { id: studentId } })) });
+  const pairing = useMutation({ mutationFn: () => pairingCode(studentId) });
   // Nothing else renders the page when a code expires.
   useEffect(() => {
     if (!pairing.data) return;
@@ -93,17 +102,17 @@ function usePairing(studentId: string, name: string) {
   const pending = (list: readonly { id: string }[]) => pairing.data !== undefined && pairing.data.code !== expired && !spent(list);
   // While a code waits on the child's device, the list shows it the moment it is redeemed.
   const { data: devices } = useSuspenseQuery({
-    ...devicesQuery(studentId),
+    ...studentDevicesQuery(studentId),
     refetchInterval: (query) => (pending(query.state.data ?? []) ? 5000 : false),
   });
   const revoke = useMutation({
-    mutationFn: (deviceId: string) => parseResponse(student.devices[':deviceId'].$delete({ param: { id: studentId, deviceId } })),
+    mutationFn: (deviceId: string) => revokeDevice(studentId, deviceId),
     onSuccess: (_, deviceId) => {
       if (before !== null && !before.has(deviceId)) {
         setBefore(null);
         pairing.reset();
       }
-      return queryClient.invalidateQueries({ queryKey: devicesQuery(studentId).queryKey });
+      return queryClient.invalidateQueries({ queryKey: studentDevicesQuery(studentId).queryKey });
     },
   });
 
@@ -166,9 +175,7 @@ function OpenHere({ child }: { child: Student }) {
       const own = held.find(({ user }) => user.id === child.id);
       await (own
         ? authData(authClient.multiSession.setActive({ sessionToken: own.session.token }))
-        : authData(
-            authClient.devicePairing.redeem({ code: (await parseResponse(student['pairing-code'].$post({ param: { id: child.id } }))).code }),
-          ));
+        : authData(authClient.devicePairing.redeem({ code: (await pairingCode(child.id)).code })));
       // Loaded afresh: nothing of the guardian's stays in memory.
       await navigate({ to: '/', reloadDocument: true });
     },
@@ -274,7 +281,7 @@ function Memory({ child }: { child: Student }) {
   const queryClient = useQueryClient();
   const [withdrawing, setWithdrawing] = useState(false);
   const propose = useMutation({
-    mutationFn: (memoryProposed: boolean) => parseResponse(student.$patch({ param: { id: child.id }, json: { memoryProposed } })),
+    mutationFn: (memoryProposed: boolean) => updateStudent(child.id, { memoryProposed }),
     onSuccess: () => {
       setWithdrawing(false);
       return queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey });
@@ -336,7 +343,7 @@ function EditStudent({ child }: { child: Student }) {
   const queryClient = useQueryClient();
   const form = useForm({ resolver: zodResolver(studentSchema), defaultValues: { name: child.name, level: child.level } });
   const update = useMutation({
-    mutationFn: (json: z.output<typeof studentSchema>) => parseResponse(student.$patch({ param: { id: child.id }, json })),
+    mutationFn: (json: Parameters<typeof updateStudent>[1]) => updateStudent(child.id, json),
     onSuccess: () => {
       toast('Enregistré.');
       return queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey });
@@ -371,7 +378,7 @@ function DeleteStudent({ child }: { child: Student }) {
   const queryClient = useQueryClient();
   const [confirming, setConfirming] = useState(false);
   const remove = useMutation({
-    mutationFn: () => parseResponse(student.$delete({ param: { id: child.id } })),
+    mutationFn: () => deleteStudent(child.id),
     onSuccess: async () => {
       await navigate({ to: '/foyer' });
       await queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey });

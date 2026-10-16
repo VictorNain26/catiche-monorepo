@@ -5,10 +5,9 @@ import { MemoryAnswer } from '../components/memory-answer';
 import { Page, ProfileLink } from '../components/page';
 import { TomHead } from '../components/tom';
 import { WeekSummary } from '../components/week-summary';
-import { api, parseResponse } from '../lib/api';
-import { sessionsQuery } from '../lib/chat';
+import { sessionsQuery, startSession } from '../lib/chat';
 import { deviceName, formatDay } from '../lib/device';
-import { devicesQuery, meQuery } from '../lib/me';
+import { meQuery, ownDevicesQuery } from '../lib/me';
 import { memoryQuery, useMemoryAnswer, type MemoryChoice } from '../lib/memory';
 import { ownSummaryQuery } from '../lib/summary';
 
@@ -22,7 +21,7 @@ export const Route = createFileRoute('/')({
     if (!me) throw redirect({ to: '/connexion' });
     if (me.role === 'guardian') throw redirect({ to: '/foyer' });
   },
-  loader: ({ context }) => Promise.all([context.queryClient.query(sessionsQuery), context.queryClient.query(devicesQuery)]),
+  loader: ({ context }) => Promise.all([context.queryClient.query(sessionsQuery), context.queryClient.query(ownDevicesQuery)]),
   component: StudentHome,
 });
 
@@ -65,7 +64,7 @@ function Sessions() {
   const { data: me } = useSuspenseQuery(meQuery);
   const { data: sessions } = useSuspenseQuery(sessionsQuery);
   const start = useMutation({
-    mutationFn: (accompanied: boolean) => parseResponse(api.sessions.$post({ json: { accompanied } })),
+    mutationFn: startSession,
     onSuccess: ({ id }) => navigate({ to: '/seance/$sessionId', params: { sessionId: id } }),
   });
 
@@ -129,7 +128,7 @@ function Sessions() {
 }
 
 function Devices() {
-  const { data: devices } = useSuspenseQuery(devicesQuery);
+  const { data: devices } = useSuspenseQuery(ownDevicesQuery);
 
   return (
     <Fold title="Tes appareils reliés">

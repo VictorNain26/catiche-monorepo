@@ -4,9 +4,8 @@ import { createFileRoute, redirect } from '@tanstack/react-router';
 import { useState } from 'react';
 import { MemoryAnswer } from '../components/memory-answer';
 import { BackLink, Page, ProfileLink } from '../components/page';
-import { api, parseResponse } from '../lib/api';
 import { meQuery } from '../lib/me';
-import { memoryMessage, memoryQuery, notionSummary, useMemoryAnswer } from '../lib/memory';
+import { eraseMemory, forgetNotion, memoryMessage, memoryQuery, notionSummary, useMemoryAnswer } from '../lib/memory';
 
 /** What Tom keeps of the student, notion by notion: theirs to see, correct and erase. */
 export const Route = createFileRoute('/memoire')({
@@ -23,11 +22,8 @@ function Memory() {
   const { data: memory } = useSuspenseQuery(memoryQuery);
   const [confirming, setConfirming] = useState<'erase' | 'stop' | null>(null);
   const refresh = () => queryClient.invalidateQueries({ queryKey: memoryQuery.queryKey });
-  const understood = useMutation({
-    mutationFn: (notionId: string) => parseResponse(api.memory.notions[':notionId'].$delete({ param: { notionId } })),
-    onSuccess: refresh,
-  });
-  const erase = useMutation({ mutationFn: () => parseResponse(api.memory.$delete()), onSuccess: refresh });
+  const understood = useMutation({ mutationFn: forgetNotion, onSuccess: refresh });
+  const erase = useMutation({ mutationFn: eraseMemory, onSuccess: refresh });
   const answer = useMemoryAnswer();
   const failure = understood.error ?? erase.error ?? answer.error;
 
