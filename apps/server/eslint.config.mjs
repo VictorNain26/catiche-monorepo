@@ -28,6 +28,8 @@ const files = [
   { pattern: 'src/modules/*/index.ts', category: 'module-index' },
   { pattern: 'src/modules/*/routes.ts', category: 'routes' },
   { pattern: 'src/modules/*/service.ts', category: 'service' },
+  // The tutor's turn, which the service opens and runs: it reaches what the service reaches.
+  { pattern: 'src/modules/*/turn-pipeline.ts', category: 'pipeline' },
   { pattern: 'src/modules/*/repository.ts', category: 'repository' },
   { pattern: 'src/modules/*/schema.ts', category: 'schema' },
   // A module's core/: its pure decisions and the model steps they call, which the service
@@ -88,15 +90,21 @@ export default [
             // The harness (src/evaluate.ts) wires the app as main.ts does, and plays the evaluation set.
             allow(file('root'), file(['root', 'config']), element(['platform', 'domain', 'eval']), inModule(['module-index'])),
             // Another module is reached by its index.ts only.
-            allow(inModule(['module-index']), sameModule(['routes', 'service', 'repository']), inModule(['module-index']), element('platform')),
+            allow(
+              inModule(['module-index']),
+              sameModule(['routes', 'service', 'pipeline', 'repository']),
+              inModule(['module-index']),
+              element('platform'),
+            ),
             allow(inModule(['routes']), sameModule(['service', 'core']), element(['platform', 'domain'])),
             // The referential is the programmes' data: the service checks a notion it is given against it.
             allow(
               inModule(['service']),
-              sameModule(['repository', 'core']),
+              sameModule(['pipeline', 'repository', 'core']),
               inModule(['module-index']),
               element(['platform', 'domain', 'referential']),
             ),
+            allow(inModule(['pipeline']), sameModule(['repository', 'core']), inModule(['module-index']), element(['platform', 'domain'])),
             allow(inModule(['core']), sameModule(['core']), element(['platform', 'domain', 'referential'])),
             // The tables store the shapes core/ decides.
             allow(inModule(['repository']), sameModule(['schema', 'core']), element(['platform', 'domain'])),
