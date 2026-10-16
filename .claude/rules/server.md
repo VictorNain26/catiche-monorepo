@@ -22,8 +22,7 @@ Tuteur : `docs/tuteur.md`. Stack locale : skill `dev-bootstrap`. Appel IA 
   `new Problem(code, detail?)` (`platform/http/problem.ts`, RFC 9457), et un message interne ne
   sort jamais.
 - Jamais `db` hors d'un repository ; jamais deux tables touchées hors d'un `db.transaction`. La
-  plateforme, sans repository, lit et écrit ses propres tables là où elle s'en sert (invitation,
-  sonde de santé, coût d'un appel d'IA).
+  plateforme lit et écrit ses propres tables dans son propre code, jamais celles d'un module.
 - Jamais une route `/api` montée après `webClient` : la page répondrait à sa place.
 - Jamais de contenu d'élève dans un log ; le logger est pino, contexte en premier argument
   (`logger.error({ err }, 'message')`).

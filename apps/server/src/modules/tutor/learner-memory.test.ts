@@ -10,6 +10,7 @@ import { programmeFor } from '../../referential';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { birthMonthAged } from '../../testing/http';
+import type { MemoryAnswer } from '../../domain/memory-consent';
 import type { Diagnosis } from './core/diagnosis';
 import { createTutorRepository } from './repository';
 import { exercise, turnRecord } from './schema';
@@ -68,7 +69,7 @@ const memoryOf = async (cookie: string) =>
   };
 const propose = (studentId: string, memoryProposed: boolean, cookie = guardian) =>
   api.request('PATCH', `/api/household/students/${studentId}`, { cookie, body: { memoryProposed } });
-const answer = (cookie: string, value: 'accepted' | 'declined') => api.request('POST', '/api/memory/answer', { cookie, body: { answer: value } });
+const answer = (cookie: string, value: MemoryAnswer) => api.request('POST', '/api/memory/answer', { cookie, body: { answer: value } });
 
 // Done before any consent: never counted.
 await pastExercise(asLea, lea.id, 'careless');
