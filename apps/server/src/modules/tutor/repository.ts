@@ -49,14 +49,14 @@ interface Exchange {
 
 async function writeExchange(executor: Executor, sessionId: string, { studentText, photoText, tutorText, replay }: Exchange) {
   await executor.insert(message).values({ sessionId, role: 'student', text: studentText, photoText });
-  const [tutor] = await executor
-    .insert(message)
-    .values({ sessionId, role: 'tutor', text: tutorText, modelMessages: replay })
-    .returning({ id: message.id });
-  return tutor?.id;
+  await executor.insert(message).values({ sessionId, role: 'tutor', text: tutorText, modelMessages: replay });
 }
 
 const ownSession = (studentId: string, sessionId: string) => and(eq(studySession.id, sessionId), eq(studySession.studentId, studentId));
+
+/** The session's messages after the position `after`, all of them when it is null: those a summary has not covered. */
+const afterSummary = (sessionId: string, after: number | null) =>
+  and(eq(message.sessionId, sessionId), after === null ? undefined : gt(message.position, after));
 
 /**
  * The last exercise position handed out, committed or not: a reset leaves out every exercise begun
@@ -202,9 +202,10 @@ export function createTutorRepository(db: Db) {
           entries: sql<string[]>`coalesce(${entries}, '[]'::jsonb)`,
           hintLevel: exercise.hintLevel,
           solvedAt: exercise.solvedAt,
+          // As text: an array of the enum is parsed only by a connection that saw the type when it opened.
           errorTypes: sql<
             string[]
-          >`coalesce((select array_agg(${turnRecord.errorType}) from ${turnRecord} where ${turnRecord.exerciseId} = ${exercise.id} and ${turnRecord.errorType} is not null), '{}')`,
+          >`coalesce((select array_agg(${turnRecord.errorType}::text) from ${turnRecord} where ${turnRecord.exerciseId} = ${exercise.id} and ${turnRecord.errorType} is not null), '{}')`,
         })
         .from(exercise)
         .innerJoin(studySession, eq(studySession.id, exercise.sessionId))
@@ -347,7 +348,7 @@ export function createTutorRepository(db: Db) {
       const rows = await db
         .select({ role: message.role, text: message.text, photoText: message.photoText, modelMessages: message.modelMessages })
         .from(message)
-        .where(and(eq(message.sessionId, sessionId), after === null ? undefined : gt(message.position, after)))
+        .where(afterSummary(sessionId, after))
         .orderBy(desc(message.position))
         .limit(limit);
       return rows.reverse();
@@ -355,10 +356,7 @@ export function createTutorRepository(db: Db) {
 
     /** How many messages of the session follow the summary's: a summary is due past a backlog. */
     async countAfter(sessionId: string, after: number | null) {
-      const [row] = await db
-        .select({ count: count() })
-        .from(message)
-        .where(and(eq(message.sessionId, sessionId), after === null ? undefined : gt(message.position, after)));
+      const [row] = await db.select({ count: count() }).from(message).where(afterSummary(sessionId, after));
       return row?.count ?? 0;
     },
 
@@ -367,7 +365,7 @@ export function createTutorRepository(db: Db) {
       return db
         .select({ position: message.position, role: message.role, text: message.text, photoText: message.photoText })
         .from(message)
-        .where(and(eq(message.sessionId, sessionId), after === null ? undefined : gt(message.position, after)))
+        .where(afterSummary(sessionId, after))
         .orderBy(asc(message.position));
     },
 

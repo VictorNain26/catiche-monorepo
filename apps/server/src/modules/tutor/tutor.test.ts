@@ -10,7 +10,7 @@ import { testDatabase } from '../../testing/database';
 import { birthMonthAged } from '../../testing/http';
 import type { ExerciseState } from './core/exercise-turn';
 import { createTutorRepository, type ExerciseProgress, type SavedTurn } from './repository';
-import { exercise, message, studySession } from './schema';
+import { exercise, message, studySession, turnRecord } from './schema';
 import { record, sheet as sheetOf, turn } from './testing';
 
 const { db } = await testDatabase();
@@ -189,6 +189,31 @@ describe('the exercise in progress', () => {
     for (const text of ['a', 'b', 'c', 'd', 'e'])
       await repository.saveTurn(sessionId, turn({ exerciseId, progress: progress({ hint: { level: 0, text } }) }));
     expect((await repository.currentExercise(studentA.id, sessionId))?.hints.map((hint) => hint.text)).toEqual(['b', 'c', 'd', 'e']);
+  });
+
+  it('refuses a value outside the closed lists of a record and a session', async () => {
+    const session = await start(asStudentA);
+    // Postgres' invalid_text_representation: the value is not one of the enum's.
+    const codeOf = (write: Promise<unknown>) =>
+      write.then(
+        () => 'written',
+        (error: unknown) => (error instanceof Error && error.cause instanceof Error && 'code' in error.cause ? error.cause.code : error),
+      );
+    const valid = { verdict: 'incorrect', errorType: 'careless', decidedBy: 'mathjs', reasoningEffort: 'high' } as const;
+    expect(await codeOf(db.insert(turnRecord).values({ ...record(valid), sessionId: session.id }))).toBe('written');
+    for (const column of ['verdict', 'errorType', 'decidedBy', 'reasoningEffort'] as const) {
+      const insert = db.insert(turnRecord).values({ ...record(valid), sessionId: session.id, [column]: sql`'not-in-the-list'` });
+      expect({ column, code: await codeOf(insert) }).toEqual({ column, code: '22P02' });
+    }
+    const cue = (value: string) =>
+      codeOf(
+        db
+          .update(studySession)
+          .set({ lastParentCue: sql`${value}` })
+          .where(eq(studySession.id, session.id)),
+      );
+    expect(await cue('block')).toBe('written');
+    expect(await cue('not-in-the-list')).toBe('22P02');
   });
 
   it('writes nothing of a turn that fails: no exercise, no message, no record', async () => {

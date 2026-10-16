@@ -9,6 +9,7 @@ import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import type { Logger } from 'pino';
 import { z } from 'zod';
+import { MEMORY_ANSWERS } from '../../domain/memory-consent';
 import type { Auth } from '../../platform/auth/auth';
 import { requireSession, type SessionEnv } from '../../platform/auth/session';
 import { Problem } from '../../platform/http/problem';
@@ -74,7 +75,7 @@ export function tutorRoutes({ auth, service, logger }: { auth: Auth; service: Tu
     });
 }
 
-const memoryAnswer = z.object({ answer: z.enum(['accepted', 'declined']) });
+const memoryAnswer = z.object({ answer: z.enum(MEMORY_ANSWERS) });
 
 /**
  * /api/memory: what Tom keeps of the signed-in student (`docs/etudes/2026-10-07/memoire-entre-seances.md`),
