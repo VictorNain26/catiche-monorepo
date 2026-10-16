@@ -14,7 +14,6 @@
     "typecheck": "bun --bun tsc --noEmit",
     "lint": "bun --bun eslint . --max-warnings 0",
     "test": "bun test",
-    "clean": "rm -rf dist",
     "db:generate": "bun --bun drizzle-kit generate --config=drizzle.config.ts",
     "db:migrate": "bun src/migrate.ts",
     "invite": "bun src/invite.ts",

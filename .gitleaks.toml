@@ -19,6 +19,4 @@ regexes = [
 paths = [
   '''\.env\.example$''',
   '''docker-compose.*\.yml$''',
-  '''CLAUDE\.md$''',
-  '''README\.md$''',
 ]

@@ -11,7 +11,7 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env.production", ".env.staging", "!.env.local", "!.env.*.local"],
+      "inputs": ["$TURBO_DEFAULT$", "!.env.local", "!.env.*.local"],
       "outputs": ["dist/**", "!dist/types/**"]
     },
     "dev": {
@@ -22,19 +22,12 @@
       "dependsOn": ["transit", "^build:types"],
       "outputs": []
     },
+    "//#lint:scripts": {
+      "outputs": []
+    },
     "typecheck": {
       "dependsOn": ["transit", "^build:types"],
       "outputs": []
-    },
-    "clean": {
-      "cache": false
-    },
-    "db:generate": {
-      "cache": false
-    },
-    "db:studio": {
-      "cache": false,
-      "persistent": true
     },
     "test:e2e": {
       "dependsOn": ["build", "^build"],
