@@ -15,9 +15,14 @@ import type { ExerciseSheet } from './sheet';
 const DIAGNOSIS_PROMPT_VERSION = '2026-10-05.2';
 export const DIAGNOSIS_TIMEOUT_MS = 8_000;
 
+export const VERDICTS = ['correct', 'right-step', 'incorrect', 'unclear'] as const;
+export const DIAGNOSIS_ERROR_TYPES = ['guess', 'misinterpret', 'careless', 'right-idea', 'imprecise', 'not-sure', 'n/a'] as const;
+/** mathjs settled the verdict, or the model alone. */
+export const DECIDED_BY = ['mathjs', 'model'] as const;
+
 const DiagnosisSchema = z.object({
   verdict: z
-    .enum(['correct', 'right-step', 'incorrect', 'unclear'])
+    .enum(VERDICTS)
     .describe(
       "correct : la réponse finale de l'élève est juste ; right-step : une étape juste, l'exercice n'est pas fini ; incorrect : fausse ; unclear : rien à juger ou impossible à juger.",
     ),
@@ -26,7 +31,7 @@ const DiagnosisSchema = z.object({
     .nullable()
     .describe("La première étape fausse de l'élève, citée ou décrite, sans la correction ; null si rien n'est faux."),
   errorType: z
-    .enum(['guess', 'misinterpret', 'careless', 'right-idea', 'imprecise', 'not-sure', 'n/a'])
+    .enum(DIAGNOSIS_ERROR_TYPES)
     .describe(
       "guess : il ne semble pas comprendre ou a deviné ; misinterpret : il a mal compris la question ; careless : une erreur d'inattention ; right-idea : la bonne idée, pas encore abouti ; imprecise : pas assez précis ; not-sure : impossible de le dire ; n/a : aucune erreur.",
     ),
@@ -39,8 +44,7 @@ const DiagnosisSchema = z.object({
 });
 
 export type Diagnosis = z.infer<typeof DiagnosisSchema> & {
-  /** mathjs settled the verdict, or the model alone. */
-  decidedBy: 'mathjs' | 'model';
+  decidedBy: (typeof DECIDED_BY)[number];
   /** Set when the diagnosis failed: the verdict is then unclear. */
   error?: string;
 };

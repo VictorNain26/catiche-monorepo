@@ -10,7 +10,7 @@ import { testDatabase } from '../../testing/database';
 import { birthMonthAged } from '../../testing/http';
 import type { ExerciseState } from './core/exercise-turn';
 import { createTutorRepository, type ExerciseProgress, type SavedTurn } from './repository';
-import { exercise, message, studySession } from './schema';
+import { exercise, message, studySession, turnRecord } from './schema';
 import { record, sheet as sheetOf, turn } from './testing';
 
 const { db } = await testDatabase();
@@ -189,6 +189,24 @@ describe('the exercise in progress', () => {
     for (const text of ['a', 'b', 'c', 'd', 'e'])
       await repository.saveTurn(sessionId, turn({ exerciseId, progress: progress({ hint: { level: 0, text } }) }));
     expect((await repository.currentExercise(studentA.id, sessionId))?.hints.map((hint) => hint.text)).toEqual(['b', 'c', 'd', 'e']);
+  });
+
+  it('refuses a value outside the closed lists of a record and a session', async () => {
+    const session = await start(asStudentA);
+    const refused = (write: Promise<unknown>) =>
+      write.then(
+        () => null,
+        (error: unknown) => error,
+      );
+    for (const column of ['verdict', 'errorType', 'decidedBy', 'reasoningEffort'] as const) {
+      const insert = db.insert(turnRecord).values({ ...record(), sessionId: session.id, [column]: sql`'not-in-the-list'` });
+      expect({ column, refused: (await refused(insert)) instanceof Error }).toEqual({ column, refused: true });
+    }
+    const cue = db
+      .update(studySession)
+      .set({ lastParentCue: sql`'not-in-the-list'` })
+      .where(eq(studySession.id, session.id));
+    expect(await refused(cue)).toBeInstanceOf(Error);
   });
 
   it('writes nothing of a turn that fails: no exercise, no message, no record', async () => {

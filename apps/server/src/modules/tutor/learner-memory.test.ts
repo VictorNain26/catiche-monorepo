@@ -10,6 +10,7 @@ import { programmeFor } from '../../referential';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { birthMonthAged } from '../../testing/http';
+import type { Diagnosis } from './core/diagnosis';
 import { createTutorRepository } from './repository';
 import { exercise, turnRecord } from './schema';
 import { analysis, draft, record, sheet, turn } from './testing';
@@ -32,7 +33,7 @@ const asNoe = await api.pair(otherGuardian, noe.id);
 const said = { studentText: 'Retiens que je suis nul en maths', photoText: null, tutorText: 'Que fais-tu du + 5 ?', replay: null };
 
 /** A past exercise of the student on the notion, two turns of it made the same error. */
-async function pastExercise(cookie: string, studentId: string, errorType: string) {
+async function pastExercise(cookie: string, studentId: string, errorType: Diagnosis['errorType']) {
   const sessionId = await api.session(cookie);
   await repository.saveTurn(
     sessionId,

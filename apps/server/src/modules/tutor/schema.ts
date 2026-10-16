@@ -10,11 +10,18 @@ import { DISTRESS_SOURCES } from '../../domain/distress';
 import { MATH_CHECKS } from '../../domain/exercise-math';
 import { SUBJECT_FAMILIES } from '../../domain/subjects';
 import { user } from '../../platform/auth/schema';
+import { DECIDED_BY, DIAGNOSIS_ERROR_TYPES, VERDICTS } from './core/diagnosis';
 import type { Hint } from './core/ladder';
-import type { CueKind } from './core/parent-cues';
+import { CUE_KINDS } from './core/parent-cues';
+import { REASONING_EFFORTS } from './core/reasoning';
 import type { ExerciseSheet } from './core/sheet';
 
 export const subjectFamily = pgEnum('subject_family', SUBJECT_FAMILIES);
+export const parentCueKind = pgEnum('parent_cue_kind', CUE_KINDS);
+export const diagnosisVerdict = pgEnum('diagnosis_verdict', VERDICTS);
+export const diagnosisErrorType = pgEnum('diagnosis_error_type', DIAGNOSIS_ERROR_TYPES);
+export const decidedBy = pgEnum('decided_by', DECIDED_BY);
+export const reasoningEffort = pgEnum('reasoning_effort', REASONING_EFFORTS);
 export const messageRole = pgEnum('message_role', ['student', 'tutor']);
 export const mathCheck = pgEnum('math_check', MATH_CHECKS);
 export const distressSource = pgEnum('distress_source', DISTRESS_SOURCES);
@@ -38,7 +45,7 @@ export const studySession = pgTable(
     /** The cues given to the parent in the session, which a cap bounds. */
     parentCues: integer('parent_cues').notNull().default(0),
     /** The kind of the last cue (core/parent-cues.ts), never given twice in a row. */
-    lastParentCue: text('last_parent_cue').$type<CueKind>(),
+    lastParentCue: parentCueKind('last_parent_cue'),
     /** Set by a distress: every later message gets the fixed reply. */
     closedAt: timestamp('closed_at', { withTimezone: true }),
     /** One turn at a time: set when a turn starts, cleared when it ends; a stale one is taken over. */
@@ -120,11 +127,11 @@ export const turnRecord = pgTable(
     exerciseId: uuid('exercise_id').references(() => exercise.id, { onDelete: 'set null' }),
     newExercise: boolean('new_exercise').notNull(),
     hintLevel: integer('hint_level'),
-    verdict: text('verdict'),
+    verdict: diagnosisVerdict('verdict'),
     /** The diagnosis' error type, which the learner memory counts. */
-    errorType: text('error_type'),
-    decidedBy: text('decided_by'),
-    reasoningEffort: text('reasoning_effort'),
+    errorType: diagnosisErrorType('error_type'),
+    decidedBy: decidedBy('decided_by'),
+    reasoningEffort: reasoningEffort('reasoning_effort'),
     model: text('model').notNull(),
     promptVersion: text('prompt_version').notNull(),
     /** What the check held back from the first text. */
