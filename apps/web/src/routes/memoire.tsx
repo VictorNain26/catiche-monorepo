@@ -61,7 +61,7 @@ function Memory() {
           {confirming ? (
             <>
               <Banner
-                tone="error"
+                tone="warning"
                 title={
                   confirming === 'erase'
                     ? 'Tom oubliera tout ce qu’il retient de toi. Tes séances restent.'

@@ -1,4 +1,4 @@
-import { Banner, Card } from '@repo/ui';
+import { Banner, List, ListItem, Section, Skeleton } from '@repo/ui';
 import { lastTime } from '../lib/memory';
 import { minutesText, questionFor, subjectLabel, type WeekSummary as Week } from '../lib/summary';
 
@@ -21,17 +21,20 @@ export function WeekSummary({
   const title = reader === 'guardian' ? 'Sa semaine' : 'Ta semaine';
 
   return (
-    <section aria-label={title} className="flex flex-col gap-3">
-      <h2 className="text-xl font-bold text-foreground">{title}</h2>
+    <Section title={title}>
       {week ? (
         <Week week={week} name={name} reader={reader} />
       ) : failed ? (
         <Banner tone="error" title="Le résumé de la semaine n’a pas pu se charger. Réessayez dans un instant." />
       ) : (
-        <p className="text-muted-foreground">Chargement…</p>
+        <>
+          <p className="sr-only">Chargement…</p>
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-2/3" />
+        </>
       )}
       {reader === 'student' && <p className="text-sm text-muted-foreground">Ton parent voit ce même résumé.</p>}
-    </section>
+    </Section>
   );
 }
 
@@ -61,14 +64,11 @@ function Week({ week, name, reader }: { week: Week; name: string; reader: 'guard
       {week.resisting.length === 0 ? (
         <p className="text-muted-foreground">Rien qui résiste ces sept derniers jours.</p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <List>
           {week.resisting.map((notion) => (
-            <Card render={<li />} key={notion.notionId} className="flex flex-col gap-1">
-              <span className="font-bold">{notion.label}</span>
-              <span className="text-sm text-muted-foreground">{lastTime(notion)}</span>
-            </Card>
+            <ListItem key={notion.notionId} title={notion.label} meta={lastTime(notion)} />
           ))}
-        </ul>
+        </List>
       )}
       {first && <p>{questionFor(reader, name, first.label)}</p>}
     </>

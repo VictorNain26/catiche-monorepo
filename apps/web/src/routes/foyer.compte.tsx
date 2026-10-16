@@ -1,4 +1,4 @@
-import { Banner, Button, Card } from '@repo/ui';
+import { Banner, Button, List, ListItem, Section } from '@repo/ui';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { BackLink, Page } from '../components/page';
@@ -35,21 +35,14 @@ function Passkeys() {
   });
 
   return (
-    <section aria-labelledby="passkeys" className="flex flex-col gap-3">
-      <h2 id="passkeys" className="text-xl font-bold text-foreground">
-        Vos clés d’accès
-      </h2>
-      <p className="text-muted-foreground">
-        Une clé d’accès vous fait entrer par le verrouillage de votre téléphone ou de votre ordinateur, sans code par e-mail.
-      </p>
+    <Section
+      title="Vos clés d’accès"
+      description="Une clé d’accès vous fait entrer par le verrouillage de votre téléphone ou de votre ordinateur, sans code par e-mail."
+    >
       {passkeys.length > 0 && (
-        <ul className="flex flex-col gap-2">
+        <List>
           {passkeys.map((passkey) => (
-            <Card render={<li />} key={passkey.id} className="flex items-center justify-between gap-3">
-              <span className="flex flex-col">
-                <span className="font-bold">{deviceName(passkey.name)}</span>
-                <span className="text-sm text-muted-foreground">Créée le {formatDay(passkey.createdAt)}</span>
-              </span>
+            <ListItem key={passkey.id} title={deviceName(passkey.name)} meta={`Créée le ${formatDay(passkey.createdAt)}`}>
               <Button
                 variant="outline"
                 disabled={remove.isPending}
@@ -59,12 +52,12 @@ function Passkeys() {
               >
                 Supprimer
               </Button>
-            </Card>
+            </ListItem>
           ))}
-        </ul>
+        </List>
       )}
       {remove.error && <Banner tone="error" title={remove.error.message} />}
       <PasskeyCreate label="Créer une clé d’accès sur cet appareil" onCreated={refresh} />
-    </section>
+    </Section>
   );
 }

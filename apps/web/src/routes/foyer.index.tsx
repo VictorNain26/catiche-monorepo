@@ -1,4 +1,4 @@
-import { Button, Card } from '@repo/ui';
+import { Button, Card, Section, Skeleton } from '@repo/ui';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, Navigate, createFileRoute, redirect } from '@tanstack/react-router';
 import { UserRoundIcon } from 'lucide-react';
@@ -33,10 +33,7 @@ function Household() {
         </HeaderLink>
       }
     >
-      <section aria-labelledby="children" className="flex flex-col gap-3">
-        <h2 id="children" className="text-xl font-bold text-foreground">
-          Vos enfants
-        </h2>
+      <Section title="Vos enfants">
         <ul className="flex flex-col gap-2">
           {students.map((student) => (
             <li key={student.id}>
@@ -44,7 +41,7 @@ function Household() {
             </li>
           ))}
         </ul>
-      </section>
+      </Section>
       <Button render={<Link to="/foyer/ajouter" />} variant="outline">
         Ajouter un enfant
       </Button>
@@ -61,15 +58,20 @@ function ChildCard({ child }: { child: Student }) {
         <span className="font-bold">{child.name}</span>
         <span className="text-sm text-muted-foreground">{LEVEL_LABELS[child.level]}</span>
       </span>
-      <span className="text-sm text-muted-foreground">
-        {week.data
-          ? week.data.sessions === 0
-            ? 'Pas de séance ces sept derniers jours'
-            : `Ces sept derniers jours : ${minutesText(week.data.minutes)}`
-          : week.isError
-            ? 'Sa semaine n’a pas pu se charger'
-            : 'Chargement…'}
-      </span>
+      {week.isPending ? (
+        <>
+          <span className="sr-only">Chargement…</span>
+          <Skeleton className="h-5 w-3/4" />
+        </>
+      ) : (
+        <span className="text-sm text-muted-foreground">
+          {week.data
+            ? week.data.sessions === 0
+              ? 'Pas de séance ces sept derniers jours'
+              : `Ces sept derniers jours : ${minutesText(week.data.minutes)}`
+            : 'Sa semaine n’a pas pu se charger'}
+        </span>
+      )}
     </Card>
   );
 }

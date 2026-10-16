@@ -104,7 +104,7 @@ test('a guardian adds a child, changes their class, then deletes their account',
 
   await page.getByText('Supprimer son compte', { exact: true }).click();
   await page.getByRole('button', { name: 'Supprimer le compte de Léa' }).click();
-  await expect(page.getByRole('alert')).toContainText('C’est définitif');
+  await expect(page.getByRole('region', { name: /C’est définitif/ })).toBeVisible();
   await page.getByRole('button', { name: 'Supprimer définitivement' }).click();
   // No child left: the household opens on the adding of one.
   await expect(page).toHaveURL(/\/foyer\/ajouter$/);

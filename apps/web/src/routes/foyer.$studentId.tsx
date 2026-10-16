@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Banner, Button, Card, Field, Fold, SelectField, toast } from '@repo/ui';
+import { Banner, Button, Field, Fold, List, ListItem, Section, SelectField, toast } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
@@ -140,10 +140,7 @@ type Pairing = ReturnType<typeof usePairing>;
 
 function NextStep({ child, pairing }: { child: Student; pairing: Pairing }) {
   return (
-    <section aria-labelledby="next-step" className="flex flex-col gap-3">
-      <h2 id="next-step" className="text-xl font-bold text-foreground">
-        Prochaine étape
-      </h2>
+    <Section title="Prochaine étape">
       {child.accompanied ? (
         <OpenHere child={child} />
       ) : (
@@ -156,7 +153,7 @@ function NextStep({ child, pairing }: { child: Student; pairing: Pairing }) {
           )}
         </>
       )}
-    </section>
+    </Section>
   );
 }
 
@@ -231,13 +228,9 @@ function Devices({ child, pairing }: { child: Student; pairing: Pairing }) {
       {devices.length === 0 ? (
         <p className="text-muted-foreground">Aucun appareil relié.</p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <List>
           {devices.map((device) => (
-            <Card render={<li />} key={device.id} className="flex items-center justify-between gap-3">
-              <span className="flex flex-col">
-                <span className="font-bold">{deviceName(device.userAgent)}</span>
-                <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
-              </span>
+            <ListItem key={device.id} title={deviceName(device.userAgent)} meta={`Relié le ${formatDay(device.pairedAt)}`}>
               <Button
                 variant="outline"
                 disabled={revoke.isPending}
@@ -247,9 +240,9 @@ function Devices({ child, pairing }: { child: Student; pairing: Pairing }) {
               >
                 Déconnecter
               </Button>
-            </Card>
+            </ListItem>
           ))}
-        </ul>
+        </List>
       )}
       {revoke.error && <Banner tone="error" title={householdMessage(revoke.error)} />}
       {child.accompanied ? (
@@ -303,7 +296,7 @@ function Memory({ child }: { child: Student }) {
         (withdrawing ? (
           <>
             <Banner
-              tone="error"
+              tone="warning"
               title={`Tom oubliera ce qu’il retient de ${child.name}, et lui reposera la question si vous la proposez de nouveau.`}
             />
             <Button
@@ -387,7 +380,7 @@ function DeleteStudent({ child }: { child: Student }) {
 
   return confirming ? (
     <>
-      <Banner tone="error" title="Ses séances seront effacées et ses appareils déconnectés. C’est définitif." />
+      <Banner tone="warning" title="Ses séances seront effacées et ses appareils déconnectés. C’est définitif." />
       {remove.error && <Banner tone="error" title={householdMessage(remove.error)} />}
       <Button
         disabled={remove.isPending}
