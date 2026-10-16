@@ -18,6 +18,7 @@ const TAG_NAMES = [
   'later_programme',
   'contrat',
   'fiche',
+  'learner_memory',
   'role',
   'student',
   'tone',

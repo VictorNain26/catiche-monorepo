@@ -56,9 +56,9 @@ describe('texts', () => {
 });
 
 describe('studentTurn', () => {
-  it('keeps the recorded categories and the self-harm score, the tutor message first for context', async () => {
-    mistral.moderations.push({ flagged: ['selfharm', 'health'], scores: { selfharm: 0.92 } });
-    expect(await moderation.studentTurn('Où bloques-tu ?', 'je veux disparaître')).toEqual({ flagged: ['selfharm'], selfharmScore: 0.92 });
+  it('keeps the recorded categories, and no score, the tutor message first for context', async () => {
+    mistral.moderations.push({ flagged: ['selfharm', 'health'] });
+    expect(await moderation.studentTurn('Où bloques-tu ?', 'je veux disparaître')).toEqual({ flagged: ['selfharm'] });
     expect(mistral.received[0]?.body['input']).toMatchObject([
       { role: 'assistant', content: 'Où bloques-tu ?' },
       { role: 'user', content: 'je veux disparaître' },
@@ -66,13 +66,8 @@ describe('studentTurn', () => {
   });
 
   it('asks nothing for a turn without text, a photo alone', async () => {
-    expect(await moderation.studentTurn('Envoie ton exercice', '  ')).toEqual({ flagged: [], selfharmScore: null });
+    expect(await moderation.studentTurn('Envoie ton exercice', '  ')).toEqual({ flagged: [] });
     expect(mistral.received).toEqual([]);
-  });
-
-  it('reads a missing score as unknown, not as low', async () => {
-    mistral.moderations.push({ scores: {} });
-    expect(await moderation.studentTurn(null, 'bonjour')).toEqual({ flagged: [], selfharmScore: null });
   });
 });
 

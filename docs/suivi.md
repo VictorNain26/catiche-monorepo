@@ -68,8 +68,7 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 - **Dependabot** : classer `inaccurate` les alertes rattachées à `apps/ai-service/uv.lock` et
   `apps/curriculum/uv.lock`, supprimés en `8f5011f`, et signaler le bug au support GitHub.
 - **Vérifications** : Tom dans le hero sur un iPhone (Safari, sans fond noir) ; un e-mail à
-  contact@tomia.fr depuis une autre adresse que Gmail ; le lundi 2026-10-12, que Renovate a
-  ouvert les mises à jour en attente (#310) ; les plugins Claude Code à jour
+  contact@tomia.fr depuis une autre adresse que Gmail ; les plugins Claude Code à jour
   (`claude plugin marketplace update`, puis `claude plugin update <nom>`).
 
 ## Reporté
@@ -85,7 +84,9 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
 - Clever Cloud à éprouver : un tour long à travers le proxy (délai documenté de 180 s), le délai
   de grâce réel au SIGTERM contre `SHUTDOWN_DEADLINE_MS`, la sonde pour `DRAIN_MS`, le PITR et son
   prix, Postgres 18.4 chez eux contre 18.6 en dev et en CI.
-- `platform/http/client-address.ts` n'est exercé par aucun test, faute d'un vrai `Bun.serve`.
+- L'adresse de la connexion, que `clientAddress` (`platform/http/client-address.ts`) lit par
+  `getConnInfo`, n'est exercée par aucun test, faute d'un vrai `Bun.serve` : `addressOf` l'est
+  (`client-address.test.ts`), le middleware aussi, sous `app.request` (`rate-limit.test.ts`).
 - Le préfixe `__Host-` des cookies, quand better-auth le livre
   ([#10806](https://github.com/better-auth/better-auth/issues/10806)).
 
@@ -105,7 +106,8 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
 - Le site, à l'étape 3 : sa composition sur la charte (il porte déjà les tokens) ; ses annotations
   d'école (surligneur, gribouillis) à repenser ; la note « c'est toi qui l'as trouvé ! », qui
   célèbre et finit par un point d'exclamation, contre la charte ; l'image Open Graph composée ;
-  `hero.spec.ts` ; une application de preview par PR.
+  `apps/landing/tests/hero.spec.ts`, qui fige la composition actuelle du hero, à réécrire avec
+  elle ; une application de preview par PR.
 - Trois appels à `listDeviceSessions` (`foyer.$studentId.tsx`, `sign-out.tsx`, `bienvenue.tsx`)
   gèrent chacun l'erreur à leur façon : passer par `deviceSessionsQuery` (`lib/auth.ts`).
 - Aux étapes 3 et 4, avec les écrans : les cartes en `li` des listes deviennent `List`.

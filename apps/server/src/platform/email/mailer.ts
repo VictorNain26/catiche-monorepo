@@ -1,7 +1,7 @@
 /**
  * Sending an email: one function, passed to whoever sends. Scaleway Transactional Email in
  * production (docs/etudes/2026-10-07/email-transactionnel.md), through Scaleway's own SDK; in
- * development, the email is logged so that its link can be followed; the tests pass their own.
+ * development, the email is logged so that its sign-in code can be read; the tests pass their own.
  */
 
 import { createClient } from '@scaleway/sdk-client';
@@ -55,7 +55,7 @@ export function scalewayMailer({ accessKey, secretKey, projectId, from, apiURL }
   };
 }
 
-/** Development only: the email in the log, its link to follow by hand. */
+/** Development only: the email in the log, its code to type by hand. */
 export function logMailer(logger: Logger): Mailer {
   return (email) => {
     logger.info({ email }, 'Email not sent (development)');

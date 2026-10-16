@@ -11,9 +11,8 @@
 
 import type { SchoolLevel } from '../../../domain/levels';
 import type { SubjectFamily } from '../../../domain/subjects';
+import type { ReasoningEffort } from '../../../platform/ai/client';
 import type { TurnAnalysis } from './analysis';
-
-type ReasoningEffort = 'none' | 'high';
 
 /** School levels where abstract reasoning becomes worth the latency cost. */
 const REASONING_LEVELS: ReadonlySet<SchoolLevel> = new Set<SchoolLevel>(['quatrieme', 'troisieme']);

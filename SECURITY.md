@@ -24,5 +24,6 @@ We will acknowledge within 48 hours and provide a fix timeline within 7 days.
 - Non-root server image (the base image's `bun` user)
 - Security headers on the landing page (`apps/landing/Caddyfile`: HSTS and a redirect to HTTPS,
   nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy, `frame-ancestors`) and the server. The
-  landing has a hash-based CSP (`security.csp` in `apps/landing/astro.config.mjs`); the web app
-  (`apps/web`, served by the server) gets its own in lot 3
+  landing has a hash-based CSP (`security.csp` in `apps/landing/astro.config.mjs`); the server's
+  responses, the web app's pages included, carry theirs
+  (`apps/server/src/platform/http/security-headers.ts`)

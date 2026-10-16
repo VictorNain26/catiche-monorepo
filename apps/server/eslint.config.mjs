@@ -17,11 +17,20 @@ const elements = [
 const files = [
   { pattern: '**/*.test.ts', category: 'test' },
   { pattern: ['src/main.ts', 'src/migrate.ts', 'src/invite.ts', 'src/evaluate.ts', 'src/app.ts', 'src/contract.ts'], category: 'root' },
+  // The harness plays through the tests' client and inbox, nothing else of src/testing: its calls are the web's.
+  { pattern: 'src/evaluate.ts', category: 'harness' },
+  { pattern: ['src/testing/http.ts', 'src/testing/mailer.ts'], category: 'client' },
+  // The app a test wires, as main.ts does.
+  { pattern: 'src/app.ts', category: 'app' },
+  // A module's fixtures, for its tests only.
+  { pattern: 'src/modules/*/testing.ts', category: 'test' },
   { pattern: 'src/config.ts', category: 'config' },
   // In a module, routes → service → repository, and only the repository and the schema touch the database.
   { pattern: 'src/modules/*/index.ts', category: 'module-index' },
   { pattern: 'src/modules/*/routes.ts', category: 'routes' },
   { pattern: 'src/modules/*/service.ts', category: 'service' },
+  // The tutor's turn, which the service opens and runs: the repository, core/ and the platform, not the referential.
+  { pattern: 'src/modules/*/turn-pipeline.ts', category: 'pipeline' },
   { pattern: 'src/modules/*/repository.ts', category: 'repository' },
   { pattern: 'src/modules/*/schema.ts', category: 'schema' },
   // A module's core/: its pure decisions and the model steps they call, which the service
@@ -30,10 +39,11 @@ const files = [
 ];
 
 // Only the entry points read the environment: everything else receives the config.
+const ENTRY_POINTS = ['src/main.ts', 'src/migrate.ts', 'src/invite.ts', 'src/evaluate.ts'];
 const NO_ENVIRONMENT = ['Bun', 'process'].map((object) => ({
   object,
   property: 'env',
-  message: "L'environnement ne se lit que dans src/main.ts, src/migrate.ts, src/invite.ts et src/evaluate.ts : recevoir la config en paramètre.",
+  message: `L'environnement ne se lit que dans ${ENTRY_POINTS.join(', ')} : recevoir la config en paramètre.`,
 }));
 
 const element = (type) => ({ element: { type } });
@@ -75,9 +85,21 @@ export default [
             // The harness (src/evaluate.ts) wires the app as main.ts does, and plays the evaluation set.
             allow(file('root'), file(['root', 'config']), element(['platform', 'domain', 'eval']), inModule(['module-index'])),
             // Another module is reached by its index.ts only.
-            allow(inModule(['module-index']), sameModule(['routes', 'service', 'repository']), inModule(['module-index']), element('platform')),
+            allow(
+              inModule(['module-index']),
+              sameModule(['routes', 'service', 'pipeline', 'repository']),
+              inModule(['module-index']),
+              element('platform'),
+            ),
             allow(inModule(['routes']), sameModule(['service', 'core']), element(['platform', 'domain'])),
-            allow(inModule(['service']), sameModule(['repository', 'core']), inModule(['module-index']), element(['platform', 'domain'])),
+            // The referential is the programmes' data: the service checks a notion it is given against it.
+            allow(
+              inModule(['service']),
+              sameModule(['pipeline', 'repository', 'core']),
+              inModule(['module-index']),
+              element(['platform', 'domain', 'referential']),
+            ),
+            allow(inModule(['pipeline']), sameModule(['repository', 'core']), inModule(['module-index']), element(['platform', 'domain'])),
             allow(inModule(['core']), sameModule(['core']), element(['platform', 'domain', 'referential'])),
             // The tables store the shapes core/ decides.
             allow(inModule(['repository']), sameModule(['schema', 'core']), element(['platform', 'domain'])),
@@ -86,7 +108,9 @@ export default [
             allow(element('domain'), element('domain')),
             allow(element('referential'), element(['referential', 'domain'])),
             allow(element('eval'), element(['eval', 'referential', 'domain'])),
-            allow(element('testing'), element(['testing', 'platform']), file('config')),
+            allow(file('harness'), file('client')),
+            // A test's app is wired as main.ts wires it.
+            allow(element('testing'), element(['testing', 'platform']), file(['app', 'config']), inModule(['module-index'])),
             allow(file('test'), file(['root', 'config']), element(['platform', 'domain', 'module', 'referential', 'eval', 'testing'])),
           ],
         },
@@ -112,7 +136,7 @@ export default [
   },
   {
     files: ['src/**/*.ts'],
-    ignores: ['src/main.ts', 'src/migrate.ts', 'src/invite.ts', 'src/evaluate.ts', 'src/testing/**'],
+    ignores: [...ENTRY_POINTS, 'src/testing/**'],
     rules: {
       'no-restricted-properties': ['error', NO_MOCK_MODULE, ...NO_ENVIRONMENT],
     },
