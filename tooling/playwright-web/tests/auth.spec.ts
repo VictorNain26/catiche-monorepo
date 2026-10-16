@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { invite } from '../database';
 import { address, askCode, guardian, signIn } from '../guardian';
+import { codeSince, logMark } from '../server-log';
 
 test('an invited parent gets in by the code their address received, names themselves, and signs out', async ({ page }) => {
   const email = address('parent');
@@ -73,6 +74,40 @@ test('an address without an invitation is answered as any other, and gets no cod
   await page.getByLabel('Le code reçu par e-mail').fill('000000');
   await page.getByRole('button', { name: 'Entrer' }).click();
   await expect(page.getByRole('alert')).toHaveText('Ce code ne correspond pas. Vérifiez-le, ou demandez-en un nouveau.');
+});
+
+test('on the code step, the parent goes back to change the address, then gets in by a new code', async ({ page }) => {
+  const mistyped = address('faute-de-frappe');
+  invite(mistyped);
+  await askCode(page, mistyped);
+  await page.getByRole('button', { name: 'Changer d’adresse' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Entrer dans Catiche');
+  await expect(page.getByLabel('Adresse e-mail')).toHaveValue('');
+
+  const email = address('renvoi');
+  invite(email);
+  await page.getByLabel('Adresse e-mail').fill(email);
+  await page.getByRole('button', { name: 'Recevoir mon code' }).click();
+  await expect(page.getByRole('region', { name: `Un code à 6 chiffres vient d’être envoyé à ${email}.` })).toBeVisible();
+  const mark = logMark();
+  await page.getByRole('button', { name: 'Recevoir un nouveau code' }).click();
+  await expect(page.getByRole('region', { name: `Un nouveau code vient d’être envoyé à ${email}.` })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Notifications' })).toContainText(`Un nouveau code vient d’être envoyé à ${email}.`);
+  let code: string | undefined;
+  await expect.poll(() => (code = codeSince(mark, email))).toBeDefined();
+  await page.getByLabel('Le code reçu par e-mail').fill(code ?? '');
+  await page.getByRole('button', { name: 'Entrer' }).click();
+  await expect(page.getByRole('heading', { name: 'Bienvenue' })).toBeVisible();
+});
+
+test('an error of the sign-in service lands on a page of the app, which leads back to the sign-in', async ({ page }) => {
+  // better-auth's own page has an inline style the CSP blocks: the server sends its errors here.
+  await page.goto('/api/auth/error?error=boom');
+  await expect(page).toHaveURL(/\/erreur-connexion\?error=boom$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('La connexion n’a pas abouti');
+  await expect(page.getByRole('alert')).toContainText('un nouveau code vous sera envoyé');
+  await page.getByRole('link', { name: 'Aller à la connexion' }).click();
+  await expect(page).toHaveURL(/\/connexion$/);
 });
 
 // page.route never sees what the service worker answers.
