@@ -92,8 +92,8 @@ jobs:
       # Lets Claude read the CI's results on the pull request.
       actions: read
       id-token: write
-    concurrency:
-      group: claude-${{ github.event.issue.number || github.event.pull_request.number }}
+    # No concurrency group: a group keeps one pending run, and a third `@claude` would cancel the
+    # second without an answer. Two answers at once on one branch fail their push, loudly.
     steps:
       # An issue comment runs with the repository's secrets whatever the pull request's origin, and
       # carries no head repository: asked of the API. First, so that a fork's review event, which

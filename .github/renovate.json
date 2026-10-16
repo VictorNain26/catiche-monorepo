@@ -108,7 +108,7 @@
       "commitMessagePrefix": "chore(ci)"
     },
     {
-      "description": "Docker images (server base, Postgres, tools).",
+      "description": "Docker images (server base, tools); Postgres and Bun have their own groups below.",
       "matchManagers": ["dockerfile", "docker-compose"],
       "groupName": "docker",
       "commitMessagePrefix": "chore(docker)"
@@ -117,7 +117,8 @@
       "description": "Postgres moves as one: the developer's (docker-compose.yml) and the CI's services (ci.yml), two managers.",
       "matchDatasources": ["docker"],
       "matchPackageNames": ["postgres"],
-      "groupName": "postgres"
+      "groupName": "postgres",
+      "commitMessagePrefix": "chore(docker)"
     },
     {
       "description": "Bun moves as one: the version the repository declares (packageManager, engines), its image (Dockerfile) and its types. After the docker rule, whose group it overrides for the image.",
