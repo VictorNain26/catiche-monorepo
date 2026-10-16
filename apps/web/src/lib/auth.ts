@@ -33,7 +33,7 @@ export class AuthFailure extends Error {
   readonly status: number;
 
   constructor(error: AuthError) {
-    super(authMessage(error));
+    super(authMessage(error), { cause: error });
     this.name = 'AuthFailure';
     this.code = error.code;
     this.status = error.status;

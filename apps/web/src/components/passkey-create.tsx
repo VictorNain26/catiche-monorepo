@@ -36,6 +36,7 @@ export function PasskeyCreate({ label, onCreated }: { label: string; onCreated: 
       setCodeSentTo(session.user.email);
     },
   });
+  // One action at a time: each clears the other's error as it starts.
   const failure = add.error ?? askCode.error;
 
   return (
@@ -58,6 +59,7 @@ export function PasskeyCreate({ label, onCreated }: { label: string; onCreated: 
           <Button
             disabled={askCode.isPending}
             onClick={() => {
+              add.reset();
               askCode.mutate();
             }}
           >
@@ -68,6 +70,7 @@ export function PasskeyCreate({ label, onCreated }: { label: string; onCreated: 
         <Button
           disabled={add.isPending}
           onClick={() => {
+            askCode.reset();
             add.mutate();
           }}
         >
