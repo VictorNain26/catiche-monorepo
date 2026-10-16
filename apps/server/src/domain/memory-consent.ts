@@ -6,7 +6,9 @@
 
 const SELF_CONSENT_AGE = 15;
 
-export type MemoryAnswer = 'accepted' | 'declined';
+/** The child's answers, as the API takes them and the profile stores them. */
+export const MEMORY_ANSWERS = ['accepted', 'declined'] as const;
+export type MemoryAnswer = (typeof MEMORY_ANSWERS)[number];
 
 /** off: nothing asked of the child; asked: the child may answer; active: Tom reads the memory. */
 type MemoryState = 'off' | 'asked' | 'active';
