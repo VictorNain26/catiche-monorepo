@@ -202,9 +202,10 @@ export function createTutorRepository(db: Db) {
           entries: sql<string[]>`coalesce(${entries}, '[]'::jsonb)`,
           hintLevel: exercise.hintLevel,
           solvedAt: exercise.solvedAt,
+          // As text: an array of the enum is parsed only by a connection that saw the type when it opened.
           errorTypes: sql<
             string[]
-          >`coalesce((select array_agg(${turnRecord.errorType}) from ${turnRecord} where ${turnRecord.exerciseId} = ${exercise.id} and ${turnRecord.errorType} is not null), '{}')`,
+          >`coalesce((select array_agg(${turnRecord.errorType}::text) from ${turnRecord} where ${turnRecord.exerciseId} = ${exercise.id} and ${turnRecord.errorType} is not null), '{}')`,
         })
         .from(exercise)
         .innerJoin(studySession, eq(studySession.id, exercise.sessionId))

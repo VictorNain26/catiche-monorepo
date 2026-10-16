@@ -193,20 +193,27 @@ describe('the exercise in progress', () => {
 
   it('refuses a value outside the closed lists of a record and a session', async () => {
     const session = await start(asStudentA);
-    const refused = (write: Promise<unknown>) =>
+    // Postgres' invalid_text_representation: the value is not one of the enum's.
+    const codeOf = (write: Promise<unknown>) =>
       write.then(
-        () => null,
-        (error: unknown) => error,
+        () => 'written',
+        (error: unknown) => (error instanceof Error && error.cause instanceof Error && 'code' in error.cause ? error.cause.code : error),
       );
+    const valid = { verdict: 'incorrect', errorType: 'careless', decidedBy: 'mathjs', reasoningEffort: 'high' } as const;
+    expect(await codeOf(db.insert(turnRecord).values({ ...record(valid), sessionId: session.id }))).toBe('written');
     for (const column of ['verdict', 'errorType', 'decidedBy', 'reasoningEffort'] as const) {
-      const insert = db.insert(turnRecord).values({ ...record(), sessionId: session.id, [column]: sql`'not-in-the-list'` });
-      expect({ column, refused: (await refused(insert)) instanceof Error }).toEqual({ column, refused: true });
+      const insert = db.insert(turnRecord).values({ ...record(valid), sessionId: session.id, [column]: sql`'not-in-the-list'` });
+      expect({ column, code: await codeOf(insert) }).toEqual({ column, code: '22P02' });
     }
-    const cue = db
-      .update(studySession)
-      .set({ lastParentCue: sql`'not-in-the-list'` })
-      .where(eq(studySession.id, session.id));
-    expect(await refused(cue)).toBeInstanceOf(Error);
+    const cue = (value: string) =>
+      codeOf(
+        db
+          .update(studySession)
+          .set({ lastParentCue: sql`${value}` })
+          .where(eq(studySession.id, session.id)),
+      );
+    expect(await cue('block')).toBe('written');
+    expect(await cue('not-in-the-list')).toBe('22P02');
   });
 
   it('writes nothing of a turn that fails: no exercise, no message, no record', async () => {

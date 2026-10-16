@@ -45,10 +45,11 @@ const NO_MOCK_MODULE = {
 };
 
 // Only the entry points read the environment: everything else receives the config.
+const ENTRY_POINTS = ['src/main.ts', 'src/migrate.ts', 'src/invite.ts', 'src/evaluate.ts'];
 const NO_ENVIRONMENT = ['Bun', 'process'].map((object) => ({
   object,
   property: 'env',
-  message: "L'environnement ne se lit que dans src/main.ts, src/migrate.ts, src/invite.ts et src/evaluate.ts : recevoir la config en paramètre.",
+  message: `L'environnement ne se lit que dans ${ENTRY_POINTS.join(', ')} : recevoir la config en paramètre.`,
 }));
 
 const element = (type) => ({ element: { type } });
@@ -142,7 +143,7 @@ export default [
   },
   {
     files: ['src/**/*.ts'],
-    ignores: ['src/main.ts', 'src/migrate.ts', 'src/invite.ts', 'src/evaluate.ts', 'src/testing/**'],
+    ignores: [...ENTRY_POINTS, 'src/testing/**'],
     rules: {
       'no-restricted-properties': ['error', NO_MOCK_MODULE, ...NO_ENVIRONMENT],
     },

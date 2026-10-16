@@ -15,7 +15,7 @@ Tuteur : `docs/tuteur.md`. Stack locale : skill `dev-bootstrap`. Appel IA 
 
 - Jamais recréer à côté ce que la refonte du code (lot 0) n'a pas reconstruit : il revient de
   l'historique (`048676b4`) avec l'étape qui l'utilise.
-- Jamais lire l'environnement hors des points d'entrée (`NO_ENVIRONMENT` dans `eslint.config.mjs`,
+- Jamais lire l'environnement hors des points d'entrée (`ENTRY_POINTS` dans `eslint.config.mjs`,
   refusé au lint) : la config (`src/config.ts`) et les dépendances se passent
   en paramètre, aucun état global importé.
 - Jamais un try/catch dans une route ni un corps d'erreur écrit à la main : on lève
