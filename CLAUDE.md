@@ -14,7 +14,7 @@ Catiche : un tuteur IA des devoirs pour collégiens, Tom, et un tableau de bord 
   `docs/etudes/`.
 - Stack, structure, démarrage : `README.md`. Règles d'une partie du code :
   `.claude/rules/<sujet>.md`, chargées sur ses chemins. Les règles valables pour tous les projets
-  (git, TDD, tests, plan de PR, revue) sont dans `~/.claude/` et ne se répètent pas ici.
+  (TDD, tests, plan, revue) sont dans `~/.claude/` et ne se répètent pas ici.
 
 ## Commandes
 
@@ -29,7 +29,8 @@ change (Postgres de `docker compose` requis). Formatage : `bun run format`.
   tokens de la charte, un correctif d'honnêteté ou technique (`.claude/rules/landing.md`).
 - Jamais un écran construit sans `docs/experience.md` ni la charte : un écran du lot 1 est
   composé au téléphone et à l'ordinateur, pas une colonne de boutons.
-- Jamais une PR mergée autrement qu'en merge commit (le squash est désactivé).
+- Jamais de push sur `main` : une branche courte, puis une PR, mergée en merge commit (le squash
+  est désactivé).
 - Jamais un type du serveur réécrit côté client : il vient du client typé de `hono/client`.
 - Jamais de `mock.module` (refusé au lint) : une dépendance se remplace en la passant.
 
