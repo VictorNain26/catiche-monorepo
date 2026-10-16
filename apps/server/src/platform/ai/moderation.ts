@@ -40,8 +40,6 @@ const INPUT_RECORDED = ['selfharm', 'sexual', 'jailbreaking', 'pii', 'violence_a
 export interface InputModeration {
   /** The recorded categories Mistral flags. */
   flagged: string[];
-  /** Null when Mistral returns no score: a missing score is not a low one. */
-  selfharmScore: number | null;
 }
 
 /** Every function throws when moderation is unavailable: a text without its result was not checked. */
@@ -112,17 +110,14 @@ export function createModeration({ mistral, logger }: { mistral: MistralConfig; 
     },
 
     async studentTurn(lastTutorText, studentText) {
-      // A photo alone: no text to classify, and no score measured.
-      if (!studentText.trim()) return { flagged: [], selfharmScore: null };
+      // A photo alone: no text to classify.
+      if (!studentText.trim()) return { flagged: [] };
       const response = await sdk.classifiers.moderateChat({
         model: MODEL,
         inputs: [...(lastTutorText ? [{ role: 'assistant' as const, content: lastTutorText }] : []), { role: 'user' as const, content: studentText }],
       });
       const [result] = resultsFor(response.results, 1);
-      return {
-        flagged: INPUT_RECORDED.filter((category) => result?.categories?.[category] === true),
-        selfharmScore: result?.categoryScores?.['selfharm'] ?? null,
-      };
+      return { flagged: INPUT_RECORDED.filter((category) => result?.categories?.[category] === true) };
     },
   };
 }

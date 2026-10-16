@@ -162,7 +162,7 @@ describe('a turn', () => {
   it('answers a distress with the fixed reply, records it once, closes the session, and asks no model afterwards', async () => {
     const sessionId = await newSession();
     mistral.chat.push(analysis());
-    mistral.moderations.push({ flagged: ['selfharm'], scores: { selfharm: 0.95 } });
+    mistral.moderations.push({ flagged: ['selfharm'] });
     expect((await say(sessionId, "j'en peux plus")).reply).toBe(DISTRESS_REPLY);
     expect(await db.select({ detectedBy: distressEvent.detectedBy }).from(distressEvent).where(eq(distressEvent.sessionId, sessionId))).toEqual([
       { detectedBy: 'moderation' },
@@ -179,7 +179,7 @@ describe('a turn', () => {
   it('still gives a distress its fixed reply when the database refuses to store it', async () => {
     const sessionId = await newSession();
     mistral.chat.push(analysis());
-    mistral.moderations.push({ flagged: ['selfharm'], scores: { selfharm: 0.95 } });
+    mistral.moderations.push({ flagged: ['selfharm'] });
     // A real failure of the database, for this session's distress only.
     await db.execute(
       sql.raw(`create function refuse_distress() returns trigger language plpgsql as $$
