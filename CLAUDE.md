@@ -37,6 +37,4 @@ change (Postgres de `docker compose` requis). Formatage : `bun run format`.
 ## Garde-fous déterministes
 
 - lefthook : format, lint et typecheck avant un commit ; tests et build avant un push.
-- CI (`.github/workflows/ci.yml`) : vérifications, tests, e2e, image, sécurité, réunis par
-  `ci-ok`, le seul check à exiger, puis les déploiements. La revue de Claude
-  (`.github/workflows/claude.yml`) n'en fait pas partie.
+- CI (`.github/workflows/ci.yml`) : ses jobs réunis par `ci-ok`, le seul check à exiger.
