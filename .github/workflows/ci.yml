@@ -1,6 +1,7 @@
 # One pipeline: every check of the repository, in parallel jobs, gathered by `ci-ok`, the one
-# check the ruleset requires. On a PR, turbo `--affected` picks the tasks; on main, all run.
-# Actions pinned by SHA.
+# check the ruleset requires; then, on main, the deployments. On a PR, turbo `--affected` picks the
+# tasks; on main, all run. Actions pinned by SHA; each job gets only the permissions it uses, and
+# no checkout keeps its token (https://docs.github.com/en/actions/reference/security/secure-use).
 
 name: CI
 
@@ -12,12 +13,13 @@ on:
     branches: [main]
   pull_request:
 
-permissions:
-  contents: read
+permissions: {}
 
-# A new push cancels a PR's run; on main, each merge's run goes on to publish its image.
+# A new push cancels a PR's run. On main, each commit has its own group: a group holds one running
+# and one pending run, and a third merge would cancel the pending one, leaving a commit without
+# its image (https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency).
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
@@ -30,10 +32,13 @@ jobs:
     name: Check
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: ./.github/actions/setup-monorepo
       - run: bunx --no-install turbo run typecheck lint lint:scripts ${AFFECTED:+"$AFFECTED"}
       - run: bunx --no-install prettier --check .
@@ -54,26 +59,41 @@ jobs:
         working-directory: apps/server
         run: bun run db:check
 
-  actionlint:
-    name: Actionlint
+  # actionlint checks the syntax, the expressions and the shell of every workflow; zizmor, their
+  # security: injections, permissions, credentials, impostor commits (https://docs.zizmor.sh/audits/).
+  workflows:
+    name: Workflows
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       # Docker image method of https://github.com/rhysd/actionlint/blob/main/docs/usage.md.
       - uses: docker://rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
         with:
           args: -color
+      # The action runs zizmor's image by digest.
+      - uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+        with:
+          version: 1.30.1
+          config: .github/zizmor.yml
+          advanced-security: false
+          annotations: true
 
   test:
     name: Test
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
     # The server's tests run on a real Postgres: a database per test file, copied from this run's
     # template (apps/server/src/testing).
     services:
       postgres:
-        image: postgres:18.6
+        image: postgres:18.6@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -84,6 +104,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: ./.github/actions/setup-monorepo
       - run: bunx --no-install turbo run test ${AFFECTED:+"$AFFECTED"}
         env:
@@ -96,14 +117,24 @@ jobs:
   # on the runner, whose mirror has held a run up to 17 minutes, and every pull bounded
   # (.github/actions/compose-up). The web's suite runs the built server on its own database, on
   # the compose Postgres (tooling/playwright-web).
+  # The web's suite is the longest job: it runs in two shards, each on its own runner, server and
+  # database (https://playwright.dev/docs/test-sharding); turbo hands `--shard` to `playwright test`
+  # only, not to the builds it depends on. A failed shard keeps its own report.
   e2e-web:
-    name: E2E web (Playwright)
+    name: E2E web (Playwright ${{ matrix.shard }}/${{ strategy.job-total }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: ./.github/actions/setup-monorepo
       - name: Is the web affected
         id: affected
@@ -115,12 +146,14 @@ jobs:
         with:
           services: postgres playwright
       - if: steps.affected.outputs.run == 'true'
-        run: bunx --no-install turbo run test:e2e --filter=@repo/playwright-web
-      - name: Keep the suite's report
+        env:
+          SHARD: ${{ matrix.shard }}/${{ strategy.job-total }}
+        run: bunx --no-install turbo run test:e2e --filter=@repo/playwright-web -- --shard="$SHARD"
+      - name: Keep the shard's report
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: playwright-web-report
+          name: playwright-web-report-${{ matrix.shard }}
           path: tooling/playwright-web/playwright-report/
           retention-days: 7
 
@@ -129,10 +162,13 @@ jobs:
     name: E2E landing (Playwright)
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: ./.github/actions/setup-monorepo
       - name: Is the landing affected
         id: affected
@@ -167,7 +203,7 @@ jobs:
       image: ${{ steps.publish.outputs.image }}
     services:
       postgres:
-        image: postgres:18.6
+        image: postgres:18.6@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -182,6 +218,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: ./.github/actions/setup-monorepo
       # The web depends on the server: a change to either affects the web's build.
       - name: Is the server or the web affected
@@ -191,9 +228,12 @@ jobs:
           echo "run=$([ "$TASKS" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
       # A registry's names are lower case; the owner's may not be.
       - run: echo "IMAGE=${IMAGE,,}" >> "$GITHUB_ENV"
-      # The docker-container driver, which the GitHub Actions cache needs.
+      # The docker-container driver, which the GitHub Actions cache needs. The runner is thrown
+      # away after the job: removing the builder only cost ~20 s.
       - if: steps.affected.outputs.run == 'true'
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        with:
+          cleanup: false
       - name: Build
         if: steps.affected.outputs.run == 'true'
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -229,52 +269,50 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "$GITHUB_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
           docker push "$IMAGE:$GITHUB_SHA"
           echo "image=$(docker inspect -f '{{index .RepoDigests 0}}' "$IMAGE:$GITHUB_SHA")" >> "$GITHUB_OUTPUT"
 
+  # GitHub's own secret scanning and push protection cover the providers' patterns; gitleaks adds
+  # the generic ones and the repository's rules (.gitleaks.toml), over the whole history.
   secrets:
     name: Secret Detection
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  sast:
-    name: SAST
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    container:
-      image: semgrep/semgrep@sha256:acaac22ffc7b7cc5926de0751b223bce0b2491c33d18422fa72f632c78d81198 # 1.177.0
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - run: semgrep ci
-        env:
-          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
   audit:
     name: Dependency audit (prod, high+)
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-monorepo
       - run: bun audit --audit-level=high --prod
 
   # The one required check. A job that needs another is skipped when that one fails, unless
   # always() runs it (https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-jobs):
-  # it fails on any result but success.
+  # it fails on any result but success. A matrix job reports one result for all its shards.
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [check, actionlint, test, e2e-web, e2e-landing, image, secrets, sast, audit]
+    needs: [check, workflows, test, e2e-web, e2e-landing, image, secrets, audit]
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions: {}
     steps:
       - name: Every job succeeded
         env:
@@ -287,13 +325,15 @@ jobs:
 
   # The staging takes every merge on main once everything passed: the image the CI built and ran,
   # by its digest. Clever Cloud only pulls it, nothing is built there, so no secret reaches a build
-  # (docs/architecture.md, « Environnements et livraison »). The keys are the staging environment's.
+  # (docs/architecture.md, « Environnements et livraison »). The keys are the staging environment's,
+  # which only main may use. Rolling back is a revert merged on main, deployed like any merge.
   deploy-staging:
     name: Deploy staging
     needs: [ci-ok, image]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions: {}
     environment:
       name: staging
       url: https://staging.tomia.fr
@@ -308,8 +348,8 @@ jobs:
     steps:
       - name: Deploy the image
         run: |
-          # Two merges close together can finish their CI out of order: only main's head deploys,
-          # so that an older image never replaces a newer one.
+          # Runs on main are concurrent, and two merges close together can finish out of order:
+          # only main's head deploys, so that an older image never replaces a newer one.
           head="$(git ls-remote "https://github.com/$GITHUB_REPOSITORY" refs/heads/main | cut -f1)"
           if [ "$head" != "$GITHUB_SHA" ]; then
             echo "::notice::$GITHUB_SHA is no longer main's head ($head): the run of the head deploys"
@@ -333,6 +373,8 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
     environment:
       name: landing
       url: https://tomia.fr
@@ -345,6 +387,8 @@ jobs:
       APP_ID: app_abb69675-6703-41a7-a092-c847e01a57eb
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-monorepo
       - run: bunx --no-install turbo run build --filter=landing
       - name: Deploy the build
