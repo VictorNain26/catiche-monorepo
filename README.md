@@ -33,9 +33,6 @@ packages/
 ├── ui/              # Primitives shadcn du web ; ses classes servent aussi la landing (`@repo/ui/classes`)
 ├── tokens/          # Design tokens CSS (Tailwind v4) partagés
 └── eslint-config/   # Config ESLint partagée
-
-tooling/
-└── playwright-web/  # Suite de bout en bout du web, contre le serveur construit
 ```
 
 ## Stack
@@ -44,7 +41,7 @@ tooling/
 |--------|-------------|
 | Backend | Bun 1.4, Hono 4, PostgreSQL 18, Drizzle ORM 0.45, pino |
 | Landing | Astro 7, statique et sans framework client, TailwindCSS 4, Motion 13 (API vanilla), classes de `@repo/ui` |
-| Web | Vite 8, React 19, TanStack Router, TailwindCSS 4 ; tests Playwright à largeur de téléphone (`docs/etudes/2026-10-06/client-web.md`) |
+| Web | Vite 8, React 19, TanStack Router, TailwindCSS 4 (`docs/etudes/2026-10-06/client-web.md`) |
 | Auth | Better Auth 1.7 : le gardien entre par un code envoyé à son adresse ou par une clé d'accès, sans mot de passe, sur invitation pendant la bêta fermée ; l'appareil de l'élève est relié par un code |
 | IA | Mistral Small 4, endpoint UE (`docs/tuteur.md`) |
 | Paiements | Aucun branché. Paiement web prévu au lot 1 |

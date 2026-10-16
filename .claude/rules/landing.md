@@ -31,14 +31,12 @@ Clever Cloud (`apps/landing/Caddyfile`).
   (`apps/landing/src/scripts/reveal.ts`). Les classes partagées avec le web viennent de
   `@repo/ui/classes`.
 - Jamais un état d'entrée masqué hors de `@media (scripting: enabled)` : sans scripts, la page
-  s'affiche entière (`apps/landing/tests/reveals.spec.ts`).
+  s'affiche entière.
 - Jamais de `<script>` ni de `<style>` en `is:inline`, ni d'attribut `style` : la CSP
-  (`security.csp`, `apps/landing/astro.config.mjs`) n'admet que ce qu'Astro a haché ; les tests
-  « nothing it refuses » (`apps/landing/tests/server.spec.ts`) le vérifient.
+  (`security.csp`, `apps/landing/astro.config.mjs`) n'admet que ce qu'Astro a haché.
 - Jamais un texte suivi d'une balise qui ouvre la ligne suivante sans `{' '}` : Astro 7 compresse
   le HTML comme du JSX (`compressHTML: 'jsx'`) et colle les deux
   ([guide de migration](https://docs.astro.build/en/guides/upgrade-to/v7/)).
 - Jamais un en-tête HTTP, une redirection ou une page d'erreur ailleurs que dans le `Caddyfile` :
-  la suite e2e tourne contre lui, dans l'image `caddy` de la version que Clever Cloud annonce
-  ([doc](https://www.clever.cloud/developers/doc/deploy/applications/static/)), à suivre à la main
-  dans `apps/landing/playwright.config.ts`.
+  c'est lui que Clever Cloud sert
+  ([doc](https://www.clever.cloud/developers/doc/deploy/applications/static/)).

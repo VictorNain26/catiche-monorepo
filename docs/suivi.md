@@ -5,7 +5,7 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 
 ## Où on en est
 
-- **Mis à jour le** 2026-10-12.
+- **Mis à jour le** 2026-10-16.
 - **La refonte du produit** (`decisions.md`, 2026-10-12 ; `etudes/2026-10-12/refonte-produit.md`) :
   la vision, les décisions et la roadmap réécrites ; les anciens lots 1 à 3 forment le lot 1,
   « Le produit » ; les espaces et les écrans visés sont dans `experience.md`.
@@ -16,8 +16,9 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
   Hyperlegible Next. Les composants de `@repo/ui` (2.3) sont là, sur Base UI, sous une CSP
   stricte (`decisions.md`) : la coquille, section, liste,
   carte, état vide, squelette, bandeau, dialogue et tiroir, toast, graphique en barres, montrés
-  par le catalogue `/catalogue` de l'app que la suite e2e visite. En cours en parallèle : 2.2, la
-  qualité (captures, axe, projet à l'ordinateur) ; puis 2.4, le logo et Tom en 2D. L'essai
+  par le catalogue `/catalogue` de l'app. La qualité (2.2) est la définition de « fini » d'un
+  écran, vérifiée dans Chrome avant chaque merge : les suites Playwright sont supprimées
+  (`decisions.md`, 2026-10-16). Reste 2.4, le logo et Tom en 2D. L'essai
   de Rive est sur la branche locale `da2/rive`, jamais poussée : une référence pour le hero du
   site, pas un code à reprendre ; sa composition des écrans n'est pas retenue.
 - **Déjà construit**, aux couleurs de Rive mais sans composition : le nom Catiche dans
@@ -27,6 +28,14 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
   de l'espace de l'enfant par le parent ; le mode accompagné, la séance, la photo, le résumé de la
   semaine. Ces flux, leurs tests et leur sécurité restent ; leur habillage se refait aux étapes 3
   et 4 du lot 1, et « Qui utilise Tom ? » y devient « Qui utilise Catiche ? » (`experience.md`).
+- **Sans test automatique depuis le 2026-10-16** (suites Playwright supprimées, `decisions.md`) :
+  les parcours dans un navigateur (entrée par code et par clé d'accès, foyer, jumelage, séance,
+  photo, mémoire, semaine), la CSP sans violation dans un navigateur, le rechargement après un
+  déploiement, la PWA et son service worker, les composants de `@repo/ui` rendus (cibles de
+  44 px, clavier, défilement horizontal) ; pour la landing, les en-têtes, redirections et 404 du
+  `Caddyfile`, le rendu sans JavaScript et sous mouvement réduit, la mise en page. Restent les tests
+  Bun du serveur, de `apps/web/src/lib` et des tokens, et la vérification dans Chrome avant chaque
+  merge, puis au staging.
 - **Lot 4 en attente** : le harnais `bun run eval` est mergé ; son passage unique attend le
   paiement à l'usage de Mistral (bloquant ci-dessous). Le premier essai s'est arrêté à 3
   conversations sur 104 et ne compte pas comme mesure. Référence de comparaison : 11 fuites sur
@@ -99,13 +108,12 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
 - Résumé de la semaine : son arrêt à la demande de l'élève, avec le consentement (le point
   hebdomadaire par e-mail au parent est décidé, `decisions.md`).
 - Appareils de l'élève : le prévenir quand un nouvel appareil est relié.
-- Client web : mesures sur un vrai iPhone et un Android ; un projet Playwright à l'ordinateur,
-  avec les premiers écrans composés pour lui (`experience.md`).
+- Client web : mesures sur un vrai iPhone et un Android.
 - Le réglage « Lecture aérée » (`charte.md`, `experience.md`).
 - Le site, à l'étape 3 : sa composition sur la charte (il porte déjà les tokens) ; ses annotations
   d'école (surligneur, gribouillis) à repenser ; la note « c'est toi qui l'as trouvé ! », qui
   célèbre et finit par un point d'exclamation, contre la charte ; l'image Open Graph composée ;
-  `hero.spec.ts` ; une application de preview par PR.
+  une application de preview par PR.
 - Trois appels à `listDeviceSessions` (`foyer.$studentId.tsx`, `sign-out.tsx`, `bienvenue.tsx`)
   gèrent chacun l'erreur à leur façon : passer par `deviceSessionsQuery` (`lib/auth.ts`).
 - Aux étapes 3 et 4, avec les écrans : les cartes en `li` des listes deviennent `List`.
@@ -129,13 +137,6 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
 
 Conditions à guetter, sans PR tant qu'elles ne se déclenchent pas.
 
-- **E2E instables en local** (2026-10-09, avant le serveur Playwright) : sous la suite complète,
-  « the button gets a parent in with their passkey » et « a paired student opens a session » ont
-  échoué une fois chacun, puis passé seuls à chaque relance. Si la CI les voit échouer, en
-  chercher la cause (attente, charge).
-- **Tirage des images en CI** (`.github/actions/compose-up`, depuis le 2026-10-12) : si
-  l'avertissement d'un essai dépassé revient souvent, regarder le registre en cause avant
-  d'allonger le délai.
 - **Jeton de la CLI Clever Cloud** : il expire le 2027-10-08 ; le renouveler avant.
 - **Taux de Mistral** (`MISTRAL_USD_TO_EUR`, 0,85 le 2026-10-06) : le revérifier à chaque
   facture ; un écart change chaque coût et chaque quota.

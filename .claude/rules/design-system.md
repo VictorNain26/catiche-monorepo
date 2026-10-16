@@ -44,5 +44,5 @@ l'app. Les composants ne dépendent de l'identité que par les rôles.
 
 - sans ses états : vide, chargement, erreur, et hors ligne ou quota quand ils le concernent ;
 - sans être vu au téléphone (deux largeurs) et à l'ordinateur, en clair et en sombre ;
-- sans `@axe-core/playwright` vert sur chacun de ses états, ni un passage au clavier ;
-- sans ses captures de référence relues, une fois l'étape 2.2 du lot 1 faite (`docs/roadmap.md`).
+- sans un passage au clavier ;
+- sans être vu dans Chrome avant son merge, puis au staging.

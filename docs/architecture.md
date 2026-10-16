@@ -51,8 +51,7 @@ téléphone** : chaque parcours se conçoit et se prouve à largeur de télépho
 propre mise en page, pas une colonne étirée (`experience.md`).
 
 En place (`apps/web`) :
-- Application monopage Vite + React + TanStack Router, Tailwind sur les tokens `@repo/tokens`,
-  tests Playwright à largeur de téléphone (WebKit et Chromium).
+- Application monopage Vite + React + TanStack Router, Tailwind sur les tokens `@repo/tokens`.
 - Servie par Hono sur la même origine que l'API (`apps/server/src/platform/http/web-client.ts`) : cookie de
   session limité à l'hôte, sans CORS ni blocage de Safari, un seul déploiement. Le serveur lit le
   build dans `WEB_DIST_DIR`, que l'image Docker embarque ; une navigation hors de `/api` sans
@@ -60,8 +59,7 @@ En place (`apps/web`) :
   `immutable`, le reste en `no-cache` revalidé par ETag ; fichiers compressés au build. CSP
   `default-src 'self'` sur toutes les réponses, `no-store` sur `/api`. En dev, le proxy de Vite
   envoie `/api/` et `/health` au serveur, et l'origine de Vite est la base de better-auth : une
-  seule origine aussi. La suite de bout en bout (`tooling/playwright-web`) tourne sur le serveur
-  construit qui sert le web construit.
+  seule origine aussi.
 - Après un déploiement, un onglet ouvert qui demande un morceau disparu de son ancien build se
   recharge une fois sur le nouveau (TanStack Router, `lazyRouteComponent`).
 - Installable (PWA, `vite-plugin-pwa`) : manifest et service worker, qui ne met en cache que le

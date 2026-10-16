@@ -203,6 +203,10 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
 - **TDD et parcours pensés depuis l'usage réel** (2026-10-08). Le test qui échoue d'abord, puis
   le code ; chaque fonctionnalité se conçoit à la place du parent et de l'enfant (téléphone
   partagé, soirée, vacances), avant les critères techniques.
+- **Pas de suite de bout en bout** (2026-10-16, Victor). Les suites Playwright du web et de la
+  landing sont supprimées : trop lentes, de 8 à 30 minutes en local, et des heures à chasser leurs
+  tests instables. Restent les tests Bun du serveur et du web, et la vérification de chaque PR dans
+  Chrome avant son merge, puis au staging.
 - **Supprimer plutôt qu'archiver** (2026-08-23, rappelé le 2026-10-06). Ce qui ne sert plus se
   supprime ; git le garde.
 - **Merge commit, pas de squash** ; une branche courte par PR, jamais de push sur `main`.
