@@ -119,12 +119,19 @@ jobs:
   # on the runner, whose mirror has held a run up to 17 minutes, and every pull bounded
   # (.github/actions/compose-up). The web's suite runs the built server on its own database, on
   # the compose Postgres (tooling/playwright-web).
+  # The web's suite is the longest job: it runs in two shards, each on its own runner, server and
+  # database (https://playwright.dev/docs/test-sharding); turbo hands `--shard` to `playwright test`
+  # only, not to the builds it depends on. A failed shard keeps its own report.
   e2e-web:
-    name: E2E web (Playwright)
+    name: E2E web (Playwright ${{ matrix.shard }}/2)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -141,12 +148,14 @@ jobs:
         with:
           services: postgres playwright
       - if: steps.affected.outputs.run == 'true'
-        run: bunx --no-install turbo run test:e2e --filter=@repo/playwright-web
-      - name: Keep the suite's report
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: bunx --no-install turbo run test:e2e --filter=@repo/playwright-web -- --shard="$SHARD/2"
+      - name: Keep the shard's report
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: playwright-web-report
+          name: playwright-web-report-${{ matrix.shard }}
           path: tooling/playwright-web/playwright-report/
           retention-days: 7
 
@@ -154,7 +163,7 @@ jobs:
   e2e-landing:
     name: E2E landing (Playwright)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -221,9 +230,12 @@ jobs:
           echo "run=$([ "$TASKS" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
       # A registry's names are lower case; the owner's may not be.
       - run: echo "IMAGE=${IMAGE,,}" >> "$GITHUB_ENV"
-      # The docker-container driver, which the GitHub Actions cache needs.
+      # The docker-container driver, which the GitHub Actions cache needs. The runner is thrown
+      # away after the job: removing the builder only cost ~20 s.
       - if: steps.affected.outputs.run == 'true'
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        with:
+          cleanup: false
       - name: Build
         if: steps.affected.outputs.run == 'true'
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -295,7 +307,7 @@ jobs:
 
   # The one required check. A job that needs another is skipped when that one fails, unless
   # always() runs it (https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-jobs):
-  # it fails on any result but success.
+  # it fails on any result but success. A matrix job reports one result for all its shards.
   ci-ok:
     name: ci-ok
     if: always()
