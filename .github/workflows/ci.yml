@@ -24,8 +24,6 @@ env:
   TURBO_SCM_BASE: origin/main
   # The PR runs what it affects, main runs everything.
   AFFECTED: ${{ github.event_name == 'pull_request' && '--affected' || '' }}
-  # The git hooks are a developer's guard: the CI runs the same checks as jobs.
-  LEFTHOOK: 0
 
 jobs:
   check:
