@@ -30,7 +30,8 @@
 	@plainHttp header X-Forwarded-Proto http
 	redir @plainHttp https://{host}{uri} 308
 
-	redir /home / 308
+	# The questions live in the help center; /faq was the same list under a second address.
+	redir /faq /aide{?query} 308
 	redir /sitemap.xml /sitemap-index.xml 308
 	# As Next.js did: a trailing slash redirects to the path without it. The path must start with a
 	# single slash and hold no backslash: browsers read "/\" as "//", a redirect to another host.

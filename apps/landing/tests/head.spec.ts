@@ -6,6 +6,18 @@ for (const path of PAGES) {
     await page.goto(path);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', new URL(path, 'https://tomia.fr').href);
   });
+
+  test(`${path} shares its own title and description`, async ({ page }) => {
+    await page.goto(path);
+    const title = await page.title();
+    const description = await page.locator('meta[name="description"]').getAttribute('content');
+    for (const name of ['og:title', 'twitter:title']) {
+      await expect(page.locator(`meta[property="${name}"], meta[name="${name}"]`), name).toHaveAttribute('content', title);
+    }
+    for (const name of ['og:description', 'twitter:description']) {
+      await expect(page.locator(`meta[property="${name}"], meta[name="${name}"]`), name).toHaveAttribute('content', description ?? '');
+    }
+  });
 }
 
 test('the Open Graph image every page names is served', async ({ page, request }) => {

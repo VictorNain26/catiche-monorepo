@@ -18,10 +18,10 @@ for (const path of [...PAGES, '/cette-page-n-existe-pas']) {
 }
 
 for (const [from, to] of [
-  ['/home', '/'],
+  ['/faq?q=1', '/aide?q=1'],
   ['/sitemap.xml', '/sitemap-index.xml'],
   ['/aide/', '/aide'],
-  ['/faq/?q=1', '/faq?q=1'],
+  ['/contact/?q=1', '/contact?q=1'],
 ] as const) {
   test(`${from} redirects permanently to ${to}`, async ({ request }) => {
     const response = await request.get(from, { maxRedirects: 0 });

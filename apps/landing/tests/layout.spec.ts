@@ -131,7 +131,7 @@ test('/aide at 375px keeps each FAQ question within three lines', async ({ page 
   expect(tall).toEqual([]);
 });
 
-for (const path of ['/', '/faq']) {
+for (const path of ['/', '/aide']) {
   test(`${path} underlines every inline link in body text`, async ({ page }) => {
     await page.goto(path);
     const notUnderlined = await page.evaluate(() =>
