@@ -42,7 +42,5 @@ demandent le Postgres de `docker compose` (`DATABASE_URL`).
   CSP sans refus.
 
 Les suites Playwright tournent en CI (jobs `E2E web (Playwright)` et `E2E landing (Playwright)`,
-tâche turbo `test:e2e`, sur les paquets touchés), pas avant un commit.
-
-Jamais un test instable dit réparé sans l'avoir vu échouer en répétition avant la correction et
-passer après, dans les mêmes conditions (`--repeat-each`, `--retries=0`).
+tâche turbo `test:e2e`, sur les paquets touchés), pas avant un commit. Un test instable se
+répète avec `--repeat-each` et `--retries=0`.
