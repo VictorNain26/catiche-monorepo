@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { token } from '../colors';
 
 test('the page a visitor lands on renders in French at phone width, with one h1 and no horizontal scroll', async ({ page }) => {
   await page.goto('/');
@@ -20,7 +21,7 @@ test('the brand applies: the mist background, Atkinson Hyperlegible Next at 17 p
   await expect(title).toBeVisible();
 
   const body = page.locator('body');
-  await expect(body).toHaveCSS('background-color', 'rgb(239, 243, 241)');
+  await expect(body).toHaveCSS('background-color', await token(page, 'background'));
   await expect(body).toHaveCSS('font-size', '17px');
   // WebKit serialises the computed family unquoted, Chromium quoted.
   await expect(body).toHaveCSS('font-family', /^"?Atkinson Hyperlegible Next Variable"?,/);

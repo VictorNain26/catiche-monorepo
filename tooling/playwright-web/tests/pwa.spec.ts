@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { computedColor } from '../colors';
+import { computedColor, token } from '../colors';
 
 interface Manifest {
   name: string;
@@ -37,7 +37,11 @@ test.describe('in dark mode', () => {
 
   test('the page turns to the night background', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(12, 30, 36)');
+    const night = await token(page, 'background');
+    await expect(page.locator('body')).toHaveCSS('background-color', night);
+    // The scales turn by themselves in the dark: the day's background is another color.
+    await page.emulateMedia({ colorScheme: 'light' });
+    expect(await token(page, 'background')).not.toBe(night);
   });
 });
 
