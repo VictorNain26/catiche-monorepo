@@ -2,15 +2,15 @@ import { describe, expect, it } from 'bun:test';
 import { PROMPT_TAG } from './prompt-tags';
 
 const TEMPLATES = new Bun.Glob('modules/tutor/**/*.ts');
-const SOURCE = new URL('..', import.meta.url).pathname;
+const SOURCE = `${import.meta.dir}/..`;
 
 // A closing tag is never TypeScript (a generic opens, it never closes with `</`), so every one in
 // the tutor's sources is a tag a template writes into the prompt.
 async function closingTags(): Promise<Set<string>> {
   const tags = new Set<string>();
-  for await (const path of TEMPLATES.scan(SOURCE)) {
+  for await (const path of TEMPLATES.scan({ cwd: SOURCE, absolute: true })) {
     if (path.endsWith('.test.ts')) continue;
-    for (const [tag] of (await Bun.file(SOURCE + path).text()).matchAll(/<\/[a-z_]+>/g)) tags.add(tag.slice(2, -1));
+    for (const [, name = ''] of (await Bun.file(path).text()).matchAll(/<\/([\w-]+)>/g)) tags.add(name);
   }
   return tags;
 }
