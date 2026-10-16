@@ -14,6 +14,8 @@ export { Dialog, DialogClose, DialogContent, DialogTrigger, DrawerContent } from
 
 export { EmptyState } from './components/empty-state';
 
+export { CheckboxField, Field, SelectField } from './components/field';
+
 export { Fold } from './components/fold';
 
 export { Input } from './components/input';

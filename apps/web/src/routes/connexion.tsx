@@ -1,12 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Banner, Button } from '@repo/ui';
+import { Banner, Button, Field } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from '../lib/zod';
 import { CodeForm, sendCode } from '../components/code-form';
-import { Field } from '../components/field';
 import { Page } from '../components/page';
 import { AuthFailure, authClient, authData, authMessage, deviceSessionsQuery, hasCode, isCancelled } from '../lib/auth';
 import { meQuery } from '../lib/me';

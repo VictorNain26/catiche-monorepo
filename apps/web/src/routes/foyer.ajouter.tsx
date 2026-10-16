@@ -1,11 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Banner, Button } from '@repo/ui';
+import { Banner, Button, CheckboxField, Field, SelectField } from '@repo/ui';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { UserRoundIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm, useWatch, type FieldPath } from 'react-hook-form';
-import { CheckboxField, Field, SelectField } from '../components/field';
 import { BackLink, HeaderLink, Page } from '../components/page';
 import { api, parseResponse } from '../lib/api';
 import { LEVEL_LABELS, birthYears, householdMessage, newChildSchema, studentsQuery } from '../lib/household';

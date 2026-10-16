@@ -1,11 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Banner, Button, Card, Fold, toast } from '@repo/ui';
+import { Banner, Button, Card, Field, Fold, SelectField, toast } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from '../lib/zod';
-import { Field, SelectField } from '../components/field';
 import { BackLink, Page } from '../components/page';
 import { QrCode } from '../components/qr-code';
 import { WeekSummary } from '../components/week-summary';
