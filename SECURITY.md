@@ -19,9 +19,10 @@ We will acknowledge within 48 hours and provide a fix timeline within 7 days.
 - Dependency updates opened by Renovate (`.github/renovate.json`: minor/patch auto-merged
   once CI is green after a 3-day release age, majors reviewed by a human); Dependabot
   only raises vulnerability alerts
-- Secret scanning (Gitleaks), SAST (Semgrep) and `bun audit` (prod, high+) on every
-  push/PR to `main` (`.github/workflows/ci.yml`)
-- SHA-pinned GitHub Actions (supply chain protection)
+- GitHub secret scanning with push protection, and on every pull request and push to `main`
+  (`.github/workflows/ci.yml`): Gitleaks, `bun audit` (prod, high+), and actionlint and zizmor on
+  the workflows
+- SHA-pinned GitHub Actions and digest-pinned images; each job holds only the permissions it uses
 - Non-root server image (the base image's `bun` user)
 - Security headers on the landing page (`apps/landing/Caddyfile`: HSTS and a redirect to HTTPS,
   nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy, `frame-ancestors`) and the server. The
