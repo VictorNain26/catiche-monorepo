@@ -5,7 +5,7 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 
 ## Où on en est
 
-- **Mis à jour le** 2026-10-12.
+- **Mis à jour le** 2026-10-16.
 - **La refonte du produit** (`decisions.md`, 2026-10-12 ; `etudes/2026-10-12/refonte-produit.md`) :
   la vision, les décisions et la roadmap réécrites ; les anciens lots 1 à 3 forment le lot 1,
   « Le produit » ; les espaces et les écrans visés sont dans `experience.md`.
@@ -125,10 +125,11 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
 
 Conditions à guetter, sans PR tant qu'elles ne se déclenchent pas.
 
-- **E2E instables en local** (2026-10-09, avant le serveur Playwright) : sous la suite complète,
-  « the button gets a parent in with their passkey » et « a paired student opens a session » ont
-  échoué une fois chacun, puis passé seuls à chaque relance. Si la CI les voit échouer, en
-  chercher la cause (attente, charge).
+- **E2E sans relance** (depuis le 2026-10-16, `retries: 0` en CI aussi) : une suite complète
+  locale a vu échouer une fois, sur `iphone`, « the dialog opens from the keyboard… » (le focus
+  pas encore dans le dialogue) et « a week without a session says so… » (30 s dépassées sous la
+  charge) ; ni l'un ni l'autre n'a échoué en répétition. S'ils reviennent, les répéter
+  (`--repeat-each`, `--retries=0`) avant de les corriger.
 - **Tirage des images en CI** (`.github/actions/compose-up`, depuis le 2026-10-12) : si
   l'avertissement d'un essai dépassé revient souvent, regarder le registre en cause avant
   d'allonger le délai.
