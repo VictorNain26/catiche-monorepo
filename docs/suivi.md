@@ -54,6 +54,10 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 - **Mistral** : lire la réponse du support (ticket du 2026-10-11) ; au lot 4, activer le paiement
   à l'usage avec un plafond, demander le Zero Data Retention, vérifier Admin › API ›
   Confidentialité.
+- **CI** : le secret `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`) et l'application GitHub
+  Claude sur le dépôt, pour `.github/workflows/claude.yml` ; CodeQL en configuration par défaut
+  (Settings › Code security), qui remplace Semgrep ; supprimer les secrets `ANTHROPIC_API_KEY` et
+  `MISTRAL_API_KEY_CI`, que rien n'utilise.
 - **Comptes à fermer** : le projet Vercel et l'application GitHub Vercel (son check échoue sur
   chaque PR), l'organisation Sentry `home-drx`, le projet Langfuse « tomai » ; vérifier que Koyeb
   ne facture plus rien ; supprimer les secrets de dépôt `KOYEB_API_TOKEN` et `DATABASE_URL`.
