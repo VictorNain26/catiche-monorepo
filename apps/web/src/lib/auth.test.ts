@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { authMessage, isCancelled } from './auth';
+import { AuthFailure, authData, authMessage, isCancelled } from './auth';
 
 const FALLBACK = 'Une erreur est survenue. Réessayez dans un instant.';
 
@@ -20,6 +20,30 @@ describe('authMessage', () => {
     expect(authMessage({ code: 'SOMETHING_NEW', status: 400 })).toBe(FALLBACK);
     expect(authMessage({ code: '', status: 400 })).toBe(FALLBACK);
     expect(authMessage({ status: 500 })).toBe(FALLBACK);
+  });
+});
+
+describe('authData', () => {
+  it('gives the data of an answer', async () => {
+    expect(await authData(Promise.resolve({ data: [{ id: 'a' }], error: null }))).toEqual([{ id: 'a' }]);
+  });
+
+  it('throws a refusal in French, its code and status kept for the screen to tell it apart', async () => {
+    const refused: unknown = await authData(Promise.resolve({ data: null, error: { code: 'INVALID_OTP', status: 400 } })).catch(
+      (error: unknown) => error,
+    );
+    expect(refused).toBeInstanceOf(AuthFailure);
+    expect(refused).toMatchObject({
+      message: 'Ce code ne correspond pas. Vérifiez-le, ou demandez-en un nouveau.',
+      code: 'INVALID_OTP',
+      status: 400,
+    });
+  });
+
+  it('throws a refusal without a code, as a failing server gives it, in the fallback words', async () => {
+    const refused: unknown = await authData(Promise.resolve({ data: null, error: { status: 500 } })).catch((error: unknown) => error);
+    expect(refused).toBeInstanceOf(AuthFailure);
+    expect(refused).toMatchObject({ message: FALLBACK, code: undefined, status: 500 });
   });
 });
 

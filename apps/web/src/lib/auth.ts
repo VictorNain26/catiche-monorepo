@@ -12,19 +12,41 @@ const devicePairing = { id: 'device-pairing', $InferServerPlugin: {} as DevicePa
 
 export const authClient = createAuthClient({ plugins: [devicePairing, emailOTPClient(), passkeyClient(), multiSessionClient()] });
 
-/** The sessions this device holds, one per account, as better-auth's multi-session lists them. */
+/**
+ * The sessions this device holds, one per account, as better-auth's multi-session lists them. A
+ * choice that rests on them reads them by `queryClient.query`, which throws when the list is
+ * refused: nothing is decided blind.
+ */
 export const deviceSessionsQuery = queryOptions({
   queryKey: ['device-sessions'],
-  queryFn: async () => {
-    const { data, error } = await authClient.multiSession.listDeviceSessions();
-    if (error) throw new Error(authMessage(error));
-    return data;
-  },
+  queryFn: () => authData(authClient.multiSession.listDeviceSessions()),
 });
 
 interface AuthError {
   code?: string | undefined;
   status: number;
+}
+
+/** A refusal of better-auth, thrown: its message in words a parent reads, its code and status kept. */
+export class AuthFailure extends Error {
+  readonly code: string | undefined;
+  readonly status: number;
+
+  constructor(error: AuthError) {
+    super(authMessage(error));
+    this.name = 'AuthFailure';
+    this.code = error.code;
+    this.status = error.status;
+  }
+}
+
+/** better-auth's data, or its error thrown as an AuthFailure: what a query or a mutation awaits. */
+export async function authData<Result extends { data: unknown; error: AuthError | null }>(
+  call: Promise<Result>,
+): Promise<Extract<Result, { error: null }>['data']> {
+  const { data, error } = await call;
+  if (error) throw new AuthFailure(error);
+  return data;
 }
 
 /** better-auth's error codes, in words a parent reads; the server's own message never shows. */
