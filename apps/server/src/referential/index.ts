@@ -6,7 +6,8 @@ import mathematiquesAttendus4e from './texts/mathematiques-attendus-4e-2019.json
 import mathematiquesAttendus3e from './texts/mathematiques-attendus-3e-2019.json' with { type: 'json' };
 import francaisAttendus4e from './texts/francais-attendus-4e-2019.json' with { type: 'json' };
 import francaisAttendus3e from './texts/francais-attendus-3e-2019.json' with { type: 'json' };
-import type { SchoolLevel } from '../domain/levels';
+import { SCHOOL_LEVELS, type SchoolLevel } from '../domain/levels';
+import type { SubjectFamily } from '../domain/subjects';
 import { textFileSchema, type Entry, type TextFile } from './schema';
 import { PROGRAMME_SOURCES, type ProgrammeSource } from './sources';
 
@@ -47,3 +48,25 @@ export function programmeFor(
   if (!latest) return null;
   return { source: latest.source, entries: latest.entries.filter((entry) => entry.level === level) };
 }
+
+export interface Notions {
+  entries: Entry[];
+  later: Entry[];
+}
+
+/**
+ * The programme of the class and of the later college classes for a subject, or null without a
+ * referential: a subject other than mathematics and French.
+ */
+export function notionsFor(level: SchoolLevel, subject: SubjectFamily | undefined, schoolYear: number): Notions | null {
+  if (subject !== 'mathematiques' && subject !== 'francais') return null;
+  const entries = programmeFor(level, subject, schoolYear)?.entries ?? [];
+  if (entries.length === 0) return null;
+  const later = SCHOOL_LEVELS.slice(SCHOOL_LEVELS.indexOf(level) + 1).flatMap((next) => programmeFor(next, subject, schoolYear)?.entries ?? []);
+  return { entries, later };
+}
+
+const entryById = new Map(programmes.flatMap(({ entries }) => entries.map((entry) => [entry.id, entry] as const)));
+
+/** A notion of the referential, as its programme words it; undefined for an unknown id. */
+export const notionText = (id: string) => entryById.get(id)?.text;

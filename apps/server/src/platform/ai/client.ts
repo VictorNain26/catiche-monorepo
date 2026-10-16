@@ -56,6 +56,8 @@ interface StructuredCall<T> extends TextCall {
 export interface Ai {
   /** The dated model every call uses. */
   model: string;
+  /** The deadline that caps every call, its retries included. */
+  timeoutMs: number;
   /** The text, and the response messages as the model produced them, reasoning included, for a later turn to replay. */
   generateText: (call: TextCall) => Promise<{ text: string; responseMessages: ResponseMessage[] }>;
   generateStructured: <T>(call: StructuredCall<T>) => Promise<{ object: T; usage: Usage }>;
@@ -123,6 +125,7 @@ export function createAi({ mistral, db, logger }: { mistral: MistralConfig; db: 
 
   return {
     model: mistral.model,
+    timeoutMs: mistral.timeoutMs,
 
     async generateText(call) {
       const result = await generate({ ...settings(call, AbortSignal.timeout(deadline(call))), messages: call.messages });
