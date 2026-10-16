@@ -119,6 +119,12 @@
       "commitMessagePrefix": "chore(docker)"
     },
     {
+      "description": "Postgres moves as one: the developer's (docker-compose.yml) and the CI's services (ci.yml), two managers.",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["postgres"],
+      "groupName": "postgres"
+    },
+    {
       "description": "Playwright's image moves with @playwright/test: its browsers are the ones the tests drive, through the Playwright Server it runs (docker-compose.yml, service playwright).",
       "matchPackageNames": ["@playwright/test", "mcr.microsoft.com/playwright"],
       "groupName": "playwright"
