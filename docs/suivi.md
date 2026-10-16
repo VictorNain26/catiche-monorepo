@@ -81,8 +81,8 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
   de grâce réel au SIGTERM contre `SHUTDOWN_DEADLINE_MS`, la sonde pour `DRAIN_MS`, le PITR et son
   prix, Postgres 18.4 chez eux contre 18.6 en dev et en CI.
 - L'adresse de la connexion, que `clientAddress` (`platform/http/client-address.ts`) lit par
-  `getConnInfo`, n'est exercée par aucun test, faute d'un vrai `Bun.serve` : `addressOf` et le
-  middleware sous `app.request` (`rate-limit.test.ts`) le sont.
+  `getConnInfo`, n'est exercée par aucun test, faute d'un vrai `Bun.serve` : `addressOf` l'est
+  (`client-address.test.ts`), le middleware aussi, sous `app.request` (`rate-limit.test.ts`).
 - Le préfixe `__Host-` des cookies, quand better-auth le livre
   ([#10806](https://github.com/better-auth/better-auth/issues/10806)).
 
