@@ -5,39 +5,13 @@
 
 import { describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
-import pino from 'pino';
-import { createApp } from '../../app';
-import { accountDeletion } from '../../modules/household';
+import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
-import { httpClient, ORIGIN } from '../../testing/http';
-import { memoryMailer } from '../../testing/mailer';
-import { fakeMistral } from '../../testing/mistral';
-import { createBackgroundTasks } from '../lifecycle/background';
-import { createLifecycle } from '../lifecycle/shutdown';
-import { createAuth } from './auth';
+import { ORIGIN } from '../../testing/http';
 import { passkey, session } from './schema';
 
 const { db } = await testDatabase();
-const mistral = fakeMistral();
-const mail = memoryMailer();
-const auth = createAuth(
-  db,
-  { publicUrl: ORIGIN, authSecret: 'x'.repeat(32) },
-  { mailer: mail.mailer, logger: pino({ level: 'silent' }), background: createBackgroundTasks().run, deleteUser: accountDeletion(db) },
-);
-const api = httpClient(
-  createApp({
-    config: { production: false, webDistDir: undefined, apiRateLimit: 1000, trustedProxyHops: 0 },
-    logger: pino({ level: 'silent' }),
-    db,
-    ...mistral.deps(db, pino({ level: 'silent' })),
-    auth,
-    lifecycle: createLifecycle(),
-    background: createBackgroundTasks().run,
-  }),
-  mail,
-  db,
-);
+const { api } = testApp(db);
 
 const registerOptions = (cookie: string) => api.request('GET', '/api/auth/passkey/generate-register-options', { cookie });
 

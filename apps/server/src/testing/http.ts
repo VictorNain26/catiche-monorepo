@@ -1,10 +1,11 @@
 /**
- * The HTTP calls of a test, as the web makes them: a guardian invited and in by the code their
- * address received, a student created, a device paired by the guardian's code. `app` is the
- * test's app, built by createApp.
+ * The HTTP calls of a client, as the web makes them: a guardian invited and in by the code their
+ * address received, a student created, a device paired by the guardian's code, a turn read from
+ * its UI message stream. The tests and the harness (src/evaluate.ts) both play through it, so it
+ * throws on a refused step rather than asserting: no `bun:test` here.
  */
 
-import { expect } from 'bun:test';
+import { parseJsonEventStream, readUIMessageStream, uiMessageChunkSchema, type UIMessage, type UIMessageChunk } from 'ai';
 import { invite } from '../platform/auth/invitation';
 import type { Db } from '../platform/db/client';
 import type { memoryMailer } from './mailer';
@@ -35,17 +36,62 @@ interface Device {
   userAgent: string | null;
 }
 
-export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: Db) {
+/** The session cookie a response sets, as `name=value`; empty if it sets none. */
+const cookieOf = (res: Response) =>
+  res.headers
+    .getSetCookie()
+    .find((cookie) => cookie.startsWith('better-auth.session_token='))
+    ?.split(';')[0] ?? '';
+
+/** The response, once its status is the one the step expects; an error naming the step otherwise. */
+async function expectStatus(response: Response | Promise<Response>, status: number, step: string): Promise<Response> {
+  const res = await response;
+  if (res.status !== status) throw new Error(`${step}: HTTP ${String(res.status)} ${await res.text()}`);
+  return res;
+}
+
+/**
+ * A turn's UI message stream as the web reads it: the chunks in their order, parsed by the AI SDK,
+ * and the reply the student reads, built by its `readUIMessageStream`; with the stream's error, if
+ * any, and the raw body.
+ */
+async function readTurn(res: Response) {
+  const body = await res.text();
+  const chunks: UIMessageChunk[] = [];
+  let error: string | undefined;
+  const stream = parseJsonEventStream({ stream: new Response(body).body ?? new ReadableStream(), schema: uiMessageChunkSchema }).pipeThrough(
+    new TransformStream<{ success: true; value: UIMessageChunk } | { success: false; error: Error }, UIMessageChunk>({
+      transform(part, controller) {
+        if (!part.success) throw part.error;
+        chunks.push(part.value);
+        controller.enqueue(part.value);
+      },
+    }),
+  );
+  let last: UIMessage | undefined;
+  for await (const message of readUIMessageStream({
+    stream,
+    onError: (caught) => {
+      error = caught instanceof Error ? caught.message : String(caught);
+    },
+  })) {
+    last = message;
+  }
+  const reply = (last?.parts ?? []).flatMap((part) => (part.type === 'text' ? [part.text] : [])).join('');
+  return { status: res.status, chunks, reply, error, body };
+}
+
+export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: Db, origin = ORIGIN) {
   const request = (
     method: string,
     path: string,
     { cookie, body, headers }: { cookie?: string | undefined; body?: unknown; headers?: Record<string, string> } = {},
   ) =>
-    app.request(`${ORIGIN}${path}`, {
+    app.request(`${origin}${path}`, {
       method,
       headers: {
         'Content-Type': 'application/json',
-        Origin: ORIGIN,
+        Origin: origin,
         'User-Agent': 'test-device',
         ...(cookie === undefined ? {} : { Cookie: cookie }),
         ...headers,
@@ -53,11 +99,7 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
 
-  const cookieOf = (res: Response) =>
-    res.headers
-      .getSetCookie()
-      .find((cookie) => cookie.startsWith('better-auth.session_token='))
-      ?.split(';')[0] ?? '';
+  const redeem = (code: string) => request('POST', '/api/auth/device-pairing/redeem', { body: { code } });
 
   const api = {
     request,
@@ -69,33 +111,45 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
     /** In by the code the address receives, named on a first sign-in: the session cookie. */
     async signIn(email: string) {
       const received = mail.next(email);
-      expect((await request('POST', '/api/auth/email-otp/send-verification-otp', { body: { email, type: 'sign-in' } })).status).toBe(200);
-      const res = await request('POST', '/api/auth/sign-in/email-otp', { body: { email, otp: mail.codeIn(await received), name: 'Parent' } });
-      expect(res.status).toBe(200);
+      await expectStatus(request('POST', '/api/auth/email-otp/send-verification-otp', { body: { email, type: 'sign-in' } }), 200, 'code');
+      const res = await expectStatus(
+        request('POST', '/api/auth/sign-in/email-otp', { body: { email, otp: mail.codeIn(await received), name: 'Parent' } }),
+        200,
+        'sign-in',
+      );
       return cookieOf(res);
     },
     async student(cookie: string, overrides: Partial<Omit<Student, 'id'>> = {}) {
-      const res = await request('POST', '/api/household/students', {
-        cookie,
-        body: { name: 'Léa', level: 'cinquieme', birthMonth: birthMonthAged(12), ...overrides },
-      });
-      expect(res.status).toBe(201);
+      const res = await expectStatus(
+        request('POST', '/api/household/students', {
+          cookie,
+          body: { name: 'Léa', level: 'cinquieme', birthMonth: birthMonthAged(12), ...overrides },
+        }),
+        201,
+        'student',
+      );
       return (await res.json()) as Student;
     },
     async pairingCode(cookie: string, studentId: string) {
-      const res = await request('POST', `/api/household/students/${studentId}/pairing-code`, { cookie });
-      expect(res.status).toBe(201);
+      const res = await expectStatus(request('POST', `/api/household/students/${studentId}/pairing-code`, { cookie }), 201, 'pairing code');
       return ((await res.json()) as { code: string; expiresAt: string }).code;
     },
     async redeem(code: string) {
-      const res = await request('POST', '/api/auth/device-pairing/redeem', { body: { code } });
+      const res = await redeem(code);
       return { status: res.status, cookie: cookieOf(res) };
     },
     /** A guardian's code, redeemed on a new device: that device's session cookie. */
     async pair(cookie: string, studentId: string) {
-      const { status, cookie: device } = await api.redeem(await api.pairingCode(cookie, studentId));
-      expect(status).toBe(200);
-      return device;
+      return cookieOf(await expectStatus(redeem(await api.pairingCode(cookie, studentId)), 200, 'pairing'));
+    },
+    /** A session the student opens: its id. */
+    async session(cookie: string, accompanied = false) {
+      const res = await expectStatus(request('POST', '/api/sessions', { cookie, body: { accompanied } }), 201, 'session');
+      return ((await res.json()) as { id: string }).id;
+    },
+    /** One turn through the route, read from its UI message stream. */
+    async turn(cookie: string, sessionId: string, body: Record<string, unknown>) {
+      return readTurn(await request('POST', `/api/sessions/${sessionId}/messages`, { cookie, body }));
     },
     async sessionUser(cookie: string) {
       const res = await request('GET', '/api/auth/get-session', { cookie });
@@ -128,7 +182,7 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
         /** The guardian in by the code their address received, on this device. */
         async signIn(email: string) {
           const received = mail.next(email);
-          expect((await send('POST', '/api/auth/email-otp/send-verification-otp', { email, type: 'sign-in' })).status).toBe(200);
+          await expectStatus(send('POST', '/api/auth/email-otp/send-verification-otp', { email, type: 'sign-in' }), 200, 'code');
           return send('POST', '/api/auth/sign-in/email-otp', { email, otp: mail.codeIn(await received) });
         },
         redeem: (code: string) => send('POST', '/api/auth/device-pairing/redeem', { code }),
