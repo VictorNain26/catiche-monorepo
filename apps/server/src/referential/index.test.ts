@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'bun:test';
-import { programmeFor, programmes } from '.';
+import { notionsFor, programmeFor, programmes } from '.';
 import { PROGRAMME_SOURCES } from './sources';
 
 describe('referential texts', () => {
@@ -51,5 +51,20 @@ describe('programmeFor', () => {
 
   it('gives nothing for a subject without an extracted text', () => {
     expect(programmeFor('cinquieme', 'svt', 2026)).toBeNull();
+  });
+});
+
+describe('notionsFor', () => {
+  it('gives the class programme and the later college classes', () => {
+    const notions = notionsFor('cinquieme', 'mathematiques', 2026);
+    expect(notions?.entries).toEqual(programmeFor('cinquieme', 'mathematiques', 2026)?.entries ?? []);
+    expect(notions?.entries.length).toBeGreaterThan(0);
+    expect(new Set(notions?.later.map((entry) => entry.level))).toEqual(new Set(['quatrieme', 'troisieme']));
+    expect(notionsFor('troisieme', 'francais', 2026)?.later).toEqual([]);
+  });
+
+  it('gives nothing without a referential: another subject, or none', () => {
+    expect(notionsFor('quatrieme', 'histoire-geo', 2026)).toBeNull();
+    expect(notionsFor('quatrieme', undefined, 2026)).toBeNull();
   });
 });

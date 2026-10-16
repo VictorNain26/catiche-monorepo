@@ -35,11 +35,24 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup-monorepo
-      - run: bunx --no-install turbo run typecheck lint ${AFFECTED:+"$AFFECTED"}
+      - run: bunx --no-install turbo run typecheck lint lint:scripts ${AFFECTED:+"$AFFECTED"}
       - run: bunx --no-install prettier --check .
-      - run: bunx --no-install knip
-      # Version-pinned, as its README asks (https://github.com/QuiiBz/sherif).
-      - run: npx sherif@1.13.0
+      # knip reads the server's declarations, which a PR that does not affect it has not built.
+      - run: bunx --no-install turbo run build:types --filter=tomai-server
+      - run: bunx --no-install knip --treat-config-hints-as-errors
+      - run: bunx --no-install sherif
+      - name: The committed SQL matches the schema
+        working-directory: apps/server
+        run: |
+          bun run db:generate
+          if [ -n "$(git status --porcelain drizzle/)" ]; then
+            echo "::error::Schema and migrations out of sync: run 'bun run db:generate' in apps/server and commit drizzle/."
+            git status --porcelain drizzle/
+            exit 1
+          fi
+      - name: The migrations are consistent
+        working-directory: apps/server
+        run: bun run db:check
 
   actionlint:
     name: Actionlint
@@ -76,17 +89,8 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
 
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-      - uses: ./.github/actions/setup-monorepo
-      - run: bunx --no-install turbo run build ${AFFECTED:+"$AFFECTED"}
-
+  # No build job: the only builds are the server's, the web's and the landing's, which the e2e
+  # suites build before they run (turbo.json, `test:e2e`) and the image builds again.
   # Both e2e suites run on the runner and drive the browsers of Playwright's official image, which
   # docker compose serves as on a developer's machine (docker-compose.yml, `playwright`): no apt
   # on the runner, whose mirror has held a run up to 17 minutes, and every pull bounded
@@ -141,25 +145,17 @@ jobs:
           services: playwright
       - if: steps.affected.outputs.run == 'true'
         run: bunx --no-install turbo run test:e2e --filter=landing
+      - name: Keep the suite's report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-landing-report
+          path: apps/landing/playwright-report/
+          retention-days: 7
 
-  migrations:
-    name: Migration Sync
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup-monorepo
-      - name: The committed SQL matches the schema
-        working-directory: apps/server
-        run: |
-          bun run db:generate
-          if [ -n "$(git status --porcelain drizzle/)" ]; then
-            echo "::error::Schema and migrations out of sync: run 'bun run db:generate' in apps/server and commit drizzle/."
-            git status --porcelain drizzle/
-            exit 1
-          fi
-
-  # The image is built once, run against Postgres, and published by its commit on main.
+  # The image is built once, run against Postgres, and published by its commit on main. On a PR,
+  # only when the server or the web, which it serves, is affected. Its layers are cached in the
+  # GitHub Actions cache (https://docs.docker.com/build/ci/github-actions/cache/).
   image:
     name: Server image
     runs-on: ubuntu-latest
@@ -182,13 +178,34 @@ jobs:
       IMAGE: ghcr.io/${{ github.repository_owner }}/tomai-server
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Build
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-monorepo
+      # The web depends on the server: a change to either affects the web's build.
+      - name: Is the server or the web affected
+        id: affected
         run: |
-          IMAGE="${IMAGE,,}"
-          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
-          docker build --target production -t "$IMAGE:$GITHUB_SHA" -f apps/server/Dockerfile .
+          TASKS=$(bunx --no-install turbo run build --filter=web ${AFFECTED:+"$AFFECTED"} --dry=json | jq '[.tasks[] | select(.command != "<NONEXISTENT>")] | length')
+          echo "run=$([ "$TASKS" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      # A registry's names are lower case; the owner's may not be.
+      - run: echo "IMAGE=${IMAGE,,}" >> "$GITHUB_ENV"
+      # The docker-container driver, which the GitHub Actions cache needs.
+      - if: steps.affected.outputs.run == 'true'
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - name: Build
+        if: steps.affected.outputs.run == 'true'
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: apps/server/Dockerfile
+          target: production
+          tags: ${{ env.IMAGE }}:${{ github.sha }}
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       # NODE_ENV=test: the service's Postgres has no TLS, which production requires.
       - name: Run against Postgres
+        if: steps.affected.outputs.run == 'true'
         run: |
           docker run -d --name server --network host \
             -e NODE_ENV=test -e PORT=3000 -e LOG_LEVEL=warn \
@@ -206,7 +223,7 @@ jobs:
           exit 1
       - name: Publish
         id: publish
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: steps.affected.outputs.run == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -253,7 +270,7 @@ jobs:
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [check, actionlint, test, build, e2e-web, e2e-landing, migrations, image, secrets, sast, audit]
+    needs: [check, actionlint, test, e2e-web, e2e-landing, image, secrets, sast, audit]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

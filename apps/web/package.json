@@ -8,8 +8,7 @@
     "preview": "vite preview --port 3002 --strictPort",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc -b",
-    "test": "bun test src",
-    "clean": "rm -rf dist node_modules/.tmp"
+    "test": "bun test src"
   },
   "dependencies": {
     "@ai-sdk/react": "4.0.139",

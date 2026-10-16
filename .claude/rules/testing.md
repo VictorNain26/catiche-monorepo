@@ -26,7 +26,8 @@ demandent le Postgres de `docker compose` (`DATABASE_URL`).
 - **Serveur** : un test exerce le vrai code sur une vraie base, jamais un module remplacé.
   `testDatabase()` (`apps/server/src/testing/database.ts`) donne au fichier sa base, copiée
   d'un modèle que le preload migre une fois par lancement (`CREATE DATABASE … TEMPLATE`) et
-  supprimée après ; l'app se construit par `createApp` avec ses dépendances. Pas de
+  supprimée après ; l'app se construit par `testApp` (`apps/server/src/testing/app.ts`), et ses appels passent
+  par le client de `testing/http.ts`, celui du harnais. Pas de
   `mock.module` : une dépendance se remplace en la passant.
 - **Web, de bout en bout** : le paquet `@repo/playwright-web` dépend du web et du serveur, que
   turbo construit d'abord ; Playwright lance le serveur construit, qui sert le web construit, sur

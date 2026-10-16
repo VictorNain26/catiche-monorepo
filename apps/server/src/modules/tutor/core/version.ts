@@ -9,6 +9,7 @@ import { SCHOOL_LEVELS } from '../../../domain/levels';
 import { SUBJECT_FAMILIES } from '../../../domain/subjects';
 import { turnInstruction } from './analysis';
 import { VOICE_MARKER } from './assembler';
+import { VERDICTS } from './diagnosis';
 import { LADDER, turnContract } from './ladder';
 import { learnerMemoryBlock } from './memory';
 import { regenerationInstruction } from './output-check';
@@ -40,7 +41,7 @@ const ANALYSIS = {
 } as const;
 const DIAGNOSES = [
   null,
-  ...(['correct', 'right-step', 'incorrect', 'unclear'] as const).map((verdict) => ({
+  ...VERDICTS.map((verdict) => ({
     verdict,
     firstWrongStep: 'e',
     errorType: 'n/a' as const,

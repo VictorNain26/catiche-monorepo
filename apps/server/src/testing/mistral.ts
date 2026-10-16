@@ -20,7 +20,7 @@ interface WireUsage {
 
 type ChatReply = { text: string; usage?: Partial<WireUsage> } | { json: unknown; usage?: Partial<WireUsage> } | { status: number } | 'hang';
 
-type ModerationReply = { flagged?: string[]; scores?: Record<string, number> } | { status: number } | 'hang';
+type ModerationReply = { flagged?: string[] } | { status: number } | 'hang';
 
 interface Received {
   path: string;
@@ -51,11 +51,12 @@ function completion(reply: { text: string; usage?: Partial<WireUsage> } | { json
   });
 }
 
-function moderation(reply: { flagged?: string[]; scores?: Record<string, number> }, count: number): Response {
+function moderation(reply: { flagged?: string[] }, count: number): Response {
   const flagged = new Set(reply.flagged);
+  // Mistral's shape, scores included, though the server reads only the categories.
   const result = {
     categories: Object.fromEntries(['selfharm', 'sexual', 'violence_and_threats', 'dangerous', ...flagged].map((c) => [c, flagged.has(c)])),
-    category_scores: reply.scores ?? { selfharm: 0.01 },
+    category_scores: { selfharm: 0.01 },
   };
   return Response.json({ id: crypto.randomUUID(), model: 'mistral-moderation-2603', results: Array.from({ length: count }, () => result) });
 }

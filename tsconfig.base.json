@@ -23,21 +23,8 @@
     "verbatimModuleSyntax": true,
     "resolveJsonModule": true,
 
-    /* ========================================= */
-    /* Type Checking - Strict Mode              */
-    /* All options from strict: true            */
-    /* ========================================= */
+    /* Type Checking: strict, and the checks it leaves out */
     "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
-    "useUnknownInCatchVariables": true,
-    "alwaysStrict": true,
-
-    /* Additional Strict Checks */
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
