@@ -1,11 +1,10 @@
 import { Banner, Button, Card } from '@repo/ui';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
 import { BackLink, Page } from '../components/page';
 import { PasskeyCreate } from '../components/passkey-create';
 import { SignOut } from '../components/sign-out';
-import { authClient, authMessage } from '../lib/auth';
+import { authClient, authData } from '../lib/auth';
 import { deviceName, formatDay } from '../lib/device';
 import { passkeysQuery } from '../lib/passkey';
 
@@ -28,16 +27,11 @@ function Account() {
 function Passkeys() {
   const queryClient = useQueryClient();
   const { data: passkeys } = useSuspenseQuery(passkeysQuery);
-  const [failure, setFailure] = useState<string | null>(null);
   const refresh = () => queryClient.invalidateQueries({ queryKey: passkeysQuery.queryKey });
 
   const remove = useMutation({
-    mutationFn: async (id: string) => {
-      setFailure(null);
-      const { error } = await authClient.passkey.deletePasskey({ id });
-      if (error) setFailure(authMessage(error));
-      return refresh();
-    },
+    mutationFn: (id: string) => authData(authClient.passkey.deletePasskey({ id })),
+    onSettled: refresh,
   });
 
   return (
@@ -69,7 +63,7 @@ function Passkeys() {
           ))}
         </ul>
       )}
-      {failure && <Banner tone="error" title={failure} />}
+      {remove.error && <Banner tone="error" title={remove.error.message} />}
       <PasskeyCreate label="Créer une clé d’accès sur cet appareil" onCreated={refresh} />
     </section>
   );
