@@ -4,8 +4,6 @@ import { devices, expect, type Browser, type Page, type TestInfo } from '@playwr
 import { invite } from './database';
 import { codeSince, logMark } from './server-log';
 
-// iPhone and Android run side by side on one database: each test has its own address, in
-// lowercase ASCII, as better-auth stores it.
 /**
  * The birth month of a child exactly this old all year, up to 19: December of the year before,
  * since a birthday counts once its month is over (domain/memory-consent.ts). A fixed year would
@@ -13,6 +11,8 @@ import { codeSince, logMark } from './server-log';
  */
 export const birthMonthAged = (years: number, now = new Date()) => `${String(now.getUTCFullYear() - years - 1)}-12`;
 
+// iPhone and Android run side by side on one database: each test has its own address, in
+// lowercase ASCII, as better-auth stores it.
 export const address = (name: string) =>
   `${name
     .normalize('NFD')
