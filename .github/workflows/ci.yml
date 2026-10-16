@@ -15,9 +15,11 @@ on:
 
 permissions: {}
 
-# A new push cancels a PR's run; on main, each merge's run goes on to publish its image.
+# A new push cancels a PR's run. On main, each commit has its own group: a group holds one running
+# and one pending run, and a third merge would cancel the pending one, leaving a commit without
+# its image (https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency).
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
@@ -336,8 +338,8 @@ jobs:
     steps:
       - name: Deploy the image
         run: |
-          # Two merges close together can finish their CI out of order: only main's head deploys,
-          # so that an older image never replaces a newer one.
+          # Runs on main are concurrent, and two merges close together can finish out of order:
+          # only main's head deploys, so that an older image never replaces a newer one.
           head="$(git ls-remote "https://github.com/$GITHUB_REPOSITORY" refs/heads/main | cut -f1)"
           if [ "$head" != "$GITHUB_SHA" ]; then
             echo "::notice::$GITHUB_SHA is no longer main's head ($head): the run of the head deploys"
