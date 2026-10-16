@@ -9,10 +9,11 @@ import type { Logger } from 'pino';
 import { z } from 'zod';
 import { checkAnswer, sameMath, type MathCheck } from '../../../domain/exercise-math';
 import { normalizeForLeak } from '../../../domain/leak';
-import { LEVEL_SHORT_LABELS, SCHOOL_LEVELS, type SchoolLevel } from '../../../domain/levels';
+import { LEVEL_SHORT_LABELS, type SchoolLevel } from '../../../domain/levels';
+import { schoolYearOf } from '../../../domain/school-calendar';
 import type { SubjectFamily } from '../../../domain/subjects';
 import type { Ai } from '../../../platform/ai/client';
-import { programmeFor, programmes, type Entry } from '../../../referential';
+import { notionsFor, notionText, type Entry, type Notions } from '../../../referential';
 import { stripPromptTags, wrapUserMessage } from './fences';
 
 const ExerciseSheetSchema = z.object({
@@ -61,32 +62,6 @@ const ExerciseDraftSchema = z.object({
     ),
   ...ExerciseSheetSchema.shape,
 });
-
-/** The school year a date belongs to, named after the September that opens it. */
-export function schoolYearOf(date: Date): number {
-  // In Paris: on a server in UTC, the night of 1 September would still be August.
-  const parts = new Intl.DateTimeFormat('en', { timeZone: 'Europe/Paris', year: 'numeric', month: 'numeric' }).formatToParts(date);
-  const year = Number(parts.find((part) => part.type === 'year')?.value);
-  const month = Number(parts.find((part) => part.type === 'month')?.value);
-  return month >= 9 ? year : year - 1;
-}
-
-export interface Notions {
-  entries: Entry[];
-  later: Entry[];
-}
-
-/**
- * The programme of the class and of the later college classes for a subject, or null without a
- * referential: a subject other than mathematics and French.
- */
-export function notionsFor(level: SchoolLevel, subject: SubjectFamily | undefined, schoolYear: number): Notions | null {
-  if (subject !== 'mathematiques' && subject !== 'francais') return null;
-  const entries = programmeFor(level, subject, schoolYear)?.entries ?? [];
-  if (entries.length === 0) return null;
-  const later = SCHOOL_LEVELS.slice(SCHOOL_LEVELS.indexOf(level) + 1).flatMap((next) => programmeFor(next, subject, schoolYear)?.entries ?? []);
-  return { entries, later };
-}
 
 const listing = (entries: readonly Entry[]) => entries.map((entry) => `- ${entry.id} : ${entry.text}`).join('\n');
 
@@ -187,13 +162,9 @@ export function vote(drafts: readonly ExerciseSheet[]): VotedSheet | null {
   return { sheet, uncertain: (supported?.agreeing ?? 0) < 2 || mathCheck === 'failed', mathCheck };
 }
 
-const entryById = new Map(programmes.flatMap(({ entries }) => entries.map((entry) => [entry.id, entry] as const)));
-
-/** A notion of the referential, as its programme words it; undefined for an unknown id. */
-export const notionText = (id: string) => entryById.get(id)?.text;
 const texts = (ids: readonly string[]) =>
   ids
-    .flatMap((id) => entryById.get(id)?.text ?? [])
+    .flatMap((id) => notionText(id) ?? [])
     .map((text) => `- ${text}`)
     .join('\n');
 

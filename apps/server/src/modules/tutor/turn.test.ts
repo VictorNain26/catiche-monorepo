@@ -6,7 +6,8 @@
 import { describe, expect, it } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
 import { DISTRESS_REPLY } from '../../domain/distress';
-import { DAILY_BUDGET_MICRO_EUR, quotaDayStart } from '../../domain/quota';
+import { DAILY_BUDGET_MICRO_EUR } from '../../domain/quota';
+import { quotaDayStart } from '../../domain/school-calendar';
 import { aiCost } from '../../platform/ai/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';

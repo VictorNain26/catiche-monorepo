@@ -90,7 +90,13 @@ export default [
             // Another module is reached by its index.ts only.
             allow(inModule(['module-index']), sameModule(['routes', 'service', 'repository']), inModule(['module-index']), element('platform')),
             allow(inModule(['routes']), sameModule(['service', 'core']), element(['platform', 'domain'])),
-            allow(inModule(['service']), sameModule(['repository', 'core']), inModule(['module-index']), element(['platform', 'domain'])),
+            // The referential is the programmes' data: the service checks a notion it is given against it.
+            allow(
+              inModule(['service']),
+              sameModule(['repository', 'core']),
+              inModule(['module-index']),
+              element(['platform', 'domain', 'referential']),
+            ),
             allow(inModule(['core']), sameModule(['core']), element(['platform', 'domain', 'referential'])),
             // The tables store the shapes core/ decides.
             allow(inModule(['repository']), sameModule(['schema', 'core']), element(['platform', 'domain'])),

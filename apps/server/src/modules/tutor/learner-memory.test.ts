@@ -5,11 +5,11 @@
 
 import { describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
+import { schoolYearOf } from '../../domain/school-calendar';
 import { programmeFor } from '../../referential';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { birthMonthAged } from '../../testing/http';
-import { schoolYearOf } from './core/sheet';
 import { createTutorRepository } from './repository';
 import { exercise, turnRecord } from './schema';
 import { analysis, draft, record, sheet, turn } from './testing';
