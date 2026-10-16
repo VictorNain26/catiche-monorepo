@@ -6,12 +6,14 @@
 import { describe, expect, it } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
 import { DISTRESS_REPLY } from '../../domain/distress';
-import { DAILY_BUDGET_MICRO_EUR, quotaDayStart } from '../../domain/quota';
+import { DAILY_BUDGET_MICRO_EUR } from '../../domain/quota';
+import { quotaDayStart } from '../../domain/school-calendar';
 import { aiCost } from '../../platform/ai/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { FALLBACK_REPLY } from './core/output-check';
 import { PARENT_CUES } from './core/parent-cues';
+import { SHEET_PROMPT_VERSION } from './core/sheet';
 import { TURN_PROMPT_VERSION } from './core/version';
 import { distressEvent, exercise, message, studySession, turnRecord } from './schema';
 import { analysis, draft as sheetDraft } from './testing';
@@ -224,17 +226,19 @@ describe('a turn', () => {
     ]);
   });
 
-  it('refuses a second turn while one runs, and takes over one left by a crash', async () => {
+  it("refuses a second turn while one runs, and takes over one left by a crash past the turn's deadline", async () => {
     const sessionId = await newSession();
-    await db
-      .update(studySession)
-      .set({ turnStartedAt: sql`now()` })
-      .where(eq(studySession.id, sessionId));
+    // The fake Mistral's 2 s client deadline makes a turn's deadline 55 s (core/turn-deadline.ts).
+    const markedAgo = (seconds: number) =>
+      db
+        .update(studySession)
+        .set({ turnStartedAt: sql`now() - make_interval(secs => ${seconds})` })
+        .where(eq(studySession.id, sessionId));
+    await markedAgo(0);
     expect((await say(sessionId, 'Bonjour')).status).toBe(409);
-    await db
-      .update(studySession)
-      .set({ turnStartedAt: sql`now() - interval '4 minutes'` })
-      .where(eq(studySession.id, sessionId));
+    await markedAgo(50);
+    expect((await say(sessionId, 'Bonjour')).status).toBe(409);
+    await markedAgo(60);
     mistral.chat.push(analysis(), { text: 'Bonjour !' });
     expect((await say(sessionId, 'Bonjour')).reply).toBe('Bonjour !');
   });
@@ -279,6 +283,15 @@ describe('a turn', () => {
     await say(sessionId, 'Bonjour');
     expect((await records(sessionId)).at(-1)?.promptVersion).toBe(TURN_PROMPT_VERSION);
     expect(TURN_PROMPT_VERSION).toMatch(/^[0-9a-f]{12}$/);
+  });
+
+  it("records with a new exercise the version of the sheet's prompt, computed as the writer's is", async () => {
+    const sessionId = await newSession();
+    mistral.chat.push(analysis({ bringsExercise: true }), draft, draft, draft, { text: 'Que cherches-tu ?' });
+    await say(sessionId, 'Résous 3x + 5 = 20.');
+    const [stored] = await db.select({ promptVersion: exercise.promptVersion }).from(exercise).where(eq(exercise.sessionId, sessionId));
+    expect(stored?.promptVersion).toBe(SHEET_PROMPT_VERSION);
+    expect(SHEET_PROMPT_VERSION).toMatch(/^[0-9a-f]{12}$/);
   });
 });
 
