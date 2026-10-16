@@ -20,83 +20,35 @@ import { turnRecords } from './modules/tutor';
 import { createAi } from './platform/ai/client';
 import { createModeration } from './platform/ai/moderation';
 import { createAuth } from './platform/auth/auth';
-import { invite } from './platform/auth/invitation';
 import { user } from './platform/auth/schema';
 import { createDb, type Db } from './platform/db/client';
 import { pendingMigrations } from './platform/db/migrations';
-import type { Mailer } from './platform/email/mailer';
 import { createBackgroundTasks } from './platform/lifecycle/background';
 import { createLifecycle } from './platform/lifecycle/shutdown';
 import { createLogger } from './platform/observability/logger';
+import { httpClient } from './testing/http';
+import { memoryMailer } from './testing/mailer';
 
 /** The addresses of the run's guardians: RFC 6761 reserves `.test`, which no one receives. */
 const EVAL_DOMAIN = '@eval.test';
 
-/** The emails the run's server sends, kept in memory: the run reads the guardian's code there. */
-export function harnessInbox() {
-  const codes = new Map<string, string>();
-  const mailer: Mailer = (email) => {
-    const code = /\b\d{6}\b/.exec(email.text)?.[0];
-    if (code) codes.set(email.to, code);
-    return Promise.resolve();
-  };
-  return { mailer, codeFor: (address: string) => codes.get(address) };
-}
-
 export interface Harness {
-  app: { request: (input: string, init?: RequestInit) => Response | Promise<Response> };
-  origin: string;
-  db: Db;
-  inbox: ReturnType<typeof harnessInbox>;
+  /** The calls of the web, its emails kept in memory: the run reads the guardian's code there. */
+  api: ReturnType<typeof httpClient>;
   records: (sessionId: string) => Promise<{ outcome: string }[]>;
-  /** The work after a reply (an email, a session's title and summary), done before the next step. */
+  /** The work after a reply (a session's title and summary), done before the next step. */
   settled: () => Promise<void>;
 }
 
-function call(harness: Harness, method: string, path: string, { cookie, body }: { cookie?: string; body?: unknown } = {}) {
-  return harness.app.request(`${harness.origin}${path}`, {
-    method,
-    headers: { 'Content-Type': 'application/json', Origin: harness.origin, ...(cookie === undefined ? {} : { Cookie: cookie }) },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  });
-}
-
-async function ok(response: Response | Promise<Response>, step: string): Promise<Response> {
-  const res = await response;
-  if (!res.ok) throw new Error(`${step}: HTTP ${String(res.status)} ${await res.text()}`);
-  return res;
-}
-
-/** The `Cookie` header a response's `Set-Cookie` headers give, an expired cookie left out. */
-const cookieOf = (res: Response) =>
-  res.headers
-    .getSetCookie()
-    .map((cookie) => cookie.split(';')[0]?.trim() ?? '')
-    .filter((pair) => pair !== '' && !pair.endsWith('='))
-    .join('; ');
-
 /** A guardian invited and in by the code their address received: their session's cookie. */
-export async function signInGuardian(harness: Harness): Promise<string> {
-  const email = `guardian-${crypto.randomUUID().slice(0, 8)}${EVAL_DOMAIN}`;
-  await invite(harness.db, email);
-  await ok(call(harness, 'POST', '/api/auth/email-otp/send-verification-otp', { body: { email, type: 'sign-in' } }), 'code');
-  await harness.settled();
-  const otp = harness.inbox.codeFor(email);
-  if (!otp) throw new Error(`no code sent to ${email}`);
-  return cookieOf(await ok(call(harness, 'POST', '/api/auth/sign-in/email-otp', { body: { email, otp } }), 'sign-in'));
+export function signInGuardian(harness: Harness): Promise<string> {
+  return harness.api.guardian(`guardian-${crypto.randomUUID().slice(0, 8)}${EVAL_DOMAIN}`);
 }
 
 /** A new student of the guardian, at the exercise's level, and their device's session cookie. */
 async function pairedStudent(harness: Harness, guardian: string, exercise: Exercise): Promise<string> {
-  const birthMonth = `${String(new Date().getUTCFullYear() - 13)}-12`;
-  const created = await ok(
-    call(harness, 'POST', '/api/household/students', { cookie: guardian, body: { name: 'Élève', level: exercise.level, birthMonth } }),
-    'student',
-  );
-  const { id } = (await created.json()) as { id: string };
-  const pairing = await ok(call(harness, 'POST', `/api/household/students/${id}/pairing-code`, { cookie: guardian }), 'pairing code');
-  const { code } = (await pairing.json()) as { code: string };
-  return cookieOf(await ok(call(harness, 'POST', '/api/auth/device-pairing/redeem', { body: { code } }), 'pairing'));
+  const { id } = await harness.api.student(guardian, { name: 'Élève', level: exercise.level });
+  return harness.api.pair(guardian, id);
 }
 
 /** One student turn through the route, read from its UI message stream as the web reads it. */
@@ -105,19 +57,9 @@ async function playTurn(harness: Harness, sessionId: string, device: string, stu
   let text = '';
   let error: string | undefined;
   try {
-    const res = await ok(
-      call(harness, 'POST', `/api/sessions/${sessionId}/messages`, {
-        cookie: device,
-        body: { text: student.text, ...(student.inputMode && { inputMode: student.inputMode }) },
-      }),
-      'turn',
-    );
-    for (const line of (await res.text()).split('\n')) {
-      if (!line.startsWith('data: {')) continue;
-      const chunk = JSON.parse(line.slice('data: '.length)) as { type: string; delta?: string; errorText?: string };
-      if (chunk.type === 'text-delta' && chunk.delta) text += chunk.delta;
-      if (chunk.type === 'error') error = chunk.errorText ?? 'stream error';
-    }
+    const turn = await harness.api.turn(device, sessionId, { text: student.text, ...(student.inputMode && { inputMode: student.inputMode }) });
+    text = turn.reply;
+    error = turn.status === 200 ? turn.error : `turn: HTTP ${String(turn.status)} ${turn.body}`;
   } catch (caught) {
     error = caught instanceof Error ? caught.message : String(caught);
   }
@@ -140,9 +82,7 @@ export async function playConversation(
   repetition: number,
 ): Promise<Transcript> {
   const device = await pairedStudent(harness, guardian, exercise);
-  const { id: sessionId } = (await (
-    await ok(call(harness, 'POST', '/api/sessions', { cookie: device, body: { accompanied: false } }), 'session')
-  ).json()) as { id: string };
+  const sessionId = await harness.api.session(device);
   const played: Omit<TutorTurn, 'record'>[] = [];
   for (const student of renderTurns(scenario, exercise)) {
     const turn = await playTurn(harness, sessionId, device, student);
@@ -215,12 +155,16 @@ async function main(): Promise<number> {
       console.error('migrations not applied: run `bun run db:migrate` first');
       return 1;
     }
-    const inbox = harnessInbox();
+    const inbox = memoryMailer();
     const auth = createAuth(database.db, config, { mailer: inbox.mailer, logger, background: tasks.run, deleteUser: accountDeletion(database.db) });
     const ai = createAi({ mistral: config.mistral, db: database.db, logger });
     const moderation = createModeration({ mistral: config.mistral, logger });
     const app = createApp({ config, logger, db: database.db, auth, ai, moderation, lifecycle: createLifecycle(), background: tasks.run });
-    const harness: Harness = { app, origin: config.publicUrl, db: database.db, inbox, records: turnRecords(database.db), settled: tasks.settled };
+    const harness: Harness = {
+      api: httpClient(app, inbox, database.db, config.publicUrl),
+      records: turnRecords(database.db),
+      settled: tasks.settled,
+    };
 
     console.log(`removed ${String(await removeEvalAccounts(database.db))} account(s) of an earlier run`);
     const guardian = await signInGuardian(harness);

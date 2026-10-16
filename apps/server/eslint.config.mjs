@@ -16,6 +16,12 @@ const elements = [
 const files = [
   { pattern: '**/*.test.ts', category: 'test' },
   { pattern: ['src/main.ts', 'src/migrate.ts', 'src/invite.ts', 'src/evaluate.ts', 'src/app.ts', 'src/contract.ts'], category: 'root' },
+  // The harness plays through the tests' client: its calls are the web's.
+  { pattern: 'src/evaluate.ts', category: 'harness' },
+  // The app a test wires, as main.ts does.
+  { pattern: 'src/app.ts', category: 'app' },
+  // A module's fixtures, for its tests only.
+  { pattern: 'src/modules/*/testing.ts', category: 'test' },
   { pattern: 'src/config.ts', category: 'config' },
   // In a module, routes → service → repository, and only the repository and the schema touch the database.
   { pattern: 'src/modules/*/index.ts', category: 'module-index' },
@@ -92,7 +98,9 @@ export default [
             allow(element('domain'), element('domain')),
             allow(element('referential'), element(['referential', 'domain'])),
             allow(element('eval'), element(['eval', 'referential', 'domain'])),
-            allow(element('testing'), element(['testing', 'platform']), file('config')),
+            allow(file('harness'), element('testing')),
+            // A test's app is wired as main.ts wires it.
+            allow(element('testing'), element(['testing', 'platform']), file(['app', 'config']), inModule(['module-index'])),
             allow(file('test'), file(['root', 'config']), element(['platform', 'domain', 'module', 'referential', 'eval', 'testing'])),
           ],
         },

@@ -1,4 +1,4 @@
-/** The emails a test's app sends, kept in memory, and a wait for the next one to an address. */
+/** The emails a test's app (or the harness's) sends, kept in memory, and a wait for the next one to an address. */
 
 import type { Email, Mailer } from '../platform/email/mailer';
 

@@ -5,42 +5,16 @@
 
 import { describe, expect, it } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
-import pino from 'pino';
-import { createApp } from '../../app';
-import { createAuth } from '../../platform/auth/auth';
-import { createBackgroundTasks } from '../../platform/lifecycle/background';
-import { createLifecycle } from '../../platform/lifecycle/shutdown';
+import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
-import { fakeMistral } from '../../testing/mistral';
-import { birthMonthAged, httpClient, ORIGIN } from '../../testing/http';
-import { memoryMailer } from '../../testing/mailer';
-import { accountDeletion } from '../household';
+import { birthMonthAged } from '../../testing/http';
 import type { ExerciseState } from './core/exercise-turn';
-import type { ExerciseSheet } from './core/sheet';
 import { createTutorRepository, type ExerciseProgress, type SavedTurn } from './repository';
 import { exercise, message, studySession } from './schema';
+import { record, sheet as sheetOf, turn } from './testing';
 
 const { db } = await testDatabase();
-const mistral = fakeMistral();
-const mail = memoryMailer();
-const auth = createAuth(
-  db,
-  { publicUrl: ORIGIN, authSecret: 'x'.repeat(32) },
-  { mailer: mail.mailer, logger: pino({ level: 'silent' }), background: createBackgroundTasks().run, deleteUser: accountDeletion(db) },
-);
-const api = httpClient(
-  createApp({
-    config: { production: false, webDistDir: undefined, apiRateLimit: 100, trustedProxyHops: 0 },
-    logger: pino({ level: 'silent' }),
-    db,
-    ...mistral.deps(db, pino({ level: 'silent' })),
-    auth,
-    lifecycle: createLifecycle(),
-    background: createBackgroundTasks().run,
-  }),
-  mail,
-  db,
-);
+const { api } = testApp(db);
 
 interface Session {
   id: string;
@@ -143,21 +117,7 @@ describe('sessions', () => {
 
 describe('the exercise in progress', () => {
   const repository = createTutorRepository(db);
-  const sheet: ExerciseSheet = {
-    statement: 'Résous 3x + 5 = 20.',
-    kind: 'short',
-    answer: 'x = 5',
-    answerForms: ['5'],
-    mathEquation: '3*x + 5 = 20',
-    mathAnswer: 'x = 5',
-    steps: [],
-    commonErrors: [],
-    rule: null,
-    facts: [],
-    expectedElements: [],
-    entries: [],
-    laterEntries: [],
-  };
+  const sheet = sheetOf();
   const fresh: ExerciseState = {
     sheet,
     uncertain: false,
@@ -169,16 +129,6 @@ describe('the exercise in progress', () => {
     solved: false,
   };
   const newExercise: SavedTurn['newExercise'] = { sheet, uncertain: false, drawnForms: ['x = 5', '5'], mathCheck: 'passed', promptVersion: 'v1' };
-  const record: SavedTurn['record'] = { model: 'm', promptVersion: 'v', newExercise: false, findings: [], outcome: 'passed' };
-  const turn = (overrides: Partial<SavedTurn>): SavedTurn => ({
-    exchange: { studentText: 'élève', photoText: null, tutorText: 'tuteur', replay: null },
-    subject: null,
-    newExercise: null,
-    exerciseId: null,
-    progress: null,
-    record,
-    ...overrides,
-  });
   const progress = (overrides: Partial<ExerciseProgress> = {}): ExerciseProgress => ({
     hintLevel: 0,
     stuckTurns: 0,
@@ -241,7 +191,7 @@ describe('the exercise in progress', () => {
 
   it('writes nothing of a turn that fails: no exercise, no message, no record', async () => {
     const session = await start(asStudentA);
-    const broken = turn({ newExercise, record: { ...record, outcome: 'not-an-outcome' as 'passed' } });
+    const broken = turn({ newExercise, record: record({ outcome: 'not-an-outcome' as 'passed' }) });
     expect(
       await repository.saveTurn(session.id, broken).then(
         () => null,
