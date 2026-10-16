@@ -188,14 +188,17 @@ export function exerciseBlock(sheet: ExerciseSheet, memory: string | null): stri
 }
 
 /**
- * The version of everything a draw receives besides what the student sent: each class's
- * instructions, with and without a programme, and the schema it fills, whose descriptions are
- * instructions too. Hashed as the writer's (`version.ts`): an edit of any of them makes a new
- * version, which the exercise records and Mistral's cache is keyed by.
+ * The version of the instructions a draw receives: each class's, with and without a programme,
+ * the fence around the student's message, and the schema it fills, whose descriptions are
+ * instructions too. Not the data: the student's message and files, the programme's notions (the
+ * referential pins its sources). Hashed as the writer's (`version.ts`): an edit of any of them
+ * makes a new version, which the exercise records and Mistral's cache is keyed by.
  */
 export const SHEET_PROMPT_VERSION = promptVersion(
   [
-    ...SCHOOL_LEVELS.flatMap((level) => [null, { entries: [], later: [] }].map((notions) => sheetMessages(level, notions, '', null)[0].content)),
+    ...SCHOOL_LEVELS.flatMap((level) =>
+      [null, { entries: [], later: [] }].flatMap((notions) => sheetMessages(level, notions, '', null).map((message) => message.content)),
+    ),
     JSON.stringify(z.toJSONSchema(ExerciseDraftSchema)),
   ].join('\n'),
 );

@@ -28,7 +28,7 @@ const files = [
   { pattern: 'src/modules/*/index.ts', category: 'module-index' },
   { pattern: 'src/modules/*/routes.ts', category: 'routes' },
   { pattern: 'src/modules/*/service.ts', category: 'service' },
-  // The tutor's turn, which the service opens and runs: it reaches what the service reaches.
+  // The tutor's turn, which the service opens and runs: the repository, core/ and the platform, not the referential.
   { pattern: 'src/modules/*/turn-pipeline.ts', category: 'pipeline' },
   { pattern: 'src/modules/*/repository.ts', category: 'repository' },
   { pattern: 'src/modules/*/schema.ts', category: 'schema' },

@@ -226,17 +226,19 @@ describe('a turn', () => {
     ]);
   });
 
-  it('refuses a second turn while one runs, and takes over one left by a crash', async () => {
+  it("refuses a second turn while one runs, and takes over one left by a crash past the turn's deadline", async () => {
     const sessionId = await newSession();
-    await db
-      .update(studySession)
-      .set({ turnStartedAt: sql`now()` })
-      .where(eq(studySession.id, sessionId));
+    // The fake Mistral's 2 s client deadline makes a turn's deadline 55 s (core/turn-deadline.ts).
+    const markedAgo = (seconds: number) =>
+      db
+        .update(studySession)
+        .set({ turnStartedAt: sql`now() - make_interval(secs => ${seconds})` })
+        .where(eq(studySession.id, sessionId));
+    await markedAgo(0);
     expect((await say(sessionId, 'Bonjour')).status).toBe(409);
-    await db
-      .update(studySession)
-      .set({ turnStartedAt: sql`now() - interval '4 minutes'` })
-      .where(eq(studySession.id, sessionId));
+    await markedAgo(50);
+    expect((await say(sessionId, 'Bonjour')).status).toBe(409);
+    await markedAgo(60);
     mistral.chat.push(analysis(), { text: 'Bonjour !' });
     expect((await say(sessionId, 'Bonjour')).reply).toBe('Bonjour !');
   });
