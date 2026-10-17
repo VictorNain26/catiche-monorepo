@@ -5,11 +5,11 @@
  * a new version, so that measures never mix two prompts.
  */
 
+import { VERDICTS } from '../../../domain/diagnosis';
 import { SCHOOL_LEVELS } from '../../../domain/levels';
 import { SUBJECT_FAMILIES } from '../../../domain/subjects';
 import { turnInstruction } from './analysis';
 import { VOICE_MARKER } from './assembler';
-import { VERDICTS } from './diagnosis';
 import { LADDER, turnContract } from './ladder';
 import { learnerMemoryBlock } from './memory';
 import { regenerationInstruction } from './output-check';

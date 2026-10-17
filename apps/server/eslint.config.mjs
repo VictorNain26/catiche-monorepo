@@ -104,7 +104,8 @@ export default [
             // The tables store the shapes core/ decides.
             allow(inModule(['repository']), sameModule(['schema', 'core']), element(['platform', 'domain'])),
             allow(inModule(['schema']), sameModule(['core']), element(['platform', 'domain'])),
-            allow(element('platform'), element('platform'), file('config')),
+            // The domain imports nothing: the platform may read its value lists (a reasoning effort).
+            allow(element('platform'), element(['platform', 'domain']), file('config')),
             allow(element('domain'), element('domain')),
             allow(element('referential'), element(['referential', 'domain'])),
             allow(element('eval'), element(['eval', 'referential', 'domain'])),

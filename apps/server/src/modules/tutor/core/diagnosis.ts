@@ -7,6 +7,7 @@
 
 import type { Logger } from 'pino';
 import { z } from 'zod';
+import { DECIDED_BY, DIAGNOSIS_ERROR_TYPES, VERDICTS } from '../../../domain/diagnosis';
 import { compareEquations, sameMath } from '../../../domain/exercise-math';
 import type { Ai } from '../../../platform/ai/client';
 import { stripPromptTags, wrapUserMessage } from './fences';
@@ -14,11 +15,6 @@ import type { ExerciseSheet } from './sheet';
 
 const DIAGNOSIS_PROMPT_VERSION = '2026-10-05.2';
 export const DIAGNOSIS_TIMEOUT_MS = 8_000;
-
-export const VERDICTS = ['correct', 'right-step', 'incorrect', 'unclear'] as const;
-export const DIAGNOSIS_ERROR_TYPES = ['guess', 'misinterpret', 'careless', 'right-idea', 'imprecise', 'not-sure', 'n/a'] as const;
-/** mathjs settled the verdict, or the model alone. */
-export const DECIDED_BY = ['mathjs', 'model'] as const;
 
 const DiagnosisSchema = z.object({
   verdict: z
