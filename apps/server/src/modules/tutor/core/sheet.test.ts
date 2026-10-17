@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
 import { notionsFor } from '../../../referential';
-import { exerciseBlock, keepKnownNotions, sheetMessages, vote, type ExerciseSheet } from './sheet';
+import { exerciseBlock, keepKnownNotions, sheetMessages, sheetPromptVersion, vote, type ExerciseSheet } from './sheet';
 
 function first<T>(items: readonly T[] | undefined): T {
   const [item] = items ?? [];
@@ -61,6 +61,22 @@ describe('sheetMessages', () => {
     const [system] = sheetMessages('quatrieme', null, 'Quand a eu lieu la bataille de Marignan ?', null);
     expect(system.content).toContain('Aucun programme fourni');
     expect(system.content).not.toContain('<programme>');
+  });
+});
+
+describe('sheetPromptVersion', () => {
+  /** The messages of a draw, one of their template parts written otherwise. */
+  const rewritten =
+    (from: RegExp, to: string) =>
+    (...args: Parameters<typeof sheetMessages>) =>
+      sheetMessages(...args).map((message) => ({ content: message.content.replace(from, to) }));
+
+  it("changes with the format of a programme's line", () => {
+    expect(sheetPromptVersion(rewritten(/^- (\S+) : /gm, '* $1: '))).not.toBe(sheetPromptVersion());
+  });
+
+  it('changes with the fence of an attached file', () => {
+    expect(sheetPromptVersion(rewritten(/<attached_file name="[^"]*">/g, '<attached_file>'))).not.toBe(sheetPromptVersion());
   });
 });
 

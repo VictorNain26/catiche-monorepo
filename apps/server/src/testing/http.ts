@@ -36,11 +36,14 @@ interface Device {
   userAgent: string | null;
 }
 
-/** The session cookie a response sets, as `name=value`; empty if it sets none. */
+/**
+ * The session cookie a response sets, as `name=value`; empty if it sets none. Over https,
+ * better-auth prefixes its name `__Secure-` (`createCookieGetter`, better-auth/dist/cookies).
+ */
 const cookieOf = (res: Response) =>
   res.headers
     .getSetCookie()
-    .find((cookie) => cookie.startsWith('better-auth.session_token='))
+    .find((cookie) => /^(__Secure-)?better-auth\.session_token=/.test(cookie))
     ?.split(';')[0] ?? '';
 
 /** The response, once its status is the one the step expects; an error naming the step otherwise. */
@@ -101,6 +104,14 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
 
   const redeem = (code: string) => request('POST', '/api/auth/device-pairing/redeem', { body: { code } });
 
+  /**
+   * The email of a code, waited for before the request that sends it (the auth sends in the
+   * background). Awaited together, a refused request fails the step at once, and the wait
+   * rejecting later is not left unhandled.
+   */
+  const codeSent = async (email: string, send: () => Response | Promise<Response>) =>
+    (await Promise.all([mail.next(email), expectStatus(send(), 200, 'code')]))[0];
+
   const api = {
     request,
     /** Invited, then in by the code their address received: the session it opens. */
@@ -110,10 +121,11 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
     },
     /** In by the code the address receives, named on a first sign-in: the session cookie. */
     async signIn(email: string) {
-      const received = mail.next(email);
-      await expectStatus(request('POST', '/api/auth/email-otp/send-verification-otp', { body: { email, type: 'sign-in' } }), 200, 'code');
+      const received = await codeSent(email, () =>
+        request('POST', '/api/auth/email-otp/send-verification-otp', { body: { email, type: 'sign-in' } }),
+      );
       const res = await expectStatus(
-        request('POST', '/api/auth/sign-in/email-otp', { body: { email, otp: mail.codeIn(await received), name: 'Parent' } }),
+        request('POST', '/api/auth/sign-in/email-otp', { body: { email, otp: mail.codeIn(received), name: 'Parent' } }),
         200,
         'sign-in',
       );
@@ -181,9 +193,8 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
         send,
         /** The guardian in by the code their address received, on this device. */
         async signIn(email: string) {
-          const received = mail.next(email);
-          await expectStatus(send('POST', '/api/auth/email-otp/send-verification-otp', { email, type: 'sign-in' }), 200, 'code');
-          return send('POST', '/api/auth/sign-in/email-otp', { email, otp: mail.codeIn(await received) });
+          const received = await codeSent(email, () => send('POST', '/api/auth/email-otp/send-verification-otp', { email, type: 'sign-in' }));
+          return send('POST', '/api/auth/sign-in/email-otp', { email, otp: mail.codeIn(received) });
         },
         redeem: (code: string) => send('POST', '/api/auth/device-pairing/redeem', { code }),
       };

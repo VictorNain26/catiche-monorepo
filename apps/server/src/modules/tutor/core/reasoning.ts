@@ -10,8 +10,8 @@
  */
 
 import type { SchoolLevel } from '../../../domain/levels';
+import type { ReasoningEffort } from '../../../domain/reasoning-effort';
 import type { SubjectFamily } from '../../../domain/subjects';
-import type { ReasoningEffort } from '../../../platform/ai/client';
 import type { TurnAnalysis } from './analysis';
 
 /** School levels where abstract reasoning becomes worth the latency cost. */
