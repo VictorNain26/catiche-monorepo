@@ -10,7 +10,7 @@ import { BackLink, Page } from '../components/page';
 import { QrCode } from '../components/qr-code';
 import { WeekSummary } from '../components/week-summary';
 import { api, isProblem, parseResponse } from '../lib/api';
-import { authClient, authMessage } from '../lib/auth';
+import { authClient, authData, deviceSessionsQuery } from '../lib/auth';
 import { deviceName, formatDay, formatHour } from '../lib/device';
 import { formatCode, pairingLink } from '../lib/pairing';
 import { summaryQuery } from '../lib/summary';
@@ -160,14 +160,16 @@ function NextStep({ child, pairing }: { child: Student; pairing: Pairing }) {
  */
 function OpenHere({ child }: { child: Student }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const open = useMutation({
     mutationFn: async () => {
-      const { data: held } = await authClient.multiSession.listDeviceSessions();
-      const own = held?.find(({ user }) => user.id === child.id);
-      const { error } = own
-        ? await authClient.multiSession.setActive({ sessionToken: own.session.token })
-        : await authClient.devicePairing.redeem({ code: (await parseResponse(student['pairing-code'].$post({ param: { id: child.id } }))).code });
-      if (error) throw new Error(authMessage(error));
+      const held = await queryClient.query(deviceSessionsQuery);
+      const own = held.find(({ user }) => user.id === child.id);
+      await (own
+        ? authData(authClient.multiSession.setActive({ sessionToken: own.session.token }))
+        : authData(
+            authClient.devicePairing.redeem({ code: (await parseResponse(student['pairing-code'].$post({ param: { id: child.id } }))).code }),
+          ));
       // Loaded afresh: nothing of the guardian's stays in memory.
       await navigate({ to: '/', reloadDocument: true });
     },

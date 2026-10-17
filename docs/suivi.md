@@ -117,8 +117,6 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
   d'école (surligneur, gribouillis) à repenser ; la note « c'est toi qui l'as trouvé ! », qui
   célèbre et finit par un point d'exclamation, contre la charte ; l'image Open Graph composée ;
   une application de preview par PR.
-- Trois appels à `listDeviceSessions` (`foyer.$studentId.tsx`, `sign-out.tsx`, `bienvenue.tsx`)
-  gèrent chacun l'erreur à leur façon : passer par `deviceSessionsQuery` (`lib/auth.ts`).
 - Aux étapes 3 et 4, avec les écrans : les cartes en `li` des listes deviennent `List`.
 
 **Lot 4, Tom**
