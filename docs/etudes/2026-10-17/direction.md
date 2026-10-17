@@ -109,12 +109,76 @@ L'impression de base malsaine vient du dispositif qui entoure le code plus que d
 quarantaine d'études, une doc stratégique de 1 300 lignes, des règles, des lots, des étapes, un
 plan de nettoyage en plusieurs PR, pour un projet mené seul et sans utilisateur.
 
+## Synthèse : le socle et les hypothèses
+
+Quatre recherches du même jour l'étayent : le rôle du parent (`parent.md`), les méthodes et la
+motivation des 11-15 ans (`methodes-motivation.md`), le collège et le marché de la révision en
+France (`france-marche.md`), le fournisseur d'IA et les mineurs (`fournisseur-mineurs.md`). La
+vision réécrite sépare ce que la recherche établit, qui ne bouge plus, de ce que seul l'usage
+tranchera.
+
+### Le socle
+
+1. **Finir le devoir ne prouve plus rien ; ce qui compte, c'est ce que l'enfant sait faire
+   seul.** Les élèves font faire leurs devoirs par l'IA, l'évaluation revient en classe, et au
+   brevet 2026 les moyennes de 3e comptent pour 40 % (`france-marche.md`).
+2. **La méthode est prouvée au collège, en classe** : s'interroger avec correction (g ≈ 0,60,
+   Yang et al. 2021), s'expliquer (g = 0,43 au secondaire, Bisra et al. 2018), apprendre à
+   organiser son travail (`methodes-motivation.md`).
+3. **L'IA qui fait à la place nuit** : les notes d'entraînement montent, celles de l'examen
+   baissent (Bastani et al. 2025). Tom ne cède pas.
+4. **Le parent donne du sens et un cadre, il ne fait ni ne corrige.** Parler de l'école et de
+   l'utilité des matières va avec la réussite ; l'aide directe aux devoirs est la seule forme
+   associée négativement, et le contrôle suit les mauvais résultats puis les prédit (corrélations,
+   `parent.md`). Ce qui marche par essai randomisé : une information rare, ciblée, poussée vers le
+   parent, sans effet mesuré sur les notes au collège.
+5. **Conçu d'abord pour les familles modestes** : un portail en libre-service creuse l'écart
+   (environ 75 % d'usage dans les écoles aux meilleurs résultats, 20 % dans les plus faibles,
+   Bergman 2020).
+6. **Ni jeu ni récompense** : les récompenses attendues minent la motivation, davantage chez
+   l'enfant ; l'effet de la gamification est petit et retombe en quelques semaines. Ce qui fait
+   revenir : un but proche et une raison qui compte pour l'enfant.
+7. **L'IA choisie par critères, pas par marque** : des modèles ouverts, servis en Europe, sans
+   conservation des échanges, par un fournisseur qui accepte les moins de 15 ans
+   (`fournisseur-mineurs.md`).
+8. **La place** : personne ne réunit l'interrogation sur le cours, la révision espacée calée sur
+   le programme du collège et un tuteur qui ne donne pas la réponse ; personne ne donne une
+   méthode au parent (`france-marche.md`).
+
+### Les hypothèses, et ce qui les tranche
+
+| Hypothèse | Pourquoi elle est risquée | Ce qui la tranche |
+|---|---|---|
+| **L'enfant s'en sert de lui-même** | Le risque n° 1 : dans 18 collèges du Tennessee, Khanmigo réglé pour ne pas donner la réponse reçoit un message un jour sur trois de l'élève médian (Oreopoulos et Low 2026) ; l'effort paraît inefficace | En bêta, la part des séances commencées sans relance, et le retour sur plusieurs semaines |
+| **La méthode tient seul à la maison** | Aucun essai d'app de révision ou de tuteur IA utilisé par des collégiens seuls chez eux | En bêta, le score sans aide une semaine après |
+| **Le moment avant le contrôle est le bon** | Déduit des sources, jamais demandé à un parent | Le questionnaire, puis la bêta |
+| **Le parent veut une méthode plutôt qu'un tableau, et la suit** | Le marché ne vend que des tableaux | Le questionnaire et ses échanges de 15 minutes, puis la bêta |
+| **Le prix, autour de 8 € par mois** | Entre 4,90 et 14,99 € chez les concurrents ; jamais testé | La bêta |
+| **Un fournisseur sert les moins de 15 ans** | La clause 2.2(c) de Mistral les interdit, y compris par Azure, Bedrock ou Vertex ; Scaleway sert Small 3.2 sans clause sur les mineurs, sans Small 4 ; aucune voix française commerciale hors de l'API de Mistral | Une réponse écrite de Scaleway, ou une dérogation de Mistral dans un bon de commande ; un avocat sur les quatre points marqués |
+
+### Ce que la vision actuelle change
+
+- **Le moment** : avant le contrôle, plus seulement le soir du blocage ; la révision espacée entre
+  dans la V1.
+- **Le mode accompagné en 6e et 5e** : le parent assis à côté pendant la séance va contre ce que
+  dit la recherche sur l'aide directe aux devoirs. Proposé : le parent ne s'assoit plus pour la
+  séance ; son rôle passe par le sens, le cadre et le point de la semaine.
+- **Le tableau de bord** : un point rare et tourné vers l'action (ce qui a résisté, comment en
+  parler) devient le cœur ; le tableau à consulter passe au second plan.
+- **Le fournisseur** : écrit par critères ; Mistral par API reste pour le développement.
+- **La promesse** : moins de devoirs bâclés et un enfant qui sait s'il sait, jamais de meilleures
+  notes.
+
 ## À trancher par Victor
 
-1. **La direction** : « la méthode de la maison », avec le moment avant le contrôle au centre ;
-   ou une autre lecture de « précurseur » (programme complet, primaire, école alternative).
-2. **Le public, avant de rebâtir** : rouvrir la décision « pas d'entretiens » pour cinq
-   conversations avec des parents de l'entourage, sur une question : « Avant un contrôle, comment
-   savez-vous si votre enfant sait vraiment ? »
-3. **Le dispositif** : ce qu'on allège de la doc, des règles et des lots, une fois la vision
-   réécrite.
+1. **La direction et son socle** : « la méthode de la maison », avec le moment avant le contrôle
+   au centre.
+2. **Le mode accompagné** : retirer le parent assis à côté pendant la séance, en 6e et 5e.
+3. **Le parent** : un point rare et tourné vers l'action plutôt qu'un tableau de bord à consulter.
+4. **Le questionnaire** : un formulaire anonyme pour les parents, qui remplace « pas d'entretiens
+   avant la bêta » ; ses réponses entrent dans une étude datée.
+5. **Le fournisseur** : des critères dans la vision ; demander par écrit à Scaleway si son
+   partenariat avec Mistral fait remonter la clause des mineurs.
+6. **Le dispositif** : une seule place par fait (la vision pour le pourquoi et les principes,
+   `decisions.md` pour les choix datés, le code pour les chiffres), `suivi.md` et `roadmap.md`
+   fusionnés en un état court, et les suppressions de l'inventaire du 2026-10-17.
