@@ -7,43 +7,16 @@
 
 import { describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
-import pino from 'pino';
-import { createBackgroundTasks } from '../lifecycle/background';
-import { createApp } from '../../app';
-import { accountDeletion } from '../../modules/household';
 import { household, householdMember } from '../../modules/household/schema';
+import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
-import { httpClient, ORIGIN } from '../../testing/http';
-import { fakeMistral } from '../../testing/mistral';
-import { memoryMailer } from '../../testing/mailer';
-import { createLifecycle } from '../lifecycle/shutdown';
-import { createAuth } from './auth';
+import { ORIGIN } from '../../testing/http';
 import { invitationIdentifier, invite } from './invitation';
 import { session, user, verification } from './schema';
 
 const { db } = await testDatabase();
-const mistral = fakeMistral();
-const mail = memoryMailer();
-const tasks = createBackgroundTasks();
-const auth = createAuth(
-  db,
-  { publicUrl: ORIGIN, authSecret: 'x'.repeat(32) },
-  { mailer: mail.mailer, logger: pino({ level: 'silent' }), background: tasks.run, deleteUser: accountDeletion(db) },
-);
-const api = httpClient(
-  createApp({
-    // Behind one proxy, as at Clever Cloud.
-    config: { production: false, webDistDir: undefined, apiRateLimit: 1000, trustedProxyHops: 1 },
-    logger: pino({ level: 'silent' }),
-    db,
-    ...mistral.deps(db, pino({ level: 'silent' })),
-    auth,
-    lifecycle: createLifecycle(),
-    background: createBackgroundTasks().run,
-  }),
-  mail,
-  db,
-);
+// Behind one proxy, as at Clever Cloud.
+const { api, mail, tasks } = testApp(db, { config: { trustedProxyHops: 1 } });
 
 const sendCode = (email: string) => api.request('POST', '/api/auth/email-otp/send-verification-otp', { body: { email, type: 'sign-in' } });
 const signIn = (email: string, otp: string) => api.request('POST', '/api/auth/sign-in/email-otp', { body: { email, otp } });

@@ -5,12 +5,12 @@
       "entry": ["scripts/*.mjs"],
       "project": ["scripts/**/*.mjs"],
     },
+    // Run after the server's `build:types`: the declarations it emits (dist/types, the package's
+    // export) are an entry, and only they name @simplewebauthn/server, through better-auth's
+    // passkey plugin (TS2883).
     "apps/server": {
       "entry": ["src/main.ts", "src/contract.ts", "src/**/*.test.ts"],
       "project": ["src/**/*.ts"],
-      // Only the declarations `build:types` emits name its types, through better-auth's passkey
-      // plugin (TS2883): no source imports it, and a run without that build would call it unused.
-      "ignoreDependencies": ["@simplewebauthn/server"],
     },
     "packages/ui": {
       "entry": ["src/**/*.test.tsx"],
@@ -18,10 +18,6 @@
     },
     "packages/tokens": {
       "entry": ["*.test.mjs"],
-    },
-    "tooling/playwright-web": {
-      "entry": ["reset-database.ts"],
-      "ignoreDependencies": ["tomai-server", "web"],
     },
   },
 }

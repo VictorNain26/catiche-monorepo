@@ -18,6 +18,7 @@ import {
 import type { Logger } from 'pino';
 import type { z } from 'zod';
 import type { MistralConfig } from '../../config';
+import type { ReasoningEffort } from '../../domain/reasoning-effort';
 import type { Db } from '../db/client';
 import { pricing, type Usage } from './cost';
 import { insertCost } from './repository';
@@ -39,7 +40,7 @@ export interface TextCall {
   maxOutputTokens?: number;
   /** Mistral's prompt cache: stable while the start of the prompt is (docs.mistral.ai/api/endpoint/chat). */
   promptCacheKey?: string;
-  reasoningEffort?: 'none' | 'high';
+  reasoningEffort?: ReasoningEffort;
   /** A deadline shorter than the configured one, for a call the turn waits on; never longer. */
   timeoutMs?: number;
 }
@@ -56,6 +57,8 @@ interface StructuredCall<T> extends TextCall {
 export interface Ai {
   /** The dated model every call uses. */
   model: string;
+  /** The deadline that caps every call, its retries included. */
+  timeoutMs: number;
   /** The text, and the response messages as the model produced them, reasoning included, for a later turn to replay. */
   generateText: (call: TextCall) => Promise<{ text: string; responseMessages: ResponseMessage[] }>;
   generateStructured: <T>(call: StructuredCall<T>) => Promise<{ object: T; usage: Usage }>;
@@ -123,6 +126,7 @@ export function createAi({ mistral, db, logger }: { mistral: MistralConfig; db: 
 
   return {
     model: mistral.model,
+    timeoutMs: mistral.timeoutMs,
 
     async generateText(call) {
       const result = await generate({ ...settings(call, AbortSignal.timeout(deadline(call))), messages: call.messages });

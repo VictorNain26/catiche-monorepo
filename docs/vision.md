@@ -144,8 +144,8 @@ Victor a choisi de ne pas mener d'entretiens (`decisions.md`) : ces hypothèses
 ## Marque
 
 Le produit s'appelle **Catiche**, le gîte de la loutre ; Tom est la loutre, le tuteur : en 2D
-au trait dans l'app, en 3D sur le site. La direction artistique se rechoisit (2026-10-12) sur les
-vrais écrans du site et de l'app ; sa charte (`charte.md`) règle les couleurs et les fontes, et
+au trait dans l'app, en 3D sur le site. La direction artistique est « Rive », pour le site et l'app
+(`decisions.md`, 2026-10-12) ; sa charte (`charte.md`) règle les couleurs et les fontes, et
 aussi la composition, la navigation, l'iconographie et Tom. Une app que l'enfant ouvre de
 lui-même le soir et que le parent trouve sérieuse fait partie du pari, sans jamais passer par le
 jeu ni par un compagnon.

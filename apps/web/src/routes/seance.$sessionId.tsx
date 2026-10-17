@@ -8,7 +8,7 @@ import { BackLink, Page, ProfileLink } from '../components/page';
 import { TomHead } from '../components/tom';
 import { TomText } from '../components/tom-text';
 import { api, isProblem } from '../lib/api';
-import type { TurnStep } from 'tomai-server/contract';
+import type { TurnStep } from '@repo/server/contract';
 import { chatMessage, isTurnStep, messagesQuery, textOf, toUIMessage, waitingText, type ChatMessage, type TurnBody } from '../lib/chat';
 import { meQuery } from '../lib/me';
 import { preparePhoto, type PhotoUpload } from '../lib/photo';

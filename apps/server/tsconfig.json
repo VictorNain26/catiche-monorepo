@@ -1,12 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "./tsconfig.base.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    /* ===================================== */
-    /* SERVER - DEV & TYPECHECK CONFIG      */
-    /* No emit for development              */
-    /* ===================================== */
-    "noEmit": true
+    /* Bun runtime */
+    "types": ["bun-types"],
+    "lib": ["ESNext", "DOM"],
+    "target": "ESNext"
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "scripts/**/*.ts", "drizzle.config.ts"]
+  "include": ["src/**/*.ts", "drizzle.config.ts"]
 }

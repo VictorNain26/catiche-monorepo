@@ -8,8 +8,7 @@
     "preview": "vite preview --port 3002 --strictPort",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc -b",
-    "test": "bun test src",
-    "clean": "rm -rf dist node_modules/.tmp"
+    "test": "bun test src"
   },
   "dependencies": {
     "@ai-sdk/react": "4.0.139",
@@ -39,6 +38,7 @@
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
+    "@repo/server": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/router-plugin": "^1.168.42",
     "@types/node": "^24.13.6",
@@ -48,7 +48,6 @@
     "bun-types": "^1.4.2",
     "eslint": "^10.12.0",
     "tailwindcss": "^4.3.3",
-    "tomai-server": "workspace:*",
     "typescript": "6.0.3",
     "vite": "^8.3.4",
     "vite-plugin-pwa": "^2.0.0"

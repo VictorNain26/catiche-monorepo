@@ -1,0 +1,6 @@
+# zizmor's configuration (https://docs.zizmor.sh/configuration/), passed by the CI's Workflows job.
+rules:
+  # GitHub's `uses: $/…` (2026-07-30) is not yet known to actionlint 1.7.12, which refuses it: the
+  # in-repository actions stay `./…` until actionlint supports it.
+  self-repository:
+    disable: true

@@ -23,11 +23,10 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
   famille »), où l'enfant choisit « Avec mon parent à côté » ou « Sans mon parent ce soir » ; le
   profil reste ouvert
   pour les soirs suivants, et revenir au parent demande sa clé ou un code. À côté, le parent écoute
-  et reste disponible, il ne corrige pas au fil de l'eau ; Tom lui propose au plus trois ou quatre
-  pistes par séance, de vingt mots au plus, au lancement, à un blocage, à une frustration et à la
-  fin, visibles de l'enfant, jamais plus d'aide que le cran de l'enfant, ce que le serveur
-  garantit. Seul, l'enfant a le même Tom, sans pistes ; aucun compteur ni reproche des soirs sans
-  parent. Le jumelage d'un appareil à l'enfant ouvre en 4e. Raisons : l'école ne fait utiliser
+  et reste disponible, il ne corrige pas au fil de l'eau ; Tom lui propose quelques pistes de vingt
+  mots au plus, visibles de l'enfant, jamais plus d'aide que le cran de l'enfant, ce que le
+  serveur garantit (le mécanisme : `tuteur.md`, § 8). Seul, l'enfant a le même Tom, sans pistes ;
+  aucun compteur ni reproche des soirs sans parent. Le jumelage d'un appareil à l'enfant ouvre en 4e. Raisons : l'école ne fait utiliser
   l'IA générative aux élèves, en classe et encadrée par l'enseignant, qu'à partir de la 4e ; au
   collège, l'aide aux devoirs qui laisse chercher va avec des progrès, l'aide intrusive avec des
   reculs. Écart assumé : l'UNESCO recommande 13 ans pour converser seul avec une IA générative, et
@@ -203,6 +202,10 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
 - **TDD et parcours pensés depuis l'usage réel** (2026-10-08). Le test qui échoue d'abord, puis
   le code ; chaque fonctionnalité se conçoit à la place du parent et de l'enfant (téléphone
   partagé, soirée, vacances), avant les critères techniques.
+- **Pas de suite de bout en bout** (2026-10-16, Victor). Les suites Playwright du web et de la
+  landing sont supprimées : trop lentes, de 8 à 30 minutes en local, et des heures à chasser leurs
+  tests instables. Restent les tests Bun du serveur et du web, et la vérification de chaque PR dans
+  Chrome avant son merge, puis au staging pour l'app (la landing n'en a pas).
 - **Supprimer plutôt qu'archiver** (2026-08-23, rappelé le 2026-10-06). Ce qui ne sert plus se
   supprime ; git le garde.
 - **Merge commit, pas de squash** ; une branche courte par PR, jamais de push sur `main`.
