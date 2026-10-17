@@ -26,4 +26,5 @@ demandent le Postgres de `docker compose` (`DATABASE_URL`).
   par le client de `testing/http.ts`, celui du harnais. Pas de
   `mock.module` : une dépendance se remplace en la passant.
 - **Pas de suite de bout en bout** (`docs/decisions.md`, 2026-10-16) : le rendu, les parcours dans
-  un navigateur et la landing se vérifient dans Chrome avant le merge, puis au staging.
+  un navigateur et la landing se vérifient dans Chrome avant le merge, puis au staging pour l'app ;
+  la landing, sans staging, part en production au merge (`docs/architecture.md`).
