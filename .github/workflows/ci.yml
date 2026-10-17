@@ -49,6 +49,14 @@ jobs:
       # The image builds the server and the web; the landing builds here, so that a PR sees the
       # build its deployment would run.
       - run: bunx --no-install turbo run build --filter=landing ${AFFECTED:+"$AFFECTED"}
+      # The landing's headers, redirections and error pages ship in its Caddyfile, which nothing
+      # else reads before production: the Caddy Clever Cloud runs (2.11.4, `apps/landing/Caddyfile`)
+      # adapts and provisions it here.
+      - name: The Caddyfile is valid
+        uses: docker://caddy@sha256:6aeddd44c3078b0f9a35206472a11420648a79c184603ef95957d0a20044cb2b # 2.11.4-alpine
+        with:
+          entrypoint: caddy
+          args: validate --config apps/landing/Caddyfile --adapter caddyfile
       - name: The committed SQL matches the schema
         working-directory: apps/server
         run: |
