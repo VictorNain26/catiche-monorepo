@@ -18,13 +18,16 @@ tient dans le cercle central.
 
 ## Couleurs
 
-| Rôle | Clair | Sombre | Usage |
-|---|---|---|---|
-| Brume (`background`, `mist`) | `#eff3f1` | `#0c1e24` | Le fond |
-| Encre (`foreground`, `mist-12`) | `#13252b` | `#e3e8e6` | Le texte |
-| Eau profonde (`primary`, `water`) | `#0f5361` | `#6ababb` | L'action principale, les liens, le focus, le panneau de marque |
-| Jonc (`highlight`, `reed`) | `#d7e077` | `#3b410b` | Ce qui ressort derrière le texte de l'encre ; jamais en texte ni en bordure (sur la brume, 1,27:1 en clair, 1,59:1 en sombre) |
-| Pelage (`annotation`, `fur`) | `#945934` | `#b77d56` | Une note, un accent rare |
+Chaque rôle pointe vers un pas d'échelle dans `packages/tokens/theme.css` ; les valeurs des pas,
+en clair et en sombre, sont dans `packages/tokens/scales.css`.
+
+| Rôle | Échelle | Usage |
+|---|---|---|
+| Brume (`background`) | `mist` | Le fond |
+| Encre (`foreground`) | `mist` | Le texte |
+| Eau profonde (`primary`) | `water` | L'action principale, les liens, le focus, le panneau de marque |
+| Jonc (`highlight`) | `reed` | Ce qui ressort derrière le texte de l'encre ; jamais en texte ni en bordure, trop pâle sur la brume : seul le texte de l'encre sur le jonc est testé (`packages/tokens/contrast.test.mjs`) |
+| Pelage (`annotation`) | `fur` | Une note, un accent rare |
 
 - Chaque couleur a son échelle de douze pas, chaque pas à son rôle : 1 et 2 les fonds, 3 à 5 les
   aplats des composants, 6 à 8 les bordures, 9 ce qui n'est pas du texte (3:1 au moins), 10 et 11

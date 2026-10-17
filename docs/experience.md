@@ -26,8 +26,8 @@ PR qui construit un écran précise le reste dans son plan.
   part ; un seul bouton principal par écran ; une question par écran dans un formulaire.
 - **Le parent vouvoyé, l'élève tutoyé** ; un écran ne parle qu'à l'un des deux.
 - **Un réglage « Lecture aérée »**, aux espacements de WCAG 1.4.12 (`charte.md`).
-- **Prouvé au téléphone et à l'ordinateur** : la suite e2e reçoit un projet à l'ordinateur avec
-  les premiers écrans composés pour lui.
+- **Prouvé au téléphone et à l'ordinateur** : chaque écran vu dans Chrome aux deux largeurs avant
+  son merge (`.claude/rules/design-system.md`).
 - **Tom en 2D au trait** dans l'app, sans émotion qui réagit à l'élève : en grand devant l'arche
   à l'entrée seulement, petit dans les espaces et la séance, jamais près de l'énoncé ; la 3D sur
   le site.

@@ -7,11 +7,12 @@
 import { sql } from 'drizzle-orm';
 import { bigint, check, date, index, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { SCHOOL_LEVELS } from '../../domain/levels';
+import { MEMORY_ANSWERS } from '../../domain/memory-consent';
 import { user } from '../../platform/auth/schema';
 
 export const memberRole = pgEnum('household_member_role', ['guardian', 'student']);
 export const schoolLevel = pgEnum('school_level', SCHOOL_LEVELS);
-export const memoryAnswer = pgEnum('memory_answer', ['accepted', 'declined']);
+export const memoryAnswer = pgEnum('memory_answer', MEMORY_ANSWERS);
 
 export const household = pgTable('household', {
   id: uuid('id').primaryKey().defaultRandom(),

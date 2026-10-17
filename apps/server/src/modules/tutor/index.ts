@@ -10,7 +10,7 @@ import { createTutorRepository } from './repository';
 import { memoryRoutes, summaryRoutes, tutorRoutes } from './routes';
 import { createTutorService } from './service';
 
-export type { TurnStep } from './service';
+export type { TurnStep } from './turn-pipeline';
 
 interface Deps {
   db: Db;

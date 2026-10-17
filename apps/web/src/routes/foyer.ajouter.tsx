@@ -6,7 +6,7 @@ import { UserRoundIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm, useWatch, type FieldPath } from 'react-hook-form';
 import { BackLink, HeaderLink, Page } from '../components/page';
-import { LEVEL_LABELS, addStudent, birthYears, householdMessage, newChildSchema, studentsQuery } from '../lib/household';
+import { CHILD_AGES, LEVEL_LABELS, addStudent, birthYears, householdMessage, newChildSchema, studentsQuery } from '../lib/household';
 import type { z } from '../lib/zod';
 
 /**
@@ -115,7 +115,7 @@ function AddChild() {
             {create.error && (
               <Banner
                 tone="error"
-                title={householdMessage(create.error, 'Vérifiez le prénom et le mois de naissance : votre enfant a entre 5 et 20 ans.')}
+                title={householdMessage(create.error, `Vérifiez le prénom et le mois de naissance : votre enfant a ${CHILD_AGES}.`)}
               />
             )}
           </>

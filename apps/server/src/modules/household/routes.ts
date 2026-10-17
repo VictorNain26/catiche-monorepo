@@ -9,6 +9,7 @@ import { Hono } from 'hono';
 import { createMiddleware } from 'hono/factory';
 import { z } from 'zod';
 import { schoolLevelSchema } from '../../domain/levels';
+import { isStudentBirthMonth, STUDENT_AGE_YEARS } from '../../domain/student-age';
 import type { Auth } from '../../platform/auth/auth';
 import { requireSession, type SessionEnv } from '../../platform/auth/session';
 import type { AppEnv } from '../../platform/http/env';
@@ -16,9 +17,6 @@ import { Problem } from '../../platform/http/problem';
 import { jsonBody } from '../../platform/http/validate';
 import type { HouseholdService } from './service';
 
-// From the CP to the terminale and beyond for a student who repeated: five to twenty years old.
-const MIN_AGE_YEARS = 5;
-const MAX_AGE_YEARS = 20;
 // A student's own routes, and the guardian's ways in: a guardian enters on their child's device,
 // which keeps the child's session (multi-session). On the family's phone, a child switches to a
 // brother's or sister's session: a device a child uses holds no guardian session to switch to
@@ -40,12 +38,7 @@ const name = z.string().trim().min(1).max(50);
 const birthMonth = z
   .string()
   .regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'au format AAAA-MM')
-  .refine((month) => {
-    const now = new Date();
-    const youngest = `${String(now.getUTCFullYear() - MIN_AGE_YEARS)}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
-    const oldest = `${String(now.getUTCFullYear() - MAX_AGE_YEARS)}-01`;
-    return month <= youngest && month >= oldest;
-  }, 'un âge de 5 à 20 ans');
+  .refine((month) => isStudentBirthMonth(month, new Date()), `un âge de ${String(STUDENT_AGE_YEARS.min)} à ${String(STUDENT_AGE_YEARS.max)} ans`);
 
 const newStudent = z.object({ name, level: schoolLevelSchema, birthMonth, memoryProposed: z.boolean().optional() });
 const studentPatch = z

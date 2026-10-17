@@ -14,7 +14,8 @@ COPY apps/web/package.json ./apps/web/
 COPY packages/tokens/package.json ./packages/tokens/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/eslint-config/package.json ./packages/eslint-config/
-# The web imports only the server's types, which Vite erases: its manifest, for the install.
+# Of the server, the web bundles one source file, `@repo/server/student-age`, which imports
+# nothing; its other imports are types, which Vite erases.
 COPY apps/server/package.json ./apps/server/
 RUN --mount=type=cache,target=/root/.bun/install/cache \
     bun install --frozen-lockfile --ignore-scripts --filter web
@@ -22,6 +23,7 @@ RUN --mount=type=cache,target=/root/.bun/install/cache \
 COPY tsconfig.base.json ./
 COPY packages/tokens/ ./packages/tokens/
 COPY packages/ui/ ./packages/ui/
+COPY apps/server/src/domain/student-age.ts ./apps/server/src/domain/
 COPY apps/web/ ./apps/web/
 WORKDIR /app/apps/web
 RUN bun run build && test -f dist/index.html -a -f dist/sw.js
@@ -34,7 +36,7 @@ COPY package.json bun.lock bunfig.toml ./
 COPY apps/server/package.json ./apps/server/
 COPY packages/eslint-config/package.json ./packages/eslint-config/
 RUN --mount=type=cache,target=/root/.bun/install/cache \
-    bun install --frozen-lockfile --ignore-scripts --filter tomai-server
+    bun install --frozen-lockfile --ignore-scripts --filter @repo/server
 
 COPY apps/server/src/ ./apps/server/src/
 COPY tsconfig.base.json ./
@@ -71,6 +73,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["bun", "--smol", "dist/main.js"]
 
+# The image's published name, kept from before Catiche (why: the IMAGE of .github/workflows/ci.yml).
 LABEL org.opencontainers.image.title="tomai-server" \
       org.opencontainers.image.description="Bun + Hono server, serving the web client on its origin" \
       org.opencontainers.image.source="https://github.com/VictorNain26/tomai-monorepo"

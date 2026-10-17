@@ -5,7 +5,7 @@ import { queryOptions } from '@tanstack/react-query';
 import type { BetterAuthClientPlugin } from 'better-auth/client';
 import { emailOTPClient, multiSessionClient } from 'better-auth/client/plugins';
 import { createAuthClient } from 'better-auth/react';
-import type { DevicePairing } from 'tomai-server/contract';
+import type { DevicePairing } from '@repo/server/contract';
 
 // The server's device pairing, its endpoints inferred (https://better-auth.com/docs/concepts/plugins).
 const devicePairing = { id: 'device-pairing', $InferServerPlugin: {} as DevicePairing } satisfies BetterAuthClientPlugin;
