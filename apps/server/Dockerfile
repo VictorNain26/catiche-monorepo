@@ -14,7 +14,8 @@ COPY apps/web/package.json ./apps/web/
 COPY packages/tokens/package.json ./packages/tokens/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/eslint-config/package.json ./packages/eslint-config/
-# The web imports only the server's types, which Vite erases: its manifest, for the install.
+# Of the server, the web bundles one source file, `@repo/server/student-age`, which imports
+# nothing; its other imports are types, which Vite erases.
 COPY apps/server/package.json ./apps/server/
 RUN --mount=type=cache,target=/root/.bun/install/cache \
     bun install --frozen-lockfile --ignore-scripts --filter web
@@ -22,6 +23,7 @@ RUN --mount=type=cache,target=/root/.bun/install/cache \
 COPY tsconfig.base.json ./
 COPY packages/tokens/ ./packages/tokens/
 COPY packages/ui/ ./packages/ui/
+COPY apps/server/src/domain/student-age.ts ./apps/server/src/domain/
 COPY apps/web/ ./apps/web/
 WORKDIR /app/apps/web
 RUN bun run build && test -f dist/index.html -a -f dist/sw.js
