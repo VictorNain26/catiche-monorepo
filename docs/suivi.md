@@ -5,7 +5,7 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 
 ## Où on en est
 
-- **Mis à jour le** 2026-10-16.
+- **Mis à jour le** 2026-10-17.
 - **La refonte du produit** (`decisions.md`, 2026-10-12 ; `etudes/2026-10-12/refonte-produit.md`) :
   la vision, les décisions et la roadmap réécrites ; les anciens lots 1 à 3 forment le lot 1,
   « Le produit » ; les espaces et les écrans visés sont dans `experience.md`.
@@ -37,8 +37,8 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
   mouvement réduit, la mise en page, et ce que répondent les en-têtes, redirections et 404 du
   `Caddyfile`. Restent les tests Bun du serveur, de `apps/web/src/lib` et des tokens, le
   `Caddyfile` validé en CI par le Caddy de Clever Cloud (job `check`), et la vérification dans
-  Chrome avant chaque merge, puis au staging. Les âges d'un élève, le web les prend au serveur
-  (`@repo/server/student-age`).
+  Chrome avant chaque merge, puis au staging. L'âge d'un élève se compte d'une seule façon, que
+  le web prend au serveur (`@repo/server/student-age`).
 - **Lot 4 en attente** : le harnais `bun run eval` est mergé ; son passage unique attend le
   paiement à l'usage de Mistral (bloquant ci-dessous). Le premier essai s'est arrêté à 3
   conversations sur 104 et ne compte pas comme mesure. Référence de comparaison : 11 fuites sur

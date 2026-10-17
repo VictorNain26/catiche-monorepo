@@ -16,6 +16,9 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
   collège, en mode accompagné en 6e et 5e, guidé en 4e et 3e ; l'enfant n'a aucun identifiant ; la
   détresse est relue par un humain avant tout message au parent. Source :
   `etudes/2026-10-07/foyer-eleve-age.md`.
+- **Un seul âge, compté au mois** (2026-10-17, Victor). Seul le mois de naissance est gardé ; un
+  seul calcul de l'âge sert aux bornes d'inscription, côté serveur et web, et au consentement de
+  la mémoire, compté pour ne jamais vieillir un enfant : `apps/server/src/domain/student-age.ts`.
 - **Le mode accompagné en 6e et 5e** (2026-10-08). Le découpage des modes devient : accompagné
   du CP à la 5e, guidé en 4e et 3e, autonome au lycée (l'étude du 2026-10-07 plaçait la 6e et la
   5e en guidé). Avant la 4e, pas d'appareil propre à l'enfant : le parent lance la séance sur

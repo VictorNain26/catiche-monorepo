@@ -161,7 +161,9 @@ describe('a guardian creates a student', () => {
     ['level', 'seconde'],
     ['birthMonth', '2999-01'],
     ['birthMonth', new Date().toISOString().slice(0, 7)],
-    ['birthMonth', `${String(new Date().getUTCFullYear() - 3)}-01`],
+    ['birthMonth', birthMonthAged(3)],
+    // Turning 5 this month: still 4 until it is over (domain/student-age.ts).
+    ['birthMonth', `${String(new Date().getUTCFullYear() - 5)}-${String(new Date().getUTCMonth() + 1).padStart(2, '0')}`],
     ['birthMonth', '1990-01'],
     ['birthMonth', '2014-13'],
     ['birthMonth', '2014-3'],

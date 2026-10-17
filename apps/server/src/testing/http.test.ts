@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { ageAt } from '../domain/memory-consent';
+import { ageAt } from '../domain/student-age';
 import { testApp } from './app';
 import { testDatabase } from './database';
 import { birthMonthAged, httpClient } from './http';

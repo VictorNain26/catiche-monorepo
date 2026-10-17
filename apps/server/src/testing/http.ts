@@ -13,8 +13,8 @@ import type { memoryMailer } from './mailer';
 export const ORIGIN = 'http://localhost:3002';
 
 /**
- * The birth month of a child exactly this old all year, up to 19: December of the year before,
- * since a birthday counts once its month is over (domain/memory-consent.ts). A fixed year would
+ * The birth month of a child exactly this old all year, up to 20: December of the year before,
+ * since a birthday counts once its month is over (domain/student-age.ts). A fixed year would
  * leave the accepted ages one day.
  */
 export const birthMonthAged = (years: number, now = new Date()) => `${String(now.getUTCFullYear() - years - 1)}-12`;
