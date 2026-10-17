@@ -84,7 +84,7 @@ export const newChildSchema = (now = new Date()) =>
     })
     .refine(({ month, year }) => isStudentBirthMonth(`${year}-${month}`, now), {
       path: ['year'],
-      message: `Votre enfant a ${CHILD_AGES} : vérifiez son année.`,
+      message: `Votre enfant a ${CHILD_AGES} : vérifiez son mois et son année.`,
     })
     .transform(({ month, year, ...child }) => ({ ...child, birthMonth: `${year}-${month}` }));
 

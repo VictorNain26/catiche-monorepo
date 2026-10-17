@@ -53,7 +53,7 @@ describe('newChildSchema', () => {
     // Born in June 2021: 5 only once June is over.
     const tooYoung = newChildSchema(now).safeParse(child('06', '2021'));
     expect(tooYoung.error?.issues).toEqual([
-      expect.objectContaining({ path: ['year'], message: 'Votre enfant a entre 5 et 20 ans : vérifiez son année.' }),
+      expect.objectContaining({ path: ['year'], message: 'Votre enfant a entre 5 et 20 ans : vérifiez son mois et son année.' }),
     ]);
     expect(newChildSchema(now).safeParse(child('05', '2005')).success).toBe(false);
   });
