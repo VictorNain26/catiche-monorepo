@@ -46,6 +46,9 @@ jobs:
       - run: bunx --no-install turbo run build:types --filter=@repo/server
       - run: bunx --no-install knip --treat-config-hints-as-errors
       - run: bunx --no-install sherif
+      # The image builds the server and the web; the landing builds here, so that a PR sees the
+      # build its deployment would run.
+      - run: bunx --no-install turbo run build --filter=landing ${AFFECTED:+"$AFFECTED"}
       - name: The committed SQL matches the schema
         working-directory: apps/server
         run: |
@@ -109,22 +112,6 @@ jobs:
       - run: bunx --no-install turbo run test ${AFFECTED:+"$AFFECTED"}
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
-
-  # The image builds the server and the web; the landing builds here, so that a PR sees the build
-  # its deployment would run.
-  build-landing:
-    name: Build landing
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: ./.github/actions/setup-monorepo
-      - run: bunx --no-install turbo run build --filter=landing ${AFFECTED:+"$AFFECTED"}
 
   # The image is built once, run against Postgres, and published by its commit on main. On a PR,
   # only when the server or the web, which it serves, is affected. Its layers are cached in the
@@ -246,7 +233,7 @@ jobs:
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [check, workflows, test, build-landing, image, secrets, audit]
+    needs: [check, workflows, test, image, secrets, audit]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}
