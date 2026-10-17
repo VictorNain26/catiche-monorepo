@@ -15,14 +15,15 @@ import { httpClient, ORIGIN } from './http';
 import { memoryMailer } from './mailer';
 import { fakeMistral } from './mistral';
 
-export function testApp(db: Db, { config = {} }: { config?: Partial<AppDeps['config']> } = {}) {
+/** `origin`: the public origin of the auth and the client; over https, better-auth prefixes its cookies `__Secure-`. */
+export function testApp(db: Db, { config = {}, origin = ORIGIN }: { config?: Partial<AppDeps['config']>; origin?: string } = {}) {
   const silent = pino({ level: 'silent' });
   const mistral = fakeMistral();
   const mail = memoryMailer();
   const tasks = createBackgroundTasks();
   const auth = createAuth(
     db,
-    { publicUrl: ORIGIN, authSecret: 'x'.repeat(32) },
+    { publicUrl: origin, authSecret: 'x'.repeat(32) },
     { mailer: mail.mailer, logger: silent, background: tasks.run, deleteUser: accountDeletion(db) },
   );
   const app = createApp({
@@ -34,5 +35,5 @@ export function testApp(db: Db, { config = {} }: { config?: Partial<AppDeps['con
     lifecycle: createLifecycle(),
     background: tasks.run,
   });
-  return { app, mail, mistral, tasks, api: httpClient(app, mail, db) };
+  return { app, mail, mistral, tasks, api: httpClient(app, mail, db, origin) };
 }
