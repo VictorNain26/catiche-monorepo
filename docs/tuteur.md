@@ -296,7 +296,7 @@ quotas et rentabilité : `etudes/2026-10-07/rentabilite.md`.
   (`platform/ai/cost.ts`), sous l'`operation` que chaque appel nomme, lecture de la photo
   comprise ; la voix le sera à son arrivée. La modération, gratuite, ne l'est pas.
 - Le quota est un budget du jour par élève, lu dans `ai_cost` : le coût réel, tokens en cache à
-  leur prix (10 %), lecture vocale comprise, jamais des tokens bruts ; 2 c pour tous tant que le
+  leur prix (10 %), de chaque appel tracé (la voix aussi quand elle arrivera), jamais des tokens bruts ; 2 c pour tous tant que le
   paiement n'existe pas, puis 2 c en Gratuit et 10 c en Complet, le jour commençant à 4 h à Paris (`domain/quota.ts`, `domain/school-calendar.ts`). Vérifié à
   l'ouverture d'un tour (`modules/tutor/service.ts`) : au-delà, le tour est refusé avant tout
   modèle, sauf une détresse ; un quota illisible refuse le tour.
