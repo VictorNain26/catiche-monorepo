@@ -39,4 +39,6 @@ Clever Cloud (`apps/landing/Caddyfile`).
   ([guide de migration](https://docs.astro.build/en/guides/upgrade-to/v7/)).
 - Jamais un en-tête HTTP, une redirection ou une page d'erreur ailleurs que dans le `Caddyfile` :
   c'est lui que Clever Cloud sert
-  ([doc](https://www.clever.cloud/developers/doc/deploy/applications/static/)).
+  ([doc](https://www.clever.cloud/developers/doc/deploy/applications/static/)), et la CI le valide
+  avec l'image `caddy` de la version que Clever Cloud annonce, à suivre à la main dans
+  `.github/workflows/ci.yml`.

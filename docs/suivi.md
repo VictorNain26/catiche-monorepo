@@ -32,10 +32,12 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
   les parcours dans un navigateur (entrée par code et par clé d'accès, foyer, jumelage, séance,
   photo, mémoire, semaine), la CSP sans violation dans un navigateur, le rechargement après un
   déploiement, la PWA et son service worker, les composants de `@repo/ui` rendus (cibles de
-  44 px, clavier, défilement horizontal) ; pour la landing, les en-têtes, redirections et 404 du
-  `Caddyfile`, le rendu sans JavaScript et sous mouvement réduit, la mise en page. Restent les tests
-  Bun du serveur, de `apps/web/src/lib` et des tokens, et la vérification dans Chrome avant chaque
-  merge, puis au staging.
+  44 px, clavier, défilement horizontal) ; pour la landing, le rendu sans JavaScript et sous
+  mouvement réduit, la mise en page, et ce que répondent les en-têtes, redirections et 404 du
+  `Caddyfile`. Restent les tests Bun du serveur, de `apps/web/src/lib` et des tokens, le
+  `Caddyfile` validé en CI par le Caddy de Clever Cloud (job `check`), et la vérification dans
+  Chrome avant chaque merge, puis au staging. Les âges d'un élève, le web les prend au serveur
+  (`@repo/server/student-age`).
 - **Lot 4 en attente** : le harnais `bun run eval` est mergé ; son passage unique attend le
   paiement à l'usage de Mistral (bloquant ci-dessous). Le premier essai s'est arrêté à 3
   conversations sur 104 et ne compte pas comme mesure. Référence de comparaison : 11 fuites sur

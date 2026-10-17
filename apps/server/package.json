@@ -5,6 +5,10 @@
   "exports": {
     "./contract": {
       "types": "./dist/types/contract.d.ts"
+    },
+    "./student-age": {
+      "types": "./src/domain/student-age.ts",
+      "import": "./src/domain/student-age.ts"
     }
   },
   "scripts": {
