@@ -5,42 +5,16 @@
 
 import { describe, expect, it } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
-import pino from 'pino';
-import { createApp } from '../../app';
-import { createAuth } from '../../platform/auth/auth';
-import { createBackgroundTasks } from '../../platform/lifecycle/background';
-import { createLifecycle } from '../../platform/lifecycle/shutdown';
+import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
-import { fakeMistral } from '../../testing/mistral';
-import { birthMonthAged, httpClient, ORIGIN } from '../../testing/http';
-import { memoryMailer } from '../../testing/mailer';
-import { accountDeletion } from '../household';
+import { birthMonthAged } from '../../testing/http';
 import type { ExerciseState } from './core/exercise-turn';
-import type { ExerciseSheet } from './core/sheet';
 import { createTutorRepository, type ExerciseProgress, type SavedTurn } from './repository';
-import { exercise, message, studySession } from './schema';
+import { exercise, message, studySession, turnRecord } from './schema';
+import { record, sheet as sheetOf, turn } from './testing';
 
 const { db } = await testDatabase();
-const mistral = fakeMistral();
-const mail = memoryMailer();
-const auth = createAuth(
-  db,
-  { publicUrl: ORIGIN, authSecret: 'x'.repeat(32) },
-  { mailer: mail.mailer, logger: pino({ level: 'silent' }), background: createBackgroundTasks().run, deleteUser: accountDeletion(db) },
-);
-const api = httpClient(
-  createApp({
-    config: { production: false, webDistDir: undefined, apiRateLimit: 100, trustedProxyHops: 0 },
-    logger: pino({ level: 'silent' }),
-    db,
-    ...mistral.deps(db, pino({ level: 'silent' })),
-    auth,
-    lifecycle: createLifecycle(),
-    background: createBackgroundTasks().run,
-  }),
-  mail,
-  db,
-);
+const { api } = testApp(db);
 
 interface Session {
   id: string;
@@ -143,21 +117,9 @@ describe('sessions', () => {
 
 describe('the exercise in progress', () => {
   const repository = createTutorRepository(db);
-  const sheet: ExerciseSheet = {
-    statement: 'Résous 3x + 5 = 20.',
-    kind: 'short',
-    answer: 'x = 5',
-    answerForms: ['5'],
-    mathEquation: '3*x + 5 = 20',
-    mathAnswer: 'x = 5',
-    steps: [],
-    commonErrors: [],
-    rule: null,
-    facts: [],
-    expectedElements: [],
-    entries: [],
-    laterEntries: [],
-  };
+  // Under the four minutes the takeover test marks its turn with.
+  const TURN_DEADLINE = 3 * 60_000;
+  const sheet = sheetOf();
   const fresh: ExerciseState = {
     sheet,
     uncertain: false,
@@ -169,16 +131,6 @@ describe('the exercise in progress', () => {
     solved: false,
   };
   const newExercise: SavedTurn['newExercise'] = { sheet, uncertain: false, drawnForms: ['x = 5', '5'], mathCheck: 'passed', promptVersion: 'v1' };
-  const record: SavedTurn['record'] = { model: 'm', promptVersion: 'v', newExercise: false, findings: [], outcome: 'passed' };
-  const turn = (overrides: Partial<SavedTurn>): SavedTurn => ({
-    exchange: { studentText: 'élève', photoText: null, tutorText: 'tuteur', replay: null },
-    subject: null,
-    newExercise: null,
-    exerciseId: null,
-    progress: null,
-    record,
-    ...overrides,
-  });
   const progress = (overrides: Partial<ExerciseProgress> = {}): ExerciseProgress => ({
     hintLevel: 0,
     stuckTurns: 0,
@@ -239,9 +191,34 @@ describe('the exercise in progress', () => {
     expect((await repository.currentExercise(studentA.id, sessionId))?.hints.map((hint) => hint.text)).toEqual(['b', 'c', 'd', 'e']);
   });
 
+  it('refuses a value outside the closed lists of a record and a session', async () => {
+    const session = await start(asStudentA);
+    // Postgres' invalid_text_representation: the value is not one of the enum's.
+    const codeOf = (write: Promise<unknown>) =>
+      write.then(
+        () => 'written',
+        (error: unknown) => (error instanceof Error && error.cause instanceof Error && 'code' in error.cause ? error.cause.code : error),
+      );
+    const valid = { verdict: 'incorrect', errorType: 'careless', decidedBy: 'mathjs', reasoningEffort: 'high' } as const;
+    expect(await codeOf(db.insert(turnRecord).values({ ...record(valid), sessionId: session.id }))).toBe('written');
+    for (const column of ['verdict', 'errorType', 'decidedBy', 'reasoningEffort'] as const) {
+      const insert = db.insert(turnRecord).values({ ...record(valid), sessionId: session.id, [column]: sql`'not-in-the-list'` });
+      expect({ column, code: await codeOf(insert) }).toEqual({ column, code: '22P02' });
+    }
+    const cue = (value: string) =>
+      codeOf(
+        db
+          .update(studySession)
+          .set({ lastParentCue: sql`${value}` })
+          .where(eq(studySession.id, session.id)),
+      );
+    expect(await cue('block')).toBe('written');
+    expect(await cue('not-in-the-list')).toBe('22P02');
+  });
+
   it('writes nothing of a turn that fails: no exercise, no message, no record', async () => {
     const session = await start(asStudentA);
-    const broken = turn({ newExercise, record: { ...record, outcome: 'not-an-outcome' as 'passed' } });
+    const broken = turn({ newExercise, record: record({ outcome: 'not-an-outcome' as 'passed' }) });
     expect(
       await repository.saveTurn(session.id, broken).then(
         () => null,
@@ -252,22 +229,38 @@ describe('the exercise in progress', () => {
     expect(await repository.listMessages(studentA.id, session.id)).toEqual([]);
   });
 
+  it("lets a turn take over a session marked longer ago than a turn's deadline, never within it", async () => {
+    const session = await start(asStudentA);
+    const markedAgo = (seconds: number) =>
+      db
+        .update(studySession)
+        .set({ turnStartedAt: sql`now() - make_interval(secs => ${seconds})` })
+        .where(eq(studySession.id, session.id));
+    expect(await repository.startTurn(studentA.id, session.id, 60_000)).toBeDefined();
+    await markedAgo(50);
+    expect(await repository.startTurn(studentA.id, session.id, 60_000)).toBeUndefined();
+    await markedAgo(70);
+    const taken = await repository.startTurn(studentA.id, session.id, 60_000);
+    expect(taken).toBeDefined();
+    if (taken?.turnStartedAt) await repository.endTurn(session.id, taken.turnStartedAt);
+  });
+
   it('frees a session only from the turn that holds it, never from one whose lock was taken over', async () => {
     const session = await start(asStudentA);
-    const first = await repository.startTurn(studentA.id, session.id);
-    expect(await repository.startTurn(studentA.id, session.id)).toBeUndefined();
+    const first = await repository.startTurn(studentA.id, session.id, TURN_DEADLINE);
+    expect(await repository.startTurn(studentA.id, session.id, TURN_DEADLINE)).toBeUndefined();
     await db
       .update(studySession)
       .set({ turnStartedAt: sql`now() - interval '4 minutes'` })
       .where(eq(studySession.id, session.id));
     const [stale] = await db.select({ at: studySession.turnStartedAt }).from(studySession).where(eq(studySession.id, session.id));
-    const second = await repository.startTurn(studentA.id, session.id);
+    const second = await repository.startTurn(studentA.id, session.id, TURN_DEADLINE);
     expect(second?.turnStartedAt).toBeInstanceOf(Date);
     if (!stale?.at || !second?.turnStartedAt || !first?.turnStartedAt) throw new Error('turns not started');
     await repository.endTurn(session.id, stale.at);
-    expect(await repository.startTurn(studentA.id, session.id)).toBeUndefined();
+    expect(await repository.startTurn(studentA.id, session.id, TURN_DEADLINE)).toBeUndefined();
     await repository.endTurn(session.id, second.turnStartedAt);
-    expect(await repository.startTurn(studentA.id, session.id)).toBeDefined();
+    expect(await repository.startTurn(studentA.id, session.id, TURN_DEADLINE)).toBeDefined();
   });
 
   it('writes one summary of two runs that read the same previous one', async () => {

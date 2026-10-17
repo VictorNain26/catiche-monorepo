@@ -17,12 +17,12 @@ export const nodeConfig = [
     },
   },
   {
-    // The bun:test DSL is built on these patterns: mock factories mirror async
-    // signatures without awaiting or do nothing at all, mock.module/describe
-    // return thenables called for their side effects, and asymmetric matchers
-    // (expect.any, expect.objectContaining) are typed any. Tests also assign
-    // process.env to configure the code under test, which is not a task input.
-    files: ['**/*.test.ts', '**/_helpers/**/*.ts'],
+    // The bun:test DSL is built on these patterns: doubles mirror async signatures
+    // without awaiting or do nothing at all, describe returns a thenable called
+    // for its side effects, and asymmetric matchers (expect.any,
+    // expect.objectContaining) are typed any. Tests also assign process.env to
+    // configure the code under test, which is not a task input.
+    files: ['**/*.test.ts'],
     rules: {
       '@typescript-eslint/require-await': 'off',
       '@typescript-eslint/no-floating-promises': 'off',

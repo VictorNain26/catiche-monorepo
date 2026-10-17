@@ -61,13 +61,6 @@
       "minimumReleaseAge": "3 days"
     },
     {
-      "description": "Majors always need a human reviewer.",
-      "matchUpdateTypes": ["major"],
-      "automerge": false,
-      "dependencyDashboardApproval": true,
-      "addLabels": ["major"]
-    },
-    {
       "description": "TypeScript 7 is blocked: typescript-eslint peer is typescript <6.1.0 until TS 7 ships an API. https://github.com/typescript-eslint/typescript-eslint/issues/10940",
       "matchPackageNames": ["typescript"],
       "allowedVersions": "<6.1.0"
@@ -77,11 +70,10 @@
       "matchPackageNames": ["@types/node"],
       "allowedVersions": "<25.0.0"
     },
-    { "description": "AWS SDK v3 in one bump.", "matchPackageNames": ["@aws-sdk/**"], "groupName": "aws-sdk" },
     { "description": "Better Auth packages together.", "matchPackageNames": ["better-auth", "@better-auth/**"], "groupName": "better-auth" },
     { "description": "Drizzle ORM toolchain.", "matchPackageNames": ["drizzle-orm", "drizzle-kit"], "groupName": "drizzle" },
     {
-      "description": "Hono and its middleware: the server and @repo/api must stay on the same hono for hc<AppType> to infer.",
+      "description": "Hono and its middleware: the server and the web must stay on the same hono for hc<AppType> to infer.",
       "matchPackageNames": ["hono", "@hono/**"],
       "groupName": "hono"
     },
@@ -90,21 +82,19 @@
       "matchPackageNames": ["@typescript-eslint/**", "typescript-eslint", "eslint", "@eslint/**", "@eslint-react/**", "eslint-plugin-react-hooks"],
       "groupName": "eslint"
     },
-    { "description": "OpenTelemetry packages move in lockstep.", "matchPackageNames": ["@opentelemetry/**"], "groupName": "opentelemetry" },
     {
-      "description": "Vercel AI SDK core, providers and @ai-sdk/otel in one branch: they share provider-utils, and @ai-sdk/otel depends on the exact `ai` version, so bumping one alone installs a second copy of `ai`.",
+      "description": "Vercel AI SDK core, provider and React bindings in one branch: they pin the same @ai-sdk/provider-utils, and @ai-sdk/react depends on the exact `ai` version, so bumping one alone installs a second copy.",
       "matchPackageNames": ["ai", "@ai-sdk/**"],
       "groupName": "ai-sdk",
-      "labels": ["dependencies", "ai-stack"]
+      "addLabels": ["ai-stack"]
     },
     {
       "description": "Mistral SDK is critical (EU sovereignty): isolated and reviewed.",
       "matchPackageNames": ["@mistralai/mistralai"],
       "groupName": "mistral",
-      "labels": ["dependencies", "ai-stack"],
+      "addLabels": ["ai-stack"],
       "reviewers": ["VictorNain26"]
     },
-    { "description": "Radix UI primitives.", "matchPackageNames": ["@radix-ui/**"], "groupName": "radix-ui" },
     { "description": "Tailwind toolchain.", "matchPackageNames": ["tailwindcss", "tailwind-merge", "@tailwindcss/**"], "groupName": "tailwind" },
     {
       "description": "React runtime and types together.",
@@ -112,28 +102,28 @@
       "groupName": "react"
     },
     {
-      "description": "GitHub Actions: pinned to digest, grouped.",
+      "description": "GitHub Actions, grouped; helpers:pinGitHubActionDigests pins them.",
       "matchManagers": ["github-actions"],
       "groupName": "github-actions",
-      "pinDigests": true,
       "commitMessagePrefix": "chore(ci)"
     },
     {
-      "description": "Docker images (server base, Postgres, tools).",
+      "description": "Docker images (server base, tools); Postgres and Bun have their own groups below.",
       "matchManagers": ["dockerfile", "docker-compose"],
       "groupName": "docker",
       "commitMessagePrefix": "chore(docker)"
     },
     {
-      "description": "Playwright's image moves with @playwright/test: its browsers are the ones the tests drive, through the Playwright Server it runs (docker-compose.yml, service playwright).",
-      "matchPackageNames": ["@playwright/test", "mcr.microsoft.com/playwright"],
-      "groupName": "playwright"
+      "description": "Postgres moves as one: the developer's (docker-compose.yml) and the CI's services (ci.yml), two managers.",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["postgres"],
+      "groupName": "postgres",
+      "commitMessagePrefix": "chore(docker)"
     },
     {
-      "description": "Playwright's image tags read v1.63.0-noble: the distribution is the compatibility part.",
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["mcr.microsoft.com/playwright"],
-      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<compatibility>.+)$"
+      "description": "Bun moves as one: the version the repository declares (packageManager, engines), its image (Dockerfile) and its types. After the docker rule, whose group it overrides for the image.",
+      "matchPackageNames": ["bun", "oven/bun", "bun-types"],
+      "groupName": "bun"
     }
   ]
 }

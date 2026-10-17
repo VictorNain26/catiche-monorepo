@@ -6,7 +6,9 @@ paths:
 
 # Serveur (`apps/server`)
 
-Cible et sources : `docs/etudes/2026-10-06/refonte-architecture.md`, reconstruite par étapes.
+Ce qui est en place : `docs/architecture.md` ; d'où viennent sa structure et ses règles de
+dépendance :
+`docs/etudes/2026-10-06/refonte-architecture.md`, une étude datée, pas une cible.
 Tuteur : `docs/tuteur.md`. Stack locale : skill `dev-bootstrap`. Appel IA : skill
 `mistral-stack`. Migrations : `.claude/rules/database-migrations.md`. Tests :
 `.claude/rules/testing.md`.
@@ -15,13 +17,14 @@ Tuteur : `docs/tuteur.md`. Stack locale : skill `dev-bootstrap`. Appel IA 
 
 - Jamais recréer à côté ce que la refonte du code (lot 0) n'a pas reconstruit : il revient de
   l'historique (`048676b4`) avec l'étape qui l'utilise.
-- Jamais lire l'environnement hors des points d'entrée `src/main.ts`, `src/migrate.ts`,
-  `src/invite.ts` et `src/evaluate.ts` (refusé au lint) : la config (`src/config.ts`) et les dépendances se passent
+- Jamais lire l'environnement hors des points d'entrée (`ENTRY_POINTS` dans `eslint.config.mjs`,
+  refusé au lint) : la config (`src/config.ts`) et les dépendances se passent
   en paramètre, aucun état global importé.
 - Jamais un try/catch dans une route ni un corps d'erreur écrit à la main : on lève
   `new Problem(code, detail?)` (`platform/http/problem.ts`, RFC 9457), et un message interne ne
   sort jamais.
-- Jamais `db` hors d'un repository ; jamais deux tables touchées hors d'un `db.transaction`.
+- Jamais `db` hors d'un repository ; jamais deux tables touchées hors d'un `db.transaction`. La
+  plateforme lit et écrit ses propres tables dans son propre code, jamais celles d'un module.
 - Jamais une route `/api` montée après `webClient` : la page répondrait à sa place.
 - Jamais de contenu d'élève dans un log ; le logger est pino, contexte en premier argument
   (`logger.error({ err }, 'message')`).

@@ -28,14 +28,13 @@ est une PR, ses pratiques dans `etudes/2026-10-12/bonnes-pratiques.md` :
       (axe de graisse seul) et Atkinson Hyperlegible Next, chargées par les mêmes variables dans le
       site et l'app ; le site prend `theme.css`, `landing.css` et ses fontes partent ; les tests
       de contraste couvrent les graphiques (3:1) et le jonc. Fait.
-   2. La qualité : `@playwright/test` à une version exacte ; les captures de référence
-      (`toHaveScreenshot`) générées et comparées dans l'image officielle de Playwright, en local
-      comme en CI ; `@axe-core/playwright` sur chaque état ; un projet à l'ordinateur dans la suite ;
-      la définition de « fini » d'un écran (`.claude/rules/design-system.md`).
+   2. La qualité : la définition de « fini » d'un écran (`.claude/rules/design-system.md`),
+      vérifiée dans Chrome avant chaque merge, sans suite de bout en bout (`decisions.md`,
+      2026-10-16). Fait.
    3. Les composants de `@repo/ui`, sur Base UI, toasts compris : la coquille de l'app (en-tête,
       onglets en bas, navigation sur le côté à l'ordinateur), section, liste, carte, état vide,
       squelette, bandeau, dialogue et tiroir, toast, graphique en barres en SVG accessible ; une page de
-      catalogue, visitée par la suite e2e. Fait.
+      catalogue. Fait.
    4. L'identité : le logo de Catiche et ses icônes (favicon, PWA) ; Tom en 2D au trait, tiré de
       `tom.blend` par le Line Art de Blender, et sa planche de référence.
 3. **Le site et l'entrée** : la landing refaite sur la charte, « Se connecter » vers l'app, l'app en

@@ -22,7 +22,7 @@ const MODEL = 'mistral-moderation-2603';
  */
 const ATTEMPT_MS = 1_500;
 const RETRY_WINDOW_MS = 2_500;
-const TIMEOUT_MS = 5_000;
+export const MODERATION_TIMEOUT_MS = 5_000;
 
 /**
  * The categories that hold back what reaches the student. `health`, `financial` and `law` stay
@@ -40,8 +40,6 @@ const INPUT_RECORDED = ['selfharm', 'sexual', 'jailbreaking', 'pii', 'violence_a
 export interface InputModeration {
   /** The recorded categories Mistral flags. */
   flagged: string[];
-  /** Null when Mistral returns no score: a missing score is not a low one. */
-  selfharmScore: number | null;
 }
 
 /** Every function throws when moderation is unavailable: a text without its result was not checked. */
@@ -70,7 +68,7 @@ export function createModeration({ mistral, logger }: { mistral: MistralConfig; 
     // Always passed, even empty: the SDK would otherwise read MISTRAL_API_KEY itself.
     apiKey: mistral.apiKey ?? '',
     serverURL: mistral.serverUrl,
-    timeoutMs: TIMEOUT_MS,
+    timeoutMs: MODERATION_TIMEOUT_MS,
     ...(mistral.retryAttempts > 0
       ? {
           retryConfig: {
@@ -112,17 +110,14 @@ export function createModeration({ mistral, logger }: { mistral: MistralConfig; 
     },
 
     async studentTurn(lastTutorText, studentText) {
-      // A photo alone: no text to classify, and no score measured.
-      if (!studentText.trim()) return { flagged: [], selfharmScore: null };
+      // A photo alone: no text to classify.
+      if (!studentText.trim()) return { flagged: [] };
       const response = await sdk.classifiers.moderateChat({
         model: MODEL,
         inputs: [...(lastTutorText ? [{ role: 'assistant' as const, content: lastTutorText }] : []), { role: 'user' as const, content: studentText }],
       });
       const [result] = resultsFor(response.results, 1);
-      return {
-        flagged: INPUT_RECORDED.filter((category) => result?.categories?.[category] === true),
-        selfharmScore: result?.categoryScores?.['selfharm'] ?? null,
-      };
+      return { flagged: INPUT_RECORDED.filter((category) => result?.categories?.[category] === true) };
     },
   };
 }

@@ -4,6 +4,7 @@ import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@ta
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { Failure } from './components/failure';
 import { isProblem } from './lib/api';
+import { preloading } from './lib/preload';
 import { routeTree } from './routeTree.gen';
 // The variable fonts on their weight axis alone (the packages' index.css).
 import '@fontsource-variable/atkinson-hyperlegible-next';
@@ -25,7 +26,7 @@ const queryClient = new QueryClient({ queryCache: new QueryCache({ onError }), m
 const router = createRouter({
   routeTree,
   context: { queryClient, sessionLost },
-  defaultPreload: 'intent',
+  ...preloading,
   defaultErrorComponent: Failure,
   // A session places itself on its last message (routes/seance.$sessionId.tsx).
   scrollRestoration: ({ location }) => !location.pathname.startsWith('/seance/'),

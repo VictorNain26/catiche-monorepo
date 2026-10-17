@@ -22,15 +22,16 @@ export interface CueTurn {
 }
 
 // The child's name keeps them epicene; vous, twenty words at most, nothing to know of the subject.
-export const PARENT_CUES = {
+export const CUE_KINDS = ['launch', 'newExercise', 'block', 'frustration', 'end'] as const;
+export type CueKind = (typeof CUE_KINDS)[number];
+
+export const PARENT_CUES: Record<CueKind, (name: string) => string> = {
   launch: (name: string) => `Ce soir, votre rôle auprès de ${name} : écouter et poser des questions. Les explications, c’est Tom.`,
   newExercise: (name: string) => `Avant de chercher, demandez à ${name} de redire la question avec ses mots.`,
   block: (name: string) => `Demandez à ${name} ce qui est déjà trouvé, et où ça coince. Pas besoin de connaître la réponse.`,
   frustration: (name: string) => `Une erreur de ${name}, c’est normal. Plutôt que corriger, dites : « on regarde cette étape ensemble ».`,
   end: (name: string) => `Demandez à ${name} de vous réexpliquer en une phrase comment l’exercice a été résolu.`,
 };
-
-export type CueKind = keyof typeof PARENT_CUES;
 
 /** The kind of cue the turn calls for, the launch first, then the end, a block, a frustration, a new exercise. */
 function kindOf(turn: CueTurn): CueKind | null {

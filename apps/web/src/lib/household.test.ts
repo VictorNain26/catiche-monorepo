@@ -39,7 +39,7 @@ describe('isLevel', () => {
 });
 
 describe('newChildSchema', () => {
-  // The server's rule (modules/household/routes.ts): 5 to 20 years, in UTC. On 15 June 2026, from 2006-01 to 2021-06.
+  // The server's rule (domain/student-age.ts): 5 to 20 years, in UTC. On 15 June 2026, from 2006-01 to 2021-06.
   const now = new Date('2026-06-15T12:00:00Z');
   const child = (month: string, year: string) => ({ name: '  Léa ', level: 'sixieme', month, year, memoryProposed: true });
 

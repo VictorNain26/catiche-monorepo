@@ -2,7 +2,7 @@
   "$schema": "https://turborepo.dev/schema.v2.json",
   "ui": "tui",
   "agentGuidance": false,
-  "globalDependencies": ["tsconfig.base.json", ".github/workflows/ci.yml", ".github/actions/**", "docker-compose.yml"],
+  "globalDependencies": ["tsconfig.base.json", "bunfig.toml", ".github/workflows/ci.yml", ".github/actions/**", "docker-compose.yml"],
   "globalEnv": ["NODE_ENV", "CI"],
   "globalPassThroughEnv": ["GITHUB_ACTIONS"],
   "tasks": {
@@ -11,7 +11,7 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env.production", ".env.staging", "!.env.local", "!.env.*.local"],
+      "inputs": ["$TURBO_DEFAULT$", "!.env.local", "!.env.*.local"],
       "outputs": ["dist/**", "!dist/types/**"]
     },
     "dev": {
@@ -22,22 +22,12 @@
       "dependsOn": ["transit", "^build:types"],
       "outputs": []
     },
-    "typecheck": {
-      "dependsOn": ["transit", "^build:types"],
+    "//#lint:scripts": {
+      "dependsOn": ["@repo/eslint-config#transit"],
       "outputs": []
     },
-    "clean": {
-      "cache": false
-    },
-    "db:generate": {
-      "cache": false
-    },
-    "db:studio": {
-      "cache": false,
-      "persistent": true
-    },
-    "test:e2e": {
-      "dependsOn": ["build", "^build"],
+    "typecheck": {
+      "dependsOn": ["transit", "^build:types"],
       "outputs": []
     },
     "test": {

@@ -13,6 +13,7 @@ import { stripPromptTags } from './fences';
 
 const TURN_ANALYSIS_PROMPT_VERSION = '2026-10-07';
 const MAX_CHARS = 4000;
+export const ANALYSIS_TIMEOUT_MS = 20_000;
 
 const TurnAnalysisSchema = z.object({
   subject: z.enum(SUBJECT_FAMILIES),
@@ -103,7 +104,7 @@ ${clip(turn.studentText)}
       schema: TurnAnalysisSchema,
       schemaName: 'turn_analysis',
       promptCacheKey: `turn-analysis-${TURN_ANALYSIS_PROMPT_VERSION}`,
-      timeoutMs: 20_000,
+      timeoutMs: ANALYSIS_TIMEOUT_MS,
     });
     return object;
   } catch (err) {
