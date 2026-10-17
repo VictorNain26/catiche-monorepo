@@ -9,6 +9,7 @@ import { QrCode } from '../components/qr-code';
 import { WeekSummary } from '../components/week-summary';
 import { isProblem } from '../lib/api';
 import { authClient, authData, deviceSessionsQuery } from '../lib/auth';
+import { useConfirmation } from '../lib/confirmation';
 import { deviceName, formatDay, formatHour } from '../lib/device';
 import { formatCode, pairingLink } from '../lib/pairing';
 import { summaryQuery } from '../lib/summary';
@@ -272,11 +273,11 @@ function Devices({ child, pairing }: { child: Student; pairing: Pairing }) {
 
 function Memory({ child }: { child: Student }) {
   const queryClient = useQueryClient();
-  const [withdrawing, setWithdrawing] = useState(false);
+  const withdrawal = useConfirmation();
   const propose = useMutation({
     mutationFn: (memoryProposed: boolean) => updateStudent(child.id, { memoryProposed }),
     onSuccess: () => {
-      setWithdrawing(false);
+      withdrawal.close();
       return queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey });
     },
     // Refused, the child may have turned 15 meanwhile: the page reads it again.
@@ -293,10 +294,11 @@ function Memory({ child }: { child: Student }) {
         />
       )}
       {!child.memory.decidesAlone &&
-        (withdrawing ? (
+        (withdrawal.confirming ? (
           <>
             <Banner
               tone="warning"
+              focusOnMount
               title={`Tom oubliera ce qu’il retient de ${child.name}, et lui reposera la question si vous la proposez de nouveau.`}
             />
             <Button
@@ -307,21 +309,17 @@ function Memory({ child }: { child: Student }) {
             >
               Retirer et effacer
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setWithdrawing(false);
-              }}
-            >
+            <Button variant="outline" onClick={withdrawal.cancel}>
               Annuler
             </Button>
           </>
         ) : (
           <Button
+            ref={withdrawal.opener('confirm')}
             variant="outline"
             disabled={propose.isPending}
             onClick={() => {
-              if (child.memory.proposed) setWithdrawing(true);
+              if (child.memory.proposed) withdrawal.open('confirm');
               else propose.mutate(true);
             }}
           >
@@ -369,7 +367,7 @@ function EditStudent({ child }: { child: Student }) {
 function DeleteStudent({ child }: { child: Student }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [confirming, setConfirming] = useState(false);
+  const deletion = useConfirmation();
   const remove = useMutation({
     mutationFn: () => deleteStudent(child.id),
     onSuccess: async () => {
@@ -378,9 +376,9 @@ function DeleteStudent({ child }: { child: Student }) {
     },
   });
 
-  return confirming ? (
+  return deletion.confirming ? (
     <>
-      <Banner tone="warning" title="Ses séances seront effacées et ses appareils déconnectés. C’est définitif." />
+      <Banner tone="warning" focusOnMount title="Ses séances seront effacées et ses appareils déconnectés. C’est définitif." />
       {remove.error && <Banner tone="error" title={householdMessage(remove.error)} />}
       <Button
         disabled={remove.isPending}
@@ -390,20 +388,16 @@ function DeleteStudent({ child }: { child: Student }) {
       >
         Supprimer définitivement
       </Button>
-      <Button
-        variant="outline"
-        onClick={() => {
-          setConfirming(false);
-        }}
-      >
+      <Button variant="outline" onClick={deletion.cancel}>
         Annuler
       </Button>
     </>
   ) : (
     <Button
+      ref={deletion.opener('confirm')}
       variant="outline"
       onClick={() => {
-        setConfirming(true);
+        deletion.open('confirm');
       }}
     >
       Supprimer le compte de {child.name}
