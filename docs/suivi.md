@@ -121,6 +121,9 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
   d'école (surligneur, gribouillis) à repenser ; la note « c'est toi qui l'as trouvé ! », qui
   célèbre et finit par un point d'exclamation, contre la charte ; l'image Open Graph composée ;
   une application de preview par PR.
+- Le paiement, avec son fournisseur : la politique de confidentialité
+  (`apps/landing/src/pages/confidentialite.astro`) reprend alors la facturation (données, base
+  légale, conservation).
 - Aux étapes 3 et 4, avec les écrans : les séances, appareils, clés d'accès et notions qui
   résistent passent déjà par `List` ; restent en cartes les notions de `/memoire` (leur ligne
   « Au programme » et leur bouton) et les enfants du foyer, à trancher avec leur composition.
@@ -137,8 +140,10 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
   l'usage.
 - Après une détresse : la revue humaine, son délai et sa trace ; ce que voit l'élève ensuite ; le
   canal du message au parent (`decisions.md`, « Ouvertes »), avec une table d'envois idempotente.
-- Voix : la `Permissions-Policy` interdit le micro, à ouvrir à `self` ; la transcription impose le
-  français, un oral de langue déclare sa langue.
+- Voix : le micro, que la `Permissions-Policy` du serveur ferme
+  (`platform/http/security-headers.ts`), à ouvrir à `self` ; la transcription impose le
+  français, un oral de langue déclare sa langue ; le site ne la promet qu'une fois qu'elle marche
+  (`apps/landing/src/components/sections/how-it-works.astro`).
 
 ## Surveillance
 
