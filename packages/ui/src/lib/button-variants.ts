@@ -9,6 +9,8 @@ export const buttonVariants = cva(
           'bg-primary text-primary-foreground shadow-control hover:bg-primary/90 hover:shadow-control-hover active:scale-[0.98] disabled:bg-disabled disabled:shadow-none',
         outline: 'border border-border bg-transparent hover:bg-accent hover:text-accent-foreground active:scale-[0.98]',
         ghost: 'hover:bg-accent hover:text-accent-foreground active:scale-[0.98]',
+        // A way out of the screen, in its words: underlined text, the line's height a finger's.
+        link: 'justify-start whitespace-normal text-left font-normal text-primary underline underline-offset-4',
       },
       size: {
         default: 'h-11 px-6 text-sm rounded-control',
@@ -17,6 +19,7 @@ export const buttonVariants = cva(
         icon: 'size-11 rounded-control',
       },
     },
+    compoundVariants: [{ variant: 'link', className: 'h-auto min-h-11 px-0 py-3 text-sm' }],
     defaultVariants: {
       variant: 'default',
       size: 'default',

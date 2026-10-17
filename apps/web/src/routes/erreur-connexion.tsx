@@ -1,4 +1,4 @@
-import { Banner } from '@repo/ui';
+import { Banner, Button } from '@repo/ui';
 import { Link, createFileRoute } from '@tanstack/react-router';
 import { Page } from '../components/page';
 
@@ -11,9 +11,9 @@ function AuthError() {
       <Banner tone="error" title="Une erreur est survenue">
         Recommencez depuis la connexion : un nouveau code vous sera envoyé.
       </Banner>
-      <Link to="/connexion" className="min-h-11 py-3 text-sm text-primary underline">
+      <Button render={<Link to="/connexion" />} variant="link">
         Aller à la connexion
-      </Link>
+      </Button>
     </Page>
   );
 }

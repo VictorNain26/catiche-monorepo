@@ -1,22 +1,31 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Banner, Button, Card, Fold, toast } from '@repo/ui';
+import { Banner, Button, Field, Fold, List, ListItem, Section, SelectField, toast } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import type { z } from '../lib/zod';
-import { Field, SelectField } from '../components/field';
 import { BackLink, Page } from '../components/page';
 import { QrCode } from '../components/qr-code';
 import { WeekSummary } from '../components/week-summary';
-import { api, isProblem, parseResponse } from '../lib/api';
+import { isProblem } from '../lib/api';
 import { authClient, authData, deviceSessionsQuery } from '../lib/auth';
+import { useConfirmation } from '../lib/confirmation';
 import { deviceName, formatDay, formatHour } from '../lib/device';
 import { formatCode, pairingLink } from '../lib/pairing';
 import { summaryQuery } from '../lib/summary';
-import { LEVEL_LABELS, devicesQuery, householdMessage, memoryStatus, studentSchema, studentsQuery, type Student } from '../lib/household';
-
-const student = api.household.students[':id'];
+import {
+  LEVEL_LABELS,
+  deleteStudent,
+  householdMessage,
+  memoryStatus,
+  pairingCode,
+  revokeDevice,
+  studentDevicesQuery,
+  studentSchema,
+  studentsQuery,
+  updateStudent,
+  type Student,
+} from '../lib/household';
 
 /**
  * One child of the household. Until a device holds their space, the page opens on the next step:
@@ -29,7 +38,7 @@ export const Route = createFileRoute('/foyer/$studentId')({
     void context.queryClient.query(summaryQuery(params.studentId)).catch(() => undefined);
     const students = await context.queryClient.query(studentsQuery);
     if (!students.some(({ id }) => id === params.studentId)) throw redirect({ to: '/foyer' });
-    await context.queryClient.query(devicesQuery(params.studentId));
+    await context.queryClient.query(studentDevicesQuery(params.studentId));
   },
   component: StudentPage,
 });
@@ -75,7 +84,7 @@ function usePairing(studentId: string, name: string) {
   // The devices paired when the code was asked for: one more, and the code is spent.
   const [before, setBefore] = useState<ReadonlySet<string> | null>(null);
   const [expired, setExpired] = useState<string | null>(null);
-  const pairing = useMutation({ mutationFn: () => parseResponse(student['pairing-code'].$post({ param: { id: studentId } })) });
+  const pairing = useMutation({ mutationFn: () => pairingCode(studentId) });
   // Nothing else renders the page when a code expires.
   useEffect(() => {
     if (!pairing.data) return;
@@ -94,17 +103,17 @@ function usePairing(studentId: string, name: string) {
   const pending = (list: readonly { id: string }[]) => pairing.data !== undefined && pairing.data.code !== expired && !spent(list);
   // While a code waits on the child's device, the list shows it the moment it is redeemed.
   const { data: devices } = useSuspenseQuery({
-    ...devicesQuery(studentId),
+    ...studentDevicesQuery(studentId),
     refetchInterval: (query) => (pending(query.state.data ?? []) ? 5000 : false),
   });
   const revoke = useMutation({
-    mutationFn: (deviceId: string) => parseResponse(student.devices[':deviceId'].$delete({ param: { id: studentId, deviceId } })),
+    mutationFn: (deviceId: string) => revokeDevice(studentId, deviceId),
     onSuccess: (_, deviceId) => {
       if (before !== null && !before.has(deviceId)) {
         setBefore(null);
         pairing.reset();
       }
-      return queryClient.invalidateQueries({ queryKey: devicesQuery(studentId).queryKey });
+      return queryClient.invalidateQueries({ queryKey: studentDevicesQuery(studentId).queryKey });
     },
   });
 
@@ -132,10 +141,7 @@ type Pairing = ReturnType<typeof usePairing>;
 
 function NextStep({ child, pairing }: { child: Student; pairing: Pairing }) {
   return (
-    <section aria-labelledby="next-step" className="flex flex-col gap-3">
-      <h2 id="next-step" className="text-xl font-bold text-foreground">
-        Prochaine étape
-      </h2>
+    <Section title="Prochaine étape">
       {child.accompanied ? (
         <OpenHere child={child} />
       ) : (
@@ -148,7 +154,7 @@ function NextStep({ child, pairing }: { child: Student; pairing: Pairing }) {
           )}
         </>
       )}
-    </section>
+    </Section>
   );
 }
 
@@ -167,9 +173,7 @@ function OpenHere({ child }: { child: Student }) {
       const own = held.find(({ user }) => user.id === child.id);
       await (own
         ? authData(authClient.multiSession.setActive({ sessionToken: own.session.token }))
-        : authData(
-            authClient.devicePairing.redeem({ code: (await parseResponse(student['pairing-code'].$post({ param: { id: child.id } }))).code }),
-          ));
+        : authData(authClient.devicePairing.redeem({ code: (await pairingCode(child.id)).code })));
       // Loaded afresh: nothing of the guardian's stays in memory.
       await navigate({ to: '/', reloadDocument: true });
     },
@@ -225,13 +229,9 @@ function Devices({ child, pairing }: { child: Student; pairing: Pairing }) {
       {devices.length === 0 ? (
         <p className="text-muted-foreground">Aucun appareil relié.</p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <List>
           {devices.map((device) => (
-            <Card render={<li />} key={device.id} className="flex items-center justify-between gap-3">
-              <span className="flex flex-col">
-                <span className="font-bold">{deviceName(device.userAgent)}</span>
-                <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
-              </span>
+            <ListItem key={device.id} title={deviceName(device.userAgent)} meta={`Relié le ${formatDay(device.pairedAt)}`}>
               <Button
                 variant="outline"
                 disabled={revoke.isPending}
@@ -241,9 +241,9 @@ function Devices({ child, pairing }: { child: Student; pairing: Pairing }) {
               >
                 Déconnecter
               </Button>
-            </Card>
+            </ListItem>
           ))}
-        </ul>
+        </List>
       )}
       {revoke.error && <Banner tone="error" title={householdMessage(revoke.error)} />}
       {child.accompanied ? (
@@ -273,11 +273,11 @@ function Devices({ child, pairing }: { child: Student; pairing: Pairing }) {
 
 function Memory({ child }: { child: Student }) {
   const queryClient = useQueryClient();
-  const [withdrawing, setWithdrawing] = useState(false);
+  const withdrawal = useConfirmation();
   const propose = useMutation({
-    mutationFn: (memoryProposed: boolean) => parseResponse(student.$patch({ param: { id: child.id }, json: { memoryProposed } })),
+    mutationFn: (memoryProposed: boolean) => updateStudent(child.id, { memoryProposed }),
     onSuccess: () => {
-      setWithdrawing(false);
+      withdrawal.close();
       return queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey });
     },
     // Refused, the child may have turned 15 meanwhile: the page reads it again.
@@ -294,10 +294,11 @@ function Memory({ child }: { child: Student }) {
         />
       )}
       {!child.memory.decidesAlone &&
-        (withdrawing ? (
+        (withdrawal.confirming ? (
           <>
             <Banner
-              tone="error"
+              tone="warning"
+              focusOnMount
               title={`Tom oubliera ce qu’il retient de ${child.name}, et lui reposera la question si vous la proposez de nouveau.`}
             />
             <Button
@@ -308,21 +309,17 @@ function Memory({ child }: { child: Student }) {
             >
               Retirer et effacer
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setWithdrawing(false);
-              }}
-            >
+            <Button variant="outline" onClick={withdrawal.cancel}>
               Annuler
             </Button>
           </>
         ) : (
           <Button
+            ref={withdrawal.opener('confirm')}
             variant="outline"
             disabled={propose.isPending}
             onClick={() => {
-              if (child.memory.proposed) setWithdrawing(true);
+              if (child.memory.proposed) withdrawal.open('confirm');
               else propose.mutate(true);
             }}
           >
@@ -337,7 +334,7 @@ function EditStudent({ child }: { child: Student }) {
   const queryClient = useQueryClient();
   const form = useForm({ resolver: zodResolver(studentSchema), defaultValues: { name: child.name, level: child.level } });
   const update = useMutation({
-    mutationFn: (json: z.output<typeof studentSchema>) => parseResponse(student.$patch({ param: { id: child.id }, json })),
+    mutationFn: (json: Parameters<typeof updateStudent>[1]) => updateStudent(child.id, json),
     onSuccess: () => {
       toast('Enregistré.');
       return queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey });
@@ -370,18 +367,18 @@ function EditStudent({ child }: { child: Student }) {
 function DeleteStudent({ child }: { child: Student }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [confirming, setConfirming] = useState(false);
+  const deletion = useConfirmation();
   const remove = useMutation({
-    mutationFn: () => parseResponse(student.$delete({ param: { id: child.id } })),
+    mutationFn: () => deleteStudent(child.id),
     onSuccess: async () => {
       await navigate({ to: '/foyer' });
       await queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey });
     },
   });
 
-  return confirming ? (
+  return deletion.confirming ? (
     <>
-      <Banner tone="error" title="Ses séances seront effacées et ses appareils déconnectés. C’est définitif." />
+      <Banner tone="warning" focusOnMount title="Ses séances seront effacées et ses appareils déconnectés. C’est définitif." />
       {remove.error && <Banner tone="error" title={householdMessage(remove.error)} />}
       <Button
         disabled={remove.isPending}
@@ -391,20 +388,16 @@ function DeleteStudent({ child }: { child: Student }) {
       >
         Supprimer définitivement
       </Button>
-      <Button
-        variant="outline"
-        onClick={() => {
-          setConfirming(false);
-        }}
-      >
+      <Button variant="outline" onClick={deletion.cancel}>
         Annuler
       </Button>
     </>
   ) : (
     <Button
+      ref={deletion.opener('confirm')}
       variant="outline"
       onClick={() => {
-        setConfirming(true);
+        deletion.open('confirm');
       }}
     >
       Supprimer le compte de {child.name}

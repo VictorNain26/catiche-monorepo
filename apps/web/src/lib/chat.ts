@@ -16,6 +16,9 @@ export const sessionsQuery = queryOptions({
   queryFn: () => parseResponse(sessions.$get()),
 });
 
+/** A new session, beside the parent or not, as the student chooses. */
+export const startSession = (accompanied: boolean) => parseResponse(sessions.$post({ json: { accompanied } }));
+
 export const messagesQuery = (sessionId: string) =>
   queryOptions({
     queryKey: ['sessions', sessionId, 'messages'],

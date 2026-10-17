@@ -14,6 +14,11 @@ export const memoryQuery = queryOptions({
   queryFn: () => parseResponse(api.memory.$get()),
 });
 
+/** A notion the student says they understood, which Tom no longer keeps; and all of them. */
+export const forgetNotion = (notionId: string) => parseResponse(api.memory.notions[':notionId'].$delete({ param: { notionId } }));
+
+export const eraseMemory = () => parseResponse(api.memory.$delete());
+
 /** « La dernière fois : pas encore résolue, avec un indice. À surveiller : mal lire la consigne. », as the memory and the week say it. */
 export function lastTime({ lastSolved, lastHelp, watch }: Pick<Notion, 'lastSolved' | 'lastHelp' | 'watch'>): string {
   return [

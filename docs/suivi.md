@@ -16,7 +16,8 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
   Hyperlegible Next. Les composants de `@repo/ui` (2.3) sont là, sur Base UI, sous une CSP
   stricte (`decisions.md`) : la coquille, section, liste,
   carte, état vide, squelette, bandeau, dialogue et tiroir, toast, graphique en barres, montrés
-  par le catalogue `/catalogue` de l'app. La qualité (2.2) est la définition de « fini » d'un
+  par le catalogue `/catalogue` de l'app ; les écrans existants les prennent au lieu de leurs
+  copies, champs de formulaire compris. La qualité (2.2) est la définition de « fini » d'un
   écran, vérifiée dans Chrome avant chaque merge : les suites Playwright sont supprimées
   (`decisions.md`, 2026-10-16). Reste 2.4, le logo et Tom en 2D. L'essai
   de Rive est sur la branche locale `da2/rive`, jamais poussée : une référence pour le hero du
@@ -117,7 +118,9 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
   d'école (surligneur, gribouillis) à repenser ; la note « c'est toi qui l'as trouvé ! », qui
   célèbre et finit par un point d'exclamation, contre la charte ; l'image Open Graph composée ;
   une application de preview par PR.
-- Aux étapes 3 et 4, avec les écrans : les cartes en `li` des listes deviennent `List`.
+- Aux étapes 3 et 4, avec les écrans : les séances, appareils, clés d'accès et notions qui
+  résistent passent déjà par `List` ; restent en cartes les notions de `/memoire` (leur ligne
+  « Au programme » et leur bouton) et les enfants du foyer, à trancher avec leur composition.
 
 **Lot 4, Tom**
 - Tom qui se dit programme : un scénario où l'élève demande s'il est humain ou parle de lui ; la

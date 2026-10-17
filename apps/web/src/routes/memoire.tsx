@@ -1,12 +1,11 @@
 import { Banner, Button, Card } from '@repo/ui';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { useState } from 'react';
 import { MemoryAnswer } from '../components/memory-answer';
 import { BackLink, Page, ProfileLink } from '../components/page';
-import { api, parseResponse } from '../lib/api';
+import { useConfirmation } from '../lib/confirmation';
 import { meQuery } from '../lib/me';
-import { memoryMessage, memoryQuery, notionSummary, useMemoryAnswer } from '../lib/memory';
+import { eraseMemory, forgetNotion, memoryMessage, memoryQuery, notionSummary, useMemoryAnswer } from '../lib/memory';
 
 /** What Tom keeps of the student, notion by notion: theirs to see, correct and erase. */
 export const Route = createFileRoute('/memoire')({
@@ -21,13 +20,10 @@ export const Route = createFileRoute('/memoire')({
 function Memory() {
   const queryClient = useQueryClient();
   const { data: memory } = useSuspenseQuery(memoryQuery);
-  const [confirming, setConfirming] = useState<'erase' | 'stop' | null>(null);
+  const { confirming, opener, open, close, cancel } = useConfirmation<'erase' | 'stop'>();
   const refresh = () => queryClient.invalidateQueries({ queryKey: memoryQuery.queryKey });
-  const understood = useMutation({
-    mutationFn: (notionId: string) => parseResponse(api.memory.notions[':notionId'].$delete({ param: { notionId } })),
-    onSuccess: refresh,
-  });
-  const erase = useMutation({ mutationFn: () => parseResponse(api.memory.$delete()), onSuccess: refresh });
+  const understood = useMutation({ mutationFn: forgetNotion, onSuccess: refresh });
+  const erase = useMutation({ mutationFn: eraseMemory, onSuccess: refresh });
   const answer = useMemoryAnswer();
   const failure = understood.error ?? erase.error ?? answer.error;
 
@@ -65,7 +61,8 @@ function Memory() {
           {confirming ? (
             <>
               <Banner
-                tone="error"
+                tone="warning"
+                focusOnMount
                 title={
                   confirming === 'erase'
                     ? 'Tom oubliera tout ce qu’il retient de toi. Tes séances restent.'
@@ -75,40 +72,33 @@ function Memory() {
               <Button
                 disabled={erase.isPending || answer.isPending}
                 onClick={() => {
-                  const done = {
-                    onSuccess: () => {
-                      setConfirming(null);
-                    },
-                  };
+                  const done = { onSuccess: close };
                   if (confirming === 'erase') erase.mutate(undefined, done);
                   else answer.mutate('declined', done);
                 }}
               >
                 {confirming === 'erase' ? 'Tout effacer' : 'Arrêter et tout effacer'}
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setConfirming(null);
-                }}
-              >
+              <Button variant="outline" onClick={cancel}>
                 Annuler
               </Button>
             </>
           ) : (
             <>
               <Button
+                ref={opener('erase')}
                 variant="outline"
                 onClick={() => {
-                  setConfirming('erase');
+                  open('erase');
                 }}
               >
                 Effacer ce que Tom retient
               </Button>
               <Button
+                ref={opener('stop')}
                 variant="outline"
                 onClick={() => {
-                  setConfirming('stop');
+                  open('stop');
                 }}
               >
                 Arrêter la mémoire

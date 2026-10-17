@@ -17,6 +17,12 @@ interface BannerProps {
   title: string;
   children?: React.ReactNode;
   className?: string;
+  /**
+   * Takes the focus when it appears, and with it the screen reader, which reads its title: for a
+   * confirmation drawn in place of the button that opened it, which would otherwise leave the
+   * focus on nothing and the warning unheard. An error, already an alert, does not take it.
+   */
+  focusOnMount?: boolean;
 }
 
 /**
@@ -30,8 +36,13 @@ interface BannerProps {
  * A confirmation that must be heard goes through `toast()`, whose region is there from the
  * page's load.
  */
-function Banner({ tone, title, children, className }: BannerProps) {
+function Banner({ tone, title, children, className, focusOnMount = false }: BannerProps) {
   const titleId = React.useId();
+  const frameRef = React.useRef<HTMLElement>(null);
+  // The error's alert holds no ref: only a region takes the focus.
+  React.useEffect(() => {
+    if (focusOnMount) frameRef.current?.focus();
+  }, [focusOnMount]);
   const { icon: Icon, frame, mark } = TONES[tone];
   const content = (
     <>
@@ -50,7 +61,12 @@ function Banner({ tone, title, children, className }: BannerProps) {
       {content}
     </div>
   ) : (
-    <section aria-labelledby={titleId} className={classes}>
+    <section
+      ref={frameRef}
+      aria-labelledby={titleId}
+      tabIndex={focusOnMount ? -1 : undefined}
+      className={cn(classes, 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2')}
+    >
       {content}
     </section>
   );

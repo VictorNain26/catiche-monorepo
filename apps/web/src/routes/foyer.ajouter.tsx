@@ -1,14 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Banner, Button } from '@repo/ui';
+import { Banner, Button, CheckboxField, Field, SelectField } from '@repo/ui';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { UserRoundIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm, useWatch, type FieldPath } from 'react-hook-form';
-import { CheckboxField, Field, SelectField } from '../components/field';
 import { BackLink, HeaderLink, Page } from '../components/page';
-import { api, parseResponse } from '../lib/api';
-import { CHILD_AGES, LEVEL_LABELS, birthYears, householdMessage, newChildSchema, studentsQuery } from '../lib/household';
+import { CHILD_AGES, LEVEL_LABELS, addStudent, birthYears, householdMessage, newChildSchema, studentsQuery } from '../lib/household';
 import type { z } from '../lib/zod';
 
 /**
@@ -43,7 +41,7 @@ function AddChild() {
   const name = useWatch({ control: form.control, name: 'name' }).trim();
 
   const create = useMutation({
-    mutationFn: (json: z.output<typeof schema>) => parseResponse(api.household.students.$post({ json })),
+    mutationFn: addStudent,
     onSuccess: async (created) => {
       queryClient.setQueryData(studentsQuery.queryKey, (list) => [...(list ?? []), created]);
       await navigate({ to: '/foyer/$studentId', params: { studentId: created.id } });

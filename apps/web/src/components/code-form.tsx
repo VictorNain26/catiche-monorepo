@@ -1,12 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Banner, Button, toast } from '@repo/ui';
+import { Banner, Button, Field, toast } from '@repo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { authClient, authMessage } from '../lib/auth';
 import { meQuery } from '../lib/me';
 import { z } from '../lib/zod';
-import { CODE_INPUT_CLASS, Field } from './field';
+
+/** A field for a code, the one the address received or the pairing's: large mono, spaced out. */
+export const CODE_INPUT_CLASS = 'h-14 font-mono text-2xl tracking-widest md:text-2xl';
 
 const codeSchema = z.object({
   otp: z
@@ -66,9 +68,9 @@ export function CodeForm({ email, submitLabel, onEntered }: { email: string; sub
           {submitLabel}
         </Button>
       </form>
-      <button type="button" onClick={() => void resend()} className="min-h-11 py-3 text-left text-sm text-primary underline">
+      <Button type="button" variant="link" onClick={() => void resend()}>
         Recevoir un nouveau code
-      </button>
+      </Button>
     </>
   );
 }

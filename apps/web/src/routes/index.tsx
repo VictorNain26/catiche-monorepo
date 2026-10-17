@@ -1,14 +1,13 @@
-import { Banner, Button, Card, Fold, toast } from '@repo/ui';
+import { Banner, Button, Fold, List, ListItem, Section, toast } from '@repo/ui';
 import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { MemoryAnswer } from '../components/memory-answer';
 import { Page, ProfileLink } from '../components/page';
 import { TomHead } from '../components/tom';
 import { WeekSummary } from '../components/week-summary';
-import { api, parseResponse } from '../lib/api';
-import { sessionsQuery } from '../lib/chat';
+import { sessionsQuery, startSession } from '../lib/chat';
 import { deviceName, formatDay } from '../lib/device';
-import { devicesQuery, meQuery } from '../lib/me';
+import { meQuery, ownDevicesQuery } from '../lib/me';
 import { memoryQuery, useMemoryAnswer, type MemoryChoice } from '../lib/memory';
 import { ownSummaryQuery } from '../lib/summary';
 
@@ -22,7 +21,7 @@ export const Route = createFileRoute('/')({
     if (!me) throw redirect({ to: '/connexion' });
     if (me.role === 'guardian') throw redirect({ to: '/foyer' });
   },
-  loader: ({ context }) => Promise.all([context.queryClient.query(sessionsQuery), context.queryClient.query(devicesQuery)]),
+  loader: ({ context }) => Promise.all([context.queryClient.query(sessionsQuery), context.queryClient.query(ownDevicesQuery)]),
   component: StudentHome,
 });
 
@@ -52,9 +51,9 @@ function StudentHome() {
       )}
       <Sessions />
       {me && <WeekSummary week={week.data} failed={week.isError} name={me.name} reader="student" />}
-      <Link to="/memoire" className="min-h-11 py-3 text-sm text-primary underline">
+      <Button render={<Link to="/memoire" />} variant="link">
         Ce que Tom retient
-      </Link>
+      </Button>
       <Devices />
     </Page>
   );
@@ -65,15 +64,12 @@ function Sessions() {
   const { data: me } = useSuspenseQuery(meQuery);
   const { data: sessions } = useSuspenseQuery(sessionsQuery);
   const start = useMutation({
-    mutationFn: (accompanied: boolean) => parseResponse(api.sessions.$post({ json: { accompanied } })),
+    mutationFn: startSession,
     onSuccess: ({ id }) => navigate({ to: '/seance/$sessionId', params: { sessionId: id } }),
   });
 
   return (
-    <section aria-labelledby="sessions" className="flex flex-col gap-3">
-      <h2 id="sessions" className="text-xl font-bold text-foreground">
-        Tes séances avec Tom
-      </h2>
+    <Section title="Tes séances avec Tom">
       <p className="flex items-center gap-3 text-muted-foreground">
         <TomHead className="size-10 shrink-0" />
         Un exercice qui résiste ? Ouvre une séance, on le reprend pas à pas.
@@ -113,34 +109,31 @@ function Sessions() {
       )}
       {start.error && <Banner tone="error" title="La séance n’a pas pu s’ouvrir. Réessaie dans un instant." />}
       {sessions.length > 0 && (
-        <ul className="flex flex-col gap-2">
+        <List>
           {sessions.map((session) => (
-            <li key={session.id}>
-              <Card render={<Link to="/seance/$sessionId" params={{ sessionId: session.id }} />} className="flex min-h-11 flex-col">
-                <span className="font-bold">{session.title ?? 'Séance sans titre'}</span>
-                <span className="text-sm text-muted-foreground">{formatDay(session.createdAt)}</span>
-              </Card>
-            </li>
+            <ListItem
+              key={session.id}
+              render={<Link to="/seance/$sessionId" params={{ sessionId: session.id }} />}
+              title={session.title ?? 'Séance sans titre'}
+              meta={formatDay(session.createdAt)}
+            />
           ))}
-        </ul>
+        </List>
       )}
-    </section>
+    </Section>
   );
 }
 
 function Devices() {
-  const { data: devices } = useSuspenseQuery(devicesQuery);
+  const { data: devices } = useSuspenseQuery(ownDevicesQuery);
 
   return (
     <Fold title="Tes appareils reliés">
-      <ul className="flex flex-col gap-2">
+      <List>
         {devices.map((device) => (
-          <Card render={<li />} key={device.id} className="flex flex-col">
-            <span className="font-bold">{deviceName(device.userAgent)}</span>
-            <span className="text-sm text-muted-foreground">Relié le {formatDay(device.pairedAt)}</span>
-          </Card>
+          <ListItem key={device.id} title={deviceName(device.userAgent)} meta={`Relié le ${formatDay(device.pairedAt)}`} />
         ))}
-      </ul>
+      </List>
       <p className="text-sm text-muted-foreground">Un appareil que tu ne reconnais pas ? Dis-le à ton parent, qui peut le déconnecter.</p>
       <p className="text-sm text-muted-foreground">Sur un appareil partagé, ton parent passe sur son profil sans te déconnecter.</p>
     </Fold>

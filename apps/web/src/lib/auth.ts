@@ -90,8 +90,12 @@ export const isCancelled = (error: AuthError) => hasCode(error, 'ERROR_PASSTHROU
 /** Whether better-auth's error is this one: some of its errors carry no code. */
 export const hasCode = (error: AuthError, code: string) => error.code === code;
 
+/** A refusal for too many tries, and any other failure, as a parent reads them here and in the household. */
+export const TOO_MANY_TRIES = 'Trop d’essais. Patientez une minute avant de réessayer.';
+export const FAILED = 'Une erreur est survenue. Réessayez dans un instant.';
+
 export function authMessage(error: AuthError): string {
-  if (error.status === 429) return 'Trop d’essais. Patientez une minute avant de réessayer.';
+  if (error.status === 429) return TOO_MANY_TRIES;
   const message = error.code === undefined ? undefined : AUTH_MESSAGES[error.code];
-  return message ?? 'Une erreur est survenue. Réessayez dans un instant.';
+  return message ?? FAILED;
 }

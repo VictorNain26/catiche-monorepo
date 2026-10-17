@@ -1,14 +1,13 @@
-import { Checkbox, Input, NativeSelect, NativeSelectOption } from '@repo/ui';
-import { useId, type ComponentProps } from 'react';
+import * as React from 'react';
+import { Checkbox } from './checkbox';
+import { Input } from './input';
+import { NativeSelect, NativeSelectOption } from './native-select';
 
-type FieldProps = ComponentProps<typeof Input> & { label: string; error?: string | undefined };
+type FieldProps = React.ComponentProps<typeof Input> & { label: string; error?: string | undefined };
 
 /** A labelled input, its error read out with it. */
-/** A field for a code, the one the address received or the pairing's: large mono, spaced out. */
-export const CODE_INPUT_CLASS = 'h-14 font-mono text-2xl tracking-widest md:text-2xl';
-
-export function Field({ label, error, ...input }: FieldProps) {
-  const id = useId();
+function Field({ label, error, ...input }: FieldProps) {
+  const id = React.useId();
   const errorId = `${id}-error`;
   return (
     <div className="flex flex-col gap-2">
@@ -31,11 +30,11 @@ export function Field({ label, error, ...input }: FieldProps) {
   );
 }
 
-type SelectFieldProps = ComponentProps<'select'> & { label: string; options: Record<string, string>; error?: string | undefined };
+type SelectFieldProps = React.ComponentProps<'select'> & { label: string; options: Record<string, string>; error?: string | undefined };
 
 /** A labelled native select, which a phone shows as its own picker. */
-export function SelectField({ label, options, error, ...select }: SelectFieldProps) {
-  const id = useId();
+function SelectField({ label, options, error, ...select }: SelectFieldProps) {
+  const id = React.useId();
   const errorId = `${id}-error`;
   return (
     <div className="flex flex-col gap-2">
@@ -65,11 +64,11 @@ export function SelectField({ label, options, error, ...select }: SelectFieldPro
   );
 }
 
-type CheckboxFieldProps = Omit<ComponentProps<'input'>, 'type'> & { label: string; hint?: string };
+type CheckboxFieldProps = Omit<React.ComponentProps<'input'>, 'type'> & { label: string; hint?: string };
 
 /** A checkbox with its label beside it, and a line that says what it means. */
-export function CheckboxField({ label, hint, ...checkbox }: CheckboxFieldProps) {
-  const id = useId();
+function CheckboxField({ label, hint, ...checkbox }: CheckboxFieldProps) {
+  const id = React.useId();
   const hintId = `${id}-hint`;
   return (
     <div className="flex items-start gap-3">
@@ -87,3 +86,5 @@ export function CheckboxField({ label, hint, ...checkbox }: CheckboxFieldProps) 
     </div>
   );
 }
+
+export { CheckboxField, Field, SelectField };

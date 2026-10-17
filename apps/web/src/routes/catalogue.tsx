@@ -4,20 +4,19 @@ import {
   BarChart,
   Button,
   Card,
-  Checkbox,
+  CheckboxField,
   Dialog,
   DialogClose,
   DialogContent,
   DialogTrigger,
   DrawerContent,
   EmptyState,
+  Field,
   Fold,
-  Input,
   List,
   ListItem,
-  NativeSelect,
-  NativeSelectOption,
   Section,
+  SelectField,
   Skeleton,
   toast,
   type Destination,
@@ -106,39 +105,12 @@ function Fields() {
   return (
     <Section title="Champs">
       <div className="flex flex-col gap-4">
-        <label className="flex flex-col gap-2">
-          <span className="font-bold">Votre adresse e-mail</span>
-          <Input type="email" autoComplete="off" defaultValue="parent@example.fr" />
-        </label>
-        <label className="flex flex-col gap-2">
-          <span className="font-bold">Le code reçu</span>
-          <Input variant="error" inputMode="numeric" defaultValue="12" aria-invalid="true" aria-describedby="code-erreur" />
-          <span id="code-erreur" className="text-sm text-destructive">
-            Le code a six chiffres : vérifiez l’e-mail reçu.
-          </span>
-        </label>
-        <label className="flex flex-col gap-2">
-          <span className="font-bold">Classe</span>
-          <NativeSelect defaultValue="5e">
-            {['6e', '5e', '4e', '3e'].map((grade) => (
-              <NativeSelectOption key={grade} value={grade}>
-                {grade}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
-        </label>
-        <label className="flex flex-col gap-2">
-          <span className="font-bold">Prénom (désactivé)</span>
-          <Input disabled defaultValue="Léa" />
-        </label>
-        <label className="flex min-h-11 items-center gap-3">
-          <Checkbox defaultChecked />
-          Recevoir le point de la semaine
-        </label>
-        <label className="flex min-h-11 items-center gap-3 text-disabled-foreground">
-          <Checkbox disabled />
-          Une option indisponible
-        </label>
+        <Field label="Votre adresse e-mail" type="email" autoComplete="off" defaultValue="parent@example.fr" />
+        <Field label="Le code reçu" inputMode="numeric" defaultValue="12" error="Le code a six chiffres : vérifiez l’e-mail reçu." />
+        <SelectField label="Classe" options={{ '6e': '6e', '5e': '5e', '4e': '4e', '3e': '3e' }} defaultValue="5e" />
+        <Field label="Prénom (désactivé)" disabled defaultValue="Léa" />
+        <CheckboxField label="Recevoir le point de la semaine" hint="Chaque dimanche, ce qui a été travaillé." defaultChecked />
+        <CheckboxField label="Une option indisponible" disabled />
       </div>
     </Section>
   );

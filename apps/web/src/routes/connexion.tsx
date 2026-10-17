@@ -1,12 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Banner, Button } from '@repo/ui';
+import { Banner, Button, Field } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from '../lib/zod';
 import { CodeForm, sendCode } from '../components/code-form';
-import { Field } from '../components/field';
 import { Page } from '../components/page';
 import { AuthFailure, authClient, authData, authMessage, deviceSessionsQuery, hasCode, isCancelled } from '../lib/auth';
 import { meQuery } from '../lib/me';
@@ -38,15 +37,15 @@ function SignIn() {
     return (
       <Page title="Votre code">
         <CodeForm email={email} submitLabel="Entrer" onEntered={enter} />
-        <button
+        <Button
           type="button"
+          variant="link"
           onClick={() => {
             setEmail(null);
           }}
-          className="min-h-11 py-3 text-left text-sm text-primary underline"
         >
           Changer d’adresse
-        </button>
+        </Button>
       </Page>
     );
   }
@@ -127,9 +126,9 @@ function EmailStep({ onSent, onEntered }: { onSent: (email: string) => void; onE
         Entrer avec une clé d’accès
       </Button>
       {!child && (
-        <Link to="/jumeler" className="min-h-11 py-3 text-sm text-primary underline">
+        <Button render={<Link to="/jumeler" />} variant="link">
           Tu es élève ? Relie cet appareil
-        </Link>
+        </Button>
       )}
     </Page>
   );

@@ -191,6 +191,8 @@ function Session() {
             accept="image/jpeg,image/png,image/webp"
             capture="environment"
             aria-label="Prendre une photo de l’exercice"
+            // Reached by the button below: a hidden stop in the tab order would be a second one.
+            tabIndex={-1}
             className="sr-only"
             onChange={(event) => {
               takePhoto(event.target.files?.[0]);

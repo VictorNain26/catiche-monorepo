@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Banner, Button } from '@repo/ui';
+import { Banner, Button, Field } from '@repo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { CODE_INPUT_CLASS, Field } from '../components/field';
+import { CODE_INPUT_CLASS } from '../components/code-form';
 import { Page } from '../components/page';
 import { authClient, authMessage } from '../lib/auth';
 import { pairingSchema } from '../lib/pairing';

@@ -5,6 +5,7 @@ import { queryOptions } from '@tanstack/react-query';
 import type { InferRequestType, InferResponseType } from 'hono/client';
 import { z } from './zod';
 import { api, isProblem, parseResponse } from './api';
+import { FAILED, TOO_MANY_TRIES } from './auth';
 
 const students = api.household.students;
 
@@ -26,18 +27,32 @@ export const studentsQuery = queryOptions({
   queryFn: () => parseResponse(students.$get()),
 });
 
-export const devicesQuery = (studentId: string) =>
+export const studentDevicesQuery = (studentId: string) =>
   queryOptions({
     queryKey: ['students', studentId, 'devices'],
     queryFn: () => parseResponse(students[':id'].devices.$get({ param: { id: studentId } })),
   });
 
+/** What the guardian changes of the household, each request as the server takes it. */
+export const addStudent = (json: InferRequestType<typeof students.$post>['json']) => parseResponse(students.$post({ json }));
+
+export const updateStudent = (id: string, json: InferRequestType<(typeof students)[':id']['$patch']>['json']) =>
+  parseResponse(students[':id'].$patch({ param: { id }, json }));
+
+export const deleteStudent = (id: string) => parseResponse(students[':id'].$delete({ param: { id } }));
+
+/** A one-time code that pairs a device to the child's account. */
+export const pairingCode = (id: string) => parseResponse(students[':id']['pairing-code'].$post({ param: { id } }));
+
+export const revokeDevice = (id: string, deviceId: string) =>
+  parseResponse(students[':id'].devices[':deviceId'].$delete({ param: { id, deviceId } }));
+
 /** A failed household request, in words a parent reads; the server's own message never shows. */
 export function householdMessage(error: unknown, invalid = 'Vérifiez ce que vous avez saisi.'): string {
   if (isProblem(error, 'INVALID_REQUEST')) return invalid;
   if (isProblem(error, 'NOT_FOUND')) return 'Cet enfant ou cet appareil n’est plus dans votre foyer.';
-  if (isProblem(error, 'RATE_LIMITED')) return 'Trop d’essais. Patientez une minute avant de réessayer.';
-  return 'Une erreur est survenue. Réessayez dans un instant.';
+  if (isProblem(error, 'RATE_LIMITED')) return TOO_MANY_TRIES;
+  return FAILED;
 }
 
 const name = z.string().trim().min(1, 'Son prénom.').max(50, '50 caractères au plus.');
