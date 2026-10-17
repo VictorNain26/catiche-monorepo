@@ -36,8 +36,8 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
       de passe : il utilise un appareil que le parent relie à son compte par un code à usage unique.
     </p>
     <p>
-      <strong>Contenus d&apos;apprentissage :</strong> les messages échangés avec le tuteur, les photos et documents d&apos;exercices envoyés, les
-      messages vocaux et leur transcription.
+      <strong>Contenus d&apos;apprentissage :</strong> les messages échangés avec le tuteur et le texte des photos d&apos;exercices envoyées. La photo
+      elle-même est lue par le modèle puis n&apos;est pas gardée : seul le texte qu&apos;il en tire reste avec le message.
     </p>
     <p>
       <strong>Suivi de la séance :</strong> un résumé de la conversation en cours, pour que le tuteur garde le fil.
@@ -101,14 +101,14 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
     </p>
     <ul>
       <li>
-        <strong>Mistral AI</strong> (France) — modèles d&apos;intelligence artificielle : traite les messages, photos d&apos;exercices, messages
-        vocaux (transcription) et la mémoire d&apos;apprentissage pour générer la réponse. Sans accord de conservation zéro (Zero Data Retention),
-        Mistral AI peut garder ces contenus selon ses propres conditions : nous lui avons demandé cet accord, qui n&apos;est pas encore donné, et le
-        service n&apos;ouvrira pas aux élèves sans lui.
+        <strong>Mistral AI</strong> (France) — modèles d&apos;intelligence artificielle : traite les messages, photos d&apos;exercices et la mémoire
+        d&apos;apprentissage pour générer la réponse. Sans accord de conservation zéro (Zero Data Retention), Mistral AI peut garder ces contenus
+        selon ses propres conditions : nous lui avons demandé cet accord, qui n&apos;est pas encore donné, et le service n&apos;ouvrira pas aux élèves
+        sans lui.
       </li>
       <li>
-        <strong>Clever Cloud</strong> (France, données hébergées à Paris) — hébergement du site, du service et de sa base de données, stockage des
-        photos, documents et messages vocaux.
+        <strong>Clever Cloud</strong> (France, données hébergées à Paris) — hébergement du site, du service et de sa base de données. Les photos
+        envoyées n&apos;y sont pas stockées.
       </li>
       <li>
         <strong>Scaleway</strong> (France, données traitées dans l&apos;Union européenne) — envoi des e-mails du compte parent.
