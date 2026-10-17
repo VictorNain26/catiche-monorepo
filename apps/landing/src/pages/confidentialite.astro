@@ -5,7 +5,7 @@ import { BRAND_NAME } from '@/lib/brand';
 const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfant\u00a0: données collectées, bases légales, prestataires, durées de conservation et vos droits.`;
 ---
 
-<PageLayout title="Politique de Confidentialité" description="Dernière mise à jour : 7 octobre 2026" maxWidth="3xl" metaDescription={DESCRIPTION}>
+<PageLayout title="Politique de Confidentialité" description="Dernière mise à jour : 16 octobre 2026" maxWidth="3xl" metaDescription={DESCRIPTION}>
   <div class="legal-copy">
     <p>
       <strong>Service en préparation&nbsp;:</strong> cette politique décrit le service tel qu&apos;il fonctionnera à son ouverture. L&apos;application
@@ -19,8 +19,8 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
 
     <h2>1. Qui est responsable de vos données ?</h2>
     <p>
-      Le responsable du traitement est Victor Lenain, entrepreneur individuel, éditeur de l&apos;application {BRAND_NAME} (voir les{' '}
-      <a href="/mentions-legales">mentions légales</a>). Pour toute question relative à vos données personnelles ou pour exercer vos droits :{' '}
+      Le responsable du traitement est Victor Lenain, entrepreneur individuel (micro-entrepreneur), éditeur de l&apos;application {BRAND_NAME} (voir
+      les <a href="/mentions-legales">mentions légales</a>). Pour toute question relative à vos données personnelles ou pour exercer vos droits :{' '}
       <a href="mailto:contact@tomia.fr">contact@tomia.fr</a>.
     </p>
 
@@ -36,8 +36,8 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
       de passe : il utilise un appareil que le parent relie à son compte par un code à usage unique.
     </p>
     <p>
-      <strong>Contenus d&apos;apprentissage :</strong> les messages échangés avec le tuteur, les photos et documents d&apos;exercices envoyés, les
-      messages vocaux et leur transcription.
+      <strong>Contenus d&apos;apprentissage :</strong> les messages échangés avec le tuteur et le texte des photos d&apos;exercices envoyées. La photo
+      elle-même est lue par le modèle puis n&apos;est pas gardée : seul le texte qu&apos;il en tire reste avec le message.
     </p>
     <p>
       <strong>Suivi de la séance :</strong> un résumé de la conversation en cours, pour que le tuteur garde le fil.
@@ -101,12 +101,14 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
     </p>
     <ul>
       <li>
-        <strong>Mistral AI</strong> (France) — modèles d&apos;intelligence artificielle : traite les messages, photos d&apos;exercices, messages
-        vocaux (transcription) et la mémoire d&apos;apprentissage le temps de générer la réponse.
+        <strong>Mistral AI</strong> (France) — modèles d&apos;intelligence artificielle : traite les messages, photos d&apos;exercices et la mémoire
+        d&apos;apprentissage pour générer la réponse. Sans accord de conservation zéro (Zero Data Retention), Mistral AI peut garder ces contenus
+        selon ses propres conditions : nous lui avons demandé cet accord, qui n&apos;est pas encore donné, et le service n&apos;ouvrira pas aux élèves
+        sans lui.
       </li>
       <li>
-        <strong>Clever Cloud</strong> (France, données hébergées à Paris) — hébergement du site, du service et de sa base de données, stockage des
-        photos, documents et messages vocaux.
+        <strong>Clever Cloud</strong> (France, données hébergées à Paris) — hébergement du site, du service et de sa base de données. Les photos
+        envoyées n&apos;y sont pas stockées.
       </li>
       <li>
         <strong>Scaleway</strong> (France, données traitées dans l&apos;Union européenne) — envoi des e-mails du compte parent.
@@ -117,16 +119,22 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
     <p>Mistral AI, Clever Cloud et Scaleway traitent vos données dans l&apos;Union européenne.</p>
 
     <h2>7. Combien de temps conservons-nous vos données ?</h2>
+    <p>
+      Ces durées sont nos engagements pour l&apos;ouverture du service. Aujourd&apos;hui, la suppression d&apos;un compte efface ses données de la
+      base, et les sessions de connexion expirent comme indiqué ; l&apos;effacement des comptes inactifs et des journaux reste à construire d&apos;ici
+      là.
+    </p>
     <ul>
       <li>
-        <strong>Compte et contenus d&apos;apprentissage</strong> (messages, fichiers) : pendant l&apos;utilisation du service, puis effacés dans un
-        délai de 30 jours après la suppression du compte.
+        <strong>Compte et contenus d&apos;apprentissage</strong> (messages, texte des photos) : pendant l&apos;utilisation du service, puis effacés
+        dans un délai de 30 jours après la suppression du compte.
       </li>
       <li>
         <strong>Compte inactif</strong> : supprimé après 3 ans sans connexion, après relance par e-mail.
       </li>
       <li>
-        <strong>Sessions de connexion</strong> : 7 jours.
+        <strong>Sessions de connexion</strong> : fermées après 90 jours sans utilisation, pour que l&apos;appareil de l&apos;enfant reste relié après
+        des vacances.
       </li>
       <li>
         <strong>Journaux techniques et de sécurité</strong> : 12 mois.

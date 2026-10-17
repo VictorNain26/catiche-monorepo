@@ -96,6 +96,9 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
 - Clever Cloud à éprouver : un tour long à travers le proxy (délai documenté de 180 s), le délai
   de grâce réel au SIGTERM contre `SHUTDOWN_DEADLINE_MS`, la sonde pour `DRAIN_MS`, le PITR et son
   prix, Postgres 18.4 chez eux contre 18.6 en dev et en CI.
+- Les durées de conservation que la politique de confidentialité annonce pour l'ouverture
+  (`apps/landing/src/pages/confidentialite.astro`, § 7) : aucune purge ne tient encore celles du
+  compte inactif ni des journaux.
 - L'adresse de la connexion, que `clientAddress` (`platform/http/client-address.ts`) lit par
   `getConnInfo`, n'est exercée par aucun test, faute d'un vrai `Bun.serve` : `addressOf` l'est
   (`client-address.test.ts`), le middleware aussi, sous `app.request` (`rate-limit.test.ts`).
