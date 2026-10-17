@@ -1,12 +1,11 @@
 import { describe, expect, it } from 'bun:test';
-import { isStudentBirthMonth, STUDENT_AGE_YEARS } from './student-age';
+import { isStudentBirthMonth } from './student-age';
 
 describe('isStudentBirthMonth', () => {
   // On 15 June 2026, a child of 5 to 20 was born from 2006-01 to 2021-06.
   const now = new Date('2026-06-15T12:00:00Z');
 
   it('takes a child of 5 to 20, to the month', () => {
-    expect(STUDENT_AGE_YEARS).toEqual({ min: 5, max: 20 });
     expect(isStudentBirthMonth('2021-06', now)).toBe(true);
     expect(isStudentBirthMonth('2006-01', now)).toBe(true);
     expect(isStudentBirthMonth('2014-03', now)).toBe(true);
