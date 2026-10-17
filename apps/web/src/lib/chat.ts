@@ -3,7 +3,7 @@
 import { queryOptions } from '@tanstack/react-query';
 import type { UIMessage } from 'ai';
 import type { InferRequestType, InferResponseType } from 'hono/client';
-import type { TurnStep } from 'tomai-server/contract';
+import type { TurnStep } from '@repo/server/contract';
 import { api, isProblem, parseResponse } from './api';
 
 const sessions = api.sessions;

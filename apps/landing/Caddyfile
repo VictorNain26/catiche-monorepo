@@ -1,4 +1,4 @@
-# Served by Clever Cloud's static runtime (Caddy 2.11.4, port 8080), and by the e2e suite in the same Caddy.
+# Served by Clever Cloud's static runtime (Caddy 2.11.4, port 8080).
 {
 	admin off
 }

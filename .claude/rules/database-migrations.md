@@ -1,7 +1,8 @@
 ---
 description: Migrations Drizzle — chargé uniquement sur le schéma DB et les migrations
 paths:
-  - "apps/server/src/**/schema.ts"
+  - "apps/server/src/platform/*/schema.ts"
+  - "apps/server/src/modules/*/schema.ts"
   - "apps/server/src/platform/db/**"
   - "apps/server/drizzle/**"
   - "apps/server/drizzle.config*.ts"
@@ -27,7 +28,8 @@ bun run db:generate   # SQL dans ./drizzle/
 git add src/<chemin>/schema.ts drizzle/
 ```
 
-Le job Migration Sync de la CI vérifie que le SQL commité correspond au schéma. Au démarrage
+Le job Check de la CI vérifie que le SQL commité correspond au schéma (`db:generate`) et que les
+migrations sont cohérentes (`db:check`). Au démarrage
 de l'image Docker, `docker-entrypoint.sh` applique les migrations (`dist/migrate.js`) avant de
 lancer le serveur.
 

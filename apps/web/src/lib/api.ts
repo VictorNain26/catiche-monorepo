@@ -1,11 +1,11 @@
 /**
- * The server's API, typed by its own contract (`tomai-server/contract`, emitted by the server's
+ * The server's API, typed by its own contract (`@repo/server/contract`, emitted by the server's
  * `build:types`): no type of the server is written again here.
  */
 
 import { APICallError } from 'ai';
 import { DetailedError, hc, parseResponse } from 'hono/client';
-import type { AppType, ProblemCode } from 'tomai-server/contract';
+import type { AppType, ProblemCode } from '@repo/server/contract';
 
 export const api = hc<AppType>('/').api;
 

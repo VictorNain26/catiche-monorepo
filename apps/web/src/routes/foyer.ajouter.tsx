@@ -8,7 +8,7 @@ import { useForm, useWatch, type FieldPath } from 'react-hook-form';
 import { CheckboxField, Field, SelectField } from '../components/field';
 import { BackLink, HeaderLink, Page } from '../components/page';
 import { api, parseResponse } from '../lib/api';
-import { LEVEL_LABELS, birthYears, householdMessage, newChildSchema, studentsQuery } from '../lib/household';
+import { CHILD_AGES, LEVEL_LABELS, birthYears, householdMessage, newChildSchema, studentsQuery } from '../lib/household';
 import type { z } from '../lib/zod';
 
 /**
@@ -117,7 +117,7 @@ function AddChild() {
             {create.error && (
               <Banner
                 tone="error"
-                title={householdMessage(create.error, 'Vérifiez le prénom et le mois de naissance : votre enfant a entre 5 et 20 ans.')}
+                title={householdMessage(create.error, `Vérifiez le prénom et le mois de naissance : votre enfant a ${CHILD_AGES}.`)}
               />
             )}
           </>

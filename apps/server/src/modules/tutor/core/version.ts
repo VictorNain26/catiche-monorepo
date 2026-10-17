@@ -5,6 +5,7 @@
  * a new version, so that measures never mix two prompts.
  */
 
+import { VERDICTS } from '../../../domain/diagnosis';
 import { SCHOOL_LEVELS } from '../../../domain/levels';
 import { SUBJECT_FAMILIES } from '../../../domain/subjects';
 import { turnInstruction } from './analysis';
@@ -40,7 +41,7 @@ const ANALYSIS = {
 } as const;
 const DIAGNOSES = [
   null,
-  ...(['correct', 'right-step', 'incorrect', 'unclear'] as const).map((verdict) => ({
+  ...VERDICTS.map((verdict) => ({
     verdict,
     firstWrongStep: 'e',
     errorType: 'n/a' as const,

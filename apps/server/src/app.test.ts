@@ -7,47 +7,21 @@ import { afterAll, describe, expect, it } from 'bun:test';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import pino from 'pino';
-import { createBackgroundTasks } from './platform/lifecycle/background';
-import { createApp } from './app';
-import { accountDeletion } from './modules/household';
-import { createAuth } from './platform/auth/auth';
 import { invite } from './platform/auth/invitation';
-import { createLifecycle } from './platform/lifecycle/shutdown';
+import { testApp } from './testing/app';
 import { testDatabase } from './testing/database';
 import { ORIGIN } from './testing/http';
-import { fakeMistral } from './testing/mistral';
-import { memoryMailer } from './testing/mailer';
 
 const { db } = await testDatabase();
-const mistral = fakeMistral();
 const dist = mkdtempSync(join(tmpdir(), 'web-dist-'));
 writeFileSync(join(dist, 'index.html'), '<!doctype html><title>Tom</title>');
 afterAll(() => {
   rmSync(dist, { recursive: true, force: true });
 });
 
-const mail = memoryMailer();
-const app = createApp({
-  config: { production: false, webDistDir: dist, apiRateLimit: 100, trustedProxyHops: 0 },
-  logger: pino({ level: 'silent' }),
-  db,
-  ...mistral.deps(db, pino({ level: 'silent' })),
-  auth: createAuth(
-    db,
-    { publicUrl: ORIGIN, authSecret: 'x'.repeat(32) },
-    { mailer: mail.mailer, logger: pino({ level: 'silent' }), background: createBackgroundTasks().run, deleteUser: accountDeletion(db) },
-  ),
-  lifecycle: createLifecycle(),
-  background: createBackgroundTasks().run,
-});
+const { app, api, mail } = testApp(db, { config: { webDistDir: dist, apiRateLimit: 100 } });
 
-const post = (path: string, body: unknown, headers: Record<string, string> = {}) =>
-  app.request(`${ORIGIN}${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Origin: ORIGIN, ...headers },
-    body: JSON.stringify(body),
-  });
+const post = (path: string, body: unknown, headers: Record<string, string> = {}) => api.request('POST', path, { body, headers });
 
 const sessionCookie = (res: Response) => res.headers.getSetCookie().find((cookie) => cookie.startsWith('better-auth.session_token='));
 

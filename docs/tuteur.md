@@ -56,24 +56,16 @@ mesure d'accord doivent contenir.
 modèle sans prévenir et invalide l'évaluation. Chaque prompt porte une version
 (`PROMPT_VERSION`), journalisée avec l'ID du modèle à chaque tour.
 
-**Pièges vérifiés** :
-- `@ai-sdk/mistral` n'envoie `reasoning_effort` que pour les IDs de sa liste interne : un
-  nouveau modèle s'y vérifie, faute de quoi il ne raisonne jamais.
-- `safePrompt` est déprécié par Mistral au profit des Custom Guardrails
-  ([source](https://docs.mistral.ai/resources/deprecated/guardrailing/safe_prompt)) : on ne
-  l'utilise pas ; ce qui atteint l'élève passe par la modération d'entrée et de sortie.
+**Pièges vérifiés** : ceux de l'appel à Mistral (`reasoning_effort` et la liste interne
+d'`@ai-sdk/mistral`, `safePrompt`, `maxOutputTokens` sur un appel qui raisonne, cache de
+préfixe, endpoint UE, débit du mode gratuit) sont dans le skill `mistral-stack`. **Propres au
+tuteur** :
 - Chaque appel au modèle est entier, sans flux (`generateText`) : son usage, `cacheRead` compris,
   arrive avec sa réponse et se compte au coût (`platform/ai/client.ts`) ; un appel coupé par son
   délai ne rapporte pas d'usage.
-- `reasoning_effort` n'a pas de budget de tokens : un appel qui raisonne n'a pas de
-  `maxOutputTokens`, sa borne est le timeout.
-- Le cache de préfixe se règle par `promptCacheKey` ; les tokens servis par le cache coûtent 10 %.
-- Agents, Batch et Files ne sont pas servis sur l'endpoint UE : la boucle du tour est la nôtre.
-- **Débit** : en mode gratuit, 100 000 tokens par minute pour l'organisation ; une fiche
-  d'exercice en prend environ 78 000 (trois tirages de 26 000 tokens d'entrée), et la première
-  réponse d'un exercice arrive après 12 à 15 s (mesuré le 2026-10-08). Le paiement à l'usage lève
-  le plafond ; pendant l'attente, la séance dit l'étape du tour (lecture, préparation d'un nouvel
-  exercice, écriture).
+- En mode gratuit, dont le plafond de débit est dans le skill, la première réponse d'un exercice
+  arrive après 12 à 15 s (mesuré le 2026-10-08) ; pendant
+  l'attente, la séance dit l'étape du tour (lecture, préparation d'un nouvel exercice, écriture).
 
 ## 3. Pédagogie
 
@@ -119,10 +111,10 @@ modèle sans prévenir et invalide l'évaluation. Chaque prompt porte une versio
 
 | Garde-fou | Mécanisme | Où |
 |---|---|---|
-| Modération d'entrée | `mistral-moderation-2603` par `studentTurn` (`platform/ai/moderation.ts`), qui classe le message de l'élève avec le dernier message du tuteur en contexte ; catégories `sexual`, `selfharm`, `jailbreaking`, `pii`, `violence_and_threats`, `dangerous`, `criminal` gardées avec le message ; `selfharm` décide la détresse, les autres se mesurent sans bloquer (un devoir d'histoire touche à la violence) ; modération indisponible : les règles seules jugent la détresse, l'échec journalisé (`modules/tutor/service.ts`) | En parallèle de l'analyse du tour, avant le premier mot |
+| Modération d'entrée | `mistral-moderation-2603` par `studentTurn` (`platform/ai/moderation.ts`), qui classe le message de l'élève avec le dernier message du tuteur en contexte ; catégories `sexual`, `selfharm`, `jailbreaking`, `pii`, `violence_and_threats`, `dangerous`, `criminal` gardées avec le message ; `selfharm` décide la détresse, les autres se mesurent sans bloquer (un devoir d'histoire touche à la violence) ; modération indisponible : les règles seules jugent la détresse, l'échec journalisé (`modules/tutor/turn-pipeline.ts`) | En parallèle de l'analyse du tour, avant le premier mot |
 | Contrôle avant l'élève | Le message entier est généré, contrôlé, puis envoyé ; celui qui est envoyé est celui qui est persisté (`modules/tutor/core/controlled-turn.ts`, `modules/tutor/core/output-check.ts`). Déterministe : réponse et ses formes comparées à la fiche d'exercice, une forme déjà écrite par l'élève et jugée juste restant permise pour la confirmer ; une fiche incertaine tenue aux formes de tous ses tirages, et une fiche absente à un palier bas (le contrôle échoue fermé) ; balises et gabarits ; égalités recalculées par mathjs. Sur un échec, une régénération sous contrainte, puis une réponse de repli fixe, l'événement tracé | Entre l'appel du rédacteur et l'élève ; aussi sur le titre de séance |
 | Modération de sortie | Même modèle sur le message entier, en parallèle du contrôle ; catégories bloquantes `OUTPUT_BLOCKING` ; même action sur un blocage | Avant l'élève |
-| Détresse | Classifieur indépendant du prompt (catégorie Self-Harm + règles en français, testés sur des phrases d'élèves) ; réponse fixe rédigée et approuvée par un humain, avec le 3114 et un adulte de confiance, et, à construire au lot 4, le 119 quand le message laisse penser que le danger vient de la maison, puis fin de la conversation (Crawford et Glatard, CMAJ 2026) ; numéros d'aide vérifiés sur service-public.gouv.fr F33954. Ni fiche ni tuteur (l'analyse du tour, lancée en parallèle, est écartée) : la réponse est gardée avec le message, la séance close (tout message suivant reçoit la même réponse), l'événement enregistré, un par séance, rattaché à l'élève et sans score (`distress_event`, `modules/tutor/schema.ts`), pour la revue humaine du lot 4 : un humain relit chaque événement et décide d'un message au parent, qui n'en reçoit que le motif et des ressources, l'élève prévenu d'abord (`etudes/2026-10-07/foyer-eleve-age.md`). Ni quota, ni limite de flux, ni écriture en échec ne retiennent la réponse (`modules/tutor/service.ts`, règles dans `domain/distress.ts`) | Même point d'entrée |
+| Détresse | Classifieur indépendant du prompt (catégorie Self-Harm + règles en français, testés sur des phrases d'élèves) ; réponse fixe rédigée et approuvée par un humain, avec le 3114 et un adulte de confiance, et, à construire au lot 4, le 119 quand le message laisse penser que le danger vient de la maison, puis fin de la conversation (Crawford et Glatard, CMAJ 2026) ; numéros d'aide vérifiés sur service-public.gouv.fr F33954. Ni fiche ni tuteur (l'analyse du tour, lancée en parallèle, est écartée) : la réponse est gardée avec le message, la séance close (tout message suivant reçoit la même réponse), l'événement enregistré, un par séance, rattaché à l'élève et sans score (`distress_event`, `modules/tutor/schema.ts`), pour la revue humaine du lot 4 : un humain relit chaque événement et décide d'un message au parent, qui n'en reçoit que le motif et des ressources, l'élève prévenu d'abord (`etudes/2026-10-07/foyer-eleve-age.md`). Ni quota, ni limite de flux, ni écriture en échec ne retiennent la réponse (`modules/tutor/service.ts` et `turn-pipeline.ts`, règles dans `domain/distress.ts`) | Même point d'entrée |
 | Fuite de réponse | Palier d'aide imposé par le serveur (§3) ; la recherche de la réponse dans le texte (`findLeakForm`, `domain/leak.ts`), partagée avec le harnais, tourne dans le contrôle avant l'élève | Assembleur de tour, contrôle avant l'élève |
 | Aucune solution montrée par accident | Le raisonnement du modèle ne quitte jamais le serveur : seul le texte contrôlé part dans le flux (`modules/tutor/routes.ts`) ; aucune balise interne, étape de calcul cachée, résultat d'outil brut ni bloc de contexte n'arrive dans ce que voit ou entend l'élève. Le contrôle de fuite porte sur tout ce qui l'atteint : texte, titre de séance, messages d'erreur, et la lecture vocale à venir | Sortie du tour |
 | Injection | Texte élève et contenu de documents délimités comme données ; aucun outil sensible déclenchable par du contenu importé | Assembleur, outils |
@@ -301,11 +293,11 @@ succès). Coûts mesurés : `etudes/2026-10-06/passage-de-fin.md` ;
 quotas et rentabilité : `etudes/2026-10-07/rentabilite.md`.
 
 - Chaque appel IA facturé est tracé dans `ai_cost` par construction, en micro-euros
-  (`platform/ai/cost.ts`) : chat, analyse du tour, fiche, diagnostic, titre, résumé ; la lecture
-  d'image et la voix le seront à leur arrivée. La modération, gratuite, ne l'est pas.
+  (`platform/ai/cost.ts`), sous l'`operation` que chaque appel nomme, lecture de la photo
+  comprise ; la voix le sera à son arrivée. La modération, gratuite, ne l'est pas.
 - Le quota est un budget du jour par élève, lu dans `ai_cost` : le coût réel, tokens en cache à
-  leur prix (10 %), lecture vocale comprise, jamais des tokens bruts ; 2 c pour tous tant que le
-  paiement n'existe pas, puis 2 c en Gratuit et 10 c en Complet, le jour commençant à 4 h à Paris (`domain/quota.ts`). Vérifié à
+  leur prix (10 %), de chaque appel tracé, jamais des tokens bruts ; 2 c pour tous tant que le
+  paiement n'existe pas, puis 2 c en Gratuit et 10 c en Complet, le jour commençant à 4 h à Paris (`domain/quota.ts`, `domain/school-calendar.ts`). Vérifié à
   l'ouverture d'un tour (`modules/tutor/service.ts`) : au-delà, le tour est refusé avant tout
   modèle, sauf une détresse ; un quota illisible refuse le tour.
 - Le résumé de conversation est incrémental : il ne se relance qu'après un nombre fixe de

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
-import { programmeFor } from '../../../referential';
-import { exerciseBlock, keepKnownNotions, notionsFor, schoolYearOf, sheetMessages, vote, type ExerciseSheet } from './sheet';
+import { notionsFor } from '../../../referential';
+import { exerciseBlock, keepKnownNotions, sheetMessages, sheetPromptVersion, vote, type ExerciseSheet } from './sheet';
 
 function first<T>(items: readonly T[] | undefined): T {
   const [item] = items ?? [];
@@ -36,32 +36,6 @@ const written = (overrides: Partial<ExerciseSheet> = {}): ExerciseSheet => ({
   ...overrides,
 });
 
-describe('schoolYearOf', () => {
-  it('names a school year after the September that opens it', () => {
-    expect(schoolYearOf(new Date('2026-10-04'))).toBe(2026);
-    expect(schoolYearOf(new Date('2027-06-30'))).toBe(2026);
-    expect(schoolYearOf(new Date('2026-09-01'))).toBe(2026);
-    // The night of 1 September in Paris is still 31 August in UTC.
-    expect(schoolYearOf(new Date('2026-08-31T22:30:00Z'))).toBe(2026);
-    expect(schoolYearOf(new Date('2026-08-31T21:30:00Z'))).toBe(2025);
-  });
-});
-
-describe('notionsFor', () => {
-  it('gives the class programme and the later college classes', () => {
-    const notions = notionsFor('cinquieme', 'mathematiques', 2026);
-    expect(notions?.entries).toEqual(programmeFor('cinquieme', 'mathematiques', 2026)?.entries ?? []);
-    expect(notions?.entries.length).toBeGreaterThan(0);
-    expect(new Set(notions?.later.map((entry) => entry.level))).toEqual(new Set(['quatrieme', 'troisieme']));
-    expect(notionsFor('troisieme', 'francais', 2026)?.later).toEqual([]);
-  });
-
-  it('gives nothing without a referential: another subject, or none', () => {
-    expect(notionsFor('quatrieme', 'histoire-geo', 2026)).toBeNull();
-    expect(notionsFor('quatrieme', undefined, 2026)).toBeNull();
-  });
-});
-
 describe('sheetMessages', () => {
   it('lists the notions with their ids before the fenced student message, its tags stripped', () => {
     const notions = notionsFor('cinquieme', 'mathematiques', 2026);
@@ -87,6 +61,22 @@ describe('sheetMessages', () => {
     const [system] = sheetMessages('quatrieme', null, 'Quand a eu lieu la bataille de Marignan ?', null);
     expect(system.content).toContain('Aucun programme fourni');
     expect(system.content).not.toContain('<programme>');
+  });
+});
+
+describe('sheetPromptVersion', () => {
+  /** The messages of a draw, one of their template parts written otherwise. */
+  const rewritten =
+    (from: RegExp, to: string) =>
+    (...args: Parameters<typeof sheetMessages>) =>
+      sheetMessages(...args).map((message) => ({ content: message.content.replace(from, to) }));
+
+  it("changes with the format of a programme's line", () => {
+    expect(sheetPromptVersion(rewritten(/^- (\S+) : /gm, '* $1: '))).not.toBe(sheetPromptVersion());
+  });
+
+  it('changes with the fence of an attached file', () => {
+    expect(sheetPromptVersion(rewritten(/<attached_file name="[^"]*">/g, '<attached_file>'))).not.toBe(sheetPromptVersion());
   });
 });
 
