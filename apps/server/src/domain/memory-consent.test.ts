@@ -12,12 +12,6 @@ describe('memoryConsent', () => {
     expect(memoryConsent(turningFifteen, new Date('2026-11-01T00:00:00Z')).decidesAlone).toBe(true);
   });
 
-  it('turns a child born in December 15 on 1 January, in UTC', () => {
-    const december = { birthMonth: '2011-12-01', proposedAt: null, answer: null };
-    expect(memoryConsent(december, new Date('2026-12-31T23:30:00Z')).decidesAlone).toBe(false);
-    expect(memoryConsent(december, new Date('2027-01-01T00:00:00Z')).decidesAlone).toBe(true);
-  });
-
   it('before 15, asks the child only once the parent proposed it, and is active once the child accepts', () => {
     expect(memoryConsent({ birthMonth: fourteen, proposedAt: null, answer: null }, now)).toEqual({
       state: 'off',

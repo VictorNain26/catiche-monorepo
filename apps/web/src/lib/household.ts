@@ -67,7 +67,7 @@ export const CHILD_AGES = `entre ${String(min)} et ${String(max)} ans`;
 
 /**
  * The years with a month the server takes, the youngest last: a child of 20 may be born 21 years
- * ago. The months a year takes follow on, so a year takes one if it takes its January or December.
+ * ago. The months taken run unbroken over years, so a year has one when its January or December is.
  */
 export const birthYears = (now = new Date()) =>
   Array.from({ length: max - min + 2 }, (_, index) => String(now.getUTCFullYear() - max - 1 + index)).filter(
