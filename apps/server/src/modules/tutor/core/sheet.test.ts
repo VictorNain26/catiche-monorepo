@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
-import { programmeFor } from '../../../referential';
-import { exerciseBlock, keepKnownNotions, notionsFor, schoolYearOf, sheetMessages, vote, type ExerciseSheet } from './sheet';
+import { notionsFor } from '../../../referential';
+import { exerciseBlock, keepKnownNotions, sheetMessages, vote, type ExerciseSheet } from './sheet';
 
 function first<T>(items: readonly T[] | undefined): T {
   const [item] = items ?? [];
@@ -34,32 +34,6 @@ const written = (overrides: Partial<ExerciseSheet> = {}): ExerciseSheet => ({
   mathAnswer: null,
   expectedElements: ['un lieu', 'un personnage'],
   ...overrides,
-});
-
-describe('schoolYearOf', () => {
-  it('names a school year after the September that opens it', () => {
-    expect(schoolYearOf(new Date('2026-10-04'))).toBe(2026);
-    expect(schoolYearOf(new Date('2027-06-30'))).toBe(2026);
-    expect(schoolYearOf(new Date('2026-09-01'))).toBe(2026);
-    // The night of 1 September in Paris is still 31 August in UTC.
-    expect(schoolYearOf(new Date('2026-08-31T22:30:00Z'))).toBe(2026);
-    expect(schoolYearOf(new Date('2026-08-31T21:30:00Z'))).toBe(2025);
-  });
-});
-
-describe('notionsFor', () => {
-  it('gives the class programme and the later college classes', () => {
-    const notions = notionsFor('cinquieme', 'mathematiques', 2026);
-    expect(notions?.entries).toEqual(programmeFor('cinquieme', 'mathematiques', 2026)?.entries ?? []);
-    expect(notions?.entries.length).toBeGreaterThan(0);
-    expect(new Set(notions?.later.map((entry) => entry.level))).toEqual(new Set(['quatrieme', 'troisieme']));
-    expect(notionsFor('troisieme', 'francais', 2026)?.later).toEqual([]);
-  });
-
-  it('gives nothing without a referential: another subject, or none', () => {
-    expect(notionsFor('quatrieme', 'histoire-geo', 2026)).toBeNull();
-    expect(notionsFor('quatrieme', undefined, 2026)).toBeNull();
-  });
 });
 
 describe('sheetMessages', () => {

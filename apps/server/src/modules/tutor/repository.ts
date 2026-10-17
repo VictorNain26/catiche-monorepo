@@ -20,9 +20,6 @@ import { distressEvent, exercise, learnerNotionReset, message, studySession, tur
 /** The tutor's last messages on an exercise that the contract lists, so as not to repeat them. */
 const KEPT_HINTS = 4;
 
-/** Past it, a turn left marked by a crash no longer blocks the session: longer than any turn's calls. */
-const STALE_TURN = sql`interval '3 minutes'`;
-
 type Executor = Db | Parameters<Parameters<Db['transaction']>[0]>[0];
 
 export type TurnRecord = Omit<typeof turnRecord.$inferInsert, 'id' | 'sessionId' | 'exerciseId' | 'createdAt'>;
@@ -52,14 +49,14 @@ interface Exchange {
 
 async function writeExchange(executor: Executor, sessionId: string, { studentText, photoText, tutorText, replay }: Exchange) {
   await executor.insert(message).values({ sessionId, role: 'student', text: studentText, photoText });
-  const [tutor] = await executor
-    .insert(message)
-    .values({ sessionId, role: 'tutor', text: tutorText, modelMessages: replay })
-    .returning({ id: message.id });
-  return tutor?.id;
+  await executor.insert(message).values({ sessionId, role: 'tutor', text: tutorText, modelMessages: replay });
 }
 
 const ownSession = (studentId: string, sessionId: string) => and(eq(studySession.id, sessionId), eq(studySession.studentId, studentId));
+
+/** The session's messages after the position `after`, all of them when it is null: those a summary has not covered. */
+const afterSummary = (sessionId: string, after: number | null) =>
+  and(eq(message.sessionId, sessionId), after === null ? undefined : gt(message.position, after));
 
 /**
  * The last exercise position handed out, committed or not: a reset leaves out every exercise begun
@@ -205,9 +202,10 @@ export function createTutorRepository(db: Db) {
           entries: sql<string[]>`coalesce(${entries}, '[]'::jsonb)`,
           hintLevel: exercise.hintLevel,
           solvedAt: exercise.solvedAt,
+          // As text: an array of the enum is parsed only by a connection that saw the type when it opened.
           errorTypes: sql<
             string[]
-          >`coalesce((select array_agg(${turnRecord.errorType}) from ${turnRecord} where ${turnRecord.exerciseId} = ${exercise.id} and ${turnRecord.errorType} is not null), '{}')`,
+          >`coalesce((select array_agg(${turnRecord.errorType}::text) from ${turnRecord} where ${turnRecord.exerciseId} = ${exercise.id} and ${turnRecord.errorType} is not null), '{}')`,
         })
         .from(exercise)
         .innerJoin(studySession, eq(studySession.id, exercise.sessionId))
@@ -291,9 +289,11 @@ export function createTutorRepository(db: Db) {
     /**
      * Marks a turn as running in the student's session, and reads the session in the same
      * statement: a session closed by the turn before is seen closed. Undefined when a turn of the
-     * student already runs, in this session or another, or when the session is not theirs.
+     * student already runs, in this session or another, or when the session is not theirs. A turn
+     * marked longer than `staleAfterMs` ago, longer than any turn's calls, was left by a crash and
+     * no longer counts.
      */
-    async startTurn(studentId: string, sessionId: string) {
+    async startTurn(studentId: string, sessionId: string, staleAfterMs: number) {
       return db.transaction(async (tx) => {
         // One turn at a time for the student, whatever the session: turns in parallel sessions would
         // all pass the same quota check. The lock serialises this student's starts until the commit.
@@ -301,7 +301,9 @@ export function createTutorRepository(db: Db) {
         const [running] = await tx
           .select({ id: studySession.id })
           .from(studySession)
-          .where(and(eq(studySession.studentId, studentId), gte(studySession.turnStartedAt, sql`now() - ${STALE_TURN}`)))
+          .where(
+            and(eq(studySession.studentId, studentId), gte(studySession.turnStartedAt, sql`now() - make_interval(secs => ${staleAfterMs / 1000})`)),
+          )
           .limit(1);
         if (running) return undefined;
         const [started] = await tx
@@ -346,7 +348,7 @@ export function createTutorRepository(db: Db) {
       const rows = await db
         .select({ role: message.role, text: message.text, photoText: message.photoText, modelMessages: message.modelMessages })
         .from(message)
-        .where(and(eq(message.sessionId, sessionId), after === null ? undefined : gt(message.position, after)))
+        .where(afterSummary(sessionId, after))
         .orderBy(desc(message.position))
         .limit(limit);
       return rows.reverse();
@@ -354,10 +356,7 @@ export function createTutorRepository(db: Db) {
 
     /** How many messages of the session follow the summary's: a summary is due past a backlog. */
     async countAfter(sessionId: string, after: number | null) {
-      const [row] = await db
-        .select({ count: count() })
-        .from(message)
-        .where(and(eq(message.sessionId, sessionId), after === null ? undefined : gt(message.position, after)));
+      const [row] = await db.select({ count: count() }).from(message).where(afterSummary(sessionId, after));
       return row?.count ?? 0;
     },
 
@@ -366,7 +365,7 @@ export function createTutorRepository(db: Db) {
       return db
         .select({ position: message.position, role: message.role, text: message.text, photoText: message.photoText })
         .from(message)
-        .where(and(eq(message.sessionId, sessionId), after === null ? undefined : gt(message.position, after)))
+        .where(afterSummary(sessionId, after))
         .orderBy(asc(message.position));
     },
 

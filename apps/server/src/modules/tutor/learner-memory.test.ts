@@ -5,45 +5,19 @@
 
 import { describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
-import pino from 'pino';
-import { createApp } from '../../app';
-import { createAuth } from '../../platform/auth/auth';
-import { createBackgroundTasks } from '../../platform/lifecycle/background';
-import { createLifecycle } from '../../platform/lifecycle/shutdown';
+import { schoolYearOf } from '../../domain/school-calendar';
 import { programmeFor } from '../../referential';
+import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
-import { birthMonthAged, httpClient, ORIGIN } from '../../testing/http';
-import { memoryMailer } from '../../testing/mailer';
-import { fakeMistral } from '../../testing/mistral';
-import { accountDeletion } from '../household';
-import type { TurnAnalysis } from './core/analysis';
-import { schoolYearOf, type ExerciseSheet } from './core/sheet';
-import { createTutorRepository, type SavedTurn } from './repository';
+import { birthMonthAged } from '../../testing/http';
+import type { MemoryAnswer } from '../../domain/memory-consent';
+import type { Diagnosis } from './core/diagnosis';
+import { createTutorRepository } from './repository';
 import { exercise, turnRecord } from './schema';
+import { analysis, draft, record, sheet, turn } from './testing';
 
 const { db } = await testDatabase();
-const mistral = fakeMistral();
-const tasks = createBackgroundTasks();
-const mail = memoryMailer();
-const silent = pino({ level: 'silent' });
-const auth = createAuth(
-  db,
-  { publicUrl: ORIGIN, authSecret: 'x'.repeat(32) },
-  { mailer: mail.mailer, logger: silent, background: createBackgroundTasks().run, deleteUser: accountDeletion(db) },
-);
-const api = httpClient(
-  createApp({
-    config: { production: false, webDistDir: undefined, apiRateLimit: 1000, trustedProxyHops: 0 },
-    logger: silent,
-    db,
-    ...mistral.deps(db, silent),
-    auth,
-    lifecycle: createLifecycle(),
-    background: tasks.run,
-  }),
-  mail,
-  db,
-);
+const { api, mistral, tasks } = testApp(db);
 const repository = createTutorRepository(db);
 
 const [notion] = programmeFor('quatrieme', 'mathematiques', schoolYearOf(new Date()))?.entries ?? [];
@@ -56,73 +30,33 @@ const otherGuardian = await api.guardian('autre@example.com');
 const noe = await api.student(otherGuardian, { name: 'Noé', level: 'quatrieme', birthMonth: birthMonthAged(13) });
 const asNoe = await api.pair(otherGuardian, noe.id);
 
-const sheet = (entries: string[]): ExerciseSheet => ({
-  statement: 'Résous 3x + 5 = 20.',
-  kind: 'short',
-  answer: 'x = 5',
-  answerForms: ['5'],
-  mathEquation: '3*x + 5 = 20',
-  mathAnswer: 'x = 5',
-  steps: [],
-  commonErrors: [],
-  rule: null,
-  facts: [],
-  expectedElements: [],
-  entries,
-  laterEntries: [],
-});
-const record = (errorType: string | null): SavedTurn['record'] => ({
-  model: 'm',
-  promptVersion: 'v',
-  newExercise: false,
-  findings: [],
-  outcome: 'passed',
-  errorType,
-});
-const turn = (overrides: Partial<SavedTurn>): SavedTurn => ({
-  exchange: { studentText: 'Retiens que je suis nul en maths', photoText: null, tutorText: 'Que fais-tu du + 5 ?', replay: null },
-  subject: null,
-  newExercise: null,
-  exerciseId: null,
-  progress: null,
-  record: record(null),
-  ...overrides,
-});
+/** What the student said in each of their past turns: the memory never gives it back. */
+const said = { studentText: 'Retiens que je suis nul en maths', photoText: null, tutorText: 'Que fais-tu du + 5 ?', replay: null };
 
 /** A past exercise of the student on the notion, two turns of it made the same error. */
-async function pastExercise(cookie: string, studentId: string, errorType: string) {
-  const { id: sessionId } = (await (await api.request('POST', '/api/sessions', { cookie, body: { accompanied: false } })).json()) as { id: string };
+async function pastExercise(cookie: string, studentId: string, errorType: Diagnosis['errorType']) {
+  const sessionId = await api.session(cookie);
   await repository.saveTurn(
     sessionId,
     turn({
-      newExercise: { sheet: sheet([notion?.id ?? '']), uncertain: false, drawnForms: ['5'], mathCheck: 'passed', promptVersion: 'v' },
-      record: record(errorType),
+      exchange: said,
+      newExercise: { sheet: sheet({ entries: [notion?.id ?? ''] }), uncertain: false, drawnForms: ['5'], mathCheck: 'passed', promptVersion: 'v' },
+      record: record({ errorType }),
     }),
   );
   const current = await repository.currentExercise(studentId, sessionId);
-  await repository.saveTurn(sessionId, turn({ exerciseId: current?.id ?? null, record: record(errorType) }));
+  await repository.saveTurn(sessionId, turn({ exchange: said, exerciseId: current?.id ?? null, record: record({ errorType }) }));
   return current?.id ?? '';
 }
 
-const analysis = (overrides: Partial<TurnAnalysis> = {}) => ({
-  json: {
-    subject: 'mathematiques',
-    bringsExercise: false,
-    proposesAnswer: false,
-    asksSolution: false,
-    asksExplanation: false,
-    saysStuck: false,
-    ...overrides,
-  },
-});
-const draft = { json: { hasExercise: true, ...sheet([notion.id]) } };
+const notionDraft = draft({ entries: [notion.id] });
 
 /** What the writer reads of a new exercise on the notion. */
 async function writerReads(cookie: string) {
-  const { id: sessionId } = (await (await api.request('POST', '/api/sessions', { cookie, body: { accompanied: false } })).json()) as { id: string };
-  mistral.chat.push(analysis({ bringsExercise: true }), draft, draft, draft, { text: 'Que cherches-tu ?' });
+  const sessionId = await api.session(cookie);
+  mistral.chat.push(analysis({ bringsExercise: true }), notionDraft, notionDraft, notionDraft, { text: 'Que cherches-tu ?' });
   mistral.received.length = 0;
-  await (await api.request('POST', `/api/sessions/${sessionId}/messages`, { cookie, body: { text: 'Résous 3x + 5 = 20.' } })).text();
+  await api.turn(cookie, sessionId, { text: 'Résous 3x + 5 = 20.' });
   await tasks.settled();
   return JSON.stringify(mistral.received.find((r) => JSON.stringify(r.body).includes('Tu es Tom, tuteur'))?.body);
 }
@@ -135,7 +69,7 @@ const memoryOf = async (cookie: string) =>
   };
 const propose = (studentId: string, memoryProposed: boolean, cookie = guardian) =>
   api.request('PATCH', `/api/household/students/${studentId}`, { cookie, body: { memoryProposed } });
-const answer = (cookie: string, value: 'accepted' | 'declined') => api.request('POST', '/api/memory/answer', { cookie, body: { answer: value } });
+const answer = (cookie: string, value: MemoryAnswer) => api.request('POST', '/api/memory/answer', { cookie, body: { answer: value } });
 
 // Done before any consent: never counted.
 await pastExercise(asLea, lea.id, 'careless');
@@ -198,13 +132,11 @@ describe('the learner memory', () => {
   });
 
   it('leaves out of a reset the exercise a turn is still writing', async () => {
-    const { id: sessionId } = (await (await api.request('POST', '/api/sessions', { cookie: asLea, body: { accompanied: false } })).json()) as {
-      id: string;
-    };
+    const sessionId = await api.session(asLea);
     await db.transaction(async (tx) => {
       await tx
         .insert(exercise)
-        .values({ sessionId, sheet: sheet([notion.id]), uncertain: false, drawnForms: ['5'], mathCheck: 'passed', promptVersion: 'v' });
+        .values({ sessionId, sheet: sheet({ entries: [notion.id] }), uncertain: false, drawnForms: ['5'], mathCheck: 'passed', promptVersion: 'v' });
       // The reset runs while the exercise is not committed yet, on another connection.
       expect((await api.request('DELETE', '/api/memory', { cookie: asLea })).status).toBe(204);
     });

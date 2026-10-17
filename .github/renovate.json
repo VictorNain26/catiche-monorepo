@@ -71,11 +71,6 @@
       "allowedVersions": "<25.0.0"
     },
     { "description": "Better Auth packages together.", "matchPackageNames": ["better-auth", "@better-auth/**"], "groupName": "better-auth" },
-    {
-      "description": "Bun moves as one: the version the repository declares (packageManager, engines), its image (Dockerfile) and its types.",
-      "matchPackageNames": ["bun", "oven/bun", "bun-types"],
-      "groupName": "bun"
-    },
     { "description": "Drizzle ORM toolchain.", "matchPackageNames": ["drizzle-orm", "drizzle-kit"], "groupName": "drizzle" },
     {
       "description": "Hono and its middleware: the server and the web must stay on the same hono for hc<AppType> to infer.",
@@ -91,13 +86,13 @@
       "description": "Vercel AI SDK core, provider and React bindings in one branch: they pin the same @ai-sdk/provider-utils, and @ai-sdk/react depends on the exact `ai` version, so bumping one alone installs a second copy.",
       "matchPackageNames": ["ai", "@ai-sdk/**"],
       "groupName": "ai-sdk",
-      "labels": ["dependencies", "ai-stack"]
+      "addLabels": ["ai-stack"]
     },
     {
       "description": "Mistral SDK is critical (EU sovereignty): isolated and reviewed.",
       "matchPackageNames": ["@mistralai/mistralai"],
       "groupName": "mistral",
-      "labels": ["dependencies", "ai-stack"],
+      "addLabels": ["ai-stack"],
       "reviewers": ["VictorNain26"]
     },
     { "description": "Tailwind toolchain.", "matchPackageNames": ["tailwindcss", "tailwind-merge", "@tailwindcss/**"], "groupName": "tailwind" },
@@ -113,7 +108,7 @@
       "commitMessagePrefix": "chore(ci)"
     },
     {
-      "description": "Docker images (server base, Postgres, tools).",
+      "description": "Docker images (server base, tools); Postgres and Bun have their own groups below.",
       "matchManagers": ["dockerfile", "docker-compose"],
       "groupName": "docker",
       "commitMessagePrefix": "chore(docker)"
@@ -122,7 +117,13 @@
       "description": "Postgres moves as one: the developer's (docker-compose.yml) and the CI's services (ci.yml), two managers.",
       "matchDatasources": ["docker"],
       "matchPackageNames": ["postgres"],
-      "groupName": "postgres"
+      "groupName": "postgres",
+      "commitMessagePrefix": "chore(docker)"
+    },
+    {
+      "description": "Bun moves as one: the version the repository declares (packageManager, engines), its image (Dockerfile) and its types. After the docker rule, whose group it overrides for the image.",
+      "matchPackageNames": ["bun", "oven/bun", "bun-types"],
+      "groupName": "bun"
     }
   ]
 }

@@ -5,42 +5,17 @@
 
 import { describe, expect, it } from 'bun:test';
 import { and, eq, gt } from 'drizzle-orm';
-import pino from 'pino';
-import { createApp } from '../../app';
-import { createAuth } from '../../platform/auth/auth';
-import { createBackgroundTasks } from '../../platform/lifecycle/background';
-import { createLifecycle } from '../../platform/lifecycle/shutdown';
+import { schoolYearOf } from '../../domain/school-calendar';
 import { programmeFor } from '../../referential';
+import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
-import { birthMonthAged, httpClient, ORIGIN } from '../../testing/http';
-import { memoryMailer } from '../../testing/mailer';
-import { fakeMistral } from '../../testing/mistral';
-import { accountDeletion } from '../household';
-import { schoolYearOf, type ExerciseSheet } from './core/sheet';
-import { createTutorRepository, type SavedTurn } from './repository';
+import { birthMonthAged } from '../../testing/http';
+import { createTutorRepository } from './repository';
 import { exercise, message, studySession, turnRecord } from './schema';
+import { record, sheet, turn } from './testing';
 
 const { db } = await testDatabase();
-const mail = memoryMailer();
-const silent = pino({ level: 'silent' });
-const auth = createAuth(
-  db,
-  { publicUrl: ORIGIN, authSecret: 'x'.repeat(32) },
-  { mailer: mail.mailer, logger: silent, background: createBackgroundTasks().run, deleteUser: accountDeletion(db) },
-);
-const api = httpClient(
-  createApp({
-    config: { production: false, webDistDir: undefined, apiRateLimit: 1000, trustedProxyHops: 0 },
-    logger: silent,
-    db,
-    ...fakeMistral().deps(db, silent),
-    auth,
-    lifecycle: createLifecycle(),
-    background: createBackgroundTasks().run,
-  }),
-  mail,
-  db,
-);
+const { api } = testApp(db);
 const repository = createTutorRepository(db);
 
 const [notion] = programmeFor('quatrieme', 'mathematiques', schoolYearOf(new Date()))?.entries ?? [];
@@ -53,38 +28,13 @@ const otherGuardian = await api.guardian('autre@example.com');
 const noe = await api.student(otherGuardian, { name: 'Noé', level: 'quatrieme', birthMonth: birthMonthAged(13) });
 const asNoe = await api.pair(otherGuardian, noe.id);
 
-const sheet: ExerciseSheet = {
-  statement: 'Résous 3x + 5 = 20.',
-  kind: 'short',
-  answer: 'x = 5',
-  answerForms: ['5'],
-  mathEquation: '3*x + 5 = 20',
-  mathAnswer: 'x = 5',
-  steps: [],
-  commonErrors: [],
-  rule: null,
-  facts: [],
-  expectedElements: [],
-  entries: [notion.id],
-  laterEntries: [],
-};
-const turn = (overrides: Partial<SavedTurn>): SavedTurn => ({
-  exchange: { studentText: 'Je bloque sur le + 5', photoText: null, tutorText: 'Que fais-tu du + 5 ?', replay: null },
-  subject: null,
-  newExercise: null,
-  exerciseId: null,
-  progress: null,
-  record: { model: 'm', promptVersion: 'v', newExercise: false, findings: [], outcome: 'passed' },
-  ...overrides,
-});
-
 const DAY = 24 * 60 * 60_000;
 const ago = (days: number, minutes = 0) => new Date(Date.now() - days * DAY + minutes * 60_000);
-const newExercise = { sheet, uncertain: false, drawnForms: ['5'], mathCheck: 'passed' as const, promptVersion: 'v' };
+const newExercise = { sheet: sheet({ entries: [notion.id] }), uncertain: false, drawnForms: ['5'], mathCheck: 'passed' as const, promptVersion: 'v' };
 
 /** A session the student opened at `when`. */
 async function openSession(cookie: string, when: Date) {
-  const { id } = (await (await api.request('POST', '/api/sessions', { cookie, body: { accompanied: false } })).json()) as { id: string };
+  const id = await api.session(cookie);
   await db.update(studySession).set({ createdAt: when }).where(eq(studySession.id, id));
   return id;
 }
@@ -155,10 +105,9 @@ describe('the summary of the week', () => {
     const asMax = await api.pair(guardian, max.id);
     const sessionId = await mathsSession(asMax, 1, [0, 4]);
     const fixed = { studentText: 'Je veux plus', photoText: null, tutorText: 'Réponse fixe', replay: null };
-    const record = { model: 'm', promptVersion: 'v', newExercise: false, findings: [] };
-    await at(sessionId, ago(1, 5), () => repository.closeForDistress(max.id, sessionId, 'rules', fixed, { ...record, outcome: 'distress' }));
+    await at(sessionId, ago(1, 5), () => repository.closeForDistress(max.id, sessionId, 'rules', fixed, record({ outcome: 'distress' })));
     for (const offset of [10, 15, 20]) {
-      await at(sessionId, ago(1, offset), () => repository.saveTurn(sessionId, turn({ exchange: fixed, record: { ...record, outcome: 'closed' } })));
+      await at(sessionId, ago(1, offset), () => repository.saveTurn(sessionId, turn({ exchange: fixed, record: record({ outcome: 'closed' }) })));
     }
     expect(await (await summaryOf(asMax)).json()).toMatchObject({ minutes: 5, subjects: [{ subject: 'mathematiques', minutes: 5 }] });
   });

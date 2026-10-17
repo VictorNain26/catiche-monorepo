@@ -58,10 +58,10 @@ export function createHouseholdService({ repository, createPairingCode }: Deps) 
     return toStudent(student);
   };
 
+  const isStudent = async (userId: string) => (await repository.roleOf(userId)) === 'student';
+
   return {
-    async isStudent(userId: string) {
-      return (await repository.roleOf(userId)) === 'student';
-    },
+    isStudent,
 
     /** A student in 6e or 5e, whose profile lives on the family's phone. */
     async isAccompanied(userId: string) {
@@ -71,7 +71,7 @@ export function createHouseholdService({ repository, createPairingCode }: Deps) 
 
     /** A student reaches none of the guardian's routes. */
     async assertNotStudent(userId: string) {
-      if ((await repository.roleOf(userId)) === 'student') throw new Problem('FORBIDDEN');
+      if (await isStudent(userId)) throw new Problem('FORBIDDEN');
     },
 
     /** Who is signed in: a student, or else a guardian, whose household may not exist yet. */

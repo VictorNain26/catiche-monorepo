@@ -30,7 +30,7 @@ apps/
 └── web/          # Vite + React + TanStack Router — application, téléphone d'abord (3002)
 
 packages/
-├── ui/              # Primitives shadcn du web ; ses classes servent aussi la landing (`@repo/ui/classes`)
+├── ui/              # Primitives du web, sur Base UI ; ses classes servent aussi la landing (`@repo/ui/classes`)
 ├── tokens/          # Design tokens CSS (Tailwind v4) partagés
 └── eslint-config/   # Config ESLint partagée
 ```
@@ -47,7 +47,7 @@ packages/
 | Paiements | Aucun branché. Paiement web prévu au lot 1 |
 | Observabilité | Logs pino ; Bugsink, auto-hébergé, pour les erreurs avant la première famille (`docs/etudes/2026-10-07/hebergement.md`). Pas d'analytics installée |
 | Monorepo | Turborepo, workspaces Bun |
-| Déploiement | Clever Cloud, région Paris, par la CI à chaque merge sur `main` (`docs/architecture.md`, « Environnements et livraison »). Landing : une application statique servie par Caddy (`apps/landing/Caddyfile`). Serveur : l'image `apps/server/Dockerfile`, qui embarque le build du web, publiée sur GHCR au SHA, déployée en staging ; la production suivra, sur approbation. Web : servi par le serveur, sur la même origine que l'API ; en dev, par le proxy de Vite |
+| Déploiement | Clever Cloud, région Paris : `docs/architecture.md`, « Hébergement » et « Environnements et livraison » |
 
 ## Commandes
 

@@ -64,9 +64,9 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
   à l'usage avec un plafond, demander le Zero Data Retention, vérifier Admin › API ›
   Confidentialité.
 - **CI** : le secret `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`) et l'application GitHub
-  Claude sur le dépôt, pour `.github/workflows/claude.yml` ; CodeQL en configuration par défaut
-  (Settings › Code security), qui remplace Semgrep ; supprimer les secrets `ANTHROPIC_API_KEY` et
-  `MISTRAL_API_KEY_CI`, que rien n'utilise.
+  Claude sur le dépôt, pour `.github/workflows/claude.yml` ; supprimer les secrets
+  `ANTHROPIC_API_KEY`, `MISTRAL_API_KEY_CI` et `SEMGREP_APP_TOKEN`, que rien n'utilise (CodeQL, en
+  configuration par défaut, remplace Semgrep).
 - **Comptes à fermer** : le projet Vercel et l'application GitHub Vercel (son check échoue sur
   chaque PR), l'organisation Sentry `home-drx`, le projet Langfuse « tomai » ; vérifier que Koyeb
   ne facture plus rien ; supprimer les secrets de dépôt `KOYEB_API_TOKEN` et `DATABASE_URL`.
@@ -77,8 +77,7 @@ Où on en est, réécrit dans chaque PR qui fait avancer ; ce qui est fini en so
 - **Dependabot** : classer `inaccurate` les alertes rattachées à `apps/ai-service/uv.lock` et
   `apps/curriculum/uv.lock`, supprimés en `8f5011f`, et signaler le bug au support GitHub.
 - **Vérifications** : Tom dans le hero sur un iPhone (Safari, sans fond noir) ; un e-mail à
-  contact@tomia.fr depuis une autre adresse que Gmail ; le lundi 2026-10-12, que Renovate a
-  ouvert les mises à jour en attente (#310) ; les plugins Claude Code à jour
+  contact@tomia.fr depuis une autre adresse que Gmail ; les plugins Claude Code à jour
   (`claude plugin marketplace update`, puis `claude plugin update <nom>`).
 
 ## Reporté
@@ -94,7 +93,9 @@ concernée les reprend (`.claude/rules/plans-and-agents.md`).
 - Clever Cloud à éprouver : un tour long à travers le proxy (délai documenté de 180 s), le délai
   de grâce réel au SIGTERM contre `SHUTDOWN_DEADLINE_MS`, la sonde pour `DRAIN_MS`, le PITR et son
   prix, Postgres 18.4 chez eux contre 18.6 en dev et en CI.
-- `platform/http/client-address.ts` n'est exercé par aucun test, faute d'un vrai `Bun.serve`.
+- L'adresse de la connexion, que `clientAddress` (`platform/http/client-address.ts`) lit par
+  `getConnInfo`, n'est exercée par aucun test, faute d'un vrai `Bun.serve` : `addressOf` l'est
+  (`client-address.test.ts`), le middleware aussi, sous `app.request` (`rate-limit.test.ts`).
 - Le préfixe `__Host-` des cookies, quand better-auth le livre
   ([#10806](https://github.com/better-auth/better-auth/issues/10806)).
 

@@ -58,15 +58,7 @@ export function createHouseholdRepository(db: Db) {
     /** A student's own profile; undefined for anyone who is not a student. */
     async findProfile(studentId: string) {
       const [student] = await db
-        .select({
-          id: user.id,
-          name: user.name,
-          level: studentProfile.level,
-          birthMonth: studentProfile.birthMonth,
-          memoryProposedAt: studentProfile.memoryProposedAt,
-          memoryAnswer: studentProfile.memoryAnswer,
-          memoryResetAfter: studentProfile.memoryResetAfter,
-        })
+        .select({ ...studentColumns, memoryResetAfter: studentProfile.memoryResetAfter })
         .from(user)
         .innerJoin(studentProfile, eq(studentProfile.userId, user.id))
         .innerJoin(householdMember, and(eq(householdMember.userId, user.id), eq(householdMember.role, 'student')))
