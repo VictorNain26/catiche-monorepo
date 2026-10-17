@@ -18,7 +18,7 @@ const fields = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   LOG_LEVEL: z.enum(LOG_LEVELS).default('info'),
-  // Requests per minute a client address may send to the API; the e2e suite, whose browsers share one address, raises it.
+  // Requests per minute a client address may send to the API.
   API_RATE_LIMIT: z.coerce.number().int().positive().default(100),
   // The proxies in front of the server whose X-Forwarded-For entry is trusted: 1 at Clever Cloud
   // (platform/http/client-address.ts), none locally.

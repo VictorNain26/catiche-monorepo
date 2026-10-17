@@ -124,17 +124,6 @@
       "description": "Bun moves as one: the version the repository declares (packageManager, engines), its image (Dockerfile) and its types. After the docker rule, whose group it overrides for the image.",
       "matchPackageNames": ["bun", "oven/bun", "bun-types"],
       "groupName": "bun"
-    },
-    {
-      "description": "Playwright's image moves with @playwright/test: its browsers are the ones the tests drive, through the Playwright Server it runs (docker-compose.yml, service playwright).",
-      "matchPackageNames": ["@playwright/test", "mcr.microsoft.com/playwright"],
-      "groupName": "playwright"
-    },
-    {
-      "description": "Playwright's image tags read v1.63.0-noble: the distribution is the compatibility part.",
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["mcr.microsoft.com/playwright"],
-      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<compatibility>.+)$"
     }
   ]
 }

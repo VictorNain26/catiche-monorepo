@@ -45,7 +45,7 @@ const level = z.custom<Level>(isLevel, 'Sa classe.');
 export const studentSchema = z.object({ name, level });
 
 // The ages the server takes (modules/household/routes.ts), in UTC as it counts them: a contract
-// the server does not export as a value, held by the e2e « a birth month the server would refuse ».
+// the server does not export as a value, and no test holds the two together.
 const MIN_AGE_YEARS = 5;
 const MAX_AGE_YEARS = 20;
 

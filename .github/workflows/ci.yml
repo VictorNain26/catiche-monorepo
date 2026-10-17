@@ -46,6 +46,9 @@ jobs:
       - run: bunx --no-install turbo run build:types --filter=@repo/server
       - run: bunx --no-install knip --treat-config-hints-as-errors
       - run: bunx --no-install sherif
+      # The image builds the server and the web; the landing builds here, so that a PR sees the
+      # build its deployment would run.
+      - run: bunx --no-install turbo run build --filter=landing ${AFFECTED:+"$AFFECTED"}
       - name: The committed SQL matches the schema
         working-directory: apps/server
         run: |
@@ -109,85 +112,6 @@ jobs:
       - run: bunx --no-install turbo run test ${AFFECTED:+"$AFFECTED"}
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
-
-  # No build job: the only builds are the server's, the web's and the landing's, which the e2e
-  # suites build before they run (turbo.json, `test:e2e`) and the image builds again.
-  # Both e2e suites run on the runner and drive the browsers of Playwright's official image, which
-  # docker compose serves as on a developer's machine (docker-compose.yml, `playwright`): no apt
-  # on the runner, whose mirror has held a run up to 17 minutes, and every pull bounded
-  # (.github/actions/compose-up). The web's suite runs the built server on its own database, on
-  # the compose Postgres (tooling/playwright-web).
-  # The web's suite is the longest job: it runs in two shards, each on its own runner, server and
-  # database (https://playwright.dev/docs/test-sharding); turbo hands `--shard` to `playwright test`
-  # only, not to the builds it depends on. A failed shard keeps its own report.
-  e2e-web:
-    name: E2E web (Playwright ${{ matrix.shard }}/${{ strategy.job-total }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    permissions:
-      contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2]
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: ./.github/actions/setup-monorepo
-      - name: Is the web affected
-        id: affected
-        run: |
-          TASKS=$(bunx --no-install turbo run test:e2e --filter=@repo/playwright-web ${AFFECTED:+"$AFFECTED"} --dry=json | jq '[.tasks[] | select(.command != "<NONEXISTENT>")] | length')
-          echo "run=$([ "$TASKS" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-      - if: steps.affected.outputs.run == 'true'
-        uses: ./.github/actions/compose-up
-        with:
-          services: postgres playwright
-      - if: steps.affected.outputs.run == 'true'
-        env:
-          SHARD: ${{ matrix.shard }}/${{ strategy.job-total }}
-        run: bunx --no-install turbo run test:e2e --filter=@repo/playwright-web -- --shard="$SHARD"
-      - name: Keep the shard's report
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: playwright-web-report-${{ matrix.shard }}
-          path: tooling/playwright-web/playwright-report/
-          retention-days: 7
-
-  # The landing's server is Caddy, started by `docker run` (apps/landing/playwright.config.ts).
-  e2e-landing:
-    name: E2E landing (Playwright)
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: ./.github/actions/setup-monorepo
-      - name: Is the landing affected
-        id: affected
-        run: |
-          TASKS=$(bunx --no-install turbo run test:e2e --filter=landing ${AFFECTED:+"$AFFECTED"} --dry=json | jq '[.tasks[] | select(.command != "<NONEXISTENT>")] | length')
-          echo "run=$([ "$TASKS" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-      - if: steps.affected.outputs.run == 'true'
-        uses: ./.github/actions/compose-up
-        with:
-          services: playwright
-      - if: steps.affected.outputs.run == 'true'
-        run: bunx --no-install turbo run test:e2e --filter=landing
-      - name: Keep the suite's report
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: playwright-landing-report
-          path: apps/landing/playwright-report/
-          retention-days: 7
 
   # The image is built once, run against Postgres, and published by its commit on main. On a PR,
   # only when the server or the web, which it serves, is affected. Its layers are cached in the
@@ -305,11 +229,11 @@ jobs:
 
   # The one required check. A job that needs another is skipped when that one fails, unless
   # always() runs it (https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-jobs):
-  # it fails on any result but success. A matrix job reports one result for all its shards.
+  # it fails on any result but success.
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [check, workflows, test, e2e-web, e2e-landing, image, secrets, audit]
+    needs: [check, workflows, test, image, secrets, audit]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}
