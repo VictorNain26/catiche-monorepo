@@ -1,5 +1,6 @@
 /** The guardian's household, as `/api/household` serves it: its students and their devices. */
 
+import { isStudentBirthMonth, STUDENT_AGE_YEARS } from '@repo/server/student-age';
 import { queryOptions } from '@tanstack/react-query';
 import type { InferRequestType, InferResponseType } from 'hono/client';
 import { z } from './zod';
@@ -44,14 +45,13 @@ const level = z.custom<Level>(isLevel, 'Sa classe.');
 
 export const studentSchema = z.object({ name, level });
 
-// The ages the server takes (modules/household/routes.ts), in UTC as it counts them: a contract
-// the server does not export as a value, and no test holds the two together.
-const MIN_AGE_YEARS = 5;
-const MAX_AGE_YEARS = 20;
+const { min, max } = STUDENT_AGE_YEARS;
 
-/** The years a child of 5 to 20 was born in, the youngest last. */
-export const birthYears = (now = new Date()) =>
-  Array.from({ length: MAX_AGE_YEARS - MIN_AGE_YEARS + 1 }, (_, index) => String(now.getUTCFullYear() - MAX_AGE_YEARS + index));
+/** The ages the server takes, as a parent reads them. */
+export const CHILD_AGES = `entre ${String(min)} et ${String(max)} ans`;
+
+/** The years a child of 5 to 20 was born in, the youngest last, in UTC as the server counts. */
+export const birthYears = (now = new Date()) => Array.from({ length: max - min + 1 }, (_, index) => String(now.getUTCFullYear() - max + index));
 
 /** A new child as the adding asks it, month and year in two menus, as the server takes it. */
 export const newChildSchema = (now = new Date()) =>
@@ -61,15 +61,10 @@ export const newChildSchema = (now = new Date()) =>
       year: z.string().regex(/^\d{4}$/, 'Son année.'),
       memoryProposed: z.boolean(),
     })
-    .refine(
-      ({ month, year }) => {
-        const birth = `${year}-${month}`;
-        const youngest = `${String(now.getUTCFullYear() - MIN_AGE_YEARS)}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
-        const oldest = `${String(now.getUTCFullYear() - MAX_AGE_YEARS)}-01`;
-        return birth >= oldest && birth <= youngest;
-      },
-      { path: ['year'], message: 'Votre enfant a entre 5 et 20 ans : vérifiez son année.' },
-    )
+    .refine(({ month, year }) => isStudentBirthMonth(`${year}-${month}`, now), {
+      path: ['year'],
+      message: `Votre enfant a ${CHILD_AGES} : vérifiez son année.`,
+    })
     .transform(({ month, year, ...child }) => ({ ...child, birthMonth: `${year}-${month}` }));
 
 /** What the guardian reads of the learner memory of their child. */
