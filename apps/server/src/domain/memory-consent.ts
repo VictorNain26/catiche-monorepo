@@ -4,6 +4,8 @@
  * 15, the child alone (loi Informatique et Libertés, art. 45).
  */
 
+import { ageAt } from './student-age';
+
 const SELF_CONSENT_AGE = 15;
 
 /** The child's answers, as the API takes them and the profile stores them. */
@@ -18,16 +20,6 @@ export interface MemoryConsent {
   birthMonth: string;
   proposedAt: Date | null;
   answer: MemoryAnswer | null;
-}
-
-/**
- * The age in full years at `now`. The day of birth is not collected: the birthday is counted at the
- * end of its month, so that a child is never taken for older than they are.
- */
-export function ageAt(birthMonth: string, now: Date): number {
-  const [year = 0, month = 1] = birthMonth.split('-').map(Number);
-  const age = now.getUTCFullYear() - year;
-  return now.getUTCMonth() + 1 > month ? age : age - 1;
 }
 
 /** The state of the memory, whether the child may answer it, and whether they decide alone. */

@@ -65,8 +65,14 @@ const { min, max } = STUDENT_AGE_YEARS;
 /** The ages the server takes, as a parent reads them. */
 export const CHILD_AGES = `entre ${String(min)} et ${String(max)} ans`;
 
-/** The years a child of 5 to 20 was born in, the youngest last, in UTC as the server counts. */
-export const birthYears = (now = new Date()) => Array.from({ length: max - min + 1 }, (_, index) => String(now.getUTCFullYear() - max + index));
+/**
+ * The years with a month the server takes, the youngest last: a child of 20 may be born 21 years
+ * ago. The months a year takes follow on, so a year takes one if it takes its January or December.
+ */
+export const birthYears = (now = new Date()) =>
+  Array.from({ length: max - min + 2 }, (_, index) => String(now.getUTCFullYear() - max - 1 + index)).filter(
+    (year) => isStudentBirthMonth(`${year}-01`, now) || isStudentBirthMonth(`${year}-12`, now),
+  );
 
 /** A new child as the adding asks it, month and year in two menus, as the server takes it. */
 export const newChildSchema = (now = new Date()) =>

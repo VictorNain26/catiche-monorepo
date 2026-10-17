@@ -39,7 +39,7 @@ describe('isLevel', () => {
 });
 
 describe('newChildSchema', () => {
-  // The server's rule (domain/student-age.ts): 5 to 20 years, in UTC. On 15 June 2026, from 2006-01 to 2021-06.
+  // The server's rule (domain/student-age.ts): 5 to 20 years, in UTC. On 15 June 2026, from 2005-06 to 2021-05.
   const now = new Date('2026-06-15T12:00:00Z');
   const child = (month: string, year: string) => ({ name: '  Léa ', level: 'sixieme', month, year, memoryProposed: true });
 
@@ -48,13 +48,14 @@ describe('newChildSchema', () => {
   });
 
   it('takes the ages the server takes, to the month, and no other', () => {
-    expect(newChildSchema(now).safeParse(child('06', '2021')).success).toBe(true);
-    expect(newChildSchema(now).safeParse(child('01', '2006')).success).toBe(true);
-    const tooYoung = newChildSchema(now).safeParse(child('07', '2021'));
+    expect(newChildSchema(now).safeParse(child('05', '2021')).success).toBe(true);
+    expect(newChildSchema(now).safeParse(child('06', '2005')).success).toBe(true);
+    // Born in June 2021: 5 only once June is over.
+    const tooYoung = newChildSchema(now).safeParse(child('06', '2021'));
     expect(tooYoung.error?.issues).toEqual([
       expect.objectContaining({ path: ['year'], message: 'Votre enfant a entre 5 et 20 ans : vérifiez son année.' }),
     ]);
-    expect(newChildSchema(now).safeParse(child('12', '2005')).success).toBe(false);
+    expect(newChildSchema(now).safeParse(child('05', '2005')).success).toBe(false);
   });
 
   it('asks for each menu, and refuses an empty name or no level', () => {
@@ -69,8 +70,17 @@ describe('newChildSchema', () => {
 });
 
 describe('birthYears', () => {
-  it('lists the years of a child of 5 to 20, the youngest last, in UTC', () => {
+  it('lists every year with a month the server takes, the youngest last, in UTC', () => {
+    // On 31 December 2026: from December 2005 (20) to November 2021 (5).
     const years = birthYears(new Date('2026-12-31T23:30:00Z'));
+    expect(years[0]).toBe('2005');
+    expect(years.at(-1)).toBe('2021');
+    expect(years).toHaveLength(17);
+  });
+
+  it('leaves out, in January, the year whose children are all still 4', () => {
+    // On 15 January 2027: from January 2006 (20) to December 2021 (5).
+    const years = birthYears(new Date('2027-01-15T12:00:00Z'));
     expect(years[0]).toBe('2006');
     expect(years.at(-1)).toBe('2021');
     expect(years).toHaveLength(16);
