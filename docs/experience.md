@@ -65,7 +65,8 @@ l'accueil.
   - les matières travaillées ;
   - les notions de son programme travaillées, celles qui résistent, celles qui ont cédé ;
   - une question à poser, tournée vers sa façon de chercher, pas vers l'exercice ;
-  - la prochaine étape quand il y en a une (relier son téléphone, faire les devoirs avec lui).
+  - la prochaine étape quand il y en a une (relier son téléphone, faire les devoirs avec lui ; à
+    la rentrée, sa classe de l'année, `decisions.md`).
   Jamais les conversations, jamais un taux de réussite, jamais une comparaison entre enfants.
 - **Fiche d'un enfant** : ses semaines dans le détail, ses appareils, la mémoire proposée, son
   prénom et sa classe.

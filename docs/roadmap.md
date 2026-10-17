@@ -42,7 +42,7 @@ est une PR, ses pratiques dans `etudes/2026-10-12/bonnes-pratiques.md` :
    appareil ».
 4. **Les deux espaces** : côté serveur, le temps jour par jour, les semaines précédentes, les
    notions du programme et le point hebdomadaire par e-mail ; le tableau de bord du parent et la
-   fiche d'un enfant ; l'espace de l'élève (accueil, séances, « Mon programme », semaine, ce que
+   fiche d'un enfant, avec la classe redemandée à la rentrée (`decisions.md`) ; l'espace de l'élève (accueil, séances, « Mon programme », semaine, ce que
    Tom retient, appareils).
 5. **Le reste** : la séance ; le compte et les données (résiliation en ligne comprise) ; le second
    parent et le double consentement ; le paiement, son fournisseur et le statut juridique tranchés

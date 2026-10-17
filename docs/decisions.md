@@ -19,6 +19,12 @@ Une décision prise en séance entre ici dans la PR qui la suit, pas dans une m�
 - **Un seul âge, compté au mois** (2026-10-17, Victor). Seul le mois de naissance est gardé ; un
   seul calcul de l'âge sert aux bornes d'inscription, côté serveur et web, et au consentement de
   la mémoire, compté pour ne jamais vieillir un enfant : `apps/server/src/domain/student-age.ts`.
+- **La classe redemandée à la rentrée, sans mettre personne en difficulté** (2026-10-17, Victor).
+  L'âge et la classe restent indépendants : un redoublement, une avance ou un parcours adapté ne
+  bloquent rien. La classe ne passe jamais seule à la suivante ; à la rentrée, le parent seul voit
+  « En quelle classe est Léa cette année ? », les classes sans aucune présélectionnée, jamais le
+  mot redoublement, et peut répondre plus tard. Rien n'est gardé de la classe d'avant, ni montré à
+  l'enfant, ni dit à Tom : il ne connaît que la classe de l'année.
 - **Le mode accompagné en 6e et 5e** (2026-10-08). Le découpage des modes devient : accompagné
   du CP à la 5e, guidé en 4e et 3e, autonome au lycée (l'étude du 2026-10-07 plaçait la 6e et la
   5e en guidé). Avant la 4e, pas d'appareil propre à l'enfant : le parent lance la séance sur
