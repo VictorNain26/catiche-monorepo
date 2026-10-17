@@ -15,6 +15,7 @@ import type { SubjectFamily } from '../../../domain/subjects';
 import type { Ai } from '../../../platform/ai/client';
 import { notionsFor, notionText, type Entry, type Notions } from '../../../referential';
 import { stripPromptTags, wrapUserMessage } from './fences';
+import { photoBlock } from './photo';
 import { promptVersion } from './prompt';
 
 const ExerciseSheetSchema = z.object({
@@ -187,21 +188,44 @@ export function exerciseBlock(sheet: ExerciseSheet, memory: string | null): stri
     .join('\n');
 }
 
+// A notion and a file's text standing for the data, so that the version covers their template:
+// the programme's lines and the fence of an attached file.
+const NOTION: Entry = {
+  id: 'id',
+  level: 'sixieme',
+  subject: 'mathematiques',
+  domain: 'd',
+  cycleExpectation: null,
+  subtheme: null,
+  subsubtheme: null,
+  kind: 'objective',
+  text: 't',
+  page: 1,
+  formula: false,
+};
+
 /**
  * The version of the instructions a draw receives: each class's, with and without a programme,
- * the fence around the student's message, and the schema it fills, whose descriptions are
- * instructions too. Not the data: the student's message and files, the programme's notions (the
- * referential pins its sources). Hashed as the writer's (`version.ts`): an edit of any of them
- * makes a new version, which the exercise records and Mistral's cache is keyed by.
+ * the format of the programme's lines, the fences around the student's message and an attached
+ * file, and the schema it fills, whose descriptions are instructions too. Not the data: the
+ * student's message and files, the programme's notions (the referential pins its sources). Hashed
+ * as the writer's (`version.ts`): an edit of any of them makes a new version, which the exercise
+ * records and Mistral's cache is keyed by. `messages` is the draw's, another only in its tests.
  */
-export const SHEET_PROMPT_VERSION = promptVersion(
-  [
-    ...SCHOOL_LEVELS.flatMap((level) =>
-      [null, { entries: [], later: [] }].flatMap((notions) => sheetMessages(level, notions, '', null).map((message) => message.content)),
-    ),
-    JSON.stringify(z.toJSONSchema(ExerciseDraftSchema)),
-  ].join('\n'),
-);
+export function sheetPromptVersion(messages: (...args: Parameters<typeof sheetMessages>) => readonly { content: string }[] = sheetMessages): string {
+  return promptVersion(
+    [
+      ...SCHOOL_LEVELS.flatMap((level) =>
+        [null, { entries: [NOTION], later: [NOTION] }].flatMap((notions) =>
+          messages(level, notions, '', photoBlock('t')).map((message) => message.content),
+        ),
+      ),
+      JSON.stringify(z.toJSONSchema(ExerciseDraftSchema)),
+    ].join('\n'),
+  );
+}
+
+export const SHEET_PROMPT_VERSION = sheetPromptVersion();
 const DRAWS = 3;
 export const SHEET_TIMEOUT_MS = 20_000;
 // Small 4's model card: « 0.7 for reasoning_effort="high" » (huggingface.co/mistralai/Mistral-Small-4-119B-2603).

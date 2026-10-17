@@ -18,16 +18,13 @@ import {
 import type { Logger } from 'pino';
 import type { z } from 'zod';
 import type { MistralConfig } from '../../config';
+import type { ReasoningEffort } from '../../domain/reasoning-effort';
 import type { Db } from '../db/client';
 import { pricing, type Usage } from './cost';
 import { insertCost } from './repository';
 
 /** What a model call answers, as `response.messages` gives it: the assistant's messages and tool results. */
 export type ResponseMessage = AssistantModelMessage | ToolModelMessage;
-
-/** Mistral's reasoning efforts a call may ask, which a turn's record keeps. */
-export const REASONING_EFFORTS = ['none', 'high'] as const;
-export type ReasoningEffort = (typeof REASONING_EFFORTS)[number];
 
 /** Who a call is billed to: a student, or nobody outside a student (evaluation, live tests). */
 type Owner = { studentId: string } | null;

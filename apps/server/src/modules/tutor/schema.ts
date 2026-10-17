@@ -6,12 +6,12 @@
 
 import { sql } from 'drizzle-orm';
 import { bigint, boolean, index, integer, jsonb, pgEnum, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import { DECIDED_BY, DIAGNOSIS_ERROR_TYPES, VERDICTS } from '../../domain/diagnosis';
 import { DISTRESS_SOURCES } from '../../domain/distress';
 import { MATH_CHECKS } from '../../domain/exercise-math';
+import { REASONING_EFFORTS } from '../../domain/reasoning-effort';
 import { SUBJECT_FAMILIES } from '../../domain/subjects';
-import { REASONING_EFFORTS } from '../../platform/ai/client';
 import { user } from '../../platform/auth/schema';
-import { DECIDED_BY, DIAGNOSIS_ERROR_TYPES, VERDICTS } from './core/diagnosis';
 import type { Hint } from './core/ladder';
 import { CUE_KINDS } from './core/parent-cues';
 import type { ExerciseSheet } from './core/sheet';
