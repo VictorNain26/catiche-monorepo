@@ -2,7 +2,7 @@ import boundaries from 'eslint-plugin-boundaries';
 import { NO_MOCK_MODULE } from '@repo/eslint-config/base';
 import { nodeConfig } from '@repo/eslint-config/node';
 
-// The dependency rules of docs/etudes/2026-10-06/refonte-architecture.md, « Serveur »:
+// The dependency rules of the server (docs/architecture.md, « Serveur »):
 // what is not allowed here is refused.
 const elements = [
   { type: 'platform', pattern: 'src/platform/*', partialMatch: false, capture: ['part'] },

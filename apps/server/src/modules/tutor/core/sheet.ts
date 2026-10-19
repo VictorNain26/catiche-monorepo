@@ -1,7 +1,6 @@
 /**
  * The exercise sheet: what the server knows of an exercise before the tutor helps, out of the
- * student's sight (`docs/etudes/2026-10-04/refonte-agent.md`, « À l'ouverture d'un exercice : la
- * fiche »): the schema, the prompt, the programme's notions, three draws of Small 4 in reasoning,
+ * student's sight (`docs/tuteur.md` § 3): the schema, the prompt, the programme's notions, three draws of Small 4 in reasoning,
  * the vote between them and the block the writer receives.
  */
 

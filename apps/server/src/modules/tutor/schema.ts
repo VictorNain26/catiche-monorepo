@@ -110,7 +110,7 @@ export const turnOutcome = pgEnum('turn_outcome', ['passed', 'regenerated', 'fal
 
 /**
  * What the code decided at each turn, to explain a reply and compare prompt versions
- * (`docs/etudes/2026-10-06/refonte-architecture.md`, « Tuteur »): no word of the student nor of
+ * (`docs/tuteur.md` § 7): no word of the student nor of
  * the tutor, only the decisions and the versions.
  */
 export const turnRecord = pgTable(

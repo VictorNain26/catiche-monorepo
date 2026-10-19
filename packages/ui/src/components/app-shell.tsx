@@ -27,7 +27,7 @@ interface AppShellProps {
 }
 
 /**
- * The frame of a signed-in space (`docs/experience.md`): the header with the logo and the active
+ * The frame of a signed-in space: the header with the logo and the active
  * profile, the destinations always visible. The viewport places them: tabs at the bottom of a
  * phone, a rail from `sm`, a side bar from `lg`.
  */

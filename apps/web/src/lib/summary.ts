@@ -42,7 +42,7 @@ export const subjectLabel = (subject: SubjectFamily) => SUBJECTS[subject];
 
 /**
  * A question for the parent, from a notion that resists: the child shows, the parent listens,
- * nothing to know of the subject (`docs/etudes/2026-10-08/aide-parentale.md`). Said to the parent,
+ * nothing to know of the subject. Said to the parent,
  * or to the child, never the adult's sentence to a pupil.
  */
 export function questionFor(reader: 'guardian' | 'student', name: string, notion: string): string {

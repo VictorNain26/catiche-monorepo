@@ -78,7 +78,7 @@ export function tutorRoutes({ auth, service, logger }: { auth: Auth; service: Tu
 const memoryAnswer = z.object({ answer: z.enum(MEMORY_ANSWERS) });
 
 /**
- * /api/memory: what Tom keeps of the signed-in student (`docs/etudes/2026-10-07/memoire-entre-seances.md`),
+ * /api/memory: what Tom keeps of the signed-in student (`docs/tuteur.md` § 5),
  * their answer to it, and its erasure, all of it or one notion understood.
  */
 export function memoryRoutes({ auth, service }: { auth: Auth; service: TutorService }) {
@@ -100,7 +100,7 @@ export function memoryRoutes({ auth, service }: { auth: Auth; service: TutorServ
 }
 
 /**
- * /api/summary: the summary of the week (`docs/vision.md`, principle 3), the signed-in student's
+ * /api/summary: the summary of the week (`docs/tuteur.md` § 8), the signed-in student's
  * own, or a student's for a guardian of their household; the same for both.
  */
 export function summaryRoutes({ auth, service }: { auth: Auth; service: TutorService }) {

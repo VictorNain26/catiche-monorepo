@@ -1,6 +1,6 @@
 /**
  * The 95 % Wilson score interval of a proportion: a rate is never published alone
- * (docs/etudes/2026-10-06/refonte-evaluation.md, décision 3). Unlike the normal approximation, it
+ * (docs/tuteur.md § 7). Unlike the normal approximation, it
  * stays inside [0, 1] and keeps a width when nothing or everything was seen (Brown, Cai and
  * DasGupta, « Interval Estimation for a Binomial Proportion », Statistical Science, 2001).
  */

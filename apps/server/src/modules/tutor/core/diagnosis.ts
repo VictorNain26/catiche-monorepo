@@ -1,6 +1,6 @@
 /**
- * Diagnosis of what the student proposes, against the exercise sheet (`docs/etudes/2026-10-04/refonte-agent.md`,
- * « À chaque tour », 3): right or wrong, the first wrong step, the kind of error in Bridge's
+ * Diagnosis of what the student proposes, against the exercise sheet (`docs/tuteur.md` § 3):
+ * right or wrong, the first wrong step, the kind of error in Bridge's
  * categories (https://arxiv.org/html/2310.10648). Small 4 reads the proposal against the sheet;
  * mathjs settles it whenever it can read both.
  */

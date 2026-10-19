@@ -6,9 +6,8 @@ paths:
 
 # Client web (`apps/web`)
 
-Seul client produit, pensé d'abord pour le téléphone et composé aussi pour l'ordinateur ; ce que
-montre chaque écran vient de `docs/experience.md`. Cible : `docs/architecture.md`,
-« Client web » ; options comparées : `docs/etudes/2026-10-06/client-web.md`. Port 3002 en dev :
+Seul client produit, pensé d'abord pour le téléphone et composé aussi pour l'ordinateur.
+Cible : `docs/architecture.md`, « Client web ». Port 3002 en dev :
 le proxy de Vite envoie `/api/` et `/health` au serveur sur 3000, pour une seule origine.
 
 ## Interdits

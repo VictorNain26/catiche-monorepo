@@ -1,6 +1,5 @@
 /**
- * The hint ladder and the turn contract, decided by the code (`docs/etudes/2026-10-04/refonte-agent.md`,
- * « À chaque tour », 4 et 5 ; `docs/tuteur.md` § 3). The level climbs on a real attempt the
+ * The hint ladder and the turn contract, decided by the code (`docs/tuteur.md` § 3). The level climbs on a real attempt the
  * diagnosis finds wrong, never on pressure alone; the writer gets from the sheet only what the
  * level allows, never the answer.
  */

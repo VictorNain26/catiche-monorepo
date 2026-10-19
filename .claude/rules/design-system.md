@@ -9,8 +9,8 @@ paths:
 
 # Design system
 
-La direction « Rive » (`docs/decisions.md`, 2026-10-12), pour le site et l'app ensemble ; son
-usage, `docs/charte.md` ; ce que montre chaque écran, `docs/experience.md`. Ses tokens vivent dans
+La direction « Rive », pour le site et l'app ensemble ; son usage, `docs/charte.md`. Ses tokens
+vivent dans
 `packages/tokens` : les échelles de `scales.css`, les rôles de `theme.css`, partagés par le site et
 l'app. Les composants ne dépendent de l'identité que par les rôles.
 
@@ -35,7 +35,7 @@ l'app. Les composants ne dépendent de l'identité que par les rôles.
   animation qui ignore le mouvement réduit.
 - Aucune primitive interactive hors de Base UI (`@base-ui/react` : dialogue, toast, onglets, menu ;
   le tiroir est un dialogue de Base UI), toasts compris : une seule famille dans `@repo/ui`, et
-  aucune qui écrive une balise `<style>` (`docs/decisions.md`, « `@repo/ui` sur Base UI »).
+  aucune qui écrive une balise `<style>`, que la CSP stricte refuserait.
 - Aucun graphique en anneau, en camembert ou en 3D, aucune couleur seule porteuse d'une
   information, aucun graphique sans sa phrase et son tableau de valeurs.
 - Aucune arche ailleurs que derrière Tom, sur le haut du site et à l'entrée de l'app.

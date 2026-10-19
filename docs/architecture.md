@@ -1,16 +1,14 @@
 # Architecture
 
-Ce qui est en place, et comment. Le pourquoi de chaque choix : `decisions.md` ; le produit :
-`vision.md` ; le tuteur : `tuteur.md`.
+Ce qui est en place, et comment. Le tuteur : `tuteur.md`.
 
-Tom est le nom de l'IA, pas du produit, qui s'appelle Catiche (`decisions.md`). Aucun utilisateur réel : aucune
+Tom est le nom de l'IA, pas du produit, qui s'appelle Catiche. Aucun utilisateur réel : aucune
 contrainte de rétrocompatibilité, on vise directement la cible.
 
 ## Serveur
 
-Monolithe modulaire ; sa structure et ses règles de dépendance viennent de
-`etudes/2026-10-06/refonte-architecture.md`. La facturation arrive au lot 1,
-la voix au lot 4.
+Monolithe modulaire, dont les règles de dépendance sont vérifiées au lint
+(`apps/server/eslint.config.mjs`).
 
 En place (`apps/server/src`) :
 - `main.ts`, seule racine de composition, et `migrate.ts` ; `config.ts`, un seul schéma de
@@ -46,9 +44,8 @@ En place (`apps/server/src`) :
 
 ## Client web
 
-Choix et options comparées : `etudes/2026-10-06/client-web.md`. **Pensé d'abord pour le
-téléphone** : chaque parcours se conçoit et se prouve à largeur de téléphone ; l'ordinateur a sa
-propre mise en page, pas une colonne étirée (`experience.md`).
+**Pensé d'abord pour le téléphone** : chaque parcours se conçoit et se prouve à largeur de
+téléphone ; l'ordinateur a sa propre mise en page, pas une colonne étirée.
 
 En place (`apps/web`) :
 - Application monopage Vite + React + TanStack Router, Tailwind sur les tokens `@repo/tokens`.
@@ -72,15 +69,14 @@ En place (`apps/web`) :
   (`apps/web/src/lib/api.ts`). Aucun type du serveur n'est réécrit côté client.
 - Données par TanStack Query, formulaires par react-hook-form et Zod, celui-ci en mode
   `jitless` : sa sonde `new Function` serait une violation de la CSP.
-- Primitives `@repo/ui`, sur Base UI (`decisions.md`) ; le chat par `useChat` de
+- Primitives `@repo/ui`, sur Base UI ; le chat par `useChat` de
   `@ai-sdk/react`, qui lit le protocole du serveur (`apps/web/src/lib/chat.ts`).
 
 ## Observabilité
 
 - **En place** : logs pino avec le `requestId` de chaque requête et un sérialiseur d'erreurs en
   liste blanche (aucun texte d'élève). Les erreurs iront à Bugsink, auto-hébergé chez Clever Cloud,
-  juste avant la première vraie famille ; les traces OpenTelemetry attendent un besoin mesuré
-  (`etudes/2026-10-07/hebergement.md`).
+  juste avant la première vraie famille ; les traces OpenTelemetry attendent un besoin mesuré.
 - **À tenir dès leur retour** : l'AI SDK écrit le message d'erreur dans le span quel que soit
   `recordInputs`, et une erreur de validation y met la sortie du modèle ; les messages d'erreur
   se réécrivent avant tout export.
@@ -89,7 +85,7 @@ En place (`apps/web`) :
 
 ## Hébergement
 
-Tout chez Clever Cloud, région Paris (`etudes/2026-10-07/hebergement.md`). L'image du serveur
+Tout chez Clever Cloud, région Paris. L'image du serveur
 sert l'API et le web ; la landing, en Astro, vit dans une application statique à part. L'e-mail
 part de Scaleway TEM, les photos iront dans Cellar.
 
@@ -126,11 +122,3 @@ l'intégration (la recherche DORA lie les meilleures performances aux branches c
 reconstruirait une image que personne n'a testée, là où l'image se construit une fois et ne change
 que par sa configuration ([12factor.net](https://12factor.net/build-release-run)). Clever Cloud ne
 fait que tirer l'image : il ne construit rien, et les secrets ne passent pas au build.
-
-## Décisions ouvertes
-
-`decisions.md`, « Ouvertes ».
-
-## Ordre des lots
-
-Voir `docs/roadmap.md`.

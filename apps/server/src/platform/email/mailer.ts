@@ -1,6 +1,6 @@
 /**
  * Sending an email: one function, passed to whoever sends. Scaleway Transactional Email in
- * production (docs/etudes/2026-10-07/email-transactionnel.md), through Scaleway's own SDK; in
+ * production (docs/architecture.md, « Hébergement »), through Scaleway's own SDK; in
  * development, the email is logged so that its sign-in code can be read; the tests pass their own.
  */
 

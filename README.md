@@ -2,7 +2,7 @@
 
 Tuteur IA pour les devoirs des collégiens (6e à 3e) : il aide l'élève à trouver sans
 faire l'exercice à sa place, et le parent a un tableau de bord de la semaine, jamais les
-conversations (`docs/experience.md`). Pré-lancement : aucun utilisateur réel. Staging : https://staging.tomia.fr ;
+conversations. Pré-lancement : aucun utilisateur réel. Staging : https://staging.tomia.fr ;
 landing : https://tomia.fr.
 
 ## Démarrage
@@ -19,7 +19,7 @@ Un compte parent se crée sur invitation, en bêta fermée comme en production�
 Arrêt de l'infra : `bun run dev:down`. `bun run dev` attend que postgres soit prêt et que les
 migrations passent ; sinon rien ne démarre.
 
-Où on en est : `docs/suivi.md`.
+Bloquants et points ouverts : `docs/etat.md`.
 
 ## Structure
 
@@ -41,11 +41,11 @@ packages/
 |--------|-------------|
 | Backend | Bun 1.4, Hono 4, PostgreSQL 18, Drizzle ORM 0.45, pino |
 | Landing | Astro 7, statique et sans framework client, TailwindCSS 4, Motion 13 (API vanilla), classes de `@repo/ui` |
-| Web | Vite 8, React 19, TanStack Router, TailwindCSS 4 (`docs/etudes/2026-10-06/client-web.md`) |
+| Web | Vite 8, React 19, TanStack Router, TailwindCSS 4 (`docs/architecture.md`, « Client web ») |
 | Auth | Better Auth 1.7 : le gardien entre par un code envoyé à son adresse ou par une clé d'accès, sans mot de passe, sur invitation pendant la bêta fermée ; l'appareil de l'élève est relié par un code |
 | IA | Mistral Small 4, endpoint UE (`docs/tuteur.md`) |
-| Paiements | Aucun branché. Paiement web prévu au lot 1 |
-| Observabilité | Logs pino ; Bugsink, auto-hébergé, pour les erreurs avant la première famille (`docs/etudes/2026-10-07/hebergement.md`). Pas d'analytics installée |
+| Paiements | Aucun branché |
+| Observabilité | Logs pino ; Bugsink, auto-hébergé, pour les erreurs avant la première famille (`docs/architecture.md`, « Observabilité »). Pas d'analytics installée |
 | Monorepo | Turborepo, workspaces Bun |
 | Déploiement | Clever Cloud, région Paris : `docs/architecture.md`, « Hébergement » et « Environnements et livraison » |
 
@@ -77,9 +77,6 @@ gratuit plafonne le débit).
 instructions destinées aux agents, et `.claude/rules/` celles qui ne valent que pour une
 partie du code, chargées sur ses chemins.
 
-Produit et avancement, dans `docs/` :
-[vision](./docs/vision.md) (pour qui, promesse, principes,
-périmètre) · [expérience](./docs/experience.md) (les espaces et les écrans) ·
-[charte](./docs/charte.md) · [décisions](./docs/decisions.md) · [roadmap](./docs/roadmap.md) ·
-[suivi](./docs/suivi.md) (où on en est) · [architecture](./docs/architecture.md) ·
-[tuteur IA](./docs/tuteur.md) · études datées dans `docs/etudes/`.
+Dans `docs/` : [architecture](./docs/architecture.md) (ce qui est en place) ·
+[tuteur IA](./docs/tuteur.md) · [charte](./docs/charte.md) · [état](./docs/etat.md)
+(bloquants, points ouverts, surveillance).

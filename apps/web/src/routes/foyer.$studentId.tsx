@@ -162,7 +162,7 @@ function NextStep({ child, pairing }: { child: Student; pairing: Pairing }) {
  * The family's phone, handed to a child in 6e or 5e: their session if the device holds it,
  * otherwise one paired here by the app, no code to copy. The server then closes the guardian's
  * session on it (platform/auth/pairing.ts): coming back takes the guardian's passkey or a code.
- * From the 4e, the child's space opens on no device of the guardian's (`decisions.md`).
+ * From the 4e, the child's space opens on no device of the guardian's (`docs/tuteur.md` § 8).
  */
 function OpenHere({ child }: { child: Student }) {
   const navigate = useNavigate();

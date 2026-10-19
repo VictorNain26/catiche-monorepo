@@ -1,10 +1,9 @@
 # Charte
 
-La direction « Rive » (`decisions.md`, 2026-10-12) : la catiche, le gîte de la loutre au bord de
+La direction « Rive » : la catiche, le gîte de la loutre au bord de
 l'eau. Ce document dit comment s'en servir ; les valeurs vivent dans le code,
-`packages/tokens/theme.css` pour les tokens, `@repo/ui` pour les composants. Les pratiques d'où
-viennent ces règles : `etudes/2026-10-12/bonnes-pratiques.md`. Le site et l'app la portent depuis
-le lot 1, étape 2.1 ; leur composition se refait aux étapes 3 et 4 (`roadmap.md`).
+`packages/tokens/theme.css` pour les tokens, `@repo/ui` pour les composants. Le site et l'app
+portent ses tokens ; leur composition reste à faire.
 
 ## Le nom et le logo
 
@@ -12,7 +11,7 @@ le lot 1, étape 2.1 ; leur composition se refait aux étapes 3 et 4 (`roadmap.m
 le tuteur qui s'y trouve et garde son nom : l'élève fait ses devoirs « sur Catiche, avec Tom ».
 Jamais « Tom t'attend à la Catiche » : Tom n'est pas un compagnon.
 
-Le logo est à dessiner (étape 2) : peu de formes, ni trait fin ni texte dans l'icône ; il se
+Le logo est à dessiner : peu de formes, ni trait fin ni texte dans l'icône ; il se
 vérifie en monochrome, à 16 et 32 px, en clair, en sombre et en icône « maskable », dont le motif
 tient dans le cercle central.
 
@@ -66,7 +65,7 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
 - Une liste pour des éléments semblables, une carte pour un bloc à part qui mène à un détail ; un
   seul bouton principal par écran.
 - Au téléphone, une colonne et des onglets en bas ; à l'ordinateur, la navigation sur le côté et
-  une vraie mise en page, jamais une colonne étirée (`experience.md`).
+  une vraie mise en page, jamais une colonne étirée.
 
 ## Tom
 
@@ -108,4 +107,4 @@ aucune information portée par le mouvement seul ; rien ne bouge sous le mouveme
 
 Les règles de `.claude/rules/design-system.md` : contrastes AA testés dans les deux modes, cibles
 de 44 px, aucun défilement horizontal à 320 px. Un réglage « Lecture aérée », aux espacements de
-WCAG 1.4.12, vient au lot 1.
+WCAG 1.4.12, reste à faire.

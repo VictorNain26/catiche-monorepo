@@ -1,5 +1,5 @@
 /**
- * The learner memory (`docs/etudes/2026-10-07/memoire-entre-seances.md`): what the student's past
+ * The learner memory (`docs/tuteur.md` § 5): what the student's past
  * exercises say of each notion of the programme, written by the server, never by the model. No
  * text of the student enters it: the referential's wording, numbers and error types of a closed
  * list.

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-/** The levels Tom serves in V1 (`docs/vision.md`), the collège. */
+/** The levels Tom serves in V1 (`docs/tuteur.md` § 3), the collège. */
 export const SCHOOL_LEVELS = ['sixieme', 'cinquieme', 'quatrieme', 'troisieme'] as const;
 
 export type SchoolLevel = (typeof SCHOOL_LEVELS)[number];
@@ -9,7 +9,7 @@ export const schoolLevelSchema = z.enum(SCHOOL_LEVELS);
 
 /**
  * Before the 4e, the child works on the family's device, the parent beside or not
- * (`docs/decisions.md`, « Le mode accompagné en 6e et 5e »).
+ * (`docs/tuteur.md` § 8, « le mode accompagné »).
  */
 export const isAccompaniedLevel = (level: SchoolLevel) => level === 'sixieme' || level === 'cinquieme';
 

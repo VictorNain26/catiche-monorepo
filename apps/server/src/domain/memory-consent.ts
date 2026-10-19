@@ -1,5 +1,5 @@
 /**
- * Who decides the learner memory (`docs/etudes/2026-10-07/memoire-entre-seances.md`, decisions):
+ * Who decides the learner memory (`docs/tuteur.md` § 8):
  * before 15, the parent proposes it and the child accepts it, either one switching it off; from
  * 15, the child alone (loi Informatique et Libertés, art. 45).
  */

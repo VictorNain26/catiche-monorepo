@@ -13,8 +13,8 @@ Le mode plan écrit ses plans dans `docs/plans/` (`plansDirectory`) ; un plan s'
 
 ## Interdits
 
-- Jamais un point reporté dans `docs/suivi.md` sans l'étape ou le lot qui le reprend ; quand le
-  plan de celle-ci s'écrit, le point y devient une tâche ou est renvoyé explicitement.
+- Jamais un constat hors du périmètre d'une PR laissé sans trace : il entre dans `docs/etat.md`,
+  et le plan qui le reprend en fait une tâche ou le renvoie explicitement.
 - Jamais l'environnement décrit dans la doc : il renvoie à `apps/server/src/config.ts`.
 - Jamais un chiffre cité au-delà de ce que sa source mesure (un site, un échantillon), ni un
   contraste écrit sans être recalculé sur les valeurs du document qui le porte.
