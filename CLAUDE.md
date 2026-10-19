@@ -5,7 +5,8 @@ Catiche : un tuteur IA des devoirs pour collégiens, Tom, et un tableau de bord 
 ## Carte
 
 - La direction du produit est à redéfinir (page blanche du 2026-10-19) ; on n'affirme que ce
-  qu'on peut prouver.
+  qu'on peut prouver. Ce qui existe déjà : `docs/concurrence.md`, analyse datée, jamais mise à
+  jour.
 - Ce qui est en place, et comment : `docs/architecture.md` ; le tuteur : `docs/tuteur.md` ;
   l'identité : `docs/charte.md`.
 - **Bloquants, gestes de Victor, technique reporté, surveillance : `docs/etat.md`**, à lire avant

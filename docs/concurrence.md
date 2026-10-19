@@ -11,7 +11,7 @@ rapporté par la presse ou un tiers. « Non trouvé » signifie absent des pages
 
 | Nom                                             | Ce qu'il fait                                                                                                    | Âge / cible                                                                                       | Prix                                                                                                          | Suivi parent                                                                                    | Donne la réponse ?                                                                   | Données (UE ?)                                                                                                                                                 | Signaux d'usage                                                                          | Sources                                                                                                                                                                                                                                                                      |
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kartable (Alfa)                                 | Cours CE1-Terminale ; « Alfa », « professeur particulier IA », avec limite d'usage mensuelle (É)                 | CE1 à Terminale générale (É) ; App Store 4+ (S)                                                   | 14,99 €/mois ; 99,90 € l'année scolaire ; 175,78 € deux ans (É) ; App Store : 24,99 €/mois pour 3 enfants (S) | Oui : « Tableau de suivi parental », courbe de progression par enfant (É)                       | « vous guide pas à pas » (É)                                                         | Non trouvé (politique de confidentialité introuvable à l'URL tentée)                                                                                           | 4,5/5 sur 20 k notes (S) ; « plus de 20 millions d'élèves » en 15 ans (É)                | [site](https://www.kartable.fr/), [App Store](https://apps.apple.com/fr/app/id825500330)                                                                                                                                                                                     |
+| Kartable (Alfa)                                 | Cours CE1-Terminale ; « Alfa », « professeur particulier IA », avec limite d'usage mensuelle (É)                 | CE1 à Terminale générale (É) ; App Store 4+ (S)                                                   | 14,99 €/mois ; 99,90 € l'année scolaire, payés une fois pour 10 mois (É) ; 175,78 € deux ans (É) ; App Store : 24,99 €/mois pour 3 enfants (S) | Oui : « Tableau de suivi parental », courbe de progression par enfant (É)                       | « vous guide pas à pas » (É)                                                         | Non trouvé (politique de confidentialité introuvable à l'URL tentée)                                                                                           | 4,5/5 sur 20 k notes (S) ; « plus de 20 millions d'élèves » en 15 ans (É)                | [site](https://www.kartable.fr/), [App Store](https://apps.apple.com/fr/app/id825500330)                                                                                                                                                                                     |
 | SchoolMouv                                      | Cours, quiz, « coach IA » par tchat, aide d'un prof humain en Premium (É)                                        | CP à Terminale (É) ; 4+ (S)                                                                       | 4,99 €/mois Standard, 5,99 €/mois Premium, présentés à –60 % (É) ; App Store : 19,99 à 29,99 €/mois (S)       | Oui : progrès, activité, résultats aux quiz ; 3 comptes élèves (É)                              | Photo d'un exercice → « explication détaillée étape par étape » (S)                  | « aucun transfert en dehors de l'Union Européenne » ; hébergeur et fournisseur IA non nommés ; charte du 2 juillet 2024 (É)                                    | 4,6/5 sur 12 k notes (S) ; « 3 millions d'élèves inscrits » (É)                          | [site](https://www.schoolmouv.fr/), [offres](https://offres.schoolmouv.fr/plans/), [parent](https://www.schoolmouv.fr/parent), [charte](https://www.schoolmouv.fr/charte-donnees-personnelles), [App Store](https://apps.apple.com/fr/app/id1353761629)                      |
 | Nomad Education (Nomad'IA)                      | Révisions générées depuis une photo, un PDF ou un sujet, adossées à des contenus de profs (É)                    | Primaire à Bac+3 (É) ; 4+ (S)                                                                     | Usage de base gratuit ; Nomad+ « à partir de 9,99 €/mois », 119,99 €/an pour 5 personnes (É)                  | « ACCÈS PARENTS » : voir les programmes des enfants (S)                                         | « Elle ne fait pas tes devoirs à ta place » (É)                                      | Non trouvé                                                                                                                                                     | 4,6/5 sur 60 k notes (S) ; « 10 millions d'utilisateurs accompagnés » (É)                | [offre](https://www.nomadeducation.fr/premium/offre-25-26), [Nomad'IA](https://www.nomadeducation.fr/blog/articles/2025-11-12/nomadia-ia-educative-revisions-sur-mesure), [App Store](https://apps.apple.com/fr/app/id1441761075)                                            |
 | digiSchool (et Devoirs Maîtrisés, même éditeur) | « Coach IA » pour les devoirs, fiches générées ; Devoirs Maîtrisés : photo du devoir, explications pas à pas (S) | Collège à BTS (S) ; 4+ (S)                                                                        | digiSchool Pass 14,49 €/mois, 94,99 €/an (S) ; Devoirs Maîtrisés : de 4,99 € à 44,99 € (S)                    | Non trouvé (S)                                                                                  | Devoirs Maîtrisés : « Prends en photo ton devoir et laisse-nous faire le reste » (S) | « Certaines données peuvent être traitées en dehors de l'Union européenne » (É)                                                                                | digiSchool 4,5/5 sur 5,4 k notes ; Devoirs Maîtrisés 4,7/5 sur 7,2 k notes (S)           | [App Store digiSchool](https://apps.apple.com/fr/app/digischool-education/id6443938926), [App Store DM](https://apps.apple.com/fr/app/devoirs-ma%C3%AEtris%C3%A9s-brevet-bac/id6447790594), [confidentialité](https://www.digischool.fr/lemag/politique-de-confidentialite/) |
@@ -34,12 +34,13 @@ Notes :
 - DinoBot : l'App Store dit « 100% gratuite », un blog tiers liste des offres à 5,99 et 9,99 €/mois
   ([blog-ia](https://blog-ia.com/outils-ia-aide-aux-devoirs/)) ; le site de l'éditeur n'a pas pu
   être lu.
-- Kartable affiche des prix différents sur son site et sur l'App Store ; SchoolMouv et digiSchool
-  aussi. Les prix « –60 % » de SchoolMouv sont des prix promotionnels affichés.
+- Les prix diffèrent entre le site et l'App Store : chez Kartable, l'App Store montre une offre
+  pour 3 enfants ; chez SchoolMouv, le site affiche des prix promotionnels (« –60 % ») ; chez
+  digiSchool, l'écart n'est pas expliqué sur les pages lues.
 - Superprof : aucune page de l'éditeur sur un tuteur IA trouvée. Un article sur un « Dr.
   Supernabot » ([LeBigData](https://www.lebigdata.fr/ia-va-t-elle-remplacer-les-profs-ils-ont-fait-le-test-en-france),
   daté du 31 mars 2025) semble satirique et n'est pas retenu.
-- Autres noms croisés, non étudiés : StudentAI, Parkeur, Wiloki, Quiztr.
+- Autres noms croisés, non étudiés : Le Chat (Mistral), StudentAI, Parkeur, Wiloki, Quiztr.
 
 ## Ailleurs
 
@@ -67,14 +68,14 @@ Notes :
 
 | Nom                                    | Ce qu'il fait                                                                    | Âge / cible                                                                                                                     | Prix                                           | Suivi parent                                                                                                             | Donne la réponse ?                                                     | Données (UE ?)                    | Signaux d'usage | Sources                                                                                                                                                                                                                                                                                                                              |
 | -------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | --------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| ChatGPT, study mode (OpenAI)           | Mode d'étude lancé le 29 juillet 2025 : questions guidantes, étape par étape (P) | 13 ans ou l'âge du pays ; accord parental sous 18 ans (É) ; « ChatGPT for Teens » pour les 13-17 ans depuis le 18 août 2026 (P) | Inclus dans l'offre gratuite (P)               | Comptes liés : heures calmes, study mode imposable, fonctions désactivables ; le parent ne lit pas les conversations (P) | « instead of providing direct answers » ; désactivable par l'élève (P) | Non vérifié (pages OpenAI en 403) | Non trouvé      | [The Week (PTI)](https://www.theweek.in/wire-updates/business/2025/07/29/dcm151-biz-openai-chatgpt.html), [iPhone in Canada](https://www.iphoneincanada.ca/2026/08/18/chatgpt-for-teens-launches-with-study-mode-strict-parental-controls/), [conditions](https://www.openai.com/terms)                                              |
+| ChatGPT, study mode (OpenAI)           | Mode d'étude lancé le 29 juillet 2025 : questions guidantes, étape par étape (P) | 13 ans ou l'âge du pays ; accord parental sous 18 ans (P : conditions d'OpenAI en 403, lues par des reprises) ; « ChatGPT for Teens » pour les 13-17 ans depuis le 18 août 2026 (P) | Inclus dans l'offre gratuite (P)               | Comptes liés : heures calmes, study mode imposable, fonctions désactivables ; le parent ne lit pas les conversations (P) | « instead of providing direct answers » ; désactivable par l'élève (P) | Non vérifié (pages OpenAI en 403) | Non trouvé      | [The Week (PTI)](https://www.theweek.in/wire-updates/business/2025/07/29/dcm151-biz-openai-chatgpt.html), [iPhone in Canada](https://www.iphoneincanada.ca/2026/08/18/chatgpt-for-teens-launches-with-study-mode-strict-parental-controls/), [conditions](https://www.openai.com/terms)                                              |
 | Gemini, Guided Learning (Google)       | Mode tuteur lancé en août 2025 : étapes, images, vidéos, quiz (P)                | « au moins 13 ans (ou l'âge autorisé dans votre pays) » ; appli web inaccessible avec un compte Family Link (É)                 | Outils « for everyone » (É) ; prix non précisé | Family Link peut couper l'accès aux moins de 13 ans (É)                                                                  | « deep understanding instead of just getting answers » (P)             | Non trouvé                        | Non trouvé      | [TechCrunch](https://techcrunch.com/2025/08/06/google-takes-on-chatgpts-study-mode-with-new-guided-learning-tool-in-gemini/), [blog Google](https://blog.google/products/gemini/new-gemini-app-tools-to-help-students-in-europe-the-middle-east-and-africa/), [aide Gemini](https://support.google.com/gemini/answer/13278668?hl=fr) |
 | Claude, mode apprentissage (Anthropic) | Style socratique ouvert à tous les utilisateurs le 14 août 2025 (P)              | « You must be at least 18 years old » (É)                                                                                       | Gratuité non précisée (P)                      | Sans objet (18+)                                                                                                         | Guide « toward their own solutions » ; désactivable (P)                | Non trouvé                        | Non trouvé      | [AlternativeTo](https://alternativeto.net/news/2025/8/claude-s-learning-mode-is-now-available-to-all-users-with-new-coding-styles), [conditions](https://www.anthropic.com/legal/consumer-terms)                                                                                                                                     |
 
 Notes :
 
-- Les trois modes « étude » se désactivent d'un clic ; seul ChatGPT for Teens permet au parent de
-  l'imposer (P).
+- Les modes de ChatGPT et de Claude sont présentés comme désactivables par l'utilisateur (P) ;
+  pour Gemini, non trouvé. Seul ChatGPT for Teens permet au parent d'imposer le mode (P).
 - Les conditions de Claude excluent les mineurs ; celles de Gemini et ChatGPT les admettent sous
   conditions.
 
@@ -95,12 +96,13 @@ Notes :
   ci-dessus).
 - **Galac6** : « 100% gratuit », accès illimité, tableau de bord parent compris
   ([site](https://galac6.io/)).
-- **Le Prof IA** : 3 sessions gratuites, puis 4,90 €/mois ([site](https://leprofia.fr/)).
 - **DinoBot** : « 100% gratuite » ([App Store](https://apps.apple.com/fr/app/id1665887524)).
 - **MIA Seconde** : gratuit, pour les élèves de seconde seulement
   ([CIDJ](https://www.cidj.com/actualite/mia-l-outil-d-intelligence-artificielle-pour-booster-le-niveau-des-lyceens)).
-- **Les Sherpas** : ressources gratuites, « plus de 4 millions d'étudiants et de parents » (É)
-  ([site](https://sherpas.com/)).
+
+Essais limités, pas un gratuit : Le Prof IA (3 sessions, puis 4,90 €/mois,
+[site](https://leprofia.fr/)) ; Comprendo (14 jours, 10 messages et 5 exercices par jour,
+[site](https://comprendo.fr/)).
 
 ## Les manques observés
 
@@ -109,8 +111,8 @@ Faits relevés sur les pages lues, sans conclusion.
 - **Preuve d'efficacité** : aucune évaluation indépendante des progrès scolaires n'a été trouvée,
   pour aucun acteur. Les chiffres de progrès (« + 3,2 points » chez SchoolMouv) sont de l'éditeur
   ([SchoolMouv](https://www.schoolmouv.fr/)). Pour MIA, aucun bilan public trouvé.
-- **Hébergement et fournisseur d'IA** : non trouvés sur les pages lues de Kartable, Nomad, Wilgo,
-  Photomath, Le Prof IA. SchoolMouv écarte tout transfert hors UE ; Galac6 (France) et Comprendo
+- **Hébergement et fournisseur d'IA** : non trouvés pour la plupart des acteurs (colonne
+  « Données »). SchoolMouv écarte tout transfert hors UE ; Galac6 (France) et Comprendo
   (Europe) annoncent un hébergement européen ; digiSchool admet un traitement hors UE. Aucun
   acteur français lu ne nomme son fournisseur d'IA ; seul Knowunity est nommé, par Mistral.
 - **Suivi parent** : non trouvé sur les fiches de Wilgo, digiSchool, Devoirs Maîtrisés, Brainly,
@@ -120,8 +122,8 @@ Faits relevés sur les pages lues, sans conclusion.
   sans lire les conversations.
 - **Refus de donner la réponse** : affirmé par Galac6, Le Prof IA, Comprendo, Nomad'IA et DinoBot,
   sans test tiers trouvé ; les fiches de Wilgo, SchoolMouv, Devoirs Maîtrisés et Photomath
-  décrivent au contraire une photo suivie d'une solution expliquée. Les modes d'étude des géants
-  sont désactivables par l'élève.
+  décrivent au contraire une photo suivie d'une solution expliquée. Les modes d'étude de ChatGPT
+  et de Claude sont présentés comme désactivables ; pour Gemini, non trouvé.
 - **Âge** : la plupart des applis françaises sont classées 4+ sur l'App Store. Seuls Galac6 (accord
   parental sous 15 ans) et Comprendo (consentement parental) décrivent un consentement sur les
   pages lues. La charte SchoolMouv dit que les données « peuvent concerner des mineurs » sans fixer
@@ -129,9 +131,11 @@ Faits relevés sur les pages lues, sans conclusion.
 - **Preuve d'usage des acteurs web** : Galac6 et Comprendo ne publient aucun chiffre ; Le Prof IA
   annonce 2 000 familles, sans source tierce.
 - **Contrats d'IA avec les mineurs** : Anthropic exige 18 ans ; ChatGPT et Gemini acceptent des
-  mineurs sous conditions.
-- **Prix incohérents** : Kartable, SchoolMouv, digiSchool et Synthesis affichent des prix
-  différents selon la page ou le canal.
+  mineurs sous conditions. Les conditions commerciales de Mistral (2.2(c), version du
+  2026-09-25) interdisent au client d'y inclure les données personnelles d'enfants de moins de 13
+  ans ou de l'âge du consentement numérique, 15 ans en France
+  ([conditions](https://legal.mistral.ai/terms/commercial-terms-of-service)).
+- **Prix incohérents** : Synthesis affiche des montants différents sur une même page.
 
 ## Limites de cette analyse
 
@@ -147,8 +151,7 @@ Faits relevés sur les pages lues, sans conclusion.
 - Le premier passage, centré sur l'App Store, a raté les produits uniquement web (Galac6, Le Prof
   IA) ; une relecture les a ajoutés, avec Comprendo et Eliott. D'autres produits web peuvent
   manquer.
-- Le périmètre n'est pas exhaustif : Le Chat (Mistral), StudentAI, Parkeur et d'autres n'ont pas
-  été étudiés ; les acteurs hors France et États-Unis sont peu couverts.
+- Le périmètre n'est pas exhaustif (noms non étudiés : notes de la section France) ; les acteurs
+  hors France et États-Unis sont peu couverts.
 - Relecture au hasard de 5 URL le 2026-10-19 : site Kartable, fiche App Store Wilgo, Maddyness
-  (Wilgo), prix Khanmigo, fiche App Store DinoBot. Les 5 confirment les faits cités ; précision
-  pour Kartable, 99,90 € est un paiement unique pour 10 mois à 9,99 €.
+  (Wilgo), prix Khanmigo, fiche App Store DinoBot. Les 5 confirment les faits cités.
