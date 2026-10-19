@@ -10,6 +10,9 @@ Catiche : un tuteur IA des devoirs pour collégiens, Tom, et un tableau de bord 
   l'identité : `docs/charte.md`.
 - **Bloquants, gestes de Victor, technique reporté, surveillance : `docs/etat.md`**, à lire avant
   de reprendre et à mettre à jour dans la PR qui en change un point.
+- Une décision de Victor entre, dans la PR qui la suit, dans le document qui porte son sujet
+  (`architecture.md`, `tuteur.md`, `charte.md`, `etat.md`), jamais seulement dans une mémoire
+  d'agent.
 - Stack, structure, démarrage : `README.md`. Règles d'une partie du code :
   `.claude/rules/<sujet>.md`, chargées sur ses chemins. Les règles valables pour tous les projets
   (TDD, tests, plan, revue) sont dans `~/.claude/` et ne se répètent pas ici.
@@ -25,6 +28,8 @@ change (Postgres de `docker compose` requis). Formatage : `bun run format`.
   y mène par un simple lien.
 - Rien n'entre dans la landing en ligne jusqu'à la nouvelle direction, sauf les tokens de la
   charte, un correctif d'honnêteté ou technique (`.claude/rules/landing.md`).
+- Jamais un écran construit sans la charte : il est composé au téléphone et à l'ordinateur, pas
+  une colonne de boutons.
 - Jamais de push sur `main` : une branche courte, puis une PR, mergée en merge commit (le squash
   est désactivé).
 - Jamais un type du serveur réécrit côté client : il vient du client typé de `hono/client`.

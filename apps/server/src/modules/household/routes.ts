@@ -70,7 +70,7 @@ const switchBody = z.object({ sessionToken: z.string() });
 
 /**
  * A child switches only to a brother's or sister's profile in 6e or 5e: from the 4e, a child's
- * space opens on no family device (docs/tuteur.md § 8), even one that kept it from the 5e. A token
+ * space opens on no family device (`docs/tuteur.md` § 8), even one that kept it from the 5e. A token
  * the device does not hold is better-auth's to refuse.
  */
 async function assertSiblingSwitch(auth: Auth, service: HouseholdService, request: Request) {

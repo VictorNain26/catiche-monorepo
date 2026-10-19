@@ -109,9 +109,8 @@ export const exercise = pgTable(
 export const turnOutcome = pgEnum('turn_outcome', ['passed', 'regenerated', 'fallback', 'distress', 'closed']);
 
 /**
- * What the code decided at each turn, to explain a reply and compare prompt versions
- * (`docs/tuteur.md` § 7): no word of the student nor of
- * the tutor, only the decisions and the versions.
+ * What the code decided at each turn, to explain a reply and compare prompt versions: no word of
+ * the student nor of the tutor, only the decisions and the versions.
  */
 export const turnRecord = pgTable(
   'turn_record',

@@ -239,7 +239,13 @@ Le code vit dans `apps/server/src/eval/` ; `bun run eval` rejoue le jeu sur le v
   `data-cue` transitoire, montrées sous la réponse jusqu'au message suivant, visibles de
   l'enfant. Le web ne propose plus de relier un appareil de l'enfant avant la 4e ; le serveur
   garde le code de jumelage, dont se sert l'ouverture sur l'appareil de la famille.
-- **La détresse n'alerte pas le parent d'office** : un humain relit l'événement et décide (§4).
+- **À partir de la 4e, l'espace de l'enfant ne s'ouvre sur aucun appareil de la famille**, même
+  un qui le tenait depuis la 5e : le serveur refuse le passage au profil d'un frère ou d'une sœur
+  (`assertSiblingSwitch`, `modules/household/routes.ts`), et le web ne propose pas de l'ouvrir
+  (`OpenHere`, `routes/foyer.$studentId.tsx`).
+- **La détresse n'alerte pas le parent d'office** : l'événement est enregistré
+  (`distress_event`) ; la revue humaine qui doit le relire et décider n'existe pas encore
+  (`etat.md`).
 
 ## 9. Conformité
 

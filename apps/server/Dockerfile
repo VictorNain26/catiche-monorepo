@@ -2,8 +2,8 @@
 # `bun build` bundles every dependency (the bundles load with no node_modules), so the last stage
 # copies none. Bases pinned by digest; Renovate bumps them.
 
-# Stage 1: the apps/web build, served by the server on its own origin. Vite runs on Node
-# (docs/architecture.md, « Client web »); bun only installs.
+# Stage 1: the apps/web build, served by the server on its own origin. Vite runs on Node: Bun's
+# bundler has no plugin for @tanstack/router-plugin nor vite-plugin-pwa; bun only installs.
 FROM node:24-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20 AS web
 
 COPY --from=oven/bun:1.4.3-slim@sha256:14a223fa35747ec728bce300ef85888bc5f7958164d15bbba6a54b22b52a3288 /usr/local/bin/bun /usr/local/bin/bun
