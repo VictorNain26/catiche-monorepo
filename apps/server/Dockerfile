@@ -6,7 +6,7 @@
 # (docs/etudes/2026-10-06/client-web.md); bun only installs.
 FROM node:24-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20 AS web
 
-COPY --from=oven/bun:1.4.2-slim@sha256:cb3bbbb08e13a4a2ff400f24c7a2a1d5efa83f6ef8544d52d95a519631e2fc61 /usr/local/bin/bun /usr/local/bin/bun
+COPY --from=oven/bun:1.4.3-slim@sha256:14a223fa35747ec728bce300ef85888bc5f7958164d15bbba6a54b22b52a3288 /usr/local/bin/bun /usr/local/bin/bun
 
 WORKDIR /app
 COPY package.json bun.lock bunfig.toml ./
@@ -29,7 +29,7 @@ WORKDIR /app/apps/web
 RUN bun run build && test -f dist/index.html -a -f dist/sw.js
 
 # Stage 2: the server's bundles. The CI typechecks and lints; this stage only builds.
-FROM oven/bun:1.4.2-slim@sha256:cb3bbbb08e13a4a2ff400f24c7a2a1d5efa83f6ef8544d52d95a519631e2fc61 AS build
+FROM oven/bun:1.4.3-slim@sha256:14a223fa35747ec728bce300ef85888bc5f7958164d15bbba6a54b22b52a3288 AS build
 
 WORKDIR /app
 COPY package.json bun.lock bunfig.toml ./
@@ -47,7 +47,7 @@ ENV NODE_ENV=production
 RUN bun run build && test -f dist/main.js -a -f dist/migrate.js -a -f dist/invite.js
 
 # Stage 3: production.
-FROM oven/bun:1.4.2-slim@sha256:cb3bbbb08e13a4a2ff400f24c7a2a1d5efa83f6ef8544d52d95a519631e2fc61 AS production
+FROM oven/bun:1.4.3-slim@sha256:14a223fa35747ec728bce300ef85888bc5f7958164d15bbba6a54b22b52a3288 AS production
 
 ENV NODE_ENV=production
 ENV WEB_DIST_DIR=/app/apps/web/dist
