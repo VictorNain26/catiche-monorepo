@@ -1,6 +1,6 @@
 /**
- * The summary of the week, which the guardian and the student read alike (`docs/vision.md`,
- * principle 3): the subjects, the time spent, what resists. Written by the code from timestamps
+ * The summary of the week, which the guardian and the student read alike (`docs/tuteur.md` § 8):
+ * the subjects, the time spent, what resists. Written by the code from timestamps
  * and the exercises' records, never by a model: no word of the student nor of Tom enters it.
  */
 

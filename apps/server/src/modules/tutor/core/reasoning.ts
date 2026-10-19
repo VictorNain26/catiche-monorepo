@@ -36,8 +36,7 @@ interface ReasoningRouteParams {
 /**
  * Decide whether the next chat turn warrants `reasoning_effort: "high"`.
  *
- * Rule: a turn under a contract writes without reasoning (`docs/etudes/2026-10-04/refonte-agent.md`,
- * « À chaque tour », 6). Without one, a proposed answer always reasons; otherwise STEM subject
+ * Rule: a turn under a contract writes without reasoning (`docs/tuteur.md` § 2). Without one, a proposed answer always reasons; otherwise STEM subject
  * AND 4e-3e level AND a request for the solution or an explanation, all three, or "none".
  */
 export function routeReasoningEffort(params: ReasoningRouteParams): ReasoningEffort {

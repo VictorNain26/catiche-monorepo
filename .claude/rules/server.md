@@ -6,9 +6,7 @@ paths:
 
 # Serveur (`apps/server`)
 
-Ce qui est en place : `docs/architecture.md` ; d'où viennent sa structure et ses règles de
-dépendance :
-`docs/etudes/2026-10-06/refonte-architecture.md`, une étude datée, pas une cible.
+Ce qui est en place : `docs/architecture.md` ; ses règles de dépendance : `eslint.config.mjs`.
 Tuteur : `docs/tuteur.md`. Stack locale : skill `dev-bootstrap`. Appel IA : skill
 `mistral-stack`. Migrations : `.claude/rules/database-migrations.md`. Tests :
 `.claude/rules/testing.md`.

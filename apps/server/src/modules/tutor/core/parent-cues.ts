@@ -1,6 +1,6 @@
 /**
- * The cues Tom gives the parent beside their child, in 6e and 5e (`docs/decisions.md`, « Le mode
- * accompagné » ; `docs/etudes/2026-10-08/aide-parentale.md`, § 6 (c)). Fixed sentences the code
+ * The cues Tom gives the parent beside their child, in 6e and 5e (`docs/tuteur.md` § 8). Fixed
+ * sentences the code
  * picks, never a word of the model: a cue cannot carry the exercise nor its answer. The parent
  * listens and lets the child search; the child reads them too.
  */

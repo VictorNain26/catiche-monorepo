@@ -1,6 +1,5 @@
 /**
- * The check of what reaches the student (`docs/etudes/2026-10-04/refonte-agent.md`, « À chaque
- * tour », 7): the exercise's answer and its forms, as the evaluation harness looks for them; the
+ * The check of what reaches the student (`docs/tuteur.md` § 4): the exercise's answer and its forms, as the evaluation harness looks for them; the
  * prompt's tags; the written equalities, recomputed by mathjs; Mistral's moderation. It fails
  * closed: an uncertain sheet watches the forms of every draw, and a moderation that cannot answer
  * holds the text back.

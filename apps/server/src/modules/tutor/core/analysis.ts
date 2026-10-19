@@ -1,8 +1,7 @@
 /**
  * Turn analysis, before the answer: what the student's message brings and asks, read by Small 4
  * in strict structured output. The server derives from it the turn's instruction, the reasoning
- * routing and the subject (`docs/etudes/2026-10-04/refonte-agent.md`,
- * « À chaque tour », 2). A failure is logged and the turn goes on without the analysis.
+ * routing and the subject (`docs/tuteur.md` § 3). A failure is logged and the turn goes on without the analysis.
  */
 
 import type { Logger } from 'pino';
@@ -97,8 +96,8 @@ ${clip(turn.studentText)}
         },
       ],
       // Without reasoning, a question of fact (« Combien de chromosomes… ? ») was read as a request
-      // for an explanation: no sheet, no check, and the tutor gave the answer (etudes/2026-10-06/
-      // passage-de-fin.md). 0.7 is Mistral's temperature for reasoning_effort high, as for the sheet.
+      // for an explanation: no sheet, no check, and the tutor gave the answer. 0.7 is Mistral's
+      // temperature for reasoning_effort high, as for the sheet.
       temperature: 0.7,
       reasoningEffort: 'high',
       schema: TurnAnalysisSchema,

@@ -7,7 +7,7 @@ description: Choisir le modèle Mistral et l'appeler correctement — chat, rais
 
 Contrainte non négociable : **stack 100 % Mistral, inférence en UE** (`api.eu.mistral.ai`,
 variable `MISTRAL_SERVER_URL`, +10 % sur le prix). Les rôles, les modèles et leurs réglages :
-`docs/tuteur.md` §2 ; le pourquoi : `docs/decisions.md`.
+`docs/tuteur.md` §2.
 
 ## Casting
 
@@ -60,8 +60,7 @@ devra écrire son coût lui aussi : jamais un appel facturé hors du quota.
   le timeout).
 - **Endpoint UE** : Batch, Agents et Files n'y sont pas servis : on ne les utilise pas.
 
-Coûts mesurés : `docs/etudes/2026-10-06/passage-de-fin.md` ; quotas et prix :
-`docs/etudes/2026-10-07/rentabilite.md`.
+Prix par modèle : `apps/server/src/platform/ai/cost.ts` ; quotas : `docs/tuteur.md` §11.
 
 ## Sources
 

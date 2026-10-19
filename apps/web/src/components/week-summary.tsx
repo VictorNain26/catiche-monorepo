@@ -3,7 +3,7 @@ import { lastTime } from '../lib/memory';
 import { minutesText, questionFor, subjectLabel, type WeekSummary as Week } from '../lib/summary';
 
 /**
- * The summary of the week (`docs/decisions.md`): the subjects and the time, what resists with the
+ * The summary of the week (`docs/tuteur.md` § 8): the subjects and the time, what resists with the
  * help given, a question for the parent. The same content for the guardian and the student, said
  * to each; never a mark nor a rate. It holds its place while it loads, and says when it failed.
  */

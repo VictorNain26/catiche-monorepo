@@ -9,17 +9,15 @@ paths:
 Vitrine marketing et SEO, statique, en Astro 7, servie par Caddy dans une application statique
 Clever Cloud (`apps/landing/Caddyfile`).
 
-- **Elle se refait avec l'app** (`docs/roadmap.md`, lot 1, étape 3) : sa composition sur la
-  charte, le nom, et « Se connecter » vers l'app par un simple lien (`docs/experience.md`). Elle
-  porte déjà les tokens et les fontes de Rive (étape 2.1, `@repo/tokens/theme.css`) ; d'ici là,
-  seuls ces tokens et des correctifs d'honnêteté ou techniques y entrent, pas de nouvelle section.
-- **On n'affirme que ce qu'on peut prouver** (`docs/vision.md`) : chaque chiffre a une source
+- **Elle est gelée jusqu'à la nouvelle direction** : elle porte déjà les tokens et les fontes
+  de Rive (`@repo/tokens/theme.css`) ; d'ici là, seuls ces tokens et des correctifs d'honnêteté
+  ou techniques y entrent, pas de nouvelle section. Elle mènera à l'app par un simple lien.
+- **On n'affirme que ce qu'on peut prouver** : chaque chiffre a une source
   primaire datée, chaque différence face à un concurrent est mesurée, ce qui n'est pas construit
   ne se promet pas. Une phrase qu'on ne peut adosser à une source ou à une mesure se retire.
 - Jamais de promesse de progrès scolaire ni de meilleures notes, jamais « le seul » ; jamais
   « conforme au cadre d'usage de l'IA du ministère », « agréé » ou « recommandé par l'Éducation
-  nationale », « aligné sur les programmes » sans la métrique publiée, ni « fait les devoirs »
-  (`docs/etudes/2026-10-01/education-nationale.md`, c).
+  nationale », « aligné sur les programmes » sans la métrique publiée, ni « fait les devoirs ».
 - Preuve sociale réelle seulement : témoignages de vraies familles avec leur accord, chiffres
   sourcés ; jamais un avis, un logo ou un compteur inventé ou anticipé.
 - Jamais un cookie non essentiel avant le consentement, ni un bandeau où « Refuser » est moins

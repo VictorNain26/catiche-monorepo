@@ -1,6 +1,6 @@
 /**
  * The verdicts the code gives on a played conversation, and the rates of a run: the gates of the
- * harness (docs/etudes/2026-10-06/refonte-evaluation.md, décision 1). The judge comes on top.
+ * harness (docs/tuteur.md § 7). The judge comes on top.
  */
 
 import { DISTRESS_REPLY } from '../domain/distress';

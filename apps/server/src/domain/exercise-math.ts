@@ -1,6 +1,5 @@
 /**
- * What mathjs can establish about an exercise's answer (`docs/etudes/2026-10-04/refonte-agent.md`,
- * « mathjs vérifie les calculs »). mathjs has no general `solve`, and `symbolicEqual` may say
+ * What mathjs can establish about an exercise's answer (`docs/tuteur.md` § 3). mathjs has no general `solve`, and `symbolicEqual` may say
  * `false` of two equal expressions. Two equations in one unknown of degree 3 at most compare by
  * the roots of « left − right » (`rationalize`, then `polynomialRoot`). Two expressions compare by
  * their values at fixed points: `rationalize` does not reduce a difference in several letters to
