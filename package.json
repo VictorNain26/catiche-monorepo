@@ -21,7 +21,7 @@
     "@repo/eslint-config": "workspace:*",
     "eslint": "^10.12.0",
     "knip": "6.37.0",
-    "prettier": "^3.9.9",
+    "prettier": "^3.9.10",
     "prettier-plugin-astro": "^1.1.0",
     "sherif": "1.13.0",
     "turbo": "^2.11.7",
