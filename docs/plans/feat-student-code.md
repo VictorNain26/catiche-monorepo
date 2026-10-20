@@ -168,3 +168,28 @@ reste attendu de better-auth (`etat.md`).
   - un code oublié donne un nouveau code, et l'avis s'affiche ;
   - « Changer de profil » marche entre deux onglets.
 - CI `ci-ok` verte, puis merge via `gh api`.
+
+## Écarts à l'exécution (2026-10-20)
+
+Chaque fois, l'option la plus sûre pour l'enfant, ou la seule que better-auth 1.7 permette :
+
+- **Tables hors du `schema` du plugin** : un modèle de better-auth exige une colonne `id`, et son
+  adaptateur n'a pas d'incrément atomique. `device`, `device_profile` et `student_code` vivent dans
+  `schema.ts`, lues et écrites par le dépôt de la plateforme (`platform/auth/student-devices.ts`) :
+  `UPDATE … SET failures = failures + 1 WHERE failures < 3 RETURNING`, la ligne du code verrouillée
+  d'abord. Seul `session.deviceId` est un champ du plugin, que better-auth écrit lui-même.
+- **Session fraîche** : `sensitiveSessionMiddleware` ne vérifie pas l'âge de la session ;
+  `add-profiles` prend `freshSessionMiddleware` (10 minutes, le `freshAge` du compte).
+- **`device.user_agent`** ajouté : le parent voit le navigateur de chaque appareil.
+- **Code oublié** : l'ancien code s'arrête dès que le code du parent est saisi, pas au choix du
+  nouveau. Le choix d'un code n'a qu'une règle : aucun code en place et la fenêtre ouverte ; rien ne
+  remplace un code existant sans le parent.
+- **Inactivité au serveur** aussi : sur un appareil partagé, chaque lecture de la session repousse
+  sa fin de 10 minutes, jamais au-delà de 2 h ; le minuteur du web ne fait que le dire tout de suite.
+- **Réponses** : `/api/me/devices` rend `{ devices, codeResetAt }`, et
+  `/api/household/students/:id/devices` `{ devices, code: { chosen, locked } }`.
+- **Code tapé deux fois** au premier choix : une faute de frappe bloquerait l'enfant.
+- **Avis de code changé** : sur l'accueil de l'élève deux semaines, et toujours dans « Tes
+  appareils ».
+- **Commits** : le serveur entier part avec les écrans du commit 3, chaque commit devant passer le
+  typecheck ; le foyer y est aussi.

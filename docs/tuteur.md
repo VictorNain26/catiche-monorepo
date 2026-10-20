@@ -227,12 +227,15 @@ Le code vit dans `apps/server/src/eval/` ; `bun run eval` rejoue le jeu sur le v
   intermédiaire »). L'élève voit le même résumé (`GET /api/summary`), son parent par
   `GET /api/summary/:studentId`. L'écran (`components/week-summary.tsx` du web) dit la même
   semaine au parent et à l'élève, avec une question à poser à l'enfant tirée de ce qui résiste.
-- **L'enfant a son espace à lui, dès la 6e** (décision de Victor, 2026-10-20) : il travaille sur
-  son propre appareil, relié par un code que le parent demande (`platform/auth/pairing.ts`) ; le
-  web ne propose pas au parent de l'ouvrir sur le sien. Chaque appareil relié est une session que
-  l'enfant voit dans sa liste, et que le parent déconnecte. Un appareil ne tient qu'un enfant : un
-  code saisi y ferme les autres sessions. Un enfant n'y liste ni n'ouvre d'autre session : la
-  garde du foyer lui refuse ces routes de better-auth (`STUDENT_AUTH_PATHS`,
+- **L'enfant a son espace à lui, dès la 6e, ouvert par son propre code** (décisions de Victor,
+  2026-10-20) : un code du parent met son profil sur un appareil, le sien ou l'ordinateur de la
+  famille, puis l'enfant y choisit un code de 6 chiffres que le parent ne voit pas
+  (`platform/auth/student-sign-in.ts`, et `docs/architecture.md`, « Serveur »). L'écran « Qui fait
+  ses devoirs ? » liste les profils de l'appareil ; chaque frère ou sœur entre par son code, et
+  « Changer de profil » referme le sien. Le parent peut toujours donner un code « oublié » : l'enfant
+  le sait, la date du changement s'affiche chez lui (CNIL, recommandation 5). L'enfant voit les
+  appareils qui portent son profil ; le parent les débloque ou les déconnecte. La garde du foyer
+  refuse à l'enfant les autres routes de better-auth (`STUDENT_AUTH_PATHS`,
   `modules/household/routes.ts`).
 - **La détresse n'alerte pas le parent d'office** : l'événement est enregistré
   (`distress_event`) ; la revue humaine qui doit le relire et décider n'existe pas encore

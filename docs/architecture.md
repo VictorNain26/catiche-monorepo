@@ -25,18 +25,29 @@ En place (`apps/server/src`) :
   (`@better-auth/passkey`, liée à l'origine publique) qu'il crée depuis son foyer. Une clé se crée,
   et le compte se supprime, depuis une session ouverte il y a moins de 10 minutes ; la suppression
   emporte son foyer s'il en est le seul gardien. L'élève n'a pas de clé : le garde du foyer lui
-  ferme les routes de better-auth, sauf celles par où son parent entre sur son appareil. Une session
-  vit 90 jours sans usage ; un appareil garde la session de l'enfant quand le parent y entre
-  (`multiSession`), et ne garde aucune session de parent une fois rendu à l'enfant
-  (`platform/auth/pairing.ts`). Les envois partent après la réponse (`platform/lifecycle/background.ts`),
-  que l'arrêt attend.
+  ferme les routes de better-auth, sauf les siennes et celles par où son parent entre sur son
+  appareil. Une session vit 90 jours sans usage, sauf sur un appareil partagé. Les envois partent
+  après la réponse (`platform/lifecycle/background.ts`), que l'arrêt attend.
 - `modules/tutor` : les séances, le tour (`POST /api/sessions/:id/messages`), qui dit ses étapes à
   l'élève pendant l'attente (parties `data-step` transitoires du flux) et échoue fermé, le
   quota par élève, le résumé et le titre en tâche de fond, la mémoire d'apprentissage
   (`/api/memory`), le résumé de la semaine (`/api/summary`) ; ses règles dans `tuteur.md`.
 - `platform/ai` : les appels à Mistral et à sa modération, le coût de chacun.
-- `platform/auth/pairing.ts` : le jumelage d'un appareil d'élève, un code à usage unique demandé
-  par le gardien, haché par better-auth, qui ouvre une session pour l'élève.
+- `platform/auth/student-sign-in.ts` : l'entrée de l'élève par son propre code (décision de Victor,
+  2026-10-20), sur le modèle du « secret d'activation » du NIST (SP 800-63B-4, § 3.2.10) et du
+  « code de déverrouillage » de la CNIL (délibération 2022-100, § 45-47) :
+  - un code du gardien, à usage unique et haché, reconnaît l'appareil par un cookie signé qui ne
+    porte que son identifiant, sans ouvrir de session ;
+  - l'élève y choisit un code de 6 chiffres, refusé trop facile (`domain/student-code.ts`), que le
+    gardien ne voit jamais ; ce code n'ouvre son profil que sur un appareil qui le porte ;
+  - les essais se comptent avant d'être vérifiés (`platform/auth/student-devices.ts`) : 3 sur un
+    appareil, puis le gardien débloque ; 10 partout, puis il faut un code « oublié » du gardien, qui
+    arrête l'ancien code, ferme les sessions de l'élève, et que l'élève voit daté ;
+  - le hachage est celui des mots de passe de better-auth, sur un HMAC du code par une clé dérivée
+    du secret de l'auth : une copie de la base seule ne livre pas le million de codes ;
+  - un appareil partagé (l'élève le dit, ou il porte un deuxième profil) garde une session dix
+    minutes sans usage, deux heures au plus, et jamais au-delà du navigateur ; celle du gardien
+    aussi, pour que la fratrie ne lise pas son espace.
 - `domain/` (niveaux, matières), `referential/` (outil et textes officiels), `eval/` (jeu
   d'évaluation, données seules) ; `testing/` (une base de test par fichier).
 - Les frontières sont vérifiées au lint (`eslint-plugin-boundaries`), jusqu'aux couches d'un

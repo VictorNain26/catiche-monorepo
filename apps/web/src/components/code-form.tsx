@@ -7,7 +7,7 @@ import { authClient, authMessage } from '../lib/auth';
 import { meQuery } from '../lib/me';
 import { z } from '../lib/zod';
 
-/** A field for a code, the one the address received or the pairing's: large mono, spaced out. */
+/** A field for a code, the one the address received or the parent's for a device: large mono, spaced out. */
 export const CODE_INPUT_CLASS = 'h-14 font-mono text-2xl tracking-widest md:text-2xl';
 
 const codeSchema = z.object({

@@ -1,7 +1,7 @@
 # État
 
 Ce qui reste vrai quelle que soit la direction du produit : les bloquants, les gestes de Victor,
-le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-19 ; ce qui est fait en sort.
+le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui est fait en sort.
 
 ## Bloquants
 
@@ -36,7 +36,13 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-19 ; ce qui 
 - Après une détresse : la revue humaine qui relit `distress_event` (aucun code ne la lit
   aujourd'hui), son délai et sa trace ; ce que voit l'élève ensuite ; le canal du message au
   parent, avec une table d'envois idempotente.
-- Appareils de l'élève : le prévenir quand un nouvel appareil est relié.
+- Appareils de l'élève : le prévenir quand un nouvel appareil porte son profil ; aujourd'hui il le
+  voit seulement dans sa liste.
+- Le code de l'élève dans l'analyse d'impact : la CNIL réserve le code court au « dispositif
+  matériel détenu en propre » (délibération 2022-100, § 46) ; l'ordinateur de la famille ne l'est
+  pas, et s'appuie sur « tout autre mécanisme technique apportant un même niveau de sécurité »
+  (appareil reconnu, 3 essais, session courte). C'est une interprétation à écrire, pas une
+  conformité littérale.
 - Les durées de conservation annoncées (`apps/landing/src/pages/confidentialite.astro`, § 7) :
   aucune purge ne tient encore celles du compte inactif ni des journaux.
 - L'adresse de la connexion (`platform/http/client-address.ts`, `getConnInfo`) n'est exercée par
@@ -65,6 +71,9 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-19 ; ce qui 
 ## Surveillance
 
 - **Jeton de la CLI Clever Cloud** : il expire le 2027-10-08 ; le renouveler avant.
+- **Secret de l'auth** (`BETTER_AUTH_SECRET`) : le poivre des codes d'élève en dérive
+  (`platform/auth/student-sign-in.ts`) ; le changer arrête tous les codes, et chaque élève en
+  choisit un nouveau par un code « oublié » de son parent.
 - **Taux de Mistral** (`MISTRAL_USD_TO_EUR`) : le revérifier à chaque facture.
 - **Configuration des agents** : élagage mensuel, le prochain le 2026-11-02.
 - **TypeScript** figé à 6.0 tant que `typescript-eslint` exige `<6.1.0` ; `@types/node` 24 pour
