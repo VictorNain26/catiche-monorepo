@@ -58,7 +58,7 @@ modèle sans prévenir et invalide l'évaluation. Chaque prompt porte une versio
 
 **Pièges vérifiés** : ceux de l'appel à Mistral (`reasoning_effort` et la liste interne
 d'`@ai-sdk/mistral`, `safePrompt`, `maxOutputTokens` sur un appel qui raisonne, cache de
-préfixe, endpoint UE, débit du mode gratuit) sont dans le skill `mistral-stack`. **Propres au
+préfixe, débit du mode gratuit) sont dans le skill `mistral-stack`. **Propres au
 tuteur** :
 - Chaque appel au modèle est entier, sans flux (`generateText`) : son usage, `cacheRead` compris,
   arrive avec sa réponse et se compte au coût (`platform/ai/client.ts`) ; un appel coupé par son
@@ -284,8 +284,10 @@ Cartographie de risque, à valider par un conseil avant l'ouverture.
 - Le quota est un budget du jour par élève, lu dans `ai_cost` : le coût réel, tokens en cache à
   leur prix (10 %), de chaque appel tracé, jamais des tokens bruts ; le même pour tous, les
   offres restant ouvertes (`produit.md`), le jour commençant à 4 h à Paris
-  (`domain/quota.ts`, `domain/school-calendar.ts`). Vérifié à
-  l'ouverture d'un tour (`modules/tutor/service.ts`) : au-delà, le tour est refusé avant tout
-  modèle, sauf une détresse ; un quota illisible refuse le tour.
+  (`domain/quota.ts`, `domain/school-calendar.ts`). Vérifié à l'ouverture d'un tour, un seul
+  tour à la fois par élève, toutes séances confondues (`modules/tutor/repository.ts`,
+  `startTurn`) : au-delà, le tour est refusé avant tout modèle, sauf une détresse ; un quota
+  illisible refuse le tour (`modules/tutor/service.ts`). Chaque appel facturé du tour s'inscrit
+  de lui-même dans `ai_cost` (`platform/ai/client.ts`).
 - Le résumé de conversation est incrémental : il ne se relance qu'après un nombre fixe de
   nouveaux messages, comptés hors de la fenêtre gardée en clair.
