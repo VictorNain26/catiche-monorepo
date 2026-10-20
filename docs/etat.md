@@ -68,6 +68,11 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
 
 ## Technique reporté
 
+- Code de l'élève, vu dans Chrome le 2026-10-20 à l'ordinateur seulement (la fenêtre ne s'est
+  pas réduite à la largeur d'un téléphone) : à revoir au téléphone. Trois finitions :
+  - un code trop facile n'est refusé qu'après sa seconde saisie, au lieu de la première ;
+  - « Ajouter cet ordinateur » reste proposé sur un ordinateur déjà ajouté ;
+  - le titre de « Qui fait ses devoirs ? » est aligné à gauche, et les prénoms au centre.
 - Les formules de Tom : sur Chrome de bureau, chaque formule montre des flèches de défilement
   vertical, son conteneur (`[&_.katex]:overflow-x-auto`, `components/tom-text.tsx`) débordant de
   6 px en hauteur.
