@@ -7,7 +7,6 @@ import { describe, expect, it } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
-import { birthMonthAged } from '../../testing/http';
 import type { ExerciseState } from './core/exercise-turn';
 import { createTutorRepository, type ExerciseProgress, type SavedTurn } from './repository';
 import { exercise, message, studySession, turnRecord } from './schema';
@@ -31,7 +30,7 @@ const asStudentA = await api.pair(guardianA, studentA.id);
 const asStudentB = await api.pair(guardianB, studentB.id);
 
 const start = async (cookie: string) => {
-  const res = await api.request('POST', '/api/sessions', { cookie, body: { accompanied: false } });
+  const res = await api.request('POST', '/api/sessions', { cookie });
   expect(res.status).toBe(201);
   return (await res.json()) as Session;
 };
@@ -44,14 +43,14 @@ await db.insert(message).values([
 
 describe('access matrix', () => {
   const routes = [
-    { method: 'POST', path: '/api/sessions', body: { accompanied: false } },
+    { method: 'POST', path: '/api/sessions' },
     { method: 'GET', path: '/api/sessions' },
     { method: 'GET', path: `/api/sessions/${sessionOfA.id}/messages` },
   ];
 
-  it.each(routes)('refuses $method $path to an anonymous visitor, and to a guardian, the student’s own included', async ({ method, path, body }) => {
-    expect((await api.request(method, path, { body })).status).toBe(401);
-    expect((await api.request(method, path, { cookie: guardianA, body })).status).toBe(403);
+  it.each(routes)('refuses $method $path to an anonymous visitor, and to a guardian, the student’s own included', async ({ method, path }) => {
+    expect((await api.request(method, path)).status).toBe(401);
+    expect((await api.request(method, path, { cookie: guardianA })).status).toBe(403);
   });
 
   it("does not find another student's session, nor one that does not exist", async () => {
@@ -81,29 +80,16 @@ describe('sessions', () => {
     expect(JSON.stringify(messages)).not.toContain('secret');
   });
 
-  it('opens a session with the parent beside in 6e and 5e only, and keeps the choice', async () => {
-    const beside = await api.request('POST', '/api/sessions', { cookie: asStudentA, body: { accompanied: true } });
-    expect(beside.status).toBe(201);
-    expect(await beside.json()).toMatchObject({ accompanied: true });
-    // The empty session opened again takes the new choice.
-    expect(await (await api.request('POST', '/api/sessions', { cookie: asStudentA, body: { accompanied: false } })).json()).toMatchObject({
-      accompanied: false,
-    });
-
-    const quatrieme = await api.student(guardianA, { name: 'Noé', level: 'quatrieme', birthMonth: birthMonthAged(13) });
-    const asQuatrieme = await api.pair(guardianA, quatrieme.id);
-    expect((await api.request('POST', '/api/sessions', { cookie: asQuatrieme, body: { accompanied: true } })).status).toBe(403);
-    expect((await api.request('POST', '/api/sessions', { cookie: asQuatrieme, body: { accompanied: false } })).status).toBe(201);
-    expect((await api.request('POST', '/api/sessions', { cookie: asQuatrieme })).status).toBe(400);
+  it('opens a session without a mode: the child works alone, in 6e as in 3e', async () => {
+    const res = await api.request('POST', '/api/sessions', { cookie: asStudentA });
+    expect(res.status).toBe(201);
+    expect(Object.keys((await res.json()) as Session).sort()).toEqual(['closedAt', 'createdAt', 'id', 'title']);
   });
 
-  it('leaves the mode of an empty session alone while its first turn runs: another tap opens a new one', async () => {
-    const running = (await (await api.request('POST', '/api/sessions', { cookie: asStudentA, body: { accompanied: true } })).json()) as Session;
+  it('opens a new session when the empty one has its first turn running', async () => {
+    const running = await start(asStudentA);
     await db.update(studySession).set({ turnStartedAt: new Date() }).where(eq(studySession.id, running.id));
-    const other = (await (await api.request('POST', '/api/sessions', { cookie: asStudentA, body: { accompanied: false } })).json()) as Session;
-    expect(other.id).not.toBe(running.id);
-    const [kept] = await db.select({ accompanied: studySession.accompanied }).from(studySession).where(eq(studySession.id, running.id));
-    expect(kept?.accompanied).toBe(true);
+    expect((await start(asStudentA)).id).not.toBe(running.id);
     await db.update(studySession).set({ turnStartedAt: null }).where(eq(studySession.id, running.id));
   });
 
@@ -205,15 +191,6 @@ describe('the exercise in progress', () => {
       const insert = db.insert(turnRecord).values({ ...record(valid), sessionId: session.id, [column]: sql`'not-in-the-list'` });
       expect({ column, code: await codeOf(insert) }).toEqual({ column, code: '22P02' });
     }
-    const cue = (value: string) =>
-      codeOf(
-        db
-          .update(studySession)
-          .set({ lastParentCue: sql`${value}` })
-          .where(eq(studySession.id, session.id)),
-      );
-    expect(await cue('block')).toBe('written');
-    expect(await cue('not-in-the-list')).toBe('22P02');
   });
 
   it('writes nothing of a turn that fails: no exercise, no message, no record', async () => {

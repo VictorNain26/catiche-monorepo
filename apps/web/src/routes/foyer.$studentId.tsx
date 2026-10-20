@@ -8,7 +8,6 @@ import { BackLink, Page } from '../components/page';
 import { QrCode } from '../components/qr-code';
 import { WeekSummary } from '../components/week-summary';
 import { isProblem } from '../lib/api';
-import { authClient, authData, deviceSessionsQuery } from '../lib/auth';
 import { useConfirmation } from '../lib/confirmation';
 import { deviceName, formatDay, formatHour } from '../lib/device';
 import { formatCode, pairingLink } from '../lib/pairing';
@@ -29,8 +28,8 @@ import {
 
 /**
  * One child of the household. Until a device holds their space, the page opens on the next step:
- * the family's phone in 6e and 5e, their own in 4e and 3e. Then their week; their devices, their
- * memory, their name and class and their account folded, a tap away.
+ * pairing their own phone, from the 6e. Then their week; their devices, their memory, their name
+ * and class and their account folded, a tap away.
  */
 export const Route = createFileRoute('/foyer/$studentId')({
   loader: async ({ context, params }) => {
@@ -53,7 +52,7 @@ function StudentPage() {
 
   return (
     <Page title={child.name} subtitle={LEVEL_LABELS[child.level]} back={<BackLink to="/foyer">Retour au foyer</BackLink>}>
-      {pairing.firstStep ? <NextStep child={child} pairing={pairing} /> : child.accompanied && <OpenHere child={child} />}
+      {pairing.firstStep && <NextStep child={child} pairing={pairing} />}
       <WeekSummary week={week.data} failed={week.isError} name={child.name} reader="guardian" />
       <div className="flex flex-col">
         <Fold title="Ses appareils">
@@ -142,59 +141,13 @@ type Pairing = ReturnType<typeof usePairing>;
 function NextStep({ child, pairing }: { child: Student; pairing: Pairing }) {
   return (
     <Section title="Prochaine étape">
-      {child.accompanied ? (
-        <OpenHere child={child} />
+      <p>{child.name} fait ses devoirs sur son téléphone : un code à usage unique le relie à son compte, sans mot de passe.</p>
+      {pairing.redeemed ? (
+        <Banner tone="success" title={`L’appareil de ${child.name} est relié.`} />
       ) : (
-        <>
-          <p>{child.name} fait ses devoirs sur son téléphone : un code à usage unique le relie à son compte, sans mot de passe.</p>
-          {pairing.redeemed ? (
-            <Banner tone="success" title={`L’appareil de ${child.name} est relié.`} />
-          ) : (
-            <PairingCode pairing={pairing} device="son téléphone" label={`Relier le téléphone de ${child.name}`} name={child.name} />
-          )}
-        </>
+        <PairingCode pairing={pairing} device="son téléphone" label={`Relier le téléphone de ${child.name}`} name={child.name} />
       )}
     </Section>
-  );
-}
-
-/**
- * The family's phone, handed to a child in 6e or 5e: their session if the device holds it,
- * otherwise one paired here by the app, no code to copy. The server then closes the guardian's
- * session on it (platform/auth/pairing.ts): coming back takes the guardian's passkey or a code.
- * From the 4e, the child's space opens on no device of the guardian's (`docs/tuteur.md` § 8).
- */
-function OpenHere({ child }: { child: Student }) {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const open = useMutation({
-    mutationFn: async () => {
-      const held = await queryClient.query(deviceSessionsQuery);
-      const own = held.find(({ user }) => user.id === child.id);
-      await (own
-        ? authData(authClient.multiSession.setActive({ sessionToken: own.session.token }))
-        : authData(authClient.devicePairing.redeem({ code: (await pairingCode(child.id)).code })));
-      // Loaded afresh: nothing of the guardian's stays in memory.
-      await navigate({ to: '/', reloadDocument: true });
-    },
-  });
-
-  return (
-    <section className="flex flex-col gap-3">
-      <Button
-        disabled={open.isPending}
-        onClick={() => {
-          open.mutate();
-        }}
-      >
-        Faire les devoirs avec {child.name}
-      </Button>
-      <p className="text-sm text-muted-foreground">
-        À chaque séance, {child.name} choisit : avec vous à côté, ou sans vous ce soir. À côté, Tom vous propose quoi dire, jamais la réponse.
-      </p>
-      <p className="text-sm text-muted-foreground">Pour revenir au vôtre, il vous faudra votre clé d’accès ou un code.</p>
-      {open.error && <Banner tone="error" title={open.error.message} />}
-    </section>
   );
 }
 
@@ -246,26 +199,18 @@ function Devices({ child, pairing }: { child: Student; pairing: Pairing }) {
         </List>
       )}
       {revoke.error && <Banner tone="error" title={householdMessage(revoke.error)} />}
-      {child.accompanied ? (
-        <p className="text-muted-foreground">
-          En 6e et 5e, {child.name} travaille sur l’appareil de la famille ; relier son propre appareil devient possible en 4e.
-        </p>
-      ) : (
-        // Until a device holds the child's space, the code is asked for in the next step.
-        !pairing.firstStep && (
-          <>
-            {pairing.redeemed ? (
-              <Banner tone="success" title={`L’appareil de ${child.name} est relié.`} />
-            ) : (
-              !pairing.code && (
-                <p className="text-muted-foreground">
-                  Un code à usage unique relie un autre appareil de {child.name} à son compte, sans mot de passe.
-                </p>
-              )
-            )}
-            <PairingCode pairing={pairing} device="son autre appareil" label="Relier un autre appareil" name={child.name} />
-          </>
-        )
+      {/* Until a device holds the child's space, the code is asked for in the next step. */}
+      {!pairing.firstStep && (
+        <>
+          {pairing.redeemed ? (
+            <Banner tone="success" title={`L’appareil de ${child.name} est relié.`} />
+          ) : (
+            !pairing.code && (
+              <p className="text-muted-foreground">Un code à usage unique relie un autre appareil de {child.name} à son compte, sans mot de passe.</p>
+            )
+          )}
+          <PairingCode pairing={pairing} device="son autre appareil" label="Relier un autre appareil" name={child.name} />
+        </>
       )}
     </>
   );

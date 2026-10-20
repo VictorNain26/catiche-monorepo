@@ -7,7 +7,7 @@
 
 import { createPlaceholderEmail } from '@better-auth/core/utils/email';
 import { generateId } from '@better-auth/core/utils/id';
-import { isAccompaniedLevel, type SchoolLevel } from '../../domain/levels';
+import type { SchoolLevel } from '../../domain/levels';
 import { memoryConsent, type MemoryAnswer } from '../../domain/memory-consent';
 
 export type { MemoryAnswer };
@@ -46,7 +46,6 @@ const toStudent = ({ birthMonth, memoryProposedAt, memoryAnswer, ...student }: S
   return {
     ...student,
     birthMonth: birthMonth.slice(0, 7),
-    accompanied: isAccompaniedLevel(student.level),
     memory: { proposed: memoryProposedAt !== null, state, decidesAlone },
   };
 };
@@ -63,12 +62,6 @@ export function createHouseholdService({ repository, createPairingCode }: Deps) 
   return {
     isStudent,
 
-    /** A student in 6e or 5e, whose profile lives on the family's phone. */
-    async isAccompanied(userId: string) {
-      const student = await repository.findProfile(userId);
-      return student !== undefined && isAccompaniedLevel(student.level);
-    },
-
     /** A student reaches none of the guardian's routes. */
     async assertNotStudent(userId: string) {
       if (await isStudent(userId)) throw new Problem('FORBIDDEN');
@@ -78,8 +71,8 @@ export function createHouseholdService({ repository, createPairingCode }: Deps) 
     async me(userId: string, name: string) {
       const student = await repository.findProfile(userId);
       return student
-        ? { id: userId, name, role: 'student' as const, level: student.level, accompanied: isAccompaniedLevel(student.level) }
-        : { id: userId, name, role: 'guardian' as const, level: null, accompanied: false };
+        ? { id: userId, name, role: 'student' as const, level: student.level }
+        : { id: userId, name, role: 'guardian' as const, level: null };
     },
 
     async listStudents(guardianId: string) {

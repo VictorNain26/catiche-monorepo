@@ -26,9 +26,6 @@ const tooLarge = (): never => {
 const KEEP_ALIVE_MS = 10_000;
 const MAX_CHARS = 4000;
 
-// In 6e and 5e, the parent beside the child or not (`domain/levels.ts`): said every time, never assumed.
-const newSession = z.object({ accompanied: z.boolean() });
-
 // The web sends a photo cut to 1 600 px in JPEG, well under this: past it, 413 before any parsing.
 const MAX_BODY_BYTES = 3 * 1024 * 1024;
 
@@ -44,7 +41,7 @@ const turnBody = z
 export function tutorRoutes({ auth, service, logger }: { auth: Auth; service: TutorService; logger: Logger }) {
   return new Hono<SessionEnv>()
     .use(requireSession(auth))
-    .post('/', jsonBody(newSession), async (c) => c.json(await service.startSession(c.var.userId, c.req.valid('json').accompanied), 201))
+    .post('/', async (c) => c.json(await service.startSession(c.var.userId), 201))
     .get('/', async (c) => c.json(await service.listSessions(c.var.userId)))
     .get('/:id/messages', uuidParam('id'), async (c) => c.json(await service.listMessages(c.var.userId, c.req.valid('param').id)))
     .post('/:id/messages', bodyLimit({ maxSize: MAX_BODY_BYTES, onError: () => tooLarge() }), uuidParam('id'), jsonBody(turnBody), async (c) => {
@@ -56,14 +53,12 @@ export function tutorRoutes({ auth, service, logger }: { auth: Auth; service: Tu
         stream: createUIMessageStream({
           execute: async ({ writer }) => {
             // Transient: the student reads it while waiting, the conversation never keeps it.
-            const { text, cue } = await service.runTurn(opened, input, (step) => {
+            const text = await service.runTurn(opened, input, (step) => {
               writer.write({ type: 'data-step', data: step, transient: true });
             });
             writer.write({ type: 'text-start', id: 'reply' });
             writer.write({ type: 'text-delta', id: 'reply', delta: text });
             writer.write({ type: 'text-end', id: 'reply' });
-            // For the parent beside the child, under the reply until the next message: never in the conversation.
-            if (cue) writer.write({ type: 'data-cue', data: cue, transient: true });
           },
           // The internal message never reaches the student.
           onError: (err) => {

@@ -155,8 +155,8 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
       return cookieOf(await expectStatus(redeem(await api.pairingCode(cookie, studentId)), 200, 'pairing'));
     },
     /** A session the student opens: its id. */
-    async session(cookie: string, accompanied = false) {
-      const res = await expectStatus(request('POST', '/api/sessions', { cookie, body: { accompanied } }), 201, 'session');
+    async session(cookie: string) {
+      const res = await expectStatus(request('POST', '/api/sessions', { cookie }), 201, 'session');
       return ((await res.json()) as { id: string }).id;
     },
     /** One turn through the route, read from its UI message stream. */

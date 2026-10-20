@@ -1,5 +1,5 @@
 import { useChat } from '@ai-sdk/react';
-import { Banner, Button, Card, Input } from '@repo/ui';
+import { Banner, Button, Input } from '@repo/ui';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { DefaultChatTransport } from 'ai';
@@ -30,7 +30,6 @@ function Session() {
   const [text, setText] = useState('');
   const aiNoticeId = useId();
   const [step, setStep] = useState<TurnStep | null>(null);
-  const [cue, setCue] = useState<string | null>(null);
   const [photo, setPhoto] = useState<PhotoUpload | null>(null);
   const [preparing, setPreparing] = useState(false);
   const [photoFailed, setPhotoFailed] = useState(false);
@@ -56,8 +55,7 @@ function Session() {
     messages: stored.map(toUIMessage),
     transport,
     onData: (part) => {
-      if (part.type === 'data-cue') setCue(part.data);
-      else if (isTurnStep(part.data)) setStep(part.data);
+      if (isTurnStep(part.data)) setStep(part.data);
     },
     // A refused or failed turn stored nothing: its message leaves the conversation and comes back
     // to the field with its photo, to be sent again.
@@ -90,7 +88,6 @@ function Session() {
     setText('');
     setPhoto(null);
     setStep(null);
-    setCue(null);
     void sendMessage({ text: trimmed, metadata: { photo: photo !== null } });
   };
   const takePhoto = (file: File | undefined) => {
@@ -131,14 +128,6 @@ function Session() {
           ),
         )}
       </ol>
-      {cue && !busy && (
-        <Card className="flex flex-col gap-1">
-          <span className="text-sm font-bold text-muted-foreground">Pour vous, parent</span>
-          <p role="note" aria-label="Pour vous, parent">
-            {cue}
-          </p>
-        </Card>
-      )}
       {/* In the page before the wait, so that what it says is read out as it comes. */}
       <div role="status">{status === 'submitted' && <Banner tone="info" title={waitingText(step)} />}</div>
       {error && <Banner tone="error" title={chatMessage(error)} />}

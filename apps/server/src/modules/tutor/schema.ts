@@ -13,11 +13,9 @@ import { REASONING_EFFORTS } from '../../domain/reasoning-effort';
 import { SUBJECT_FAMILIES } from '../../domain/subjects';
 import { user } from '../../platform/auth/schema';
 import type { Hint } from './core/ladder';
-import { CUE_KINDS } from './core/parent-cues';
 import type { ExerciseSheet } from './core/sheet';
 
 export const subjectFamily = pgEnum('subject_family', SUBJECT_FAMILIES);
-export const parentCueKind = pgEnum('parent_cue_kind', CUE_KINDS);
 export const diagnosisVerdict = pgEnum('diagnosis_verdict', VERDICTS);
 export const diagnosisErrorType = pgEnum('diagnosis_error_type', DIAGNOSIS_ERROR_TYPES);
 export const decidedBy = pgEnum('decided_by', DECIDED_BY);
@@ -40,12 +38,6 @@ export const studySession = pgTable(
     summaryUntil: bigint('summary_until', { mode: 'number' }),
     /** The subject of the first turn that names one: the next turns fall back on it. */
     subject: subjectFamily('subject'),
-    /** In 6e and 5e, the parent stays beside the child: Tom gives them cues (core/parent-cues.ts). */
-    accompanied: boolean('accompanied').notNull().default(false),
-    /** The cues given to the parent in the session, which a cap bounds. */
-    parentCues: integer('parent_cues').notNull().default(0),
-    /** The kind of the last cue (core/parent-cues.ts), never given twice in a row. */
-    lastParentCue: parentCueKind('last_parent_cue'),
     /** Set by a distress: every later message gets the fixed reply. */
     closedAt: timestamp('closed_at', { withTimezone: true }),
     /** One turn at a time: set when a turn starts, cleared when it ends; a stale one is taken over. */

@@ -69,23 +69,6 @@ describe('access matrix', () => {
     expect(listA.map((s) => s.id)).toEqual([studentOfA.id]);
     expect(listB.map((s) => s.id)).toEqual([studentOfB.id]);
   });
-
-  it('says of each student whether they work on the family’s device, before the 4e', async () => {
-    const [lea] = (await (await api.request('GET', '/api/household/students', { cookie: guardianA })).json()) as (Student & {
-      accompanied: boolean;
-    })[];
-    expect(lea).toMatchObject({ level: 'cinquieme', accompanied: true });
-    await api.request('PATCH', `/api/household/students/${studentOfA.id}`, { cookie: guardianA, body: { level: 'quatrieme' } });
-    try {
-      const [later] = (await (await api.request('GET', '/api/household/students', { cookie: guardianA })).json()) as (Student & {
-        accompanied: boolean;
-      })[];
-      expect(later).toMatchObject({ level: 'quatrieme', accompanied: false });
-    } finally {
-      // Léa stays in 5e for the tests after this one.
-      await api.request('PATCH', `/api/household/students/${studentOfA.id}`, { cookie: guardianA, body: { level: 'cinquieme' } });
-    }
-  });
 });
 
 const creation = client();
@@ -100,15 +83,13 @@ describe('/api/me', () => {
       name: 'Parent',
       role: 'guardian',
       level: null,
-      accompanied: false,
     });
-    // In 5e, the child works on the family's device, the parent beside or not.
+    // In 5e as in 3e, the child's own space, which says nothing of a family device.
     expect(await (await api.request('GET', '/api/me', { cookie: asStudentA })).json()).toEqual({
       id: studentOfA.id,
       name: 'Léa',
       role: 'student',
       level: 'cinquieme',
-      accompanied: true,
     });
     expect((await api.request('GET', '/api/me')).status).toBe(401);
   });

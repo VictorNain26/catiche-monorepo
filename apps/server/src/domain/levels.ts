@@ -7,12 +7,6 @@ export type SchoolLevel = (typeof SCHOOL_LEVELS)[number];
 
 export const schoolLevelSchema = z.enum(SCHOOL_LEVELS);
 
-/**
- * Before the 4e, the child works on the family's device, the parent beside or not
- * (`docs/tuteur.md` § 8, « le mode accompagné »).
- */
-export const isAccompaniedLevel = (level: SchoolLevel) => level === 'sixieme' || level === 'cinquieme';
-
 /** The class as a teacher writes it, for the exercise sheet. */
 export const LEVEL_SHORT_LABELS: Record<SchoolLevel, string> = {
   sixieme: '6e',
