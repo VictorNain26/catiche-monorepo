@@ -8,7 +8,7 @@ import { BackLink, Page } from '../components/page';
 import { CODE_INPUT_CLASS } from '../components/code-form';
 import { activationSchema } from '../lib/activation';
 import { authClient } from '../lib/auth';
-import { profilesQuery, studentCodeMessage } from '../lib/student';
+import { keepChooseTokens, studentCodeMessage } from '../lib/student';
 
 /**
  * A new device, or a code forgotten: the code the parent asked for in their space puts the
@@ -29,7 +29,9 @@ function Activate() {
       setFailure(studentCodeMessage(error));
       return;
     }
-    await queryClient.invalidateQueries({ queryKey: profilesQuery.queryKey });
+    keepChooseTokens({ [data.studentId]: data.chooseToken });
+    // A session the device carried ended with the code: nothing of it stays cached.
+    queryClient.clear();
     await navigate({ to: '/profils/$studentId', params: { studentId: data.studentId } });
   });
 

@@ -198,6 +198,8 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
     /** One device's browser: every cookie its responses set, kept for its next requests, and dropped once expired. */
     device() {
       const jar = new Map<string, string>();
+      // The one-time token that lets a student choose their code, as the page that opened the window holds it.
+      const tokens = new Map<string, string>();
       const cookie = () => [...jar].map(([name, value]) => `${name}=${value}`).join('; ');
       const send = async (method: string, path: string, body?: unknown) => {
         const res = await request(method, path, { cookie: cookie(), body });
@@ -218,18 +220,33 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
           const received = await codeSent(email, () => send('POST', '/api/auth/email-otp/send-verification-otp', { email, type: 'sign-in' }));
           return send('POST', '/api/auth/sign-in/email-otp', { email, otp: mail.codeIn(received) });
         },
-        /** A guardian's code, which recognises this device for the student. */
-        activate: (code: string) => send('POST', '/api/auth/student/activate', { code }),
+        /** A guardian's code, which recognises this device for the student; the page keeps the token to choose a code with. */
+        async activate(code: string) {
+          const res = await send('POST', '/api/auth/student/activate', { code });
+          if (res.ok) {
+            const { studentId, chooseToken } = (await res.clone().json()) as { studentId: string; chooseToken: string };
+            tokens.set(studentId, chooseToken);
+          }
+          return res;
+        },
         /** The profiles this device holds. */
         async profiles() {
           return (await (await expectStatus(send('GET', '/api/auth/student/profiles'), 200, 'profiles')).json()) as Profiles;
         },
-        chooseCode: (studentId: string, code: string, ownDevice: boolean) =>
-          send('POST', '/api/auth/student/choose-code', { studentId, code, ownDevice }),
+        /** The student's first code, with the token the page that opened the window holds, unless another is given. */
+        chooseCode: (studentId: string, code: string, ownDevice: boolean, chooseToken = tokens.get(studentId) ?? '') =>
+          send('POST', '/api/auth/student/choose-code', { studentId, code, ownDevice, chooseToken }),
         /** The student in by their own code. */
         enter: (studentId: string, code: string) => send('POST', '/api/auth/student/sign-in', { studentId, code }),
         /** The guardian adds their children to this device, a family computer. */
-        addProfiles: (studentIds: string[]) => send('POST', '/api/auth/student/add-profiles', { studentIds }),
+        async addProfiles(studentIds: string[]) {
+          const res = await send('POST', '/api/auth/student/add-profiles', { studentIds });
+          if (res.ok) {
+            const { chooseTokens } = (await res.clone().json()) as { chooseTokens: Record<string, string> };
+            for (const [studentId, token] of Object.entries(chooseTokens)) tokens.set(studentId, token);
+          }
+          return res;
+        },
       };
     },
   };

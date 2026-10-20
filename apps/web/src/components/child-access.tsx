@@ -15,7 +15,7 @@ import {
   type ActivationReason,
   type Student,
 } from '../lib/household';
-import { announceProfileChange, tabChannel } from '../lib/student';
+import { announceProfileChange, keepChooseTokens, tabChannel } from '../lib/student';
 import { CodeForm, sendCode } from './code-form';
 
 /**
@@ -210,12 +210,14 @@ function Devices({ child, activation }: { child: Student; activation: Activation
  */
 function AddThisComputer({ child }: { child: Student }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [stale, setStale] = useState(false);
   const [codeSentTo, setCodeSentTo] = useState<string | null>(null);
   const add = useMutation({
     mutationFn: async () => {
+      let added;
       try {
-        await authData(authClient.student.addProfiles({ studentIds: [child.id] }));
+        added = await authData(authClient.student.addProfiles({ studentIds: [child.id] }));
       } catch (error) {
         if (error instanceof AuthFailure && hasCode(error, 'SESSION_NOT_FRESH')) {
           setStale(true);
@@ -223,8 +225,11 @@ function AddThisComputer({ child }: { child: Student }) {
         }
         throw error;
       }
+      // In this tab's memory only: the child chooses their code here, now; no one later.
+      keepChooseTokens(added.chooseTokens);
       announceProfileChange(tabChannel());
-      await navigate({ to: '/profils/$studentId', params: { studentId: child.id }, reloadDocument: true });
+      queryClient.clear();
+      await navigate({ to: '/profils/$studentId', params: { studentId: child.id } });
     },
   });
   const askCode = useMutation({

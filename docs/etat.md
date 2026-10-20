@@ -38,6 +38,16 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
   parent, avec une table d'envois idempotente.
 - Appareils de l'élève : le prévenir quand un nouvel appareil porte son profil ; aujourd'hui il le
   voit seulement dans sa liste.
+- Appareils reconnus (`platform/auth/student-devices.ts`) :
+  - la ligne d'un appareil (son navigateur) part quand le parent le déconnecte de son dernier
+    profil, pas encore à la suppression d'un compte : une purge des appareils sans profil reste à
+    écrire, avec celle des comptes inactifs ;
+  - le cookie d'appareil n'est posé qu'à l'activation : passé 400 jours, le navigateur l'oublie et il
+    faut un nouveau code du parent ; le reposer à chaque entrée réussie ;
+  - la limite de better-auth par adresse (5 par minute sur les routes de l'élève) vit en mémoire,
+    par instance, et n'est exercée par aucun test : une seule instance, ou son stockage en base.
+- Sessions de parent : un code « oublié » et la suppression d'un enfant ne demandent pas de session
+  fraîche ; à exiger comme pour une clé d'accès, si un parent laisse sa session ouverte.
 - Le code de l'élève dans l'analyse d'impact : la CNIL réserve le code court au « dispositif
   matériel détenu en propre » (délibération 2022-100, § 46) ; l'ordinateur de la famille ne l'est
   pas, et s'appuie sur « tout autre mécanisme technique apportant un même niveau de sécurité »
@@ -71,9 +81,9 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
 ## Surveillance
 
 - **Jeton de la CLI Clever Cloud** : il expire le 2027-10-08 ; le renouveler avant.
-- **Secret de l'auth** (`BETTER_AUTH_SECRET`) : le poivre des codes d'élève en dérive
-  (`platform/auth/student-sign-in.ts`) ; le changer arrête tous les codes, et chaque élève en
-  choisit un nouveau par un code « oublié » de son parent.
+- **Secret de l'auth** (`BETTER_AUTH_SECRET`) : le poivre des codes d'élève en dérive, et il
+  signe le cookie d'appareil (`platform/auth/student-sign-in.ts`) ; le changer arrête tous les codes
+  et fait oublier tous les appareils : chaque élève revient par un code « oublié » de son parent.
 - **Taux de Mistral** (`MISTRAL_USD_TO_EUR`) : le revérifier à chaque facture.
 - **Configuration des agents** : élagage mensuel, le prochain le 2026-11-02.
 - **TypeScript** figé à 6.0 tant que `typescript-eslint` exige `<6.1.0` ; `@types/node` 24 pour

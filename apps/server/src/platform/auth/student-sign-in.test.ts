@@ -108,6 +108,22 @@ describe('the code the student chooses', () => {
     expect(await problem(await tablet.chooseCode(lea.id, '920374', true))).toEqual({ status: 403, code: 'CODE_NOT_EXPECTED' });
   });
 
+  it('is chosen only by the page the window was opened for: a brother on the device has not its token', async () => {
+    const { lea, tablet } = await family('jeton@example.com');
+    expect(await problem(await tablet.chooseCode(lea.id, STUDENT_CODE, true, ''))).toEqual({ status: 403, code: 'CODE_NOT_EXPECTED' });
+    expect(await problem(await tablet.chooseCode(lea.id, STUDENT_CODE, true, 'un-jeton-devine'))).toEqual({ status: 403, code: 'CODE_NOT_EXPECTED' });
+    expect((await tablet.chooseCode(lea.id, STUDENT_CODE, true)).status).toBe(200);
+  });
+
+  it('tells a device whose window is not open nothing of the month of birth', async () => {
+    const { guardian, lea } = await family('naissance-cachee@example.com');
+    const tom = await api.student(guardian, { name: 'Tom', level: 'sixieme' });
+    const other = api.device();
+    await other.activate(await api.activationCode(guardian, tom.id));
+    const [month, year] = [lea.birthMonth.slice(5), lea.birthMonth.slice(0, 4)];
+    expect(await problem(await other.chooseCode(lea.id, `${month}${year}`, true))).toEqual({ status: 403, code: 'CODE_NOT_EXPECTED' });
+  });
+
   it('is not chosen once the window the guardian opened has closed', async () => {
     const { lea, tablet } = await family('fenetre@example.com');
     await db
@@ -238,6 +254,16 @@ describe('a forgotten code', () => {
     expect(Date.parse(codeResetAt ?? '')).toBeGreaterThan(Date.now() - 60_000);
     // The new code opens the other device; the old one no longer.
     expect((await tablet.enter(lea.id, '920374')).status).toBe(200);
+  });
+
+  it('closes the windows other devices had open: the new code is chosen where the forgotten code was typed', async () => {
+    const { guardian, lea } = await withCode('autres-fenetres@example.com');
+    const phone = api.device();
+    await phone.activate(await api.activationCode(guardian, lea.id));
+    const fresh = api.device();
+    await fresh.activate(await api.activationCode(guardian, lea.id, 'forgotten'));
+    expect(await problem(await phone.chooseCode(lea.id, '920374', true))).toEqual({ status: 403, code: 'CODE_NOT_EXPECTED' });
+    expect((await fresh.chooseCode(lea.id, '920374', true)).status).toBe(200);
   });
 
   it('tells a student whose code never changed nothing', async () => {

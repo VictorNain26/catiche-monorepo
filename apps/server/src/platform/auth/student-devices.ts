@@ -2,7 +2,7 @@
  * The repository of the student's way in (`./student-sign-in.ts`): devices, the profiles they
  * hold, the student's code and its tries, and the sessions a device holds. Every count of a try
  * is one statement that cannot pass its ceiling, so tries sent at once count no more than it
- * allows; the code's row is locked first wherever both rows change, always in that order.
+ * allows. Rows are locked in one order: the code, then the device, then the profile.
  */
 
 import { and, asc, eq, gt, lt, ne, sql } from 'drizzle-orm';
@@ -34,6 +34,15 @@ function stateOf({ failures, codeWindowUntil, hash, codeFailures }: ProfileRow, 
 export type Claim =
   { outcome: 'try'; hash: string; deviceFailures: number; codeFailures: number } | { outcome: 'unknown' | 'no-code' | 'blocked' | 'locked' };
 
+/** The profile's window to choose a code, open and opened for the page that holds this token. */
+const windowOf = (deviceId: string, studentId: string, chooseTokenHash: string, now: Date) =>
+  and(
+    eq(deviceProfile.deviceId, deviceId),
+    eq(deviceProfile.studentId, studentId),
+    gt(deviceProfile.codeWindowUntil, now),
+    eq(deviceProfile.chooseTokenHash, chooseTokenHash),
+  );
+
 export function createStudentDevices(db: Db) {
   /** Ends every session the device holds but `keep`: it has just become shared, and a long session would outlive it. */
   const closeSessionsOf = (tx: Pick<Db, 'delete'>, deviceId: string, keep: string | undefined) =>
@@ -51,21 +60,25 @@ export function createStudentDevices(db: Db) {
 
     /**
      * The student on the device, by a guardian's code: their tries there start again, and a student
-     * without a code chooses one until `windowUntil`. A second profile makes the device shared, and
-     * `shared` makes it so: the sessions it held close, but `keep`'s. Whether it is shared now.
+     * without a code chooses one until `windowUntil`, by the page that holds the token hashed as
+     * `chooseTokenHash`. A second profile makes the device shared, and `shared` makes it so: the
+     * sessions it held close, but `keep`'s. Whether it is shared now.
      */
     async addProfile(
       deviceId: string,
       studentId: string,
-      { windowUntil, shared, keep }: { windowUntil: Date; shared: boolean; keep?: string | undefined },
+      { windowUntil, chooseTokenHash, shared, keep }: { windowUntil: Date; chooseTokenHash: string; shared: boolean; keep?: string | undefined },
     ) {
       return db.transaction(async (tx) => {
         const [held] = await tx.select({ shared: device.shared }).from(device).where(eq(device.id, deviceId)).for('update');
         if (!held) throw new Error('The device to add a profile to does not exist');
         await tx
           .insert(deviceProfile)
-          .values({ deviceId, studentId, codeWindowUntil: windowUntil })
-          .onConflictDoUpdate({ target: [deviceProfile.deviceId, deviceProfile.studentId], set: { failures: 0, codeWindowUntil: windowUntil } });
+          .values({ deviceId, studentId, codeWindowUntil: windowUntil, chooseTokenHash })
+          .onConflictDoUpdate({
+            target: [deviceProfile.deviceId, deviceProfile.studentId],
+            set: { failures: 0, codeWindowUntil: windowUntil, chooseTokenHash },
+          });
         const others = await tx
           .select({ studentId: deviceProfile.studentId })
           .from(deviceProfile)
@@ -135,42 +148,59 @@ export function createStudentDevices(db: Db) {
     },
 
     /** The right code: its tries start again, here and everywhere. */
-    async succeeded(deviceId: string, studentId: string, now = new Date()) {
+    async succeeded(deviceId: string, studentId: string) {
       await db.transaction(async (tx) => {
         await tx.update(studentCode).set({ failures: 0 }).where(eq(studentCode.userId, studentId));
         await tx
           .update(deviceProfile)
-          .set({ failures: 0, lastUsedAt: now })
+          .set({ failures: 0 })
           .where(and(eq(deviceProfile.deviceId, deviceId), eq(deviceProfile.studentId, studentId)));
       });
     },
 
     /**
-     * The student's first code, or a new one after a forgotten code: only on a device whose window
-     * is open, and only while they have none. `shared`: the student said the device is not theirs
-     * alone, which closes the sessions it held. False when no code was expected.
+     * Whether a code may be chosen here, read before the code itself is looked at: a device whose
+     * window is closed, or a page without its token, learns nothing of the student.
      */
-    async chooseCode(deviceId: string, studentId: string, hash: string, { shared, now = new Date() }: { shared: boolean; now?: Date }) {
+    async mayChoose(deviceId: string, studentId: string, chooseTokenHash: string, now = new Date()) {
+      const [open] = await db
+        .select({ hash: studentCode.hash })
+        .from(deviceProfile)
+        .leftJoin(studentCode, eq(studentCode.userId, deviceProfile.studentId))
+        .where(windowOf(deviceId, studentId, chooseTokenHash, now));
+      return open !== undefined && !open.hash;
+    },
+
+    /**
+     * The student's first code, or a new one after a forgotten code: only by the page that holds
+     * the window's token, while it is open, and while they have none. `shared`: the student said the
+     * device is not theirs alone, which closes the sessions it held. False when no code was expected.
+     * Locks the code, then the device, then the profile: the order `claimTry` and `addProfile` keep.
+     */
+    async chooseCode(
+      deviceId: string,
+      studentId: string,
+      hash: string,
+      { chooseTokenHash, shared, now = new Date() }: { chooseTokenHash: string; shared: boolean; now?: Date },
+    ) {
       return db.transaction(async (tx) => {
         const [code] = await tx.select({ hash: studentCode.hash }).from(studentCode).where(eq(studentCode.userId, studentId)).for('update');
         if (code?.hash) return false;
+        const [held] = await tx.select({ shared: device.shared }).from(device).where(eq(device.id, deviceId)).for('update');
+        if (!held) return false;
         const [opened] = await tx
           .update(deviceProfile)
-          .set({ codeWindowUntil: null, failures: 0, lastUsedAt: now })
-          .where(and(eq(deviceProfile.deviceId, deviceId), eq(deviceProfile.studentId, studentId), gt(deviceProfile.codeWindowUntil, now)))
+          .set({ codeWindowUntil: null, chooseTokenHash: null, failures: 0 })
+          .where(windowOf(deviceId, studentId, chooseTokenHash, now))
           .returning({ studentId: deviceProfile.studentId });
         if (!opened) return false;
         await tx
           .insert(studentCode)
           .values({ userId: studentId, hash, setAt: now })
           .onConflictDoUpdate({ target: studentCode.userId, set: { hash, setAt: now, failures: 0 } });
-        if (shared) {
-          const [turned] = await tx
-            .update(device)
-            .set({ shared: true })
-            .where(and(eq(device.id, deviceId), eq(device.shared, false)))
-            .returning({ id: device.id });
-          if (turned) await closeSessionsOf(tx, deviceId, undefined);
+        if (shared && !held.shared) {
+          await tx.update(device).set({ shared: true }).where(eq(device.id, deviceId));
+          await closeSessionsOf(tx, deviceId, undefined);
         }
         return true;
       });
@@ -178,7 +208,8 @@ export function createStudentDevices(db: Db) {
 
     /**
      * A guardian's « forgotten » code, spent: the old code stops, every session of the student
-     * closes, the tries start again, and the student is told when it happened.
+     * closes, the windows other devices had open close, the tries start again, and the student is
+     * told when it happened.
      */
     async forget(studentId: string, now = new Date()) {
       await db.transaction(async (tx) => {
@@ -186,9 +217,36 @@ export function createStudentDevices(db: Db) {
           .insert(studentCode)
           .values({ userId: studentId, hash: null, resetAt: now })
           .onConflictDoUpdate({ target: studentCode.userId, set: { hash: null, failures: 0, resetAt: now } });
-        await tx.update(deviceProfile).set({ failures: 0 }).where(eq(deviceProfile.studentId, studentId));
+        await tx
+          .update(deviceProfile)
+          .set({ failures: 0, codeWindowUntil: null, chooseTokenHash: null })
+          .where(eq(deviceProfile.studentId, studentId));
         await tx.delete(session).where(eq(session.userId, studentId));
       });
+    },
+
+    /**
+     * Whether a session of `userId` on the device is a short one: the device is shared, or it holds
+     * profiles and the user is none of them, a guardian on their child's device. The child who takes
+     * it back never finds the guardian's space open.
+     */
+    async isShortSession(deviceId: string, userId: string) {
+      const [found] = await db
+        .select({
+          shared: device.shared,
+          profiles: sql<number>`(select count(*) from ${deviceProfile} where ${deviceProfile.deviceId} = ${device.id})`.mapWith(Number),
+          own: sql<number>`(select count(*) from ${deviceProfile} where ${deviceProfile.deviceId} = ${device.id} and ${deviceProfile.studentId} = ${userId})`.mapWith(
+            Number,
+          ),
+        })
+        .from(device)
+        .where(eq(device.id, deviceId));
+      return found !== undefined && (found.shared || (found.profiles > 0 && found.own === 0));
+    },
+
+    /** Ends a session, whoever's: the one a device carried when a guardian's code gave it to a child. */
+    async closeSession(token: string) {
+      await db.delete(session).where(eq(session.token, token));
     },
 
     /** Ties a session to the device it was opened on; on a shared one, it closes at `expiresAt`. */

@@ -175,8 +175,9 @@ reste attendu de better-auth (`etat.md`).
   plugin `studentSignIn`, foyer, écrans élève et parent, suppressions ; appareil partagé côté web
   (inactivité, onglets) ; doc. Tests serveur et web verts en local ; écrans vus dans Chrome
   (ajout de l'ordinateur, choix du code, changement de profil, blocage à 3 essais).
-- Prochaine étape : revue dans un contexte neuf, constats corrigés en nouveaux commits, puis le
-  dernier commit supprime ce plan ; attendre `ci-ok` ; ne pas merger (Victor vérifie dans Chrome).
+- PR #549 (brouillon). Revue faite ; constats corrigés dans le commit « fix » qui suit.
+- Prochaine étape : le dernier commit supprime ce plan ; attendre `ci-ok` ; ne pas merger (Victor
+  vérifie dans Chrome).
 
 ## Écarts à l'exécution (2026-10-20)
 
@@ -198,6 +199,19 @@ Chaque fois, l'option la plus sûre pour l'enfant, ou la seule que better-auth 1
 - **Réponses** : `/api/me/devices` rend `{ devices, codeResetAt }`, et
   `/api/household/students/:id/devices` `{ devices, code: { chosen, locked } }`.
 - **Code tapé deux fois** au premier choix : une faute de frappe bloquerait l'enfant.
+- **Revue** (constats corrigés) :
+  - la fenêtre de choix ne s'ouvre qu'à la page qui l'a demandée : `activate` et `add-profiles`
+    rendent un jeton à usage unique, haché sur `device_profile` (migration `0018`), que le web garde
+    en mémoire ; un frère qui touche le prénom ne choisit pas à la place de sa sœur ; un code
+    « oublié » ferme les fenêtres des autres appareils ;
+  - le choix vérifie d'abord la fenêtre, puis le code : un appareil sans fenêtre n'apprend pas le
+    mois de naissance ;
+  - le parent a une session courte sur l'appareil de son enfant aussi, et un code d'activation
+    ferme la session que l'appareil portait ;
+  - `last_used_at` retiré (migration `0017`) : le parent ne lit pas quand l'enfant entre ; un
+    appareil sans profil est supprimé ;
+  - verrous dans un seul ordre (code, appareil, profil) ; la garde renvoie l'élève à `/` ;
+  - le reste est dans `docs/etat.md`.
 - **Avis de code changé** : sur l'accueil de l'élève deux semaines, et toujours dans « Tes
   appareils ».
 - **Commits** : le serveur entier part avec les écrans du commit 3, chaque commit devant passer le

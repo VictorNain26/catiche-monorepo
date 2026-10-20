@@ -59,10 +59,11 @@ export const deviceProfile = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
     failures: integer('failures').notNull().default(0),
-    // Until then, a student without a code chooses one here.
+    // Until then, a student without a code chooses one here, by the page that holds this token:
+    // a brother or sister who touches the name meanwhile has it not. Hashed, single use.
     codeWindowUntil: timestamp('code_window_until', { withTimezone: true }),
+    chooseTokenHash: text('choose_token_hash'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-    lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
   },
   (table) => [primaryKey({ columns: [table.deviceId, table.studentId] }), index('device_profile_student_id_idx').on(table.studentId)],
 );

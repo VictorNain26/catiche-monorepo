@@ -50,15 +50,15 @@ const activationRequest = z.object({ reason: z.enum(['device', 'forgotten']) });
 
 /**
  * Before better-auth's handler: a signed-in student is refused every route but STUDENT_AUTH_PATHS.
- * A link opened on their device, a guardian's confirmation link say, goes to the sign-in page,
- * which says whose the device is; the API and the web share one origin.
+ * A link opened on their device, a guardian's confirmation link say, goes back to their own space;
+ * the API and the web share one origin.
  */
 export function studentAuthGuard({ auth, service }: { auth: Auth; service: HouseholdService }) {
   return createMiddleware<AppEnv>(async (c, next) => {
     if (!STUDENT_AUTH_PATHS.has(c.req.path)) {
       const session = await auth.api.getSession({ headers: c.req.raw.headers, query: { disableRefresh: true } });
       if (session && (await service.isStudent(session.user.id))) {
-        if (c.req.method === 'GET') return c.redirect('/connexion');
+        if (c.req.method === 'GET') return c.redirect('/');
         throw new Problem('FORBIDDEN');
       }
     }

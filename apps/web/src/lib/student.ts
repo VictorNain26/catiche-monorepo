@@ -19,6 +19,18 @@ export const profilesQuery = queryOptions({
 
 export const CODE_DIGITS = 6;
 
+// The tokens of the windows this tab opened to choose a code: in memory, never stored, so that a
+// brother or sister who later touches the name on the list cannot choose in the student's place.
+const chooseTokens = new Map<string, string>();
+
+/** The tokens the server gave this tab with a window to choose a code, by student. */
+export function keepChooseTokens(tokens: Record<string, string>) {
+  for (const [studentId, token] of Object.entries(tokens)) chooseTokens.set(studentId, token);
+}
+
+/** The token of the window this tab opened for the student, if it did. */
+export const chooseTokenFor = (studentId: string) => chooseTokens.get(studentId);
+
 /** The code once a key is pressed, on the screen's keypad or the keyboard: a digit up to six, or one taken back. */
 export function pressKey(code: string, key: string): string {
   if (key === 'Backspace') return code.slice(0, -1);

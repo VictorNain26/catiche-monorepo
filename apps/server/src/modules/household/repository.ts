@@ -4,7 +4,7 @@
  * (OWASP Authorization Cheat Sheet): a student of another household is simply not found.
  */
 
-import { and, desc, eq, gte, inArray, ne, type SQL, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, ne, notExists, type SQL, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { SchoolLevel } from '../../domain/levels';
 import type { MemoryAnswer } from '../../domain/memory-consent';
@@ -45,7 +45,6 @@ export function createHouseholdRepository(db: Db) {
         userAgent: device.userAgent,
         shared: device.shared,
         createdAt: deviceProfile.createdAt,
-        lastUsedAt: deviceProfile.lastUsedAt,
         blocked: gte(deviceProfile.failures, DEVICE_TRIES).mapWith(Boolean),
       })
       .from(deviceProfile)
@@ -193,7 +192,7 @@ export function createHouseholdRepository(db: Db) {
       return unblocked.length > 0;
     },
 
-    /** The device no longer holds the student: their profile there and its sessions go. `false` when no such profile. */
+    /** The device no longer holds the student: their profile there and its sessions go, the device too once empty. `false` when no such profile. */
     async removeDevice(guardianId: string, studentId: string, deviceId: string) {
       return db.transaction(async (tx) => {
         const removed = await tx
@@ -202,6 +201,15 @@ export function createHouseholdRepository(db: Db) {
           .returning({ deviceId: deviceProfile.deviceId });
         if (removed.length === 0) return false;
         await tx.delete(session).where(and(eq(session.userId, studentId), eq(session.deviceId, deviceId)));
+        // A device left without a profile keeps nothing, its browser included: its sessions go with it (ON DELETE CASCADE).
+        await tx
+          .delete(device)
+          .where(
+            and(
+              eq(device.id, deviceId),
+              notExists(tx.select({ deviceId: deviceProfile.deviceId }).from(deviceProfile).where(eq(deviceProfile.deviceId, deviceId))),
+            ),
+          );
         return true;
       });
     },

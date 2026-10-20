@@ -5,7 +5,16 @@ import { useState, type ReactNode } from 'react';
 import { CodePad } from '../components/code-pad';
 import { BackLink, Page } from '../components/page';
 import { authClient } from '../lib/auth';
-import { announceProfileChange, CODE_DIGITS, pressKey, profileNote, profilesQuery, studentCodeMessage, tabChannel } from '../lib/student';
+import {
+  announceProfileChange,
+  chooseTokenFor,
+  CODE_DIGITS,
+  pressKey,
+  profileNote,
+  profilesQuery,
+  studentCodeMessage,
+  tabChannel,
+} from '../lib/student';
 
 /**
  * One profile of this device: its student types their code, or chooses it the first time, twice,
@@ -27,13 +36,18 @@ function Profile() {
 
   const back = <BackLink to="/profils">Pas toi ? Changer</BackLink>;
   if (profile.state === 'ready') return <EnterCode studentId={studentId} name={profile.name} back={back} />;
-  if (profile.state === 'choose') return <ChooseCode studentId={studentId} name={profile.name} shared={data.shared} back={back} />;
+  // The code is chosen in the tab the parent's code was typed in, which holds the window's token.
+  const token = chooseTokenFor(studentId);
+  if (profile.state === 'choose' && token) {
+    return <ChooseCode studentId={studentId} name={profile.name} shared={data.shared} token={token} back={back} />;
+  }
+  const state = profile.state === 'choose' ? 'waiting' : profile.state;
   return (
     <Page title={profile.name} back={back}>
-      <Banner tone="warning" title={profileNote(profile.state) ?? ''}>
-        {profile.state === 'waiting'
+      <Banner tone="warning" title={profileNote(state) ?? ''}>
+        {state === 'waiting'
           ? 'Ton parent obtient dans son espace un code pour cet appareil. Tu choisiras alors ton code.'
-          : profile.state === 'blocked'
+          : state === 'blocked'
             ? 'Trop d’essais sur cet appareil. Ton parent peut le débloquer depuis son espace.'
             : 'Trop d’essais : ton code ne marche plus. Ton parent te donne un code pour en choisir un nouveau.'}
       </Banner>
@@ -99,7 +113,8 @@ type Step = { kind: 'first' } | { kind: 'again'; first: string } | { kind: 'devi
  * The first code: chosen, typed again so that a slip does not lock the student out, then whether
  * the device is theirs alone. A device already shared asks nothing.
  */
-function ChooseCode({ studentId, name, shared, back }: { studentId: string; name: string; shared: boolean; back: ReactNode }) {
+function ChooseCode({ studentId, name, shared, token, back }: { studentId: string; name: string; shared: boolean; token: string; back: ReactNode }) {
+  const queryClient = useQueryClient();
   const entered = useEntered();
   const [step, setStep] = useState<Step>({ kind: 'first' });
   const [code, setCode] = useState('');
@@ -109,11 +124,13 @@ function ChooseCode({ studentId, name, shared, back }: { studentId: string; name
   const send = async (chosen: string, ownDevice: boolean) => {
     setSending(true);
     setFailure(null);
-    const { error } = await authClient.student.chooseCode({ studentId, code: chosen, ownDevice });
+    const { error } = await authClient.student.chooseCode({ studentId, code: chosen, ownDevice, chooseToken: token });
     if (!error) return entered();
     setSending(false);
     setStep({ kind: 'first' });
     setFailure(studentCodeMessage(error));
+    // The window closed meanwhile: the screen says whom to ask.
+    if (error.code === 'CODE_NOT_EXPECTED') await queryClient.invalidateQueries({ queryKey: profilesQuery.queryKey });
   };
 
   /** Six digits typed: the next step. */

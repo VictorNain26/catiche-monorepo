@@ -1,0 +1,1 @@
+ALTER TABLE "device_profile" ADD COLUMN "choose_token_hash" text;

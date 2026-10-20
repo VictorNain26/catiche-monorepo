@@ -141,6 +141,34 @@ describe('a shared device', () => {
   });
 });
 
+describe("a guardian on their child's own device", () => {
+  it('gets a short session there too: the child who takes the device back never finds it open', async () => {
+    const { lea, recognise } = await family('sur-sa-tablette@example.com');
+    const tablet = api.device();
+    await recognise(tablet, lea.id);
+    await tablet.chooseCode(lea.id, STUDENT_CODE, true);
+    expect((await tablet.profiles()).shared).toBe(false);
+
+    const res = await tablet.signIn('sur-sa-tablette@example.com');
+    expect(sessionCookie(res)).not.toContain('Max-Age');
+    const guardianId = (await api.sessionUser(tablet.cookie()))?.id ?? '';
+    const [short] = (await sessionsOf(guardianId)).filter(({ deviceId }) => deviceId !== null);
+    expect((short?.expiresAt.getTime() ?? 0) - Date.now()).toBeLessThanOrEqual(10 * MINUTE);
+  });
+
+  it('loses the session the device carried when a code recognises it for the child', async () => {
+    const { lea } = await family('mon-telephone-pour-lea@example.com');
+    const phone = api.device();
+    await phone.signIn('mon-telephone-pour-lea@example.com');
+    const guardianId = (await api.sessionUser(phone.cookie()))?.id ?? '';
+    const before = (await sessionsOf(guardianId)).length;
+
+    expect((await phone.activate(await api.activationCode(phone.cookie(), lea.id))).status).toBe(200);
+    expect(await api.sessionUser(phone.cookie())).toBeUndefined();
+    expect(await sessionsOf(guardianId)).toHaveLength(before - 1);
+  });
+});
+
 describe('signing out', () => {
   it("closes the session and keeps the device's profiles", async () => {
     const { lea, tom, recognise } = await family('deconnexion@example.com');

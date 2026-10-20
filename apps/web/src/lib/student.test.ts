@@ -1,12 +1,19 @@
 import { describe, expect, it } from 'bun:test';
-import { announceProfileChange, CODE_DIGITS, listenForProfileChange, pressKey, profileNote, studentCodeMessage } from './student';
+import {
+  announceProfileChange,
+  chooseTokenFor,
+  keepChooseTokens,
+  listenForProfileChange,
+  pressKey,
+  profileNote,
+  studentCodeMessage,
+} from './student';
 
 describe('pressKey', () => {
   it('adds a digit, up to six', () => {
     expect(pressKey('', '4')).toBe('4');
     expect(pressKey('48291', '7')).toBe('482917');
     expect(pressKey('482917', '3')).toBe('482917');
-    expect(CODE_DIGITS).toBe(6);
   });
 
   it('takes back the last digit, and nothing from an empty code', () => {
@@ -47,6 +54,14 @@ describe('studentCodeMessage', () => {
     for (const code of ['INVALID_CODE', 'PROFILE_BLOCKED', 'PROFILE_LOCKED', 'CODE_TOO_EASY', 'INVALID_ACTIVATION_CODE']) {
       expect(studentCodeMessage({ code, status: 400 })).not.toMatch(/\bvous\b|\bvotre\b|enfant/i);
     }
+  });
+});
+
+describe('the token of a window to choose a code', () => {
+  it('stays with the tab that opened the window, for that student only', () => {
+    keepChooseTokens({ lea: 'jeton-de-lea' });
+    expect(chooseTokenFor('lea')).toBe('jeton-de-lea');
+    expect(chooseTokenFor('tom')).toBeUndefined();
   });
 });
 

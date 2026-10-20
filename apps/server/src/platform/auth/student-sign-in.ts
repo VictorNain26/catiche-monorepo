@@ -25,7 +25,8 @@ import { runWithTransaction } from '@better-auth/core/context';
 import { generateId } from '@better-auth/core/utils/id';
 import type { BetterAuthPlugin } from 'better-auth';
 import { APIError, createAuthEndpoint, createAuthMiddleware, freshSessionMiddleware } from 'better-auth/api';
-import { expireCookie, setSessionCookie } from 'better-auth/cookies';
+import { deleteSessionCookie, expireCookie, setSessionCookie } from 'better-auth/cookies';
+import { createHash } from 'node:crypto';
 import { makeSignature } from 'better-auth/crypto';
 import { z } from 'zod';
 import { studentCodeRefusal } from '../../domain/student-code';
@@ -81,6 +82,9 @@ export async function createActivationCode(auth: Auth, userId: string, reason: A
   return { code, expiresAt };
 }
 
+/** The window's token as the profile keeps it: a SHA-256, the token itself being 190 random bits. */
+const hashToken = (token: string) => createHash('sha256').update(token).digest('base64url');
+
 const activation = z.object({ userId: z.string(), reason: z.enum(['device', 'forgotten']) });
 
 /** When a session on a shared device closes: ten minutes from now, never past two hours from its opening. */
@@ -123,6 +127,17 @@ export function studentSignIn({ devices, students }: { devices: StudentDevices; 
   let decoy: Promise<string> | undefined;
 
   /**
+   * A window to choose a code, for the page that opened it alone: the token goes to that page, its
+   * hash to the profile. A brother or sister who touches the name on the list has it not.
+   */
+  const openWindow = async (deviceId: string, studentId: string, options: { shared: boolean; keep?: string | undefined }) => {
+    const chooseToken = generateId(32);
+    const windowUntil = new Date(Date.now() + ACTIVATION_MINUTES * MINUTE);
+    await devices.addProfile(deviceId, studentId, { windowUntil, chooseTokenHash: hashToken(chooseToken), ...options });
+    return chooseToken;
+  };
+
+  /**
    * Opens the student's session on the device, in place of the one the request carried, whoever's:
    * a device given to a child keeps no guardian session. Short on a shared device.
    */
@@ -162,9 +177,15 @@ export function studentSignIn({ devices, students }: { devices: StudentDevices; 
             throw APIError.from('BAD_REQUEST', { code: 'INVALID_ACTIVATION_CODE', message: 'Invalid or expired code' });
           }
           if (spent.reason === 'forgotten') await devices.forget(spent.userId);
+          // The device goes to the child: a session it carried, a guardian's say, ends with it.
+          const carried = await ctx.getSignedCookie(ctx.context.authCookies.sessionToken.name, ctx.context.secret);
+          if (carried) {
+            await devices.closeSession(carried);
+            deleteSessionCookie(ctx);
+          }
           const device = await ensureDevice(ctx);
-          await devices.addProfile(device.id, spent.userId, { windowUntil: new Date(Date.now() + ACTIVATION_MINUTES * MINUTE), shared: false });
-          return ctx.json({ studentId: spent.userId });
+          const chooseToken = await openWindow(device.id, spent.userId, { shared: false });
+          return ctx.json({ studentId: spent.userId, chooseToken });
         },
       ),
 
@@ -176,21 +197,26 @@ export function studentSignIn({ devices, students }: { devices: StudentDevices; 
       }),
 
       /**
-       * The student's code, chosen while the window a guardian's code opened lasts and while they
-       * have none: it opens their session. `ownDevice` false makes the device shared.
+       * The student's code, chosen by the page that holds the window's token, while the window lasts
+       * and while they have none: it opens their session. `ownDevice` false makes the device shared.
+       * Whether a code is expected is read first: a page without the window learns nothing more.
        */
       chooseStudentCode: createAuthEndpoint(
         '/student/choose-code',
-        { method: 'POST', body: z.object({ studentId: z.string().max(64), code: studentCodeSchema, ownDevice: z.boolean() }) },
+        {
+          method: 'POST',
+          body: z.object({ studentId: z.string().max(64), code: studentCodeSchema, ownDevice: z.boolean(), chooseToken: z.string().max(64) }),
+        },
         async (ctx) => {
-          const { studentId, code, ownDevice } = ctx.body;
+          const { studentId, code, ownDevice, chooseToken } = ctx.body;
           const device = await requestDevice(ctx);
           const notExpected = APIError.from('FORBIDDEN', { code: 'CODE_NOT_EXPECTED', message: 'No code is to be chosen here' });
-          if (!device) throw notExpected;
+          const chooseTokenHash = hashToken(chooseToken);
+          if (!device || !(await devices.mayChoose(device.id, studentId, chooseTokenHash))) throw notExpected;
           const refusal = studentCodeRefusal(code, (await students.birthMonth(studentId)) ?? '');
           if (refusal) throw APIError.from(REFUSALS[refusal].status, REFUSALS[refusal]);
           const hash = await ctx.context.password.hash(await peppered(ctx, code));
-          if (!(await devices.chooseCode(device.id, studentId, hash, { shared: !ownDevice }))) throw notExpected;
+          if (!(await devices.chooseCode(device.id, studentId, hash, { chooseTokenHash, shared: !ownDevice }))) throw notExpected;
           return openSession(ctx, studentId, device.id, device.shared || !ownDevice);
         },
       ),
@@ -239,26 +265,27 @@ export function studentSignIn({ devices, students }: { devices: StudentDevices; 
               throw APIError.from('NOT_FOUND', { code: 'NOT_FOUND', message: 'Not found' });
           }
           const device = await ensureDevice(ctx);
-          const windowUntil = new Date(Date.now() + ACTIVATION_MINUTES * MINUTE);
+          const chooseTokens: Record<string, string> = {};
           for (const studentId of ctx.body.studentIds)
-            await devices.addProfile(device.id, studentId, { windowUntil, shared: true, keep: session.token });
+            chooseTokens[studentId] = await openWindow(device.id, studentId, { shared: true, keep: session.token });
           const deadline = sharedDeadline(new Date(), new Date());
           await devices.attachSession(session.token, device.id, deadline);
           await setSessionCookie(ctx, { session: { ...session, expiresAt: deadline }, user: ctx.context.session.user }, true);
-          return ctx.json({ shared: true });
+          return ctx.json({ shared: true, chooseTokens });
         },
       ),
     },
     hooks: {
       after: [
         {
-          // A guardian entering on a recognised device: the session is the device's, short on a shared one.
+          // A guardian entering on a recognised device: the session is the device's, short on a
+          // shared one or on their child's, so that the child who takes it back never finds it open.
           matcher: (ctx) => ctx.path === '/sign-in/email-otp' || ctx.path === '/passkey/verify-authentication',
           handler: createAuthMiddleware(async (ctx) => {
             const created = ctx.context.newSession;
             const device = created ? await requestDevice(ctx) : undefined;
             if (!created || !device) return;
-            if (!device.shared) {
+            if (!(await devices.isShortSession(device.id, created.user.id))) {
               await devices.attachSession(created.session.token, device.id, undefined);
               return;
             }
@@ -269,17 +296,18 @@ export function studentSignIn({ devices, students }: { devices: StudentDevices; 
           }),
         },
         {
-          // A session on a shared device in use: ten more minutes, never past two hours from its opening.
+          // A short session in use: ten more minutes, never past two hours from its opening.
           matcher: (ctx) => ctx.path === '/get-session',
           handler: createAuthMiddleware(async (ctx) => {
             const returned: unknown = ctx.context.returned;
             const read = z
               .object({
                 session: z.object({ token: z.string(), deviceId: z.string().nullish(), createdAt: z.coerce.date(), expiresAt: z.coerce.date() }),
+                user: z.object({ id: z.string() }),
               })
               .safeParse(returned);
             const deviceId = read.success ? read.data.session.deviceId : undefined;
-            if (!read.success || !deviceId || !(await devices.findDevice(deviceId))?.shared) return;
+            if (!read.success || !deviceId || !(await devices.isShortSession(deviceId, read.data.user.id))) return;
             const { token, createdAt, expiresAt } = read.data.session;
             const deadline = sharedDeadline(createdAt, new Date());
             if (Math.abs(deadline.getTime() - expiresAt.getTime()) < MINUTE) return;

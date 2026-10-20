@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
-import { account, deviceProfile, session, user } from '../../platform/auth/schema';
+import { account, device as deviceTable, deviceProfile, session, user } from '../../platform/auth/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { birthMonthAged, STUDENT_CODE, type Student } from '../../testing/http';
@@ -164,7 +164,8 @@ describe('a guardian creates a student', () => {
 const devicesClient = client();
 const devicesGuardian = await devicesClient.guardian('appareils@example.com');
 
-const DEVICE_FIELDS = ['blocked', 'createdAt', 'id', 'lastUsedAt', 'shared', 'userAgent'];
+// Never when the child last entered there: the guardian reads a device, not a schedule.
+const DEVICE_FIELDS = ['blocked', 'createdAt', 'id', 'shared', 'userAgent'];
 
 describe("a student's devices", () => {
   const api = devicesClient;
@@ -206,6 +207,13 @@ describe("a student's devices", () => {
     expect(await api.sessionUser(device)).toBeUndefined();
     expect((await api.devices(guardian, student.id)).devices).toEqual([]);
     expect(await db.select().from(deviceProfile).where(eq(deviceProfile.studentId, student.id))).toEqual([]);
+    // The device holds no profile now: nothing of it, its browser included, stays behind.
+    expect(
+      await db
+        .select()
+        .from(deviceTable)
+        .where(eq(deviceTable.id, held?.id ?? '')),
+    ).toEqual([]);
   });
 
   it('show the student their own devices, however long ago they were recognised', async () => {
@@ -287,10 +295,10 @@ describe("a student, through better-auth's own routes", () => {
     expect(await db.select().from(account).where(eq(account.userId, student.id))).toEqual([]);
   });
 
-  it('sends a link opened on their device to the sign-in page, which says whose the device is', async () => {
+  it('sends a link opened on their device back to their own space', async () => {
     const res = await api.request('GET', '/api/auth/verify-email?token=un-lien-du-parent&callbackURL=/', { cookie });
     expect(res.status).toBe(302);
-    expect(res.headers.get('location')).toBe('/connexion');
+    expect(res.headers.get('location')).toBe('/');
   });
 
   it('still reads their session and signs out', async () => {

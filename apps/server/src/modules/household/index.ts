@@ -45,7 +45,7 @@ export type StudentDirectory = ReturnType<typeof studentDirectory>;
 export function studentAccess(db: Db): StudentAccess {
   const repository = createHouseholdRepository(db);
   return {
-    inHousehold: async (guardianId, studentId) => (await repository.findStudent(guardianId, studentId)) !== undefined,
+    inHousehold: studentDirectory(db).inHousehold,
     birthMonth: async (studentId) => (await repository.findProfile(studentId))?.birthMonth ?? null,
   };
 }
