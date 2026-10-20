@@ -9,9 +9,12 @@ paths:
 Vitrine marketing et SEO, statique, en Astro 7, servie par Caddy dans une application statique
 Clever Cloud (`apps/landing/Caddyfile`).
 
-- **Elle est gelée jusqu'à la nouvelle direction** : elle porte déjà les tokens et les fontes
-  de Rive (`@repo/tokens/theme.css`) ; d'ici là, seuls ces tokens et des correctifs d'honnêteté
-  ou techniques y entrent, pas de nouvelle section. Elle mènera à l'app par un simple lien.
+- **Elle est gelée jusqu'à sa réécriture sur `docs/produit.md`** : elle porte déjà les tokens
+  et les fontes de Rive (`@repo/tokens/theme.css`) ; d'ici là, seuls ces tokens et des
+  correctifs d'honnêteté ou techniques y entrent, pas de nouvelle section. Elle mènera à l'app
+  par un simple lien.
+- Jamais un mot de soin (« symptômes », « rééduquer », « compenser », « traiter ») ni « pour les
+  TDAH » ou « pour les dys » : la raison est dans `docs/produit.md`, « Ce qu'on dit ».
 - **On n'affirme que ce qu'on peut prouver** : chaque chiffre a une source
   primaire datée, chaque différence face à un concurrent est mesurée, ce qui n'est pas construit
   ne se promet pas. Une phrase qu'on ne peut adosser à une source ou à une mesure se retire.

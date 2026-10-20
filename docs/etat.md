@@ -47,13 +47,17 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-19 ; ce qui 
 - Le préfixe `__Host-` des cookies, quand better-auth le livre
   ([#10806](https://github.com/better-auth/better-auth/issues/10806)).
 
+## Prochain chantier
+
+- La soirée de devoirs à l'oral (`produit.md`). Le micro, que la `Permissions-Policy` du serveur
+  ferme (`platform/http/security-headers.ts`), s'ouvre à `self` ; la transcription impose le
+  français.
+
 ## Technique reporté
 
 - Les formules de Tom : sur Chrome de bureau, chaque formule montre des flèches de défilement
   vertical, son conteneur (`[&_.katex]:overflow-x-auto`, `components/tom-text.tsx`) débordant de
   6 px en hauteur.
-- Voix : le micro, que la `Permissions-Policy` du serveur ferme
-  (`platform/http/security-headers.ts`), à ouvrir à `self` ; la transcription impose le français.
 - Mémoire : les 1 053 libellés du référentiel restent ceux du programme (« Il utilise… ») ; leur
   réécriture dans les mots de l'élève demande une relecture de Victor avant tout élève réel.
 - Harnais : la mesure de référence (11 fuites sur 106 conversations, commit `2f8aeed8`, avant le

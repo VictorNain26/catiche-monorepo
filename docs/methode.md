@@ -1,8 +1,7 @@
 # La méthode d'une soirée de devoirs
 
 Fiche du 2026-10-20 : les gestes que les programmes évalués font faire à un élève qui peine à
-s'organiser, et ce que Tom en reprendrait. Elle sert la piste « coach des devoirs qui apprend
-l'organisation », que Victor n'a pas encore tranchée.
+s'organiser, et ce que Tom en reprendrait, pour la direction de `produit.md`.
 
 Provenance : **(T)** texte lu en entier, **(Rés.)** seulement le résumé publié de l'article,
 **(R)** page lue par un outil qui la résume. On reprend les idées, jamais les textes, les écrans
