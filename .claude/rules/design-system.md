@@ -34,8 +34,9 @@ l'app. Les composants ne dépendent de l'identité que par les rôles.
 - Aucune cible tactile sous 44 px, aucun défilement horizontal à largeur de téléphone, aucune
   animation qui ignore le mouvement réduit.
 - Aucune primitive interactive hors de Base UI (`@base-ui/react` : dialogue, toast, onglets, menu),
-  toasts compris : une seule famille dans `@repo/ui`, et aucune qui écrive une balise `<style>`, que la CSP stricte refuserait : ni ScrollArea ni Select
-  de Base UI, qui en écrivent une (`utils/styles.js`), ni le dialogue de Radix ni `sonner`.
+  toasts compris : une seule famille dans `@repo/ui`, et aucune qui écrive une balise `<style>`,
+  que la CSP stricte refuserait : ni ScrollArea ni Select de Base UI, qui en écrivent une
+  (`utils/styles.js`), ni le dialogue de Radix ni `sonner`.
 - Aucun graphique en anneau, en camembert ou en 3D, aucune couleur seule porteuse d'une
   information, aucun graphique sans sa phrase et son tableau de valeurs.
 - Aucune arche ailleurs que derrière Tom, sur le haut du site et à l'entrée de l'app.
