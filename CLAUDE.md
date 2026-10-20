@@ -1,19 +1,23 @@
 # Monorepo Catiche
 
-Catiche : un tuteur IA des devoirs pour collégiens, Tom, et un tableau de bord pour le parent.
+Catiche : un coach des devoirs qui apprend au collégien à s'organiser, avec Tom (direction :
+`docs/produit.md`). Construit : le tuteur et un résumé de la semaine pour le parent.
 
 ## Carte
 
-- La direction du produit est à redéfinir (page blanche du 2026-10-19) ; on n'affirme que ce
-  qu'on peut prouver. Ce qui existe déjà : `docs/concurrence.md`, analyse datée, jamais mise à
-  jour. La méthode d'une soirée de devoirs, tirée des programmes évalués : `docs/methode.md`.
+Dans l'ordre de lecture ; on n'affirme que ce qu'on peut prouver.
+
+- La direction, pour qui et pourquoi : `docs/produit.md`.
+- La méthode d'une soirée, tirée des programmes évalués : `docs/methode.md`.
+- Ce qui existe déjà : `docs/concurrence.md`, analyse datée ; un complément s'y ajoute en
+  section datée, rien ne s'y réécrit.
 - Ce qui est en place, et comment : `docs/architecture.md` ; le tuteur : `docs/tuteur.md` ;
   l'identité : `docs/charte.md`.
 - **Bloquants, gestes de Victor, technique reporté, surveillance : `docs/etat.md`**, à lire avant
   de reprendre et à mettre à jour dans la PR qui en change un point.
 - Une décision de Victor entre, dans la PR qui la suit, dans le document qui porte son sujet
-  (`architecture.md`, `tuteur.md`, `charte.md`, `etat.md`), jamais seulement dans une mémoire
-  d'agent.
+  (`produit.md`, `architecture.md`, `tuteur.md`, `charte.md`, `etat.md`), jamais seulement dans
+  une mémoire d'agent.
 - Stack, structure, démarrage : `README.md`. Règles d'une partie du code :
   `.claude/rules/<sujet>.md`, chargées sur ses chemins. Les règles valables pour tous les projets
   (TDD, tests, plan, revue) sont dans `~/.claude/` et ne se répètent pas ici.
@@ -27,8 +31,8 @@ change (Postgres de `docker compose` requis). Formatage : `bun run format`.
 
 - La landing n'appelle jamais le serveur, ni l'auth : `apps/web` est le seul client produit ; elle
   y mène par un simple lien.
-- Rien n'entre dans la landing en ligne jusqu'à la nouvelle direction, sauf les tokens de la
-  charte, un correctif d'honnêteté ou technique (`.claude/rules/landing.md`).
+- Rien n'entre dans la landing en ligne avant sa réécriture sur `docs/produit.md`, sauf les
+  tokens de la charte, un correctif d'honnêteté ou technique (`.claude/rules/landing.md`).
 - Jamais un écran construit sans la charte : il est composé au téléphone et à l'ordinateur, pas
   une colonne de boutons.
 - Jamais de push sur `main` : une branche courte, puis une PR, mergée en merge commit (le squash

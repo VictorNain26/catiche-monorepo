@@ -1,8 +1,9 @@
 # Catiche
 
-Tuteur IA pour les devoirs des collégiens (6e à 3e) : il aide l'élève à trouver sans
-faire l'exercice à sa place, et le parent a un tableau de bord de la semaine, jamais les
-conversations. Pré-lancement : aucun utilisateur réel. Staging : https://staging.tomia.fr ;
+Coach des devoirs qui apprend au collégien à s'organiser (`docs/produit.md`), de la 6e à la
+3e : il l'aide à faire son travail sans le faire à sa place. Construit aujourd'hui : le
+tuteur qui aide sur le contenu, et un résumé de la semaine pour le parent, jamais les
+conversations. Pré-lancement : aucun utilisateur réel. Staging : https://staging.tomia.fr ;
 landing : https://tomia.fr.
 
 ## Démarrage
@@ -77,7 +78,8 @@ gratuit plafonne le débit).
 instructions destinées aux agents, et `.claude/rules/` celles qui ne valent que pour une
 partie du code, chargées sur ses chemins.
 
-Dans `docs/` : [architecture](./docs/architecture.md) (ce qui est en place) ·
-[tuteur IA](./docs/tuteur.md) · [charte](./docs/charte.md) · [état](./docs/etat.md)
-(bloquants, points ouverts, surveillance) · [concurrence](./docs/concurrence.md) (analyse datée) ·
-[méthode](./docs/methode.md) (la soirée de devoirs, d'après les programmes évalués).
+Dans `docs/`, dans l'ordre de lecture : [produit](./docs/produit.md) (la direction) ·
+[méthode](./docs/methode.md) (la soirée de devoirs, d'après les programmes évalués) ·
+[concurrence](./docs/concurrence.md) (analyse datée) · [architecture](./docs/architecture.md)
+(ce qui est en place) · [tuteur IA](./docs/tuteur.md) · [charte](./docs/charte.md) ·
+[état](./docs/etat.md) (bloquants, points ouverts, surveillance).

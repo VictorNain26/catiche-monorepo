@@ -1,6 +1,7 @@
 # Tuteur IA (Tom)
 
-Comment Tom aide, ce que le code garantit, et ce qui reste à construire, marqué comme tel.
+Comment Tom aide sur le contenu, ce que le code garantit, et ce qui reste à construire, marqué
+comme tel. La soirée qui l'entoure : `produit.md` et `methode.md`.
 
 ## 1. Principes
 

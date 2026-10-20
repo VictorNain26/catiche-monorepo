@@ -1,8 +1,7 @@
 # La méthode d'une soirée de devoirs
 
 Fiche du 2026-10-20 : les gestes que les programmes évalués font faire à un élève qui peine à
-s'organiser, et ce que Tom en reprendrait. Elle sert la piste « coach des devoirs qui apprend
-l'organisation », que Victor n'a pas encore tranchée.
+s'organiser, et ce que Tom en reprendrait, pour la direction de `produit.md`.
 
 Provenance : **(T)** texte lu en entier, **(Rés.)** seulement le résumé publié de l'article,
 **(R)** page lue par un outil qui la résume. On reprend les idées, jamais les textes, les écrans
@@ -98,8 +97,8 @@ Des mesures déjà validées, plutôt qu'un score maison :
   primaire. La réplication de HOPS d'où viennent les gestes du tableau [7] accueille les élèves
   quel que soit leur diagnostic, et n'a pas encore de résultat.
 - **Le contenu exact des séances.** Il est dans les manuels de HOPS et d'OST, non lus ici.
-- **Un effet de soin.** Le produit dit « apprendre à s'organiser », jamais « réduire les
-  symptômes » ni « rééduquer » : ces mots le feraient basculer en dispositif médical.
+- **Un effet de soin** : les mots à éviter et leur raison sont dans `produit.md`, « Ce qu'on
+  dit, et ce qu'on ne dit pas ».
 
 ## Sources
 

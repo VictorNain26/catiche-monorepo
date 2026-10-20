@@ -3,7 +3,8 @@
 Analyse du 2026-10-19.
 
 Méthode : recherche web et lecture des pages des éditeurs, des fiches App Store France et de la
-presse. Toutes les URL ont été consultées le 2026-10-19. Chaque fait porte sa provenance : **(É)**
+presse. Toutes les URL ont été consultées le 2026-10-19, sauf celles d'une section datée, consultées à
+sa date. Chaque fait porte sa provenance : **(É)**
 affirmé par l'éditeur, **(S)** affiché par l'App Store France (notes agrégées par Apple), **(P)**
 rapporté par la presse ou un tiers. « Non trouvé » signifie absent des pages lues, pas inexistant.
 
@@ -137,9 +138,58 @@ Faits relevés sur les pages lues, sans conclusion.
   ([conditions](https://legal.mistral.ai/terms/commercial-terms-of-service)).
 - **Prix incohérents** : Synthesis affiche des montants différents sur une même page.
 
+## Pronote et les logiciels de vie scolaire (2026-10-19)
+
+- **Index Éducation sur Papillon** : « Cette pratique n'est pas illégale en soi », parce que
+  l'utilisateur saisit lui-même ses identifiants « et aussi par le fait que Papillon n'a pas de
+  finalité commerciale ». L'éditeur lui reproche de traiter les données scolaires « pour
+  d'autres finalités que celles décidées par le chef d'établissement » (É,
+  [article](https://www.index-education.com/fr/article-1760-recommandations-relatives-a-l-application-papillon.php)).
+- **Les partenaires « IA » de Pronote** : Pronote et École Directe ne transmettent à Eliott que
+  « identité, établissement, classe » (É,
+  [confidentialité](https://www.eliott.app/politique-de-confidentialite)). Logbook s'en sert
+  pour « une authentification facilitée » (É, [site](https://www.logbook.education/)). Aucun ne
+  reçoit les devoirs. Le partenaire doit être « une entreprise », sous convention avec Index
+  Éducation, activée par chaque établissement (É,
+  [CGVU 2026](https://www.index-education.com/contenu/telechargement/doc/CGVU-INDEX-EDUCATION-2026.pdf)).
+- **Le propriétaire de la plateforme ajoute le tuteur** : depuis le 10 août 2026, l'élève de
+  Google Classroom choisit « Learn with Gemini » sur un devoir à rendre, avec sa consigne et ses
+  supports en contexte ; l'onglet Gemini est actif par défaut, sauf si l'administrateur le coupe (É,
+  [Google](https://workspaceupdates.googleblog.com/2026/08/gemini-in-google-classroom-is-expanding-to-users-of-all-ages-with-contextualized-Gemini-starter-prompts-for-students.html)).
+  Les nouveautés de Pronote 2026 ne citent aucune IA (É,
+  [nouveautés](https://docs.index-education.com/docs_fr/fr-pronote-support-fiche-1856-7228-nouveautes-et-evolutions-de-pronote-2026.php)).
+  Index Éducation et Polytechnique mènent OrienteXpress, un projet de recherche qui analysera par
+  IA des données anonymisées de Pronote (notes, absences, options) pour l'orientation ; premières
+  expérimentations dans une académie d'ici 2027 (É,
+  [communiqué](https://www.polytechnique.edu/sites/default/files/content/communiques/fichiers/2025-11/20251120_Docaposte-EcolePolytechnique.pdf)).
+
+## Le créneau de l'organisation (2026-10-20)
+
+Le coach qui accompagne la soirée de devoirs, et non un tuteur des matières.
+
+- **PANDAH** (CHU et Université de Nantes) : une application pour les enfants avec un TDAH,
+  qui les aide « avant, pendant et après » les devoirs, accessible seulement dans une étude
+  (É, [CGU](https://irealite.com/pandah/CGU-pandah.pdf)). Sans conversation ni aide sur le
+  contenu sur les pages lues. L'âge, l'essai et son absence de résultat : `methode.md` [6].
+- **Tiimo** (Danemark) : agenda visuel en français, avec une IA qui crée, priorise et découpe
+  les tâches ; de 4,99 € à 44,99 € en achats intégrés ; pas centré sur les devoirs (S,
+  [App Store](https://apps.apple.com/fr/app/tiimo/id1480220328)).
+- **Goblin Tools** (Belgique) : découpe une tâche en étapes ; site gratuit, Pro à 3,99 €/mois
+  (S, [App Store](https://apps.apple.com/fr/app/id6449003064)).
+- **Joon** (États-Unis) : routines en jeu pour les 6-12 ans, 12,99 $/mois (É,
+  [site](https://www.joonapp.io/)) ; son essai NCT06447909 n'a pas de résultat publié.
+- **Alongside** (États-Unis) : guide IA des fonctions exécutives, vendu aux écoles (É,
+  [site](https://www.alongside.care/learn/personalized-support-for-executive-function-the-foundation-of-student-achievement)).
+- **Klixo** (France) : plateforme d'exercices de devoirs, avec des exercices créés par une IA en
+  Premium ; des entrées payantes « Heure des devoirs » et « Contrôle bientôt », non décrites
+  (É, [site](https://klixo.fr/)).
+
+Sur les pages lues, aucun produit grand public n'accompagne en français la soirée de devoirs
+d'un collégien du début à la fin.
+
 ## Limites de cette analyse
 
-- Une seule personne, une seule journée, des recherches en anglais et en français ; plusieurs
+- Une seule personne, deux journées (2026-10-19 et 2026-10-20), des recherches en anglais et en français ; plusieurs
   pages ont répondu en 403 (OpenAI, Quizlet, Superprof) ou 404 (confidentialité Kartable).
 - Les pages ont été lues au travers d'un outil qui résume ; les citations sont reprises de ce
   résumé et pas d'une capture.
