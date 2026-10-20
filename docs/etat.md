@@ -71,8 +71,18 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
   applications et dépôt renommés, variables du staging, anciens domaines détachés. Reste, par
   Victor : supprimer l'image GHCR `tomai-server` (Settings du paquet sur GitHub) ; l'ancien
   domaine expire seul le 24 août 2027.
-- Ensuite, l'application (`produit.md`, « Ce que devient l'existant »), puis la soirée de devoirs
-  à l'oral (`produit.md`). Le micro, que la `Permissions-Policy` du serveur
+- **L'ordre décidé par Victor (2026-10-20)**, un chantier après l'autre :
+  1. **La restructuration de la landing** : le plan est écrit, il attend la validation de Victor
+     et ses réponses (une section « qui fait Catiche », sombre ou clair, le libellé du bouton).
+  2. **La refonte de l'application**, pensée depuis le parent et l'enfant réels. Il faut d'abord
+     un parcours et des textes validés, puis l'écran à l'ordinateur comme au téléphone. Un
+     inventaire des écrans actuels est fait : vocabulaire technique, colonne unique, doublons,
+     écarts à la charte.
+  3. **La soirée de devoirs à l'oral et le point du soir** (`produit.md`), avec le volet IA.
+- **À vérifier, relevé par l'inventaire** : le résumé montre au parent « Ce qui résiste » même
+  quand l'enfant a refusé la mémoire, alors que `/memoire` dit le contraire
+  (`core/week-summary.ts`, `routes/memoire.tsx` du web).
+- Pour la soirée : le micro, que la `Permissions-Policy` du serveur
   ferme (`platform/http/security-headers.ts`), s'ouvre à `self` ; la transcription impose le
   français.
 
