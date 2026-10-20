@@ -9,10 +9,8 @@ const MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`Prévenez-
 
 <section id="prevenu" class="scroll-mt-20 py-16 lg:py-24">
   <FadeIn class="container max-w-3xl text-center">
-    <h2 class="text-4xl text-balance text-foreground sm:text-5xl">Écrivez-nous, nous vous préviendrons à l&apos;ouverture</h2>
-    <p class="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
-      Un e-mail suffit, son objet est déjà rempli. Nous vous écrirons quand {BRAND_NAME} ouvrira.
-    </p>
+    <h2 class="text-4xl text-balance text-foreground sm:text-5xl">{BRAND_NAME} ouvrira d&apos;abord à quelques familles</h2>
+    <p class="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">Écrivez-nous pour en faire partie. Un e-mail suffit, son objet est déjà rempli.</p>
     <a href={MAILTO} class={buttonVariants({ size: 'lg', className: 'mt-8' })}>
       Être prévenu de l&apos;ouverture
     </a>
@@ -24,8 +22,8 @@ const MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`Prévenez-
       .
     </p>
     <p class="mx-auto mt-8 max-w-xl text-sm text-muted-foreground">
-      Nous gardons votre adresse pour ce seul message, puis nous l&apos;effaçons. Elle n&apos;est ni vendue ni utilisée pour autre chose. Le détail
-      est dans notre{' '}
+      Nous gardons votre adresse pour vous écrire à l&apos;ouverture, puis nous l&apos;effaçons. Elle n&apos;est ni vendue ni utilisée pour autre
+      chose. Le détail est dans notre{' '}
       <a href="/confidentialite" class="text-primary underline underline-offset-4">
         politique de confidentialité
       </a>

@@ -1,4 +1,4 @@
-import { BrainCircuit, Clock, GraduationCap, Monitor, NotebookPen, School, ShieldCheck, Wallet } from '@lucide/astro';
+import { BrainCircuit, CalendarClock, Clock, GraduationCap, Monitor, NotebookPen, School, ShieldCheck, Wallet } from '@lucide/astro';
 import { BRAND_NAME } from '@/lib/brand';
 
 // Each answer is checked against the docs: docs/produit.md, docs/tuteur.md, docs/architecture.md.
@@ -9,8 +9,13 @@ export const FAQS = [
     icon: GraduationCap,
   },
   {
+    question: `Quand ${BRAND_NAME} ouvre-t-il ?`,
+    answer: `${BRAND_NAME} est en préparation, et sa date d'ouverture n'est pas fixée. Les familles qui nous écrivent seront prévenues en premier.`,
+    icon: CalendarClock,
+  },
+  {
     question: 'Combien ça coûte ?',
-    answer: "Le prix n'est pas encore fixé. Nous l'annoncerons avant l'ouverture. Nous écrire pour être prévenu ne vous engage à rien.",
+    answer: "Le prix sera annoncé à l'ouverture. Nous écrire ne vous engage à rien.",
     icon: Wallet,
   },
   {
