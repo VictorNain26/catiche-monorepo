@@ -1,19 +1,17 @@
 ---
-import SectionHeader from '@/components/atoms/section-header.astro';
 import FaqList from './faq-list.astro';
 ---
 
 <section id="faq" class="scroll-mt-20 py-16 lg:py-24">
-  <div class="container">
-    <SectionHeader eyebrow="Questions" title="Les questions des parents" />
-
-    <FaqList />
-
-    <p class="text-center text-sm text-muted-foreground mt-8">
-      Vous avez une autre question ?{' '}
+  <div class="container max-w-6xl">
+    <h2 class="text-4xl text-balance text-foreground sm:text-5xl">Vos questions</h2>
+    <FaqList class="mt-10 lg:grid-cols-2" />
+    <p class="mt-8 text-muted-foreground">
+      Une autre question&nbsp;?{' '}
       <a href="/contact" class="text-primary underline underline-offset-4">
-        Contactez-nous
+        Écrivez-nous
       </a>
+      .
     </p>
   </div>
 </section>

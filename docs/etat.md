@@ -57,9 +57,10 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
   conformité littérale.
 - Les durées de conservation annoncées (`apps/landing/src/pages/confidentialite.astro`, § 7) :
   aucune purge ne tient encore celles du compte inactif ni des journaux. Celles des e-mails reçus
-  à `contact@` (prévenir à l'ouverture, puis effacer) se tiennent à la main, dans la boîte Zimbra.
-- La landing, à la naissance de la production : un formulaire d'inscription à la place du
-  `mailto:` de la section « prévenu », avec son information CNIL au moment de la collecte.
+  à `contact@` se tiennent à la main, dans la boîte Zimbra.
+- La landing, à la naissance de la production : son bouton et « Se connecter » mènent au staging
+  (`APP_URL`, `apps/landing/src/lib/brand.ts`) ; changer cette constante, et la phrase sur
+  l'invitation si l'inscription s'ouvre.
 - L'adresse de la connexion (`platform/http/client-address.ts`, `getConnInfo`) n'est exercée par
   aucun test, faute d'un vrai `Bun.serve`.
 - Le préfixe `__Host-` des cookies, quand better-auth le livre
@@ -72,8 +73,8 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
   Victor : supprimer l'image GHCR `tomai-server` (Settings du paquet sur GitHub) ; l'ancien
   domaine expire seul le 24 août 2027.
 - **L'ordre décidé par Victor (2026-10-20)**, un chantier après l'autre :
-  1. **La restructuration de la landing** : le plan est écrit, il attend la validation de Victor
-     et ses réponses (une section « qui fait Catiche », sombre ou clair, le libellé du bouton).
+  1. **La restructuration de la landing** : en PR (`feat/landing-v2`), selon les décisions de
+     Victor du 2026-10-21 ; le texte de « Qui fait Catiche » attend ses mots.
   2. **La refonte de l'application**, pensée depuis le parent et l'enfant réels. Il faut d'abord
      un parcours et des textes validés, puis l'écran à l'ordinateur comme au téléphone. Un
      inventaire des écrans actuels est fait : vocabulaire technique, colonne unique, doublons,

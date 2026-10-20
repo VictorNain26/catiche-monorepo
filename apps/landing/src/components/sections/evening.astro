@@ -1,0 +1,111 @@
+---
+import { Check, GripVertical, Mic } from '@lucide/astro';
+import Screen from '@/components/molecules/screen.astro';
+import TomSays from '@/components/molecules/tom-says.astro';
+
+// The evening of docs/produit.md, "Ce que fait Catiche", and its gestures in docs/methode.md.
+const STEPS = [
+  {
+    title: "« Qu'est-ce que tu as ce soir ? »",
+    body: 'Votre enfant dit ses devoirs à voix haute. Tom demande ce qui manque : pour quand, quels exercices, un contrôle bientôt ?',
+  },
+  {
+    title: 'Un ordre',
+    body: "Tom propose par quoi commencer, et votre enfant peut changer l'ordre.",
+  },
+  {
+    title: 'De petites étapes',
+    body: "Chaque devoir est coupé en étapes courtes, pour s'y mettre et tenir. Sur un exercice, Tom aide sans donner la réponse.",
+  },
+  {
+    title: 'Le sac de demain',
+    body: "À la fin, Tom récapitule ce qui est fait et ce qui reste, puis le cartable du lendemain. Un contrôle annoncé revient les jours d'avant.",
+  },
+] as const;
+
+const ORDER = ['Maths', 'Anglais', 'Histoire'];
+const BAG = [
+  { item: 'Cahier de maths', packed: true },
+  { item: "Manuel d'anglais", packed: true },
+  { item: "Fiche d'histoire", packed: false },
+];
+---
+
+{/* The one inverted section, in the middle of the page: light on a dark device, dark on a light one. Inside it, only the ink and the mist, swapped; the screens keep their card. */}
+<section id="soiree" class="scroll-mt-20 bg-foreground py-16 text-background lg:py-24">
+  <div class="container max-w-6xl">
+    <h2 class="max-w-3xl text-4xl text-balance sm:text-5xl">Une soirée avec Tom</h2>
+    <p class="mt-4 max-w-2xl text-lg md:text-xl">Une soirée de devoirs en quatre temps, du début à la fin.</p>
+
+    {/* At a computer, each step is a column of the same three rows (number, text, screen), so the screens line up. */}
+    <ol class="mt-12 grid gap-10 lg:grid-cols-4 lg:gap-x-6 lg:gap-y-4">
+      {STEPS.map(({ title, body }, index) => (
+        <li class="grid grid-cols-[auto_1fr] gap-x-4 lg:row-span-3 lg:grid-cols-1 lg:grid-rows-subgrid">
+          <span class="flex size-10 items-center justify-center rounded-full border-2 border-background font-heading text-lg font-extrabold">
+            {index + 1}
+          </span>
+          <div class="lg:contents">
+            <div>
+              <h3 class="text-xl text-balance">{title}</h3>
+              <p class="mt-2">{body}</p>
+            </div>
+            <Screen class="mt-4 space-y-2 self-start lg:mt-0">
+              {index === 0 && (
+                <>
+                  <p class="ml-auto flex w-fit max-w-full items-start gap-2 rounded-2xl bg-secondary px-3 py-2 text-secondary-foreground">
+                    <Mic class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                    J&apos;ai maths, anglais, et un contrôle d&apos;histoire.
+                  </p>
+                  <TomSays>Le contrôle, c&apos;est pour quel jour&nbsp;?</TomSays>
+                </>
+              )}
+              {index === 1 && (
+                <ol class="space-y-2">
+                  {ORDER.map((subject, position) => (
+                    <li class="flex items-center gap-2 rounded-control bg-secondary px-2 py-1.5 text-secondary-foreground">
+                      <GripVertical class="size-4 text-muted-foreground" aria-hidden="true" />
+                      <span class="font-bold">{position + 1}.</span>
+                      {subject}
+                    </li>
+                  ))}
+                </ol>
+              )}
+              {index === 2 && (
+                <>
+                  <p class="font-bold">Maths · étape 1 sur 3</p>
+                  <div class="grid grid-cols-3 gap-1">
+                    <span class="h-1.5 rounded-full bg-primary"></span>
+                    <span class="h-1.5 rounded-full bg-accent"></span>
+                    <span class="h-1.5 rounded-full bg-accent"></span>
+                  </div>
+                  <TomSays>Relis l&apos;énoncé de l&apos;exercice 3. Qu&apos;est-ce qu&apos;on cherche&nbsp;?</TomSays>
+                </>
+              )}
+              {index === 3 && (
+                <>
+                  <p class="font-bold">Pour demain</p>
+                  <ul class="space-y-1.5">
+                    {BAG.map(({ item, packed }) => (
+                      <li class="flex items-center gap-2">
+                        <span
+                          class={
+                            packed
+                              ? 'flex size-5 items-center justify-center rounded-full bg-success text-success-foreground'
+                              : 'size-5 rounded-full ring-2 ring-input'
+                          }
+                        >
+                          {packed && <Check class="size-3.5" aria-hidden="true" />}
+                        </span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </Screen>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>

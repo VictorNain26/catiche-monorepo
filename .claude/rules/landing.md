@@ -10,8 +10,10 @@ Vitrine marketing et SEO, statique, en Astro 7, servie par Caddy dans une applic
 Clever Cloud (`apps/landing/Caddyfile`).
 
 - Sans appel au serveur, et rien qui ne vienne de `docs/produit.md` : `CLAUDE.md`, « Interdits ».
-- Le seul appel à l'action est un e-mail (`mailto:`) tant que la production n'existe pas : un
-  formulaire public demande un service qui le reçoive (`docs/etat.md`).
+- Le seul appel à l'action ouvre l'application, par un lien : son adresse est une seule constante
+  (`APP_URL`, `apps/landing/src/lib/brand.ts`), le staging tant que la production n'existe pas
+  (`docs/etat.md`). Ni liste d'attente ni formulaire : un formulaire public demande un service qui
+  le reçoive.
 - Jamais un mot de soin ni un trouble ciblé : la liste et la raison sont dans `docs/produit.md`,
   « Ce qu'on dit, et ce qu'on ne dit pas ».
 - Ce qu'on peut prouver (`CLAUDE.md`, « Carte »), sur la landing : chaque chiffre a une source
@@ -27,9 +29,8 @@ Clever Cloud (`apps/landing/Caddyfile`).
 - Jamais de framework client (React ou autre) : la landing est du HTML statique. Un composant qui
   a besoin du navigateur est un élément personnalisé (`customElements.define`) dans le `<script>`
   de son composant, sur l'élément natif quand il existe (`<dialog>` pour le menu, `<details>` pour
-  la FAQ) ; les apparitions passent par l'API vanilla de Motion
-  (`apps/landing/src/scripts/reveal.ts`). Les classes partagées avec le web viennent de
-  `@repo/ui/classes`.
+  la FAQ). Aucune apparition au défilement : elles masquaient le texte. Les classes partagées avec
+  le web viennent de `@repo/ui/classes`.
 - Jamais un état d'entrée masqué hors de `@media (scripting: enabled)` : sans scripts, la page
   s'affiche entière.
 - Jamais de `<script>` ni de `<style>` en `is:inline`, ni d'attribut `style` : la CSP

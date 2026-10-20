@@ -1,0 +1,37 @@
+---
+import { Check } from '@lucide/astro';
+
+// Each fact is checked against the docs: docs/produit.md and docs/methode.md (no better grades, homework handed in), docs/tuteur.md (no answer given;
+// § 2, Mistral's EU endpoint), docs/architecture.md ("Hébergement", "Serveur").
+const COMMITMENTS = [
+  "Tom ne fait pas les devoirs à la place de votre enfant, et il est conçu pour ne pas donner la réponse d'un exercice.",
+  "Nous ne promettons pas de meilleures notes. Nous visons l'organisation, et des devoirs rendus.",
+  "Tom ne remplace ni l'enseignant, ni vous.",
+  "Le service est hébergé par Clever Cloud, à Paris. L'IA vient de Mistral AI, une entreprise française, appelée sur son service européen.",
+  'Aucune publicité, aucune revente de données.',
+  "Votre enfant n'a pas d'adresse e-mail chez nous. Vous pouvez consulter, corriger ou supprimer ses données sur simple demande.",
+];
+---
+
+<section class="bg-secondary py-16 text-secondary-foreground lg:py-24">
+  <div class="container grid max-w-6xl gap-10 lg:grid-cols-[1fr_2fr] lg:gap-16">
+    <div>
+      <h2 class="text-4xl text-balance sm:text-5xl">Nos engagements</h2>
+      <p class="mt-4 text-muted-foreground">
+        Le détail des données est dans notre{' '}
+        <a href="/confidentialite" class="text-primary underline underline-offset-4">
+          politique de confidentialité
+        </a>
+        .
+      </p>
+    </div>
+    <ul class="grid gap-x-10 gap-y-6 text-lg md:grid-cols-2">
+      {COMMITMENTS.map((commitment) => (
+        <li class="flex gap-3">
+          <Check class="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" />
+          {commitment}
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

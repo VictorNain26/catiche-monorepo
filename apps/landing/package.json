@@ -16,8 +16,7 @@
     "@lucide/astro": "^1.52.0",
     "@repo/tokens": "workspace:*",
     "@repo/ui": "workspace:*",
-    "astro": "^7.3.8",
-    "motion": "^13.4.0"
+    "astro": "^7.3.8"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

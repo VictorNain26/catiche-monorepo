@@ -1,42 +1,70 @@
 ---
 import { Check, EyeOff } from '@lucide/astro';
-import FadeIn from '@/components/atoms/fade-in.astro';
-import SectionHeader from '@/components/atoms/section-header.astro';
-import Highlight from '@/components/annotations/highlight.astro';
+import Screen from '@/components/molecules/screen.astro';
 
-const POINTS = [
-  {
-    icon: Check,
-    title: 'Ce que vous verrez',
-    body: "Que les devoirs du soir sont faits, et ce qui reste. Ce résumé « c'est fait » est en construction.",
-  },
-  {
-    icon: EyeOff,
-    title: 'Ce que vous ne verrez pas',
-    body: "Ses conversations avec Tom. C'est son espace à lui : il l'ouvre par un code de 6 chiffres qu'il choisit, et que vous ne voyez pas.",
-  },
+// The evening check-in of docs/produit.md ("Le point du soir") and how it fits each family; the parent sees that it is done, never the conversations.
+const FAMILIES = [
+  'Rentré tard ? Vous voyez le récapitulatif plus tard, et votre enfant voit votre « Vu » le lendemain.',
+  'En garde alternée, le récapitulatif va au parent chez qui votre enfant est ce soir-là.',
+  'Si les devoirs sont un sujet tendu, vous pouvez couper le point du soir.',
+  "En 4e et en 3e, c'est votre enfant qui choisit de le partager.",
+];
+
+const SUMMARY = [
+  { label: 'Fait', items: 'Maths, anglais' },
+  { label: 'Reste', items: "Réviser l'histoire, pour jeudi" },
+  { label: 'Cartable', items: 'Prêt pour demain' },
 ];
 ---
 
-<section id="parents" class="scroll-mt-20 bg-secondary py-16 lg:py-24">
-  <div class="container grid max-w-6xl gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
-    <SectionHeader eyebrow="Pour vous, le parent" align="left" class="mb-0">
-      <Fragment slot="title">
-        Vous savez que c&apos;est fait, <Highlight>sans lire par-dessus son épaule</Highlight>
-      </Fragment>
-    </SectionHeader>
-    <div class="grid gap-6">
-      {POINTS.map(({ icon: Icon, title, body }, index) => (
-        <FadeIn delay={index * 0.1}>
-          <div class="flex h-full gap-4 rounded-2xl bg-card p-6 shadow-sm ring-1 ring-border">
-            <Icon class="mt-1 size-6 shrink-0 text-primary" aria-hidden="true" />
-            <div>
-              <h3 class="mb-2 text-xl text-foreground">{title}</h3>
-              <p class="text-muted-foreground">{body}</p>
-            </div>
-          </div>
-        </FadeIn>
-      ))}
+<section id="parents" class="scroll-mt-20 py-16 lg:py-24">
+  <div class="container grid max-w-6xl gap-12 lg:grid-cols-[3fr_2fr] lg:items-center lg:gap-16">
+    <div>
+      <p class="text-sm font-bold text-muted-foreground">Pour vous, le parent</p>
+      <h2 class="mt-4 text-4xl text-balance text-foreground sm:text-5xl">Vous savez que c&apos;est fait, sans lire par-dessus son épaule</h2>
+      <p class="mt-6 text-lg text-muted-foreground">
+        À la fin de la soirée, c&apos;est le point du soir&nbsp;: votre enfant vous montre son récapitulatif. Vous répondez «&nbsp;Vu&nbsp;», avec un
+        encouragement si vous le voulez. Vous ne vérifiez pas le contenu, et rien n&apos;est noté&nbsp;: ni score, ni série de jours, ni relance.
+      </p>
+      <ul class="mt-6 grid gap-3 sm:grid-cols-2">
+        {FAMILIES.map((family) => (
+          <li class="flex gap-3 text-foreground">
+            <Check class="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" />
+            {family}
+          </li>
+        ))}
+      </ul>
+      <p class="mt-8 flex gap-3 rounded-2xl bg-secondary p-4 text-secondary-foreground">
+        <EyeOff class="mt-1 size-5 shrink-0" aria-hidden="true" />
+        <span>
+          <strong class="font-bold">Ses conversations avec Tom, vous ne les voyez pas.</strong> C&apos;est son espace à lui&nbsp;: il l&apos;ouvre par
+          un code qu&apos;il choisit, et que vous ne voyez pas.
+        </span>
+      </p>
     </div>
+
+    <figure class="mx-auto w-full max-w-sm">
+      <Screen class="space-y-4 p-6 text-base">
+        <p class="font-heading text-lg font-extrabold">Mardi soir</p>
+        <dl class="space-y-3">
+          {SUMMARY.map(({ label, items }) => (
+            <div>
+              <dt class="text-sm font-bold text-muted-foreground">{label}</dt>
+              <dd>{items}</dd>
+            </div>
+          ))}
+        </dl>
+        <div class="flex flex-wrap items-center gap-3 border-t pt-4">
+          <span class="inline-flex h-11 items-center gap-2 rounded-control bg-primary px-6 font-bold text-primary-foreground">
+            <Check class="size-5" aria-hidden="true" />
+            Vu
+          </span>
+          <span class="text-muted-foreground">Ajouter un mot</span>
+        </div>
+      </Screen>
+      <figcaption class="mt-4 text-center text-sm text-muted-foreground">
+        Le récapitulatif du soir&nbsp;: ce qui est fait, ce qui reste, le cartable de demain.
+      </figcaption>
+    </figure>
   </div>
 </section>

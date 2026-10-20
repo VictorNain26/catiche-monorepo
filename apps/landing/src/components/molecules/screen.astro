@@ -1,0 +1,15 @@
+---
+import { cn } from '@repo/ui/classes';
+
+// A fragment of the application's screen, drawn in HTML until the app's redesign gives real ones. It only
+// illustrates: the text beside it, or its figure's caption, says what it shows, so screen readers skip it.
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div aria-hidden="true" class={cn('rounded-2xl bg-card p-4 text-sm text-card-foreground shadow-control ring-1 ring-border', className)}>
+  <slot />
+</div>

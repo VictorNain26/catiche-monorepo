@@ -1,0 +1,13 @@
+---
+import { Image } from 'astro:assets';
+import tomTete from '@repo/ui/assets/tom-tete.png';
+
+// Tom's head beside each of his messages: the pupil knows he reads Tom, a program (docs/charte.md, "Tom").
+---
+
+<p class="flex items-start gap-2">
+  <Image src={tomTete} alt="" width={28} height={28} densities={[1, 2]} class="size-7 shrink-0" />
+  <span class="pt-0.5">
+    <slot />
+  </span>
+</p>
