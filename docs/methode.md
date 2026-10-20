@@ -10,16 +10,20 @@ ni le matériel des programmes. Le protocole de PANDAH est publié sous licence 
 
 ## Ce que disent les sources
 
-- **HOPS** (*Homework, Organization, and Planning Skills*) : 280 collégiens TDAH, tirés au sort.
-  16 séances d'environ 20 minutes à l'école et 2 rencontres avec les parents. Les effets sont
-  grands sur les devoirs et l'organisation selon les parents, et moyens selon les enseignants
-  sur la gestion du matériel [1] (Rés.).
+- **HOPS** (*Homework, Organization, and Planning Skills*) : 16 courtes séances avec l'élève et
+  2 rencontres avec les parents [8] (Rés.), d'environ 20 minutes chacune [7] (R). Dans l'essai
+  de 280 collégiens TDAH tirés au sort, les séances durent moins de 20 minutes en moyenne ; les
+  effets sont grands sur les devoirs et l'organisation selon les parents, et moyens selon les
+  enseignants sur la gestion du matériel [1] (Rés.).
 - **OST** (*Organizational Skills Training*) : 158 enfants du CE2 au CM2, 20 séances en clinique
   sur 10 à 12 semaines [2] (Rés.).
-  - L'effet atteint d = 2,77 selon les parents et se maintient l'année suivante.
-  - Un second bras sans entraînement, où parents et enseignants récompensent l'atteinte des
-    objectifs, marche aussi.
-  - Une version scolaire en petits groupes a été validée en 2024 [3] (Rés.).
+  - Selon les parents, d = 2,77 contre la liste d'attente à la fin du traitement, et 0,63
+    contre l'autre bras actif ; un effet significatif persiste l'année suivante.
+  - Ce second bras n'entraîne pas l'enfant : des parents et des enseignants, formés,
+    récompensent l'atteinte des objectifs. Il marche aussi sur la plupart des mesures, mais pas
+    sur le niveau scolaire.
+  - Une version scolaire en petits groupes a montré un effet en 2024, atténué à 12 mois et nul
+    sur les résultats scolaires [3] (Rés.).
 - **Méta-analyse** : 12 essais, 1 054 enfants [4] (Rés.).
 
   | Effet mesuré | Selon les enseignants | Selon les parents |
@@ -33,10 +37,12 @@ ni le matériel des programmes. Le protocole de PANDAH est publié sous licence 
   devoirs rendus prédit les notes 18 mois plus tard. Une bonne gestion du matériel, au départ,
   prédit les devoirs rendus [5] (Rés.).
 - **PANDAH** (CHU de Nantes) : une application pour les 9-16 ans atteints de TDAH, en essai
-  randomisé dans 9 centres de référence [6] (T). Aucun résultat n'est publié.
+  randomisé dans 9 centres de référence [6] (T). Aucun résultat n'est publié : la fiche de
+  l'essai, mise à jour pour la dernière fois en novembre 2023, prévoyait la fin en mars 2024.
 
 **À retenir.** L'organisation s'apprend et le gain est net, mais il est surtout vu par les
-parents, et les parents savent quel enfant est traité. Les notes bougent peu. Ces effets
+parents. Notre lecture : contre une liste d'attente, les parents qui notent savent si leur
+enfant suit le programme. Les notes bougent peu. Ces effets
 viennent d'un adulte qui vérifie à chaque séance. Aucune source ne montre qu'une application
 ou une IA obtient le même effet.
 
@@ -44,14 +50,14 @@ ou une IA obtient le même effet.
 
 | Moment | Geste | Source | Ce que ferait Tom |
 |---|---|---|---|
-| Avant | **Noter chaque devoir et chaque contrôle**, avec la date et ce qui est demandé | HOPS : agenda tenu, exactitude vérifiée à chaque séance [7] (R). L'exactitude de la prise de notes prédit le résultat [8] (Rés.) | Demande à l'oral « qu'est-ce que tu as ce soir ? », puis ce qui manque : « pour quand ? », « quels exercices ? », « un contrôle bientôt ? » |
+| Avant | **Noter chaque devoir et chaque contrôle à venir** | HOPS : agenda tenu, exactitude vérifiée à chaque séance [7] (R). L'exactitude de la prise de notes prédit le résultat [8] (Rés.) | Demande à l'oral « qu'est-ce que tu as ce soir ? », puis ce qui manque : « pour quand ? », « quels exercices ? », « un contrôle bientôt ? » |
 | Avant | **Vérifier ses affaires** | HOPS : liste de contrôle du cartable et du classeur à chaque séance [7] (R). PANDAH : « prendre ses affaires » [6] (T) | Une courte liste selon les devoirs du soir : cahier, manuel, fiche |
 | Avant | **S'installer** | PANDAH : s'installer au bon endroit, un espace de travail confortable [6] (T) | Une question, pas un sermon : « tu es installé où ? » |
-| Avant | **Ordonner et estimer** | HOPS : gestion du temps [7] (R). PANDAH : commencer par la matière difficile pour réduire l'anxiété et éviter les séances qui s'allongent [6] (T) | Propose un ordre et une durée par devoir ; l'élève peut changer |
-| Pendant | **Découper** | HOPS : découper la révision d'un contrôle [7] (R) | Une étape à la fois. Les « 10 minutes » sont notre choix, aucune source ne les fixe |
+| Avant | **Ordonner** | PANDAH : un conseil personnalisé, par exemple commencer par la matière difficile pour réduire l'anxiété et éviter les séances qui s'allongent [6] (T) | Propose un ordre ; l'élève peut changer. Estimer la durée de chaque devoir est notre choix |
+| Pendant | **Découper** | HOPS : découper la révision d'un contrôle [7] (R) | Une étape d'environ 10 minutes à la fois ; cette durée est notre choix, aucune source ne la fixe |
 | Pendant | **Renforcer l'effort** | HOPS : renforcement positif de l'effort et du résultat [7] (R). PANDAH : retours positifs pendant la séance [6] (T) | Note l'étape faite et l'effort, jamais la vitesse ni la note |
 | Pendant | **Aider sur le contenu** | Hors de ces programmes | Le tuteur qui ne donne pas la réponse (`docs/tuteur.md`) |
-| Après | **Classer le fait et le reste à faire** | HOPS : pochette à deux côtés, « à faire » et « fait » [7] (R) | Récapitule ce qui est fait et ce qui reste, et pour quand |
+| Après | **Classer le fait et le reste à faire** | HOPS : pochette à deux côtés, ce qui reste à faire ou à faire signer, et ce qui est fait et à rendre [7] (R) | Récapitule ce qui est fait et ce qui reste, et pour quand |
 | Après | **Préparer le cartable du lendemain** | PANDAH [6] (T) | Liste tirée de l'emploi du temps que l'élève a dit |
 | D'un soir à l'autre | **Préparer les contrôles et projets longs** | HOPS : noter le contrôle d'abord, puis découper la révision sur les jours d'avant [7] (R) | Garde les contrôles annoncés et les ramène dans l'ordre des jours suivants, avec les révisions espacées |
 | D'un soir à l'autre | **Monter par paliers** | HOPS : les gestes simples d'abord, puis les plus durs [7] (R) | Les premiers soirs, noter et cocher seulement ; le découpage et la révision viennent ensuite |
@@ -75,10 +81,10 @@ Pour Tom :
 
 Des mesures déjà validées, plutôt qu'un score maison :
 - **Homework Problems Checklist** : questionnaire parent à deux facteurs, faire ses devoirs et
-  les gérer [9] (Rés.).
+  les gérer, validé chez 579 enfants TDAH de 7 à 9 ans, pas au collège [9] (Rés.).
 - **Homework Performance Questionnaire, version parent** (12 questions) : la mesure principale
   de PANDAH [6] (T).
-- **Devoirs rendus**, la mesure la plus liée aux notes [5] (Rés.).
+- **Devoirs rendus**, qui prédisent les notes 18 mois plus tard [5] (Rés.).
 - **L'usage réel**, soirée après soirée, comme PANDAH le mesure dans l'application [6] (T).
 
 ## Ce que la fiche ne permet pas d'affirmer
@@ -86,10 +92,11 @@ Des mesures déjà validées, plutôt qu'un score maison :
 - **Qu'une IA remplace l'adulte qui vérifie.** C'est l'hypothèse centrale de la piste, et elle
   n'est pas prouvée.
 - **Que les notes montent.** Les sources annoncent des effets faibles sur les notes.
-- **Le bon dosage.** Les programmes tiennent en 16 à 20 séances sur un trimestre, alors que Tom
-  serait là chaque soir.
+- **Le bon dosage.** Les programmes tiennent en 16 à 20 séances, sur 10 à 12 semaines pour
+  OST [2], alors que Tom serait là chaque soir.
 - **Que l'effet vaut hors TDAH**, ou au collège pour OST, dont l'essai principal porte sur le
-  primaire.
+  primaire. La réplication de HOPS d'où viennent les gestes du tableau [7] accueille les élèves
+  quel que soit leur diagnostic, et n'a pas encore de résultat.
 - **Le contenu exact des séances.** Il est dans les manuels de HOPS et d'OST, non lus ici.
 - **Un effet de soin.** Le produit dit « apprendre à s'organiser », jamais « réduire les
   symptômes » ni « rééduquer » : ces mots le feraient basculer en dispositif médical.
@@ -102,7 +109,8 @@ Consultées le 2026-10-20.
    PMID [29172596](https://europepmc.org/article/MED/29172596).
 2. Abikoff et al., « Remediating organizational functioning in children with ADHD »,
    *J Consult Clin Psychol*, 2013, PMID [22889336](https://europepmc.org/article/MED/22889336).
-3. « School-based organizational skills training for students in grades 3-5 »,
+3. Nissley-Tsiopinis et al., « School-based organizational skills training for students in
+   grades 3-5 »,
    *J Consult Clin Psychol*, 2024, PMID [39480288](https://europepmc.org/article/MED/39480288).
 4. Bikic et al., « Meta-analysis of organizational skills interventions for children and
    adolescents with ADHD », *Clin Psychol Rev*, 2017, PMID
@@ -113,10 +121,13 @@ Consultées le 2026-10-20.
    ADHD » (protocole de PANDAH), *JMIR Res Protoc*, 2024, CC BY,
    [PMC11621713](https://pmc.ncbi.nlm.nih.gov/articles/PMC11621713/) ; essai
    [NCT04857788](https://clinicaltrials.gov/study/NCT04857788).
-7. Protocole d'une réplication de HOPS, medRxiv, 2026-02-13,
+7. Nissley-Tsiopinis et al., « Cluster-randomized Trial of Homework, Organization, and Planning
+   Skills Program Compared to Treatment as Usual/Waitlist for Youth Ages 11-14: Study Protocol
+   for Conceptual Replication », medRxiv, déposé le 2026-02-13 d'après son DOI,
    [10.64898/2026.02.13.26346294](https://www.medrxiv.org/content/10.64898/2026.02.13.26346294v1) ;
    essai NCT04465708.
-8. « Predictors and trajectories of response to the HOPS intervention », *Behav Ther*, 2019,
-   PMID [30661554](https://europepmc.org/article/MED/30661554).
-9. Langberg et al., « Assessing homework problems in children with ADHD », 2010, PMID
+8. Breaux et al., « Predictors and trajectories of response to the HOPS intervention »,
+   *Behav Ther*, 2019, PMID [30661554](https://europepmc.org/article/MED/30661554).
+9. Langberg et al., « Assessing homework problems in children with ADHD », *School Ment Health*,
+   2010, PMID
    [21544228](https://europepmc.org/article/MED/21544228).
