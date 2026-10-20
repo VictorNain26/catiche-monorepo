@@ -73,7 +73,7 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
   `staging` ; MX et SPF de la boîte Zimbra ; SPF, DKIM, DMARC et MX de Scaleway TEM sous
   `mail.`), les domaines rattachés aux applications Clever Cloud, le domaine d'envoi
   `mail.catiche.fr` chez Scaleway, le renommage du dépôt GitHub en `catiche-monorepo`.
-  Anciens noms à effacer des consoles : `tomia.fr` (`www.`, `staging.`), les applications `tomai-*`, l'image GHCR `tomai-server`.
+  Anciens noms à effacer : `tomia.fr` (`www.`, `staging.`), les applications `tomai-*`, l'image `tomai-server`.
 
   Reste, par Victor, avant le merge de la PR de bascule :
   - chez Scaleway, la clé DKIM publiée et le « Check status » de `mail.catiche.fr` au vert ;
@@ -98,6 +98,9 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
 - La suppression du compte parent : le serveur la porte (`POST /api/auth/delete-user`, session de
   moins de 10 minutes), mais le web n'a pas de bouton ; d'ici là, elle se fait sur demande, comme
   le disent les CGU et la politique de confidentialité.
+- L'e-mail de suppression invite à répondre (`platform/auth/auth.ts`), mais le mailer ne pose
+  aucun `Reply-To` : la réponse irait à `MAIL_FROM`, que personne ne lit ; à faire pointer vers
+  `contact@catiche.fr`, avec son test.
 - Code de l'élève, vu dans Chrome le 2026-10-20 à l'ordinateur seulement (la fenêtre ne s'est
   pas réduite à la largeur d'un téléphone) : à revoir au téléphone. Trois finitions :
   - un code trop facile n'est refusé qu'après sa seconde saisie, au lieu de la première ;
