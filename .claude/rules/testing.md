@@ -2,7 +2,6 @@
 description: Runners et emplacement des tests du monorepo — chargé en ouvrant un test
 paths:
   - "**/*.test.ts"
-  - "**/*.test.tsx"
   - "**/*.test.mjs"
   - "apps/server/src/testing/**"
 ---
@@ -16,7 +15,6 @@ demandent le Postgres de `docker compose` (`DATABASE_URL`).
 |-------|--------|----------|-------------|
 | Serveur | Bun, Postgres | `cd apps/server && bun test` | à côté du code, `<fichier>.test.ts` |
 | Web | Bun | `cd apps/web && bun run test` | `apps/web/src/**/<fichier>.test.ts` |
-| UI | Bun | `cd packages/ui && bun run test` | `packages/ui/src/**/<fichier>.test.tsx` |
 | Tokens | Bun | `bun run test` | `packages/tokens/contrast.test.mjs` |
 
 - **Serveur** : un test exerce le vrai code sur une vraie base, jamais un module remplacé.

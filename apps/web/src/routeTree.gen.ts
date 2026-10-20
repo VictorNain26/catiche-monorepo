@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BienvenueRouteImport } from './routes/bienvenue'
-import { Route as CatalogueRouteImport } from './routes/catalogue'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as ErreurConnexionRouteImport } from './routes/erreur-connexion'
 import { Route as FoyerRouteImport } from './routes/foyer'
@@ -32,11 +31,6 @@ const IndexRoute = IndexRouteImport.update({
 const BienvenueRoute = BienvenueRouteImport.update({
   id: '/bienvenue',
   path: '/bienvenue',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CatalogueRoute = CatalogueRouteImport.update({
-  id: '/catalogue',
-  path: '/catalogue',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConnexionRoute = ConnexionRouteImport.update({
@@ -98,7 +92,6 @@ const SeanceSessionIdRoute = SeanceSessionIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bienvenue': typeof BienvenueRoute
-  '/catalogue': typeof CatalogueRoute
   '/connexion': typeof ConnexionRoute
   '/erreur-connexion': typeof ErreurConnexionRoute
   '/foyer': typeof FoyerRouteWithChildren
@@ -114,7 +107,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bienvenue': typeof BienvenueRoute
-  '/catalogue': typeof CatalogueRoute
   '/connexion': typeof ConnexionRoute
   '/erreur-connexion': typeof ErreurConnexionRoute
   '/jumeler': typeof JumelerRoute
@@ -130,7 +122,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/bienvenue': typeof BienvenueRoute
-  '/catalogue': typeof CatalogueRoute
   '/connexion': typeof ConnexionRoute
   '/erreur-connexion': typeof ErreurConnexionRoute
   '/foyer': typeof FoyerRouteWithChildren
@@ -148,7 +139,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/bienvenue'
-    | '/catalogue'
     | '/connexion'
     | '/erreur-connexion'
     | '/foyer'
@@ -164,7 +154,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/bienvenue'
-    | '/catalogue'
     | '/connexion'
     | '/erreur-connexion'
     | '/jumeler'
@@ -179,7 +168,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/bienvenue'
-    | '/catalogue'
     | '/connexion'
     | '/erreur-connexion'
     | '/foyer'
@@ -196,7 +184,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BienvenueRoute: typeof BienvenueRoute
-  CatalogueRoute: typeof CatalogueRoute
   ConnexionRoute: typeof ConnexionRoute
   ErreurConnexionRoute: typeof ErreurConnexionRoute
   FoyerRoute: typeof FoyerRouteWithChildren
@@ -219,13 +206,6 @@ declare module '@tanstack/react-router' {
       path: '/bienvenue'
       fullPath: '/bienvenue'
       preLoaderRoute: typeof BienvenueRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/catalogue': {
-      id: '/catalogue'
-      path: '/catalogue'
-      fullPath: '/catalogue'
-      preLoaderRoute: typeof CatalogueRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connexion': {
@@ -329,7 +309,6 @@ const FoyerRouteWithChildren = FoyerRoute._addFileChildren(FoyerRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BienvenueRoute: BienvenueRoute,
-  CatalogueRoute: CatalogueRoute,
   ConnexionRoute: ConnexionRoute,
   ErreurConnexionRoute: ErreurConnexionRoute,
   FoyerRoute: FoyerRouteWithChildren,
