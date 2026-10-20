@@ -1,10 +1,11 @@
 /**
  * The tables of better-auth 1.7, field for field as its core declares them
  * (@better-auth/core `getAuthTables`, and @better-auth/passkey's schema): required there is NOT
- * NULL here.
+ * NULL here. Then the student's way in (`./student-sign-in.ts`): the devices a guardian's code
+ * recognised, the profiles each holds, and the code the student chose.
  */
 
-import { boolean, index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { boolean, index, integer, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
 
 const timestamps = {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -20,6 +21,15 @@ export const user = pgTable('user', {
   ...timestamps,
 });
 
+/** A browser a guardian's code recognised: its id is all its signed cookie holds. */
+export const device = pgTable('device', {
+  id: text('id').primaryKey(),
+  // Shared (a family computer), its sessions are short: a brother or sister comes next.
+  shared: boolean('shared').notNull().default(false),
+  userAgent: text('user_agent'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const session = pgTable(
   'session',
   {
@@ -31,10 +41,46 @@ export const session = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     ipAddress: text('ip_address'),
     userAgent: text('user_agent'),
+    // The student sign-in's own field: the device the session was opened on, if a recognised one.
+    deviceId: text('device_id').references(() => device.id, { onDelete: 'cascade' }),
     ...timestamps,
   },
-  (table) => [index('session_user_id_idx').on(table.userId)],
+  (table) => [index('session_user_id_idx').on(table.userId), index('session_device_id_idx').on(table.deviceId)],
 );
+
+/** A student's profile on a device: the tries its code had there since the last success. */
+export const deviceProfile = pgTable(
+  'device_profile',
+  {
+    deviceId: text('device_id')
+      .notNull()
+      .references(() => device.id, { onDelete: 'cascade' }),
+    studentId: text('student_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    failures: integer('failures').notNull().default(0),
+    // Until then, a student without a code chooses one here.
+    codeWindowUntil: timestamp('code_window_until', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+  },
+  (table) => [primaryKey({ columns: [table.deviceId, table.studentId] }), index('device_profile_student_id_idx').on(table.studentId)],
+);
+
+/**
+ * The code a student chose, hashed, and the tries it had on every device since the last success.
+ * No hash once a guardian's « forgotten » code is spent: the student chooses a new one.
+ */
+export const studentCode = pgTable('student_code', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  hash: text('hash'),
+  failures: integer('failures').notNull().default(0),
+  setAt: timestamp('set_at', { withTimezone: true }),
+  // When a guardian's « forgotten » code replaced it: the student is told.
+  resetAt: timestamp('reset_at', { withTimezone: true }),
+});
 
 export const account = pgTable(
   'account',
