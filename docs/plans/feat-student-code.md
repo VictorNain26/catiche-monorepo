@@ -169,6 +169,15 @@ reste attendu de better-auth (`etat.md`).
   - « Changer de profil » marche entre deux onglets.
 - CI `ci-ok` verte, puis merge via `gh api`.
 
+## Avancement
+
+- Faits, poussés sur `feat/student-code` : plan ; liste de refus ; schéma et migration `0016` ;
+  plugin `studentSignIn`, foyer, écrans élève et parent, suppressions ; appareil partagé côté web
+  (inactivité, onglets) ; doc. Tests serveur et web verts en local ; écrans vus dans Chrome
+  (ajout de l'ordinateur, choix du code, changement de profil, blocage à 3 essais).
+- Prochaine étape : revue dans un contexte neuf, constats corrigés en nouveaux commits, puis le
+  dernier commit supprime ce plan ; attendre `ci-ok` ; ne pas merger (Victor vérifie dans Chrome).
+
 ## Écarts à l'exécution (2026-10-20)
 
 Chaque fois, l'option la plus sûre pour l'enfant, ou la seule que better-auth 1.7 permette :
