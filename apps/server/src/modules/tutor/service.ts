@@ -7,7 +7,6 @@
 
 import type { Logger } from 'pino';
 import { detectDistress } from '../../domain/distress';
-import { isAccompaniedLevel } from '../../domain/levels';
 import type { MemoryAnswer } from '../../domain/memory-consent';
 import { DAILY_BUDGET_MICRO_EUR } from '../../domain/quota';
 import { QUOTA_RESET_HOUR, quotaDayStart, schoolYearStart } from '../../domain/school-calendar';
@@ -108,11 +107,9 @@ export function createTutorService({ repository, students, ai, moderation, logge
       return summaryOf(studentId);
     },
 
-    /** A session, the parent beside or not: only before the 4e (`domain/levels.ts`). */
-    async startSession(userId: string, accompanied: boolean) {
-      const learner = await student(userId);
-      if (accompanied && !isAccompaniedLevel(learner.level)) throw new Problem('FORBIDDEN');
-      return repository.createSession(userId, accompanied);
+    async startSession(userId: string) {
+      await student(userId);
+      return repository.createSession(userId);
     },
 
     async listSessions(userId: string) {
@@ -146,9 +143,6 @@ export function createTutorService({ repository, students, ai, moderation, logge
           summary: started.summary,
           summaryUntil: started.summaryUntil,
           closedAt: started.closedAt,
-          accompanied: started.accompanied,
-          parentCues: started.parentCues,
-          lastParentCue: started.lastParentCue,
           turnStartedAt,
         },
         distress: null,
@@ -172,7 +166,7 @@ export function createTutorService({ repository, students, ai, moderation, logge
     },
 
     /** The turn's reply; the session is free for the next turn whatever happens. */
-    async runTurn(opened: OpenTurn, input: TurnInput, onStep: (step: TurnStep) => void): Promise<{ text: string; cue: string | null }> {
+    async runTurn(opened: OpenTurn, input: TurnInput, onStep: (step: TurnStep) => void): Promise<string> {
       const free = () => repository.endTurn(opened.session.id, opened.session.turnStartedAt);
       let reply: TurnReply;
       try {
@@ -187,7 +181,7 @@ export function createTutorService({ repository, students, ai, moderation, logge
       // messages when a turn ends while the previous summary runs.
       await free();
       if (reply.after) background(reply.after());
-      return { text: reply.text, cue: reply.cue };
+      return reply.text;
     },
   };
 }

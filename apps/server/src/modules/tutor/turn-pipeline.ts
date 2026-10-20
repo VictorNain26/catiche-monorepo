@@ -7,7 +7,6 @@
 
 import type { Logger } from 'pino';
 import { detectDistress, DISTRESS_REPLY, type DistressSource } from '../../domain/distress';
-import { isAccompaniedLevel } from '../../domain/levels';
 import type { Ai } from '../../platform/ai/client';
 import type { InputModeration, Moderation } from '../../platform/ai/moderation';
 import type { StudentDirectory } from '../household';
@@ -17,7 +16,6 @@ import { writeChecked } from './core/controlled-turn';
 import { drawsSheet, prepareExerciseTurn } from './core/exercise-turn';
 import { hintOf } from './core/ladder';
 import type { OutputCheckContext } from './core/output-check';
-import { parentCue, type CueKind } from './core/parent-cues';
 import { photoText, readPhoto, saidWith, type Photo } from './core/photo';
 import { studentBlock, subjectBlock, systemPrompt } from './core/prompt';
 import { routeReasoningEffort } from './core/reasoning';
@@ -50,8 +48,6 @@ export type TurnStep = 'reading' | 'exercise' | 'writing';
 /** The turn's reply, and what runs after it, once the session is free. */
 export interface TurnReply {
   text: string;
-  /** The cue for the parent beside the child, null without one. */
-  cue: string | null;
   after: (() => Promise<void>) | null;
 }
 
@@ -67,9 +63,6 @@ export interface OpenTurn {
     summary: string | null;
     summaryUntil: number | null;
     closedAt: Date | null;
-    accompanied: boolean;
-    parentCues: number;
-    lastParentCue: CueKind | null;
     turnStartedAt: Date;
   };
   /** A distress already seen past the quota: the turn answers it, and nothing else. */
@@ -162,10 +155,10 @@ export function createTurnPipeline({ repository, ai, moderation, logger, memoryO
         .catch((err: unknown) => {
           logger.error({ err }, 'Closed session turn not stored');
         });
-      return { text: DISTRESS_REPLY, cue: null, after: null };
+      return { text: DISTRESS_REPLY, after: null };
     }
 
-    if (distress) return { text: await answerDistress(learner.id, session.id, unread, distress), cue: null, after: null };
+    if (distress) return { text: await answerDistress(learner.id, session.id, unread, distress), after: null };
 
     const [history, current] = await Promise.all([
       repository.window(session.id, WINDOW, session.summaryUntil),
@@ -193,7 +186,6 @@ export function createTurnPipeline({ repository, ai, moderation, logger, memoryO
     if (source)
       return {
         text: await answerDistress(learner.id, session.id, sent, { source, flagged: inputModeration?.flagged ?? null }),
-        cue: null,
         after: null,
       };
     const analysis = await analysed;
@@ -265,22 +257,6 @@ export function createTurnPipeline({ repository, ai, moderation, logger, memoryO
     // A fixed reply gave none of the help the level allowed: the exercise does not move.
     const helped = reply.outcome !== 'fallback';
     const first = history.length === 0;
-    // The class read again: a child moved up to the 4e meanwhile works alone.
-    const cue =
-      session.accompanied && isAccompaniedLevel(learner.level)
-        ? parentCue(
-            {
-              first,
-              helped,
-              newExercise: exerciseTurn.isNew,
-              levelUp: !exerciseTurn.isNew && change !== null && current !== undefined && change.hintLevel > current.hintLevel,
-              solved: change?.solved === true,
-              frustrated: analysis.asksSolution || analysis.saysStuck,
-            },
-            { shown: session.parentCues, last: session.lastParentCue },
-            learner.name,
-          )
-        : null;
     await repository.saveTurn(session.id, {
       exchange: { ...sent, tutorText: reply.text, replay: reply.replay },
       subject: session.subject ? null : detected,
@@ -310,11 +286,9 @@ export function createTurnPipeline({ repository, ai, moderation, logger, memoryO
         findings: reply.findings.map((finding) => finding.kind),
         outcome: reply.outcome,
       },
-      ...(cue && { parentCue: cue.kind }),
     });
     return {
       text: reply.text,
-      cue: cue?.text ?? null,
       // The title from what the student said, the photo's text included.
       after: () => afterTurn(learner.id, session, { studentText: said, tutorText: reply.text, check, first }),
     };

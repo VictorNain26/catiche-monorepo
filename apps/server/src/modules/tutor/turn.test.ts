@@ -12,7 +12,6 @@ import { aiCost } from '../../platform/ai/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { FALLBACK_REPLY } from './core/output-check';
-import { PARENT_CUES } from './core/parent-cues';
 import { SHEET_PROMPT_VERSION } from './core/sheet';
 import { TURN_PROMPT_VERSION } from './core/version';
 import { distressEvent, exercise, message, studySession, turnRecord } from './schema';
@@ -26,10 +25,6 @@ const student = await api.student(guardian, { name: 'Léa', level: 'quatrieme' }
 const asStudent = await api.pair(guardian, student.id);
 const otherGuardian = await api.guardian('autre@example.com');
 const asOther = await api.pair(otherGuardian, (await api.student(otherGuardian)).id);
-
-const companion = await api.student(guardian, { name: 'Sam', level: 'cinquieme' });
-const asCompanion = await api.pair(guardian, companion.id);
-const companionSession = (accompanied: boolean) => api.session(asCompanion, accompanied);
 
 const newSession = () => api.session(asStudent);
 
@@ -46,7 +41,6 @@ async function say(sessionId: string, text: string, cookie = asStudent) {
     ...read,
     steps: beforeReply.flatMap((chunk) => (chunk.type === 'data-step' ? [chunk.data] : [])),
     transientSteps: data('data-step').every((chunk) => chunk.transient === true),
-    cues: data('data-cue').map((chunk) => ({ cue: chunk.data, transient: chunk.transient })),
   };
 }
 
@@ -96,35 +90,6 @@ describe('a turn', () => {
     const sessionId = await newSession();
     mistral.chat.push(analysis({ bringsExercise: true }), draft, draft, draft, { text: 'Que cherches-tu ?' });
     expect(await say(sessionId, 'Résous 3x + 5 = 20.')).toMatchObject({ steps: ['reading', 'exercise', 'writing'] });
-  });
-
-  it('gives the parent beside a cue at the launch and at a frustration, nothing when all goes well, never the same twice in a row', async () => {
-    const sessionId = await companionSession(true);
-    mistral.chat.push(analysis(), { text: 'Que travailles-tu ?' });
-    expect((await say(sessionId, 'Bonjour', asCompanion)).cues).toEqual([{ cue: PARENT_CUES.launch('Sam'), transient: true }]);
-    mistral.chat.push(analysis(), { text: 'Montre-moi.' });
-    expect((await say(sessionId, 'Les fractions', asCompanion)).cues).toEqual([]);
-    const frustrated = [];
-    for (let turn = 0; turn < 4; turn++) {
-      mistral.chat.push(analysis({ saysStuck: true }), { text: 'Qu’est-ce qui te bloque ?' });
-      frustrated.push((await say(sessionId, 'je sais pas', asCompanion)).cues.length);
-    }
-    expect(frustrated).toEqual([1, 0, 0, 0]);
-  });
-
-  it('gives no cue once the child is moved up to the 4e, though the session was opened beside', async () => {
-    const moving = await api.student(guardian, { name: 'Ali', level: 'cinquieme' });
-    const asMoving = await api.pair(guardian, moving.id);
-    const sessionId = await api.session(asMoving, true);
-    await api.request('PATCH', `/api/household/students/${moving.id}`, { cookie: guardian, body: { level: 'quatrieme' } });
-    mistral.chat.push(analysis(), { text: 'Que travailles-tu ?' });
-    expect((await say(sessionId, 'Bonjour', asMoving)).cues).toEqual([]);
-  });
-
-  it('gives no cue to a child working alone', async () => {
-    const sessionId = await companionSession(false);
-    mistral.chat.push(analysis({ saysStuck: true }), { text: 'Qu’est-ce qui te bloque ?' });
-    expect((await say(sessionId, 'je sais pas', asCompanion)).cues).toEqual([]);
   });
 
   it('gives the writer the name fenced, never in the system prompt', async () => {

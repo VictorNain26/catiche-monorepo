@@ -16,8 +16,8 @@ export const sessionsQuery = queryOptions({
   queryFn: () => parseResponse(sessions.$get()),
 });
 
-/** A new session, beside the parent or not, as the student chooses. */
-export const startSession = (accompanied: boolean) => parseResponse(sessions.$post({ json: { accompanied } }));
+/** A new session, or the latest one still empty. */
+export const startSession = () => parseResponse(sessions.$post());
 
 export const messagesQuery = (sessionId: string) =>
   queryOptions({
@@ -37,10 +37,10 @@ export const toUIMessage = ({ id, role, text, photo }: StoredMessage): ChatMessa
 export const textOf = (message: UIMessage | undefined) => (message?.parts ?? []).map((part) => (part.type === 'text' ? part.text : '')).join('');
 
 /**
- * A message of the session, and whether the student sent a photo with it; the server streams, as
- * transient parts, the step of the turn and, with the parent beside the child, a cue for them.
+ * A message of the session, and whether the student sent a photo with it; the server streams the
+ * step of the turn as a transient part.
  */
-export type ChatMessage = UIMessage<{ photo: boolean }, { step: TurnStep; cue: string }>;
+export type ChatMessage = UIMessage<{ photo: boolean }, { step: TurnStep }>;
 
 const WAITING: Record<TurnStep, string> = {
   reading: 'Tom lit ton message…',

@@ -119,32 +119,17 @@ describe('a device handed to the child', () => {
     expect(multi).toHaveLength(2);
   });
 
-  it("lets the child switch to a brother's or sister's session the device holds", async () => {
+  it("never opens a brother's or sister's space to the child, whatever their class, nor lists the device's sessions", async () => {
     const { guardian, lea, tablet } = await family('fratrie@example.com');
-    const tom = await api.student(guardian);
+    const tom = await api.student(guardian, { name: 'Tom', level: 'sixieme' });
     expect((await tablet.redeem(await api.pairingCode(guardian, tom.id))).status).toBe(200);
     expect((await api.sessionUser(tablet.cookie()))?.id).toBe(tom.id);
 
-    const sessions = await held(tablet);
-    expect(sessions.map(({ user }) => user.id).sort()).toEqual([lea.id, tom.id].sort());
-    const leas = sessions.find(({ user }) => user.id === lea.id)?.session.token ?? '';
-    expect((await tablet.send('POST', '/api/auth/multi-session/set-active', { sessionToken: leas })).status).toBe(200);
-    expect((await api.sessionUser(tablet.cookie()))?.id).toBe(lea.id);
-  });
-
-  it('does not let the child switch to a sibling past the 5e, whose space opens on no family device', async () => {
-    const { guardian, lea, tablet } = await family('frere-en-4e@example.com');
-    const tom = await api.student(guardian);
-    expect((await tablet.redeem(await api.pairingCode(guardian, tom.id))).status).toBe(200);
-    expect((await api.request('PATCH', `/api/household/students/${lea.id}`, { cookie: guardian, body: { level: 'quatrieme' } })).status).toBe(200);
-
-    const leas = (await held(tablet)).find(({ user }) => user.id === lea.id)?.session.token ?? '';
-    expect((await tablet.send('POST', '/api/auth/multi-session/set-active', { sessionToken: leas })).status).toBe(403);
+    const [leas] = await sessionsOf(lea.id);
+    expect((await tablet.send('POST', '/api/auth/multi-session/set-active', { sessionToken: leas?.token ?? '' })).status).toBe(403);
+    // A GET the guard refuses goes to the sign-in page (modules/household/routes.ts).
+    const listed = await tablet.send('GET', '/api/auth/multi-session/list-device-sessions');
+    expect({ status: listed.status, location: listed.headers.get('location') }).toEqual({ status: 302, location: '/connexion' });
     expect((await api.sessionUser(tablet.cookie()))?.id).toBe(tom.id);
-  });
-
-  it('does not let the child switch to a session the device does not hold', async () => {
-    const { tablet } = await family('pas-de-bascule@example.com');
-    expect((await tablet.send('POST', '/api/auth/multi-session/set-active', { sessionToken: 'any' })).status).toBe(401);
   });
 });
