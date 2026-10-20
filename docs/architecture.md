@@ -123,7 +123,7 @@ reconstruirait une image que personne n'a testée, là où l'image se construit 
 que par sa configuration ([12factor.net](https://12factor.net/build-release-run)). Clever Cloud ne
 fait que tirer l'image : il ne construit rien, et les secrets ne passent pas au build.
 
-**Une seule relecture par branche** (2026-10-20) : un agent relit la branche dans un contexte
-neuf avant son push, et ses constats se corrigent dans la PR. Sur GitHub, Claude ne relit pas
+**Une seule relecture par branche** (2026-10-20) : celle d'avant le merge, dans un contexte neuf,
+que décrit `~/.claude/CLAUDE.md`. Sur GitHub, Claude ne relit pas
 chaque PR : il ne répond qu'à `@claude` dans un commentaire (`.github/workflows/claude.yml`), sur
 l'abonnement de Victor, qui sert aussi aux sessions.

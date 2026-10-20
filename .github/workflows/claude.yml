@@ -1,6 +1,6 @@
 # Claude Code in the repository (https://code.claude.com/docs/en/github-actions): an answer to
 # `@claude` in a comment, and nothing else. Every branch is already reviewed in a fresh context
-# before its push (docs/architecture.md, "Environnements et livraison"); a second review on each
+# before its merge (docs/architecture.md, "Environnements et livraison"); a second review on each
 # pull request would spend the same subscription on work already reviewed. Claude works from the
 # checkout, so it follows CLAUDE.md and .claude/rules like a local session. Not part of `ci-ok`.
 #
