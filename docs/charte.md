@@ -11,6 +11,10 @@ portent ses tokens ; leur composition reste à faire.
 le tuteur qui s'y trouve et garde son nom : l'élève fait ses devoirs « sur Catiche, avec Tom ».
 Jamais « Tom t'attend à la Catiche » : Tom n'est pas un compagnon.
 
+Jamais d'article devant Catiche (« sur Catiche », pas « la Catiche ») : c'est le nom d'un service,
+pas le gîte de la loutre. Un accord se fait au masculin ; une tournure qui l'évite est préférée
+(« Catiche ouvre bientôt » plutôt que « Catiche sera ouvert ») (Victor, 2026-10-20).
+
 Le logo est à dessiner : peu de formes, ni trait fin ni texte dans l'icône ; il se
 vérifie en monochrome, à 16 et 32 px, en clair, en sombre et en icône « maskable », dont le motif
 tient dans le cercle central.

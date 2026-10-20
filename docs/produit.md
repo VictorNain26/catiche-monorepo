@@ -32,6 +32,18 @@ Une soirée suit les gestes de `methode.md` :
 3. Il découpe le travail en étapes courtes et aide l'élève à démarrer, puis à tenir.
 4. Il aide sur le contenu sans donner la réponse (`tuteur.md`).
 5. À la fin, il récapitule ce qui est fait, ce qui reste, et le cartable du lendemain.
+   **Le point du soir** (idée de Victor, 2026-10-20) : si le parent le peut, l'enfant lui
+   montre ce récapitulatif. Le parent répond « Vu », avec un encouragement s'il le veut. Il ne
+   vérifie pas le contenu et ne note rien. Ce point s'adapte à chaque famille :
+   - parent rentré tard : il voit le récapitulatif plus tard, et l'enfant voit le « Vu » le
+     lendemain ;
+   - garde alternée : le récapitulatif va au parent chez qui l'enfant est ce soir-là ;
+   - relation tendue autour des devoirs : le parent peut couper le point du soir ;
+   - sans parent disponible : le récapitulatif reste à l'enfant, et rien ne lui est reproché ;
+   - selon l'âge : proposé par défaut en 6e-5e ; en 4e-3e, l'enfant choisit de partager.
+
+   Jamais de série de jours, de relance ni de score. La raison est dans `methode.md`, « Le rôle
+   du parent ».
 6. D'un soir à l'autre, il garde les contrôles annoncés et ramène leur révision les jours
    d'avant.
 
@@ -80,7 +92,9 @@ devoirs à l'oral.
 - **À construire** : la soirée à l'oral, avec le micro à ouvrir (`etat.md`), les contrôles
   gardés d'un soir à l'autre, et le cartable du lendemain.
 
-**Le premier morceau** : la soirée de devoirs à l'oral, sur le tuteur existant.
+**Ordre décidé par Victor le 2026-10-20** : d'abord le design et la refonte (la landing, faite
+dans #550, puis le passage à `catiche.fr`, puis l'application). La soirée et le volet IA viennent
+ensuite.
 
 ## Les risques
 
