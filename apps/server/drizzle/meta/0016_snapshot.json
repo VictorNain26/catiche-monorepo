@@ -1,5 +1,5 @@
 {
-  "id": "a75eacc5-57a9-450b-a3e5-88e7398334b8",
+  "id": "9ed3a40a-1737-4017-99dd-934525330c0d",
   "prevId": "f8bd3e2b-e6a1-4fa9-97ff-78befe398476",
   "version": "7",
   "dialect": "postgresql",
@@ -300,18 +300,18 @@
           "primaryKey": false,
           "notNull": false
         },
+        "choose_token_hash": {
+          "name": "choose_token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "last_used_at": {
-          "name": "last_used_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {

@@ -1,1 +1,0 @@
-ALTER TABLE "device_profile" DROP COLUMN "last_used_at";

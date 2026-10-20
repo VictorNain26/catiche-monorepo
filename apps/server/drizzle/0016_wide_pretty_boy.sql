@@ -10,8 +10,8 @@ CREATE TABLE "device_profile" (
 	"student_id" text NOT NULL,
 	"failures" integer DEFAULT 0 NOT NULL,
 	"code_window_until" timestamp with time zone,
+	"choose_token_hash" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"last_used_at" timestamp with time zone,
 	CONSTRAINT "device_profile_device_id_student_id_pk" PRIMARY KEY("device_id","student_id")
 );
 --> statement-breakpoint
