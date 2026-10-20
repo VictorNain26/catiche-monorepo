@@ -23,8 +23,9 @@ En place (`apps/server/src`) :
   développement. Le gardien n'a pas de mot de passe : il entre par un code à 6 chiffres envoyé à son
   adresse (plugin `email-otp`), le premier créant son compte sur invitation, ou par une clé d'accès
   (`@better-auth/passkey`, liée à l'origine publique) qu'il crée depuis son foyer. Une clé se crée,
-  et le compte se supprime, depuis une session ouverte il y a moins de 10 minutes ; la suppression
-  emporte son foyer s'il en est le seul gardien. L'élève n'a pas de clé : le garde du foyer lui
+  et le compte se supprime (`POST /api/auth/delete-user`, que le web n'appelle pas encore : la
+  suppression se fait sur demande), depuis une session ouverte il y a moins de 10 minutes ; la
+  suppression emporte son foyer s'il en est le seul gardien. L'élève n'a pas de clé : le garde du foyer lui
   ferme les routes de better-auth, sauf les siennes et celles par où son parent entre sur son
   appareil. Une session vit 90 jours sans usage, sauf sur un appareil partagé. Les envois partent
   après la réponse (`platform/lifecycle/background.ts`), que l'arrêt attend.
@@ -98,17 +99,17 @@ En place (`apps/web`) :
 
 Tout chez Clever Cloud, région Paris. L'image du serveur
 sert l'API et le web ; la landing, en Astro, vit dans une application statique à part. L'e-mail
-part de Scaleway TEM, les photos iront dans Cellar.
+part de Scaleway TEM, la boîte de contact est chez OVH, les photos iront dans Cellar.
 
-- **Staging** : https://staging.tomia.fr, l'application `tomai-staging` (Docker nano) et sa base
-  `tomai-staging-db` (PostgreSQL 18, `XXS_TNY`, disque chiffré, certificat épinglé par
+- **Staging** : https://staging.catiche.fr, l'application `catiche-staging` (Docker nano) et sa base
+  `catiche-staging-db` (PostgreSQL 18, `XXS_TNY`, disque chiffré, certificat épinglé par
   `DATABASE_CA`). Le proxy de Clever Cloud ajoute l'adresse réelle à droite de
   `X-Forwarded-For` : le serveur fait confiance à `TRUSTED_PROXY_HOPS` sauts (1 au staging) pour
   son rate limit et pour better-auth (`platform/http/client-address.ts`). L'e-mail part de
-  `mail.tomia.fr`, par une clé limitée à l'envoi.
-- **Landing** : https://tomia.fr, l'application statique `tomai-landing`, servie par Caddy
-  (`apps/landing/Caddyfile`). `contact@tomia.fr` est redirigée vers la boîte Gmail de Victor,
-  donc chez Google : à revoir si une boîte dans l'UE devient nécessaire.
+  `mail.catiche.fr`, par une clé limitée à l'envoi.
+- **Landing** : https://catiche.fr, l'application statique `catiche-landing`, servie par Caddy
+  (`apps/landing/Caddyfile`).
+- **Contact** : `contact@catiche.fr`, une boîte Zimbra hébergée par OVH en France.
 - **Production** : elle naît avec la première vraie famille.
 
 ### Environnements et livraison

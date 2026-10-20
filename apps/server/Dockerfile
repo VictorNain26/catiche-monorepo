@@ -73,7 +73,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["bun", "--smol", "dist/main.js"]
 
-# The image's published name, kept from before Catiche (why: the IMAGE of .github/workflows/ci.yml).
-LABEL org.opencontainers.image.title="tomai-server" \
+# The image's published name: the IMAGE of .github/workflows/ci.yml.
+LABEL org.opencontainers.image.title="catiche-server" \
       org.opencontainers.image.description="Bun + Hono server, serving the web client on its origin" \
-      org.opencontainers.image.source="https://github.com/VictorNain26/tomai-monorepo"
+      org.opencontainers.image.source="https://github.com/VictorNain26/catiche-monorepo"

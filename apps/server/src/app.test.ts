@@ -51,7 +51,7 @@ describe('auth', () => {
   });
 
   it('refuses a form posted to the API from another origin, before any route reads it', async () => {
-    // SameSite=Lax still sends the cookie from a sibling subdomain: tomia.fr and staging.tomia.fr are one site.
+    // SameSite=Lax still sends the cookie from a sibling subdomain: catiche.fr and staging.catiche.fr are one site.
     const res = await app.request(`${ORIGIN}/api/household/students/any/activation-code`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', Origin: 'https://evil.example', Cookie: cookie },

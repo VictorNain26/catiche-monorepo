@@ -3,7 +3,7 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  site: 'https://tomia.fr',
+  site: 'https://catiche.fr',
   trailingSlash: 'never',
   // aide.html rather than aide/index.html: the Caddyfile serves /aide without a redirect to /aide/.
   build: { format: 'file' },

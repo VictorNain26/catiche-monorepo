@@ -3,8 +3,8 @@
 L'aide aux devoirs qui accompagne le collégien du début à la fin et lui apprend à s'organiser
 (`docs/produit.md`), de la 6e à la 3e : il l'aide à faire son travail sans le faire à sa place. Construit aujourd'hui : le
 tuteur qui aide sur le contenu, et un résumé de la semaine pour le parent, jamais les
-conversations. Pré-lancement : aucun utilisateur réel. Staging : https://staging.tomia.fr ;
-landing : https://tomia.fr.
+conversations. Pré-lancement : aucun utilisateur réel. Staging : https://staging.catiche.fr ;
+landing : https://catiche.fr.
 
 ## Démarrage
 
