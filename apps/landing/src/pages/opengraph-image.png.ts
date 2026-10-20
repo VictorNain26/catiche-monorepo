@@ -44,9 +44,9 @@ export const GET: APIRoute = async () => {
         node('div', { display: 'flex', flexDirection: 'column', width: 640 }, [
           node('div', { display: 'flex', fontSize: 44, color: PRIMARY }, BRAND_NAME),
           node('div', { display: 'flex', flexWrap: 'wrap', marginTop: 40, fontSize: 64, lineHeight: 1.1 }, [
-            node('span', {}, "Le soir, l'exercice "),
-            node('span', {}, 'restera '),
-            node('span', { backgroundImage: `linear-gradient(to top, ${HIGHLIGHT} 50%, transparent 50%)` }, 'le sien'),
+            node('span', {}, 'Ce soir, votre enfant '),
+            node('span', {}, 'sait '),
+            node('span', { backgroundImage: `linear-gradient(to top, ${HIGHLIGHT} 50%, transparent 50%)` }, 'par où commencer'),
             '.',
           ]),
           node('div', { display: 'flex', marginTop: 40, fontSize: 30, color: MUTED }, 'En préparation, pour le collège (6e à 3e)'),

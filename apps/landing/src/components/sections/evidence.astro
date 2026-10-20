@@ -1,0 +1,40 @@
+---
+import FadeIn from '@/components/atoms/fade-in.astro';
+import SectionHeader from '@/components/atoms/section-header.astro';
+
+// The programmes of docs/methode.md, "Sources" [1] and [2]; no effect size on the page.
+const SOURCES = [
+  { href: 'https://europepmc.org/article/MED/29172596', label: 'HOPS, Langberg et al., 2018' },
+  { href: 'https://europepmc.org/article/MED/22889336', label: 'OST, Abikoff et al., 2013' },
+];
+---
+
+<section id="appuis" class="scroll-mt-20 py-16 lg:py-24">
+  <div class="container grid max-w-6xl gap-10 lg:grid-cols-2 lg:gap-16">
+    <SectionHeader eyebrow="Sur quoi on s'appuie" title="Des gestes tirés de programmes évalués" align="left" class="mb-0" />
+    <FadeIn class="space-y-4 text-lg text-muted-foreground">
+      <p>
+        Noter ses devoirs, vérifier ses affaires, découper le travail, préparer un contrôle les jours d&apos;avant&nbsp;: ces gestes viennent de
+        programmes d&apos;aide à l&apos;organisation, testés auprès de collégiens et d&apos;écoliers.
+      </p>
+      <p>
+        Dans ces programmes, un adulte vérifie à chaque séance. Rien ne prouve encore qu&apos;un programme comme Tom fasse aussi bien.{' '}
+        <strong class="font-bold text-foreground">Ce que donne Tom, nous le mesurerons et le publierons.</strong>
+      </p>
+      <ul class="flex flex-wrap gap-x-6 gap-y-2 text-base">
+        {SOURCES.map(({ href, label }) => (
+          <li>
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex min-h-11 items-center text-primary underline underline-offset-4"
+            >
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </FadeIn>
+  </div>
+</section>

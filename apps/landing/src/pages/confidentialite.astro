@@ -5,7 +5,7 @@ import { BRAND_NAME } from '@/lib/brand';
 const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfant\u00a0: données collectées, bases légales, prestataires, durées de conservation et vos droits.`;
 ---
 
-<PageLayout title="Politique de Confidentialité" description="Dernière mise à jour : 17 octobre 2026" maxWidth="3xl" metaDescription={DESCRIPTION}>
+<PageLayout title="Politique de Confidentialité" description="Dernière mise à jour : 20 octobre 2026" maxWidth="3xl" metaDescription={DESCRIPTION}>
   <div class="legal-copy">
     <p>
       <strong>Service en préparation&nbsp;:</strong> cette politique décrit le service tel qu&apos;il fonctionnera à son ouverture. L&apos;application
@@ -32,8 +32,9 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
       visage ou le code de déverrouillage ne quittent jamais l&apos;appareil.
     </p>
     <p>
-      <strong>Compte enfant :</strong> prénom, niveau scolaire et mois de naissance. L&apos;enfant n&apos;a ni identifiant, ni adresse e-mail, ni mot
-      de passe : il utilise un appareil que le parent relie à son compte par un code à usage unique.
+      <strong>Compte enfant :</strong> prénom, niveau scolaire et mois de naissance. L&apos;enfant n&apos;a ni identifiant, ni adresse e-mail : le
+      parent reconnaît son appareil par un code à usage unique, puis l&apos;enfant y choisit un code de 6 chiffres, que le parent ne voit pas et dont
+      nous ne gardons qu&apos;une empreinte.
     </p>
     <p>
       <strong>Contenus d&apos;apprentissage :</strong> les messages échangés avec le tuteur et le texte des photos d&apos;exercices envoyées. La photo
@@ -50,7 +51,13 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
       <strong>Données techniques :</strong> adresse IP et type de navigateur lors des connexions (sécurité du compte).
     </p>
     <p>
-      <strong>Site vitrine :</strong> votre adresse e-mail si vous nous contactez.
+      <strong>Site vitrine :</strong> votre adresse e-mail et votre message, si vous nous écrivez à{' '}
+      <a href="mailto:contact@tomia.fr">contact@tomia.fr</a>. Le site n&apos;a ni formulaire ni mesure d&apos;audience.
+    </p>
+    <p>
+      <strong>Être prévenu de l&apos;ouverture :</strong> si vous nous écrivez pour cela, nous utilisons votre adresse pour vous envoyer un seul
+      message, à l&apos;ouverture du service, puis nous l&apos;effaçons. Pour toute autre question, nous la gardons le temps de vous répondre, et au
+      plus 3 ans après votre dernier message.
     </p>
 
     <h2>3. Pourquoi, et sur quelle base légale ?</h2>
@@ -110,10 +117,16 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
       <li>
         <strong>Scaleway</strong> (France, données traitées dans l&apos;Union européenne) — envoi des e-mails du compte parent.
       </li>
+      <li>
+        <strong>Google</strong> (Gmail) — réception des e-mails envoyés à contact@tomia.fr.
+      </li>
     </ul>
 
     <h2>6. Transferts hors de l&apos;Union européenne</h2>
-    <p>Mistral AI, Clever Cloud et Scaleway traitent vos données dans l&apos;Union européenne.</p>
+    <p>
+      Mistral AI, Clever Cloud et Scaleway traitent vos données dans l&apos;Union européenne. Les e-mails envoyés à contact@tomia.fr arrivent chez
+      Google, qui peut les traiter hors de l&apos;Union européenne.
+    </p>
 
     <h2>7. Combien de temps conservons-nous vos données ?</h2>
     <p>
@@ -139,6 +152,10 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
       </li>
       <li>
         <strong>Journaux techniques et de sécurité</strong> : 12 mois.
+      </li>
+      <li>
+        <strong>E-mails reçus à contact@tomia.fr</strong> : pour être prévenu de l&apos;ouverture, jusqu&apos;à l&apos;envoi de ce message ; pour une
+        autre question, le temps d&apos;y répondre, et au plus 3 ans après votre dernier message.
       </li>
     </ul>
 

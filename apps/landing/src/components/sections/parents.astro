@@ -1,31 +1,35 @@
 ---
-import { EyeOff, ChartLine } from '@lucide/astro';
+import { Check, EyeOff } from '@lucide/astro';
 import FadeIn from '@/components/atoms/fade-in.astro';
 import SectionHeader from '@/components/atoms/section-header.astro';
 import Highlight from '@/components/annotations/highlight.astro';
 
 const POINTS = [
-  { icon: ChartLine, title: 'Un résumé', body: 'Matières travaillées, temps passé, notions qui résistent.' },
+  {
+    icon: Check,
+    title: 'Ce que vous verrez',
+    body: "Que les devoirs du soir sont faits, et ce qui reste. Ce résumé « c'est fait » est en construction.",
+  },
   {
     icon: EyeOff,
-    title: 'Pas les conversations',
-    body: "L'espace parent montrera un résumé, pas les conversations : votre enfant gardera un espace à lui.",
+    title: 'Ce que vous ne verrez pas',
+    body: "Ses conversations avec Tom. C'est son espace à lui : il l'ouvre par un code de 6 chiffres qu'il choisit, et que vous ne voyez pas.",
   },
 ];
 ---
 
-<section id="parents" class="scroll-mt-20 py-16 lg:py-24">
-  <div class="container">
-    <SectionHeader eyebrow="Pour les parents">
+<section id="parents" class="scroll-mt-20 bg-secondary py-16 lg:py-24">
+  <div class="container grid max-w-6xl gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
+    <SectionHeader eyebrow="Pour vous, le parent" align="left" class="mb-0">
       <Fragment slot="title">
-        Vous saurez où il en est, <Highlight>sans lire par-dessus son épaule</Highlight>
+        Vous savez que c&apos;est fait, <Highlight>sans lire par-dessus son épaule</Highlight>
       </Fragment>
     </SectionHeader>
-    <div class="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2">
+    <div class="grid gap-6">
       {POINTS.map(({ icon: Icon, title, body }, index) => (
         <FadeIn delay={index * 0.1}>
-          <div class="flex h-full gap-4 rounded-2xl bg-card shadow-sm ring-1 ring-border p-6">
-            <Icon class="mt-2 size-6 shrink-0 text-primary" aria-hidden="true" />
+          <div class="flex h-full gap-4 rounded-2xl bg-card p-6 shadow-sm ring-1 ring-border">
+            <Icon class="mt-1 size-6 shrink-0 text-primary" aria-hidden="true" />
             <div>
               <h3 class="mb-2 text-xl text-foreground">{title}</h3>
               <p class="text-muted-foreground">{body}</p>

@@ -14,9 +14,8 @@ interface Props {
   noindex?: boolean;
 }
 
-const TITLE = `${BRAND_NAME} – Une aide aux devoirs pour le collège, en préparation`;
-const DESCRIPTION =
-  "Aide aux devoirs en préparation pour les collégiens, de la 6e à la 3e : Tom est conçu pour guider votre enfant par des questions, sans faire l'exercice à sa place.";
+const TITLE = `${BRAND_NAME} – L'aide aux devoirs du collège, en préparation`;
+const DESCRIPTION = `Aide aux devoirs en préparation pour le collège, de la 6e à la 3e : ${BRAND_NAME} accompagne votre enfant pendant ses devoirs, du début à la fin, sans faire le travail à sa place.`;
 const { title, description = DESCRIPTION, noindex = false } = Astro.props;
 const pageTitle = title ? `${title} | ${BRAND_NAME}` : TITLE;
 const site = Astro.site?.href ?? '';

@@ -16,7 +16,7 @@ const CLIPS = ['salut', 'respiration'] as const;
   aria-label="Tom, une loutre en pull bleu avec un stylo dans la poche"
   class={cn('relative block aspect-square w-full max-w-sm', className)}
 >
-  <Image src={tom} alt="" width={176} height={176} densities={[1, 2]} class="size-full" />
+  <Image src={tom} alt="" width={384} height={384} densities={[1, 2]} class="size-full" />
   {CLIPS.map((clip) => (
     <video
       data-clip={clip}

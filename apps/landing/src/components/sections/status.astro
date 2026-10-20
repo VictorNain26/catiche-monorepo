@@ -1,0 +1,56 @@
+---
+import { CircleCheck, CircleQuestionMark, Hammer } from '@lucide/astro';
+import FadeIn from '@/components/atoms/fade-in.astro';
+import SectionHeader from '@/components/atoms/section-header.astro';
+import { BRAND_NAME } from '@/lib/brand';
+
+// What is built: docs/architecture.md ("Serveur") and docs/tuteur.md; what comes: docs/produit.md ("Ce que devient l'existant").
+const COLUMNS = [
+  {
+    icon: CircleCheck,
+    title: 'Déjà construit',
+    items: [
+      'Le compte du parent, ouvert par un code reçu par e-mail.',
+      "Le profil de l'enfant, avec son code à lui.",
+      "L'aide sur un exercice, par questions et indices.",
+    ],
+  },
+  {
+    icon: Hammer,
+    title: 'En construction',
+    items: ["La soirée de devoirs, à l'oral.", "Le résumé « c'est fait » pour le parent."],
+  },
+  {
+    icon: CircleQuestionMark,
+    title: 'Pas encore fixé',
+    items: ['Le prix.', "La date d'ouverture."],
+  },
+];
+---
+
+<section id="etat" class="scroll-mt-20 bg-secondary py-16 lg:py-24">
+  <div class="container">
+    <SectionHeader
+      eyebrow={`Où en est ${BRAND_NAME}`}
+      title="Ce qui existe, et ce qui arrive"
+      description={`${BRAND_NAME} n'est pas encore ouvert aux familles. Voici, sans promesse, où nous en sommes.`}
+    />
+    <div class="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
+      {COLUMNS.map(({ icon: Icon, title, items }, index) => (
+        <FadeIn delay={index * 0.1}>
+          <div class="h-full rounded-2xl bg-card p-6 shadow-sm ring-1 ring-border">
+            <h3 class="mb-4 flex items-center gap-2 text-xl text-foreground">
+              <Icon class="size-5 shrink-0 text-primary" aria-hidden="true" />
+              {title}
+            </h3>
+            <ul class="space-y-3 text-muted-foreground">
+              {items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </FadeIn>
+      ))}
+    </div>
+  </div>
+</section>
