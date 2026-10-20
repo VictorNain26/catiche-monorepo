@@ -9,13 +9,11 @@ paths:
 Vitrine marketing et SEO, statique, en Astro 7, servie par Caddy dans une application statique
 Clever Cloud (`apps/landing/Caddyfile`).
 
-- **Elle est gelée jusqu'à sa réécriture sur `docs/produit.md`** : elle porte déjà les tokens
-  et les fontes de Rive (`@repo/tokens/theme.css`) ; d'ici là, seuls ces tokens et des
-  correctifs d'honnêteté ou techniques y entrent, pas de nouvelle section. Elle mènera à l'app
-  par un simple lien.
+- Gelée, et sans appel au serveur : `CLAUDE.md`, « Interdits ». Elle porte déjà les tokens et
+  les fontes de Rive (`@repo/tokens/theme.css`) ; pas de nouvelle section d'ici sa réécriture.
 - Jamais un mot de soin ni un trouble ciblé : la liste et la raison sont dans `docs/produit.md`,
   « Ce qu'on dit, et ce qu'on ne dit pas ».
-- **On n'affirme que ce qu'on peut prouver** : chaque chiffre a une source
+- Ce qu'on peut prouver (`CLAUDE.md`, « Carte »), sur la landing : chaque chiffre a une source
   primaire datée, chaque différence face à un concurrent est mesurée, ce qui n'est pas construit
   ne se promet pas. Une phrase qu'on ne peut adosser à une source ou à une mesure se retire.
 - Jamais de promesse de progrès scolaire ni de meilleures notes, jamais « le seul » ; jamais

@@ -79,7 +79,7 @@
     },
     {
       "description": "ESLint toolchain.",
-      "matchPackageNames": ["@typescript-eslint/**", "typescript-eslint", "eslint", "@eslint/**", "@eslint-react/**", "eslint-plugin-react-hooks"],
+      "matchPackageNames": ["typescript-eslint", "eslint", "@eslint/**", "@eslint-react/**", "eslint-plugin-react-hooks"],
       "groupName": "eslint"
     },
     {
