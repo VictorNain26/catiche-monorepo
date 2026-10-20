@@ -25,7 +25,7 @@ export const FAQS = [
   },
   {
     question: 'Et Devoirs faits, au collège ?',
-    answer: `Devoirs faits est le temps d'aide aux devoirs que propose le collège. ${BRAND_NAME} ne le remplace pas. Il sert le soir, à la maison : pour les devoirs qui restent, le sac du lendemain et les contrôles à préparer.`,
+    answer: `Devoirs faits est le temps d'aide aux devoirs que propose le collège. ${BRAND_NAME} ne le remplace pas. Il servira le soir, à la maison : pour les devoirs qui restent, le sac du lendemain et les contrôles à préparer.`,
     icon: School,
   },
   {
@@ -37,7 +37,7 @@ export const FAQS = [
   {
     question: 'Combien de temps par soir ?',
     answer:
-      "Le temps de ses devoirs, pas plus. Tom coupera le travail en étapes d'environ 10 minutes, et la soirée finira quand tout sera fait. Nous mesurerons la durée réelle avec les premières familles.",
+      "Tom coupera le travail en étapes d'environ 10 minutes, et la soirée finira quand tout sera fait. Nous mesurerons la durée réelle avec les premières familles.",
     icon: Clock,
   },
   {
