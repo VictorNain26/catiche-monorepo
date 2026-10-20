@@ -9,8 +9,9 @@ paths:
 Vitrine marketing et SEO, statique, en Astro 7, servie par Caddy dans une application statique
 Clever Cloud (`apps/landing/Caddyfile`).
 
-- Gelée, et sans appel au serveur : `CLAUDE.md`, « Interdits ». Elle porte déjà les tokens et
-  les fontes de Rive (`@repo/tokens/theme.css`) ; pas de nouvelle section d'ici sa réécriture.
+- Sans appel au serveur, et rien qui ne vienne de `docs/produit.md` : `CLAUDE.md`, « Interdits ».
+- Le seul appel à l'action est un e-mail (`mailto:`) tant que la production n'existe pas : un
+  formulaire public demande un service qui le reçoive (`docs/etat.md`).
 - Jamais un mot de soin ni un trouble ciblé : la liste et la raison sont dans `docs/produit.md`,
   « Ce qu'on dit, et ce qu'on ne dit pas ».
 - Ce qu'on peut prouver (`CLAUDE.md`, « Carte »), sur la landing : chaque chiffre a une source

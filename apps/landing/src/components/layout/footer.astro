@@ -1,19 +1,13 @@
 ---
 import Logo from '@/components/atoms/logo.astro';
 import { BRAND_NAME } from '@/lib/brand';
+import { SECTION_LINKS } from '@/lib/navigation';
 
 // The page is built once: the year is the build's.
 const YEAR = new Date().getFullYear();
 
 const LINK_GROUPS = [
-  {
-    title: 'Produit',
-    links: [
-      { href: '/#how-it-works', label: 'Comment ça marche' },
-      { href: '/#parents', label: 'Parents' },
-      { href: '/#pricing', label: 'Tarifs' },
-    ],
-  },
+  { title: 'Produit', links: SECTION_LINKS },
   {
     title: 'Aide',
     links: [
@@ -38,8 +32,7 @@ const LINK_GROUPS = [
       <div class="space-y-4">
         <Logo />
         <p class="max-w-xs text-sm text-muted-foreground">
-          En préparation&nbsp;: une aide aux devoirs pour que, le soir, ce ne soit plus au parent d&apos;expliquer, ni à l&apos;IA de faire
-          l&apos;exercice.
+          En préparation&nbsp;: l&apos;aide aux devoirs qui accompagne votre collégien du début à la fin, sans faire le travail à sa place.
         </p>
         <ul class="space-y-2 text-sm text-muted-foreground">
           <li>Modèles de Mistral AI, appelés en Europe</li>

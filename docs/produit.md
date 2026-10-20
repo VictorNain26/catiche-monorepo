@@ -6,7 +6,8 @@ est construit dans `tuteur.md` et `architecture.md`.
 
 ## En une phrase
 
-Catiche est un coach des devoirs qui apprend au collégien à s'organiser. Chaque soir, l'élève
+Catiche accompagne le collégien pendant ses devoirs, du début à la fin, et lui apprend à
+s'organiser. Chaque soir, l'élève
 dit ce qu'il a à faire, et Tom l'aide à le faire, du début à la fin, sans faire le travail à sa
 place.
 
@@ -102,4 +103,3 @@ parents déjà validés.
 
 - Le prix.
 - Le nom de Tom, que la marque TOM peut empêcher (`etat.md`).
-- La réécriture de la landing sur cette direction.

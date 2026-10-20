@@ -1,7 +1,7 @@
 # Monorepo Catiche
 
-Catiche : un coach des devoirs qui apprend au collégien à s'organiser, avec Tom (direction :
-`docs/produit.md`). Construit : le tuteur et un résumé de la semaine pour le parent.
+Catiche : l'aide aux devoirs qui accompagne le collégien du début à la fin et lui apprend à
+s'organiser, avec Tom (direction : `docs/produit.md`). Construit : le tuteur et un résumé de la semaine pour le parent.
 
 ## Carte
 
@@ -31,8 +31,8 @@ change (Postgres de `docker compose` requis). Formatage : `bun run format`.
 
 - La landing n'appelle jamais le serveur, ni l'auth : `apps/web` est le seul client produit ; elle
   y mène par un simple lien.
-- Rien n'entre dans la landing en ligne avant sa réécriture sur `docs/produit.md`, sauf les
-  tokens de la charte, un correctif d'honnêteté ou technique (`.claude/rules/landing.md`).
+- Rien n'entre dans la landing en ligne hors de `docs/produit.md`, sauf les tokens de la charte,
+  un correctif d'honnêteté ou technique (`.claude/rules/landing.md`).
 - Jamais un écran construit sans la charte : il est composé au téléphone et à l'ordinateur, pas
   une colonne de boutons.
 - Jamais de push sur `main` : une branche courte, puis une PR, mergée en merge commit (le squash
