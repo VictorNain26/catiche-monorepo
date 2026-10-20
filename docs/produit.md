@@ -16,9 +16,8 @@ place.
   notions. Il ne sait pas par où commencer, oublie un contrôle, ne finit pas.
 - **Le parent** : celui pour qui la soirée de devoirs est un conflit, ou qui n'a pas le temps de
   la tenir. Il cherche la paix du soir et des devoirs rendus, pas un tableau de notes.
-- **La cible de départ** : les familles concernées par le TDAH et les troubles dys, chez qui
-  cette douleur est quotidienne et souvent déjà payée (`concurrence.md`, « Le créneau de
-  l'organisation »). Leurs associations et les professionnels qui les suivent sont le canal pour
+- **La cible de départ** : les familles concernées par le TDAH et les troubles dys, pour qui des
+  solutions payantes existent déjà (`concurrence.md`, « Le créneau de l'organisation »). Leurs associations et les professionnels qui les suivent sont le canal pour
   les trouver.
 - **Jamais de diagnostic demandé** : le produit s'adresse à un besoin, pas à un trouble.
 
@@ -35,13 +34,15 @@ Une soirée suit les gestes de `methode.md` :
 6. D'un soir à l'autre, il garde les contrôles annoncés et ramène leur révision les jours
    d'avant.
 
-Le parent voit que c'est fait. Il ne voit jamais les conversations.
+Le parent verra que c'est fait ; les conversations ne lui sont jamais envoyées. En 6e et 5e,
+il peut aujourd'hui ouvrir le profil de l'enfant sur l'appareil de la famille (`tuteur.md`,
+§ 8) : c'est à revoir avec le mode accompagné.
 
 ## Pourquoi pas le gratuit
 
-ChatGPT, Galac6 et Gemini répondent à la question qu'on leur pose. Le simple découpage d'une
-tâche, Goblin Tools ou ChatGPT le font déjà. Aucun n'accompagne la soirée entière d'un
-collégien en français. Le plus proche, PANDAH, n'est accessible que dans un essai clinique
+Les tuteurs IA, Galac6 ou Gemini, aident sur une question ; Goblin Tools et Tiimo découpent une
+tâche. Sur les pages lues, aucun n'accompagne la soirée entière d'un collégien en français ;
+Klixo reste à essayer. Le plus proche, PANDAH, n'est accessible que dans un essai clinique
 (`concurrence.md`).
 
 ## Ce qu'on dit, et ce qu'on ne dit pas
@@ -61,9 +62,10 @@ collégien en français. Le plus proche, PANDAH, n'est accessible que dans un es
 
 ## Pronote
 
-Pas d'accès non officiel à Pronote. Index Éducation ne tolère Papillon que parce que l'élève
-saisit lui-même ses identifiants et que Papillon « n'a pas de finalité commerciale »
-(`concurrence.md`, « Pronote et les logiciels de vie scolaire »). Un partenariat officiel
+Pas d'accès non officiel à Pronote. Pour Index Éducation, l'accès de Papillon n'est « pas
+illégal en soi » parce que l'élève saisit ses identifiants et que Papillon « n'a pas de
+finalité commerciale » ; l'éditeur le déconseille pourtant (`concurrence.md`, « Pronote et les
+logiciels de vie scolaire »). Un partenariat officiel
 suppose une entreprise et une convention. Le produit marche sans Pronote, et l'élève dit ses
 devoirs à l'oral.
 
@@ -83,7 +85,8 @@ devoirs à l'oral.
 - **Rien ne prouve qu'une IA remplace l'adulte qui vérifie** : c'est l'hypothèse centrale
   (`methode.md`).
 - **L'élève doit revenir chaque soir**, sans adulte pour le relancer.
-- **La clause de Mistral sur les moins de 15 ans** bloque tout vrai collégien (`etat.md`).
+- **La clause de Mistral sur les moins de 15 ans** bloque tout utilisateur de moins de 15 ans,
+  soit presque tous les collégiens (`etat.md`).
 - **PANDAH** pourrait publier des résultats positifs et devenir la référence gratuite des
   cliniciens.
 - **Les mots** : un seul message « pour les TDAH » fait basculer le produit vers les données de

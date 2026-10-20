@@ -97,8 +97,8 @@ Des mesures déjà validées, plutôt qu'un score maison :
   primaire. La réplication de HOPS d'où viennent les gestes du tableau [7] accueille les élèves
   quel que soit leur diagnostic, et n'a pas encore de résultat.
 - **Le contenu exact des séances.** Il est dans les manuels de HOPS et d'OST, non lus ici.
-- **Un effet de soin.** Le produit dit « apprendre à s'organiser », jamais « réduire les
-  symptômes » ni « rééduquer » : ces mots le feraient basculer en dispositif médical.
+- **Un effet de soin** : les mots à éviter et leur raison sont dans `produit.md`, « Ce qu'on
+  dit, et ce qu'on ne dit pas ».
 
 ## Sources
 

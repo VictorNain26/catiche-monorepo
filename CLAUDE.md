@@ -1,7 +1,7 @@
 # Monorepo Catiche
 
-Catiche : un coach des devoirs qui apprend au collégien à s'organiser, avec Tom ; le parent voit
-que c'est fait, jamais les conversations.
+Catiche : un coach des devoirs qui apprend au collégien à s'organiser, avec Tom (direction :
+`docs/produit.md`). Construit : le tuteur et un résumé de la semaine pour le parent.
 
 ## Carte
 
