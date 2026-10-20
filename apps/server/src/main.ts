@@ -5,7 +5,7 @@
 
 import { createApp } from './app';
 import { loadConfig } from './config';
-import { accountDeletion } from './modules/household';
+import { accountDeletion, studentAccess } from './modules/household';
 import { createAi } from './platform/ai/client';
 import { createModeration } from './platform/ai/moderation';
 import { createAuth } from './platform/auth/auth';
@@ -47,7 +47,13 @@ const lifecycle = createLifecycle();
 // Without the Scaleway settings, which production requires (config.ts), emails are logged.
 const mailer = config.mail ? scalewayMailer(config.mail) : logMailer(logger);
 const tasks = createBackgroundTasks();
-const auth = createAuth(database.db, config, { mailer, logger, background: tasks.run, deleteUser: accountDeletion(database.db) });
+const auth = createAuth(database.db, config, {
+  mailer,
+  logger,
+  background: tasks.run,
+  deleteUser: accountDeletion(database.db),
+  students: studentAccess(database.db),
+});
 const ai = createAi({ mistral: config.mistral, db: database.db, logger });
 const moderation = createModeration({ mistral: config.mistral, logger });
 const app = createApp({ config, logger, db: database.db, auth, ai, moderation, lifecycle, background: tasks.run });

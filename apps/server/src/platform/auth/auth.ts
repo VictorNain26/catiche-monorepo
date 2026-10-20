@@ -1,7 +1,7 @@
 /**
  * better-auth, on the one public origin of the API and the web: the session cookie stays on that
  * host. No cookieCache: a cached session would outlive a deleted account for its whole maxAge. A
- * student has no credential: their device is paired by a guardian's code (./pairing.ts). A
+ * student enters by a code of their own, on a device a guardian's code recognised (./student-sign-in.ts). A
  * guardian has no password either: a code sent to their address lets them in, and the first one
  * creates their account, on an invitation (./invitation.ts), and a passkey then saves them the
  * code. Deleting the account, or adding a passkey, asks for a session opened a few minutes before.
@@ -12,15 +12,16 @@ import { passkey } from '@better-auth/passkey';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { APIError } from 'better-auth/api';
-import { emailOTP, multiSession } from 'better-auth/plugins';
+import { emailOTP } from 'better-auth/plugins';
 import type { Logger } from 'pino';
 import type { Config } from '../../config';
 import type { Db } from '../db/client';
 import type { Mailer } from '../email/mailer';
 import { CLIENT_ADDRESS_HEADER } from '../http/client-address';
 import { invitationIdentifier } from './invitation';
-import { devicePairing, isStudentEmail, PAIRING_PREFIX } from './pairing';
 import { account, passkey as passkeyTable, session, user, verification } from './schema';
+import { createStudentDevices } from './student-devices';
+import { ACTIVATION_PREFIX, isStudentEmail, studentSignIn, type StudentAccess } from './student-sign-in';
 
 interface AuthDeps {
   mailer: Mailer;
@@ -32,9 +33,11 @@ interface AuthDeps {
    * deletion, which then finds nothing left: better-auth runs its steps outside a transaction.
    */
   deleteUser: (userId: string) => Promise<void>;
+  /** The household's answers to the student sign-in: whose a student is, and their month of birth. */
+  students: StudentAccess;
 }
 
-export function createAuth(db: Db, config: Pick<Config, 'publicUrl' | 'authSecret'>, { mailer, logger, background, deleteUser }: AuthDeps) {
+export function createAuth(db: Db, config: Pick<Config, 'publicUrl' | 'authSecret'>, { mailer, logger, background, deleteUser, students }: AuthDeps) {
   // A student's address is never sent to, and answered as an unknown address would be, without telling.
   const send: Mailer = async (email) => {
     if (isStudentEmail(email.to)) return;
@@ -51,7 +54,7 @@ export function createAuth(db: Db, config: Pick<Config, 'publicUrl' | 'authSecre
   return betterAuth({
     baseURL: config.publicUrl,
     secret: config.authSecret,
-    // Transactions on: better-auth's own multi-step writes (and device pairing) are atomic.
+    // Transactions on: better-auth's own multi-step writes (and an activation code spent) are atomic.
     database: drizzleAdapter(db, { provider: 'pg', schema: { user, session, account, verification, passkey: passkeyTable }, transaction: true }),
     // better-auth's own messages, a failed email among them, go to pino; only an error's own
     // fields, through pino's serializer, never the other arguments, which can hold a user.
@@ -107,8 +110,8 @@ export function createAuth(db: Db, config: Pick<Config, 'publicUrl' | 'authSecre
     // on in every environment, the tests exercise the check production runs.
     // The client's address, as the server reads it behind the host's proxy (app.ts).
     advanced: { disableOriginCheck: false, backgroundTasks: { handler: background }, ipAddress: { ipAddressHeaders: [CLIENT_ADDRESS_HEADER] } },
-    // A pairing code is a credential: stored hashed, like a password, never in clear.
-    verification: { storeIdentifier: { default: 'plain', overrides: { [PAIRING_PREFIX]: 'hashed' } } },
+    // An activation code is a credential: stored hashed, like a password, never in clear.
+    verification: { storeIdentifier: { default: 'plain', overrides: { [ACTIVATION_PREFIX]: 'hashed' } } },
     // The code's own routes for what Tom does not use: no password to reset, no other check.
     disabledPaths: [
       '/email-otp/check-verification-otp',
@@ -118,10 +121,7 @@ export function createAuth(db: Db, config: Pick<Config, 'publicUrl' | 'authSecre
       '/email-otp/reset-password',
     ],
     plugins: [
-      devicePairing(),
-      // A device keeps the child's session while their guardian enters on it (./pairing.ts hands
-      // it back to the child).
-      multiSession(),
+      studentSignIn({ devices: createStudentDevices(db), students }),
       // Bound to the public origin, never to the one a request claims; a discoverable credential,
       // which the browser offers in the address field. Its name in Tom is the browser that made it,
       // as a session's: a name the client sends would also replace, in the browser's own list, the

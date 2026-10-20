@@ -2,23 +2,23 @@ import { Banner, Button, Fold, List, ListItem, Section, toast } from '@repo/ui';
 import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { MemoryAnswer } from '../components/memory-answer';
-import { Page, ProfileLink } from '../components/page';
+import { Page, ProfileAction } from '../components/page';
 import { TomHead } from '../components/tom';
 import { WeekSummary } from '../components/week-summary';
 import { sessionsQuery, startSession } from '../lib/chat';
 import { deviceName, formatDay } from '../lib/device';
-import { meQuery, ownDevicesQuery } from '../lib/me';
+import { isRecentReset, meQuery, ownDevicesQuery } from '../lib/me';
 import { memoryQuery, useMemoryAnswer, type MemoryChoice } from '../lib/memory';
 import { ownSummaryQuery } from '../lib/summary';
 
 /**
- * The home: the sign-in for a visitor, the household for a guardian, their space for a student:
- * their sessions with Tom, and every device paired to their account.
+ * The home: « Qui fait ses devoirs ? » for a visitor, the household for a guardian, their space for
+ * a student: their sessions with Tom, and every device that holds their profile.
  */
 export const Route = createFileRoute('/')({
   beforeLoad: async ({ context }) => {
     const me = await context.queryClient.query(meQuery);
-    if (!me) throw redirect({ to: '/connexion' });
+    if (!me) throw redirect({ to: '/profils' });
     if (me.role === 'guardian') throw redirect({ to: '/foyer' });
   },
   loader: ({ context }) => Promise.all([context.queryClient.query(sessionsQuery), context.queryClient.query(ownDevicesQuery)]),
@@ -40,7 +40,8 @@ function StudentHome() {
   const week = useQuery(ownSummaryQuery);
 
   return (
-    <Page title={`Bonjour ${me?.name ?? ''}`} action={<ProfileLink />}>
+    <Page title={`Bonjour ${me?.name ?? ''}`} action={<ProfileAction />}>
+      <CodeChanged />
       {memory?.state === 'asked' && (
         <MemoryAnswer
           answer={answer}
@@ -98,18 +99,39 @@ function Sessions() {
   );
 }
 
+/**
+ * A code a parent replaced, told to the student for two weeks on their home, and for good in their
+ * devices: the parent can enter their space that way, and the student knows when (CNIL, recommendation 5).
+ */
+function CodeChanged() {
+  const { data } = useSuspenseQuery(ownDevicesQuery);
+  if (!isRecentReset(data.codeResetAt)) return null;
+  return (
+    <Banner tone="info" title={`Ton code a été changé le ${formatDay(data.codeResetAt ?? '')}, avec un code de ton parent.`}>
+      Si ce n’est pas toi qui l’as changé, parles-en à ton parent.
+    </Banner>
+  );
+}
+
 function Devices() {
-  const { data: devices } = useSuspenseQuery(ownDevicesQuery);
+  const { data } = useSuspenseQuery(ownDevicesQuery);
 
   return (
-    <Fold title="Tes appareils reliés">
+    <Fold title="Tes appareils">
       <List>
-        {devices.map((device) => (
-          <ListItem key={device.id} title={deviceName(device.userAgent)} meta={`Relié le ${formatDay(device.pairedAt)}`} />
+        {data.devices.map((device) => (
+          <ListItem
+            key={device.id}
+            title={deviceName(device.userAgent)}
+            meta={`${device.shared ? 'Partagé · ajouté' : 'Ajouté'} le ${formatDay(device.createdAt)}`}
+          />
         ))}
       </List>
+      {data.codeResetAt && <p className="text-sm text-muted-foreground">Ton code a été changé le {formatDay(data.codeResetAt)}.</p>}
       <p className="text-sm text-muted-foreground">Un appareil que tu ne reconnais pas ? Dis-le à ton parent, qui peut le déconnecter.</p>
-      <p className="text-sm text-muted-foreground">Sur un appareil partagé, ton parent passe sur son profil sans te déconnecter.</p>
+      <p className="text-sm text-muted-foreground">
+        Sur un appareil partagé, ton profil se ferme après 10 minutes sans rien faire : personne d’autre n’y entre après toi.
+      </p>
     </Fold>
   );
 }

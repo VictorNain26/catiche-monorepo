@@ -1,24 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Banner, Button, Field, Fold, List, ListItem, Section, SelectField, toast } from '@repo/ui';
+import { Banner, Button, Field, Fold, SelectField, toast } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { ChildAccess, useActivation } from '../components/child-access';
 import { BackLink, Page } from '../components/page';
-import { QrCode } from '../components/qr-code';
 import { WeekSummary } from '../components/week-summary';
 import { isProblem } from '../lib/api';
 import { useConfirmation } from '../lib/confirmation';
-import { deviceName, formatDay, formatHour } from '../lib/device';
-import { formatCode, pairingLink } from '../lib/pairing';
 import { summaryQuery } from '../lib/summary';
 import {
   LEVEL_LABELS,
   deleteStudent,
   householdMessage,
   memoryStatus,
-  pairingCode,
-  revokeDevice,
   studentDevicesQuery,
   studentSchema,
   studentsQuery,
@@ -27,9 +22,10 @@ import {
 } from '../lib/household';
 
 /**
- * One child of the household. Until a device holds their space, the page opens on the next step:
- * pairing their own phone, from the 6e. Then their week; their devices, their memory, their name
- * and class and their account folded, a tap away.
+ * One child of the household. Until a device holds their profile, the page opens on the next
+ * step: a code for their own device, or this computer added. Then their week; their codes and
+ * devices side by side on a computer; their memory, their name and class and their account
+ * folded, a tap away.
  */
 export const Route = createFileRoute('/foyer/$studentId')({
   loader: async ({ context, params }) => {
@@ -47,17 +43,16 @@ function StudentPage() {
   const { data: students } = useSuspenseQuery(studentsQuery);
   const week = useQuery(summaryQuery(studentId));
   const child = students.find(({ id }) => id === studentId);
-  const pairing = usePairing(studentId, child?.name ?? '');
+  const activation = useActivation(studentId);
   if (!child) return null;
+  const first = activation.devices.length === 0;
 
   return (
-    <Page title={child.name} subtitle={LEVEL_LABELS[child.level]} back={<BackLink to="/foyer">Retour au foyer</BackLink>}>
-      {pairing.firstStep && <NextStep child={child} pairing={pairing} />}
+    <Page title={child.name} subtitle={LEVEL_LABELS[child.level]} back={<BackLink to="/foyer">Retour au foyer</BackLink>} wide>
+      {first && <ChildAccess child={child} activation={activation} />}
       <WeekSummary week={week.data} failed={week.isError} name={child.name} reader="guardian" />
+      {!first && <ChildAccess child={child} activation={activation} />}
       <div className="flex flex-col">
-        <Fold title="Ses appareils">
-          <Devices child={child} pairing={pairing} />
-        </Fold>
         <Fold title="Ce que Tom retient">
           <Memory child={child} />
         </Fold>
@@ -69,150 +64,6 @@ function StudentPage() {
         </Fold>
       </div>
     </Page>
-  );
-}
-
-/**
- * The pairing of a device of the child's: a code asked, then their devices watched until one more
- * holds their space. A code leaves the screen once spent or expired, and a code a device spent
- * never shows again, even once that device is disconnected. The first step stays, said done, until
- * the page is left: the parent reads it where the code was.
- */
-function usePairing(studentId: string, name: string) {
-  const queryClient = useQueryClient();
-  // The devices paired when the code was asked for: one more, and the code is spent.
-  const [before, setBefore] = useState<ReadonlySet<string> | null>(null);
-  const [expired, setExpired] = useState<string | null>(null);
-  const pairing = useMutation({ mutationFn: () => pairingCode(studentId) });
-  // Nothing else renders the page when a code expires.
-  useEffect(() => {
-    if (!pairing.data) return;
-    const { code, expiresAt } = pairing.data;
-    const timer = setTimeout(
-      () => {
-        setExpired(code);
-      },
-      Date.parse(expiresAt) - Date.now(),
-    );
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [pairing.data]);
-  const spent = (list: readonly { id: string }[]) => before !== null && list.some(({ id }) => !before.has(id));
-  const pending = (list: readonly { id: string }[]) => pairing.data !== undefined && pairing.data.code !== expired && !spent(list);
-  // While a code waits on the child's device, the list shows it the moment it is redeemed.
-  const { data: devices } = useSuspenseQuery({
-    ...studentDevicesQuery(studentId),
-    refetchInterval: (query) => (pending(query.state.data ?? []) ? 5000 : false),
-  });
-  const revoke = useMutation({
-    mutationFn: (deviceId: string) => revokeDevice(studentId, deviceId),
-    onSuccess: (_, deviceId) => {
-      if (before !== null && !before.has(deviceId)) {
-        setBefore(null);
-        pairing.reset();
-      }
-      return queryClient.invalidateQueries({ queryKey: studentDevicesQuery(studentId).queryKey });
-    },
-  });
-
-  const redeemed = spent(devices);
-  // The pairing happens on the child's device: read out here when the list shows it.
-  useEffect(() => {
-    if (redeemed) toast(`L’appareil de ${name} est relié.`);
-  }, [redeemed, name]);
-  return {
-    devices,
-    firstStep: devices.length === 0 || (redeemed && before?.size === 0),
-    code: pending(devices) ? pairing.data : undefined,
-    redeemed,
-    ask: () => {
-      setBefore(new Set(devices.map(({ id }) => id)));
-      pairing.mutate();
-    },
-    asking: pairing.isPending,
-    error: pairing.error,
-    revoke,
-  };
-}
-
-type Pairing = ReturnType<typeof usePairing>;
-
-function NextStep({ child, pairing }: { child: Student; pairing: Pairing }) {
-  return (
-    <Section title="Prochaine étape">
-      <p>{child.name} fait ses devoirs sur son téléphone : un code à usage unique le relie à son compte, sans mot de passe.</p>
-      {pairing.redeemed ? (
-        <Banner tone="success" title={`L’appareil de ${child.name} est relié.`} />
-      ) : (
-        <PairingCode pairing={pairing} device="son téléphone" label={`Relier le téléphone de ${child.name}`} name={child.name} />
-      )}
-    </Section>
-  );
-}
-
-/** A code for the child's device: `device` says which, « son téléphone » or « son autre appareil ». */
-function PairingCode({ pairing, device, label, name }: { pairing: Pairing; device: string; label: string; name: string }) {
-  const { code } = pairing;
-  return (
-    <>
-      {code && (
-        <>
-          <p>Avec l’appareil photo de {device}, visez ce code :</p>
-          <QrCode text={pairingLink(window.location.origin, code.code)} label={`QR code pour relier l’appareil de ${name}`} />
-          <p>
-            Ou, sur {device}, ouvrez {window.location.origin}/jumeler et saisissez :
-          </p>
-          <p className="self-center font-mono text-3xl tracking-widest">{formatCode(code.code)}</p>
-          <p className="text-sm text-muted-foreground">Valable jusqu’à {formatHour(code.expiresAt)}, une seule fois.</p>
-        </>
-      )}
-      {pairing.error && <Banner tone="error" title={householdMessage(pairing.error)} />}
-      <Button disabled={pairing.asking} onClick={pairing.ask}>
-        {code ? 'Nouveau code' : label}
-      </Button>
-    </>
-  );
-}
-
-function Devices({ child, pairing }: { child: Student; pairing: Pairing }) {
-  const { devices, revoke } = pairing;
-  return (
-    <>
-      {devices.length === 0 ? (
-        <p className="text-muted-foreground">Aucun appareil relié.</p>
-      ) : (
-        <List>
-          {devices.map((device) => (
-            <ListItem key={device.id} title={deviceName(device.userAgent)} meta={`Relié le ${formatDay(device.pairedAt)}`}>
-              <Button
-                variant="outline"
-                disabled={revoke.isPending}
-                onClick={() => {
-                  revoke.mutate(device.id);
-                }}
-              >
-                Déconnecter
-              </Button>
-            </ListItem>
-          ))}
-        </List>
-      )}
-      {revoke.error && <Banner tone="error" title={householdMessage(revoke.error)} />}
-      {/* Until a device holds the child's space, the code is asked for in the next step. */}
-      {!pairing.firstStep && (
-        <>
-          {pairing.redeemed ? (
-            <Banner tone="success" title={`L’appareil de ${child.name} est relié.`} />
-          ) : (
-            !pairing.code && (
-              <p className="text-muted-foreground">Un code à usage unique relie un autre appareil de {child.name} à son compte, sans mot de passe.</p>
-            )
-          )}
-          <PairingCode pairing={pairing} device="son autre appareil" label="Relier un autre appareil" name={child.name} />
-        </>
-      )}
-    </>
   );
 }
 

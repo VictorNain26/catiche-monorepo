@@ -4,11 +4,12 @@
  * (OWASP Authorization Cheat Sheet): a student of another household is simply not found.
  */
 
-import { and, desc, eq, gt, inArray, ne, type SQL, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, ne, type SQL, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { SchoolLevel } from '../../domain/levels';
 import type { MemoryAnswer } from '../../domain/memory-consent';
-import { session, user } from '../../platform/auth/schema';
+import { device, deviceProfile, session, studentCode, user } from '../../platform/auth/schema';
+import { CODE_TRIES, DEVICE_TRIES } from '../../platform/auth/student-devices';
 import type { Db } from '../../platform/db/client';
 import { household, householdMember, studentProfile } from './schema';
 
@@ -32,13 +33,38 @@ export function createHouseholdRepository(db: Db) {
       .innerJoin(guardian, and(eq(guardian.householdId, householdMember.householdId), eq(guardian.userId, guardianId), eq(guardian.role, 'guardian')))
       .where(eq(householdMember.role, 'student'));
 
-  /** Live sessions matching `where`, the newest first. */
+  /**
+   * The devices that hold a student's profile, matching `where`, the newest first: their browser,
+   * when the profile was added and last opened, whether the device is shared and the profile
+   * blocked there. Never a token nor an address.
+   */
   const devices = (where: SQL | undefined) =>
     db
-      .select({ id: session.id, pairedAt: session.createdAt, userAgent: session.userAgent })
-      .from(session)
-      .where(and(where, gt(session.expiresAt, new Date())))
-      .orderBy(desc(session.createdAt));
+      .select({
+        id: device.id,
+        userAgent: device.userAgent,
+        shared: device.shared,
+        createdAt: deviceProfile.createdAt,
+        lastUsedAt: deviceProfile.lastUsedAt,
+        blocked: gte(deviceProfile.failures, DEVICE_TRIES).mapWith(Boolean),
+      })
+      .from(deviceProfile)
+      .innerJoin(device, eq(device.id, deviceProfile.deviceId))
+      .where(where)
+      .orderBy(desc(deviceProfile.createdAt));
+
+  /** Whether the student has chosen a code, whether too many tries locked it, and when a guardian last replaced it. */
+  const codeOf = async (studentId: string) => {
+    const [code] = await db
+      .select({ hash: studentCode.hash, failures: studentCode.failures, resetAt: studentCode.resetAt })
+      .from(studentCode)
+      .where(eq(studentCode.userId, studentId));
+    return { chosen: Boolean(code?.hash), locked: (code?.failures ?? 0) >= CODE_TRIES, resetAt: code?.resetAt ?? null };
+  };
+
+  /** The profile of a student of the guardian's household on a device. */
+  const profileOf = (guardianId: string, studentId: string, deviceId: string) =>
+    and(eq(deviceProfile.deviceId, deviceId), eq(deviceProfile.studentId, studentId), inArray(deviceProfile.studentId, studentsOf(guardianId)));
 
   const studentColumns = {
     id: user.id,
@@ -145,23 +171,39 @@ export function createHouseholdRepository(db: Db) {
       });
     },
 
-    /** A device is a live session: when it was paired and its browser; never its token nor its address. */
+    /** The student's devices and the state of their code, as their guardian reads them; never the code. */
     async listDevices(guardianId: string, studentId: string) {
-      return devices(and(eq(session.userId, studentId), inArray(session.userId, studentsOf(guardianId))));
+      const list = await devices(and(eq(deviceProfile.studentId, studentId), inArray(deviceProfile.studentId, studentsOf(guardianId))));
+      const { chosen, locked } = await codeOf(studentId);
+      return { devices: list, code: { chosen, locked } };
     },
 
-    /** The signed-in user's own devices, as their guardian sees them. */
+    /** The signed-in student's own devices, and when a guardian last replaced their code. */
     async listOwnDevices(userId: string) {
-      return devices(eq(session.userId, userId));
+      return { devices: await devices(eq(deviceProfile.studentId, userId)), codeResetAt: (await codeOf(userId)).resetAt };
     },
 
-    /** `false` when no such device of a student of the guardian's household. */
-    async revokeDevice(guardianId: string, studentId: string, deviceId: string) {
-      const revoked = await db
-        .delete(session)
-        .where(and(eq(session.id, deviceId), eq(session.userId, studentId), inArray(session.userId, studentsOf(guardianId))))
-        .returning({ id: session.id });
-      return revoked.length > 0;
+    /** The profile's tries on the device start again; `false` when no such profile of a student of the household. */
+    async unblockDevice(guardianId: string, studentId: string, deviceId: string) {
+      const unblocked = await db
+        .update(deviceProfile)
+        .set({ failures: 0 })
+        .where(profileOf(guardianId, studentId, deviceId))
+        .returning({ deviceId: deviceProfile.deviceId });
+      return unblocked.length > 0;
+    },
+
+    /** The device no longer holds the student: their profile there and its sessions go. `false` when no such profile. */
+    async removeDevice(guardianId: string, studentId: string, deviceId: string) {
+      return db.transaction(async (tx) => {
+        const removed = await tx
+          .delete(deviceProfile)
+          .where(profileOf(guardianId, studentId, deviceId))
+          .returning({ deviceId: deviceProfile.deviceId });
+        if (removed.length === 0) return false;
+        await tx.delete(session).where(and(eq(session.userId, studentId), eq(session.deviceId, deviceId)));
+        return true;
+      });
     },
 
     /**

@@ -1,9 +1,10 @@
 import { buttonVariants, cn } from '@repo/ui/classes';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createLink } from '@tanstack/react-router';
-import { ChevronLeftIcon, UsersRoundIcon, type LucideIcon } from 'lucide-react';
+import { ChevronLeftIcon, type LucideIcon } from 'lucide-react';
 import { useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
 import { meQuery } from '../lib/me';
+import { ChangeProfile } from './sign-out';
 
 function HeaderAnchor({ icon: Icon, className, children, ...anchor }: ComponentProps<'a'> & { icon: LucideIcon }) {
   return (
@@ -25,17 +26,13 @@ export function BackLink(props: Omit<ComponentProps<typeof HeaderLink>, 'icon'>)
 }
 
 /**
- * The student's profile, on each of their screens: whose space the device holds shows, and a tap
- * on it leads to « Qui utilise Tom ? », where the parent enters on the child's device.
+ * The student's profile, on each of their screens: whose space is open shows, and a tap on it
+ * closes it and goes back to « Qui fait ses devoirs ? ».
  */
-export function ProfileLink() {
+export function ProfileAction() {
   const { data: me } = useSuspenseQuery(meQuery);
   if (!me) return null;
-  return (
-    <HeaderLink to="/connexion" icon={UsersRoundIcon} aria-label={`${me.name}, qui utilise Tom ?`}>
-      {me.name}
-    </HeaderLink>
-  );
+  return <ChangeProfile name={me.name} />;
 }
 
 interface PageProps {
@@ -46,6 +43,8 @@ interface PageProps {
   action?: ReactNode;
   /** A screen reached by a step of a form, not a link: its title takes the focus, so it is read out. */
   announce?: boolean;
+  /** A screen laid out by its own parts on a computer, side by side, rather than one column. */
+  wide?: boolean;
   children: ReactNode;
 }
 
@@ -53,14 +52,14 @@ interface PageProps {
  * A screen at phone width first, in one column; its header holds the way back, read before the
  * title, and an action of the space on the right, when it has them.
  */
-export function Page({ title, subtitle, back, action, announce = false, children }: PageProps) {
+export function Page({ title, subtitle, back, action, announce = false, wide = false, children }: PageProps) {
   const links = back !== undefined || action !== undefined;
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     if (announce) headingRef.current?.focus();
   }, [announce]);
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-4">
+    <main className={cn('mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-4', wide && 'lg:max-w-5xl lg:px-8')}>
       <header className="flex flex-col gap-2 pt-4">
         {links ? (
           <div className="flex min-h-11 items-center justify-between gap-3">

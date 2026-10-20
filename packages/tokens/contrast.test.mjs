@@ -84,7 +84,6 @@ const TEXT = [
   ['annotation', 'background'],
   ['annotation', 'card'],
   ['annotation', 'secondary'],
-  ['qr', 'qr-background'],
   ['disabled-foreground', 'disabled'],
   ['panel-foreground', 'panel'],
 ];
@@ -103,8 +102,8 @@ const MARKS = [
   ]),
 ];
 
-// A color the same in both modes on purpose: a QR code reads dark on light, an overlay is black.
-const FIXED = ['qr', 'qr-background', 'overlay'];
+// A color the same in both modes on purpose: an overlay is black.
+const FIXED = ['overlay'];
 
 test('every role follows the dark mode: it points at a scale step, is redefined in the dark block, or is fixed', () => {
   const roles = Object.keys(theme.light).filter((name) => name.startsWith('color-'));

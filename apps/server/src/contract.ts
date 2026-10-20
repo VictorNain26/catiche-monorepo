@@ -5,9 +5,10 @@
  */
 
 import type { createApp } from './app';
-import type { devicePairing } from './platform/auth/pairing';
+import type { studentSignIn } from './platform/auth/student-sign-in';
 
 export type AppType = ReturnType<typeof createApp>;
-export type DevicePairing = ReturnType<typeof devicePairing>;
+export type StudentSignIn = ReturnType<typeof studentSignIn>;
+export type { ProfileState } from './platform/auth/student-devices';
 export type { ProblemCode } from './platform/http/problem';
 export type { TurnStep } from './modules/tutor';

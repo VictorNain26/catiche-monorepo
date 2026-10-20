@@ -5,14 +5,15 @@ import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { z } from '../lib/zod';
 import { Page } from '../components/page';
-import { authClient, authData, deviceSessionsQuery } from '../lib/auth';
+import { authClient, authData } from '../lib/auth';
 import { meQuery } from '../lib/me';
+import { profilesQuery } from '../lib/student';
 
 /**
  * A new guardian's first name: their account was created by their first code, nameless. A screen
  * of its own, which the household sends them to until they give it, whatever they reloaded. Then
- * the passkey's offer, while the session is fresh, except on a device that holds a child's space:
- * a passkey there would open to the lock the child knows.
+ * the passkey's offer, while the session is fresh, except on a device that holds a child's
+ * profile: a passkey there would open to the lock the child knows.
  */
 export const Route = createFileRoute('/bienvenue')({
   beforeLoad: async ({ context }) => {
@@ -33,9 +34,8 @@ function Welcome() {
     mutationFn: async (values: z.infer<typeof schema>) => {
       await authData(authClient.updateUser(values));
       await queryClient.invalidateQueries({ queryKey: meQuery.queryKey });
-      // The guardian's own session, and a child's if the device holds one.
-      const held = await queryClient.query(deviceSessionsQuery);
-      await navigate({ to: held.length > 1 ? '/foyer' : '/foyer/cle' });
+      const { profiles } = await queryClient.query(profilesQuery);
+      await navigate({ to: profiles.length > 0 ? '/foyer' : '/foyer/cle' });
     },
   });
   const submit = form.handleSubmit((values) => {

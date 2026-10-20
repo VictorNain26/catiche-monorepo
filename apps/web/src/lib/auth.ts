@@ -1,46 +1,15 @@
 /** better-auth's client, on the server's own origin (`/api/auth`), its session in a cookie. */
 
 import { passkeyClient } from '@better-auth/passkey/client';
-import { queryOptions } from '@tanstack/react-query';
 import type { BetterAuthClientPlugin } from 'better-auth/client';
-import { emailOTPClient, multiSessionClient } from 'better-auth/client/plugins';
+import { emailOTPClient } from 'better-auth/client/plugins';
 import { createAuthClient } from 'better-auth/react';
-import type { DevicePairing } from '@repo/server/contract';
+import type { StudentSignIn } from '@repo/server/contract';
 
-// The server's device pairing, its endpoints inferred (https://better-auth.com/docs/concepts/plugins).
-const devicePairing = { id: 'device-pairing', $InferServerPlugin: {} as DevicePairing } satisfies BetterAuthClientPlugin;
+// The server's student sign-in, its endpoints inferred (https://better-auth.com/docs/concepts/plugins).
+const studentSignIn = { id: 'student-sign-in', $InferServerPlugin: {} as StudentSignIn } satisfies BetterAuthClientPlugin;
 
-export const authClient = createAuthClient({ plugins: [devicePairing, emailOTPClient(), passkeyClient(), multiSessionClient()] });
-
-/**
- * The sessions this device holds, one per account, as better-auth's multi-session lists them. A
- * choice that rests on them reads them by `queryClient.query`, which throws when the list is
- * refused: nothing is decided blind.
- */
-export const deviceSessionsQuery = queryOptions({
-  queryKey: ['device-sessions'],
-  queryFn: () => authData(authClient.multiSession.listDeviceSessions()),
-});
-
-interface DeviceSession {
-  session: { token: string };
-}
-
-/**
- * Signs the guardian out of this device. Where it also holds another session, a child's, only
- * theirs is revoked: better-auth's sign-out would close them all. The sessions it holds unknown,
- * nothing is signed out.
- */
-export async function signOutOfDevice(device: {
-  current: () => Promise<DeviceSession | null>;
-  held: () => Promise<readonly DeviceSession[]>;
-  revoke: (sessionToken: string) => Promise<unknown>;
-  signOut: () => Promise<unknown>;
-}): Promise<void> {
-  const [current, held] = await Promise.all([device.current(), device.held()]);
-  const shared = held.some(({ session }) => session.token !== current?.session.token);
-  await (current && shared ? device.revoke(current.session.token) : device.signOut());
-}
+export const authClient = createAuthClient({ plugins: [studentSignIn, emailOTPClient(), passkeyClient()] });
 
 interface AuthError {
   code?: string | undefined;

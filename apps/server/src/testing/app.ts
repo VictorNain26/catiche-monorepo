@@ -6,7 +6,7 @@
 
 import pino from 'pino';
 import { createApp, type AppDeps } from '../app';
-import { accountDeletion } from '../modules/household';
+import { accountDeletion, studentAccess } from '../modules/household';
 import { createAuth } from '../platform/auth/auth';
 import type { Db } from '../platform/db/client';
 import { createBackgroundTasks } from '../platform/lifecycle/background';
@@ -24,7 +24,7 @@ export function testApp(db: Db, { config = {}, origin = ORIGIN }: { config?: Par
   const auth = createAuth(
     db,
     { publicUrl: origin, authSecret: 'x'.repeat(32) },
-    { mailer: mail.mailer, logger: silent, background: tasks.run, deleteUser: accountDeletion(db) },
+    { mailer: mail.mailer, logger: silent, background: tasks.run, deleteUser: accountDeletion(db), students: studentAccess(db) },
   );
   const app = createApp({
     config: { production: false, webDistDir: undefined, apiRateLimit: 1000, trustedProxyHops: 0, ...config },

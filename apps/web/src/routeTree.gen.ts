@@ -10,22 +10,29 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ActiverRouteImport } from './routes/activer'
 import { Route as BienvenueRouteImport } from './routes/bienvenue'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as ErreurConnexionRouteImport } from './routes/erreur-connexion'
 import { Route as FoyerRouteImport } from './routes/foyer'
-import { Route as JumelerRouteImport } from './routes/jumeler'
 import { Route as MemoireRouteImport } from './routes/memoire'
 import { Route as FoyerIndexRouteImport } from './routes/foyer.index'
 import { Route as FoyerStudentIdRouteImport } from './routes/foyer.$studentId'
 import { Route as FoyerAjouterRouteImport } from './routes/foyer.ajouter'
 import { Route as FoyerCleRouteImport } from './routes/foyer.cle'
 import { Route as FoyerCompteRouteImport } from './routes/foyer.compte'
+import { Route as ProfilsIndexRouteImport } from './routes/profils.index'
+import { Route as ProfilsStudentIdRouteImport } from './routes/profils.$studentId'
 import { Route as SeanceSessionIdRouteImport } from './routes/seance.$sessionId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActiverRoute = ActiverRouteImport.update({
+  id: '/activer',
+  path: '/activer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BienvenueRoute = BienvenueRouteImport.update({
@@ -46,11 +53,6 @@ const ErreurConnexionRoute = ErreurConnexionRouteImport.update({
 const FoyerRoute = FoyerRouteImport.update({
   id: '/foyer',
   path: '/foyer',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const JumelerRoute = JumelerRouteImport.update({
-  id: '/jumeler',
-  path: '/jumeler',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MemoireRoute = MemoireRouteImport.update({
@@ -83,6 +85,16 @@ const FoyerCompteRoute = FoyerCompteRouteImport.update({
   path: '/compte',
   getParentRoute: () => FoyerRoute,
 } as any)
+const ProfilsIndexRoute = ProfilsIndexRouteImport.update({
+  id: '/profils/',
+  path: '/profils/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilsStudentIdRoute = ProfilsStudentIdRouteImport.update({
+  id: '/profils/$studentId',
+  path: '/profils/$studentId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SeanceSessionIdRoute = SeanceSessionIdRouteImport.update({
   id: '/seance/$sessionId',
   path: '/seance/$sessionId',
@@ -91,105 +103,119 @@ const SeanceSessionIdRoute = SeanceSessionIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/activer': typeof ActiverRoute
   '/bienvenue': typeof BienvenueRoute
   '/connexion': typeof ConnexionRoute
   '/erreur-connexion': typeof ErreurConnexionRoute
   '/foyer': typeof FoyerRouteWithChildren
-  '/jumeler': typeof JumelerRoute
   '/memoire': typeof MemoireRoute
   '/foyer/$studentId': typeof FoyerStudentIdRoute
   '/foyer/ajouter': typeof FoyerAjouterRoute
   '/foyer/cle': typeof FoyerCleRoute
   '/foyer/compte': typeof FoyerCompteRoute
+  '/profils/$studentId': typeof ProfilsStudentIdRoute
   '/seance/$sessionId': typeof SeanceSessionIdRoute
   '/foyer/': typeof FoyerIndexRoute
+  '/profils/': typeof ProfilsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/activer': typeof ActiverRoute
   '/bienvenue': typeof BienvenueRoute
   '/connexion': typeof ConnexionRoute
   '/erreur-connexion': typeof ErreurConnexionRoute
-  '/jumeler': typeof JumelerRoute
   '/memoire': typeof MemoireRoute
   '/foyer/$studentId': typeof FoyerStudentIdRoute
   '/foyer/ajouter': typeof FoyerAjouterRoute
   '/foyer/cle': typeof FoyerCleRoute
   '/foyer/compte': typeof FoyerCompteRoute
+  '/profils/$studentId': typeof ProfilsStudentIdRoute
   '/seance/$sessionId': typeof SeanceSessionIdRoute
   '/foyer': typeof FoyerIndexRoute
+  '/profils': typeof ProfilsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/activer': typeof ActiverRoute
   '/bienvenue': typeof BienvenueRoute
   '/connexion': typeof ConnexionRoute
   '/erreur-connexion': typeof ErreurConnexionRoute
   '/foyer': typeof FoyerRouteWithChildren
-  '/jumeler': typeof JumelerRoute
   '/memoire': typeof MemoireRoute
   '/foyer/$studentId': typeof FoyerStudentIdRoute
   '/foyer/ajouter': typeof FoyerAjouterRoute
   '/foyer/cle': typeof FoyerCleRoute
   '/foyer/compte': typeof FoyerCompteRoute
+  '/profils/$studentId': typeof ProfilsStudentIdRoute
   '/seance/$sessionId': typeof SeanceSessionIdRoute
   '/foyer/': typeof FoyerIndexRoute
+  '/profils/': typeof ProfilsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/activer'
     | '/bienvenue'
     | '/connexion'
     | '/erreur-connexion'
     | '/foyer'
-    | '/jumeler'
     | '/memoire'
     | '/foyer/$studentId'
     | '/foyer/ajouter'
     | '/foyer/cle'
     | '/foyer/compte'
+    | '/profils/$studentId'
     | '/seance/$sessionId'
     | '/foyer/'
+    | '/profils/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/activer'
     | '/bienvenue'
     | '/connexion'
     | '/erreur-connexion'
-    | '/jumeler'
     | '/memoire'
     | '/foyer/$studentId'
     | '/foyer/ajouter'
     | '/foyer/cle'
     | '/foyer/compte'
+    | '/profils/$studentId'
     | '/seance/$sessionId'
     | '/foyer'
+    | '/profils'
   id:
     | '__root__'
     | '/'
+    | '/activer'
     | '/bienvenue'
     | '/connexion'
     | '/erreur-connexion'
     | '/foyer'
-    | '/jumeler'
     | '/memoire'
     | '/foyer/$studentId'
     | '/foyer/ajouter'
     | '/foyer/cle'
     | '/foyer/compte'
+    | '/profils/$studentId'
     | '/seance/$sessionId'
     | '/foyer/'
+    | '/profils/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ActiverRoute: typeof ActiverRoute
   BienvenueRoute: typeof BienvenueRoute
   ConnexionRoute: typeof ConnexionRoute
   ErreurConnexionRoute: typeof ErreurConnexionRoute
   FoyerRoute: typeof FoyerRouteWithChildren
-  JumelerRoute: typeof JumelerRoute
   MemoireRoute: typeof MemoireRoute
+  ProfilsStudentIdRoute: typeof ProfilsStudentIdRoute
   SeanceSessionIdRoute: typeof SeanceSessionIdRoute
+  ProfilsIndexRoute: typeof ProfilsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -199,6 +225,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/activer': {
+      id: '/activer'
+      path: '/activer'
+      fullPath: '/activer'
+      preLoaderRoute: typeof ActiverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bienvenue': {
@@ -227,13 +260,6 @@ declare module '@tanstack/react-router' {
       path: '/foyer'
       fullPath: '/foyer'
       preLoaderRoute: typeof FoyerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/jumeler': {
-      id: '/jumeler'
-      path: '/jumeler'
-      fullPath: '/jumeler'
-      preLoaderRoute: typeof JumelerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/memoire': {
@@ -278,6 +304,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FoyerCompteRouteImport
       parentRoute: typeof FoyerRoute
     }
+    '/profils/': {
+      id: '/profils/'
+      path: '/profils'
+      fullPath: '/profils/'
+      preLoaderRoute: typeof ProfilsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profils/$studentId': {
+      id: '/profils/$studentId'
+      path: '/profils/$studentId'
+      fullPath: '/profils/$studentId'
+      preLoaderRoute: typeof ProfilsStudentIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/seance/$sessionId': {
       id: '/seance/$sessionId'
       path: '/seance/$sessionId'
@@ -308,13 +348,15 @@ const FoyerRouteWithChildren = FoyerRoute._addFileChildren(FoyerRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ActiverRoute: ActiverRoute,
   BienvenueRoute: BienvenueRoute,
   ConnexionRoute: ConnexionRoute,
   ErreurConnexionRoute: ErreurConnexionRoute,
   FoyerRoute: FoyerRouteWithChildren,
-  JumelerRoute: JumelerRoute,
   MemoireRoute: MemoireRoute,
+  ProfilsStudentIdRoute: ProfilsStudentIdRoute,
   SeanceSessionIdRoute: SeanceSessionIdRoute,
+  ProfilsIndexRoute: ProfilsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

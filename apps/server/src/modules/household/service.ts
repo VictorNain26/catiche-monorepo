@@ -1,8 +1,8 @@
 /**
- * What a guardian does with the students of their household. A student has no credential: no
- * email (the non-routable address better-auth itself makes for an account without one, RFC 6761
- * `.invalid`), no password. Their device is paired by a code the guardian asks for, and the
- * guardian never gets a session of their child.
+ * What a guardian does with the students of their household. A student has no email (the
+ * non-routable address better-auth itself makes for an account without one, RFC 6761 `.invalid`)
+ * and no password: a code the guardian asks for recognises a device of theirs, then the student
+ * enters by a code of their own that the guardian never learns (`platform/auth/student-sign-in.ts`).
  */
 
 import { createPlaceholderEmail } from '@better-auth/core/utils/email';
@@ -11,6 +11,7 @@ import type { SchoolLevel } from '../../domain/levels';
 import { memoryConsent, type MemoryAnswer } from '../../domain/memory-consent';
 
 export type { MemoryAnswer };
+import type { ActivationReason } from '../../platform/auth/student-sign-in';
 import { Problem } from '../../platform/http/problem';
 import type { HouseholdRepository } from './repository';
 
@@ -23,7 +24,7 @@ export interface StudentInput {
 
 interface Deps {
   repository: HouseholdRepository;
-  createPairingCode: (userId: string) => Promise<{ code: string; expiresAt: Date }>;
+  createActivationCode: (userId: string, reason: ActivationReason) => Promise<{ code: string; expiresAt: Date }>;
 }
 
 type StudentRow = NonNullable<Awaited<ReturnType<HouseholdRepository['findStudent']>>>;
@@ -50,7 +51,7 @@ const toStudent = ({ birthMonth, memoryProposedAt, memoryAnswer, ...student }: S
   };
 };
 
-export function createHouseholdService({ repository, createPairingCode }: Deps) {
+export function createHouseholdService({ repository, createActivationCode }: Deps) {
   const found = async (guardianId: string, studentId: string) => {
     const student = await repository.findStudent(guardianId, studentId);
     if (!student) throw new Problem('NOT_FOUND');
@@ -103,9 +104,10 @@ export function createHouseholdService({ repository, createPairingCode }: Deps) 
       return found(guardianId, studentId);
     },
 
-    async pairingCode(guardianId: string, studentId: string) {
+    /** A code for a new device of the student, or for the code they forgot, which then stops. */
+    async activationCode(guardianId: string, studentId: string, reason: ActivationReason) {
       await found(guardianId, studentId);
-      return createPairingCode(studentId);
+      return createActivationCode(studentId, reason);
     },
 
     listOwnDevices(userId: string) {
@@ -117,8 +119,12 @@ export function createHouseholdService({ repository, createPairingCode }: Deps) 
       return repository.listDevices(guardianId, studentId);
     },
 
-    async revokeDevice(guardianId: string, studentId: string, deviceId: string) {
-      if (!(await repository.revokeDevice(guardianId, studentId, deviceId))) throw new Problem('NOT_FOUND');
+    async unblockDevice(guardianId: string, studentId: string, deviceId: string) {
+      if (!(await repository.unblockDevice(guardianId, studentId, deviceId))) throw new Problem('NOT_FOUND');
+    },
+
+    async removeDevice(guardianId: string, studentId: string, deviceId: string) {
+      if (!(await repository.removeDevice(guardianId, studentId, deviceId))) throw new Problem('NOT_FOUND');
     },
 
     async deleteStudent(guardianId: string, studentId: string) {
