@@ -54,7 +54,10 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
   (appareil reconnu, 3 essais, session courte). C'est une interprétation à écrire, pas une
   conformité littérale.
 - Les durées de conservation annoncées (`apps/landing/src/pages/confidentialite.astro`, § 7) :
-  aucune purge ne tient encore celles du compte inactif ni des journaux.
+  aucune purge ne tient encore celles du compte inactif ni des journaux. Celles des e-mails reçus
+  à `contact@` (prévenir à l'ouverture, puis effacer) se tiennent à la main, dans Gmail.
+- La landing, à la naissance de la production : un formulaire d'inscription à la place du
+  `mailto:` de la section « prévenu », avec son information CNIL au moment de la collecte.
 - L'adresse de la connexion (`platform/http/client-address.ts`, `getConnInfo`) n'est exercée par
   aucun test, faute d'un vrai `Bun.serve`.
 - Le préfixe `__Host-` des cookies, quand better-auth le livre
