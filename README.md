@@ -79,4 +79,5 @@ partie du code, chargées sur ses chemins.
 
 Dans `docs/` : [architecture](./docs/architecture.md) (ce qui est en place) ·
 [tuteur IA](./docs/tuteur.md) · [charte](./docs/charte.md) · [état](./docs/etat.md)
-(bloquants, points ouverts, surveillance) · [concurrence](./docs/concurrence.md) (analyse datée).
+(bloquants, points ouverts, surveillance) · [concurrence](./docs/concurrence.md) (analyse datée) ·
+[méthode](./docs/methode.md) (la soirée de devoirs, d'après les programmes évalués).
