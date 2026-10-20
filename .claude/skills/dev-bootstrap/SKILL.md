@@ -3,25 +3,21 @@ name: dev-bootstrap
 description: Démarrer le monorepo depuis un clone neuf, ou réparer une stack locale qui ne monte pas — postgres, migrations Drizzle. À utiliser quand le serveur refuse de démarrer, qu'une table manque, ou qu'on part d'une base vide.
 ---
 
-# Premier démarrage, et réparation d'une stack locale
+# Réparer une stack locale
 
-## Le chemin normal
+Le chemin normal (`bun install`, `bun run setup`, `bun run dev`) : `README.md`, « Démarrage » ;
+les migrations locales : `.claude/rules/database-migrations.md`, « Base locale ».
 
-```bash
-bun install
-bun run setup         # .env depuis .env.example, BETTER_AUTH_SECRET, postgres, migrations
-bun run dev           # postgres prêt, migrations, puis les apps
-```
+## Rien ne démarre
 
 `bun run dev` lance `docker compose up -d --wait postgres`, puis `db:migrate` du serveur, puis
-`turbo run dev` : si postgres ne répond pas ou si une migration échoue, rien ne démarre. Le
-serveur tourne sur l'hôte, pas en conteneur.
+`turbo run dev` : l'étape qui échoue est la première à regarder. Le serveur tourne sur l'hôte,
+pas en conteneur.
 
 ## Le serveur refuse de démarrer
 
 Il refuse tant qu'une migration du journal (`apps/server/drizzle/`) n'est pas appliquée, et le
-dit dans son log (« Migrations not applied »). `bun run db:migrate` (`apps/server`) les
-applique. Il n'y a pas de `db:push` : il contournerait le journal que le serveur vérifie.
+dit dans son log (« Migrations not applied ») : `bun run db:migrate` (`apps/server`).
 
 ## `.env` qui suffit à démarrer
 

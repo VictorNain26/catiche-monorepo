@@ -1,6 +1,6 @@
 /**
- * The student's daily quota (`docs/tuteur.md` § 11): 2 c a day in the Gratuit plan, every billed call counted; 10 c in
- * the Complet plan, with the payment. Its day starts at 4 a.m. in Paris (`school-calendar.ts`).
+ * The student's daily quota (`docs/tuteur.md` § 11): one budget for every student, every billed call counted. Its day
+ * starts at 4 a.m. in Paris (`school-calendar.ts`).
  */
 
 /** 2 c, in the micro-euros `ai_cost` counts in. */

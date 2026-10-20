@@ -9,7 +9,7 @@ landing : https://tomia.fr.
 ## Démarrage
 
 ```bash
-bun install    # Bun 1.4.2+ ; Node 24+ pour la landing
+bun install    # versions de Bun et de Node (la landing) : `engines` de package.json
 bun run setup  # .env, BETTER_AUTH_SECRET, postgres, migrations Drizzle
 bun run dev    # postgres, migrations, puis server :3000 + landing :3001 + web :3002
 ```
@@ -45,7 +45,6 @@ packages/
 | Web | Vite 8 sous Node (le bundler de Bun ne sert ni le plugin de TanStack Router ni la PWA), React 19, TanStack Router, TailwindCSS 4 |
 | Auth | Better Auth 1.7 : le gardien entre par un code envoyé à son adresse ou par une clé d'accès, sans mot de passe, sur invitation pendant la bêta fermée ; l'appareil de l'élève est relié par un code |
 | IA | Mistral Small 4, endpoint UE (`docs/tuteur.md`) |
-| Paiements | Aucun branché |
 | Observabilité | Logs pino ; Bugsink, auto-hébergé, pour les erreurs avant la première famille (`docs/architecture.md`, « Observabilité »). Pas d'analytics installée |
 | Monorepo | Turborepo, workspaces Bun |
 | Déploiement | Clever Cloud, région Paris : `docs/architecture.md`, « Hébergement » et « Environnements et livraison » |

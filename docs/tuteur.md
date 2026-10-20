@@ -282,8 +282,9 @@ Cartographie de risque, à valider par un conseil avant l'ouverture.
   (`platform/ai/cost.ts`), sous l'`operation` que chaque appel nomme, lecture de la photo
   comprise ; la voix le sera à son arrivée. La modération, gratuite, ne l'est pas.
 - Le quota est un budget du jour par élève, lu dans `ai_cost` : le coût réel, tokens en cache à
-  leur prix (10 %), de chaque appel tracé, jamais des tokens bruts ; 2 c pour tous tant que le
-  paiement n'existe pas, puis 2 c en Gratuit et 10 c en Complet, le jour commençant à 4 h à Paris (`domain/quota.ts`, `domain/school-calendar.ts`). Vérifié à
+  leur prix (10 %), de chaque appel tracé, jamais des tokens bruts ; le même pour tous, les
+  offres restant ouvertes (`produit.md`), le jour commençant à 4 h à Paris
+  (`domain/quota.ts`, `domain/school-calendar.ts`). Vérifié à
   l'ouverture d'un tour (`modules/tutor/service.ts`) : au-delà, le tour est refusé avant tout
   modèle, sauf une détresse ; un quota illisible refuse le tour.
 - Le résumé de conversation est incrémental : il ne se relance qu'après un nombre fixe de

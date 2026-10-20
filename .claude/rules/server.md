@@ -13,7 +13,7 @@ Tuteur : `docs/tuteur.md`. Stack locale : skill `dev-bootstrap`. Appel IA 
 
 ## Interdits
 
-- Jamais recréer à côté ce que la refonte du code (lot 0) n'a pas reconstruit : il revient de
+- Jamais recréer à côté ce que la refonte du code n'a pas reconstruit : il revient de
   l'historique (`048676b4`) avec l'étape qui l'utilise.
 - Jamais lire l'environnement hors des points d'entrée (`ENTRY_POINTS` dans `eslint.config.mjs`,
   refusé au lint) : la config (`src/config.ts`) et les dépendances se passent
