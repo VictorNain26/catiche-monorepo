@@ -25,14 +25,14 @@ export function BackLink(props: Omit<ComponentProps<typeof HeaderLink>, 'icon'>)
 }
 
 /**
- * The student's profile, on each of their screens: on the family's phone, who uses Tom shows, and
- * changing it is a tap on it, to « Qui utilise Tom ? ».
+ * The student's profile, on each of their screens: whose space the device holds shows, and a tap
+ * on it leads to « Qui utilise Tom ? », where the parent enters on the child's device.
  */
 export function ProfileLink() {
   const { data: me } = useSuspenseQuery(meQuery);
   if (!me) return null;
   return (
-    <HeaderLink to="/connexion" icon={UsersRoundIcon} aria-label={`${me.name}, changer de profil`}>
+    <HeaderLink to="/connexion" icon={UsersRoundIcon} aria-label={`${me.name}, qui utilise Tom ?`}>
       {me.name}
     </HeaderLink>
   );

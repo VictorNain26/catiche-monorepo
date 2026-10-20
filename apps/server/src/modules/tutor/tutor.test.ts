@@ -86,6 +86,13 @@ describe('sessions', () => {
     expect(Object.keys((await res.json()) as Session).sort()).toEqual(['closedAt', 'createdAt', 'id', 'title']);
   });
 
+  it('opens a new session when the empty one has its first turn running', async () => {
+    const running = await start(asStudentA);
+    await db.update(studySession).set({ turnStartedAt: new Date() }).where(eq(studySession.id, running.id));
+    expect((await start(asStudentA)).id).not.toBe(running.id);
+    await db.update(studySession).set({ turnStartedAt: null }).where(eq(studySession.id, running.id));
+  });
+
   it('opens the latest session again while nothing was said in it, and a new one once something was', async () => {
     const empty = await start(asStudentB);
     expect((await start(asStudentB)).id).toBe(empty.id);

@@ -229,10 +229,11 @@ Le code vit dans `apps/server/src/eval/` ; `bun run eval` rejoue le jeu sur le v
   semaine au parent et à l'élève, avec une question à poser à l'enfant tirée de ce qui résiste.
 - **L'enfant a son espace à lui, dès la 6e** (décision de Victor, 2026-10-20) : il travaille sur
   son propre appareil, relié par un code que le parent demande (`platform/auth/pairing.ts`) ; le
-  parent ne l'ouvre pas sur le sien. Chaque appareil relié est une session que l'enfant voit dans
-  sa liste, et que le parent déconnecte. Sur un appareil, un enfant ne liste ni n'ouvre la
-  session d'un frère ou d'une sœur : la garde du foyer lui refuse ces routes de better-auth
-  (`STUDENT_AUTH_PATHS`, `modules/household/routes.ts`).
+  web ne propose pas au parent de l'ouvrir sur le sien. Chaque appareil relié est une session que
+  l'enfant voit dans sa liste, et que le parent déconnecte. Un appareil ne tient qu'un enfant : un
+  code saisi y ferme les autres sessions. Un enfant n'y liste ni n'ouvre d'autre session : la
+  garde du foyer lui refuse ces routes de better-auth (`STUDENT_AUTH_PATHS`,
+  `modules/household/routes.ts`).
 - **La détresse n'alerte pas le parent d'office** : l'événement est enregistré
   (`distress_event`) ; la revue humaine qui doit le relire et décider n'existe pas encore
   (`etat.md`).

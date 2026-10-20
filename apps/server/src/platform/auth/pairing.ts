@@ -38,18 +38,18 @@ function generatePairingCode(): string {
 export const isStudentEmail = (email: string) => email.endsWith('.invalid');
 
 /**
- * Deletes every guardian session the request's device holds: the active one, whose cookie the
- * student's replaces, and each the multi-session plugin keeps, whose cookie expires, as does one
- * whose session is gone (the active one shares its token).
+ * Deletes the sessions the request's device holds, the guardian's, or every one when a code pairs
+ * it: the active one, whose cookie the new session's replaces, and each the multi-session plugin
+ * keeps, whose cookie expires, as does one whose session is gone (the active one shares its token).
  */
-async function closeGuardianSessions(ctx: GenericEndpointContext) {
+async function closeSessions(ctx: GenericEndpointContext, which: 'guardian' | 'all') {
   const { sessionToken } = ctx.context.authCookies;
   for (const name of parseCookies(ctx.headers?.get('cookie') ?? '').keys()) {
     const active = name === sessionToken.name;
     if (!active && !name.startsWith(`${sessionToken.name}_multi-`)) continue;
     const token = await ctx.getSignedCookie(name, ctx.context.secret);
     const held = token ? await ctx.context.internalAdapter.findSession(token) : null;
-    if (held && isStudentEmail(held.user.email)) continue;
+    if (held && which === 'guardian' && isStudentEmail(held.user.email)) continue;
     if (held) await ctx.context.internalAdapter.deleteSession(held.session.token);
     if (!active) expireCookie(ctx, { name, attributes: sessionToken.attributes });
   }
@@ -68,8 +68,9 @@ export function devicePairing() {
     id: 'device-pairing',
     endpoints: {
       /**
-       * The device sends the code and gets a session of its own; the code is spent. A session of the
-       * same student the device held, the multi-session plugin closes; a sibling's stays.
+       * The device sends the code and gets a session of its own; the code is spent. Every session
+       * the device held closes: it holds one child, never a brother's or sister's space beside
+       * (`docs/tuteur.md` § 8).
        */
       redeemPairingCode: createAuthEndpoint(
         '/device-pairing/redeem',
@@ -84,7 +85,7 @@ export function devicePairing() {
             return { user, session: await internalAdapter.createSession(user.id) };
           });
           if (!paired) throw new APIError('BAD_REQUEST', { message: 'Invalid or expired code' });
-          await closeGuardianSessions(ctx);
+          await closeSessions(ctx, 'all');
           await setSessionCookie(ctx, paired);
           return ctx.json({ user: { id: paired.user.id, name: paired.user.name } });
         },
@@ -97,7 +98,7 @@ export function devicePairing() {
           matcher: (ctx) => ctx.path === '/multi-session/set-active' || ctx.path === '/multi-session/revoke',
           handler: createAuthMiddleware(async (ctx) => {
             const active = ctx.context.newSession;
-            if (active && isStudentEmail(active.user.email)) await closeGuardianSessions(ctx);
+            if (active && isStudentEmail(active.user.email)) await closeSessions(ctx, 'guardian');
           }),
         },
       ],

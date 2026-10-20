@@ -119,17 +119,31 @@ describe('a device handed to the child', () => {
     expect(multi).toHaveLength(2);
   });
 
-  it("never opens a brother's or sister's space to the child, whatever their class, nor lists the device's sessions", async () => {
+  it("holds one child: a brother's or sister's code closes the other child's session on it", async () => {
     const { guardian, lea, tablet } = await family('fratrie@example.com');
     const tom = await api.student(guardian, { name: 'Tom', level: 'sixieme' });
     expect((await tablet.redeem(await api.pairingCode(guardian, tom.id))).status).toBe(200);
     expect((await api.sessionUser(tablet.cookie()))?.id).toBe(tom.id);
+    expect(await sessionsOf(lea.id)).toEqual([]);
+    expect(
+      tablet
+        .cookie()
+        .split('; ')
+        .filter((cookie) => cookie.includes('_multi-')),
+    ).toHaveLength(1);
+  });
+
+  it("never lets the child switch to another session, whatever their class, nor list the device's sessions", async () => {
+    const { guardian, lea } = await family('fratrie-ailleurs@example.com');
+    const tom = await api.student(guardian, { name: 'Tom', level: 'sixieme' });
+    const phone = api.device();
+    expect((await phone.redeem(await api.pairingCode(guardian, tom.id))).status).toBe(200);
 
     const [leas] = await sessionsOf(lea.id);
-    expect((await tablet.send('POST', '/api/auth/multi-session/set-active', { sessionToken: leas?.token ?? '' })).status).toBe(403);
+    expect((await phone.send('POST', '/api/auth/multi-session/set-active', { sessionToken: leas?.token ?? '' })).status).toBe(403);
     // A GET the guard refuses goes to the sign-in page (modules/household/routes.ts).
-    const listed = await tablet.send('GET', '/api/auth/multi-session/list-device-sessions');
+    const listed = await phone.send('GET', '/api/auth/multi-session/list-device-sessions');
     expect({ status: listed.status, location: listed.headers.get('location') }).toEqual({ status: 302, location: '/connexion' });
-    expect((await api.sessionUser(tablet.cookie()))?.id).toBe(tom.id);
+    expect((await api.sessionUser(phone.cookie()))?.id).toBe(tom.id);
   });
 });

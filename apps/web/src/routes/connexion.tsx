@@ -95,7 +95,7 @@ function EmailStep({ onSent, onEntered }: { onSent: (email: string) => void; onE
           {/* The child's own space only: a child never opens another's (`docs/tuteur.md` § 8). */}
           <Button onClick={() => void onEntered()}>C’est {child.name}</Button>
           <h2 className="text-xl font-bold text-foreground">Vous êtes le parent</h2>
-          <p className="text-muted-foreground">Entrez avec votre clé d’accès ou un code : les profils de vos enfants restent sur l’appareil.</p>
+          <p className="text-muted-foreground">Entrez avec votre clé d’accès ou un code : le profil de {child.name} reste sur l’appareil.</p>
         </>
       ) : (
         <>
@@ -117,7 +117,7 @@ function EmailStep({ onSent, onEntered }: { onSent: (email: string) => void; onE
           error={form.formState.errors.email?.message}
         />
         {failure && <Banner tone="error" title={failure} />}
-        {/* On the family's phone, the child's own space is the screen's first way. */}
+        {/* On the child's device, their own space is the screen's first way. */}
         <Button type="submit" variant={child ? 'outline' : 'default'} disabled={form.formState.isSubmitting}>
           Recevoir mon code
         </Button>

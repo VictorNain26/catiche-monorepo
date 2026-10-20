@@ -20,6 +20,10 @@ production : pas de rétrocompatibilité. Réduire la codebase.
   (403) ; `assertSiblingSwitch` et `isAccompanied` disparaissent. Le parent qui entre sur
   l'appareil de son enfant et le lui rend (`set-active` depuis la session du parent, qui ferme
   alors la sienne) reste possible : c'est l'appareil de l'enfant, la session y était déjà.
+- **Un appareil ne tient qu'un enfant** (constat de revue) : un code saisi ferme toutes les
+  sessions que l'appareil tenait, celle d'un frère ou d'une sœur comprise
+  (`platform/auth/pairing.ts`) ; sans quoi le parent qui quitte l'appareil le rendrait à un
+  enfant pris au hasard.
 - **Choix le plus strict, fait seul** : un appareil qui tient déjà la session d'un enfant (ex.
   l'appareil familial d'un enfant de 5e) n'est plus qu'un appareil de l'enfant parmi les autres,
   visible de l'enfant et du parent, que le parent déconnecte ; le serveur ne distingue pas un

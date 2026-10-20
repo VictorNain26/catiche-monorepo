@@ -4,8 +4,8 @@ import { useNavigate } from '@tanstack/react-router';
 import { authClient, authData, deviceSessionsQuery, signOutOfDevice } from '../lib/auth';
 
 /**
- * Signs the guardian out of this device (`signOutOfDevice`), then loads the app afresh: on a device
- * the family shares, nothing of theirs stays in memory.
+ * Signs the guardian out of this device (`signOutOfDevice`), then loads the app afresh: on their
+ * child's device, nothing of theirs stays in memory.
  */
 export function SignOut({ label }: { label: string }) {
   const navigate = useNavigate();

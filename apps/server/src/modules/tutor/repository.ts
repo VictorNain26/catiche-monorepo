@@ -90,7 +90,10 @@ async function updateExercise(executor: Executor, exerciseId: string, progress: 
 
 export function createTutorRepository(db: Db) {
   return {
-    /** A new session, or the latest one nothing was said in yet: tapping again piles up no empty one. */
+    /**
+     * A new session, or the latest one nothing was said in yet and no first turn runs in: tapping
+     * again piles up no empty one.
+     */
     async createSession(studentId: string) {
       const [empty] = await db
         .select(sessionColumns)
@@ -98,6 +101,7 @@ export function createTutorRepository(db: Db) {
         .where(
           and(
             eq(studySession.studentId, studentId),
+            isNull(studySession.turnStartedAt),
             notExists(
               db
                 .select({ one: sql`1` })
