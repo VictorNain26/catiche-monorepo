@@ -87,49 +87,12 @@
   --duration-wait: 1000ms;
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
 
-  /* Un dialogue arrive en fondu, un tiroir glisse depuis son bord ; ils repartent plus vite. */
-  --animate-fade-in: fade-in var(--duration-base) var(--ease-standard);
-  --animate-fade-out: fade-out var(--duration-fast) var(--ease-standard);
-  --animate-slide-in-bottom: slide-in-bottom var(--duration-slow) var(--ease-standard);
-  --animate-slide-out-bottom: slide-out-bottom var(--duration-base) var(--ease-standard);
-  --animate-slide-in-right: slide-in-right var(--duration-slow) var(--ease-standard);
-  --animate-slide-out-right: slide-out-right var(--duration-base) var(--ease-standard);
   /* Un squelette reste caché pendant l'attente, puis pulse ; sous le mouvement réduit, il paraît
    * sans pulser. */
   --animate-skeleton:
     appear 0s linear var(--duration-wait) both, pulse-surface var(--duration-pulse) var(--ease-standard) var(--duration-wait) infinite alternate;
   --animate-skeleton-still: appear 0s linear var(--duration-wait) both;
 
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-  }
-  @keyframes fade-out {
-    to {
-      opacity: 0;
-    }
-  }
-  @keyframes slide-in-bottom {
-    from {
-      transform: translateY(100%);
-    }
-  }
-  @keyframes slide-out-bottom {
-    to {
-      transform: translateY(100%);
-    }
-  }
-  @keyframes slide-in-right {
-    from {
-      transform: translateX(100%);
-    }
-  }
-  @keyframes slide-out-right {
-    to {
-      transform: translateX(100%);
-    }
-  }
   @keyframes appear {
     from {
       visibility: hidden;
