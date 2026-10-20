@@ -1,8 +1,9 @@
 /**
  * The HTTP calls of a client, as the web makes them: a guardian invited and in by the code their
- * address received, a student created, a device paired by the guardian's code, a turn read from
- * its UI message stream. The tests and the harness (src/evaluate.ts) both play through it, so it
- * throws on a refused step rather than asserting: no `bun:test` here.
+ * address received, a student created, a device recognised by the guardian's code and the student
+ * in by their own, a turn read from its UI message stream. The tests and the harness
+ * (src/evaluate.ts) both play through it, so it throws on a refused step rather than asserting:
+ * no `bun:test` here.
  */
 
 import { parseJsonEventStream, readUIMessageStream, uiMessageChunkSchema, type UIMessage, type UIMessageChunk } from 'ai';
@@ -30,10 +31,21 @@ export interface Student {
   birthMonth: string;
 }
 
+/** The code every student of the client chooses: six digits no rule refuses. */
+export const STUDENT_CODE = '482917';
+
 interface Device {
   id: string;
-  pairedAt: string;
+  createdAt: string;
+  lastUsedAt: string | null;
   userAgent: string | null;
+  shared: boolean;
+  blocked: boolean;
+}
+
+interface Profiles {
+  shared: boolean;
+  profiles: { id: string; name: string; state: string }[];
 }
 
 /**
@@ -102,8 +114,6 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
 
-  const redeem = (code: string) => request('POST', '/api/auth/device-pairing/redeem', { body: { code } });
-
   /**
    * The email of a code, waited for before the request that sends it (the auth sends in the
    * background). Awaited together, a refused request fails the step at once, and the wait
@@ -142,17 +152,30 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
       );
       return (await res.json()) as Student;
     },
-    async pairingCode(cookie: string, studentId: string) {
-      const res = await expectStatus(request('POST', `/api/household/students/${studentId}/pairing-code`, { cookie }), 201, 'pairing code');
+    /** A guardian's code for a new device of the student, or for a code they forgot. */
+    async activationCode(cookie: string, studentId: string, reason: 'device' | 'forgotten' = 'device') {
+      const res = await expectStatus(
+        request('POST', `/api/household/students/${studentId}/activation-code`, { cookie, body: { reason } }),
+        201,
+        'activation code',
+      );
       return ((await res.json()) as { code: string; expiresAt: string }).code;
     },
-    async redeem(code: string) {
-      const res = await redeem(code);
-      return { status: res.status, cookie: cookieOf(res) };
-    },
-    /** A guardian's code, redeemed on a new device: that device's session cookie. */
+    /**
+     * A new device of the student's own, recognised by a guardian's code, the student then in by
+     * the code they choose, or by the one they chose before: that device's cookies.
+     */
     async pair(cookie: string, studentId: string) {
-      return cookieOf(await expectStatus(redeem(await api.pairingCode(cookie, studentId)), 200, 'pairing'));
+      const device = api.device();
+      await expectStatus(device.activate(await api.activationCode(cookie, studentId)), 200, 'activation');
+      const { profiles } = await device.profiles();
+      const state = profiles.find(({ id }) => id === studentId)?.state;
+      await expectStatus(
+        state === 'choose' ? device.chooseCode(studentId, STUDENT_CODE, true) : device.enter(studentId, STUDENT_CODE),
+        200,
+        'student code',
+      );
+      return device.cookie();
     },
     /** A session the student opens: its id. */
     async session(cookie: string) {
@@ -167,15 +190,16 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
       const res = await request('GET', '/api/auth/get-session', { cookie });
       return ((await res.json()) as { user: { id: string } } | null)?.user;
     },
+    /** The student's devices, as their guardian reads them, and the state of their code. */
     async devices(cookie: string, studentId: string) {
-      return (await (await request('GET', `/api/household/students/${studentId}/devices`, { cookie })).json()) as Device[];
+      const res = await expectStatus(request('GET', `/api/household/students/${studentId}/devices`, { cookie }), 200, 'devices');
+      return (await res.json()) as { devices: Device[]; code: { chosen: boolean; locked: boolean } };
     },
-    /**
-     * One device's browser: every cookie its responses set, kept for its next requests, and dropped
-     * once expired, as the multi-session plugin keeps one per account the device holds.
-     */
+    /** One device's browser: every cookie its responses set, kept for its next requests, and dropped once expired. */
     device() {
       const jar = new Map<string, string>();
+      // The one-time token that lets a student choose their code, as the page that opened the window holds it.
+      const tokens = new Map<string, string>();
       const cookie = () => [...jar].map(([name, value]) => `${name}=${value}`).join('; ');
       const send = async (method: string, path: string, body?: unknown) => {
         const res = await request(method, path, { cookie: cookie(), body });
@@ -196,7 +220,33 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
           const received = await codeSent(email, () => send('POST', '/api/auth/email-otp/send-verification-otp', { email, type: 'sign-in' }));
           return send('POST', '/api/auth/sign-in/email-otp', { email, otp: mail.codeIn(received) });
         },
-        redeem: (code: string) => send('POST', '/api/auth/device-pairing/redeem', { code }),
+        /** A guardian's code, which recognises this device for the student; the page keeps the token to choose a code with. */
+        async activate(code: string) {
+          const res = await send('POST', '/api/auth/student/activate', { code });
+          if (res.ok) {
+            const { studentId, chooseToken } = (await res.clone().json()) as { studentId: string; chooseToken: string };
+            tokens.set(studentId, chooseToken);
+          }
+          return res;
+        },
+        /** The profiles this device holds. */
+        async profiles() {
+          return (await (await expectStatus(send('GET', '/api/auth/student/profiles'), 200, 'profiles')).json()) as Profiles;
+        },
+        /** The student's first code, with the token the page that opened the window holds, unless another is given. */
+        chooseCode: (studentId: string, code: string, ownDevice: boolean, chooseToken = tokens.get(studentId) ?? '') =>
+          send('POST', '/api/auth/student/choose-code', { studentId, code, ownDevice, chooseToken }),
+        /** The student in by their own code. */
+        enter: (studentId: string, code: string) => send('POST', '/api/auth/student/sign-in', { studentId, code }),
+        /** The guardian adds their children to this device, a family computer. */
+        async addProfiles(studentIds: string[]) {
+          const res = await send('POST', '/api/auth/student/add-profiles', { studentIds });
+          if (res.ok) {
+            const { chooseTokens } = (await res.clone().json()) as { chooseTokens: Record<string, string> };
+            for (const [studentId, token] of Object.entries(chooseTokens)) tokens.set(studentId, token);
+          }
+          return res;
+        },
       };
     },
   };

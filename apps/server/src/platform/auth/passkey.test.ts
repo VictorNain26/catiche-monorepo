@@ -32,14 +32,14 @@ describe('passkey registration', () => {
     expect(options.authenticatorSelection.residentKey).toBe('required');
   });
 
-  // Their guardian pairs their device: a passkey would let them in on any other.
-  it("refuses a student's paired device, by the household's guard on better-auth's routes", async () => {
+  // A student enters by their own code on a recognised device: a passkey would let them in on any other.
+  it("refuses a student's session, by the household's guard on better-auth's routes", async () => {
     const parent = await api.guardian('parent-cle@example.com');
     const student = await api.student(parent);
     const device = await api.pair(parent, student.id);
     const options = await registerOptions(device);
     expect(options.status).toBe(302);
-    expect(options.headers.get('location')).toBe('/connexion');
+    expect(options.headers.get('location')).toBe('/');
     expect((await api.request('POST', '/api/auth/passkey/verify-registration', { cookie: device, body: {} })).status).toBe(403);
   });
 

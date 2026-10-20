@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { AuthFailure, authData, authMessage, isCancelled, signOutOfDevice } from './auth';
+import { AuthFailure, authData, authMessage, isCancelled } from './auth';
 
 const FALLBACK = 'Une erreur est survenue. Réessayez dans un instant.';
 
@@ -24,47 +24,6 @@ describe('authData', () => {
     const refused: unknown = await authData(Promise.resolve({ data: null, error: { status: 500 } })).catch((failure: unknown) => failure);
     expect(refused).toBeInstanceOf(AuthFailure);
     expect(refused).toMatchObject({ message: FALLBACK, code: undefined, status: 500 });
-  });
-});
-
-describe('signOutOfDevice', () => {
-  const session = (token: string) => ({ session: { token } });
-
-  /** A device whose calls are recorded, the list of its sessions given or refused. */
-  function device(held: () => Promise<{ session: { token: string } }[]>) {
-    const calls: string[] = [];
-    return {
-      calls,
-      current: () => Promise.resolve(session('parent')),
-      held,
-      revoke: (sessionToken: string) => {
-        calls.push(`revoke ${sessionToken}`);
-        return Promise.resolve();
-      },
-      signOut: () => {
-        calls.push('sign out');
-        return Promise.resolve();
-      },
-    };
-  }
-
-  it('closes only the guardian’s session where the device also holds a child’s', async () => {
-    const shared = device(() => Promise.resolve([session('parent'), session('child')]));
-    await signOutOfDevice(shared);
-    expect(shared.calls).toEqual(['revoke parent']);
-  });
-
-  it('signs out of everything where the device holds the guardian’s session alone', async () => {
-    const own = device(() => Promise.resolve([session('parent')]));
-    await signOutOfDevice(own);
-    expect(own.calls).toEqual(['sign out']);
-  });
-
-  it('signs nothing out when the list of the device’s sessions is refused', async () => {
-    const refused = new AuthFailure({ status: 500 });
-    const blind = device(() => Promise.reject(refused));
-    expect(await signOutOfDevice(blind).catch((failure: unknown) => failure)).toBe(refused);
-    expect(blind.calls).toEqual([]);
   });
 });
 

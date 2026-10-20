@@ -4,7 +4,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { DefaultChatTransport } from 'ai';
 import { useEffect, useId, useRef, useState } from 'react';
-import { BackLink, Page, ProfileLink } from '../components/page';
+import { BackLink, Page, ProfileAction } from '../components/page';
 import { TomHead } from '../components/tom';
 import { TomText } from '../components/tom-text';
 import { api, isProblem } from '../lib/api';
@@ -104,7 +104,7 @@ function Session() {
   };
 
   return (
-    <Page title="Séance avec Tom" back={<BackLink to="/">Retour à tes séances</BackLink>} action={<ProfileLink />}>
+    <Page title="Séance avec Tom" back={<BackLink to="/">Retour à tes séances</BackLink>} action={<ProfileAction />}>
       <p className="flex items-center gap-3 text-sm text-muted-foreground">
         <TomHead className="size-8 shrink-0" />
         Tom t’aide à trouver, il ne fait pas à ta place.

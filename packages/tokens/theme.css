@@ -61,9 +61,6 @@
   --color-input: var(--mist-9);
   --color-ring: var(--water-11);
   --color-overlay: #000000;
-  /* A QR code stays dark on light in both modes: not every reader takes it inverted. */
-  --color-qr: #000000;
-  --color-qr-background: #ffffff;
   /* Un contrôle désactivé reste lisible : un fond et un texte à lui, pas une opacité. */
   --color-disabled: var(--mist-3);
   --color-disabled-foreground: var(--mist-11);

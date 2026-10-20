@@ -35,7 +35,8 @@ Une soirée suit les gestes de `methode.md` :
    d'avant.
 
 Le parent verra que c'est fait ; les conversations ne lui sont jamais envoyées. Dès la 6e,
-l'enfant travaille dans son espace à lui, sur son propre appareil (`tuteur.md`, § 8).
+l'enfant travaille dans son espace à lui, qu'il ouvre par son propre code, sur son appareil ou sur
+l'ordinateur de la famille (`tuteur.md`, § 8).
 
 ## Pourquoi pas le gratuit
 

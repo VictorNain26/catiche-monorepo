@@ -1,16 +1,15 @@
 /**
  * The household on a real database, through the HTTP API as the web will call it: the access
  * matrix first (anonymous, two guardians, a student of each), then what a guardian does, the
- * pairing of a student's device, and what a student may do with better-auth's own routes.
+ * devices of a student, and what a student may do with better-auth's own routes.
  */
 
 import { describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
-import { PAIRING_PREFIX } from '../../platform/auth/pairing';
-import { account, session, user, verification } from '../../platform/auth/schema';
+import { account, device as deviceTable, deviceProfile, session, user } from '../../platform/auth/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
-import { birthMonthAged, type Student } from '../../testing/http';
+import { birthMonthAged, STUDENT_CODE, type Student } from '../../testing/http';
 import { householdMember, studentProfile } from './schema';
 
 const { db } = await testDatabase();
@@ -27,9 +26,9 @@ const studentOfA = await matrix.student(guardianA);
 const studentOfB = await matrix.student(guardianB);
 const asStudentA = await matrix.pair(guardianA, studentOfA.id);
 const asStudentB = await matrix.pair(guardianB, studentOfB.id);
-const [deviceOfA] = await matrix.devices(guardianA, studentOfA.id);
+const [deviceOfA] = (await matrix.devices(guardianA, studentOfA.id)).devices;
 // Without it the device route would read « /devices/ », refused all the same: the matrix would prove nothing.
-if (!deviceOfA) throw new Error('The student of A has no paired device');
+if (!deviceOfA) throw new Error('The student of A has no device');
 
 describe('access matrix', () => {
   const api = matrix;
@@ -38,8 +37,10 @@ describe('access matrix', () => {
     { method: 'GET', path: '/api/household/students' },
     { method: 'POST', path: '/api/household/students', body: { name: 'X', level: 'sixieme', birthMonth: birthMonthAged(11) } },
     { method: 'PATCH', path: target, body: { name: 'Changé' } },
-    { method: 'POST', path: `${target}/pairing-code` },
+    { method: 'POST', path: `${target}/activation-code`, body: { reason: 'device' } },
+    { method: 'POST', path: `${target}/activation-code`, body: { reason: 'forgotten' } },
     { method: 'GET', path: `${target}/devices` },
+    { method: 'POST', path: `${target}/devices/${deviceOfA.id}/unblock` },
     { method: 'DELETE', path: `${target}/devices/${deviceOfA.id}` },
     { method: 'DELETE', path: target },
   ];
@@ -160,102 +161,74 @@ describe('a guardian creates a student', () => {
   }
 });
 
-const pairing = client();
-const pairingGuardian = await pairing.guardian('jumelage@example.com');
+const devicesClient = client();
+const devicesGuardian = await devicesClient.guardian('appareils@example.com');
 
-describe("pairing a student's device", () => {
-  const api = pairing;
-  const guardian = pairingGuardian;
+// Never when the child last entered there: the guardian reads a device, not a schedule.
+const DEVICE_FIELDS = ['blocked', 'createdAt', 'id', 'shared', 'userAgent'];
 
-  it('opens a session for the student on the device that sends the code', async () => {
+describe("a student's devices", () => {
+  const api = devicesClient;
+  const guardian = devicesGuardian;
+
+  it('show the guardian their browser and state, never an address, and whether a code is chosen, never the code', async () => {
     const student = await api.student(guardian);
-    const device = await api.pair(guardian, student.id);
-    expect((await api.sessionUser(device))?.id).toBe(student.id);
-  });
-
-  it('serves a code once', async () => {
-    const student = await api.student(guardian);
-    const code = await api.pairingCode(guardian, student.id);
-    expect((await api.redeem(code)).status).toBe(200);
-    expect((await api.redeem(code)).status).toBe(400);
-  });
-
-  it('accepts the code as a person types it: lowercase, with a dash or spaces', async () => {
-    const student = await api.student(guardian);
-    const code = await api.pairingCode(guardian, student.id);
-    const typed = ` ${code.slice(0, 4).toLowerCase()}-${code.slice(4).toLowerCase()} `;
-    expect((await api.redeem(typed)).status).toBe(200);
-  });
-
-  it('refuses an unknown code and an expired one', async () => {
-    expect((await api.redeem('AAAA-AAAA')).status).toBe(400);
-    const student = await api.student(guardian);
-    const code = await api.pairingCode(guardian, student.id);
-    await db
-      .update(verification)
-      .set({ expiresAt: new Date(Date.now() - 1000) })
-      .where(eq(verification.value, student.id));
-    expect((await api.redeem(code)).status).toBe(400);
-  });
-
-  it('stores the code hashed, never in clear', async () => {
-    const student = await api.student(guardian);
-    const code = await api.pairingCode(guardian, student.id);
-    const [row] = await db.select({ identifier: verification.identifier }).from(verification).where(eq(verification.value, student.id));
-    expect(row?.identifier).toBeDefined();
-    expect(row?.identifier).not.toContain(code);
-    expect(row?.identifier).not.toStartWith(PAIRING_PREFIX);
-  });
-
-  it("shows the guardian the student's devices, without their address, and disconnects one", async () => {
-    const student = await api.student(guardian);
-    const device = await api.pair(guardian, student.id);
-    const devices = await api.devices(guardian, student.id);
+    expect((await api.devices(guardian, student.id)).code).toEqual({ chosen: false, locked: false });
+    await api.pair(guardian, student.id);
+    const { devices, code } = await api.devices(guardian, student.id);
     expect(devices).toHaveLength(1);
-    expect(devices[0]).toMatchObject({ userAgent: 'test-device' });
-    expect(Object.keys(devices[0] ?? {}).sort()).toEqual(['id', 'pairedAt', 'userAgent']);
+    expect(devices[0]).toMatchObject({ userAgent: 'test-device', shared: false, blocked: false });
+    expect(Object.keys(devices[0] ?? {}).sort()).toEqual(DEVICE_FIELDS);
+    expect(code).toEqual({ chosen: true, locked: false });
+  });
 
-    const res = await api.request('DELETE', `/api/household/students/${student.id}/devices/${devices[0]?.id ?? ''}`, { cookie: guardian });
+  it('are unblocked by the guardian, the profile open again on that device', async () => {
+    const student = await api.student(guardian);
+    const tablet = api.device();
+    await tablet.activate(await api.activationCode(guardian, student.id));
+    await tablet.chooseCode(student.id, STUDENT_CODE, true);
+    await tablet.send('POST', '/api/auth/sign-out', {});
+    for (let attempt = 0; attempt < 3; attempt++) await tablet.enter(student.id, '305186');
+    const [blocked] = (await api.devices(guardian, student.id)).devices;
+    expect(blocked?.blocked).toBe(true);
+
+    const res = await api.request('POST', `/api/household/students/${student.id}/devices/${blocked?.id ?? ''}/unblock`, { cookie: guardian });
+    expect(res.status).toBe(204);
+    expect((await api.devices(guardian, student.id)).devices[0]?.blocked).toBe(false);
+    expect((await tablet.enter(student.id, STUDENT_CODE)).status).toBe(200);
+  });
+
+  it('are disconnected by the guardian: the profile leaves the device, its sessions close', async () => {
+    const student = await api.student(guardian);
+    const device = await api.pair(guardian, student.id);
+    const [held] = (await api.devices(guardian, student.id)).devices;
+    const res = await api.request('DELETE', `/api/household/students/${student.id}/devices/${held?.id ?? ''}`, { cookie: guardian });
     expect(res.status).toBe(204);
     expect(await api.sessionUser(device)).toBeUndefined();
-    expect(await api.devices(guardian, student.id)).toEqual([]);
+    expect((await api.devices(guardian, student.id)).devices).toEqual([]);
+    expect(await db.select().from(deviceProfile).where(eq(deviceProfile.studentId, student.id))).toEqual([]);
+    // The device holds no profile now: nothing of it, its browser included, stays behind.
+    expect(
+      await db
+        .select()
+        .from(deviceTable)
+        .where(eq(deviceTable.id, held?.id ?? '')),
+    ).toEqual([]);
   });
 
-  it('shows the student their own devices, however long ago they were paired', async () => {
+  it('show the student their own devices, however long ago they were recognised', async () => {
     const student = await api.student(guardian);
     const device = await api.pair(guardian, student.id);
-    // better-auth's /list-sessions refuses a session older than its freshAge: this one is two days old.
     await db
-      .update(session)
-      .set({ createdAt: new Date(Date.now() - 2 * 86_400_000) })
-      .where(eq(session.userId, student.id));
+      .update(deviceProfile)
+      .set({ createdAt: new Date(Date.now() - 200 * 86_400_000) })
+      .where(eq(deviceProfile.studentId, student.id));
     const res = await api.request('GET', '/api/me/devices', { cookie: device });
     expect(res.status).toBe(200);
-    const devices = (await res.json()) as { id: string; userAgent: string }[];
+    const { devices } = (await res.json()) as { devices: { userAgent: string }[] };
     expect(devices).toHaveLength(1);
     expect(devices[0]).toMatchObject({ userAgent: 'test-device' });
-    expect(Object.keys(devices[0] ?? {}).sort()).toEqual(['id', 'pairedAt', 'userAgent']);
-  });
-
-  it('no longer lists a device whose session has expired', async () => {
-    const student = await api.student(guardian);
-    await api.pair(guardian, student.id);
-    await db
-      .update(session)
-      .set({ expiresAt: new Date(Date.now() - 1000) })
-      .where(eq(session.userId, student.id));
-    expect(await api.devices(guardian, student.id)).toEqual([]);
-  });
-
-  it('closes the session the device already held, so none stays behind', async () => {
-    const student = await api.student(guardian);
-    const parent = await api.guardian('tablette@example.com');
-    const parentId = (await api.sessionUser(parent))?.id ?? '';
-    const code = await api.pairingCode(guardian, student.id);
-
-    const res = await api.request('POST', '/api/auth/device-pairing/redeem', { cookie: parent, body: { code } });
-    expect(res.status).toBe(200);
-    expect(await db.select().from(session).where(eq(session.userId, parentId))).toEqual([]);
+    expect(Object.keys(devices[0] ?? {}).sort()).toEqual(DEVICE_FIELDS);
   });
 });
 
@@ -322,10 +295,10 @@ describe("a student, through better-auth's own routes", () => {
     expect(await db.select().from(account).where(eq(account.userId, student.id))).toEqual([]);
   });
 
-  it('sends a link opened on their device to the sign-in page, which says whose the device is', async () => {
+  it('sends a link opened on their device back to their own space', async () => {
     const res = await api.request('GET', '/api/auth/verify-email?token=un-lien-du-parent&callbackURL=/', { cookie });
     expect(res.status).toBe(302);
-    expect(res.headers.get('location')).toBe('/connexion');
+    expect(res.headers.get('location')).toBe('/');
   });
 
   it('still reads their session and signs out', async () => {

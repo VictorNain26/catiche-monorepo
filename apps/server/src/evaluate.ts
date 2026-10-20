@@ -15,7 +15,7 @@ import { loadConfig } from './config';
 import { renderTurns, type Exercise, type Scenario, type StudentTurn } from './eval';
 import { buildItems, isLocalDatabase, keyOf, lookup } from './eval/items';
 import { detectArtifact, detectDistress, detectLeak, rates, type Rate, type Transcript, type TutorTurn } from './eval/report';
-import { accountDeletion } from './modules/household';
+import { accountDeletion, studentAccess } from './modules/household';
 import { turnRecords } from './modules/tutor';
 import { createAi } from './platform/ai/client';
 import { createModeration } from './platform/ai/moderation';
@@ -156,7 +156,13 @@ async function main(): Promise<number> {
       return 1;
     }
     const inbox = memoryMailer();
-    const auth = createAuth(database.db, config, { mailer: inbox.mailer, logger, background: tasks.run, deleteUser: accountDeletion(database.db) });
+    const auth = createAuth(database.db, config, {
+      mailer: inbox.mailer,
+      logger,
+      background: tasks.run,
+      deleteUser: accountDeletion(database.db),
+      students: studentAccess(database.db),
+    });
     const ai = createAi({ mistral: config.mistral, db: database.db, logger });
     const moderation = createModeration({ mistral: config.mistral, logger });
     const app = createApp({ config, logger, db: database.db, auth, ai, moderation, lifecycle: createLifecycle(), background: tasks.run });

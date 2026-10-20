@@ -4,7 +4,7 @@
  */
 
 import type { Auth } from '../../platform/auth/auth';
-import { createPairingCode } from '../../platform/auth/pairing';
+import { createActivationCode, type StudentAccess } from '../../platform/auth/student-sign-in';
 import type { Db } from '../../platform/db/client';
 import { createHouseholdRepository } from './repository';
 import { householdRoutes, meRoutes, studentAuthGuard } from './routes';
@@ -13,7 +13,7 @@ import { createHouseholdService, learnerMemory, type MemoryAnswer } from './serv
 export function householdModule({ db, auth }: { db: Db; auth: Auth }) {
   const service = createHouseholdService({
     repository: createHouseholdRepository(db),
-    createPairingCode: (userId) => createPairingCode(auth, userId),
+    createActivationCode: (userId, reason) => createActivationCode(auth, userId, reason),
   });
   return { routes: householdRoutes({ auth, service }), me: meRoutes({ auth, service }), authGuard: studentAuthGuard({ auth, service }) };
 }
@@ -40,6 +40,15 @@ export function studentDirectory(db: Db) {
 }
 
 export type StudentDirectory = ReturnType<typeof studentDirectory>;
+
+/** What the student sign-in asks of the household, which main.ts hands to better-auth. */
+export function studentAccess(db: Db): StudentAccess {
+  const repository = createHouseholdRepository(db);
+  return {
+    inHousehold: studentDirectory(db).inHousehold,
+    birthMonth: async (studentId) => (await repository.findProfile(studentId))?.birthMonth ?? null,
+  };
+}
 
 /** A user's deletion, with a sole guardian's household and students, in one transaction. */
 export function accountDeletion(db: Db) {

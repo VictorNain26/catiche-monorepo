@@ -15,8 +15,14 @@ export const meQuery = queryOptions({
   },
 });
 
-/** The devices paired to the signed-in account, the newest first. */
+/** The devices that hold the signed-in student's profile, the newest first, and when a parent last replaced their code. */
 export const ownDevicesQuery = queryOptions({
   queryKey: ['me', 'devices'],
   queryFn: () => parseResponse(api.me.devices.$get()),
 });
+
+const RESET_NOTICE_DAYS = 14;
+
+/** Whether a parent replaced the student's code within two weeks: their home tells them. */
+export const isRecentReset = (resetAt: string | null, now = new Date()) =>
+  resetAt !== null && now.getTime() - Date.parse(resetAt) <= RESET_NOTICE_DAYS * 24 * 60 * 60_000;

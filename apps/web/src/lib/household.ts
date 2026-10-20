@@ -1,4 +1,4 @@
-/** The guardian's household, as `/api/household` serves it: its students and their devices. */
+/** The guardian's household, as `/api/household` serves it: its students, their devices and codes. */
 
 import { isStudentBirthMonth, STUDENT_AGE_YEARS } from '@repo/server/student-age';
 import { queryOptions } from '@tanstack/react-query';
@@ -41,10 +41,18 @@ export const updateStudent = (id: string, json: InferRequestType<(typeof student
 
 export const deleteStudent = (id: string) => parseResponse(students[':id'].$delete({ param: { id } }));
 
-/** A one-time code that pairs a device to the child's account. */
-export const pairingCode = (id: string) => parseResponse(students[':id']['pairing-code'].$post({ param: { id } }));
+export type ActivationReason = InferRequestType<(typeof students)[':id']['activation-code']['$post']>['json']['reason'];
 
-export const revokeDevice = (id: string, deviceId: string) =>
+/** A one-time code that puts the child's profile on a new device, or lets them choose a new code. */
+export const activationCode = (id: string, reason: ActivationReason) =>
+  parseResponse(students[':id']['activation-code'].$post({ param: { id }, json: { reason } }));
+
+/** The child's tries on the device start again. */
+export const unblockDevice = (id: string, deviceId: string) =>
+  parseResponse(students[':id'].devices[':deviceId'].unblock.$post({ param: { id, deviceId } }));
+
+/** The device no longer holds the child's profile, and their sessions there close. */
+export const removeDevice = (id: string, deviceId: string) =>
   parseResponse(students[':id'].devices[':deviceId'].$delete({ param: { id, deviceId } }));
 
 /** A failed household request, in words a parent reads; the server's own message never shows. */
