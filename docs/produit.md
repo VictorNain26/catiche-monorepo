@@ -34,9 +34,8 @@ Une soirée suit les gestes de `methode.md` :
 6. D'un soir à l'autre, il garde les contrôles annoncés et ramène leur révision les jours
    d'avant.
 
-Le parent verra que c'est fait ; les conversations ne lui sont jamais envoyées. En 6e et 5e,
-il peut aujourd'hui ouvrir le profil de l'enfant sur l'appareil de la famille (`tuteur.md`,
-§ 8) : c'est à revoir avec le mode accompagné.
+Le parent verra que c'est fait ; les conversations ne lui sont jamais envoyées. Dès la 6e,
+l'enfant travaille dans son espace à lui, sur son propre appareil (`tuteur.md`, § 8).
 
 ## Pourquoi pas le gratuit
 
@@ -73,8 +72,9 @@ devoirs à l'oral.
 
 - **Gardé** : le tuteur et ses garde-fous, la mémoire d'apprentissage, le foyer et les appareils,
   la charte.
+- **Retiré** : le mode accompagné de la 6e et de la 5e (2026-10-20).
 - **À revoir dans les PR qui construisent la soirée** : le résumé de la semaine, vers « c'est
-  fait » ; le mode accompagné de la 6e et de la 5e ; les offres Gratuit et Complet.
+  fait » ; les offres Gratuit et Complet.
 - **À construire** : la soirée à l'oral, avec le micro à ouvrir (`etat.md`), les contrôles
   gardés d'un soir à l'autre, et le cartable du lendemain.
 

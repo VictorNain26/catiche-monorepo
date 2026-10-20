@@ -219,31 +219,20 @@ Le code vit dans `apps/server/src/eval/` ; `bun run eval` rejoue le jeu sur le v
   à partir de 15 ans, l'élève décide seul. L'élève voit ce
   que Tom retient, notion par notion, le corrige ou l'efface ; le parent n'en voit que ce que
   dit le résumé.
-- **Le parent voit un résumé de la semaine ; les conversations ne lui sont jamais envoyées** (en
-  6e et 5e, il peut ouvrir le profil de l'enfant sur l'appareil de la famille, ce que l'enfant
-  sait) : les sept derniers
-  jours, calculés par le code sans modèle (`modules/tutor/core/week-summary.ts`) ; les matières,
+- **Le parent voit un résumé de la semaine ; les conversations ne lui sont jamais envoyées** :
+  les sept derniers jours, calculés par le code sans modèle (`modules/tutor/core/week-summary.ts`) ; les matières,
   le temps passé (de l'ouverture de la séance, d'un message à l'autre, une pause au-delà de
   10 minutes, rien après une détresse), les notions qui résistent (dernier exercice travaillé dans
   la semaine non résolu après une aide, ou résolu avec une aide allée jusqu'à « Étape
   intermédiaire »). L'élève voit le même résumé (`GET /api/summary`), son parent par
   `GET /api/summary/:studentId`. L'écran (`components/week-summary.tsx` du web) dit la même
   semaine au parent et à l'élève, avec une question à poser à l'enfant tirée de ce qui résiste.
-- **En 6e et 5e, le mode accompagné** : le parent lance la séance par « Faire les
-  devoirs avec … », l'appareil passe au profil de l'enfant, qui choisit « Avec mon parent à
-  côté » ou « Sans mon parent ce soir » (`study_session.accompanied`, refusé en 4e et 3e). À
-  côté, Tom donne au parent quatre pistes au plus par séance, une au plus par tour, jamais la même
-  deux fois de suite : au lancement, à la fin d'un exercice, à un blocage, à une frustration, à un
-  nouvel exercice ; la fin et le blocage seulement quand la réponse a vraiment aidé
-  (`modules/tutor/core/parent-cues.ts`). Ce sont des phrases fixes choisies par le code, jamais un
-  mot du modèle : elles ne peuvent porter ni l'exercice ni sa réponse. Transmises en partie
-  `data-cue` transitoire, montrées sous la réponse jusqu'au message suivant, visibles de
-  l'enfant. Le web ne propose plus de relier un appareil de l'enfant avant la 4e ; le serveur
-  garde le code de jumelage, dont se sert l'ouverture sur l'appareil de la famille.
-- **À partir de la 4e, l'espace de l'enfant ne s'ouvre sur aucun appareil de la famille**, même
-  un qui le tenait depuis la 5e : le serveur refuse le passage au profil d'un frère ou d'une sœur
-  (`assertSiblingSwitch`, `modules/household/routes.ts`), et le web ne propose pas de l'ouvrir
-  (`OpenHere`, `routes/foyer.$studentId.tsx`).
+- **L'enfant a son espace à lui, dès la 6e** (décision de Victor, 2026-10-20) : il travaille sur
+  son propre appareil, relié par un code que le parent demande (`platform/auth/pairing.ts`) ; le
+  parent ne l'ouvre pas sur le sien. Chaque appareil relié est une session que l'enfant voit dans
+  sa liste, et que le parent déconnecte. Sur un appareil, un enfant ne liste ni n'ouvre la
+  session d'un frère ou d'une sœur : la garde du foyer lui refuse ces routes de better-auth
+  (`STUDENT_AUTH_PATHS`, `modules/household/routes.ts`).
 - **La détresse n'alerte pas le parent d'office** : l'événement est enregistré
   (`distress_event`) ; la revue humaine qui doit le relire et décider n'existe pas encore
   (`etat.md`).
