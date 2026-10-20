@@ -9,7 +9,7 @@
 ## Reporting a Vulnerability
 
 1. **Do NOT** open a public GitHub issue
-2. Use [GitHub's private security advisory](https://github.com/VictorNain26/tomai-monorepo/security/advisories/new)
+2. Use [GitHub's private security advisory](https://github.com/VictorNain26/catiche-monorepo/security/advisories/new)
 3. Include: description, reproduction steps, potential impact
 
 We will acknowledge within 48 hours and provide a fix timeline within 7 days.

@@ -57,7 +57,7 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
   conformité littérale.
 - Les durées de conservation annoncées (`apps/landing/src/pages/confidentialite.astro`, § 7) :
   aucune purge ne tient encore celles du compte inactif ni des journaux. Celles des e-mails reçus
-  à `contact@` (prévenir à l'ouverture, puis effacer) se tiennent à la main, dans Gmail.
+  à `contact@` (prévenir à l'ouverture, puis effacer) se tiennent à la main, dans la boîte Zimbra.
 - La landing, à la naissance de la production : un formulaire d'inscription à la place du
   `mailto:` de la section « prévenu », avec son information CNIL au moment de la collecte.
 - L'adresse de la connexion (`platform/http/client-address.ts`, `getConnInfo`) n'est exercée par
@@ -68,21 +68,26 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
 ## Prochain chantier
 
 - **Le passage à `catiche.fr`** (acheté par Victor le 2026-10-20 chez OVH, un an), sans
-  redirection : toute trace de « tomia » et « tomai » disparaît du dépôt, des applications Clever
-  Cloud et de l'image ; `tomia.fr` est laissé à sa résiliation (24 août 2027). Déjà fait le
-  2026-10-20 :
-  - la zone DNS OVH de `catiche.fr` (Clever Cloud pour l'adresse principale, `www` et
-    `staging` ; MX et SPF de la boîte Zimbra ; SPF, DKIM, DMARC et MX de Scaleway TEM sous
-    `mail.`) ;
-  - les domaines rattachés aux applications Clever Cloud ;
-  - le domaine d'envoi `mail.catiche.fr` chez Scaleway.
+  redirection ; l'ancien domaine est laissé à sa résiliation (24 août 2027). Déjà fait le
+  2026-10-20 : la zone DNS OVH de `catiche.fr` (Clever Cloud pour l'adresse principale, `www` et
+  `staging` ; MX et SPF de la boîte Zimbra ; SPF, DKIM, DMARC et MX de Scaleway TEM sous
+  `mail.`), les domaines rattachés aux applications Clever Cloud, le domaine d'envoi
+  `mail.catiche.fr` chez Scaleway, le renommage du dépôt GitHub en `catiche-monorepo`.
+  Anciens noms à effacer : `tomia.fr` (`www.`, `staging.`), les applications `tomai-*`, l'image `tomai-server`.
 
-  Reste :
-  - vérifier le DNS et l'envoi une fois le domaine publié par l'AFNIC ;
-  - la PR de bascule ;
-  - les variables d'environnement du staging ;
-  - détacher `tomia.fr` ;
-  - le renommage du dépôt GitHub, par Victor.
+  Reste, par Victor, avant le merge de la PR de bascule :
+  - chez Scaleway, la clé DKIM publiée et le « Check status » de `mail.catiche.fr` au vert ;
+  - dans Clever Cloud, au staging : `BETTER_AUTH_URL` sur `https://staging.catiche.fr`, et
+    `MAIL_FROM` sur une adresse de `mail.catiche.fr` ;
+  - créer la boîte `contact@catiche.fr` dans Zimbra, avec un mot de passe qu'il choisit ;
+  - renommer les applications Clever Cloud en `catiche-landing`, `catiche-staging` et
+    `catiche-staging-db`.
+
+  Après le merge :
+  - rendre public le paquet GHCR `catiche-server` dès sa première publication (un paquet naît
+    privé, et Clever Cloud le tire sans identifiants), puis relancer le job « Deploy staging » ;
+  - détacher les anciens domaines des applications Clever Cloud, et supprimer l'ancienne image
+    de GHCR.
 - Ensuite, l'application (`produit.md`, « Ce que devient l'existant »), puis la soirée de devoirs
   à l'oral (`produit.md`). Le micro, que la `Permissions-Policy` du serveur
   ferme (`platform/http/security-headers.ts`), s'ouvre à `self` ; la transcription impose le
@@ -90,6 +95,12 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
 
 ## Technique reporté
 
+- La suppression du compte parent : le serveur la porte (`POST /api/auth/delete-user`, session de
+  moins de 10 minutes), mais le web n'a pas de bouton ; d'ici là, elle se fait sur demande, comme
+  le disent les CGU et la politique de confidentialité.
+- L'e-mail de suppression invite à répondre (`platform/auth/auth.ts`), mais le mailer ne pose
+  aucun `Reply-To` : la réponse irait à `MAIL_FROM`, que personne ne lit ; à faire pointer vers
+  `contact@catiche.fr`, avec son test.
 - Code de l'élève, vu dans Chrome le 2026-10-20 à l'ordinateur seulement (la fenêtre ne s'est
   pas réduite à la largeur d'un téléphone) : à revoir au téléphone. Trois finitions :
   - un code trop facile n'est refusé qu'après sa seconde saisie, au lieu de la première ;

@@ -143,9 +143,9 @@ jobs:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     env:
-      # The package's name from before Catiche: Clever Cloud pulls it without credentials, which
-      # needs it public, and a package under a new name starts private.
-      IMAGE: ghcr.io/${{ github.repository_owner }}/tomai-server
+      # Clever Cloud pulls it without credentials, which needs the package public: a package starts
+      # private, and is made public by hand after its first push.
+      IMAGE: ghcr.io/${{ github.repository_owner }}/catiche-server
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -268,7 +268,7 @@ jobs:
     permissions: {}
     environment:
       name: staging
-      url: https://staging.tomia.fr
+      url: https://staging.catiche.fr
     concurrency:
       group: deploy-staging
       cancel-in-progress: false
@@ -309,7 +309,7 @@ jobs:
       contents: read
     environment:
       name: landing
-      url: https://tomia.fr
+      url: https://catiche.fr
     concurrency:
       group: deploy-landing
       cancel-in-progress: false
