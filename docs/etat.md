@@ -17,9 +17,6 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-19 ; ce qui 
 - **Comptes à fermer** : le projet Vercel et l'application GitHub Vercel (son check échoue sur
   chaque PR), l'organisation Sentry `home-drx`, le projet Langfuse « tomai » ; vérifier que Koyeb
   ne facture plus rien.
-- **Secrets** : `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`) et l'application GitHub Claude,
-  pour `.github/workflows/claude.yml` ; supprimer `ANTHROPIC_API_KEY`, `MISTRAL_API_KEY_CI`,
-  `SEMGREP_APP_TOKEN`, `KOYEB_API_TOKEN` et `DATABASE_URL`, que rien n'utilise.
 - **Double authentification** : celle d'OVH, qui tient le domaine ; chez Scaleway, ce qui reste
   (moyen de paiement, vérification d'identité, double authentification).
 - **Dependabot** : classer `inaccurate` les alertes rattachées à `apps/ai-service/uv.lock` et
