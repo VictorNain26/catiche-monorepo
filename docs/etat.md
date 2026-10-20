@@ -19,6 +19,8 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
   ne facture plus rien.
 - **Double authentification** : celle d'OVH, qui tient le domaine ; chez Scaleway, ce qui reste
   (moyen de paiement, vérification d'identité, double authentification).
+- **Scaleway** : lire et valider les nouvelles « Specific Conditions Services » que la console
+  demande (vu le 2026-10-20).
 - **Dependabot** : classer `inaccurate` les alertes rattachées à `apps/ai-service/uv.lock` et
   `apps/curriculum/uv.lock`, supprimés en `8f5011f`, et signaler le bug au support GitHub.
 - **CNIL** : écrire sur l'hébergement de données de santé ; garder une copie du DPA de Clever
@@ -65,7 +67,24 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
 
 ## Prochain chantier
 
-- La soirée de devoirs à l'oral (`produit.md`). Le micro, que la `Permissions-Policy` du serveur
+- **Le passage à `catiche.fr`** (acheté par Victor le 2026-10-20 chez OVH, un an), sans
+  redirection : toute trace de « tomia » et « tomai » disparaît du dépôt, des applications Clever
+  Cloud et de l'image ; `tomia.fr` est laissé à sa résiliation (24 août 2027). Déjà fait le
+  2026-10-20 :
+  - la zone DNS OVH de `catiche.fr` (Clever Cloud pour l'adresse principale, `www` et
+    `staging` ; MX et SPF de la boîte Zimbra ; SPF, DKIM, DMARC et MX de Scaleway TEM sous
+    `mail.`) ;
+  - les domaines rattachés aux applications Clever Cloud ;
+  - le domaine d'envoi `mail.catiche.fr` chez Scaleway.
+
+  Reste :
+  - vérifier le DNS et l'envoi une fois le domaine publié par l'AFNIC ;
+  - la PR de bascule ;
+  - les variables d'environnement du staging ;
+  - détacher `tomia.fr` ;
+  - le renommage du dépôt GitHub, par Victor.
+- Ensuite, l'application (`produit.md`, « Ce que devient l'existant »), puis la soirée de devoirs
+  à l'oral (`produit.md`). Le micro, que la `Permissions-Policy` du serveur
   ferme (`platform/http/security-headers.ts`), s'ouvre à `self` ; la transcription impose le
   français.
 

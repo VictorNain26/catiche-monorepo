@@ -71,9 +71,16 @@ ou une IA obtient le même effet.
 - **PANDAH** veut permettre aux parents de prendre de la distance avec des séances de devoirs
   conflictuelles [6] (T).
 
+- **Un message au parent sur les devoirs non rendus**, les absences et les moyennes basses, tiré
+  a fait baisser les échecs aux cours dans un essai randomisé auprès de 1 137 parents, sans effet
+  sur les tests standardisés [10] (R).
+
 Pour Tom :
 - l'élève travaille sans qu'un parent le surveille ;
 - le parent voit « c'est fait », pas les conversations ;
+- **le point du soir** (`produit.md`) : un soutien et un encouragement, pas un contrôle. HOPS
+  montre que la surveillance seule n'apporte rien ; OST et le message au parent montrent que la
+  reconnaissance de ce qui est fait compte ;
 - il peut choisir une récompense, sans que le produit en dépende.
 
 ## Ce qu'on mesurerait
@@ -130,3 +137,7 @@ Consultées le 2026-10-20.
 9. Langberg et al., « Assessing homework problems in children with ADHD », *School Ment Health*,
    2010, PMID
    [21544228](https://europepmc.org/article/MED/21544228).
+10. Bergman et Chan, « Leveraging Parents through Low-Cost Technology », *J Hum Resour* 56(1),
+    DOI 10.3368/jhr.56.1.1118-9837R1 ; résumé de J-PAL : 1 137 parents de 22 collèges et lycées,
+    0,71 cours échoué contre 0,97, présence en hausse de 12 %
+    ([J-PAL](https://www.povertyactionlab.org/node/2353)), consulté le 2026-10-20.
