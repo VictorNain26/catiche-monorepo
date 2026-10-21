@@ -3,29 +3,55 @@ import ExternalLink from '@/components/atoms/external-link.astro';
 import PageLayout from '@/layouts/page-layout.astro';
 import { BRAND_NAME } from '@/lib/brand';
 
-const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfant\u00a0: données collectées, bases légales, prestataires, durées de conservation et vos droits.`;
+// The sections, in one place: each heading's anchor and words, and the contents under the date that link to them.
+const SECTIONS = {
+  responsable: '1. Qui est responsable de vos données ?',
+  donnees: '2. Quelles données collectons-nous ?',
+  bases: '3. Pourquoi, et sur quelle base légale ?',
+  memoire: "4. La mémoire d'apprentissage",
+  acces: '5. Qui accède à vos données ?',
+  transferts: "6. Transferts hors de l'Union européenne",
+  conservation: '7. Combien de temps conservons-nous vos données ?',
+  droits: '8. Vos droits',
+  securite: '9. Sécurité',
+  mineurs: '10. Protection des mineurs',
+  evolution: '11. Évolution de cette politique',
+} as const;
+
+const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre collégien\u00a0: données collectées, bases légales, prestataires, durées de conservation et vos droits.`;
 ---
 
 <PageLayout title="Politique de confidentialité" description="Dernière mise à jour : 21 octobre 2026" metaDescription={DESCRIPTION}>
+  <nav aria-label="Sommaire" class="mb-10">
+    <ol class="space-y-1">
+      {Object.entries(SECTIONS).map(([id, title]) => (
+        <li>
+          <a href={`#${id}`} class="inline-flex min-h-11 items-center text-primary underline underline-offset-4">
+            {title}
+          </a>
+        </li>
+      ))}
+    </ol>
+  </nav>
   <div class="legal-copy">
     <p>
       <strong>Service en préparation&nbsp;:</strong> cette politique décrit le service tel qu&apos;il fonctionnera à son ouverture. L&apos;application
       n&apos;est pas encore ouverte&nbsp;: aujourd&apos;hui, aucune donnée d&apos;élève n&apos;est collectée.
     </p>
     <p>
-      <strong>En bref :</strong> {BRAND_NAME} est conçu pour aider votre enfant à apprendre. Pour cela, nous traitons les données strictement
+      <strong>En bref :</strong> {BRAND_NAME} est conçu pour aider votre collégien à apprendre. Pour cela, nous traitons les données strictement
       nécessaires au tutorat, en France et en Europe autant que possible. Nous ne vendons jamais vos données, nous ne diffusons aucune publicité, et
       vous gardez le contrôle : consultation, correction et suppression sur simple demande.
     </p>
 
-    <h2>1. Qui est responsable de vos données ?</h2>
+    <h2 id="responsable">{SECTIONS.responsable}</h2>
     <p>
       Le responsable du traitement est Victor Lenain, entrepreneur individuel (micro-entrepreneur), éditeur de l&apos;application {BRAND_NAME} (voir
       les <a href="/mentions-legales">mentions légales</a>). Pour toute question relative à vos données personnelles ou pour exercer vos droits :{' '}
       <a href="mailto:contact@catiche.fr">contact@catiche.fr</a>.
     </p>
 
-    <h2>2. Quelles données collectons-nous ?</h2>
+    <h2 id="donnees">{SECTIONS.donnees}</h2>
     <p>
       <strong>Compte parent :</strong> prénom et adresse e-mail. Aucun mot de passe : un code à usage unique, envoyé à cette adresse, permet de se
       connecter. Le parent qui crée une clé d&apos;accès entre ensuite par le verrouillage de son appareil : Tom n&apos;en garde que la partie
@@ -57,7 +83,7 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
       message. Le site n&apos;a ni formulaire ni mesure d&apos;audience.
     </p>
 
-    <h2>3. Pourquoi, et sur quelle base légale ?</h2>
+    <h2 id="bases">{SECTIONS.bases}</h2>
     <ul>
       <li>
         <strong>Fournir le service de tutorat</strong> (compte, conversations) — exécution du contrat.
@@ -78,7 +104,7 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
       </li>
     </ul>
 
-    <h2>4. La mémoire d&apos;apprentissage</h2>
+    <h2 id="memoire">{SECTIONS.memoire}</h2>
     <p>
       Si elle est acceptée, la mémoire d&apos;apprentissage retient, notion par notion, ce que disent les exercices de l&apos;élève depuis la rentrée
       : combien il en a travaillé, le dernier niveau d&apos;aide et les types d&apos;erreur qui reviennent. Elle ne garde jamais le texte des
@@ -95,7 +121,7 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
       de vos conversations. Tu vois ce qu&apos;il retient, et tu peux l&apos;effacer quand tu veux.
     </p>
 
-    <h2>5. Qui accède à vos données ?</h2>
+    <h2 id="acces">{SECTIONS.acces}</h2>
     <p>
       Vos données ne sont jamais vendues ni louées, et nous ne diffusons aucune publicité. Elles sont traitées par les prestataires suivants, chacun
       limité à sa mission :
@@ -115,14 +141,15 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
         <strong>Scaleway</strong> (France, données traitées dans l&apos;Union européenne) — envoi des e-mails du compte parent.
       </li>
       <li>
-        <strong>OVH</strong> (France, boîte hébergée en France) — réception des e-mails envoyés à contact@catiche.fr.
+        <strong>OVH</strong> (France, boîte hébergée en France) — réception des e-mails envoyés à{' '}
+        <a href="mailto:contact@catiche.fr">contact@catiche.fr</a>.
       </li>
     </ul>
 
-    <h2>6. Transferts hors de l&apos;Union européenne</h2>
+    <h2 id="transferts">{SECTIONS.transferts}</h2>
     <p>Mistral AI, Clever Cloud, Scaleway et OVH traitent vos données dans l&apos;Union européenne.</p>
 
-    <h2>7. Combien de temps conservons-nous vos données ?</h2>
+    <h2 id="conservation">{SECTIONS.conservation}</h2>
     <p>
       Ces durées sont nos engagements pour l&apos;ouverture du service. Aujourd&apos;hui, la suppression d&apos;un compte efface ses données de la
       base, et les sessions de connexion expirent comme indiqué ; l&apos;effacement des comptes inactifs et des journaux reste à construire d&apos;ici
@@ -148,11 +175,14 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
         <strong>Journaux techniques et de sécurité</strong> : 12 mois.
       </li>
       <li>
-        <strong>E-mails reçus à contact@catiche.fr</strong> : le temps d&apos;y répondre, et au plus 3 ans après votre dernier message.
+        <strong>
+          E-mails reçus à <a href="mailto:contact@catiche.fr">contact@catiche.fr</a>
+        </strong>{' '}
+        : le temps d&apos;y répondre, et au plus 3 ans après votre dernier message.
       </li>
     </ul>
 
-    <h2>8. Vos droits</h2>
+    <h2 id="droits">{SECTIONS.droits}</h2>
     <p>
       Conformément au RGPD et à la loi Informatique et Libertés, vous disposez des droits d&apos;accès, de rectification, d&apos;effacement, de
       limitation, d&apos;opposition et de portabilité, du droit de retirer votre consentement à tout moment, et du droit de définir des directives sur
@@ -162,17 +192,16 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
       Pour les exercer : <a href="mailto:contact@catiche.fr">contact@catiche.fr</a> (réponse sous un mois ; une vérification d&apos;identité pourra
       être demandée). Les comptes enfants peuvent être supprimés directement depuis l&apos;espace parent de l&apos;application ; l&apos;application ne
       propose pas encore la suppression du compte parent, qui s&apos;effectue sur demande à la même adresse. Vous pouvez également adresser une
-      réclamation à la CNIL (<ExternalLink href="https://www.cnil.fr">cnil.fr</ExternalLink>
-      ).
+      réclamation à la CNIL (<ExternalLink href="https://www.cnil.fr">cnil.fr</ExternalLink>).
     </p>
 
-    <h2>9. Sécurité</h2>
+    <h2 id="securite">{SECTIONS.securite}</h2>
     <p>
       Les échanges sont chiffrés (TLS). Les cookies de session sont protégés (httpOnly, secure) et l&apos;accès aux données d&apos;un enfant est
-      strictement réservé à son parent.
+      strictement réservé à son représentant légal.
     </p>
 
-    <h2>10. Protection des mineurs</h2>
+    <h2 id="mineurs">{SECTIONS.mineurs}</h2>
     <p>
       {BRAND_NAME} est conçu pour des élèves mineurs, sous le contrôle de leurs parents : le compte enfant est créé par le parent, et pour les enfants
       de moins de 15 ans le traitement repose sur le consentement conjoint du parent et de l&apos;enfant (article 45 de la loi Informatique et
@@ -180,7 +209,7 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
       élèves est rédigée en langage simple, conformément aux recommandations de la CNIL sur les droits numériques des mineurs.
     </p>
 
-    <h2>11. Évolution de cette politique</h2>
+    <h2 id="evolution">{SECTIONS.evolution}</h2>
     <p>
       En cas de modification substantielle de cette politique, vous serez informé par e-mail ou via l&apos;application avant son entrée en vigueur. La
       date de dernière mise à jour figure en haut de cette page.
