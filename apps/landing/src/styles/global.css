@@ -69,6 +69,12 @@
   box-decoration-break: clone;
 }
 
+/* Depth behind Tom and the evening, at the top and at the end of the page: a soft halo of water, fading out from its
+ * middle. */
+@utility halo {
+  background: radial-gradient(closest-side, var(--color-halo), transparent);
+}
+
 @keyframes lay-highlight {
   from {
     background-size: 0% var(--highlight-height);

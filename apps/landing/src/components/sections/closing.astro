@@ -1,17 +1,22 @@
 ---
 import TomIllustration from '@/components/atoms/tom-illustration.astro';
 import RequestInvitation from '@/components/molecules/request-invitation.astro';
-import { BRAND_NAME } from '@/lib/brand';
 ---
 
-{/* The end of the evening: Tom waves, without a word (docs/charte.md, "Tom": out of a session, he does not speak). On a
- * phone he already opens the page, right above the title: the end keeps only the question and the button. */}
-<section class="bg-background pt-12 pb-12 md:pt-20 lg:pt-28 lg:pb-16">
-  <div class="container grid max-w-6xl items-end gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
-    <div class="sm:pb-8">
-      <h2 class="max-w-2xl text-3xl text-balance text-foreground sm:text-4xl">{BRAND_NAME} vous intéresse&nbsp;?</h2>
-      <RequestInvitation class="mt-6 sm:mt-8" />
+{/* The end of the evening, an echo of the top of the page: the same halo, and Tom stepping out of the brand's light plane.
+ * He waves once as he comes into view (docs/charte.md, "Tom": out of a session, he does not speak); on a phone he stays,
+ * small, above the title, half in the plane. */}
+<section class="overflow-hidden bg-background pt-24 pb-14 md:pt-28 lg:py-28">
+  <div class="container max-w-5xl">
+    <div class="relative isolate">
+      <span aria-hidden="true" class="halo absolute -inset-16 -z-10"></span>
+      <div class="rounded-3xl bg-tint px-6 pt-24 pb-8 sm:px-10 sm:pt-28 lg:py-16 lg:pr-80">
+        <h2 class="max-w-xl text-3xl text-balance text-foreground sm:text-4xl">Une soirée de devoirs, du début à la fin.</h2>
+        <RequestInvitation class="mt-6 sm:mt-8" />
+      </div>
+      <div class="pointer-events-none absolute -top-16 left-4 w-36 sm:left-8 sm:w-44 lg:top-auto lg:right-6 lg:bottom-0 lg:left-auto lg:w-96">
+        <TomIllustration start="view" class="max-w-none" />
+      </div>
     </div>
-    <TomIllustration start="view" class="hidden sm:block sm:w-full" />
   </div>
 </section>
