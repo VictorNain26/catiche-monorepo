@@ -3,6 +3,7 @@ import { Menu, X } from '@lucide/astro';
 import { buttonVariants } from '@repo/ui/classes';
 import NavLinks from './nav-links.astro';
 import ExternalLink from '@/components/atoms/external-link.astro';
+import Logo from '@/components/atoms/logo.astro';
 import { SIGN_IN_URL } from '@/lib/brand';
 ---
 
@@ -20,8 +21,21 @@ import { SIGN_IN_URL } from '@/lib/brand';
     aria-label="Menu"
     class="fixed inset-y-0 right-0 left-auto m-0 h-dvh max-h-none w-3/4 max-w-none border-l bg-background p-0 shadow-lg backdrop:bg-overlay/80 sm:max-w-sm"
   >
-    {/* Fills the dialog, so that only a click on the backdrop lands on the dialog itself. */}
-    <div class="flex h-full flex-col gap-4 p-6 pt-16">
+    {/* Fills the dialog, so that only a click on the backdrop lands on the dialog itself. Its top row, at the header's
+     * height, holds the logo and the close button, in the ink of the text; the dialog opens on the close button. */}
+    <div class="flex h-full flex-col gap-4 px-6 pb-6">
+      <div class="-mr-4 flex h-16 shrink-0 items-center justify-between">
+        <Logo />
+        <button
+          type="button"
+          data-close
+          autofocus
+          class="inline-flex size-11 items-center justify-center rounded-full text-foreground transition-colors duration-base hover:bg-accent"
+        >
+          <X class="size-5" aria-hidden="true" />
+          <span class="sr-only">Fermer</span>
+        </button>
+      </div>
       <nav aria-label="Principale" class="flex flex-col gap-4">
         <NavLinks orientation="vertical" />
       </nav>
@@ -29,14 +43,6 @@ import { SIGN_IN_URL } from '@/lib/brand';
         Se connecter
       </ExternalLink>
     </div>
-    <button
-      type="button"
-      data-close
-      class="absolute top-2 right-2 inline-flex size-11 items-center justify-center rounded-full opacity-70 transition-opacity duration-base hover:opacity-100"
-    >
-      <X class="size-5" aria-hidden="true" />
-      <span class="sr-only">Fermer</span>
-    </button>
   </dialog>
 </mobile-menu>
 

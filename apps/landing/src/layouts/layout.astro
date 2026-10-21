@@ -86,7 +86,9 @@ const jsonLd = [
     >
       Aller au contenu principal
     </a>
-    <div class="relative flex min-h-screen flex-col">
+    {/* The top the logo brings back (atoms/logo.astro): focusable by script only, so that the keyboard's focus follows
+     * the page up, and the next Tab starts again from the header. */}
+    <div id="top" tabindex="-1" class="relative flex min-h-screen flex-col outline-none">
       <Header />
       <main id="main-content" class="flex-1">
         <slot />
