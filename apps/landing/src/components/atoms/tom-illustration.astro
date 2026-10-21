@@ -1,37 +1,52 @@
 ---
 import { Image } from 'astro:assets';
+import { Pause, Play } from '@lucide/astro';
 import { cn } from '@repo/ui/classes';
 import tom from '@/assets/tom.png';
 
 interface Props {
   class?: string;
+  // On the top of the page Tom moves at once; further down, once he is in view.
+  start?: 'load' | 'view';
+  // The arch, the entrance of the holt, behind Tom on the top of the site only (docs/charte.md, "Formes et composition").
+  arch?: boolean;
 }
 
-const { class: className } = Astro.props;
+const { class: className, start = 'load', arch = false } = Astro.props;
 const CLIPS = ['salut', 'respiration'] as const;
 ---
 
-<tom-illustration
-  role="img"
-  aria-label="Tom, une loutre en pull bleu avec un stylo dans la poche"
-  class={cn('relative block aspect-square w-full max-w-sm', className)}
->
-  <Image src={tom} alt="" width={384} height={384} densities={[1, 2]} class="size-full" />
-  {CLIPS.map((clip) => (
-    <video
-      data-clip={clip}
-      aria-hidden="true"
-      muted
-      playsinline
-      loop={clip === 'respiration'}
-      preload="none"
-      class="invisible absolute inset-0 size-full"
-    >
-      {/* Safari drops VP9 alpha, so it must meet its HEVC source first. */}
-      <source src={`/tom/${clip}.mov`} type='video/mp4; codecs="hvc1"' />
-      <source src={`/tom/${clip}.webm`} type="video/webm" />
-    </video>
-  ))}
+<tom-illustration data-start={start} class={cn('relative block w-full max-w-sm', className)}>
+  <span role="img" aria-label="Tom, une loutre en pull bleu avec un stylo dans la poche" class="relative block aspect-square w-full">
+    {arch && <span aria-hidden="true" class="absolute inset-x-[6%] top-[4%] bottom-0 rounded-t-full bg-arch"></span>}
+    <Image src={tom} alt="" width={384} height={384} densities={[1, 2]} class="relative size-full" />
+    {CLIPS.map((clip) => (
+      <video
+        data-clip={clip}
+        aria-hidden="true"
+        muted
+        playsinline
+        loop={clip === 'respiration'}
+        preload="none"
+        class="invisible absolute inset-0 size-full"
+      >
+        {/* Safari drops VP9 alpha, so it must meet its HEVC source first. */}
+        <source src={`/tom/${clip}.mov`} type='video/mp4; codecs="hvc1"' />
+        <source src={`/tom/${clip}.webm`} type="video/webm" />
+      </video>
+    ))}
+  </span>
+  {/* Tom moves for more than five seconds: the visitor can stop him (WCAG 2.2.2). Shown only once he moves. */}
+  <button
+    type="button"
+    data-toggle
+    hidden
+    class="absolute top-0 right-0 inline-flex min-h-11 items-center gap-2 rounded-control px-3 text-sm font-bold text-foreground transition-colors duration-base hover:bg-accent"
+  >
+    <Pause data-icon="pause" class="size-4" aria-hidden="true" />
+    <Play data-icon="play" class="hidden size-4" aria-hidden="true" />
+    <span data-label>Pause</span>
+  </button>
 </tom-illustration>
 
 <script>
@@ -40,25 +55,60 @@ const CLIPS = ['salut', 'respiration'] as const;
       const picture = this.querySelector('img');
       const salut = this.querySelector<HTMLVideoElement>('video[data-clip="salut"]');
       const respiration = this.querySelector<HTMLVideoElement>('video[data-clip="respiration"]');
-      if (!picture || !salut || !respiration) return;
+      const toggle = this.querySelector<HTMLButtonElement>('[data-toggle]');
+      if (!picture || !salut || !respiration || !toggle) return;
+      // Autoplay can be refused (iOS Low Power Mode), and nothing moves under reduced motion: Tom then stays still.
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+      let current = salut;
       const show = (shown: HTMLElement) => {
         for (const frame of [picture, salut, respiration]) frame.classList.toggle('invisible', frame !== shown);
       };
+      // The button says what it does next: its label changes, not a pressed state.
+      const setPaused = (paused: boolean) => {
+        toggle.querySelector('[data-icon="pause"]')?.classList.toggle('hidden', paused);
+        toggle.querySelector('[data-icon="play"]')?.classList.toggle('hidden', !paused);
+        const label = toggle.querySelector('[data-label]');
+        if (label) label.textContent = paused ? 'Lecture' : 'Pause';
+      };
+
       salut.addEventListener('playing', () => {
         show(salut);
+        toggle.hidden = false;
       });
       salut.addEventListener('ended', () => {
+        current = respiration;
         respiration.play().catch(() => undefined);
       });
       respiration.addEventListener('playing', () => {
         show(respiration);
       });
+      toggle.addEventListener('click', () => {
+        if (current.paused) {
+          current.play().catch(() => undefined);
+          setPaused(false);
+        } else {
+          current.pause();
+          setPaused(true);
+        }
+      });
 
-      // Hidden on small screens, Tom must not download his clips; autoplay can also be refused
-      // (iOS Low Power Mode): either way he stays still.
-      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && salut.checkVisibility()) {
+      const play = () => {
         salut.play().catch(() => undefined);
+      };
+      if (this.dataset['start'] === 'view') {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            if (entries.some((entry) => entry.isIntersecting)) {
+              observer.disconnect();
+              play();
+            }
+          },
+          { threshold: 0.6 },
+        );
+        observer.observe(this);
+      } else {
+        play();
       }
     }
   }

@@ -1,21 +1,20 @@
 ---
-import { ArrowRight } from '@lucide/astro';
 import { buttonVariants, cn } from '@repo/ui/classes';
 import { SIGN_IN_URL } from '@/lib/brand';
 
 // The one call to action: the application's sign-in page, where accounts open on invitation (apps/server/src/platform/auth/auth.ts).
 interface Props {
-  align?: 'start' | 'center';
   class?: string;
 }
 
-const { align = 'start', class: className } = Astro.props;
+const { class: className } = Astro.props;
 ---
 
-<div class={cn('flex flex-col gap-3', align === 'center' ? 'items-center text-center' : 'items-start', className)}>
+<div class={cn('flex flex-col items-start gap-3', className)}>
   <a href={SIGN_IN_URL} class={buttonVariants({ size: 'lg' })}>
     Ouvrir l&apos;application
-    <ArrowRight class="size-5" aria-hidden="true" />
   </a>
-  <p class="text-muted-foreground">Pendant la préparation, les comptes s&apos;ouvrent sur invitation.</p>
+  <p class="max-w-sm text-muted-foreground">
+    En préparation, pour le collège de la 6e à la&nbsp;3e&nbsp;: les comptes s&apos;ouvrent sur invitation.
+  </p>
 </div>

@@ -95,7 +95,10 @@ pour les lecteurs d'écran.
 ## Mouvement
 
 Des durées et une courbe en tokens ; un fondu court à l'arrivée d'un message ; aucun rebond ;
-aucune information portée par le mouvement seul ; rien ne bouge sous le mouvement réduit.
+aucune information portée par le mouvement seul ; rien ne bouge sous le mouvement réduit. Sur la
+landing, le mouvement est un geste de la soirée : le jonc qui se pose derrière les mots, le trait
+qui raye l'étape faite, les devoirs qui se rangent dans l'ordre ; jamais un texte à lire qui
+apparaît.
 
 ## Les mots
 

@@ -29,10 +29,15 @@ Clever Cloud (`apps/landing/Caddyfile`).
 - Jamais de framework client (React ou autre) : la landing est du HTML statique. Un composant qui
   a besoin du navigateur est un élément personnalisé (`customElements.define`) dans le `<script>`
   de son composant, sur l'élément natif quand il existe (`<dialog>` pour le menu, `<details>` pour
-  la FAQ). Aucune apparition au défilement : elles masquaient le texte. Les classes partagées avec
-  le web viennent de `@repo/ui/classes`.
-- Jamais un état d'entrée masqué hors de `@media (scripting: enabled)` : sans scripts, la page
-  s'affiche entière.
+  la FAQ). Les classes partagées avec le web viennent de `@repo/ui/classes`.
+- Le mouvement anime les illustrations (les écrans, Tom, le surligneur), jamais un texte à lire
+  qui apparaît au défilement : elles le masquaient. CSS d'abord, le lien au défilement sous
+  `@supports (animation-timeline: view())` ; ce que le CSS ne sait pas faire passe par les API
+  natives (Web Animations, `IntersectionObserver`) dans `apps/landing/src/scripts/evening.ts`,
+  sans bibliothèque. Une vidéo de Tom a son bouton Pause.
+- Jamais un état d'entrée masqué hors de
+  `@media (scripting: enabled) and (prefers-reduced-motion: no-preference)` : sans scripts, ou sous
+  le mouvement réduit, la page s'affiche entière et immobile ; son HTML est l'état final.
 - Jamais de `<script>` ni de `<style>` en `is:inline`, ni d'attribut `style` : la CSP
   (`security.csp`, `apps/landing/astro.config.mjs`) n'admet que ce qu'Astro a haché.
 - Jamais un texte suivi d'une balise qui ouvre la ligne suivante sans `{' '}` : Astro 7 compresse

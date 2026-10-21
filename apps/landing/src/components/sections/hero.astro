@@ -1,70 +1,105 @@
 ---
-import { Check } from '@lucide/astro';
+import { Mic } from '@lucide/astro';
 import TomIllustration from '@/components/atoms/tom-illustration.astro';
 import OpenApp from '@/components/molecules/open-app.astro';
 import Screen from '@/components/molecules/screen.astro';
 import TomSays from '@/components/molecules/tom-says.astro';
 import { BRAND_NAME } from '@/lib/brand';
 
-// The evening of docs/produit.md, "Ce que fait Catiche": the order Tom proposes, a step done, a test kept for Thursday.
+// The evening of docs/produit.md, "Ce que fait Catiche": the homework said in a jumble, then the order Tom proposes.
+// `spoken` is each one's place in what the pupil said; the list is written in Tom's order, its end state.
 const TONIGHT = [
-  { subject: 'Maths', task: 'Exercices 3 et 4', done: true },
-  { subject: 'Anglais', task: "Les mots de l'unité 2", done: false },
-  { subject: 'Histoire', task: 'Réviser le chapitre 4', done: false, test: 'Contrôle jeudi' },
+  { subject: 'Maths', task: 'Exercices 3 et 4', spoken: 3 },
+  { subject: 'Anglais', task: "Les mots de l'unité 2", spoken: 1 },
+  { subject: 'Histoire', task: 'Réviser, contrôle jeudi', spoken: 2 },
 ];
 ---
 
-<section class="overflow-hidden pt-8 pb-16 lg:pt-16 lg:pb-24">
-  <div class="container grid max-w-6xl items-center gap-12 lg:grid-cols-[1fr_minmax(0,30rem)] lg:gap-12">
+<section class="overflow-hidden pt-10 pb-20 lg:pt-16 lg:pb-32">
+  <div class="container grid max-w-6xl items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-16">
     <div>
-      <p class="text-sm font-bold text-muted-foreground">En préparation · pour le collège, de la 6e à la 3e</p>
-
-      <h1 class="mt-4 text-4xl text-balance text-foreground sm:text-6xl xl:text-7xl">
-        Ce soir, votre enfant sait <span class="text-primary">par où commencer</span>.
+      <h1 class="text-5xl text-balance text-foreground sm:text-6xl xl:text-7xl">
+        Ce soir, votre enfant sait <mark class="highlighter">par où commencer</mark>.
       </h1>
-
-      <p class="mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">
+      <p class="mt-8 max-w-xl text-lg text-muted-foreground md:text-xl">
         {BRAND_NAME} accompagne votre enfant pendant ses devoirs, du début à la fin&nbsp;: savoir quoi faire, s&apos;y mettre, aller au bout, préparer
         les contrôles. Sans faire le travail à sa place.
       </p>
-
-      <OpenApp class="mt-8" />
+      <OpenApp class="mt-10" />
     </div>
 
-    <figure class="relative mx-auto flex w-full max-w-lg items-end justify-center">
+    {/* Tom in his arch, and the screen of the evening laid over its foot. */}
+    <figure class="mx-auto grid w-full max-w-md lg:max-w-none">
       <figcaption class="sr-only">
-        Un exemple de soirée&nbsp;: Tom propose un ordre, les maths sont faites, l&apos;anglais suit, puis la révision du contrôle d&apos;histoire de
-        jeudi.
+        Un exemple de soirée&nbsp;: votre enfant dit ses devoirs dans le désordre, et Tom propose un ordre&nbsp;: les maths, l&apos;anglais, puis la
+        révision du contrôle d&apos;histoire de jeudi.
       </figcaption>
-      {/* The arch, the entrance of the holt, behind Tom on the top of the site (docs/charte.md, "Formes et composition"). */}
-      <div aria-hidden="true" class="absolute bottom-0 left-0 h-full w-2/5 rounded-t-full bg-secondary sm:w-1/2"></div>
-      <TomIllustration class="relative -mr-4 w-2/5 shrink-0 self-end sm:-mr-12 sm:w-1/2" />
-      <Screen class="relative mb-6 w-3/4 max-w-72 min-w-0 space-y-3 sm:w-3/5">
-        <p class="font-heading text-base font-extrabold">Ce soir</p>
-        <TomSays>Je te propose cet ordre. Tu peux le changer.</TomSays>
-        <ol class="space-y-2">
-          {TONIGHT.map(({ subject, task, done, test }, index) => (
-            <li class="flex items-start gap-2 rounded-control bg-secondary p-2 text-secondary-foreground">
-              {done ? (
-                <span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-success text-success-foreground">
-                  <Check class="size-4" aria-hidden="true" />
+      <TomIllustration arch class="col-start-1 row-start-1 w-[68%] max-w-none justify-self-end" />
+      <tonight-order class="relative col-start-1 row-start-1 mt-[46%] block w-[92%] max-w-sm self-start sm:w-[80%]">
+        <Screen time="17:30" title="Ce soir">
+          <p class="ml-auto flex w-fit max-w-[92%] items-start gap-2 rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground">
+            <Mic class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            J&apos;ai anglais, un contrôle d&apos;histoire jeudi, et les exercices 3 et 4 en maths.
+          </p>
+          <div class="tonight-after mt-4">
+            <TomSays>Je te propose cet ordre. Tu peux le changer.</TomSays>
+          </div>
+          <ol class="mt-3 flex flex-col gap-2">
+            {TONIGHT.map(({ subject, task, spoken }, index) => (
+              <li data-spoken={spoken} class="tonight-item flex items-baseline gap-3 rounded-control bg-accent px-3 py-2 text-accent-foreground">
+                <span class="tonight-after font-heading font-extrabold tabular-nums">{index + 1}</span>
+                <span class="min-w-0">
+                  <span class="font-bold">{subject}</span> <span class="text-sm text-accent-muted-foreground">{task}</span>
                 </span>
-              ) : (
-                <span class="flex size-6 shrink-0 items-center justify-center rounded-full ring-2 ring-input">{index + 1}</span>
-              )}
-              <span class="min-w-0">
-                <span class="block font-bold">{subject}</span>
-                <span class="block text-muted-foreground">{task}</span>
-                {test && (
-                  <span class="mt-1 inline-block rounded-control whitespace-nowrap bg-warning px-2 py-0.5 font-bold text-warning-foreground">
-                    {test}
-                  </span>
-                )}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </Screen>
+              </li>
+            ))}
+          </ol>
+        </Screen>
+      </tonight-order>
     </figure>
   </div>
 </section>
+
+<style>
+  /* The reed lays itself behind the words, once, as the page opens. */
+  @media (prefers-reduced-motion: no-preference) {
+    .highlighter {
+      animation: lay-highlight var(--duration-slow) var(--ease-standard) var(--duration-base) both;
+    }
+  }
+
+  /* The jumble: the homework in the order it was said, askew, before Tom's order; only with scripts, which sort it (src/scripts/evening.ts). */
+  .tonight-item,
+  .tonight-after {
+    transition:
+      translate var(--duration-slow) var(--ease-standard) var(--duration-wait),
+      rotate var(--duration-slow) var(--ease-standard) var(--duration-wait),
+      opacity var(--duration-slow) var(--ease-standard) var(--duration-wait);
+  }
+
+  @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+    tonight-order:not([data-played]) {
+      .tonight-item[data-spoken='1'] {
+        order: 1;
+        rotate: -1.5deg;
+        translate: calc(var(--spacing) * 2) 0;
+      }
+
+      .tonight-item[data-spoken='2'] {
+        order: 2;
+        rotate: 1deg;
+        translate: calc(var(--spacing) * -1) 0;
+      }
+
+      .tonight-item[data-spoken='3'] {
+        order: 3;
+        rotate: -0.5deg;
+        translate: calc(var(--spacing) * 3) 0;
+      }
+
+      .tonight-after {
+        opacity: 0;
+      }
+    }
+  }
+</style>

@@ -60,6 +60,20 @@
   }
 }
 
+/* The reed laid behind the ink's words (docs/charte.md, "Couleurs": the reed highlights); `lay-highlight`
+ * lays it from the left, where a component lets it. */
+@utility highlighter {
+  color: inherit;
+  background: linear-gradient(var(--color-highlight), var(--color-highlight)) no-repeat 0 88% / 100% 0.42em;
+  box-decoration-break: clone;
+}
+
+@keyframes lay-highlight {
+  from {
+    background-size: 0% 0.42em;
+  }
+}
+
 ::selection {
   @apply bg-highlight text-foreground;
 }

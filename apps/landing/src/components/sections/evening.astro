@@ -1,111 +1,364 @@
 ---
-import { Check, GripVertical, Mic } from '@lucide/astro';
+import { Mic } from '@lucide/astro';
 import Screen from '@/components/molecules/screen.astro';
 import TomSays from '@/components/molecules/tom-says.astro';
+import { BRAND_NAME } from '@/lib/brand';
 
-// The evening of docs/produit.md, "Ce que fait Catiche", and its gestures in docs/methode.md.
-const STEPS = [
+// The evening of docs/produit.md, "Ce que fait Catiche", and its gestures in docs/methode.md, "Les gestes d'une soirée":
+// what Catiche will accompany, not yet built (docs/produit.md, "À construire"). The hours are an example evening.
+const MOMENTS = [
   {
+    time: '17:30',
     title: "« Qu'est-ce que tu as ce soir ? »",
-    body: 'Votre enfant dit ses devoirs à voix haute. Tom demande ce qui manque : pour quand, quels exercices, un contrôle bientôt ?',
+    body: 'Votre enfant dit ses devoirs à voix haute, depuis son agenda. Tom demande ce qui manque : pour quand, quels exercices, un contrôle bientôt ?',
+    screen: 'Ce soir',
   },
   {
+    time: '17:45',
     title: 'Un ordre',
-    body: "Tom propose par quoi commencer, et votre enfant peut changer l'ordre.",
+    body: "Tom propose par quoi commencer, et le temps que prendra chaque devoir. Votre enfant peut changer l'ordre.",
+    screen: "L'ordre",
   },
   {
+    time: '18:30',
     title: 'De petites étapes',
     body: "Chaque devoir est coupé en étapes courtes, pour s'y mettre et tenir. Sur un exercice, Tom aide sans donner la réponse.",
+    screen: 'Maths · exercice 3',
   },
   {
-    title: 'Le sac de demain',
-    body: "À la fin, Tom récapitule ce qui est fait et ce qui reste, puis le cartable du lendemain. Un contrôle annoncé revient les jours d'avant.",
+    time: '20:45',
+    title: 'Le cartable de demain',
+    body: "Tom récapitule ce qui est fait et ce qui reste, puis le cartable du lendemain. Un contrôle annoncé revient les jours d'avant.",
+    screen: 'Pour demain',
   },
 ] as const;
 
-const ORDER = ['Maths', 'Anglais', 'Histoire'];
-const BAG = [
-  { item: 'Cahier de maths', packed: true },
-  { item: "Manuel d'anglais", packed: true },
-  { item: "Fiche d'histoire", packed: false },
+const ORDER = [
+  { subject: 'Maths', length: 'environ 30 min' },
+  { subject: 'Anglais', length: 'environ 15 min' },
+  { subject: 'Histoire', length: 'environ 20 min' },
 ];
+
+const STEPS = [
+  { step: "Relire l'énoncé", state: 'fait' },
+  { step: "Écrire ce qu'on cherche", state: 'en cours' },
+  { step: 'Faire le calcul', state: '' },
+];
+
+const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
 ---
 
-{/* The one inverted section, in the middle of the page: light on a dark device, dark on a light one. Inside it, only the ink and the mist, swapped; the screens keep their card. */}
-<section id="soiree" class="scroll-mt-20 bg-foreground py-16 text-background lg:py-24">
+<section id="soiree" class="scroll-mt-20 border-t py-20 lg:py-32">
   <div class="container max-w-6xl">
-    <h2 class="max-w-3xl text-4xl text-balance sm:text-5xl">Une soirée avec Tom</h2>
-    <p class="mt-4 max-w-2xl text-lg md:text-xl">Une soirée de devoirs en quatre temps, du début à la fin.</p>
+    <div class="max-w-3xl">
+      <h2 class="text-4xl text-balance text-foreground sm:text-5xl">Une soirée avec {BRAND_NAME}, telle que nous la construisons</h2>
+      <p class="mt-6 text-lg text-muted-foreground md:text-xl">
+        <strong class="font-bold text-foreground">En préparation.</strong> Du début à la fin, Tom accompagnera votre enfant, une étape après
+        l&apos;autre.
+      </p>
+    </div>
 
-    {/* At a computer, each step is a column of the same three rows (number, text, screen), so the screens line up. */}
-    <ol class="mt-12 grid gap-10 lg:grid-cols-4 lg:gap-x-6 lg:gap-y-4">
-      {STEPS.map(({ title, body }, index) => (
-        <li class="grid grid-cols-[auto_1fr] gap-x-4 lg:row-span-3 lg:grid-cols-1 lg:grid-rows-subgrid">
-          <span class="flex size-10 items-center justify-center rounded-full border-2 border-background font-heading text-lg font-extrabold">
-            {index + 1}
-          </span>
-          <div class="lg:contents">
-            <div>
-              <h3 class="text-xl text-balance">{title}</h3>
-              <p class="mt-2">{body}</p>
-            </div>
-            <Screen class="mt-4 space-y-2 self-start lg:mt-0">
+    <ol class="evening mt-14 lg:mt-20">
+      {MOMENTS.map(({ time, title, body, screen }, index) => (
+        <li class="moment">
+          <div id={`moment-${String(index + 1)}`} class="moment-text">
+            <h3 class="text-2xl text-balance text-foreground">
+              <time datetime={time} class="moment-hour highlighter mb-3 block w-fit text-5xl tabular-nums lg:text-6xl">
+                {time}
+              </time>
+              {title}
+            </h3>
+            <p class="mt-3 max-w-md text-lg text-muted-foreground">{body}</p>
+          </div>
+
+          <play-once data-for={`moment-${String(index + 1)}`} class="moment-screen block">
+            <Screen time={time} title={screen}>
               {index === 0 && (
-                <>
-                  <p class="ml-auto flex w-fit max-w-full items-start gap-2 rounded-2xl bg-secondary px-3 py-2 text-secondary-foreground">
+                <div class="space-y-3">
+                  <p class="ml-auto flex w-fit max-w-[90%] items-start gap-2 rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground">
                     <Mic class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                    J&apos;ai maths, anglais, et un contrôle d&apos;histoire.
+                    J&apos;ai anglais, un contrôle d&apos;histoire, et les exercices 3 et 4 en maths.
                   </p>
-                  <TomSays>Le contrôle, c&apos;est pour quel jour&nbsp;?</TomSays>
-                </>
+                  <TomSays>Le contrôle d&apos;histoire, c&apos;est pour quel jour&nbsp;?</TomSays>
+                  <p class="ml-auto w-fit rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground">Jeudi.</p>
+                </div>
               )}
               {index === 1 && (
-                <ol class="space-y-2">
-                  {ORDER.map((subject, position) => (
-                    <li class="flex items-center gap-2 rounded-control bg-secondary px-2 py-1.5 text-secondary-foreground">
-                      <GripVertical class="size-4 text-muted-foreground" aria-hidden="true" />
-                      <span class="font-bold">{position + 1}.</span>
-                      {subject}
-                    </li>
-                  ))}
-                </ol>
-              )}
-              {index === 2 && (
-                <>
-                  <p class="font-bold">Maths · étape 1 sur 3</p>
-                  <div class="grid grid-cols-3 gap-1">
-                    <span class="h-1.5 rounded-full bg-primary"></span>
-                    <span class="h-1.5 rounded-full bg-accent"></span>
-                    <span class="h-1.5 rounded-full bg-accent"></span>
-                  </div>
-                  <TomSays>Relis l&apos;énoncé de l&apos;exercice 3. Qu&apos;est-ce qu&apos;on cherche&nbsp;?</TomSays>
-                </>
-              )}
-              {index === 3 && (
-                <>
-                  <p class="font-bold">Pour demain</p>
-                  <ul class="space-y-1.5">
-                    {BAG.map(({ item, packed }) => (
-                      <li class="flex items-center gap-2">
-                        <span
-                          class={
-                            packed
-                              ? 'flex size-5 items-center justify-center rounded-full bg-success text-success-foreground'
-                              : 'size-5 rounded-full ring-2 ring-input'
-                          }
-                        >
-                          {packed && <Check class="size-3.5" aria-hidden="true" />}
-                        </span>
-                        {item}
+                <div class="space-y-3">
+                  <TomSays>Je te propose de commencer par les maths. Tu peux changer l&apos;ordre.</TomSays>
+                  <ol class="divide-y rounded-control ring-1 ring-border">
+                    {ORDER.map(({ subject, length }, position) => (
+                      <li class="flex items-baseline gap-3 px-3 py-2">
+                        <span class="font-heading font-extrabold tabular-nums">{position + 1}</span>
+                        <span class="font-bold">{subject}</span>
+                        <span class="ml-auto text-sm text-muted-foreground">{length}</span>
                       </li>
                     ))}
-                  </ul>
-                </>
+                  </ol>
+                </div>
+              )}
+              {index === 2 && (
+                <div class="space-y-3">
+                  <ol class="space-y-2">
+                    {STEPS.map(({ step, state }, position) => (
+                      <li
+                        class:list={[
+                          'step flex items-baseline gap-3 rounded-control px-3 py-2',
+                          state === 'en cours' ? 'step-current bg-accent text-accent-foreground' : 'ring-1 ring-border',
+                        ]}
+                      >
+                        <span class="font-heading font-extrabold tabular-nums">{position + 1}</span>
+                        <span class:list={['relative', state === 'fait' && 'text-muted-foreground']}>
+                          {step}
+                          {state === 'fait' && (
+                            <svg class="strike" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true">
+                              <path d="M1 4 C 25 2, 60 5, 99 2" pathLength="1" />
+                            </svg>
+                          )}
+                        </span>
+                        {state && (
+                          <span class:list={['ml-auto text-sm', state === 'en cours' ? 'text-accent-muted-foreground' : 'text-muted-foreground']}>
+                            {state}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                  <TomSays>Qu&apos;est-ce que l&apos;exercice te demande de trouver&nbsp;?</TomSays>
+                </div>
+              )}
+              {index === 3 && (
+                <div class="space-y-4">
+                  <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+                    <dt class="text-sm font-bold text-muted-foreground">Fait</dt>
+                    <dd>Maths, anglais</dd>
+                    <dt class="text-sm font-bold text-muted-foreground">Reste</dt>
+                    <dd>Réviser l&apos;histoire, pour jeudi</dd>
+                  </dl>
+                  {/* The bag, drawn by its handle and its body. */}
+                  <span class="mx-auto -mb-4 block h-4 w-16 rounded-t-control border-2 border-b-0 border-input"></span>
+                  <div class="rounded-2xl border-2 border-input px-4 pt-3 pb-4">
+                    <p class="text-sm font-bold text-muted-foreground">Dans le cartable</p>
+                    <ul class="mt-2 space-y-1.5">
+                      {BAG.map((item) => (
+                        <li class="bag-item">{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
               )}
             </Screen>
-          </div>
+          </play-once>
         </li>
       ))}
     </ol>
   </div>
 </section>
+
+<style>
+  /* Each moment is its text, then its screen: one under the other on a phone, side by side at a computer. */
+  .moment + .moment {
+    margin-top: calc(var(--spacing) * 16);
+  }
+
+  .moment-screen {
+    margin-top: calc(var(--spacing) * 6);
+  }
+
+  @media (width >= 64rem) {
+    .moment {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+      align-items: center;
+      column-gap: calc(var(--spacing) * 24);
+    }
+
+    .moment-screen {
+      margin-top: 0;
+    }
+  }
+
+  /* The line that strikes the step done; drawn, it is the end state. */
+  .strike {
+    position: absolute;
+    inset-inline: calc(var(--spacing) * -1);
+    top: 50%;
+    width: calc(100% + var(--spacing) * 2);
+    height: calc(var(--spacing) * 1.5);
+    overflow: visible;
+    fill: none;
+    stroke: var(--color-foreground);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    transition: stroke-dashoffset var(--duration-base) var(--ease-standard) var(--duration-slow);
+  }
+
+  .step-current {
+    transition: background-color var(--duration-base) var(--ease-standard) calc(var(--duration-slow) + var(--duration-base));
+  }
+
+  .bag-item {
+    transition:
+      translate var(--duration-slow) var(--ease-standard) var(--duration-slow),
+      opacity var(--duration-slow) var(--ease-standard) var(--duration-slow);
+  }
+
+  .bag-item:nth-child(2) {
+    transition-delay: calc(var(--duration-slow) + var(--duration-fast));
+  }
+
+  .bag-item:nth-child(3) {
+    transition-delay: calc(var(--duration-slow) + var(--duration-fast) * 2);
+  }
+
+  /* Before a screen is read: the line not drawn, the next step not yet current, the bag still empty (src/scripts/evening.ts). */
+  @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+    play-once:not([data-played]) {
+      .strike {
+        stroke-dashoffset: 1;
+      }
+
+      .step-current {
+        background-color: transparent;
+      }
+
+      .bag-item {
+        opacity: 0;
+        translate: 0 calc(var(--spacing) * -3);
+      }
+    }
+  }
+
+  /* At a computer, where the browser ties animations to the scroll: one screen stays in the middle of the window and
+   * changes as each moment is read, while the hour of the moment read takes its reed. Elsewhere, and under reduced
+   * motion, each moment keeps its own screen. */
+  @supports (animation-timeline: view()) {
+    @media (width >= 64rem) and (prefers-reduced-motion: no-preference) {
+      .evening {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+        column-gap: calc(var(--spacing) * 24);
+        timeline-scope: --moment-1, --moment-2, --moment-3, --moment-4;
+        /* The first moment's row already opens with room. */
+        margin-top: 0;
+      }
+
+      .moment {
+        display: contents;
+      }
+
+      .moment + .moment {
+        margin-top: 0;
+      }
+
+      .moment-text {
+        grid-column: 1;
+        min-height: 75svh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .moment-screen {
+        grid-column: 2;
+        grid-row: 1 / span 4;
+        align-self: start;
+        /* Level with the first moment's text, in the middle of its row, then held in the middle of the window. */
+        margin-top: calc(37.5svh - var(--spacing) * 44);
+        position: sticky;
+        top: calc(50svh - var(--spacing) * 44);
+        animation: moment-screen linear both;
+        animation-range: cover 20% cover 80%;
+      }
+
+      /* Every screen the same size, so that they read as one. */
+      .moment-screen > :global(*) {
+        min-height: calc(var(--spacing) * 88);
+      }
+
+      .moment-hour {
+        animation: lay-highlight linear both;
+        animation-range: cover 25% cover 45%;
+      }
+
+      .moment:nth-child(1) .moment-text {
+        grid-row: 1;
+        view-timeline-name: --moment-1;
+      }
+
+      .moment:nth-child(2) .moment-text {
+        grid-row: 2;
+        view-timeline-name: --moment-2;
+      }
+
+      .moment:nth-child(3) .moment-text {
+        grid-row: 3;
+        view-timeline-name: --moment-3;
+      }
+
+      .moment:nth-child(4) .moment-text {
+        grid-row: 4;
+        view-timeline-name: --moment-4;
+      }
+
+      .moment:nth-child(1) :is(.moment-screen, .moment-hour) {
+        animation-timeline: --moment-1;
+      }
+
+      .moment:nth-child(2) :is(.moment-screen, .moment-hour) {
+        animation-timeline: --moment-2;
+      }
+
+      .moment:nth-child(3) :is(.moment-screen, .moment-hour) {
+        animation-timeline: --moment-3;
+      }
+
+      .moment:nth-child(4) :is(.moment-screen, .moment-hour) {
+        animation-timeline: --moment-4;
+      }
+
+      /* The first screen is there from the start, the last one stays. */
+      .moment:first-child .moment-screen {
+        animation-name: moment-screen-first;
+      }
+
+      .moment:last-child .moment-screen {
+        animation-name: moment-screen-last;
+      }
+    }
+  }
+
+  @keyframes moment-screen {
+    0% {
+      opacity: 0;
+    }
+    15%,
+    85% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes moment-screen-first {
+    0%,
+    85% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes moment-screen-last {
+    0% {
+      opacity: 0;
+    }
+    15%,
+    100% {
+      opacity: 1;
+    }
+  }
+</style>

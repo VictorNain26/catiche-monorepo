@@ -1,24 +1,17 @@
 ---
 import { BRAND_NAME } from '@/lib/brand';
 
-// The pupil and the parent of docs/produit.md, "Pour qui": where the evening goes wrong, before what Catiche does.
-const EVENINGS = [
-  'Votre enfant ne sait pas par où commencer.',
-  "Le contrôle de jeudi est oublié jusqu'à mercredi soir.",
-  'Vous rentrez à 19 h, et tout recommence.',
-];
+// The pupil and the parent of docs/produit.md, "Pour qui", in one sentence; that organisation can be learned, docs/methode.md, "À retenir".
 ---
 
-<section class="py-16 lg:py-24">
-  <div class="container max-w-6xl">
-    <h2 class="text-sm font-bold text-muted-foreground">Le soir, chez vous</h2>
-    <ul class="mt-6 grid gap-6 md:grid-cols-3 md:gap-10">
-      {EVENINGS.map((evening) => (
-        <li class="border-t-2 border-annotation pt-4 font-heading text-2xl font-extrabold text-balance text-foreground">{evening}</li>
-      ))}
-    </ul>
-    <p class="mt-10 max-w-2xl text-lg text-muted-foreground md:text-xl">
-      {BRAND_NAME} est fait pour l&apos;enfant qui bloque sur l&apos;organisation plus que sur les leçons.{' '}
+<section class="border-t py-20 lg:py-32">
+  <div class="container grid max-w-6xl gap-10 lg:grid-cols-12">
+    <h2 class="text-3xl leading-tight text-pretty text-foreground sm:text-4xl lg:col-span-10 lg:text-5xl lg:leading-tight">
+      Le soir, chez vous, votre enfant ne sait pas par où commencer, oublie un contrôle, ne finit pas.{' '}
+      <span class="text-muted-foreground">Et les devoirs tournent au conflit, ou personne n&apos;a le temps de les tenir.</span>
+    </h2>
+    <p class="max-w-md text-lg text-muted-foreground lg:col-span-5 lg:col-start-6 lg:text-xl">
+      {BRAND_NAME} est fait pour l&apos;enfant qui peine à cause de l&apos;organisation, pas des leçons.{' '}
       <strong class="font-bold text-foreground">L&apos;organisation, ça s&apos;apprend.</strong>
     </p>
   </div>

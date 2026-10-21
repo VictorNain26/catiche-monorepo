@@ -1,70 +1,84 @@
 ---
-import { Check, EyeOff } from '@lucide/astro';
 import Screen from '@/components/molecules/screen.astro';
 
-// The evening check-in of docs/produit.md ("Le point du soir") and how it fits each family; the parent sees that it is done, never the conversations.
+// The evening check-in of docs/produit.md ("Le point du soir") and how it fits each family; the parent will see that it is
+// done, never the conversations. Not built yet: told in the future.
 const FAMILIES = [
-  'Rentré tard ? Vous voyez le récapitulatif plus tard, et votre enfant voit votre « Vu » le lendemain.',
-  'En garde alternée, le récapitulatif va au parent chez qui votre enfant est ce soir-là.',
-  'Si les devoirs sont un sujet tendu, vous pouvez couper le point du soir.',
-  "En 4e et en 3e, c'est votre enfant qui choisit de le partager.",
-];
-
-const SUMMARY = [
-  { label: 'Fait', items: 'Maths, anglais' },
-  { label: 'Reste', items: "Réviser l'histoire, pour jeudi" },
-  { label: 'Cartable', items: 'Prêt pour demain' },
+  'Si vous rentrez tard, vous verrez le récapitulatif plus tard, et votre enfant verra votre « Vu » le lendemain.',
+  'En garde alternée, le récapitulatif ira au parent chez qui votre enfant est ce soir-là.',
+  'Si les devoirs sont un sujet tendu, vous pourrez couper le point du soir.',
+  "En 4e et en 3e, c'est votre enfant qui choisira de le partager.",
 ];
 ---
 
-<section id="parents" class="scroll-mt-20 py-16 lg:py-24">
-  <div class="container grid max-w-6xl gap-12 lg:grid-cols-[3fr_2fr] lg:items-center lg:gap-16">
-    <div>
-      <p class="text-sm font-bold text-muted-foreground">Pour vous, le parent</p>
-      <h2 class="mt-4 text-4xl text-balance text-foreground sm:text-5xl">Vous savez que c&apos;est fait, sans lire par-dessus son épaule</h2>
-      <p class="mt-6 text-lg text-muted-foreground">
-        À la fin de la soirée, c&apos;est le point du soir&nbsp;: votre enfant vous montre son récapitulatif. Vous répondez «&nbsp;Vu&nbsp;», avec un
-        encouragement si vous le voulez. Vous ne vérifiez pas le contenu, et rien n&apos;est noté&nbsp;: ni score, ni série de jours, ni relance.
-      </p>
-      <ul class="mt-6 grid gap-3 sm:grid-cols-2">
-        {FAMILIES.map((family) => (
-          <li class="flex gap-3 text-foreground">
-            <Check class="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" />
-            {family}
-          </li>
-        ))}
-      </ul>
-      <p class="mt-8 flex gap-3 rounded-2xl bg-secondary p-4 text-secondary-foreground">
-        <EyeOff class="mt-1 size-5 shrink-0" aria-hidden="true" />
-        <span>
-          <strong class="font-bold">Ses conversations avec Tom, vous ne les voyez pas.</strong> C&apos;est son espace à lui&nbsp;: il l&apos;ouvre par
-          un code qu&apos;il choisit, et que vous ne voyez pas.
-        </span>
-      </p>
+<section id="parents" class="scroll-mt-20 border-t py-20 lg:py-32">
+  <div class="container max-w-6xl">
+    <div class="grid gap-x-12 gap-y-12 lg:grid-cols-12">
+      <div class="lg:col-span-5">
+        <p class="font-heading text-5xl font-extrabold text-foreground tabular-nums lg:text-6xl">
+          <time datetime="20:45" class="highlighter">
+            20:45
+          </time>
+        </p>
+        <h2 class="mt-3 text-4xl text-balance text-foreground sm:text-5xl">Le point du soir</h2>
+        <p class="mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">
+          À la fin de la soirée, votre enfant vous montrera son récapitulatif. Vous répondrez «&nbsp;Vu&nbsp;», avec un encouragement si vous le
+          voulez. Vous ne vérifierez pas le contenu, et rien ne sera noté&nbsp;: ni score, ni série de jours, ni relance.
+        </p>
+      </div>
+
+      <figure class="lg:col-span-7 lg:pt-4">
+        <div class="grid gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,14rem)] sm:items-start">
+          <play-once class="block">
+            <Screen time="20:45" title="Mardi soir">
+              <dl class="space-y-3">
+                <div>
+                  <dt class="text-sm font-bold text-muted-foreground">Fait</dt>
+                  <dd>Maths, anglais</dd>
+                </div>
+                <div>
+                  <dt class="text-sm font-bold text-muted-foreground">Reste</dt>
+                  <dd>Réviser l&apos;histoire, pour jeudi</dd>
+                </div>
+                <div>
+                  <dt class="text-sm font-bold text-muted-foreground">Cartable</dt>
+                  <dd>Prêt pour demain</dd>
+                </div>
+              </dl>
+              <p class="seen mt-4 border-t pt-3">
+                <span class="text-sm font-bold text-muted-foreground">Votre réponse</span>
+                <span class="mt-1 block font-heading text-2xl font-extrabold text-primary">Vu</span>
+              </p>
+            </Screen>
+          </play-once>
+          <ul class="space-y-4 border-l-2 border-annotation pl-4 text-foreground">
+            {FAMILIES.map((family) => (
+              <li>{family}</li>
+            ))}
+          </ul>
+        </div>
+        <figcaption class="sr-only">
+          Le récapitulatif du soir&nbsp;: ce qui est fait, ce qui reste, le cartable de demain, et votre «&nbsp;Vu&nbsp;».
+        </figcaption>
+      </figure>
     </div>
 
-    <figure class="mx-auto w-full max-w-sm">
-      <Screen class="space-y-4 p-6 text-base">
-        <p class="font-heading text-lg font-extrabold">Mardi soir</p>
-        <dl class="space-y-3">
-          {SUMMARY.map(({ label, items }) => (
-            <div>
-              <dt class="text-sm font-bold text-muted-foreground">{label}</dt>
-              <dd>{items}</dd>
-            </div>
-          ))}
-        </dl>
-        <div class="flex flex-wrap items-center gap-3 border-t pt-4">
-          <span class="inline-flex h-11 items-center gap-2 rounded-control bg-primary px-6 font-bold text-primary-foreground">
-            <Check class="size-5" aria-hidden="true" />
-            Vu
-          </span>
-          <span class="text-muted-foreground">Ajouter un mot</span>
-        </div>
-      </Screen>
-      <figcaption class="mt-4 text-center text-sm text-muted-foreground">
-        Le récapitulatif du soir&nbsp;: ce qui est fait, ce qui reste, le cartable de demain.
-      </figcaption>
-    </figure>
+    <p class="mt-20 max-w-4xl font-heading text-3xl leading-tight font-extrabold text-pretty text-foreground sm:text-4xl lg:mt-28">
+      Ses conversations avec Tom, vous ne les verrez pas.{' '}
+      <span class="text-muted-foreground">C&apos;est son espace à lui, qu&apos;il ouvre par son propre code.</span>
+    </p>
   </div>
 </section>
+
+<style>
+  .seen {
+    transition: opacity var(--duration-base) var(--ease-standard) var(--duration-slow);
+  }
+
+  /* The parent's « Vu » comes last, without a stamp (src/scripts/evening.ts). */
+  @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+    play-once:not([data-played]) .seen {
+      opacity: 0;
+    }
+  }
+</style>

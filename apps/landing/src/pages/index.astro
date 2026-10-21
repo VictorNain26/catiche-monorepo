@@ -6,7 +6,6 @@ import Problem from '@/components/sections/problem.astro';
 import Evening from '@/components/sections/evening.astro';
 import Parents from '@/components/sections/parents.astro';
 import Commitments from '@/components/sections/commitments.astro';
-import Maker from '@/components/sections/maker.astro';
 import FAQ from '@/components/sections/faq.astro';
 import Closing from '@/components/sections/closing.astro';
 import { FAQS } from '@/components/sections/faq-data';
@@ -29,7 +28,10 @@ const faqJsonLd = {
   <Evening />
   <Parents />
   <Commitments />
-  <Maker />
   <FAQ />
   <Closing />
 </Layout>
+
+<script>
+  import '@/scripts/evening';
+</script>

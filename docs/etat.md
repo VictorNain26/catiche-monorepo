@@ -74,7 +74,8 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
   domaine expire seul le 24 août 2027.
 - **L'ordre décidé par Victor (2026-10-20)**, un chantier après l'autre :
   1. **La restructuration de la landing** : en PR (`feat/landing-v2`), selon les décisions de
-     Victor du 2026-10-21 ; le texte de « Qui fait Catiche » attend ses mots.
+     Victor du 2026-10-21 ; la section « Qui fait Catiche » est retirée tant que Victor n'a pas
+     donné son texte.
   2. **La refonte de l'application**, pensée depuis le parent et l'enfant réels. Il faut d'abord
      un parcours et des textes validés, puis l'écran à l'ordinateur comme au téléphone. Un
      inventaire des écrans actuels est fait : vocabulaire technique, colonne unique, doublons,

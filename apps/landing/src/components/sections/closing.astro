@@ -1,11 +1,16 @@
 ---
+import TomIllustration from '@/components/atoms/tom-illustration.astro';
 import OpenApp from '@/components/molecules/open-app.astro';
 import { BRAND_NAME } from '@/lib/brand';
 ---
 
-<section class="border-t py-16 lg:py-24">
-  <div class="container max-w-3xl text-center">
-    <h2 class="text-4xl text-balance text-foreground sm:text-5xl">{BRAND_NAME} ouvre d&apos;abord à quelques familles</h2>
-    <OpenApp align="center" class="mt-8" />
+{/* The end of the evening: Tom waves, without a word (docs/charte.md, "Tom": out of a session, he does not speak). */}
+<section class="border-t pt-20 pb-12 lg:pt-28 lg:pb-16">
+  <div class="container grid max-w-6xl items-end gap-10 sm:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
+    <div class="pb-8">
+      <h2 class="max-w-2xl text-4xl text-balance text-foreground sm:text-5xl">Ses devoirs, du début à la fin, sur {BRAND_NAME} avec Tom.</h2>
+      <OpenApp class="mt-8" />
+    </div>
+    <TomIllustration start="view" class="w-48 sm:w-full" />
   </div>
 </section>
