@@ -64,6 +64,8 @@ const TEXT = [
   ['popover-foreground', 'popover'],
   ['secondary-foreground', 'secondary'],
   ['accent-foreground', 'accent'],
+  // The site's FAQ: a question under the pointer, and an open answer in dark mode.
+  ['foreground', 'accent'],
   // The secondary words of a hovered line of a list: muted-foreground would fall to 4.3:1 there.
   ['accent-muted-foreground', 'accent'],
   // An open answer of the site's FAQ lifts onto the accent in dark mode, with its links.

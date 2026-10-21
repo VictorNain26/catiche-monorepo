@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { arrivalEnded, IN_VIEW, inView, milliseconds, orderTiming } from './timing';
+import { arrivalEnded, inView, milliseconds, orderDelay, orderTiming } from './timing';
 
 describe('milliseconds', () => {
   it('reads a duration in milliseconds or in seconds', () => {
@@ -69,9 +69,21 @@ describe('inView', () => {
   it('waits while he is out of the window', () => {
     expect(inView({ isIntersecting: false, intersectionRatio: 0 })).toBe(false);
   });
+});
 
-  it('asks the observer to report at half of him', () => {
-    expect(IN_VIEW).toBe(0.5);
+describe('orderDelay', () => {
+  it("reads the order's own delay, in milliseconds or in seconds", () => {
+    expect(orderDelay(tokens({ '--order-delay': '900ms' }))).toBe(900);
+    expect(orderDelay(tokens({ '--order-delay': '1.02s' }))).toBe(1020);
+  });
+
+  it('reads no delay when the order has none', () => {
+    expect(orderDelay(tokens({}))).toBeUndefined();
+  });
+
+  it('reads no delay from a value that is not a time', () => {
+    expect(orderDelay(tokens({ '--order-delay': 'calc(var(--duration-stagger) + var(--duration-reveal))' }))).toBeUndefined();
+    expect(orderDelay(tokens({ '--order-delay': '900' }))).toBeUndefined();
   });
 });
 

@@ -6,10 +6,16 @@ type Tokens = Pick<CSSStyleDeclaration, 'getPropertyValue'>;
 // order itself: its delay is its own (`--order-delay`); none if one is missing.
 export function orderTiming(style: Tokens): KeyframeAnimationOptions | undefined {
   const duration = milliseconds(style.getPropertyValue('--duration-slow'));
-  const delay = milliseconds(style.getPropertyValue('--order-delay'));
+  const delay = orderDelay(style);
   const easing = style.getPropertyValue('--ease-standard').trim();
   if (duration === undefined || delay === undefined || !easing) return undefined;
   return { duration, delay, easing, fill: 'backwards' };
+}
+
+// How long an order waits before it falls into place, read on the order: `--order-delay` is registered as a <time>
+// (src/styles/global.css), so its computed value is resolved; none if it is missing or not a time.
+export function orderDelay(style: Tokens): number | undefined {
+  return milliseconds(style.getPropertyValue('--order-delay'));
 }
 
 // Tom waves only once he is seen: half of him in the window, the threshold the observer reports at
