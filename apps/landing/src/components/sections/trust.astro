@@ -11,14 +11,14 @@ import ExternalLink from '@/components/atoms/external-link.astro';
 //   gestures come from, never that Catiche obtains these effects. A source is said in plain words; its scholarly name
 //   is only the link's title (docs/charte.md, "Les mots").
 const COMMITMENTS = [
-  { key: 'En France', rest: 'les données sont gardées en France, et Tom fonctionne avec Mistral AI, en Europe.' },
+  { key: 'Hébergé en France', rest: 'les données restent en France, et Tom fonctionne avec Mistral AI, en Europe.' },
   { key: 'Sans publicité', rest: 'nous ne vendons aucune donnée.' },
-  { key: 'Son espace', rest: 'ses échanges avec Tom restent à lui : il ouvre son espace avec son propre code.' },
+  { key: "L'espace de votre collégien", rest: "ses échanges avec Tom restent à lui : il l'ouvre avec son propre code." },
 ];
 
 const RESEARCH = [
   {
-    before: "Planifier son travail et faire le point est l'une des méthodes les mieux appuyées par la recherche en éducation, sur",
+    before: "Planifier son travail et faire le point compte parmi les méthodes les mieux appuyées, d'après",
     figure: '355 études',
     after: '.',
     source: {
@@ -45,7 +45,7 @@ const RESEARCH = [
   <div class="container max-w-5xl">
     <play-once class="block">
       <h2 class="reveal-fade section-title max-w-3xl text-foreground">Tom ne donne pas la réponse.</h2>
-      <div class="reveal-fade mt-6 max-w-3xl space-y-3 text-xl font-bold text-foreground lg:text-2xl">
+      <div class="reveal-fade reveal-2 mt-6 max-w-3xl space-y-3 text-xl font-bold text-foreground lg:text-2xl">
         <p>Chaque message de Tom est vérifié avant d&apos;être affiché, et remplacé s&apos;il contient la réponse.</p>
         <p>Tom aide un peu plus quand votre collégien essaie vraiment, jamais parce qu&apos;il réclame la réponse.</p>
       </div>
@@ -68,7 +68,7 @@ const RESEARCH = [
           ))}
         </ul>
       </div>
-      <div class="reveal-fade">
+      <div class="reveal-fade reveal-2">
         <h3 class="text-2xl text-foreground">Ce que dit la recherche</h3>
         {/* Each figure in bold inside its sentence, and its source in a new tab (atoms/external-link.astro). */}
         <ul class="mt-4 space-y-3 text-foreground">

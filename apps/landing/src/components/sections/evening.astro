@@ -2,6 +2,7 @@
 import PupilSays from '@/components/molecules/pupil-says.astro';
 import Screen from '@/components/molecules/screen.astro';
 import TomSays from '@/components/molecules/tom-says.astro';
+import { spokenHour } from '@/lib/hours';
 import { BAG, FIRST_SAID, HOMEWORK, HOURS, MISSING } from './evening-data';
 
 // The evening of docs/produit.md, "Ce que fait Catiche", and its gestures in docs/methode.md, "Les gestes d'une soirée":
@@ -13,7 +14,10 @@ const MOMENTS = [
   { time: HOURS.said, body: 'Votre collégien dit ses devoirs à voix haute, et Tom demande ce qui manque.' },
   { time: HOURS.ordered, body: 'Tom propose un ordre, que votre collégien peut changer.' },
   { time: HOURS.started, body: 'Tom découpe chaque devoir en étapes courtes, et aide par une question ou un indice.' },
-  { time: HOURS.ended, body: "Tom aide votre collégien à préparer son cartable. Il garde l'histoire à réviser demain, pour le contrôle de jeudi." },
+  {
+    time: HOURS.ended,
+    body: "Tom aide votre collégien à préparer son cartable, et note la suite de l'histoire pour demain soir, avant le contrôle de jeudi.",
+  },
 ] as const;
 
 const STEPS = [
@@ -30,7 +34,7 @@ const CHANGED = [english, maths, history];
 
 <section id="soiree" class="scroll-mt-20 bg-background py-12 md:py-16 lg:py-24">
   <div class="container max-w-5xl">
-    <h2 class="section-title max-w-3xl text-foreground">De 17:30 au cartable prêt.</h2>
+    <h2 class="section-title max-w-3xl text-foreground">De 17&nbsp;h&nbsp;30 au cartable prêt.</h2>
 
     <div class="evening mt-8 lg:mt-14 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-20">
       {/* At a computer only: the moments, held under the header, each lit while its screen is read. */}
@@ -38,7 +42,7 @@ const CHANGED = [english, maths, history];
         {MOMENTS.map(({ time, body }) => (
           <li role="listitem" class="moment-label text-foreground">
             <time datetime={time} class="block text-sm font-bold text-primary tabular-nums">
-              {time}
+              {spokenHour(time)}
             </time>
             <h3 class="mt-1 text-xl">{body}</h3>
           </li>
@@ -51,7 +55,7 @@ const CHANGED = [english, maths, history];
             {/* On a phone, the moment above its screen. */}
             <div class="mb-4 lg:hidden">
               <time datetime={time} class="block text-sm font-bold text-primary tabular-nums">
-                {time}
+                {spokenHour(time)}
               </time>
               <h3 class="mt-1 text-xl text-foreground">{body}</h3>
             </div>

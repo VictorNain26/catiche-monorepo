@@ -9,7 +9,7 @@ export const EVENING = 'Mardi soir';
 
 /** At 17:30, the pupil says his homework in a jumble, without dates, and Tom asks what is missing. */
 export const FIRST_SAID = "J'ai de l'histoire, de l'anglais et des maths.";
-export const MISSING = "C'est pour quand, chacun ? Et en maths, quels exercices ?";
+export const MISSING = "Chaque devoir, c'est pour quel jour ? Et en maths, quels exercices ?";
 
 /** At 17:35, the pupil's answer, still in the order he said it, before Tom puts it in order. */
 export const SPOKEN = "Le contrôle d'histoire, c'est jeudi. L'anglais, pour vendredi. Et en maths, les exercices 3 et 4 pour demain.";

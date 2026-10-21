@@ -19,7 +19,7 @@ export const FAQS: Faq[] = [
   {
     question: "Et si je rentre tard, ou s'il vit dans deux maisons ?",
     answer:
-      "Vous voyez le point du soir en rentrant, et votre collégien trouve votre « Vu » le lendemain. S'il vit dans deux maisons, le point du soir va à l'adulte chez qui il est ce soir-là. Vous pouvez aussi le couper. En 6e et en 5e, il est proposé dès le départ ; en 4e et en 3e, votre collégien choisit de le partager.",
+      "Vous voyez le point du soir en rentrant, et votre collégien trouve votre « Vu » le lendemain. S'il vit dans deux maisons, le point du soir va à l'adulte chez qui il est ce soir-là. Vous pouvez aussi le couper. En 6e et en 5e, le point du soir est proposé dès le départ ; en 4e et en 3e, votre collégien choisit de le partager.",
   },
   {
     question: 'Est-ce que ça marche ?',
