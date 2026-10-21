@@ -10,8 +10,12 @@ Vitrine marketing et SEO, statique, en Astro 7, servie par Caddy dans une applic
 Clever Cloud (`apps/landing/Caddyfile`).
 
 - Sans appel au serveur, et rien qui ne vienne de `docs/produit.md` : `CLAUDE.md`, « Interdits ».
-- Le seul appel à l'action est un e-mail (`mailto:`) tant que la production n'existe pas : un
-  formulaire public demande un service qui le reçoive (`docs/etat.md`).
+- L'appel à l'action est ce qu'un visiteur peut faire aujourd'hui : demander une invitation par
+  e-mail (`CONTACT_EMAIL`), ou se connecter à l'application par un lien, dont l'adresse est une
+  seule constante (`APP_URL`, `apps/landing/src/lib/brand.ts`), le staging tant que la production
+  n'existe pas (`docs/etat.md`). Ni liste d'attente ni formulaire : un formulaire public demande un
+  service qui le reçoive.
+- Les textes suivent `docs/charte.md`, « Les mots ».
 - Jamais un mot de soin ni un trouble ciblé : la liste et la raison sont dans `docs/produit.md`,
   « Ce qu'on dit, et ce qu'on ne dit pas ».
 - Ce qu'on peut prouver (`CLAUDE.md`, « Carte »), sur la landing : chaque chiffre a une source
@@ -27,11 +31,20 @@ Clever Cloud (`apps/landing/Caddyfile`).
 - Jamais de framework client (React ou autre) : la landing est du HTML statique. Un composant qui
   a besoin du navigateur est un élément personnalisé (`customElements.define`) dans le `<script>`
   de son composant, sur l'élément natif quand il existe (`<dialog>` pour le menu, `<details>` pour
-  la FAQ) ; les apparitions passent par l'API vanilla de Motion
-  (`apps/landing/src/scripts/reveal.ts`). Les classes partagées avec le web viennent de
-  `@repo/ui/classes`.
-- Jamais un état d'entrée masqué hors de `@media (scripting: enabled)` : sans scripts, la page
-  s'affiche entière.
+  la FAQ). Les classes partagées avec le web viennent de `@repo/ui/classes`.
+- Le mouvement anime les illustrations (les écrans, Tom, le surligneur), jamais un texte à lire
+  qui apparaît au défilement : elles le masquaient. CSS d'abord, le lien au défilement sous
+  `@supports (animation-timeline: view())` ; ce que le CSS ne sait pas faire passe par les API
+  natives (Web Animations, `IntersectionObserver`) dans `apps/landing/src/scripts/evening.ts`,
+  sans bibliothèque. Une vidéo de Tom a son bouton Pause.
+- Jamais un état d'entrée masqué hors de `@media (prefers-reduced-motion: no-preference)`, ni
+  posé par le CSS quand c'est un script qui le lève : ce script le pose lui-même (`data-armed`,
+  `apps/landing/src/scripts/evening.ts`), et rien n'attend un script qui ne vient pas. Seule une
+  animation en CSS pur, qui ne dépend d'aucun script, part d'un état masqué, si elle se termine
+  d'elle-même (le surligneur, `both` avec délai) ou suit le défilement (les écrans de la soirée,
+  sous `@supports (animation-timeline: view())`). Sans scripts, si un script échoue, ou sous le
+  mouvement réduit, même activé en cours de visite, la page s'affiche entière et immobile ; son
+  HTML est l'état final.
 - Jamais de `<script>` ni de `<style>` en `is:inline`, ni d'attribut `style` : la CSP
   (`security.csp`, `apps/landing/astro.config.mjs`) n'admet que ce qu'Astro a haché.
 - Jamais un texte suivi d'une balise qui ouvre la ligne suivante sans `{' '}` : Astro 7 compresse

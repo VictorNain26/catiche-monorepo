@@ -29,7 +29,7 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
 | Brume (`background`) | `mist` | Le fond |
 | Encre (`foreground`) | `mist` | Le texte |
 | Eau profonde (`primary`) | `water` | L'action principale, les liens, le focus, le panneau de marque |
-| Jonc (`highlight`) | `reed` | Ce qui ressort derrière le texte de l'encre ; jamais en texte ni en bordure, trop pâle sur la brume : seul le texte de l'encre sur le jonc est testé (`packages/tokens/contrast.test.mjs`) |
+| Jonc (`highlight`) | `reed` | Ce qui ressort derrière le texte de l'encre ; jamais en texte ni en bordure, trop pâle sur la brume : seul le texte de l'encre sur le jonc est testé (`packages/tokens/contrast.test.mjs`). En sombre, le surligneur ne se pose pas : chaque pas du jonc y vire à l'olive (`highlighter`, `apps/landing/src/styles/global.css`) |
 | Pelage (`annotation`) | `fur` | Une note, un accent rare |
 
 - Chaque couleur a son échelle de douze pas, chaque pas à son rôle : 1 et 2 les fonds, 3 à 5 les
@@ -95,16 +95,38 @@ pour les lecteurs d'écran.
 ## Mouvement
 
 Des durées et une courbe en tokens ; un fondu court à l'arrivée d'un message ; aucun rebond ;
-aucune information portée par le mouvement seul ; rien ne bouge sous le mouvement réduit.
+aucune information portée par le mouvement seul ; rien ne bouge sous le mouvement réduit. Sur la
+landing, le mouvement est un geste de la soirée : le jonc qui se pose derrière les mots, le trait
+qui raye l'étape faite, les devoirs qui se rangent dans l'ordre ; jamais un texte à lire qui
+apparaît.
 
 ## Les mots
 
+Le lecteur trouve, comprend et peut agir (langage clair, ISO 24495-1:2023) ; il survole plus qu'il
+ne lit, l'essentiel va donc en tête de chaque bloc. Ces règles valent pour le site et l'app
+(Victor, 2026-10-21).
+
 - On tutoie l'élève, on vouvoie le parent ; un texte pour l'un n'est jamais le texte pour l'autre.
-- Des phrases courtes, au présent. Pas de point d'exclamation, pas d'emoji, pas de mot de jeu, pas
-  le mot « enfant » dans ce que lit l'élève.
-- Tom se dit programme, jamais ami ; il ne dit pas « je suis fier de toi ».
+- En cinq secondes, le titre, la phrase dessous et le bouton disent ce qu'est le produit, pour qui,
+  et ce qu'on peut faire maintenant.
+- Une idée et un verbe conjugué par phrase, sujet en tête ; pas de titre sans verbe, sauf une
+  question. Des phrases courtes, au présent, un seul temps sur une page : ce qui n'est pas encore
+  construit se dit au présent, sous une phrase qui l'annonce comme ce que nous construisons ; seule
+  cette phrase peut parler au futur.
+- Les mots des familles, pas les nôtres (« ce qu'il a fait », pas « récapitulatif ») ; un mot du
+  produit s'explique la première fois. Un seul nom par chose : « votre enfant » pour le parent,
+  Tom présenté une fois comme le tuteur de Catiche, « e-mail » avec son trait d'union.
+- Rien sans appui : chaque phrase renvoie à `produit.md`, `methode.md` ou au code ; un exemple se
+  lit comme un exemple. On parle de l'organisation qui bloque, jamais d'un enfant qui échoue.
+- Pas de point d'exclamation, pas d'emoji, pas de mot de jeu, pas le mot « enfant » dans ce que lit
+  l'élève.
+- Tom ne prétend ni être un ami, ni ressentir : il ne dit pas « je suis fier de toi », ni « tu
+  m'as manqué ». Il ne relance pas l'élève et ne l'attend pas. Sa voix reste chaleureuse et
+  constante, et il constate le travail fait.
+- Sur la landing, Tom est un personnage qui agit dans la soirée : il propose l'ordre, coupe le
+  travail en étapes, rappelle le contrôle ; jamais un ami.
 - Des tournures sans genre pour l'élève : Tom ne sait pas s'il parle à une fille ou à un garçon.
-- Un bouton dit ce qu'il fait ; une erreur dit ce qui s'est passé et quoi faire, sans s'excuser ;
+- Un bouton dit ce qu'il fait, et ce que le lecteur peut vraiment faire aujourd'hui ; une erreur dit ce qui s'est passé et quoi faire, sans s'excuser ;
   une attente dit ce qui se passe et combien de temps.
 
 ## Accessibilité

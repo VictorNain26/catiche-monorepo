@@ -1,13 +1,13 @@
 # État
 
 Ce qui reste vrai quelle que soit la direction du produit : les bloquants, les gestes de Victor,
-le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui est fait en sort.
+le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-21 ; ce qui est fait en sort.
 
 ## Bloquants
 
 | Bloquant | Effet | Comment lever |
 |---|---|---|
-| Clause des mineurs de Mistral (2.2(c), version du 2026-09-25) | Aucun utilisateur réel de moins de 15 ans | Réponse écrite de Mistral, demandée le 2026-10-11 (ticket « legal request/GDPR ») |
+| Clause des mineurs de Mistral (§ 2.2(c), version du 2026-09-25) : deux interdictions, les données personnelles d'un enfant sous l'âge du consentement numérique (15 ans en France), et l'usage par un mineur sans consentement parental. Le consentement du parent lève la seconde, pas la première prise à la lettre | Aucun utilisateur réel de moins de 15 ans | Réponse écrite de Mistral, demandée le 2026-10-11 (ticket « legal request/GDPR ») |
 | Zero Data Retention non accordé | Mistral peut garder textes et audio d'élèves | Ouvert seulement en paiement à l'usage ([centre d'aide](https://help.mistral.ai/en/articles/347612-can-i-activate-zero-data-retention-zdr)) ; recevabilité demandée dans le même ticket |
 | La marque TOM ([FR 4873204](https://data.inpi.fr/marques/FR4873204)), classes 9, 41 et 42 | Tout nom de produit bâti sur Tom, et peut-être Tom comme mascotte | Avis d'un conseil en propriété industrielle |
 | Mistral en mode gratuit : 100 000 tokens par minute, une fiche d'exercice en prend environ 78 000 | Le harnais et deux élèves dans la même minute voient la fiche échouer | Le paiement à l'usage avec un plafond, puis relire Admin › Limites |
@@ -25,9 +25,20 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
   `apps/curriculum/uv.lock`, supprimés en `8f5011f`, et signaler le bug au support GitHub.
 - **CNIL** : écrire sur l'hébergement de données de santé ; garder une copie du DPA de Clever
   Cloud pour l'AIPD.
+- **Landing** : le texte de « Qui fait Catiche », court et sans photo, si la section doit
+  revenir ; rien n'y est écrit sans lui. Les demandes d'invitation arrivent à `contact@`.
 
 ## Avant le premier élève réel
 
+- Aucune invitation pour un enfant réel tant que les bloquants (clause Mistral, base du staging
+  joignable) ne sont pas levés : les invitations se donnent à la main.
+- À la création d'un compte adulte, une déclaration horodatée : majeur, et représentant légal des
+  enfants qu'il ajoute (un compte peut en porter plusieurs). Elle vaut consentement parental ; la
+  vérification reste proportionnée, sans pièce d'identité (CNIL) (Victor, 2026-10-21).
+- Le modèle et les mots « parent » et « enfant » de l'application, revus pour toutes les familles :
+  deux représentants légaux dans deux foyers, un beau-parent ou un grand-parent qui suit les
+  devoirs sans être représentant légal, une famille d'accueil, un tuteur. À la refonte de
+  l'application (Victor, 2026-10-21).
 - Bugsink auto-hébergé, avec sa base ; les erreurs des navigateurs par le serveur (`tunnel`), sans
   contenu d'élève.
 - La base du staging, joignable depuis internet : la placer dans un réseau privé Clever Cloud
@@ -57,9 +68,11 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
   conformité littérale.
 - Les durées de conservation annoncées (`apps/landing/src/pages/confidentialite.astro`, § 7) :
   aucune purge ne tient encore celles du compte inactif ni des journaux. Celles des e-mails reçus
-  à `contact@` (prévenir à l'ouverture, puis effacer) se tiennent à la main, dans la boîte Zimbra.
-- La landing, à la naissance de la production : un formulaire d'inscription à la place du
-  `mailto:` de la section « prévenu », avec son information CNIL au moment de la collecte.
+  à `contact@` se tiennent à la main, dans la boîte Zimbra.
+- La landing, à la naissance de la production : ses liens « Se connecter » mènent au staging
+  (`APP_URL`, `apps/landing/src/lib/brand.ts`) ; changer cette constante, et le bouton « Demander
+  une invitation » (`molecules/request-invitation.astro`) avec les phrases « en préparation » si
+  l'inscription s'ouvre.
 - L'adresse de la connexion (`platform/http/client-address.ts`, `getConnInfo`) n'est exercée par
   aucun test, faute d'un vrai `Bun.serve`.
 - Le préfixe `__Host-` des cookies, quand better-auth le livre
@@ -71,14 +84,13 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-20 ; ce qui 
   applications et dépôt renommés, variables du staging, anciens domaines détachés. Reste, par
   Victor : supprimer l'image GHCR `tomai-server` (Settings du paquet sur GitHub) ; l'ancien
   domaine expire seul le 24 août 2027.
-- **L'ordre décidé par Victor (2026-10-20)**, un chantier après l'autre :
-  1. **La restructuration de la landing** : le plan est écrit, il attend la validation de Victor
-     et ses réponses (une section « qui fait Catiche », sombre ou clair, le libellé du bouton).
-  2. **La refonte de l'application**, pensée depuis le parent et l'enfant réels. Il faut d'abord
+- **L'ordre décidé par Victor (2026-10-20)**, un chantier après l'autre, la landing restructurée
+  autour de la soirée étant faite (#555) :
+  1. **La refonte de l'application**, pensée depuis le parent et l'enfant réels. Il faut d'abord
      un parcours et des textes validés, puis l'écran à l'ordinateur comme au téléphone. Un
      inventaire des écrans actuels est fait : vocabulaire technique, colonne unique, doublons,
      écarts à la charte.
-  3. **La soirée de devoirs à l'oral et le point du soir** (`produit.md`), avec le volet IA.
+  2. **La soirée de devoirs à l'oral et le point du soir** (`produit.md`), avec le volet IA.
 - **À vérifier, relevé par l'inventaire** : le résumé montre au parent « Ce qui résiste » même
   quand l'enfant a refusé la mémoire, alors que `/memoire` dit le contraire
   (`core/week-summary.ts`, `routes/memoire.tsx` du web).

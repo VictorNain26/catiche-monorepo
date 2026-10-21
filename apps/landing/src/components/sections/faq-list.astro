@@ -1,29 +1,56 @@
 ---
-import { ChevronDown } from '@lucide/astro';
+import { Plus } from '@lucide/astro';
+import { cn } from '@repo/ui/classes';
+import { CONTACT_EMAIL } from '@/lib/brand';
 import { FAQS } from './faq-data';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
 ---
 
-<div class="mx-auto max-w-3xl space-y-4">
-  {FAQS.map((faq, index) => (
-    <details
-      name="faq"
-      open={index === 0}
-      class="group overflow-hidden rounded-2xl bg-card shadow-sm ring-1 ring-border transition-shadow duration-base hover:ring-primary"
-    >
-      <summary
-        id={`faq-question-${index}`}
-        class="flex min-h-11 cursor-pointer list-none items-center justify-between p-4 text-left focus-visible:ring-inset sm:p-6 [&::-webkit-details-marker]:hidden"
-      >
-        <div class="flex items-center gap-4">
-          <div class="hidden size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-colors group-open:bg-primary group-open:text-primary-foreground sm:flex">
-            <faq.icon class="size-5" aria-hidden="true" />
-          </div>
-          <span class="text-base font-bold text-foreground sm:text-lg">{faq.question}</span>
-        </div>
-        <ChevronDown class="ml-2 size-5 shrink-0 text-muted-foreground transition-transform duration-base group-open:rotate-180" aria-hidden="true" />
+<div class={cn('border-y divide-y', className)}>
+  {FAQS.map((faq) => (
+    <details name="faq" class="group">
+      <summary class="flex min-h-11 cursor-pointer list-none items-start justify-between gap-6 py-5 text-left focus-visible:ring-inset sm:py-6 [&::-webkit-details-marker]:hidden">
+        <span class="font-heading text-lg font-extrabold text-foreground sm:text-xl">{faq.question}</span>
+        <Plus
+          class="mt-1 size-5 shrink-0 text-muted-foreground transition-transform duration-base group-open:rotate-45 group-hover:text-foreground"
+          aria-hidden="true"
+        />
       </summary>
-      <div id={`faq-answer-${index}`} class="px-4 pb-4 text-muted-foreground sm:px-6 sm:pb-6 sm:pl-20">
-        {faq.answer}
+      <div class="max-w-2xl space-y-3 pb-6 text-muted-foreground">
+        {/* The answers are plain text, for the page's FAQPage data too: our address becomes a link only here. */}
+        <p>
+          {faq.answer.split(CONTACT_EMAIL).map((part, index) => (
+            <>
+              {index > 0 && (
+                <a href={`mailto:${CONTACT_EMAIL}`} class="text-primary underline underline-offset-4">
+                  {CONTACT_EMAIL}
+                </a>
+              )}
+              {part}
+            </>
+          ))}
+        </p>
+        {faq.sources && (
+          <ul class="flex flex-wrap gap-x-6">
+            {faq.sources.map(({ href, label }) => (
+              <li>
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex min-h-11 items-center text-primary underline underline-offset-4"
+                >
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </details>
   ))}
@@ -48,5 +75,11 @@ import { FAQS } from './faq-data';
   details[open]::details-content {
     height: auto;
     opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    details::details-content {
+      transition: none;
+    }
   }
 </style>

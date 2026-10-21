@@ -1,67 +1,46 @@
 ---
 import Logo from '@/components/atoms/logo.astro';
-import { BRAND_NAME } from '@/lib/brand';
-import { SECTION_LINKS } from '@/lib/navigation';
+import { BRAND_NAME, CONTACT_EMAIL } from '@/lib/brand';
 
 // The page is built once: the year is the build's.
 const YEAR = new Date().getFullYear();
 
-const LINK_GROUPS = [
-  { title: 'Produit', links: SECTION_LINKS },
-  {
-    title: 'Aide',
-    links: [
-      { href: '/aide', label: "Centre d'aide" },
-      { href: '/contact', label: 'Contact' },
-    ],
-  },
-  {
-    title: 'Légal',
-    links: [
-      { href: '/confidentialite', label: 'Confidentialité' },
-      { href: '/cgu', label: 'CGU' },
-      { href: '/mentions-legales', label: 'Mentions légales' },
-    ],
-  },
-] as const;
+// Help and the legal pages only: the home page's sections are in the header.
+const LINKS = [
+  { href: '/aide', label: "Centre d'aide" },
+  { href: '/contact', label: 'Contact' },
+  { href: '/confidentialite', label: 'Confidentialité' },
+  { href: '/cgu', label: 'CGU' },
+  { href: '/mentions-legales', label: 'Mentions légales' },
+];
 ---
 
 <footer class="bg-secondary text-secondary-foreground">
-  <div class="container py-16 md:py-20">
-    <div class="grid grid-cols-1 gap-10 md:grid-cols-4">
-      <div class="space-y-4">
-        <Logo />
-        <p class="max-w-xs text-sm text-muted-foreground">
-          En préparation&nbsp;: l&apos;aide aux devoirs qui accompagne votre collégien du début à la fin, sans faire le travail à sa place.
-        </p>
-        <ul class="space-y-2 text-sm text-muted-foreground">
-          <li>Modèles de Mistral AI, appelés en Europe</li>
-          <li>Sans publicité</li>
-          <li>Un service web, pensé d&apos;abord pour le téléphone</li>
-        </ul>
-      </div>
-
-      {LINK_GROUPS.map((group) => (
-        <nav aria-label={group.title}>
-          <p class="mb-4 text-sm font-bold text-muted-foreground">{group.title}</p>
-          <ul class="space-y-2 text-sm">
-            {group.links.map((link) => (
-              <li>
-                <a
-                  href={link.href}
-                  class="inline-flex min-h-11 min-w-11 items-center text-foreground underline-offset-4 transition-colors duration-base hover:underline"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      ))}
+  <div class="container flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
+    <div class="space-y-1">
+      <Logo />
+      <p class="text-sm text-muted-foreground">
+        <a href={`mailto:${CONTACT_EMAIL}`} class="inline-flex min-h-11 items-center underline-offset-4 hover:underline">
+          {CONTACT_EMAIL}
+        </a>{' '}
+        · © {YEAR} {BRAND_NAME}
+      </p>
+      {/* Its publisher, as the legal notice names him (pages/mentions-legales.astro). */}
+      <p class="text-sm text-muted-foreground">{BRAND_NAME} est conçu et développé par Victor Lenain.</p>
     </div>
-
-    <p class="mt-12 text-sm text-muted-foreground">
-      © {YEAR} {BRAND_NAME}. Tous droits réservés.
-    </p>
+    <nav aria-label="Aide et informations légales">
+      <ul class="flex flex-wrap gap-x-6 text-sm">
+        {LINKS.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class="inline-flex min-h-11 items-center text-foreground underline-offset-4 transition-colors duration-base hover:underline"
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
   </div>
 </footer>

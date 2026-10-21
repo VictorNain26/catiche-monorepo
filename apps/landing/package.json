@@ -9,15 +9,15 @@
     "build": "astro build",
     "preview": "astro preview",
     "lint": "astro sync && eslint . --max-warnings 0",
-    "typecheck": "astro check"
+    "typecheck": "astro check && tsc -p tsconfig.test.json",
+    "test": "bun test src"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
     "@lucide/astro": "^1.52.0",
     "@repo/tokens": "workspace:*",
     "@repo/ui": "workspace:*",
-    "astro": "^7.3.8",
-    "motion": "^13.4.0"
+    "astro": "^7.3.8"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
@@ -25,6 +25,7 @@
     "@repo/eslint-config": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.6",
+    "bun-types": "^1.4.3",
     "eslint": "^10.12.0",
     "satori": "^0.35.1",
     "sharp": "^0.35.5",

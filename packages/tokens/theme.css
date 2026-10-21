@@ -55,6 +55,8 @@
   --color-warning-foreground: var(--mist-12);
   /* Le jonc, derrière le texte de l'encre ; jamais en texte ni en bordure. */
   --color-highlight: var(--reed-4);
+  /* Sa hauteur derrière un mot : le bas des lettres, comme un trait de surligneur. */
+  --highlight-height: 0.42em;
   /* Le pelage, une note, un accent rare. */
   --color-annotation: var(--fur-10);
   --color-border: var(--mist-4);
@@ -67,6 +69,8 @@
   /* Le panneau de marque, à l'entrée de l'app : l'eau profonde. */
   --color-panel: var(--water-11);
   --color-panel-foreground: var(--mist-1);
+  /* L'arche derrière Tom, en haut du site : l'eau claire, sans texte posé dessus. */
+  --color-arch: var(--water-3);
   /* Les graphiques, dans cet ordre, chaque série à 3:1 du fond et de la carte, deux voisines
    * séparées par leur clarté (pas 11, 9, 10, 12), jamais le pelage contre l'eau. */
   --color-chart-1: var(--water-11);
@@ -111,5 +115,6 @@
     --color-highlight: var(--reed-6);
     --color-panel: var(--water-4);
     --color-panel-foreground: var(--mist-12);
+    --color-arch: var(--water-5);
   }
 }

@@ -8,5 +8,7 @@
     }
   },
   "include": [".astro/types.d.ts", "src"],
-  "exclude": ["dist", "node_modules"]
+  // The tests run in Bun, not in the browser: their own project, with Bun's types.
+  "exclude": ["dist", "node_modules", "src/**/*.test.ts"],
+  "references": [{ "path": "./tsconfig.test.json" }]
 }

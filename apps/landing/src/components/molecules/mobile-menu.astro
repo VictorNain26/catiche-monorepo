@@ -2,6 +2,7 @@
 import { Menu, X } from '@lucide/astro';
 import { buttonVariants } from '@repo/ui/classes';
 import NavLinks from './nav-links.astro';
+import { SIGN_IN_URL } from '@/lib/brand';
 ---
 
 <mobile-menu>
@@ -23,6 +24,9 @@ import NavLinks from './nav-links.astro';
       <nav aria-label="Principale" class="flex flex-col gap-4">
         <NavLinks orientation="vertical" />
       </nav>
+      <a href={SIGN_IN_URL} class={buttonVariants({ variant: 'outline', className: 'self-start' })}>
+        Se connecter
+      </a>
     </div>
     <button
       type="button"

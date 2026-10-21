@@ -2,13 +2,12 @@
 import Layout from '@/layouts/layout.astro';
 import JsonLd from '@/components/json-ld.astro';
 import Hero from '@/components/sections/hero.astro';
-import HowItWorks from '@/components/sections/how-it-works.astro';
+import Problem from '@/components/sections/problem.astro';
+import Evening from '@/components/sections/evening.astro';
 import Parents from '@/components/sections/parents.astro';
-import Limits from '@/components/sections/limits.astro';
-import Trust from '@/components/sections/trust.astro';
-import Evidence from '@/components/sections/evidence.astro';
+import Commitments from '@/components/sections/commitments.astro';
 import FAQ from '@/components/sections/faq.astro';
-import Notify from '@/components/sections/notify.astro';
+import Closing from '@/components/sections/closing.astro';
 import { FAQS } from '@/components/sections/faq-data';
 
 const faqJsonLd = {
@@ -25,11 +24,14 @@ const faqJsonLd = {
 <Layout>
   <JsonLd data={faqJsonLd} />
   <Hero />
-  <HowItWorks />
+  <Problem />
+  <Evening />
   <Parents />
-  <Limits />
-  <Trust />
-  <Evidence />
+  <Commitments />
   <FAQ />
-  <Notify />
+  <Closing />
 </Layout>
+
+<script>
+  import '@/scripts/evening';
+</script>

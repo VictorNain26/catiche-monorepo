@@ -1,0 +1,38 @@
+---
+import { BRAND_NAME } from '@/lib/brand';
+
+// Each fact is checked against the docs: docs/produit.md and docs/methode.md (organisation rated by the parents, no better grades: "À retenir"), docs/tuteur.md (no answer
+// given; § 2, Mistral's EU endpoint), docs/architecture.md ("Hébergement", "Serveur").
+const COMMITMENTS = [
+  "Tom ne fait pas les devoirs à la place de votre enfant. Il est conçu pour ne pas donner la réponse d'un exercice.",
+  `Nous ne promettons pas de meilleures notes. Dans les programmes sur lesquels ${BRAND_NAME} s'appuie, menés par un adulte, l'organisation progresse nettement selon les parents, et les notes bougent peu. Rien ne prouve encore qu'une application fasse aussi bien.`,
+  `${BRAND_NAME} est hébergé en France, chez Clever Cloud. L'IA vient de Mistral AI, une entreprise française, et fonctionne sur des serveurs en Europe.`,
+  'Pas de publicité. Nous ne vendons aucune donnée.',
+  "Votre enfant n'a pas besoin d'adresse e-mail. Vous pouvez voir, corriger ou supprimer ses données sur simple demande.",
+];
+---
+
+<section class="border-t py-20 lg:py-32">
+  <div class="container grid max-w-6xl gap-12 lg:grid-cols-12 lg:gap-16">
+    <div class="lg:col-span-4">
+      <div class="lg:sticky lg:top-28">
+        <h2 class="text-4xl text-balance text-foreground sm:text-5xl">Nos engagements</h2>
+        <p class="mt-4 max-w-xs text-muted-foreground">
+          Le détail est dans notre{' '}
+          <a href="/confidentialite" class="text-primary underline underline-offset-4">
+            politique de confidentialité
+          </a>
+          .
+        </p>
+      </div>
+    </div>
+    <ol class="lg:col-span-8">
+      {COMMITMENTS.map((commitment, index) => (
+        <li class="flex gap-4 border-t py-6 first:border-t-0 first:pt-0 sm:gap-6">
+          <span class="w-8 shrink-0 font-heading text-2xl leading-snug font-extrabold text-muted-foreground tabular-nums">{index + 1}</span>
+          <p class="text-xl leading-snug text-pretty text-foreground sm:text-2xl sm:leading-snug">{commitment}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>

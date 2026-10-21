@@ -24,8 +24,8 @@ l'app. Les composants ne dépendent de l'identité que par les rôles.
 - Aucune opacité pour un état désactivé : `disabled` et `disabled-foreground`.
 - Aucun « ami », sentiment ou souvenir personnel prêté à Tom dans un texte de l'interface.
 - Aucune couleur, durée, rayon ou taille littérale dans un composant : une classe issue de
-  `@repo/tokens`, ou un token ajouté à `theme.css`. Seule exception : les valeurs que Motion
-  anime (`animate()` dans la landing), et l'état d'entrée qui les attend.
+  `@repo/tokens`, ou un token ajouté à `theme.css`. Un script qui anime lit ses durées et sa
+  courbe dans ces tokens (`getComputedStyle`), comme `apps/landing/src/scripts/evening.ts`.
 - Aucune paire de tokens associée sans son test de contraste
   (`packages/tokens/contrast.test.mjs`) : texte dans `TEXT` à 4,5:1
   ([WCAG 2.2, 1.4.3](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html)),

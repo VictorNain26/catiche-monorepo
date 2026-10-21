@@ -1,42 +1,83 @@
 ---
-import { Check, EyeOff } from '@lucide/astro';
-import FadeIn from '@/components/atoms/fade-in.astro';
-import SectionHeader from '@/components/atoms/section-header.astro';
-import Highlight from '@/components/annotations/highlight.astro';
+import CheckIn from '@/components/molecules/check-in.astro';
+import Screen from '@/components/molecules/screen.astro';
+import { CHECK_IN, HOURS } from './evening-data';
 
-const POINTS = [
-  {
-    icon: Check,
-    title: 'Ce que vous verrez',
-    body: "Que les devoirs du soir sont faits, et ce qui reste. Ce résumé « c'est fait » est en construction.",
-  },
-  {
-    icon: EyeOff,
-    title: 'Ce que vous ne verrez pas',
-    body: "Ses conversations avec Tom. C'est son espace à lui : il l'ouvre par un code de 6 chiffres qu'il choisit, et que vous ne voyez pas.",
-  },
+// The evening check-in of docs/produit.md ("Le point du soir") and how it fits each family; you see that it is done,
+// never the conversations. The end of the example evening above, without a border between them: it stays under the
+// evening's lead, which says what is told is what we are building. The code has six digits (STUDENT_CODE_LENGTH,
+// apps/server/src/domain/student-code.ts).
+const FAMILIES = [
+  'Vous rentrez tard ? Vous le regardez quand vous pouvez. Votre enfant voit votre « Vu » le lendemain.',
+  "Quand votre enfant vit dans deux maisons, c'est l'adulte chez qui il est ce soir-là qui le reçoit.",
+  'Si les devoirs sont un sujet de tension, vous pouvez désactiver le point du soir.',
+  "Si personne n'est disponible, le point du soir reste à votre enfant.",
+  "En 6e et en 5e, le point du soir est proposé par défaut. En 4e et en 3e, c'est votre enfant qui choisit de le partager.",
 ];
 ---
 
-<section id="parents" class="scroll-mt-20 bg-secondary py-16 lg:py-24">
-  <div class="container grid max-w-6xl gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
-    <SectionHeader eyebrow="Pour vous, le parent" align="left" class="mb-0">
-      <Fragment slot="title">
-        Vous savez que c&apos;est fait, <Highlight>sans lire par-dessus son épaule</Highlight>
-      </Fragment>
-    </SectionHeader>
-    <div class="grid gap-6">
-      {POINTS.map(({ icon: Icon, title, body }, index) => (
-        <FadeIn delay={index * 0.1}>
-          <div class="flex h-full gap-4 rounded-2xl bg-card p-6 shadow-sm ring-1 ring-border">
-            <Icon class="mt-1 size-6 shrink-0 text-primary" aria-hidden="true" />
-            <div>
-              <h3 class="mb-2 text-xl text-foreground">{title}</h3>
-              <p class="text-muted-foreground">{body}</p>
-            </div>
-          </div>
-        </FadeIn>
-      ))}
+<section id="parents" class="scroll-mt-20 pt-8 pb-20 lg:pt-12 lg:pb-32">
+  <div class="container max-w-6xl">
+    <div class="grid gap-x-12 gap-y-12 lg:grid-cols-12">
+      <div class="lg:col-span-5">
+        <p class="font-heading text-5xl font-extrabold text-foreground tabular-nums lg:text-6xl">
+          <time datetime={HOURS.ended} class="highlighter">
+            {HOURS.ended}
+          </time>
+        </p>
+        <h2 class="mt-3 text-4xl text-balance text-foreground sm:text-5xl">Vous savez ce qui est fait, sans surveiller.</h2>
+        <p class="mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">
+          À la fin de la soirée, c&apos;est le point du soir&nbsp;: votre enfant vous montre ce qu&apos;il a fait. Vous répondez «&nbsp;Vu&nbsp;»,
+          avec un mot d&apos;encouragement si vous voulez. Vous n&apos;avez pas à vérifier le contenu, et il n&apos;y a ni note, ni compteur de jours,
+          ni rappel.
+        </p>
+      </div>
+
+      <figure class="lg:col-span-7 lg:pt-4">
+        <div class="grid gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,14rem)] sm:items-start">
+          <play-once class="block">
+            <Screen time={HOURS.ended} title="Mardi soir">
+              <CheckIn {...CHECK_IN}>
+                <div>
+                  <dt class="text-sm font-bold text-muted-foreground">Cartable</dt>
+                  <dd>Prêt pour demain</dd>
+                </div>
+              </CheckIn>
+              <p class="seen mt-4 border-t pt-3">
+                <span class="text-sm font-bold text-muted-foreground">Votre réponse</span>
+                <span class="mt-1 block font-heading text-2xl font-extrabold text-primary">Vu</span>
+              </p>
+            </Screen>
+          </play-once>
+          <ul class="space-y-4 border-l-2 border-annotation pl-4 text-foreground">
+            {FAMILIES.map((family) => (
+              <li>{family}</li>
+            ))}
+          </ul>
+        </div>
+        <figcaption class="sr-only">
+          Le point du soir&nbsp;: ce qui est fait, ce qui reste, le cartable de demain, et votre «&nbsp;Vu&nbsp;».
+        </figcaption>
+      </figure>
     </div>
+
+    <p class="mt-20 max-w-4xl font-heading text-3xl leading-tight font-extrabold text-pretty text-foreground sm:text-4xl lg:mt-28">
+      Vous ne voyez pas ses échanges avec Tom.{' '}
+      <span class="text-muted-foreground">C&apos;est son espace&nbsp;: il y entre avec un code de six chiffres qu&apos;il choisit lui-même.</span>
+    </p>
   </div>
 </section>
+
+<style>
+  /* Your « Vu » comes last, without a stamp, once the script that holds it plays it (src/scripts/evening.ts); set at
+   * once while it waits, only its arrival is a transition. */
+  @media (prefers-reduced-motion: no-preference) {
+    play-once:not([data-armed]) .seen {
+      transition: opacity var(--duration-base) var(--ease-standard) var(--duration-slow);
+    }
+
+    play-once[data-armed] .seen {
+      opacity: 0;
+    }
+  }
+</style>

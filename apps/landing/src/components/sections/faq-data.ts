@@ -1,55 +1,56 @@
-import { BrainCircuit, CalendarClock, Clock, GraduationCap, Monitor, NotebookPen, School, ShieldCheck, Wallet } from '@lucide/astro';
-import { BRAND_NAME } from '@/lib/brand';
+import { BRAND_NAME, CONTACT_EMAIL } from '@/lib/brand';
 
-// Each answer is checked against the docs: docs/produit.md, docs/tuteur.md, docs/architecture.md.
-export const FAQS = [
+interface Faq {
+  question: string;
+  answer: string;
+  sources?: { href: string; label: string }[];
+}
+
+// Each answer is checked against the docs: docs/produit.md, docs/methode.md, docs/tuteur.md (§ 2, Mistral; § 4, the check before
+// the pupil), docs/architecture.md, docs/charte.md ("Les mots") and apps/server/src/modules/tutor/core/prompt.ts (never a friend); the shared device's 10 minutes are
+// IDLE_MINUTES in apps/server/src/platform/auth/student-sign-in.ts.
+export const FAQS: Faq[] = [
   {
     question: 'Dès quelle classe ?',
-    answer: `De la 6e à la 3e. ${BRAND_NAME} est pensé pour le collège, et seulement pour lui.`,
-    icon: GraduationCap,
+    answer: `De la 6e à la 3e. ${BRAND_NAME} est pensé pour le collège.`,
   },
   {
-    question: `Quand ${BRAND_NAME} ouvre-t-il ?`,
-    answer: `${BRAND_NAME} est en préparation, et sa date d'ouverture n'est pas fixée. Les familles qui nous écrivent seront prévenues en premier.`,
-    icon: CalendarClock,
+    question: 'Comment avoir un compte, et combien ça coûte ?',
+    answer: `Pour l'instant, les comptes s'ouvrent sur invitation : écrivez-nous à ${CONTACT_EMAIL} pour en demander une. Le prix n'est pas encore fixé, et demander une invitation ne vous engage à rien.`,
   },
   {
-    question: 'Combien ça coûte ?',
-    answer: "Le prix sera annoncé à l'ouverture. Nous écrire ne vous engage à rien.",
-    icon: Wallet,
+    // The application is the web client served by the server, laid out for a phone and for a computer
+    // (docs/architecture.md, "Client web").
+    question: 'Sur quel appareil ?',
+    answer: 'Dans le navigateur, sur un téléphone, une tablette ou un ordinateur, sans rien installer.',
   },
   {
-    question: 'Et Pronote ?',
-    answer: `${BRAND_NAME} ne se connecte pas à Pronote, et n'utilise aucun accès non officiel. Votre enfant dira ses devoirs à voix haute, à partir de son agenda ou de ce qu'il a noté.`,
-    icon: NotebookPen,
-  },
-  {
-    question: 'Et Devoirs faits, au collège ?',
-    answer: `Devoirs faits est le temps d'aide aux devoirs que propose le collège. ${BRAND_NAME} ne le remplace pas. Il servira le soir, à la maison : pour les devoirs qui restent, le sac du lendemain et les contrôles à préparer.`,
-    icon: School,
-  },
-  {
-    question: "Un seul ordinateur pour toute la famille, c'est possible ?",
+    question: 'Sur quoi repose la méthode ?',
     answer:
-      "Oui. Chaque enfant a son profil sur l'ordinateur de la famille, et l'ouvre par son propre code. Sur un appareil partagé, sa session se ferme après 10 minutes sans usage, pour que son frère ou sa sœur n'y entre pas.",
-    icon: Monitor,
-  },
-  {
-    question: 'Combien de temps par soir ?',
-    answer:
-      "Tom coupera le travail en étapes d'environ 10 minutes, et la soirée finira quand tout sera fait. Nous mesurerons la durée réelle avec les premières familles.",
-    icon: Clock,
+      "Sur les gestes d'un programme d'aide à l'organisation pour collégiens, HOPS, testé dans un essai scientifique : noter ses devoirs et ses contrôles, vérifier ses affaires, découper la révision d'un contrôle, réviser un contrôle les jours d'avant. Dans ce programme, un adulte vérifie à chaque séance. Rien ne prouve encore qu'une application fasse aussi bien, et nous ne l'affirmons pas.",
+    // HOPS in docs/methode.md, "Sources": its trial [1], and the protocol [7] the gestures come from; no effect size on the page.
+    sources: [
+      { href: 'https://europepmc.org/article/MED/29172596', label: 'Essai de HOPS, Langberg et al., 2018' },
+      { href: 'https://www.medrxiv.org/content/10.64898/2026.02.13.26346294v1', label: 'Protocole de HOPS, Nissley-Tsiopinis et al., 2026' },
+    ],
   },
   {
     question: 'Tom donne-t-il les réponses ?',
     answer:
-      "Tom est conçu pour ne pas donner la réponse d'un exercice. Il cherche d'abord où ça coince, puis aide par étapes : une question, un indice, une étape. Si votre enfant bloque encore, Tom montre un exemple proche, déjà résolu, dont il reprend la méthode. Chaque message de Tom est vérifié avant d'arriver à votre enfant : s'il contient la réponse, il est réécrit ou remplacé.",
-    icon: BrainCircuit,
+      "Il est conçu pour ne pas les donner. Tom cherche d'abord où votre enfant bloque, puis l'aide pas à pas : une question, un indice, une étape. S'il bloque encore, Tom montre un exemple proche, déjà résolu. Chaque message de Tom passe par un contrôle automatique avant d'être affiché : s'il contient la réponse de l'exercice, il est réécrit ou remplacé.",
   },
   {
-    question: 'Que deviennent les données de mon enfant ?',
+    question: 'Tom est-il une intelligence artificielle ?',
     answer:
-      "Aujourd'hui, aucune donnée d'élève n'est collectée : l'application n'est pas ouverte. Ensuite, ses messages seront traités par les modèles de Mistral AI, en Europe, et gardés chez Clever Cloud, à Paris. Aucune publicité, aucune revente. Vous pourrez consulter, corriger ou supprimer ses données sur simple demande.",
-    icon: ShieldCheck,
+      "Oui. Tom fonctionne avec les modèles de Mistral AI, une entreprise française. Il ne se fait pas passer pour un ami, et chaque message passe par un contrôle automatique avant d'être affiché à votre enfant.",
+  },
+  {
+    question: 'Et Pronote ?',
+    answer: `${BRAND_NAME} ne se connecte pas à Pronote. Avec ${BRAND_NAME}, votre enfant dit ses devoirs à voix haute, en regardant son agenda ou ce qu'il a noté.`,
+  },
+  {
+    question: 'Un seul ordinateur pour toute la famille ?',
+    answer:
+      "Oui. Chaque enfant a son profil et y entre avec son propre code. Sur un ordinateur partagé, son profil se ferme après 10 minutes sans activité, pour qu'un frère ou une sœur n'y entre pas.",
   },
 ];

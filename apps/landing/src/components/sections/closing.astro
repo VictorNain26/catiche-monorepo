@@ -1,0 +1,16 @@
+---
+import TomIllustration from '@/components/atoms/tom-illustration.astro';
+import RequestInvitation from '@/components/molecules/request-invitation.astro';
+---
+
+{/* The end of the evening: Tom waves, without a word (docs/charte.md, "Tom": out of a session, he does not speak). */}
+<section class="border-t pt-20 pb-12 lg:pt-28 lg:pb-16">
+  <div class="container grid max-w-6xl items-end gap-10 sm:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
+    <div class="pb-8">
+      <h2 class="max-w-2xl text-4xl text-balance text-foreground sm:text-5xl">Envie d&apos;essayer avec votre enfant&nbsp;?</h2>
+      <p class="mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">Les comptes s&apos;ouvrent sur invitation.</p>
+      <RequestInvitation class="mt-8" />
+    </div>
+    <TomIllustration start="view" class="w-48 sm:w-full" />
+  </div>
+</section>

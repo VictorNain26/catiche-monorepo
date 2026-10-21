@@ -96,6 +96,9 @@ devoirs à l'oral.
 dans #550, puis le passage à `catiche.fr`, puis l'application). La soirée et le volet IA viennent
 ensuite.
 
+**L'accès pendant la préparation** (Victor, 2026-10-21) : les comptes s'ouvrent sur invitation,
+demandée par e-mail ; aucune promotion tant que les bloquants de `etat.md` ne sont pas levés.
+
 ## Les risques
 
 - **Rien ne prouve qu'une IA remplace l'adulte qui vérifie** : c'est l'hypothèse centrale
