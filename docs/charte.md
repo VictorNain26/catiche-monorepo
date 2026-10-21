@@ -29,7 +29,7 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
 | Brume (`background`) | `mist` | Le fond |
 | Encre (`foreground`) | `mist` | Le texte |
 | Eau profonde (`primary`) | `water` | L'action principale, les liens, le focus, le panneau de marque |
-| Jonc (`highlight`) | `reed` | Ce qui ressort derrière le texte de l'encre ; jamais en texte ni en bordure, trop pâle sur la brume : seul le texte de l'encre sur le jonc est testé (`packages/tokens/contrast.test.mjs`). Le surligneur est le fil conducteur dans les deux modes ; en sombre, le pas le plus vif sous lequel l'encre claire reste lisible (`theme.css`) |
+| Jonc (`highlight`) | `reed` | Ce qui ressort derrière le texte de l'encre ; jamais en texte ni en bordure, trop pâle sur la brume : seul le texte de l'encre sur le jonc est testé (`packages/tokens/contrast.test.mjs`). Le surligneur est le fil conducteur dans les deux modes : un jonc vif et, dessus, les mots à son encre sombre (`highlight-foreground`) ; en sombre, il couvre toute la hauteur des mots (`theme.css`) |
 | Pelage (`annotation`) | `fur` | Une note, un accent rare |
 
 - Chaque couleur a son échelle de douze pas, chaque pas à son rôle : 1 et 2 les fonds, 3 à 5 les

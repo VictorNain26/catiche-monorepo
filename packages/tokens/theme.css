@@ -53,10 +53,13 @@
   --color-success-foreground: var(--mist-1);
   --color-warning: var(--amber-4);
   --color-warning-foreground: var(--mist-12);
-  /* Le jonc, derrière le texte de l'encre, dans les deux modes ; jamais en texte ni en bordure. */
+  /* Le surligneur, dans les deux modes : un jonc vif, et dessus les mots à l'encre sombre ; jamais en
+   * texte ni en bordure. */
   --color-highlight: var(--reed-4);
-  /* Le halo du haut du site, une eau très claire derrière la soirée ; l'encre y reste lisible. */
-  --color-halo: var(--water-2);
+  --color-highlight-foreground: var(--mist-12);
+  /* Le halo derrière la soirée du haut du site, une eau claire qui donne de la profondeur ; rien
+   * n'est écrit dessus. */
+  --color-halo: var(--water-4);
   /* Sa hauteur derrière un mot : le bas des lettres, comme un trait de surligneur. */
   --highlight-height: 0.42em;
   /* Le pelage, une note, un accent rare. */
@@ -112,8 +115,11 @@
     color-scheme: dark;
     --color-card: var(--mist-2);
     --color-popover: var(--mist-2);
-    /* Le pas le plus vif du jonc sous lequel l'encre claire garde 4,5:1. */
-    --color-highlight: var(--reed-8);
+    /* En sombre, un jonc lumineux sur toute la hauteur des mots, et les mots à l'encre du fond. */
+    --color-highlight: var(--reed-12);
+    --color-highlight-foreground: var(--mist-1);
+    --highlight-height: 100%;
+    --color-halo: var(--water-6);
     --color-panel: var(--water-4);
     --color-panel-foreground: var(--mist-12);
   }

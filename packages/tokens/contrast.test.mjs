@@ -60,10 +60,8 @@ const TEXT = [
   ['foreground', 'background'],
   ['foreground', 'card'],
   ['foreground', 'secondary'],
-  // The highlighter lies behind the ink's words in both modes.
-  ['foreground', 'highlight'],
-  ['foreground', 'halo'],
-  ['muted-foreground', 'halo'],
+  // The highlighter lies behind the ink's words in both modes: a bright reed, and the words on it in its own dark ink.
+  ['highlight-foreground', 'highlight'],
   ['card-foreground', 'card'],
   ['popover-foreground', 'popover'],
   ['secondary-foreground', 'secondary'],
