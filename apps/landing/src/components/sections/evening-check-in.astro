@@ -1,7 +1,7 @@
 ---
 import CheckIn from '@/components/molecules/check-in.astro';
 import Screen from '@/components/molecules/screen.astro';
-import { CHECK_IN, HOURS } from './evening-data';
+import { CHECK_IN, EVENING, HOURS } from './evening-data';
 
 // The evening check-in of docs/produit.md ("Le point du soir"), not built yet: told in the present under the line that
 // says so (docs/charte.md, "Les mots"); how it fits each family is a question of the FAQ. The adult sees that it is done,
@@ -26,7 +26,7 @@ import { CHECK_IN, HOURS } from './evening-data';
     <figure>
       <play-once class="block">
         {/* On the secondary plane, the dark card would melt into it: there, it takes the background. */}
-        <Screen time={HOURS.ended} title="Mardi soir" class="dark:bg-background">
+        <Screen time={HOURS.ended} title={EVENING} class="dark:bg-background">
           <CheckIn {...CHECK_IN} />
           <p class="seen mt-4 border-t pt-3">
             <span class="text-sm font-bold text-muted-foreground">Votre réponse</span>

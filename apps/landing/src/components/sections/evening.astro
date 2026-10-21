@@ -3,7 +3,7 @@ import PupilSays from '@/components/molecules/pupil-says.astro';
 import Screen from '@/components/molecules/screen.astro';
 import TomSays from '@/components/molecules/tom-says.astro';
 import { BRAND_NAME } from '@/lib/brand';
-import { HOMEWORK, HOURS } from './evening-data';
+import { BAG, EVENING, FIRST_SAID, HOMEWORK, HOURS, MISSING } from './evening-data';
 
 // The evening of docs/produit.md, "Ce que fait Catiche", and its gestures in docs/methode.md, "Les gestes d'une soirée":
 // what Catiche accompanies once built (docs/produit.md, "À construire"), told in the present under a lead that says
@@ -14,7 +14,7 @@ const MOMENTS = [
     time: HOURS.said,
     title: "Dire ce qu'il a ce soir",
     body: 'Votre collégien dit ses devoirs à voix haute, et Tom demande ce qui manque.',
-    screen: 'Ce soir',
+    screen: EVENING,
   },
   {
     time: HOURS.ordered,
@@ -31,7 +31,7 @@ const MOMENTS = [
   {
     time: HOURS.ended,
     title: 'Préparer demain',
-    body: "Tom aide à préparer le cartable, et lui rappelle de réviser un contrôle les jours d'avant.",
+    body: "Tom aide votre collégien à préparer son cartable, et lui rappelle de réviser un contrôle les jours d'avant.",
     screen: 'Pour demain',
   },
 ] as const;
@@ -42,11 +42,9 @@ const STEPS = [
   { step: 'Faire le calcul', state: '' },
 ];
 
-const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
-
 // The jumble falling into Tom's order plays at the top of the page; here, the order is already proposed, and the pupil
 // changes it, the one thing docs/produit.md says he can do with it: English first.
-const [maths, english, history] = HOMEWORK;
+const [maths, history, english] = HOMEWORK;
 const CHANGED = [english, maths, history];
 ---
 
@@ -77,10 +75,9 @@ const CHANGED = [english, maths, history];
             <Screen title={screen}>
               {index === 0 && (
                 <div class="space-y-3">
-                  <TomSays>Le contrôle d&apos;histoire, c&apos;est pour quel jour&nbsp;?</TomSays>
-                  <PupilSays>Jeudi.</PupilSays>
-                  <TomSays>Et en maths, quels exercices&nbsp;?</TomSays>
-                  <PupilSays>Le 3 et le 4.</PupilSays>
+                  {/* The screen stops on Tom's question: his answer is the top of the page, at 17:35. */}
+                  <PupilSays>{FIRST_SAID}</PupilSays>
+                  <TomSays>{MISSING}</TomSays>
                 </div>
               )}
               {index === 1 && (

@@ -35,7 +35,7 @@ const RESEARCH = [
 const SAFEGUARDS = [
   "Chaque message de Tom est vérifié avant d'être affiché, et remplacé s'il contient la réponse.",
   "Nos règles fixent le niveau d'aide : il monte quand votre collégien essaie vraiment.",
-  "Si votre collégien écrit qu'il veut se faire du mal, Tom s'arrête. Un message écrit à l'avance par une personne lui donne le 3114, un numéro d'écoute gratuit jour et nuit, et l'invite à parler à un adulte de confiance.",
+  "Si votre collégien écrit qu'il veut se faire du mal, Tom s'arrête. Un message écrit à l'avance, sans intelligence artificielle, lui donne le 3114, un numéro d'écoute gratuit jour et nuit, et l'invite à parler à un adulte de confiance.",
 ];
 
 const COMMITMENTS = [
@@ -51,7 +51,7 @@ const COMMITMENTS = [
 
     <div class="mt-8 grid gap-8 md:grid-cols-2 md:gap-10 lg:mt-16 lg:grid-cols-3 lg:gap-12">
       <div>
-        <h3 class="text-2xl text-balance text-foreground">Ce que fait Tom s&apos;appuie sur la recherche</h3>
+        <h3 class="text-2xl text-balance text-foreground">La soirée que nous construisons s&apos;appuie sur la recherche</h3>
         {/* Each source at the end of its sentence, in the line, opened in a new tab (atoms/external-link.astro). */}
         <ul class="mt-4 space-y-3 text-foreground">
           {RESEARCH.map(({ gesture, finding, source }) => (
