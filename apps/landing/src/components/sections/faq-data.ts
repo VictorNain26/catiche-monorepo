@@ -21,7 +21,7 @@ export const FAQS: Faq[] = [
   {
     question: 'Sur quoi repose la méthode ?',
     answer:
-      "Sur les gestes d'un programme d'aide à l'organisation pour collégiens, HOPS, testé dans des essais scientifiques : noter ses devoirs et ses contrôles, vérifier ses affaires, découper le travail, réviser un contrôle les jours d'avant. Dans ce programme, un adulte vérifie à chaque séance. Rien ne prouve encore qu'une application fasse aussi bien : nous le mesurerons et publierons ce que nous trouvons.",
+      "Sur les gestes d'un programme d'aide à l'organisation pour collégiens, HOPS, testé dans un essai scientifique : noter ses devoirs et ses contrôles, vérifier ses affaires, découper le travail, réviser un contrôle les jours d'avant. Dans ce programme, un adulte vérifie à chaque séance. Rien ne prouve encore qu'une application fasse aussi bien : nous le mesurerons et publierons ce que nous trouvons.",
     // HOPS in docs/methode.md, "Sources": its trial [1], and the protocol [7] the gestures come from; no effect size on the page.
     sources: [
       { href: 'https://europepmc.org/article/MED/29172596', label: 'Essai de HOPS, Langberg et al., 2018' },
