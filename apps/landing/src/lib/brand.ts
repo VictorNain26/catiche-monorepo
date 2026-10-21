@@ -1,5 +1,7 @@
 export const BRAND_NAME = 'Catiche';
 export const CONTACT_EMAIL = 'contact@catiche.fr';
+// Victor's own site, linked from his name in the footer.
+export const AUTHOR_URL = 'https://www.victorlenain.fr/';
 
 // The application's address: the staging until production exists (docs/etat.md), where accounts open on invitation.
 const APP_URL = 'https://staging.catiche.fr';

@@ -1,6 +1,6 @@
 ---
 import Logo from '@/components/atoms/logo.astro';
-import { BRAND_NAME, CONTACT_EMAIL } from '@/lib/brand';
+import { AUTHOR_URL, BRAND_NAME, CONTACT_EMAIL } from '@/lib/brand';
 
 // The page is built once: the year is the build's.
 const YEAR = new Date().getFullYear();
@@ -26,7 +26,13 @@ const LINKS = [
         · © {YEAR} {BRAND_NAME}
       </p>
       {/* Its publisher, as the legal notice names him (pages/mentions-legales.astro). */}
-      <p class="text-sm text-muted-foreground">{BRAND_NAME} est conçu et développé par Victor Lenain.</p>
+      <p class="text-sm text-muted-foreground">
+        {BRAND_NAME} est conçu et développé par{' '}
+        <a href={AUTHOR_URL} class="inline-flex min-h-11 items-center underline underline-offset-4">
+          Victor Lenain
+        </a>
+        .
+      </p>
     </div>
     <nav aria-label="Aide et informations légales">
       <ul class="flex flex-wrap gap-x-6 text-sm">
