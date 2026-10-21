@@ -1,0 +1,23 @@
+// The timing of the evening's moves, read from the tokens (packages/tokens/theme.css) through a computed style.
+
+type Tokens = Pick<CSSStyleDeclaration, 'getPropertyValue'>;
+
+// The same timing as the transitions that straighten the items (hero.astro); none if one is missing.
+export function orderTiming(style: Tokens): KeyframeAnimationOptions | undefined {
+  const duration = milliseconds(style.getPropertyValue('--duration-slow'));
+  const delay = milliseconds(style.getPropertyValue('--duration-wait'));
+  const easing = style.getPropertyValue('--ease-standard').trim();
+  if (duration === undefined || delay === undefined || !easing) return undefined;
+  return { duration, delay, easing, fill: 'backwards' };
+}
+
+// A CSS <time>: a number and its unit, `ms` or `s`, in any case (https://www.w3.org/TR/css-values-4/#time).
+const TIME = /^(?<number>\d*\.?\d+)(?<unit>ms|s)$/iu;
+
+// A CSS duration (`200ms`, `0.2s`) in milliseconds; none if it is empty, has no unit or another one.
+export function milliseconds(value: string): number | undefined {
+  const groups = TIME.exec(value.trim())?.groups;
+  if (!groups?.['number'] || !groups['unit']) return undefined;
+  const number = Number(groups['number']);
+  return groups['unit'].toLowerCase() === 'ms' ? number : number * 1000;
+}

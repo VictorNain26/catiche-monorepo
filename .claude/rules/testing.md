@@ -16,6 +16,7 @@ demandent le Postgres de `docker compose` (`DATABASE_URL`).
 | Serveur | Bun, Postgres | `cd apps/server && bun test` | à côté du code, `<fichier>.test.ts` |
 | Web | Bun | `cd apps/web && bun run test` | `apps/web/src/**/<fichier>.test.ts` |
 | Tokens | Bun | `bun run test` | `packages/tokens/contrast.test.mjs` |
+| Landing | Bun | `cd apps/landing && bun run test` | `apps/landing/src/**/<fichier>.test.ts` |
 
 - **Serveur** : un test exerce le vrai code sur une vraie base, jamais un module remplacé.
   `testDatabase()` (`apps/server/src/testing/database.ts`) donne au fichier sa base, copiée

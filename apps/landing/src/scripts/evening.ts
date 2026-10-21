@@ -2,6 +2,8 @@
 // while the element carries `data-armed`, which the script sets itself and takes off to play: if the script does not
 // run, nothing waits for it. Durations and curve come from the tokens, through the computed style.
 
+import { orderTiming } from './timing';
+
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 // Where the evening's screens become sticky (evening.astro): the observed element changes with it.
 const wide = window.matchMedia('(width >= 64rem)');
@@ -72,7 +74,7 @@ class TonightOrder extends PlayOnce {
     const items = [...this.querySelectorAll<HTMLElement>('[data-spoken]')];
     const before = items.map((item) => item.getBoundingClientRect().top);
     super.play();
-    const timing = orderTiming();
+    const timing = orderTiming(getComputedStyle(document.documentElement));
     // A token that cannot be read leaves the order as it is, without a move.
     if (!timing) return;
     items.forEach((item, index) => {
@@ -80,23 +82,6 @@ class TonightOrder extends PlayOnce {
       item.animate([{ transform: `translateY(${String(shift)}px)` }, { transform: 'none' }], timing);
     });
   }
-}
-
-// The same timing as the transitions that straighten the items (hero.astro), from the tokens; none if one is missing.
-function orderTiming(): KeyframeAnimationOptions | undefined {
-  const style = getComputedStyle(document.documentElement);
-  const duration = milliseconds(style.getPropertyValue('--duration-slow'));
-  const delay = milliseconds(style.getPropertyValue('--duration-wait'));
-  const easing = style.getPropertyValue('--ease-standard').trim();
-  if (duration === undefined || delay === undefined || !easing) return undefined;
-  return { duration, delay, easing, fill: 'backwards' };
-}
-
-// A CSS duration (`200ms`, `0.2s`) in milliseconds; none if it is empty or not a number.
-function milliseconds(value: string): number | undefined {
-  const number = parseFloat(value);
-  if (!Number.isFinite(number)) return undefined;
-  return value.trim().endsWith('ms') ? number : number * 1000;
 }
 
 customElements.define('play-once', PlayOnce);
