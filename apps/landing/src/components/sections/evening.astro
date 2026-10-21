@@ -118,19 +118,32 @@ const CHANGED = [english, maths, history];
                   )}
                   {index === 1 && (
                     <tonight-order class="block space-y-3">
-                      {/* Tom's order first, then the pupil's: each item leaves the place it had in Tom's order. */}
+                      {/* The order Tom proposes, the pupil's choice, Tom's answer, then the list in the pupil's order: once
+                       * the step is shown, Tom answers, the list comes back in Tom's order, and each item leaves the place
+                       * it had there for its new one. */}
                       <ol class="flex flex-col gap-2">
-                        {CHANGED.map((item, position) => (
-                          <li data-before={HOMEWORK.indexOf(item) + 1} class="flex items-baseline gap-3 rounded-control px-3 py-2 ring-1 ring-border">
-                            <span class="tonight-after font-heading font-extrabold tabular-nums">{position + 1}</span>
+                        {HOMEWORK.map((item, position) => (
+                          <li class="flex items-baseline gap-3 rounded-control px-3 py-2 ring-1 ring-border">
+                            <span class="font-heading font-extrabold tabular-nums">{position + 1}</span>
                             <span class="font-bold">{item.subject}</span>
                           </li>
                         ))}
                       </ol>
                       <PupilSays>Je préfère commencer par l’anglais, c’est rapide.</PupilSays>
-                      <div class="tonight-after">
+                      <div class="reply">
                         <TomSays>L’anglais passe en premier, puis les maths, puis l’histoire. Qu’est-ce que tu as à faire en anglais&nbsp;?</TomSays>
                       </div>
+                      <ol class="reordered flex flex-col gap-2">
+                        {CHANGED.map((item, position) => (
+                          <li
+                            data-before={HOMEWORK.indexOf(item) + 1}
+                            class="flex items-baseline gap-3 rounded-control bg-accent px-3 py-2 text-accent-foreground ring-1 ring-border"
+                          >
+                            <span class="tonight-after font-heading font-extrabold tabular-nums">{position + 1}</span>
+                            <span class="font-bold">{item.subject}</span>
+                          </li>
+                        ))}
+                      </ol>
                     </tonight-order>
                   )}
                   {index === 2 && (
@@ -197,9 +210,25 @@ const CHANGED = [english, maths, history];
 </section>
 
 <style>
-  /* The list falls into the pupil's order once its step is shown. */
+  /* At 17:35, once the step is shown, one after the other: Tom answers, the list comes back in Tom's order, then falls
+   * into the pupil's (`tonight-order`, src/styles/global.css). Waiting while the script holds them, they are in place
+   * without it. */
   tonight-order {
-    --order-delay: var(--duration-slow);
+    --order-delay: calc(var(--duration-slow) * 3);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    tonight-order[data-armed] :is(.reply, .reordered) {
+      opacity: 0;
+    }
+
+    tonight-order[data-played] .reply {
+      transition: opacity var(--duration-slow) var(--ease-standard) var(--duration-slow);
+    }
+
+    tonight-order[data-played] .reordered {
+      transition: opacity var(--duration-slow) var(--ease-standard) calc(var(--duration-slow) * 2);
+    }
   }
 
   /* The line that strikes the step done, within the words, in a quiet ink. */
@@ -261,7 +290,7 @@ const CHANGED = [english, maths, history];
 
       [data-step] {
         grid-area: 1 / 1;
-        align-self: center;
+        align-self: start;
         margin: 0;
         opacity: 0;
         translate: 0 calc(var(--motion-distance) / 2);
