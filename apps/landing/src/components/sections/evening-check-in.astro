@@ -1,54 +1,60 @@
 ---
 import CheckIn from '@/components/molecules/check-in.astro';
-import Screen from '@/components/molecules/screen.astro';
 import { CHECK_IN, EVENING, HOURS } from './evening-data';
 
 // The evening check-in of docs/produit.md ("Le point du soir"), not built yet: told in the present under the line that
 // says so (docs/charte.md, "Les mots"); how it fits each family is a question of the FAQ. The adult sees that it is done,
-// never the conversations (docs/tuteur.md, § 8). The pupil's own code has six digits (STUDENT_CODE_LENGTH,
-// apps/server/src/domain/student-code.ts), without an e-mail address.
+// never the conversations (docs/tuteur.md, § 8); the pupil enters with a code of his own
+// (apps/server/src/platform/auth/student-sign-in.ts). The adult's side of the evening: the brand's deep plane, and the
+// adult's phone rather than the pupil's screen.
 ---
 
-<section id="point-du-soir" class="scroll-mt-20 bg-secondary py-12 md:py-16 lg:py-32">
-  <div class="container grid max-w-6xl items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:gap-24">
+<section id="point-du-soir" class="scroll-mt-20 bg-panel py-14 text-panel-foreground md:py-20 lg:py-28">
+  <div class="container grid max-w-5xl items-center gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,18rem)] lg:gap-20">
     <div>
-      <p class="font-bold text-primary">En préparation aussi&nbsp;: le point du soir.</p>
-      <h2 class="mt-3 text-3xl text-balance text-foreground sm:text-4xl">Vous savez ce qui est fait, sans surveiller.</h2>
-      <p class="mt-5 max-w-xl text-lg text-muted-foreground md:mt-6 md:text-xl">
-        Votre collégien montre ce qu&apos;il a fait à l&apos;adulte de la maison, qui répond «&nbsp;Vu&nbsp;», avec un mot d&apos;encouragement
-        s&apos;il le veut.
+      <p class="text-panel-foreground">En préparation aussi&nbsp;: le point du soir.</p>
+      <h2 class="mt-3 text-3xl text-balance sm:text-4xl">Vous savez ce qui est fait, sans surveiller.</h2>
+      <p class="mt-5 max-w-xl text-lg md:text-xl">
+        Votre collégien vous montre ce qu&apos;il a fait. Vous répondez «&nbsp;Vu&nbsp;», avec un mot d&apos;encouragement si vous voulez.
       </p>
-      <p class="mt-4 max-w-xl text-lg text-muted-foreground md:text-xl">
-        Ses échanges avec Tom restent à lui&nbsp;: il entre avec un code de six chiffres qu&apos;il choisit, sans adresse e-mail.
-      </p>
+      <p class="mt-4 max-w-xl text-lg md:text-xl">Ses échanges avec Tom restent à lui&nbsp;: il entre avec son propre code.</p>
     </div>
 
-    <figure>
-      <play-once class="block">
-        {/* On the secondary plane, the dark card would melt into it: there, it takes the background. */}
-        <Screen time={HOURS.ended} title={EVENING} class="dark:bg-background">
-          <CheckIn {...CHECK_IN} />
-          <p class="seen mt-4 border-t pt-3">
-            <span class="text-sm font-bold text-muted-foreground">Votre réponse</span>
-            <span class="mt-1 block font-heading text-2xl font-extrabold text-primary">Vu</span>
+    {/* The adult's phone, drawn in CSS: its frame, a speaker slot, and the evening's summary with the « Vu » that lands
+     * once, like a stamp, when it comes into view (src/scripts/evening.ts). */}
+    <figure class="mx-auto w-full max-w-72">
+      <play-once class="block rounded-3xl bg-overlay p-2.5 shadow-control-hover">
+        <div aria-hidden="true" class="rounded-2xl bg-card px-5 pt-3 pb-6 text-card-foreground">
+          <span class="mx-auto block h-1.5 w-14 rounded-full bg-border"></span>
+          <p class="mt-4 mb-4 flex items-baseline justify-between gap-4 border-b pb-3 text-sm">
+            <span class="font-heading font-extrabold">{EVENING}</span>
+            <span class="text-muted-foreground tabular-nums">{HOURS.ended}</span>
           </p>
-        </Screen>
+          <CheckIn {...CHECK_IN} />
+          <p class="mt-5 border-t pt-4">
+            <span class="text-sm font-bold text-muted-foreground">Votre réponse</span>
+            <span class="seen mt-1 block w-fit font-heading text-5xl font-extrabold text-primary">Vu</span>
+          </p>
+        </div>
       </play-once>
-      <figcaption class="sr-only">Le point du soir&nbsp;: ce qui est fait, ce qui reste, et votre «&nbsp;Vu&nbsp;».</figcaption>
+      <figcaption class="sr-only">Le point du soir sur votre téléphone&nbsp;: ce qui est fait, ce qui reste, et votre «&nbsp;Vu&nbsp;».</figcaption>
     </figure>
   </div>
 </section>
 
 <style>
-  /* Your « Vu » comes last, without a stamp, once the script that holds it plays it (src/scripts/evening.ts); set at
-   * once while it waits, only its arrival is a transition. */
+  /* Your « Vu » lands last, once, like a stamp, when the script that holds it plays it (src/scripts/evening.ts); set at
+   * once while it waits, only its landing is a transition. */
   @media (prefers-reduced-motion: no-preference) {
     play-once:not([data-armed]) .seen {
-      transition: opacity var(--duration-base) var(--ease-standard) var(--duration-slow);
+      transition:
+        opacity var(--duration-fast) var(--ease-standard) var(--duration-slow),
+        scale var(--duration-base) var(--ease-standard) var(--duration-slow);
     }
 
     play-once[data-armed] .seen {
       opacity: 0;
+      scale: 1.6;
     }
   }
 </style>
