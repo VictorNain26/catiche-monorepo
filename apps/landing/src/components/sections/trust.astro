@@ -1,67 +1,50 @@
 ---
-import Exercise from '@/components/molecules/exercise.astro';
-import PupilSays from '@/components/molecules/pupil-says.astro';
-import Screen from '@/components/molecules/screen.astro';
-import TomSays from '@/components/molecules/tom-says.astro';
 import { BRAND_NAME } from '@/lib/brand';
-import { HOURS, screenTime } from './evening-data';
 
-// What makes Catiche worth trusting, in everyday words, each fact with its line in the docs, the most important first:
-// - Tom does not give the answer: docs/tuteur.md, § 3 (asked for the answer, he asks the question that moves on; the
-//   help rises with real attempts: a hint, a step, a similar example solved) and § 4 (the check before the pupil; the
-//   fixed distress answer, written by a person, with the 3114 and a trusted adult);
-// - the commitments: docs/produit.md, docs/architecture.md ("Hébergement", Clever Cloud in France), docs/tuteur.md (§ 2,
-//   Mistral's EU endpoint), and the pupil's own six-digit code (§ 8).
+// Why a family can trust Catiche, in everyday words: the commitments of docs/produit.md, "Nos engagements", the pupil's
+// own space first (docs/tuteur.md, § 8), then the hosting (docs/architecture.md, "Hébergement"; docs/tuteur.md, § 2) and
+// the data never sold. The check of Tom's messages is said in the evening, at 18 h (sections/evening.astro); the fixed
+// distress answer, written by a person, with the 3114 and a trusted adult, is docs/tuteur.md, § 4.
 const COMMITMENTS = [
-  { key: `${BRAND_NAME} est hébergé en France.`, rest: 'Les réponses de Tom sont calculées en Europe, par Mistral AI.' },
-  { key: 'Aucune donnée n’est revendue.', rest: '' },
   {
-    key: 'L’espace de votre enfant est à lui.',
-    rest: 'Il l’ouvre avec son propre code à six chiffres, sans adresse e-mail. Vous voyez ce qu’il a fait\xa0; ses conversations avec Tom restent à lui.',
+    key: 'Son espace est à lui',
+    text: 'Votre enfant l’ouvre avec son propre code, sans adresse e-mail. Vous voyez ce qu’il a fait, jamais ses conversations avec Tom.',
+  },
+  {
+    key: 'Hébergé en France',
+    text: `${BRAND_NAME} est hébergé à Paris, chez Clever Cloud. Mistral AI calcule les réponses de Tom en Europe.`,
+  },
+  {
+    key: 'Rien n’est revendu',
+    text: 'Nous ne revendons aucune donnée, ni la vôtre ni celle de votre enfant.',
   },
 ];
 ---
 
 <section id="confiance" class="scroll-mt-20 bg-background py-28 md:py-32 lg:py-40">
   <div class="container max-w-5xl">
-    {/* The title and its sentence, then the screen of the exercise beside the text that says how the help rises. */}
     <play-once class="block">
       <h2 data-reveal="rise" class="section-title max-w-3xl text-foreground">
-        Votre enfant trouve la réponse <mark class="highlighter whitespace-nowrap">lui-même</mark>
+        Votre enfant travaille dans un espace <mark class="highlighter">protégé</mark>
       </h2>
-      <p data-reveal="rise" data-order="2" class="mt-5 max-w-3xl text-xl font-bold text-foreground lg:text-2xl">
-        Quand votre enfant demande la réponse, Tom pose la question qui fait avancer.
-      </p>
     </play-once>
 
-    <play-once class="mt-10 grid items-start gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] md:gap-10 lg:mt-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-16">
-      <div class="max-w-xl space-y-4 text-lg text-foreground">
-        <p>
-          Quand votre enfant essaie et se trompe, Tom va plus loin&nbsp;: un indice, puis une étape, puis un exemple semblable résolu. Redemander la
-          réponse sans essayer ne change pas l’aide.
-        </p>
-        <p>{BRAND_NAME} vérifie chaque message de Tom avant de l’afficher. Un message qui contient la réponse de l’exercice est remplacé.</p>
-      </div>
-      <div data-reveal="pop">
-        <Screen time={screenTime(HOURS.asked)}>
-          <div class="space-y-3">
-            <Exercise title="Maths · Exercice 4" statement={'Un pull coûte 40\xa0€. Il est soldé de 25\xa0%. Quel est son nouveau prix\xa0?'} />
-            <PupilSays>Donne-moi juste la réponse, s’il te plaît.</PupilSays>
-            <TomSays>«&nbsp;Soldé de 25&nbsp;%&nbsp;», qu’est-ce que ça change pour le prix&nbsp;?</TomSays>
-          </div>
-        </Screen>
-        <p class="sr-only">
-          Exemple d’écran, mardi à 18&nbsp;h&nbsp;20. Votre enfant demande la réponse de l’exercice 4 de maths. Tom lui demande ce que «&nbsp;soldé de
-          25&nbsp;%&nbsp;» change pour le prix.
-        </p>
-      </div>
+    {/* Each commitment by its key words, then its sentence: a list read at a glance, not three cards. */}
+    <play-once class="mt-10 block max-w-3xl lg:mt-14">
+      <ul data-reveal="rise" aria-label="Nos engagements" class="space-y-6 lg:space-y-8">
+        {COMMITMENTS.map(({ key, text }) => (
+          <li>
+            <p class="font-heading text-xl font-extrabold text-foreground lg:text-2xl">{key}</p>
+            <p class="mt-1 text-lg text-foreground">{text}</p>
+          </li>
+        ))}
+      </ul>
     </play-once>
 
-    {/* The 3114 in a plain band of its own, bordered: the section's strong moment, it fades in without moving. The number
-     * calls from a phone; its target is at least 44 px each way, its padding taken back by margins so that neither the
-     * words nor the line move. */}
-    <play-once class="mt-14 block max-w-3xl lg:mt-20">
-      <p data-reveal="fade" class="rounded-2xl border-2 border-primary bg-tint p-5 text-lg text-foreground lg:p-6 lg:text-xl">
+    {/* The 3114 in one plain line. The number calls from a phone; its target is at least 44 px each way, its padding
+     * taken back by margins so that neither the words nor the line move. */}
+    <play-once class="mt-12 block max-w-3xl lg:mt-16">
+      <p data-reveal="fade" class="text-lg text-foreground">
         <strong class="font-bold">3114.</strong> Si Tom repère dans un message que votre enfant veut se faire du mal, la séance s’arrête. Un message
         écrit à l’avance par une personne lui donne le{' '}
         <a href="tel:3114" class="-mx-1.5 -my-2.5 inline-block px-1.5 py-2.5 text-primary underline underline-offset-4">
@@ -69,18 +52,6 @@ const COMMITMENTS = [
         </a>
         , numéro d’écoute gratuit joignable jour et nuit, et l’invite à parler à un adulte de confiance.
       </p>
-    </play-once>
-
-    <play-once class="mt-14 block max-w-3xl lg:mt-20">
-      {/* The key words in the ink of the text: in the brand's water, they would read as links. */}
-      <ul data-reveal="rise" aria-label="Les engagements" class="space-y-4 text-lg text-foreground">
-        {COMMITMENTS.map(({ key, rest }) => (
-          <li>
-            <strong class="font-bold">{key}</strong>
-            {rest && ` ${rest}`}
-          </li>
-        ))}
-      </ul>
     </play-once>
   </div>
 </section>

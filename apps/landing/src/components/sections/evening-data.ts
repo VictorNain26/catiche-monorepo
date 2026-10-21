@@ -1,9 +1,9 @@
 // The example evening of the home page, in one place: one Tuesday evening, from the top of the page to the moments of
-// the evening, the help that answers with a question and the evening check-in, with the same homework at the same
-// hours (docs/produit.md, "Ce que fait Catiche"). Maths are due tomorrow, Wednesday; the history test is on Thursday;
-// English is due on Friday. At 17:35 the pupil chooses English first; then maths, exercise 3 at 18:00 and exercise 4
-// at 18:20; then history; the point at 18:50, and the adult's answer to the evening check-in at 19:10.
-export const HOURS = { said: '17:30', ordered: '17:35', started: '18:00', asked: '18:20', ended: '18:50', answered: '19:10' } as const;
+// the evening and the evening check-in, with the same homework at the same hours (docs/produit.md, "Ce que fait
+// Catiche"). Maths are due tomorrow, Wednesday; the history test is on Thursday; English is due on Friday. At 17:35 the
+// pupil chooses English first; then maths, exercises 3 and 4 from 18:00; then history; the point at 18:50, and the
+// adult's answer to the evening check-in at 19:10.
+export const HOURS = { said: '17:30', ordered: '17:35', started: '18:00', ended: '18:50', answered: '19:10' } as const;
 
 /** The top line of a screen, as a phone's clock writes it: « Mardi · 17:35 ». */
 export function screenTime(time: string): string {
