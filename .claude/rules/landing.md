@@ -38,7 +38,10 @@ Clever Cloud (`apps/landing/Caddyfile`).
   la FAQ). Les classes partagées avec le web viennent de `@repo/ui/classes`.
 - Le mouvement anime les illustrations (les écrans, Tom, le surligneur). Un texte peut apparaître
   au défilement, une fois, si son état d'entrée n'est posé que par le script et hors mouvement
-  réduit ; sans script, il est visible (`data-reveal`, `apps/landing/src/styles/global.css`). CSS
+  réduit ; sans script, il est visible (`data-reveal`, `apps/landing/src/styles/global.css`). Une
+  scène peut rester figée au défilement, une étape remplaçant l'autre, aux mêmes conditions : son
+  état figé n'est posé que par le script, hors mouvement réduit et si chaque étape tient dans
+  l'écran ; sinon ses étapes s'empilent (`evening-scenes`, `apps/landing/src/scripts/evening.ts`). CSS
   d'abord, le lien au défilement sous
   `@supports (animation-timeline: view())` ; ce que le CSS ne sait pas faire passe par les API
   natives (Web Animations, `IntersectionObserver`) dans `apps/landing/src/scripts/evening.ts`,

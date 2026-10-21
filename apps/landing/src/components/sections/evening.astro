@@ -11,7 +11,7 @@ import { BAG, CHECK_IN, HOMEWORK, HOURS, screenTime } from './evening-data';
 // The evening of docs/produit.md, "Ce que fait Catiche", and its gestures in docs/methode.md, "Les gestes d'une soirée":
 // the product presented in the present, as docs/produit.md describes it (docs/charte.md, "Les mots"); the pupil acts in
 // each title. A question or a hint is the bottom of Tom's ladder (docs/tuteur.md, § 3), and the hint comes after an
-// attempt. One row per moment: its hour, its title, its sentence and the proof of its gesture (docs/methode.md, "Ce qui
+// attempt. One step per moment: its hour, its title, its sentence and the proof of its gesture (docs/methode.md, "Ce qui
 // vaut pour tous les élèves", sources [11] and [13]) on the left; its screen facing them on the right, and what the
 // screen shows in words for a screen reader; on a phone, one under the other. Two screens carry a gesture: at 17:35 the
 // list falls into the pupil's order (`tonight-order`), at 18:00 a line strikes the step done.
@@ -77,119 +77,129 @@ const CHANGED = [english, maths, history];
 ---
 
 <section id="soiree" class="scroll-mt-20 bg-background py-12 md:py-16 lg:py-24">
-  <div class="container max-w-5xl">
-    <play-once class="block">
-      <h2 data-reveal="rise" class="section-title max-w-3xl text-foreground">
-        Votre enfant avance avec Tom, du premier devoir au cartable
-      </h2>
-      <p data-reveal="rise" data-order="2" class="mt-4 text-lg text-foreground md:text-xl">
-        Voici un mardi soir, moment par moment.
-      </p>
-    </play-once>
+  <play-once class="container block max-w-5xl">
+    <h2 data-reveal="rise" class="section-title max-w-3xl text-foreground">
+      Votre enfant avance avec Tom, du premier devoir au cartable
+    </h2>
+    <p data-reveal="rise" data-order="2" class="mt-4 text-lg text-foreground md:text-xl">
+      Voici un mardi soir, moment par moment.
+    </p>
+  </play-once>
 
-    <ol role="list" class="mt-8 space-y-12 lg:mt-14 lg:space-y-16">
-      {MOMENTS.map(({ time, title, body, described, proof }, index) => (
-        <li role="listitem">
-          {/* In two columns, the screen spans both rows, and the proof stays right under the moment's sentence. The text
-           * stays still; only the screen arrives, then its proof. */}
-          <play-once class="grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] md:grid-rows-[auto_1fr] md:gap-x-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-x-16">
-            <div>
-              {/* The hour stays under the section's title at every width. */}
-              <h3 class="text-xl text-foreground sm:text-2xl">
-                <time datetime={time} class="block font-heading text-3xl font-extrabold text-primary tabular-nums lg:text-4xl">
-                  {spokenHour(time)}
-                </time>
-                <span class="mt-1 block">{title}</span>
-              </h3>
-              <p class="mt-2 max-w-md text-lg text-foreground">{body}</p>
-              <p class="sr-only">{described}</p>
-            </div>
-            <div data-reveal="pop" class="md:row-span-2">
-              <Screen time={screenTime(time)}>
-                {index === 0 && (
-                  <div class="space-y-3">
-                    <PupilSays>J’ai de l’histoire, de l’anglais, et les exercices 3 et 4 de maths.</PupilSays>
-                    <TomSays>Chaque devoir est pour quand&nbsp;?</TomSays>
-                  </div>
-                )}
-                {index === 1 && (
-                  <tonight-order class="block space-y-3">
-                    {/* Tom's order first, then the pupil's: each item leaves the place it had in Tom's order. */}
-                    <ol class="flex flex-col gap-2">
-                      {CHANGED.map((item, position) => (
-                        <li data-before={HOMEWORK.indexOf(item) + 1} class="flex items-baseline gap-3 rounded-control px-3 py-2 ring-1 ring-border">
-                          <span class="tonight-after font-heading font-extrabold tabular-nums">{position + 1}</span>
-                          <span class="font-bold">{item.subject}</span>
-                        </li>
-                      ))}
-                    </ol>
-                    <PupilSays>Je préfère commencer par l’anglais, c’est rapide.</PupilSays>
-                    <div class="tonight-after">
-                      <TomSays>L’anglais passe en premier, puis les maths, puis l’histoire. Qu’est-ce que tu as à faire en anglais&nbsp;?</TomSays>
-                    </div>
-                  </tonight-order>
-                )}
-                {index === 2 && (
-                  <div class="space-y-3">
-                    <Exercise title="Maths · Exercice 3" statement={'Calcule 3/4\xa0+\xa05/6.'} />
-                    <ol class="space-y-1.5 text-sm">
-                      {STEPS.map(({ step, state }, position) => (
-                        <li
-                          class:list={[
-                            'flex items-baseline gap-2 rounded-control px-3 py-1.5 ring-1 ring-border',
-                            state === 'en cours' && 'bg-accent text-accent-foreground',
-                          ]}
-                        >
-                          <span class="shrink-0 font-bold">Étape {position + 1}</span>
-                          <span class:list={['relative', state === 'fait' && 'text-muted-foreground']}>
-                            {step}
-                            {state === 'fait' && (
-                              <svg class="strike" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true">
-                                <path pathLength="1" d="M1 4 C 25 2, 60 5, 99 2" />
-                              </svg>
-                            )}
-                          </span>
-                          {state && (
-                            <span class:list={['ml-auto shrink-0', state === 'en cours' ? 'text-accent-muted-foreground' : 'text-muted-foreground']}>
-                              {state}
-                            </span>
-                          )}
-                        </li>
-                      ))}
-                    </ol>
-                    <PupilSays>J’ai essayé 10, mais 4 ne va pas dans 10.</PupilSays>
-                    <TomSays>Il faut un nombre qui est à la fois dans la table de 4 et dans celle de 6. Lequel vient en premier&nbsp;?</TomSays>
-                    <PupilSays>12.</PupilSays>
-                    <TomSays>12 convient. Étape 2&nbsp;: 3/4, ça fait combien de douzièmes&nbsp;?</TomSays>
-                  </div>
-                )}
-                {index === 3 && (
-                  <div class="space-y-4">
-                    <TomSays>Voici le point de ce soir.</TomSays>
-                    <CheckIn {...CHECK_IN} bag={BAG} />
-                    <TomSays>Le cahier de maths est dans ton cartable&nbsp;?</TomSays>
-                    {/* The screen's button, drawn: the screen only illustrates. */}
-                    <p class="rounded-full px-4 py-2 text-center font-bold text-primary ring-2 ring-input">Montrer à un adulte de la maison</p>
-                  </div>
-                )}
-              </Screen>
-            </div>
-            {proof && (
-              <div data-reveal="fade" data-order="2">
-                <Proof {...proof} class="text-muted-foreground" />
+  {/* The moments, held while they are scrolled (src/scripts/evening.ts): the script makes the track several windows
+   * high and holds the scene under the header, where each step takes the place of the one before, with its rank among
+   * the four. Without it, if it fails, or under reduced motion, the four steps follow one another, all shown; the
+   * hidden steps of the held scene stay in the page, in their order, for a screen reader and the keyboard. */}
+  <evening-scenes class="mt-8 block lg:mt-14">
+    <div class="scene container max-w-5xl">
+      <ol role="list" class="steps space-y-12 lg:space-y-16">
+        {MOMENTS.map(({ time, title, body, described, proof }, index) => (
+          <li role="listitem" data-step class="scroll-mt-20">
+            {/* In two columns, the screen spans both rows, and the proof stays right under the moment's sentence. */}
+            <div class="grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] md:grid-rows-[auto_1fr] md:gap-x-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-x-16">
+              <div>
+                {/* The hour stays under the section's title at every width. */}
+                <h3 class="text-xl text-foreground sm:text-2xl">
+                  <time datetime={time} class="block font-heading text-3xl font-extrabold text-primary tabular-nums lg:text-4xl">
+                    {spokenHour(time)}
+                  </time>
+                  <span class="mt-1 block">{title}</span>
+                </h3>
+                <p class="mt-2 max-w-md text-lg text-foreground">{body}</p>
+                <p class="sr-only">{described}</p>
               </div>
-            )}
-          </play-once>
-        </li>
-      ))}
-    </ol>
-  </div>
+              <div data-screen class="md:row-span-2">
+                <Screen time={screenTime(time)}>
+                  {index === 0 && (
+                    <div class="space-y-3">
+                      <PupilSays>J’ai de l’histoire, de l’anglais, et les exercices 3 et 4 de maths.</PupilSays>
+                      <TomSays>Chaque devoir est pour quand&nbsp;?</TomSays>
+                    </div>
+                  )}
+                  {index === 1 && (
+                    <tonight-order class="block space-y-3">
+                      {/* Tom's order first, then the pupil's: each item leaves the place it had in Tom's order. */}
+                      <ol class="flex flex-col gap-2">
+                        {CHANGED.map((item, position) => (
+                          <li data-before={HOMEWORK.indexOf(item) + 1} class="flex items-baseline gap-3 rounded-control px-3 py-2 ring-1 ring-border">
+                            <span class="tonight-after font-heading font-extrabold tabular-nums">{position + 1}</span>
+                            <span class="font-bold">{item.subject}</span>
+                          </li>
+                        ))}
+                      </ol>
+                      <PupilSays>Je préfère commencer par l’anglais, c’est rapide.</PupilSays>
+                      <div class="tonight-after">
+                        <TomSays>L’anglais passe en premier, puis les maths, puis l’histoire. Qu’est-ce que tu as à faire en anglais&nbsp;?</TomSays>
+                      </div>
+                    </tonight-order>
+                  )}
+                  {index === 2 && (
+                    <play-once class="block space-y-3">
+                      <Exercise title="Maths · Exercice 3" statement={'Calcule 3/4\xa0+\xa05/6.'} />
+                      <ol class="space-y-1.5 text-sm">
+                        {STEPS.map(({ step, state }, position) => (
+                          <li
+                            class:list={[
+                              'flex items-baseline gap-2 rounded-control px-3 py-1.5 ring-1 ring-border',
+                              state === 'en cours' && 'bg-accent text-accent-foreground',
+                            ]}
+                          >
+                            <span class="shrink-0 font-bold">Étape {position + 1}</span>
+                            <span class:list={['relative', state === 'fait' && 'text-muted-foreground']}>
+                              {step}
+                              {state === 'fait' && (
+                                <svg class="strike" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true">
+                                  <path pathLength="1" d="M1 4 C 25 2, 60 5, 99 2" />
+                                </svg>
+                              )}
+                            </span>
+                            {state && (
+                              <span
+                                class:list={['ml-auto shrink-0', state === 'en cours' ? 'text-accent-muted-foreground' : 'text-muted-foreground']}
+                              >
+                                {state}
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ol>
+                      <PupilSays>J’ai essayé 10, mais 4 ne va pas dans 10.</PupilSays>
+                      <TomSays>Il faut un nombre qui est à la fois dans la table de 4 et dans celle de 6. Lequel vient en premier&nbsp;?</TomSays>
+                      <PupilSays>12.</PupilSays>
+                      <TomSays>12 convient. Étape 2&nbsp;: 3/4, ça fait combien de douzièmes&nbsp;?</TomSays>
+                    </play-once>
+                  )}
+                  {index === 3 && (
+                    <div class="space-y-4">
+                      <TomSays>Voici le point de ce soir.</TomSays>
+                      <CheckIn {...CHECK_IN} bag={BAG} />
+                      <TomSays>Le cahier de maths est dans ton cartable&nbsp;?</TomSays>
+                      {/* The screen's button, drawn: the screen only illustrates. */}
+                      <p class="rounded-full px-4 py-2 text-center font-bold text-primary ring-2 ring-input">Montrer à un adulte de la maison</p>
+                    </div>
+                  )}
+                </Screen>
+              </div>
+              {proof && <Proof {...proof} class="text-muted-foreground" />}
+            </div>
+          </li>
+        ))}
+      </ol>
+      {/* The rank of the step shown, among the four: only while the scene is held, for the eye; the steps themselves
+       * are what a screen reader reads. */}
+      <ol aria-hidden="true" class="ranks">
+        {MOMENTS.map(() => (
+          <li class="h-1 w-8 rounded-full bg-input"></li>
+        ))}
+      </ol>
+    </div>
+  </evening-scenes>
 </section>
 
 <style>
-  /* The list falls into the pupil's order once its screen has arrived. */
+  /* The list falls into the pupil's order once its step is shown. */
   tonight-order {
-    --order-delay: var(--duration-reveal);
+    --order-delay: var(--duration-slow);
   }
 
   /* The line that strikes the step done, within the words, in a quiet ink. */
@@ -207,17 +217,79 @@ const CHANGED = [english, maths, history];
     stroke-dasharray: 1;
   }
 
-  /* It is drawn once, when its screen has arrived (docs/charte.md, "Mouvement": the line that strikes the step done);
+  /* It is drawn once, when its step is shown (docs/charte.md, "Mouvement": the line that strikes the step done);
    * without a played screen, it is already drawn. */
   @media (prefers-reduced-motion: no-preference) {
     [data-played] .strike {
-      animation: strike-through var(--duration-slow) var(--ease-standard) var(--duration-reveal) both;
+      animation: strike-through var(--duration-slow) var(--ease-standard) var(--duration-slow) both;
     }
   }
 
   @keyframes strike-through {
     from {
       stroke-dashoffset: 1;
+    }
+  }
+
+  .ranks {
+    display: none;
+  }
+
+  /* The held scene, only while the script holds it (`data-held`) and only without reduced motion: the track is about
+   * four windows high, the scene stays under the header (h-16), and its steps lie on one another; the step shown fades
+   * in and rises slightly, the one before goes up, the next waits below. A screen that does not fit under its text
+   * shrinks (`zoom`, set by the script). */
+  @media (prefers-reduced-motion: no-preference) {
+    evening-scenes[data-held] {
+      height: calc(100svh * 4);
+
+      .scene {
+        position: sticky;
+        top: calc(var(--spacing) * 16);
+        display: flex;
+        flex-direction: column;
+        gap: calc(var(--spacing) * 4);
+        height: calc(100svh - var(--spacing) * 16);
+        padding-block: calc(var(--spacing) * 4);
+      }
+
+      .steps {
+        display: grid;
+        flex: 1;
+        min-height: 0;
+      }
+
+      [data-step] {
+        grid-area: 1 / 1;
+        align-self: center;
+        margin: 0;
+        opacity: 0;
+        translate: 0 calc(var(--motion-distance) / 2);
+        pointer-events: none;
+        transition:
+          opacity var(--duration-slow) var(--ease-standard),
+          translate var(--duration-slow) var(--ease-standard);
+      }
+
+      [data-step][data-past] {
+        translate: 0 calc(var(--motion-distance) / -2);
+      }
+
+      [data-step][data-shown] {
+        opacity: 1;
+        translate: 0 0;
+        pointer-events: auto;
+      }
+
+      .ranks {
+        display: flex;
+        justify-content: center;
+        gap: calc(var(--spacing) * 2);
+      }
+
+      .ranks [data-shown] {
+        background-color: var(--color-primary);
+      }
     }
   }
 </style>

@@ -99,7 +99,9 @@ aucune information portée par le mouvement seul ; rien ne bouge sous le mouveme
 landing, le mouvement est un geste de la soirée : le jonc qui se pose derrière les mots, le trait
 qui raye l'étape faite, les devoirs qui se rangent dans l'ordre. Un texte peut apparaître au
 défilement, une fois, si son état d'entrée n'est posé que par le script et hors mouvement réduit ;
-sans script, il reste visible (`.claude/rules/landing.md`).
+sans script, il reste visible. La soirée reste figée pendant qu'on la défile, chaque étape
+remplaçant la précédente, aux mêmes conditions ; sans script ou sous mouvement réduit, ses étapes
+s'empilent (`.claude/rules/landing.md`).
 
 ## Les mots
 
