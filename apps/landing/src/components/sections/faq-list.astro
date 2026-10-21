@@ -8,11 +8,11 @@ import { FAQS } from './faq-data';
  * in the brand's water, turns into a « × », the list's only move. Each question is the plain text of its summary,
  * which names it in every browser (a heading inside is not exposed by WebKit), at the weight of running text, under
  * the section's title; the first, on price and opening, is open. A question lights up under the pointer, and its
- * focus ring follows its corners. The list reaches into its padding, so that the questions' words fall on the column
- * of the title.
+ * focus ring follows its corners. From sm, the list reaches into its padding, so that the questions' words fall on the
+ * column of the title; on a phone, an open answer keeps off the screen's edges.
  * Inside a `play-once`, they rise in a quick cascade, the fourth and the next ones together; the rise is on a wrapper,
  * so that it leaves the ground's own transition alone. */}
-<div class="-mx-4 space-y-1">
+<div class="space-y-1 sm:-mx-4">
   {FAQS.map((faq, index) => (
     <div data-reveal="rise" data-order={Math.min(index + 1, 4)}>
       <details
