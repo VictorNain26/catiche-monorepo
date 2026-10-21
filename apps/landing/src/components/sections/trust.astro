@@ -13,43 +13,44 @@ const COMMITMENTS = [
 ];
 ---
 
-<section id="confiance" class="scroll-mt-20 bg-background py-16 md:py-24 lg:py-32">
+<section id="confiance" class="scroll-mt-20 bg-background py-28 md:py-32 lg:py-40">
   <div class="container max-w-5xl">
-    {/* The title rises, then the two protections, one after the other. */}
+    {/* Three moves only: the title rises, the band fades in, the commitments rise together. */}
     <play-once class="block">
       <h2 data-reveal="rise" class="section-title max-w-3xl text-foreground">
         Tom ne donne pas la réponse.
       </h2>
-      <div class="mt-6 max-w-3xl space-y-3 text-xl font-bold text-foreground lg:text-2xl">
-        <p data-reveal="rise" data-order="2">
-          Chaque message de Tom est vérifié avant d&apos;être affiché, et remplacé s&apos;il contient la réponse.
-        </p>
-        <p data-reveal="rise" data-order="3">
-          Tom aide un peu plus quand votre collégien essaie vraiment, jamais parce qu&apos;il réclame la réponse.
-        </p>
-      </div>
     </play-once>
+    <div class="mt-6 max-w-3xl space-y-3 text-xl font-bold text-foreground lg:text-2xl">
+      <p>Chaque message de Tom est vérifié avant d&apos;être affiché, et remplacé s&apos;il contient la réponse.</p>
+      <p>Tom aide un peu plus quand votre collégien essaie vraiment, jamais parce qu&apos;il réclame la réponse.</p>
+    </div>
 
-    {/* The 3114 in a plain band of its own, bordered: the section's strong moment, it fades in without moving. */}
-    <play-once class="mt-10 block lg:mt-14">
-      <p data-reveal="fade" class="rounded-2xl border-2 border-primary bg-tint p-5 text-foreground lg:p-6">
+    {/* The 3114 in a plain band of its own, bordered: the section's strong moment, it fades in without moving. The number
+     * calls from a phone; its target is a finger's height, without changing the line's. */}
+    <play-once class="mt-10 block max-w-3xl lg:mt-14">
+      <p data-reveal="fade" class="rounded-2xl border-2 border-primary bg-tint p-5 text-lg text-foreground lg:p-6 lg:text-xl">
         Si votre collégien dit ou écrit qu&apos;il veut se faire du mal, Tom s&apos;arrête. Un message écrit à l&apos;avance, sans intelligence
-        artificielle, lui donne le 3114, un numéro d&apos;écoute gratuit jour et nuit, et l&apos;invite à parler à un adulte de confiance.
+        artificielle, lui donne le{' '}
+        <a href="tel:3114" class="-my-2.5 inline-block py-2.5 text-primary underline underline-offset-4">
+          <strong class="font-bold">3114</strong>
+        </a>
+        , un numéro d&apos;écoute gratuit jour et nuit, et l&apos;invite à parler à un adulte de confiance.
       </p>
     </play-once>
 
-    {/* The commitments rise one after the other. */}
     <play-once class="mt-14 block max-w-3xl lg:mt-20">
-      <h3 data-reveal="rise" class="text-2xl text-foreground">
-        Nos engagements
-      </h3>
-      <ul class="mt-4 space-y-3 text-foreground">
-        {COMMITMENTS.map(({ key, rest }, index) => (
-          <li data-reveal="rise" data-order={index + 2}>
-            <strong class="font-bold text-primary">{key}</strong> — {rest}
-          </li>
-        ))}
-      </ul>
+      <div data-reveal="rise">
+        <h3 class="text-2xl text-foreground">Nos engagements</h3>
+        {/* The key words in the ink of the text: in the brand's water, they would read as links. */}
+        <ul class="mt-4 space-y-3 text-foreground">
+          {COMMITMENTS.map(({ key, rest }) => (
+            <li>
+              <strong class="font-bold">{key}</strong> — {rest}
+            </li>
+          ))}
+        </ul>
+      </div>
     </play-once>
   </div>
 </section>
