@@ -1,0 +1,13 @@
+---
+import { Mic } from '@lucide/astro';
+
+// What the pupil says aloud, on the right of the screen, facing Tom's messages (tom-says.astro): the evening is said
+// aloud (docs/produit.md, "Ce que fait Catiche").
+---
+
+<p class="ml-auto flex w-fit max-w-11/12 items-start gap-2 rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground">
+  <Mic class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+  <span>
+    <slot />
+  </span>
+</p>

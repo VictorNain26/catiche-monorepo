@@ -1,5 +1,6 @@
 ---
-import { Mic } from '@lucide/astro';
+import CheckIn from '@/components/molecules/check-in.astro';
+import PupilSays from '@/components/molecules/pupil-says.astro';
 import Screen from '@/components/molecules/screen.astro';
 import TomSays from '@/components/molecules/tom-says.astro';
 import { BRAND_NAME } from '@/lib/brand';
@@ -68,12 +69,9 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
             <Screen time={time} title={screen}>
               {index === 0 && (
                 <div class="space-y-3">
-                  <p class="ml-auto flex w-fit max-w-11/12 items-start gap-2 rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground">
-                    <Mic class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                    {SPOKEN}
-                  </p>
+                  <PupilSays>{SPOKEN}</PupilSays>
                   <TomSays>Le contrôle d&apos;histoire, c&apos;est pour quel jour&nbsp;?</TomSays>
-                  <p class="ml-auto w-fit rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground">Jeudi.</p>
+                  <PupilSays>Jeudi.</PupilSays>
                 </div>
               )}
               {index === 1 && (
@@ -122,12 +120,7 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
               )}
               {index === 3 && (
                 <div class="space-y-4">
-                  <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
-                    <dt class="text-sm font-bold text-muted-foreground">Fait</dt>
-                    <dd>{CHECK_IN.done}</dd>
-                    <dt class="text-sm font-bold text-muted-foreground">Reste</dt>
-                    <dd>{CHECK_IN.left}</dd>
-                  </dl>
+                  <CheckIn {...CHECK_IN} />
                   {/* The bag, drawn by its handle and its body. */}
                   <span class="mx-auto -mb-4 block h-4 w-16 rounded-t-control border-2 border-b-0 border-input"></span>
                   <div class="rounded-2xl border-2 border-input px-4 pt-3 pb-4">
