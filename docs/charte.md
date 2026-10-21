@@ -64,8 +64,6 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
 
 - Deux rayons : les cartes et les bulles, puis les boutons et les champs ; une ombre légère pour
   ce qui se pose sur le fond, rien de plus.
-- **L'arche**, l'entrée du gîte, est la signature : en grand derrière Tom, sur le haut du site et à
-  l'entrée de l'app ; jamais sur un élément qui se répète (une liste, une carte, un avatar).
 - Une liste pour des éléments semblables, une carte pour un bloc à part qui mène à un détail ; un
   seul bouton principal par écran.
 - Au téléphone, une colonne et des onglets en bas ; à l'ordinateur, la navigation sur le côté et

@@ -39,7 +39,8 @@ Clever Cloud (`apps/landing/Caddyfile`).
   qui apparaît au défilement : elles le masquaient. CSS d'abord, le lien au défilement sous
   `@supports (animation-timeline: view())` ; ce que le CSS ne sait pas faire passe par les API
   natives (Web Animations, `IntersectionObserver`) dans `apps/landing/src/scripts/evening.ts`,
-  sans bibliothèque. Une vidéo de Tom a son bouton Pause.
+  sans bibliothèque. Une vidéo de Tom se joue une fois et dure moins de 5 secondes ; une animation
+  plus longue ou en boucle exige un bouton Pause (WCAG 2.2.2).
 - Jamais un état d'entrée masqué hors de `@media (prefers-reduced-motion: no-preference)`, ni
   posé par le CSS quand c'est un script qui le lève : ce script le pose lui-même (`data-armed`,
   `apps/landing/src/scripts/evening.ts`), et rien n'attend un script qui ne vient pas. Seule une

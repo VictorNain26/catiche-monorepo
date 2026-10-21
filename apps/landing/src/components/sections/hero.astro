@@ -7,21 +7,20 @@ import { BRAND_NAME } from '@/lib/brand';
 // evening is what we are building ("À construire"), accounts open on invitation ("L'accès pendant la préparation").
 ---
 
-<section class="overflow-hidden pt-4 pb-12 md:pt-10 md:pb-16 lg:pt-16 lg:pb-28">
-  <div class="container grid max-w-6xl items-center gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] md:gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-16">
-    {/* Tom alone in his arch: small above the title on a phone, seen from the first screen; beside it from a tablet. */}
-    <TomIllustration arch class="w-32 sm:w-40 md:col-start-2 md:row-start-1 md:w-full md:max-w-none" />
+<section class="overflow-hidden pt-4 pb-12 md:pt-12 md:pb-16 lg:pt-16 lg:pb-24">
+  <div class="container grid max-w-6xl items-center gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] md:gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:gap-16">
+    {/* Tom on the page itself: small above the title on a phone, seen from the first screen; beside the text from a
+     * tablet, as tall as it. */}
+    <TomIllustration class="w-28 sm:w-36 md:col-start-2 md:row-start-1 md:w-full md:max-w-none" />
     <div class="md:col-start-1 md:row-start-1">
-      <h1 class="text-4xl text-balance text-foreground sm:text-5xl xl:text-6xl">
+      <h1 class="text-4xl text-balance text-foreground sm:text-5xl">
         {BRAND_NAME} accompagne votre collégien pendant ses devoirs, <mark class="highlighter">du début à la fin</mark>.
       </h1>
       <p class="mt-5 max-w-xl text-lg text-muted-foreground md:mt-6 md:text-xl">
         Nous construisons Tom, le tuteur de {BRAND_NAME}&nbsp;: une intelligence artificielle qui l&apos;aide chaque soir à s&apos;organiser, sans
         faire le travail à sa place.
       </p>
-      <RequestInvitation class="mt-6 md:mt-8">
-        <p class="text-sm text-muted-foreground">Ouverture sur invitation.</p>
-      </RequestInvitation>
+      <RequestInvitation status="Ouverture sur invitation" class="mt-6 md:mt-8" />
     </div>
   </div>
 </section>
