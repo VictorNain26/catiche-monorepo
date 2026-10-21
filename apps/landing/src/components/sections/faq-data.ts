@@ -16,7 +16,13 @@ export const FAQS: Faq[] = [
   },
   {
     question: 'Comment avoir un compte, et combien ça coûte ?',
-    answer: `Pour l'instant, les comptes s'ouvrent sur invitation : écrivez-nous à ${CONTACT_EMAIL} pour en demander une. Le prix n'est pas encore fixé.`,
+    answer: `Pour l'instant, les comptes s'ouvrent sur invitation : écrivez-nous à ${CONTACT_EMAIL} pour en demander une. Le prix n'est pas encore fixé, et demander une invitation ne vous engage à rien.`,
+  },
+  {
+    // The application is the web client served by the server, laid out for a phone and for a computer
+    // (docs/architecture.md, "Client web").
+    question: 'Sur quel appareil ?',
+    answer: 'Dans le navigateur, sur un téléphone, une tablette ou un ordinateur, sans rien installer.',
   },
   {
     question: 'Sur quoi repose la méthode ?',

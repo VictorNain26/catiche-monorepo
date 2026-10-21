@@ -1,6 +1,6 @@
 ---
-import { Mic } from '@lucide/astro';
 import TomIllustration from '@/components/atoms/tom-illustration.astro';
+import PupilSays from '@/components/molecules/pupil-says.astro';
 import RequestInvitation from '@/components/molecules/request-invitation.astro';
 import Screen from '@/components/molecules/screen.astro';
 import TomSays from '@/components/molecules/tom-says.astro';
@@ -16,13 +16,16 @@ import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
       <h1 class="text-4xl text-balance text-foreground sm:text-5xl xl:text-6xl">
         {BRAND_NAME} accompagne votre enfant pendant ses devoirs, <mark class="highlighter">du début à la fin</mark>.
       </h1>
-      <p class="mt-8 max-w-xl text-lg text-muted-foreground md:text-xl">
+      <p class="mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">
         Une aide aux devoirs pour le collège, de la 6e à la&nbsp;3e. Chaque soir, votre enfant dit ce qu&apos;il a à faire, et Tom, le tuteur de{' '}
-        {BRAND_NAME}, l&apos;aide à s&apos;organiser&nbsp;: par où commencer, des étapes courtes, le cartable du lendemain. Sans faire le travail à sa
-        place.
+        {BRAND_NAME}, une intelligence artificielle, l&apos;aide à s&apos;organiser&nbsp;: par où commencer, des étapes courtes, le cartable du
+        lendemain. Sans faire le travail à sa place.
       </p>
-      <RequestInvitation class="mt-10" />
-      <p class="mt-2 max-w-xl text-muted-foreground">{BRAND_NAME} est en préparation&nbsp;: voici ce que votre enfant y fera.</p>
+      {/* The frame of the present tense above, read before the button (docs/charte.md, "Les mots"). */}
+      <p class="mt-4 max-w-xl text-lg font-bold text-foreground md:text-xl">
+        {BRAND_NAME} est en préparation&nbsp;: voici ce que votre enfant y fera.
+      </p>
+      <RequestInvitation class="mt-6" />
     </div>
 
     {/* Tom in his arch, and the screen of the evening laid over its foot. */}
@@ -34,10 +37,7 @@ import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
       <TomIllustration arch class="-mb-16 w-2/3 max-w-none self-end sm:-mb-24" />
       <tonight-order class="relative block w-11/12 max-w-sm sm:w-4/5">
         <Screen time={HOURS.ordered} title="Ce soir">
-          <p class="ml-auto flex w-fit max-w-11/12 items-start gap-2 rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground">
-            <Mic class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-            {SPOKEN}
-          </p>
+          <PupilSays>{SPOKEN}</PupilSays>
           <div class="tonight-after mt-4">
             <TomSays>{ORDER_PROPOSED}</TomSays>
           </div>

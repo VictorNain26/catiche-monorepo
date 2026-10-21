@@ -1,4 +1,5 @@
 ---
+import CheckIn from '@/components/molecules/check-in.astro';
 import Screen from '@/components/molecules/screen.astro';
 import { CHECK_IN, HOURS } from './evening-data';
 
@@ -10,8 +11,8 @@ const FAMILIES = [
   'Vous rentrez tard ? Vous le regardez quand vous pouvez. Votre enfant voit votre « Vu » le lendemain.',
   "Quand votre enfant vit dans deux maisons, c'est l'adulte chez qui il est ce soir-là qui le reçoit.",
   'Si les devoirs sont un sujet de tension, vous pouvez désactiver le point du soir.',
-  "Si personne n'est disponible, le point du soir reste à votre enfant, et rien ne lui est reproché.",
-  "En 4e et en 3e, c'est votre enfant qui décide de le partager.",
+  "Si personne n'est disponible, le point du soir reste à votre enfant.",
+  "En 6e et en 5e, le point du soir est proposé par défaut. En 4e et en 3e, c'est votre enfant qui choisit de le partager.",
 ];
 ---
 
@@ -26,7 +27,7 @@ const FAMILIES = [
         </p>
         <h2 class="mt-3 text-4xl text-balance text-foreground sm:text-5xl">Vous savez ce qui est fait, sans surveiller.</h2>
         <p class="mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">
-          À la fin de cette soirée, votre enfant vous montre ce qu&apos;il a fait&nbsp;: c&apos;est le point du soir. Vous répondez «&nbsp;Vu&nbsp;»,
+          À la fin de la soirée, c&apos;est le point du soir&nbsp;: votre enfant vous montre ce qu&apos;il a fait. Vous répondez «&nbsp;Vu&nbsp;»,
           avec un mot d&apos;encouragement si vous voulez. Vous n&apos;avez pas à vérifier le contenu, et il n&apos;y a ni note, ni compteur de jours,
           ni rappel.
         </p>
@@ -36,20 +37,12 @@ const FAMILIES = [
         <div class="grid gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,14rem)] sm:items-start">
           <play-once class="block">
             <Screen time={HOURS.ended} title="Mardi soir">
-              <dl class="space-y-3">
-                <div>
-                  <dt class="text-sm font-bold text-muted-foreground">Fait</dt>
-                  <dd>{CHECK_IN.done}</dd>
-                </div>
-                <div>
-                  <dt class="text-sm font-bold text-muted-foreground">Reste</dt>
-                  <dd>{CHECK_IN.left}</dd>
-                </div>
+              <CheckIn {...CHECK_IN}>
                 <div>
                   <dt class="text-sm font-bold text-muted-foreground">Cartable</dt>
                   <dd>Prêt pour demain</dd>
                 </div>
-              </dl>
+              </CheckIn>
               <p class="seen mt-4 border-t pt-3">
                 <span class="text-sm font-bold text-muted-foreground">Votre réponse</span>
                 <span class="mt-1 block font-heading text-2xl font-extrabold text-primary">Vu</span>
