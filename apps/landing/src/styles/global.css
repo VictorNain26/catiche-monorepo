@@ -18,9 +18,10 @@
   }
 }
 
+/* A long text (the legal pages): read in the text's own ink; grey is kept for the date under the title. */
 @utility legal-copy {
   @apply max-w-lg;
-  color: var(--color-muted-foreground);
+  color: var(--color-foreground);
 
   & h2 {
     margin-top: 2rem;
