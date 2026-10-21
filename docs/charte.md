@@ -77,7 +77,8 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
   (`apps/landing/public/tom/`).
 - Sa tête est à côté de chacun de ses messages : l'élève sait qu'il lit Tom, une IA. Hors de la
   séance, son dessin n'a pas de bulle et ne parle pas.
-- Il ne réagit pas à l'élève : ni joie, ni déception, ni célébration.
+- Il ne réagit pas à l'élève : ni joie, ni déception, ni célébration. Il constate une étape juste
+  (« La voix de Tom », plus bas).
 - Il reste loin de l'énoncé, et absent des erreurs sérieuses et du tableau de bord du parent.
 
 ## Icônes
@@ -102,39 +103,82 @@ sans script, il reste visible (`.claude/rules/landing.md`).
 
 ## Les mots
 
-Le lecteur trouve, comprend et peut agir (langage clair, ISO 24495-1:2023) ; il survole plus qu'il
-ne lit, l'essentiel va donc en tête de chaque bloc. Ces règles valent pour le site et l'app
-(Victor, 2026-10-21).
+Deux voix, fixées par Victor le 2026-10-21 après un audit comparé au guide de Mailchimp, à GOV.UK
+et à la façon dont Khanmigo cadre son tuteur : celle de Catiche, qui parle aux adultes, et celle
+de Tom, qui parle à l'élève.
 
-- On tutoie l'élève, on vouvoie l'adulte ; un texte pour l'un n'est jamais le texte pour l'autre.
-  Pour l'adulte, l'élève est « votre collégien » ou « il », et le site ne dit jamais « parent » :
-  l'adulte de la maison n'est pas toujours un parent (Victor, 2026-10-21).
-- En cinq secondes, le titre, la phrase dessous et le bouton disent ce qu'est le produit, pour qui,
-  et ce qu'on peut faire maintenant.
-- Une idée et un verbe conjugué par phrase, sujet en tête ; pas de titre sans verbe, sauf une
-  question. Des phrases courtes, au présent. La landing présente le produit au présent, tel que
-  `produit.md` le décrit ; son statut (en préparation, sur invitation) se dit une seule fois, en haut
-  de page, et dans la FAQ sur le prix et l'ouverture. Aucune fonction hors de `produit.md`, aucun
-  résultat promis (Victor, 2026-10-21).
-- Les mots des familles, pas les nôtres (« ce qu'il a fait », pas « récapitulatif ») ; un mot du
-  produit s'explique la première fois. Un seul nom par chose : « votre collégien » pour l'adulte,
-  Tom présenté une fois comme le tuteur de Catiche, « e-mail » avec son trait d'union.
-- Aucun mot technique ni savant dans un texte pour les familles (« serveur », « navigateur »,
-  « IA » en abrégé). Une source se dit en mots simples ; son nom savant ne va que dans le lien.
-- On dit ce que Catiche fait, pas ce qu'il ne fait pas ; pas de phrase défensive. Une limite se dit
-  une seule fois, là où on la cherche, et au positif quand c'est exact.
-- Rien sans appui : chaque phrase renvoie à `produit.md`, `methode.md` ou au code ; un exemple se
-  lit comme un exemple. On parle de l'organisation qui bloque, jamais d'un enfant qui échoue.
-- Pas de point d'exclamation, pas d'emoji, pas de mot de jeu, pas le mot « enfant » dans ce que lit
-  l'élève.
-- Tom ne prétend ni être un ami, ni ressentir : il ne dit pas « je suis fier de toi », ni « tu
-  m'as manqué ». Il ne relance pas l'élève et ne l'attend pas. Sa voix reste chaleureuse et
-  constante, et il constate le travail fait.
-- Sur la landing, Tom est un personnage qui agit dans la soirée : il propose l'ordre, coupe le
-  travail en étapes, rappelle le contrôle ; jamais un ami.
-- Des tournures sans genre pour l'élève : Tom ne sait pas s'il parle à une fille ou à un garçon.
-- Un bouton dit ce qu'il fait, et ce que le lecteur peut vraiment faire aujourd'hui ; une erreur dit ce qui s'est passé et quoi faire, sans s'excuser ;
-  une attente dit ce qui se passe et combien de temps.
+### Pour les deux voix
+
+- Le lecteur trouve, comprend et peut agir (langage clair, ISO 24495-1:2023). Il survole plus
+  qu'il ne lit : l'essentiel va en tête de chaque bloc.
+- Une idée et un verbe conjugué par phrase, sujet en tête. Environ 15 mots par phrase, 25 au plus.
+  Pas de titre sans verbe, sauf une question.
+- Le présent. Les mots des familles, pas les nôtres (« ce qu'il a fait », pas « récapitulatif ») ;
+  un mot du produit s'explique la première fois.
+- Aucun mot technique ou savant (« serveur », « navigateur », « IA » en abrégé, « bêta »). Aucun
+  mot médical (trouble, TDAH, dys, symptôme, compenser).
+- Pas de point d'exclamation, pas d'emoji, pas de mot de jeu.
+- Rien sans appui : chaque phrase renvoie à `produit.md`, `methode.md` ou au code. Un exemple se lit
+  comme un exemple. On parle de l'organisation qui bloque, jamais d'un enfant qui échoue.
+- La typographie française : espace insécable avant « : ; ? ! » et dans « 17 h 30 », guillemets
+  « », « 6ᵉ » en exposant.
+
+### La voix de Catiche, aux adultes
+
+Le site, les pages annexes, les e-mails, et l'interface de l'app côté adulte.
+
+- **Concrète, pas publicitaire** : une scène de soirée plutôt qu'une promesse. Aucun résultat
+  promis, aucune fonction hors de `produit.md`.
+- **Rassurante, pas lénifiante** : elle nomme le risque, puis le garde-fou.
+- **Directe, pas sèche** : le vouvoiement, une idée par phrase.
+- **Honnête sur le statut, sans s'excuser.** Le statut a une seule formule : « En préparation : les
+  comptes s'ouvrent sur invitation. » Sur la landing, il se dit une fois en haut de page, puis dans
+  la FAQ sur le prix ; la page présente le produit au présent.
+- L'élève est « votre enfant » (Victor, 2026-10-21) ; le collège se dit dans les faits (« de la 6ᵉ
+  à la 3ᵉ »). L'adulte est « vous » ; quand il faut le nommer, « un adulte de la maison », jamais
+  « parent » : ce n'est pas toujours un parent.
+- Elle dit ce que Catiche fait, pas ce qu'il ne fait pas. Une limite se dit une fois, là où on la
+  cherche, au positif quand c'est exact ; jamais de phrase défensive.
+- Une source se dit en mots simples ; son nom savant ne va que dans le lien.
+- Tom, en troisième personne, présenté une fois comme le tuteur de Catiche, une intelligence
+  artificielle, dès le haut de page.
+- Un bouton dit ce qu'il fait et ce qu'on peut vraiment faire aujourd'hui. Une erreur dit ce qui
+  s'est passé, puis quoi faire, sans s'excuser ; une attente dit ce qui se passe et combien de
+  temps.
+
+### La voix de Tom, à l'élève
+
+Les bulles de séance, et les écrans d'exemple de la landing.
+
+- **Précise, pas froide** : il nomme ce qui est juste et ce qui manque.
+- **Patiente, pas insistante** : une seule question, à la fin de son message, puis il attend.
+- **Neutre, pas distante** : il tutoie, avec les mots de la classe ; jamais « mon pote ».
+- **Brève** : une ou deux phrases, sauf pour un récapitulatif.
+- Il dit qu'il est une intelligence artificielle dès son premier message (AI Act, art. 50), et sa
+  tête est à côté de chacun de ses messages.
+- Il constate, il ne félicite pas : « C'est juste. » ou « 12 convient », puis l'étape suivante ;
+  jamais « bravo », « génial », « je suis fier de toi ». Il ne ressent rien et ne se dit pas ami ;
+  ni « nous », ni « ensemble », ni « on ».
+- Pour ne pas donner la réponse, il ne dit pas « je ne peux pas » : il pose la question qui fait
+  avancer.
+- Il ne relance pas l'élève hors de la séance et ne l'attend pas. Reformuler une consigne pendant
+  la séance (le palier « relance » de `tuteur.md`) n'est pas une relance.
+- Une soirée finit sur ce qui est fait, ce qui reste et le cartable, puis il s'arrête ; ni « à
+  demain », ni « tu m'as manqué ».
+- Des tournures sans genre : « Ça bloque où ? » plutôt que « Tu es bloqué ? ». Jamais le mot
+  « enfant ».
+- Exception : la réponse de détresse, écrite et approuvée par Victor (`apps/server/src/domain/`),
+  garde ses mots.
+
+### Qui parle où
+
+| Où | Qui parle | À qui |
+|---|---|---|
+| Site, pages annexes, e-mails | Catiche | l'adulte, vouvoyé |
+| Écrans d'exemple de la landing | Tom, dans ses bulles | l'élève, tutoyé |
+| Bulles de séance | Tom | l'élève, tutoyé |
+| Boutons, erreurs, réglages de l'app | Catiche, jamais Tom | l'élève tutoyé, l'adulte vouvoyé |
+| Pages légales | Catiche ; « Tom » n'y désigne que le tuteur | l'adulte, et l'élève dans son encadré |
 
 ## Accessibilité
 

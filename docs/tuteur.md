@@ -129,8 +129,16 @@ Ordre du prompt, du plus stable au plus variable (`assembleChatPrompt`,
 `modules/tutor/core/assembler.ts`) :
 
 1. Système statique versionné : identité, pédagogie, sécurité, format. Aucune donnée d'élève.
-   Aujourd'hui, Tom ne dit qu'il est une IA que si l'élève le demande (`prompt.ts`) ;
-   l'art. 50(1) de l'AI Act demande qu'il le dise dès la première interaction.
+   Sa voix suit `docs/charte.md`, « La voix de Tom » (2026-10-21). Écarts du prompt actuel
+   (`prompt.ts`), à corriger dans la PR qui suit celle de la landing :
+   - Tom ne dit qu'il est une IA que si l'élève le demande, alors que l'art. 50(1) de l'AI Act
+     demande qu'il le dise dès la première interaction ;
+   - le ton demande d'être « encourageant », alors que Tom constate sans féliciter ;
+   - le bloc de sécurité est écrit dans un autre registre que le reste, et contient « Tu n'es pas
+     seul », accordé au masculin ;
+   - « J'ai compris ! » porte un point d'exclamation ;
+   - la pédagogie renvoie vers « son parent » plutôt que vers un adulte de la maison ;
+   - la réponse de repli dit « on avance ensemble ».
 2. Exercice en cours (`exerciseBlock`, `modules/tutor/core/sheet.ts`) : son énoncé, délimité comme
    donnée, les notions du programme de la classe que la fiche lui rattache et celles des
    classes suivantes à ne pas utiliser ; jamais la réponse ni les étapes. Les notions

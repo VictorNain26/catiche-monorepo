@@ -89,11 +89,16 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-21 ; ce qui 
   1. **La landing, jusqu'à sa validation par Victor.** Restructurée autour de la soirée (#555),
      puis réécrite pour tous les collégiens et toutes les familles (#559), elle attend la
      validation de Victor.
-  2. **La refonte de l'application**, pensée depuis l'enfant et les adultes réels. Il faut
+  2. **La voix de Tom et de l'app dans le code** (PR à part, juste après) :
+     - le prompt et la réponse de repli suivent `charte.md`, « La voix de Tom ». Les écarts sont
+       listés dans `tuteur.md` § 5 ;
+     - les messages de l'app vont à la bonne voix : pas de vouvoiement côté élève, pas de
+       « bêta fermée », pas de « Reviens demain ! ».
+  3. **La refonte de l'application**, pensée depuis l'enfant et les adultes réels. Il faut
      d'abord un parcours et des textes validés, puis l'écran à l'ordinateur comme au téléphone.
      Un inventaire des écrans actuels est fait : vocabulaire technique, colonne unique,
      doublons, écarts à la charte.
-  3. **La soirée de devoirs à l'oral et le point du soir** (`produit.md`), avec le volet IA.
+  4. **La soirée de devoirs à l'oral et le point du soir** (`produit.md`), avec le volet IA.
 - **À vérifier, relevé par l'inventaire** : le résumé montre au parent « Ce qui résiste » même
   quand l'enfant a refusé la mémoire, alors que `/memoire` dit le contraire
   (`core/week-summary.ts`, `routes/memoire.tsx` du web).
