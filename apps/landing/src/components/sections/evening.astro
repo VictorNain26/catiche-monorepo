@@ -19,7 +19,7 @@ const MOMENTS = [
   {
     time: HOURS.ordered,
     title: 'Choisir par quoi commencer',
-    body: 'Tom propose un ordre et une durée, que votre collégien peut changer.',
+    body: 'Tom propose un ordre, que votre collégien peut changer.',
     screen: "L'ordre",
   },
   {
@@ -87,11 +87,11 @@ const CHANGED = [english, maths, history];
                 <div class="space-y-3">
                   <PupilSays>Je préfère commencer par l&apos;anglais.</PupilSays>
                   <ol class="divide-y rounded-control ring-1 ring-border">
-                    {CHANGED.map(({ subject, length }, position) => (
+                    {CHANGED.map(({ subject, note }, position) => (
                       <li class="flex items-baseline gap-3 px-3 py-2">
                         <span class="font-heading font-extrabold tabular-nums">{position + 1}</span>
                         <span class="font-bold">{subject}</span>
-                        <span class="ml-auto text-sm text-muted-foreground">{length}</span>
+                        {note && <span class="ml-auto text-sm text-muted-foreground">{note}</span>}
                       </li>
                     ))}
                   </ol>

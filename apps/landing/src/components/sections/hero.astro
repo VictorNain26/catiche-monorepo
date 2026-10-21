@@ -42,11 +42,11 @@ import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
         <Screen time={HOURS.ordered} title="Ce soir" class="pb-24 shadow-control-hover lg:pb-5 lg:pl-32 xl:pl-40">
           <PupilSays>{SPOKEN}</PupilSays>
           <ol class="mt-4 flex flex-col gap-2">
-            {HOMEWORK.map(({ subject, length, spoken }, position) => (
+            {HOMEWORK.map(({ subject, note, spoken }, position) => (
               <li data-spoken={spoken} class="tonight-item flex items-baseline gap-3 rounded-control bg-accent px-3 py-2 text-accent-foreground">
                 <span class="tonight-after font-heading font-extrabold tabular-nums">{position + 1}</span>
                 <span class="font-bold">{subject}</span>
-                <span class="ml-auto text-sm text-accent-muted-foreground">{length}</span>
+                {note && <span class="ml-auto text-sm text-accent-muted-foreground">{note}</span>}
               </li>
             ))}
           </ol>
