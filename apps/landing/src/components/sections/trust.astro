@@ -1,5 +1,6 @@
 ---
 import ExternalLink from '@/components/atoms/external-link.astro';
+import { BRAND_NAME } from '@/lib/brand';
 
 // What makes Catiche worth trusting, in everyday words, each fact with its line in the docs:
 // - the research: docs/methode.md, "Ce qui vaut pour tous les élèves", sources [11], [13] and [17]; where the gestures
@@ -12,8 +13,8 @@ import ExternalLink from '@/components/atoms/external-link.astro';
 //   endpoint), the privacy policy (pages/confidentialite.astro), and the aim of docs/produit.md, "Pour qui".
 const RESEARCH = [
   {
-    gesture: "Planifier et faire le point, quand des enseignants l'enseignent",
-    finding: '+8 mois de progrès en moyenne, selon une synthèse de 355 études.',
+    gesture: "Planifier son travail et vérifier ce qui est fait, quand des enseignants l'apprennent aux élèves",
+    finding: 'environ huit mois de progrès en plus sur une année, en moyenne, selon une synthèse de 355 études.',
     source: {
       href: 'https://educationendowmentfoundation.org.uk/education-evidence/teaching-learning-toolkit/metacognition-and-self-regulation',
       title: 'Education Endowment Foundation, « Metacognition and self-regulation »',
@@ -32,15 +33,15 @@ const RESEARCH = [
 ];
 
 const SAFEGUARDS = [
-  "Chaque message de Tom est vérifié avant d'être affiché, et corrigé s'il contient la réponse.",
-  "Ce sont nos règles, et non Tom, qui décident quand il donne plus d'aide.",
-  "Si votre collégien écrit qu'il veut se faire du mal, un message écrit à l'avance par une personne lui répond à la place de Tom : il lui donne le 3114 et l'invite à parler à un adulte de confiance.",
+  "Chaque message de Tom est vérifié avant d'être affiché, et remplacé s'il contient la réponse.",
+  "Nos règles fixent le niveau d'aide : il monte quand votre collégien essaie vraiment.",
+  "Si votre collégien écrit qu'il veut se faire du mal, Tom s'arrête. Un message écrit à l'avance par une personne lui donne le 3114, un numéro d'écoute gratuit jour et nuit, et l'invite à parler à un adulte de confiance.",
 ];
 
 const COMMITMENTS = [
   'Les données sont gardées en France, et Tom fonctionne avec Mistral AI, en Europe.',
-  'Ni publicité, ni vente de données.',
-  'Notre but : des soirées de devoirs plus calmes et des devoirs rendus.',
+  `${BRAND_NAME} n'a pas de publicité et ne vend aucune donnée.`,
+  'Nous visons des soirées de devoirs plus calmes et des devoirs rendus.',
 ];
 ---
 
@@ -50,7 +51,7 @@ const COMMITMENTS = [
 
     <div class="mt-8 grid gap-8 md:grid-cols-2 md:gap-10 lg:mt-16 lg:grid-cols-3 lg:gap-12">
       <div>
-        <h3 class="text-2xl text-balance text-foreground">Les gestes viennent de la recherche</h3>
+        <h3 class="text-2xl text-balance text-foreground">Ce que fait Tom s&apos;appuie sur la recherche</h3>
         {/* Each source at the end of its sentence, in the line, opened in a new tab (atoms/external-link.astro). */}
         <ul class="mt-4 space-y-3 text-foreground">
           {RESEARCH.map(({ gesture, finding, source }) => (
@@ -65,7 +66,7 @@ const COMMITMENTS = [
       </div>
 
       <div>
-        <h3 class="text-2xl text-balance text-foreground">Ce qui protège déjà votre collégien</h3>
+        <h3 class="text-2xl text-balance text-foreground">Ce qui protège votre collégien</h3>
         <ul class="mt-4 space-y-3 text-foreground">
           {SAFEGUARDS.map((safeguard) => (
             <li class="border-l-2 border-annotation pl-4">{safeguard}</li>

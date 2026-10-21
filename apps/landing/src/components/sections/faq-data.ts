@@ -18,11 +18,11 @@ export const FAQS: Faq[] = [
   {
     question: 'Et dans notre famille ?',
     answer:
-      "Le point du soir, que nous construisons, s'adapte à chaque famille. Si l'adulte rentre tard, il le voit plus tard, et votre collégien trouve son « Vu » le lendemain. Dans deux maisons, il va à l'adulte chez qui il est ce soir-là. Si les devoirs sont un sujet de tension, vous pouvez le couper. Sans adulte disponible, il reste à votre collégien. Il est proposé d'office en 6e et en 5e ; en 4e et en 3e, votre collégien choisit de le partager.",
+      "Le point du soir, que nous construisons, s'adapte à chaque famille. Si l'adulte rentre tard, il voit le point du soir plus tard, et votre collégien trouve son « Vu » le lendemain. Dans deux maisons, le point du soir va à l'adulte chez qui votre collégien est ce soir-là. Si les devoirs sont un sujet de tension, vous pouvez couper le point du soir. Sans adulte disponible, le point du soir reste à votre collégien. Il est proposé d'office en 6e et en 5e ; en 4e et en 3e, votre collégien choisit de le partager.",
   },
   {
     question: 'Est-ce que ça marche avec Tom ?',
-    answer: `${BRAND_NAME} reprend des gestes qui ont fait leurs preuves quand des enseignants, des chercheurs ou des adultes de la maison les transmettent. Avec Tom, nous le mesurerons dès les premiers élèves : les soirées de devoirs par semaine, les devoirs rendus, et l'avis des familles par des questionnaires reconnus.`,
+    answer: `${BRAND_NAME} reprend des méthodes qui ont fait leurs preuves quand des enseignants ou des chercheurs les transmettent. Avec Tom, la mesure commence avec les premiers élèves : les soirées de devoirs par semaine, les devoirs rendus, et l'avis des familles.`,
   },
   {
     // The application is the web client served by the server, laid out for a phone and for a computer.
