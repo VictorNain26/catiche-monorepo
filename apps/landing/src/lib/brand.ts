@@ -1,10 +1,10 @@
 export const BRAND_NAME = 'Catiche';
 export const CONTACT_EMAIL = 'contact@catiche.fr';
 
-// The site in a title and a description, for the home page's metadata and the web manifest: the product in the present
-// (docs/produit.md), Tom introduced as an artificial intelligence (docs/charte.md, "Les mots").
+// The site in a title and a description, for the home page's metadata, its shared link and the web manifest: the
+// product in the present (docs/produit.md); Tom is introduced as an artificial intelligence on the page itself.
 export const SITE_TITLE = `${BRAND_NAME}\xa0: votre enfant apprend à organiser ses devoirs`;
-export const SITE_DESCRIPTION = `Tom, le tuteur de ${BRAND_NAME}, est une intelligence artificielle. De la 6ᵉ à la 3ᵉ, votre enfant lui dit ses devoirs et choisit par où commencer.`;
+export const SITE_DESCRIPTION = 'Votre enfant dit ses devoirs à Tom et choisit par où commencer, de la 6ᵉ à la 3ᵉ.';
 
 // The e-mail the button « Demander une invitation par e-mail » prepares: accounts open on invitation
 // (apps/server/src/platform/auth/auth.ts). encodeURIComponent writes a space as %20, which every mail client reads.

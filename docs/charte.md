@@ -138,7 +138,8 @@ de Tom, qui parle à l'élève.
 - Rien sans appui : chaque phrase renvoie à `produit.md`, `methode.md` ou au code. Un exemple se lit
   comme un exemple. On parle de l'organisation qui bloque, jamais d'un enfant qui échoue.
 - La typographie française : espace insécable avant « : ; ? ! » et dans « 17 h 30 », guillemets
-  « », « 6ᵉ » en exposant.
+  « », « 6ᵉ » en exposant. Une heure affichée sur l'écran d'un appareil suit son horloge,
+  « 17:30 » ; le texte courant écrit « 17 h 30 ».
 
 ### La voix de Catiche, aux adultes
 

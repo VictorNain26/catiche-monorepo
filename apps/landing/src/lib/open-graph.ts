@@ -5,5 +5,5 @@ import { BRAND_NAME } from './brand';
 export const OG_IMAGE = {
   width: 1200,
   height: 630,
-  alt: `Votre enfant apprend à organiser ses devoirs. De la 6ᵉ à la 3ᵉ. Tom, le tuteur de ${BRAND_NAME}, a l’allure d’une loutre.`,
+  alt: `${BRAND_NAME}. Votre enfant apprend à organiser ses devoirs, de la 6ᵉ à la 3ᵉ. À côté, Tom, une loutre debout en pull bleu.`,
 };

@@ -22,7 +22,7 @@ export const HOMEWORK = [
 
 /** Tom's order, with its reasons; the pupil chooses (docs/produit.md: he can change it). */
 export const ORDER_PROPOSED =
-  'Les maths passent en premier\xa0: elles sont pour demain. L’histoire suit, pour réviser le contrôle sur deux soirs, puis l’anglais. Tu gardes cet ordre\xa0?';
+  'Je propose les maths d’abord\xa0: elles sont pour demain. Ensuite l’histoire, à réviser sur deux soirs, puis l’anglais. Tu gardes cet ordre\xa0?';
 
 /** Where the evening ends, at 18:50: the test comes back the day before it. */
 export const CHECK_IN = {

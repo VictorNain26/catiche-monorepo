@@ -25,7 +25,7 @@ export const FAQS: readonly Faq[] = [
     answer: [
       'Le point du soir s’adapte à votre famille.',
       [
-        'Vous rentrez tard\xa0: vous le voyez en rentrant et votre enfant voit votre réponse le lendemain.',
+        'Vous rentrez tard\xa0: vous lisez le point du soir en arrivant, et votre enfant voit votre réponse le lendemain.',
         'Votre enfant vit dans deux maisons\xa0: le point du soir va à l’adulte chez qui il est ce soir-là.',
         'Personne n’est là\xa0: le point du soir reste à votre enfant et rien ne lui est reproché.',
         'Les devoirs sont un sujet tendu chez vous\xa0: vous pouvez couper le point du soir.',
@@ -36,13 +36,13 @@ export const FAQS: readonly Faq[] = [
   {
     question: 'Est-ce que ça marche\xa0?',
     answer: [
-      `Les gestes de ${BRAND_NAME} viennent de méthodes qui ont fait leurs preuves quand des enseignants ou des chercheurs les ont transmises aux élèves. Dès les premiers élèves, nous mesurerons les soirs de devoirs par semaine, les devoirs rendus et l’avis des familles.`,
+      `${BRAND_NAME} reprend des méthodes qui ont fait leurs preuves quand des enseignants ou des chercheurs les ont apprises aux élèves. Dès les premiers élèves, nous mesurerons les soirs de devoirs par semaine, les devoirs rendus et l’avis des familles.`,
     ],
   },
   {
     // The application is the web client served by the server, laid out for a phone and for a computer.
     question: 'Sur quel appareil\xa0?',
-    answer: [`Sur un téléphone, une tablette ou un ordinateur. ${BRAND_NAME} s’ouvre comme un site\xa0: il n’y a rien à installer.`],
+    answer: [`${BRAND_NAME} marche sur un téléphone, une tablette ou un ordinateur. Il s’ouvre comme un site\xa0: il n’y a rien à installer.`],
   },
   {
     question: 'Nous n’avons qu’un ordinateur pour toute la famille. Comment faire\xa0?',

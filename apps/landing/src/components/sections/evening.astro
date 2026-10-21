@@ -20,7 +20,7 @@ const MOMENTS = [
   {
     time: HOURS.said,
     title: 'Votre enfant dit ses devoirs',
-    body: 'Votre enfant dit ses devoirs à voix haute, comme ils viennent. Tom demande ce qui manque\xa0: pour quand, quels exercices, un contrôle bientôt.',
+    body: 'Il les dit à voix haute, comme ils lui viennent. Tom demande ce qui manque\xa0: la date de chaque devoir, les exercices, un contrôle à venir.',
     described:
       'Exemple d’écran, mardi à 17\xa0h\xa030. Votre enfant dit ses devoirs à voix haute\xa0: de l’histoire, de l’anglais, les exercices 3 et 4 de maths. Tom lui demande pour quand est chaque devoir.',
   },
@@ -29,9 +29,9 @@ const MOMENTS = [
     title: 'Votre enfant choisit par où commencer',
     body: 'Tom propose un ordre et dit pourquoi. Votre enfant le garde ou le change.',
     described:
-      'Exemple d’écran, mardi à 17\xa0h\xa035. Tom propose de commencer par les maths. Votre enfant préfère l’anglais. La liste devient anglais, maths, histoire, et Tom lui demande ce qu’il a à faire en anglais.',
+      'Exemple d’écran, mardi à 17\xa0h\xa035. Tom propose de commencer par les maths. Votre enfant préfère l’anglais. La liste devient anglais, maths, histoire. Tom lui demande ce qu’il a à faire en anglais.',
     proof: {
-      text: 'Planifier son travail et faire le point, c’est l’une des approches les mieux appuyées d’une grande synthèse de la recherche en éducation (355\xa0études).',
+      text: 'Planifier son travail puis faire le point compte parmi les méthodes les mieux prouvées, selon une synthèse de 355\xa0études.',
       sources: [
         {
           label: 'La source',
@@ -45,13 +45,13 @@ const MOMENTS = [
   {
     time: HOURS.started,
     title: 'Votre enfant avance par petites étapes',
-    body: 'Tom découpe l’exercice en étapes courtes. Votre enfant essaie, et quand l’essai ne marche pas, Tom lui donne un indice. Chaque message de Tom est vérifié avant d’être affiché.',
+    body: 'Tom découpe l’exercice en étapes courtes. Votre enfant essaie. Si ça ne marche pas, Tom lui donne un indice. Chaque message de Tom est vérifié avant d’être affiché.',
     described:
       'Exemple d’écran, mardi à 18\xa0h. L’exercice 3 de maths est découpé en trois étapes. Votre enfant essaie 10 comme dénominateur et voit que 4 ne va pas dans 10. Tom lui donne un indice\xa0: un nombre de la table de 4 et de celle de 6. Votre enfant trouve 12 et passe à l’étape 2.',
   },
   {
     time: HOURS.ended,
-    title: 'Votre enfant fait le point et prépare son cartable',
+    title: 'Votre enfant prépare demain',
     body: 'Tom montre ce qui est fait, ce qui reste et ce qui va dans le cartable.',
     described:
       'Exemple d’écran, mardi à 18\xa0h\xa050. Tom fait le point avec votre enfant. Fait\xa0: l’anglais, les exercices 3 et 4 de maths, le début de la révision d’histoire. Reste\xa0: la suite de la révision demain, pour le contrôle de jeudi. Dans le cartable\xa0: le cahier de maths. Un bouton permet à votre enfant de vous montrer ce point.',
@@ -124,7 +124,7 @@ const CHANGED = [english, maths, history];
                 <Screen time={screenTime(time)}>
                   {index === 0 && (
                     <play-once class="stagger block space-y-3">
-                      <PupilSays>J’ai de l’histoire, de l’anglais, et les exercices 3 et 4 de maths.</PupilSays>
+                      <PupilSays>J’ai de l’histoire, de l’anglais et les exercices 3 et 4 de maths.</PupilSays>
                       <TomSays>Chaque devoir est pour quand&nbsp;?</TomSays>
                     </play-once>
                   )}
@@ -191,7 +191,7 @@ const CHANGED = [english, maths, history];
                       <PupilSays>J’ai essayé 10, mais 4 ne va pas dans 10.</PupilSays>
                       <TomSays>Il faut un nombre qui est à la fois dans la table de 4 et dans celle de 6. Lequel vient en premier&nbsp;?</TomSays>
                       <PupilSays>12.</PupilSays>
-                      <TomSays>12 convient. Étape 2&nbsp;: 3/4, ça fait combien de douzièmes&nbsp;?</TomSays>
+                      <TomSays>12 convient. Étape 2&nbsp;: combien de douzièmes font 3/4&nbsp;?</TomSays>
                     </play-once>
                   )}
                   {index === 3 && (
