@@ -1,7 +1,7 @@
 # Monorepo Catiche
 
-Catiche : l'aide aux devoirs qui accompagne le collégien du début à la fin et lui apprend à
-s'organiser, avec Tom (direction : `docs/produit.md`). Construit : le tuteur et un résumé de la semaine pour le parent.
+Catiche : l'aide aux devoirs qui apprend au collégien à s'organiser chaque soir, avec Tom
+(direction : `docs/produit.md`). Construit : le tuteur et un résumé de la semaine pour le parent.
 
 ## Carte
 
