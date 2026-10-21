@@ -16,7 +16,7 @@ const { class: className, status } = Astro.props;
 const REQUEST_HREF = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`Demande d'invitation à ${BRAND_NAME}`)}`;
 ---
 
-<div class={cn('flex flex-col items-start gap-4', className)}>
+<div class={cn('flex flex-col items-start gap-5', className)}>
   {/* The envelope says the button opens an e-mail. */}
   <a href={REQUEST_HREF} class={cn(buttonVariants({ size: 'lg' }), 'h-14 px-8 text-lg shadow-control')}>
     <Mail class="size-5" aria-hidden="true" />

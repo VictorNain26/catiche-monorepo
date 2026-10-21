@@ -16,9 +16,10 @@ const LINKS = [
 ];
 ---
 
-{/* Its plane melts into the page above it, like the sections' (src/styles/global.css, `plane-*`). */}
-<footer class="plane-secondary text-secondary-foreground">
-  <div class="container flex flex-col gap-6 py-28 md:flex-row lg:py-40 md:items-center md:justify-between">
+{/* On the page's own background, where the last section's plane ends: one end, without a band of its own. In a row
+ * from a computer's width; stacked below it, where a row would squeeze the links. */}
+<footer class="bg-background text-foreground">
+  <div class="container flex flex-col gap-6 py-12 lg:flex-row lg:items-center lg:justify-between">
     <div class="space-y-1">
       <Logo />
       <p class="text-sm text-muted-foreground">
