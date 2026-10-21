@@ -2,38 +2,18 @@
 import PupilSays from '@/components/molecules/pupil-says.astro';
 import Screen from '@/components/molecules/screen.astro';
 import TomSays from '@/components/molecules/tom-says.astro';
-import { BAG, EVENING, FIRST_SAID, HOMEWORK, HOURS, MISSING } from './evening-data';
+import { BAG, FIRST_SAID, HOMEWORK, HOURS, MISSING } from './evening-data';
 
 // The evening of docs/produit.md, "Ce que fait Catiche", and its gestures in docs/methode.md, "Les gestes d'une soirée":
-// the product presented in the present, as docs/produit.md describes it; its state is said once, at the top of the page
-// (docs/charte.md, "Les mots").
-// A question or a hint is the bottom of Tom's ladder (docs/tuteur.md, § 3). One sentence and one screen per moment, on a
-// single line of time from 17:30 to 18:50.
+// the product presented in the present, as docs/produit.md describes it (docs/charte.md, "Les mots").
+// A question or a hint is the bottom of Tom's ladder (docs/tuteur.md, § 3). One sentence and one screen per moment.
+// At a computer, the four moments stay in a column on the left while their screens pass on the right, and the moment
+// whose screen is in the middle of the window lights up; on a phone, each moment sits above its screen.
 const MOMENTS = [
-  {
-    time: HOURS.said,
-    title: "Dire ce qu'il a ce soir",
-    body: 'Votre collégien dit ses devoirs à voix haute, et Tom demande ce qui manque.',
-    screen: EVENING,
-  },
-  {
-    time: HOURS.ordered,
-    title: 'Choisir par quoi commencer',
-    body: 'Tom propose un ordre, que votre collégien peut changer.',
-    screen: "L'ordre",
-  },
-  {
-    time: HOURS.started,
-    title: 'Avancer par petites étapes',
-    body: 'Tom découpe chaque devoir en étapes courtes, et aide par une question ou un indice.',
-    screen: 'Maths · exercice 3',
-  },
-  {
-    time: HOURS.ended,
-    title: 'Préparer demain',
-    body: "Tom aide votre collégien à préparer son cartable. Il garde l'histoire à réviser demain, pour le contrôle de jeudi.",
-    screen: 'Pour demain',
-  },
+  { time: HOURS.said, body: 'Votre collégien dit ses devoirs à voix haute, et Tom demande ce qui manque.' },
+  { time: HOURS.ordered, body: 'Tom propose un ordre, que votre collégien peut changer.' },
+  { time: HOURS.started, body: 'Tom découpe chaque devoir en étapes courtes, et aide par une question ou un indice.' },
+  { time: HOURS.ended, body: "Tom aide votre collégien à préparer son cartable. Il garde l'histoire à réviser demain, pour le contrôle de jeudi." },
 ] as const;
 
 const STEPS = [
@@ -48,39 +28,35 @@ const [maths, history, english] = HOMEWORK;
 const CHANGED = [english, maths, history];
 ---
 
-<section id="soiree" class="scroll-mt-20 bg-background py-10 md:py-20 lg:py-28">
+<section id="soiree" class="scroll-mt-20 bg-background py-12 md:py-16 lg:py-24">
   <div class="container max-w-5xl">
-    <div class="max-w-3xl">
-      <h2 class="text-3xl text-balance text-foreground sm:text-4xl">Une soirée avec Tom</h2>
-      <p class="mt-3 text-lg text-foreground md:mt-4 md:text-xl">Un mardi soir, de 17:30 au cartable prêt.</p>
-    </div>
+    <h2 class="section-title max-w-3xl">De 17:30 au cartable prêt.</h2>
 
-    {/* One line of time, the thread of the evening: on a phone on the left, at a computer in the middle, the screens
-     * changing side from one moment to the next. The line is drawn beside the list, on the same axis as its dots. */}
-    <div class="evening relative mt-10 lg:mt-16">
-      <span aria-hidden="true" class="absolute top-2 bottom-2 left-3 w-0.5 -translate-x-1/2 rounded-full bg-border lg:left-1/2">
-        <span class="rail-fill absolute inset-0 rounded-full bg-primary"></span>
-      </span>
-      <ol role="list">
-        {MOMENTS.map(({ time, title, body, screen }, index) => (
-          <li role="listitem" class="moment relative pl-10 lg:grid lg:grid-cols-2 lg:items-center lg:gap-20 lg:pl-0">
-            <span
-              aria-hidden="true"
-              class="absolute top-2 left-3 size-3 -translate-x-1/2 rounded-full bg-primary ring-4 ring-background lg:top-1/2 lg:left-1/2 lg:-translate-y-1/2"
-            ></span>
-            <div class:list={[index % 2 === 1 && 'lg:order-2']}>
-              <h3 class="text-xl text-balance text-foreground sm:text-2xl">
-                <time datetime={time} class="mb-1 block font-heading text-2xl font-extrabold text-primary tabular-nums lg:text-3xl">
-                  {time}
-                </time>
-                {title}
-              </h3>
-              <p class="mt-1 max-w-md text-foreground sm:mt-2 sm:text-lg">{body}</p>
+    <div class="evening mt-8 lg:mt-14 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-20">
+      {/* At a computer only: the moments, held under the header, each lit while its screen is read. */}
+      <ol role="list" class="hidden space-y-8 lg:sticky lg:top-28 lg:block lg:self-start">
+        {MOMENTS.map(({ time, body }) => (
+          <li role="listitem" class="moment-label text-foreground">
+            <time datetime={time} class="block text-sm font-bold text-primary tabular-nums">
+              {time}
+            </time>
+            <h3 class="mt-1 text-xl">{body}</h3>
+          </li>
+        ))}
+      </ol>
+
+      <ol role="list" class="space-y-10 lg:space-y-24">
+        {MOMENTS.map(({ time, body }, index) => (
+          <li role="listitem" class="moment-screen">
+            {/* On a phone, the moment above its screen. */}
+            <div class="mb-4 lg:hidden">
+              <time datetime={time} class="block text-sm font-bold text-primary tabular-nums">
+                {time}
+              </time>
+              <h3 class="mt-1 text-xl text-foreground">{body}</h3>
             </div>
-
-            <div class:list={['mt-4 lg:mt-0', index % 2 === 1 && 'lg:order-1']}>
-              {/* The hour is the moment's, just above or beside it: the screen keeps only its name. */}
-              <Screen title={screen}>
+            <play-once class="block">
+              <Screen class="reveal">
                 {index === 0 && (
                   <div class="space-y-3">
                     {/* The screen stops on Tom's question: his answer is the top of the page, at 17:35. */}
@@ -148,7 +124,7 @@ const CHANGED = [english, maths, history];
                   </div>
                 )}
               </Screen>
-            </div>
+            </play-once>
           </li>
         ))}
       </ol>
@@ -157,36 +133,60 @@ const CHANGED = [english, maths, history];
 </section>
 
 <style>
-  .moment + .moment {
-    margin-top: calc(var(--spacing) * 8);
-  }
-
-  @media (width >= 64rem) {
-    .moment + .moment {
-      margin-top: calc(var(--spacing) * 16);
-    }
-  }
-
-  /* The line of time fills as the evening is read: the only move of the section, tied to the scroll where the browser
-   * can; elsewhere, and under reduced motion, it is full. */
+  /* At a computer, where the browser ties animations to the scroll: the moment whose screen holds the middle of the
+   * window takes the ink, the others the muted ink. Elsewhere, and under reduced motion, every moment is lit. */
   @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
+    @media (width >= 64rem) and (prefers-reduced-motion: no-preference) {
       .evening {
-        view-timeline: --evening block;
+        timeline-scope: --moment-1, --moment-2, --moment-3, --moment-4;
       }
 
-      .rail-fill {
-        transform-origin: top;
-        animation: rail-fill linear both;
-        animation-timeline: --evening;
-        animation-range: entry 25% exit 75%;
+      .moment-label {
+        animation: moment-lit linear both;
+      }
+
+      .moment-label:nth-child(1) {
+        animation-timeline: --moment-1;
+      }
+
+      .moment-label:nth-child(2) {
+        animation-timeline: --moment-2;
+      }
+
+      .moment-label:nth-child(3) {
+        animation-timeline: --moment-3;
+      }
+
+      .moment-label:nth-child(4) {
+        animation-timeline: --moment-4;
+      }
+
+      .moment-screen:nth-child(1) {
+        view-timeline-name: --moment-1;
+      }
+
+      .moment-screen:nth-child(2) {
+        view-timeline-name: --moment-2;
+      }
+
+      .moment-screen:nth-child(3) {
+        view-timeline-name: --moment-3;
+      }
+
+      .moment-screen:nth-child(4) {
+        view-timeline-name: --moment-4;
       }
     }
   }
 
-  @keyframes rail-fill {
-    from {
-      scale: 1 0;
+  @keyframes moment-lit {
+    0%,
+    100% {
+      color: var(--color-muted-foreground);
+    }
+    35%,
+    65% {
+      color: var(--color-foreground);
     }
   }
 
