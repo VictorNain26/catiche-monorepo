@@ -1,35 +1,103 @@
 ---
 import TomIllustration from '@/components/atoms/tom-illustration.astro';
+import PupilSays from '@/components/molecules/pupil-says.astro';
 import RequestInvitation from '@/components/molecules/request-invitation.astro';
+import Screen from '@/components/molecules/screen.astro';
+import TomSays from '@/components/molecules/tom-says.astro';
 import { BRAND_NAME } from '@/lib/brand';
+import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
 
 // What Catiche is, for whom, and what to do now (docs/charte.md, "Les mots"): docs/produit.md, "En une phrase"; the
 // evening is what we are building ("À construire"), accounts open on invitation ("L'accès pendant la préparation").
+// Beside it, Tom steps out of the evening: the homework said in a jumble falls into his order, once, as the page opens.
 ---
 
-<section class="overflow-hidden pt-4 pb-12 md:pt-12 md:pb-16 lg:pt-16 lg:pb-24">
-  <div class="container grid max-w-6xl items-center gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] md:gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:gap-16">
-    {/* Tom on the page itself: small above the title on a phone, seen from the first screen; beside the text from a
-     * tablet, as tall as it. */}
-    <TomIllustration class="w-28 sm:w-36 md:col-start-2 md:row-start-1 md:w-full md:max-w-none" />
-    <div class="md:col-start-1 md:row-start-1">
-      <h1 class="text-4xl text-balance text-foreground sm:text-5xl">
+<section class="hero flex min-h-[calc(100svh-var(--spacing)*16)] items-center overflow-hidden py-10 lg:py-16">
+  <div class="container grid max-w-6xl items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:gap-20">
+    <div>
+      <h1 class="text-4xl leading-tight text-pretty text-foreground sm:text-5xl lg:text-6xl lg:leading-tight">
         {BRAND_NAME} accompagne votre collégien pendant ses devoirs, <mark class="highlighter">du début à la fin</mark>.
       </h1>
-      <p class="mt-5 max-w-xl text-lg text-muted-foreground md:mt-6 md:text-xl">
+      <p class="mt-6 max-w-xl text-lg text-foreground">
         Nous construisons Tom, le tuteur de {BRAND_NAME}&nbsp;: une intelligence artificielle qui l&apos;aide chaque soir à s&apos;organiser, sans
         faire le travail à sa place.
       </p>
-      <RequestInvitation status="En préparation · ouverture sur invitation" class="mt-6 md:mt-8" />
+      <RequestInvitation status="En préparation · ouverture sur invitation" class="mt-8" />
     </div>
+
+    {/* The card of the evening, and Tom standing in front of its lower corner, on a soft contact shadow. */}
+    <figure class="relative mb-24">
+      <figcaption class="sr-only">
+        Un exemple de soirée&nbsp;: votre collégien dit ses devoirs dans le désordre, et Tom lui propose par où commencer&nbsp;: les maths,
+        l&apos;anglais, puis la révision du contrôle d&apos;histoire. Votre collégien peut changer l&apos;ordre.
+      </figcaption>
+      <tonight-order class="relative ml-auto block w-11/12 sm:w-4/5 lg:w-full">
+        <Screen time={HOURS.ordered} title="Ce soir" class="shadow-control-hover">
+          <PupilSays>{SPOKEN}</PupilSays>
+          <ol class="mt-4 flex flex-col gap-2">
+            {HOMEWORK.map(({ subject, length, spoken }, position) => (
+              <li data-spoken={spoken} class="tonight-item flex items-baseline gap-3 rounded-control bg-accent px-3 py-2 text-accent-foreground">
+                <span class="tonight-after font-heading font-extrabold tabular-nums">{position + 1}</span>
+                <span class="font-bold">{subject}</span>
+                <span class="ml-auto text-sm text-accent-muted-foreground">{length}</span>
+              </li>
+            ))}
+          </ol>
+          {/* Tom's line on the right: the lower left corner is where Tom stands. */}
+          <div class="tonight-after mt-4 ml-auto w-3/5">
+            <TomSays>{ORDER_PROPOSED}</TomSays>
+          </div>
+        </Screen>
+      </tonight-order>
+      <div class="absolute -bottom-24 -left-4 w-44 sm:w-52 lg:-left-32 lg:w-52">
+        <span aria-hidden="true" class="absolute inset-x-1/4 bottom-1 h-3 rounded-full bg-overlay/25 blur-md"></span>
+        <TomIllustration class="max-w-none" />
+      </div>
+    </figure>
   </div>
 </section>
 
 <style>
+  /* A light matter behind the evening: a soft halo of water from the tokens. */
+  .hero {
+    background: radial-gradient(ellipse 60% 70% at 85% 45%, var(--color-halo), transparent), var(--color-background);
+  }
+
   /* The reed lays itself behind the words, once, as the page opens. */
   @media (prefers-reduced-motion: no-preference) {
     .highlighter {
       animation: lay-highlight var(--duration-slow) var(--ease-standard) var(--duration-base) both;
+    }
+  }
+
+  /* The jumble: the homework in the order it was said, out of line, before Tom's order; only while the script that sorts
+   * it holds it (src/scripts/evening.ts). The jumble is set at once, and only its release is a transition. */
+  @media (prefers-reduced-motion: no-preference) {
+    tonight-order:not([data-armed]) :is(.tonight-item, .tonight-after) {
+      transition:
+        translate var(--duration-slow) var(--ease-standard) var(--duration-wait),
+        opacity var(--duration-slow) var(--ease-standard) var(--duration-wait);
+    }
+
+    tonight-order[data-armed] {
+      .tonight-item[data-spoken='1'] {
+        order: 1;
+        translate: calc(var(--spacing) * 2) 0;
+      }
+
+      .tonight-item[data-spoken='2'] {
+        order: 2;
+        translate: calc(var(--spacing) * -1) 0;
+      }
+
+      .tonight-item[data-spoken='3'] {
+        order: 3;
+        translate: calc(var(--spacing) * 3) 0;
+      }
+
+      .tonight-after {
+        opacity: 0;
+      }
     }
   }
 </style>

@@ -1,5 +1,5 @@
-// The example evening of the home page, in one place: the moments of the evening and the evening check-in show the same
-// homework at the same hours (docs/produit.md, "Ce que fait Catiche"). The hours follow the lengths: the work starts at
+// The example evening of the home page, in one place: the top of the page, the moments of the evening and the evening
+// check-in show the same homework at the same hours (docs/produit.md, "Ce que fait Catiche"). The hours follow the lengths: the work starts at
 // 17:40, and its 30 + 15 + 20 minutes end it a little before 18:50.
 export const HOURS = { said: '17:30', ordered: '17:35', started: '17:40', ended: '18:50' } as const;
 

@@ -3,7 +3,7 @@ import PupilSays from '@/components/molecules/pupil-says.astro';
 import Screen from '@/components/molecules/screen.astro';
 import TomSays from '@/components/molecules/tom-says.astro';
 import { BRAND_NAME } from '@/lib/brand';
-import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
+import { HOMEWORK, HOURS } from './evening-data';
 
 // The evening of docs/produit.md, "Ce que fait Catiche", and its gestures in docs/methode.md, "Les gestes d'une soirée":
 // what Catiche accompanies once built (docs/produit.md, "À construire"), told in the present under a lead that says
@@ -43,111 +43,108 @@ const STEPS = [
 ];
 
 const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
+
+// The jumble falling into Tom's order plays at the top of the page; here, the order is already proposed, and the pupil
+// changes it, the one thing docs/produit.md says he can do with it: English first.
+const [maths, english, history] = HOMEWORK;
+const CHANGED = [english, maths, history];
 ---
 
-<section id="soiree" class="scroll-mt-20 border-t py-12 md:py-16 lg:py-32">
+<section id="soiree" class="scroll-mt-20 py-12 md:py-16 lg:py-32">
   <div class="container max-w-6xl">
     <div class="max-w-3xl">
-      <h2 class="text-3xl text-balance text-foreground sm:text-5xl">Une soirée avec Tom</h2>
+      <h2 class="text-3xl text-balance text-foreground sm:text-4xl">Une soirée avec Tom</h2>
       <p class="mt-4 text-lg text-muted-foreground md:mt-6 md:text-xl">{BRAND_NAME} est en préparation. Voici la soirée que nous construisons.</p>
     </div>
 
     {/* The roles stay explicit: at a computer, a moment is laid out with `display: contents`. */}
     <ol role="list" class="evening mt-10 lg:mt-20">
-      {MOMENTS.map(({ time, title, body, screen }, index) => {
-        // The order is the one scene that moves its items: from the jumble said to Tom's order (src/scripts/evening.ts).
-        const Player = index === 1 ? 'tonight-order' : 'play-once';
-        return (
-          <li role="listitem" class="moment">
-            <div id={`moment-${String(index + 1)}`} class="moment-text">
-              {/* On a phone, the hour beside the title; from a tablet, above it. */}
-              <h3 class="flex items-baseline gap-3 text-xl text-balance text-foreground sm:block sm:text-2xl">
-                <time datetime={time} class="moment-hour block w-fit shrink-0 text-3xl tabular-nums sm:mb-3 sm:text-5xl lg:text-6xl">
-                  {time}
-                </time>
-                {title}
-              </h3>
-              <p class="mt-2 max-w-md text-lg text-muted-foreground sm:mt-3">{body}</p>
-            </div>
+      {MOMENTS.map(({ time, title, body, screen }, index) => (
+        <li role="listitem" class="moment">
+          <div id={`moment-${String(index + 1)}`} class="moment-text">
+            {/* On a phone, the hour beside the title; from a tablet, above it. */}
+            <h3 class="flex items-baseline gap-3 text-xl text-balance text-foreground sm:block sm:text-2xl">
+              <time datetime={time} class="moment-hour block w-fit shrink-0 text-3xl tabular-nums sm:mb-3 sm:text-5xl lg:text-6xl">
+                {time}
+              </time>
+              {title}
+            </h3>
+            <p class="mt-2 max-w-md text-lg text-muted-foreground sm:mt-3">{body}</p>
+          </div>
 
-            <Player data-for={`moment-${String(index + 1)}`} class="moment-screen block">
-              {/* The hour is the moment's, just above or beside it: the screen keeps only its name. */}
-              <Screen title={screen}>
-                {index === 0 && (
-                  <div class="space-y-3">
-                    <PupilSays>{SPOKEN}</PupilSays>
-                    <TomSays>Le contrôle d&apos;histoire, c&apos;est pour quel jour&nbsp;?</TomSays>
-                    <PupilSays>Jeudi.</PupilSays>
-                  </div>
-                )}
-                {index === 1 && (
-                  <div>
-                    <ol class="flex flex-col gap-2">
-                      {HOMEWORK.map(({ subject, length, spoken }, position) => (
-                        <li
-                          data-spoken={spoken}
-                          class="tonight-item flex items-baseline gap-3 rounded-control bg-accent px-3 py-2 text-accent-foreground"
-                        >
-                          <span class="tonight-after font-heading font-extrabold tabular-nums">{position + 1}</span>
-                          <span class="font-bold">{subject}</span>
-                          <span class="ml-auto text-sm text-accent-muted-foreground">{length}</span>
-                        </li>
-                      ))}
-                    </ol>
-                    <div class="tonight-after mt-3">
-                      <TomSays>{ORDER_PROPOSED}</TomSays>
-                    </div>
-                  </div>
-                )}
-                {index === 2 && (
-                  <div class="space-y-3">
-                    <ol class="space-y-2">
-                      {STEPS.map(({ step, state }, position) => (
-                        <li
-                          class:list={[
-                            'step flex items-baseline gap-3 rounded-control px-3 py-2',
-                            state === 'en cours' ? 'step-current bg-accent text-accent-foreground' : 'ring-1 ring-border',
-                          ]}
-                        >
-                          <span class="font-heading font-extrabold tabular-nums">{position + 1}</span>
-                          <span class:list={['relative', state === 'fait' && 'text-muted-foreground']}>
-                            {step}
-                            {state === 'fait' && (
-                              <svg class="strike" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true">
-                                <path d="M1 4 C 25 2, 60 5, 99 2" pathLength="1" />
-                              </svg>
-                            )}
-                          </span>
-                          {state && (
-                            <span class:list={['ml-auto text-sm', state === 'en cours' ? 'text-accent-muted-foreground' : 'text-muted-foreground']}>
-                              {state}
-                            </span>
+          <play-once data-for={`moment-${String(index + 1)}`} class="moment-screen block">
+            {/* The hour is the moment's, just above or beside it: the screen keeps only its name. */}
+            <Screen title={screen}>
+              {index === 0 && (
+                <div class="space-y-3">
+                  <TomSays>Le contrôle d&apos;histoire, c&apos;est pour quel jour&nbsp;?</TomSays>
+                  <PupilSays>Jeudi.</PupilSays>
+                  <TomSays>Et en maths, quels exercices&nbsp;?</TomSays>
+                  <PupilSays>Le 3 et le 4.</PupilSays>
+                </div>
+              )}
+              {index === 1 && (
+                <div class="space-y-3">
+                  <PupilSays>Je préfère commencer par l&apos;anglais.</PupilSays>
+                  <ol class="divide-y rounded-control ring-1 ring-border">
+                    {CHANGED.map(({ subject, length }, position) => (
+                      <li class="flex items-baseline gap-3 px-3 py-2">
+                        <span class="font-heading font-extrabold tabular-nums">{position + 1}</span>
+                        <span class="font-bold">{subject}</span>
+                        <span class="ml-auto text-sm text-muted-foreground">{length}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+              {index === 2 && (
+                <div class="space-y-3">
+                  <ol class="space-y-2">
+                    {STEPS.map(({ step, state }, position) => (
+                      <li
+                        class:list={[
+                          'step flex items-baseline gap-3 rounded-control px-3 py-2',
+                          state === 'en cours' ? 'step-current bg-accent text-accent-foreground' : 'ring-1 ring-border',
+                        ]}
+                      >
+                        <span class="font-heading font-extrabold tabular-nums">{position + 1}</span>
+                        <span class:list={['relative', state === 'fait' && 'text-muted-foreground']}>
+                          {step}
+                          {state === 'fait' && (
+                            <svg class="strike" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true">
+                              <path d="M1 4 C 25 2, 60 5, 99 2" pathLength="1" />
+                            </svg>
                           )}
-                        </li>
+                        </span>
+                        {state && (
+                          <span class:list={['ml-auto text-sm', state === 'en cours' ? 'text-accent-muted-foreground' : 'text-muted-foreground']}>
+                            {state}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                  <TomSays>Qu&apos;est-ce que l&apos;exercice te demande de trouver&nbsp;?</TomSays>
+                </div>
+              )}
+              {index === 3 && (
+                <div>
+                  {/* The bag, drawn by its handle and its body. */}
+                  <span class="mx-auto block h-4 w-16 rounded-t-control border-2 border-b-0 border-input"></span>
+                  <div class="rounded-2xl border-2 border-input px-4 pt-3 pb-4">
+                    <p class="text-sm font-bold text-muted-foreground">Dans le cartable</p>
+                    <ul class="mt-2 space-y-1.5">
+                      {BAG.map((item) => (
+                        <li class="bag-item">{item}</li>
                       ))}
-                    </ol>
-                    <TomSays>Qu&apos;est-ce que l&apos;exercice te demande de trouver&nbsp;?</TomSays>
+                    </ul>
                   </div>
-                )}
-                {index === 3 && (
-                  <div>
-                    {/* The bag, drawn by its handle and its body. */}
-                    <span class="mx-auto block h-4 w-16 rounded-t-control border-2 border-b-0 border-input"></span>
-                    <div class="rounded-2xl border-2 border-input px-4 pt-3 pb-4">
-                      <p class="text-sm font-bold text-muted-foreground">Dans le cartable</p>
-                      <ul class="mt-2 space-y-1.5">
-                        {BAG.map((item) => (
-                          <li class="bag-item">{item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-              </Screen>
-            </Player>
-          </li>
-        );
-      })}
+                </div>
+              )}
+            </Screen>
+          </play-once>
+        </li>
+      ))}
     </ol>
   </div>
 </section>
@@ -241,37 +238,6 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
       .bag-item {
         opacity: 0;
         translate: 0 calc(var(--spacing) * -3);
-      }
-    }
-  }
-
-  /* The jumble: the homework in the order it was said, out of line, before Tom's order; only while the script that sorts
-   * it holds it (src/scripts/evening.ts). The jumble is set at once, and only its release is a transition. */
-  @media (prefers-reduced-motion: no-preference) {
-    tonight-order:not([data-armed]) :is(.tonight-item, .tonight-after) {
-      transition:
-        translate var(--duration-slow) var(--ease-standard) var(--duration-wait),
-        opacity var(--duration-slow) var(--ease-standard) var(--duration-wait);
-    }
-
-    tonight-order[data-armed] {
-      .tonight-item[data-spoken='1'] {
-        order: 1;
-        translate: calc(var(--spacing) * 2) 0;
-      }
-
-      .tonight-item[data-spoken='2'] {
-        order: 2;
-        translate: calc(var(--spacing) * -1) 0;
-      }
-
-      .tonight-item[data-spoken='3'] {
-        order: 3;
-        translate: calc(var(--spacing) * 3) 0;
-      }
-
-      .tonight-after {
-        opacity: 0;
       }
     }
   }

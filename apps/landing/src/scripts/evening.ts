@@ -16,8 +16,8 @@ class PlayOnce extends HTMLElement {
   connectedCallback() {
     if (reducedMotion.matches) return;
     this.dataset['armed'] = '';
-    // The entry state is computed now, before the observer can play the scene: a scene already in view on load (an
-    // arrival on /#soiree) then plays from it rather than from its end state. Its CSS sets it at once,
+    // The entry state is computed now, before the observer can play the scene: a scene already in view on load (the top
+    // of the page, an arrival on /#soiree) then plays from it rather than from its end state. Its CSS sets it at once,
     // without a transition.
     this.getBoundingClientRect();
     this.#observe();
