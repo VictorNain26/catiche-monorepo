@@ -1,87 +1,87 @@
 ---
 import ExternalLink from '@/components/atoms/external-link.astro';
-import { BRAND_NAME } from '@/lib/brand';
 
-// What makes Catiche worth trusting, in everyday words, each fact with its line in the docs:
-// - the research: docs/methode.md, "Ce qui vaut pour tous les élèves", sources [11], [13] and [17]; where the gestures
-//   come from, never that Catiche obtains these effects. A source is said in plain words; its scholarly name is only the
-//   link's title (docs/charte.md, "Les mots");
-// - what already protects the pupil: docs/tuteur.md, § 3 (the help level decided by the code, not the model) and § 4
-//   (the check before the pupil; the fixed distress answer, written and approved by a human, with the 3114 and a
-//   trusted adult);
+// What makes Catiche worth trusting, in everyday words, each fact with its line in the docs, on two levels:
+// - three proofs from the research: docs/methode.md, "Ce qui vaut pour tous les élèves", sources [11], [13] and [17];
+//   where the evening's gestures come from, never that Catiche obtains these effects nor a promise of progress. A source
+//   is said in plain words; its scholarly name is only the link's title (docs/charte.md, "Les mots");
+// - what protects the pupil: docs/tuteur.md, § 3 (the help level rises with real attempts, never under the mere demand
+//   for the answer) and § 4 (the check before the pupil; the fixed distress answer, written and approved by a human,
+//   with the 3114 and a trusted adult);
 // - the commitments: docs/architecture.md ("Hébergement", Clever Cloud in France), docs/tuteur.md (§ 2, Mistral's EU
-//   endpoint), the privacy policy (pages/confidentialite.astro), and the aim of docs/produit.md, "Pour qui".
-const RESEARCH = [
+//   endpoint) and the privacy policy (pages/confidentialite.astro).
+const PROOFS = [
   {
-    gesture: "Planifier son travail et vérifier ce qui est fait, quand des enseignants l'apprennent aux élèves",
-    finding: 'environ huit mois de progrès en plus sur une année, en moyenne, selon une synthèse de 355 études.',
+    mark: '355 études',
+    line: "Planifier son travail et faire le point : l'une des méthodes les mieux appuyées par la recherche en éducation.",
     source: {
       href: 'https://educationendowmentfoundation.org.uk/education-evidence/teaching-learning-toolkit/metacognition-and-self-regulation',
       title: 'Education Endowment Foundation, « Metacognition and self-regulation »',
     },
   },
   {
-    gesture: "Réviser en s'interrogeant, sur plusieurs jours",
-    finding: 'deux méthodes jugées très utiles par une grande revue de la recherche, quand relire et surligner le sont peu.',
+    mark: 'Plusieurs jours',
+    line: 'Réviser un contrôle sur plusieurs jours, plutôt que relire la veille : une méthode jugée très utile par la recherche.',
     source: { href: 'https://doi.org/10.1177/1529100612453266', title: 'Dunlosky et al., 2013' },
   },
   {
-    gesture: 'Un adulte qui soutient sans surveiller',
-    finding: 'chez 1 685 élèves suivis, une aide vécue comme un soutien va avec plus de progrès.',
+    mark: '1 685 élèves',
+    line: 'Une aide vécue comme un soutien va avec plus de progrès.',
     source: { href: 'https://doi.org/10.1080/00220671.2014.901283', title: 'Moroni et al., 2015' },
   },
 ];
 
-const SAFEGUARDS = [
-  "Chaque message de Tom est vérifié avant d'être affiché, et remplacé s'il contient la réponse.",
-  "Nos règles fixent le niveau d'aide : il monte quand votre collégien essaie vraiment.",
-  "Si votre collégien écrit qu'il veut se faire du mal, Tom s'arrête. Un message écrit à l'avance, sans intelligence artificielle, lui donne le 3114, un numéro d'écoute gratuit jour et nuit, et l'invite à parler à un adulte de confiance.",
-];
-
-const COMMITMENTS = [
-  'Les données sont gardées en France, et Tom fonctionne avec Mistral AI, en Europe.',
-  `${BRAND_NAME} n'a pas de publicité et ne vend aucune donnée.`,
-  'Nous visons des soirées de devoirs plus calmes et des devoirs rendus.',
+const LISTS = [
+  {
+    title: 'Ce qui protège votre collégien',
+    items: [
+      "Chaque message de Tom est vérifié avant d'être affiché, et remplacé s'il contient la réponse.",
+      "Tom aide un peu plus quand votre collégien essaie vraiment, jamais parce qu'il réclame la réponse.",
+    ],
+  },
+  {
+    title: 'Nos engagements',
+    items: ['Les données sont gardées en France, et Tom fonctionne avec Mistral AI, en Europe.', 'Pas de publicité, ni de vente de données.'],
+  },
 ];
 ---
 
-<section id="confiance" class="scroll-mt-20 bg-background py-12 md:py-16 lg:py-32">
-  <div class="container max-w-6xl">
+<section id="confiance" class="scroll-mt-20 bg-background py-14 md:py-20 lg:py-28">
+  <div class="container max-w-5xl">
     <h2 class="max-w-3xl text-3xl text-balance text-foreground sm:text-4xl">Pourquoi nous faire confiance</h2>
+    <p class="mt-3 max-w-2xl text-lg text-foreground">La soirée que nous construisons s&apos;appuie sur la recherche.</p>
 
-    <div class="mt-8 grid gap-8 md:grid-cols-2 md:gap-10 lg:mt-16 lg:grid-cols-3 lg:gap-12">
-      <div>
-        <h3 class="text-2xl text-balance text-foreground">La soirée que nous construisons s&apos;appuie sur la recherche</h3>
-        {/* Each source at the end of its sentence, in the line, opened in a new tab (atoms/external-link.astro). */}
-        <ul class="mt-4 space-y-3 text-foreground">
-          {RESEARCH.map(({ gesture, finding, source }) => (
-            <li class="border-l-2 border-annotation pl-4">
-              <strong class="font-bold">{gesture}</strong>&nbsp;: {finding}{' '}
-              <ExternalLink inline href={source.href} title={source.title} class="text-primary underline underline-offset-4">
-                La source
-              </ExternalLink>
-            </li>
-          ))}
-        </ul>
-      </div>
+    {/* Three proofs, each a large mark, one line, and its source in a new tab (atoms/external-link.astro). */}
+    <ul class="mt-8 grid gap-8 md:grid-cols-3 md:gap-10 lg:mt-12">
+      {PROOFS.map(({ mark, line, source }) => (
+        <li>
+          <p class="font-heading text-3xl font-extrabold text-primary lg:text-4xl">{mark}</p>
+          <p class="mt-2 text-foreground">
+            {line}{' '}
+            <ExternalLink inline href={source.href} title={source.title} class="text-primary underline underline-offset-4">
+              La source
+            </ExternalLink>
+          </p>
+        </li>
+      ))}
+    </ul>
 
-      <div>
-        <h3 class="text-2xl text-balance text-foreground">Ce qui protège votre collégien</h3>
-        <ul class="mt-4 space-y-3 text-foreground">
-          {SAFEGUARDS.map((safeguard) => (
-            <li class="border-l-2 border-annotation pl-4">{safeguard}</li>
-          ))}
-        </ul>
-      </div>
-
-      <div>
-        <h3 class="text-2xl text-balance text-foreground">Nous nous engageons</h3>
-        <ul class="mt-4 space-y-3 text-foreground">
-          {COMMITMENTS.map((commitment) => (
-            <li class="border-l-2 border-annotation pl-4">{commitment}</li>
-          ))}
-        </ul>
-      </div>
+    <div class="mt-12 grid gap-8 md:grid-cols-2 md:gap-10 lg:mt-16">
+      {LISTS.map(({ title, items }) => (
+        <div>
+          <h3 class="text-xl text-foreground">{title}</h3>
+          <ul class="mt-3 space-y-2 text-foreground">
+            {items.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
+
+    <p class="mt-10 rounded-2xl bg-secondary p-5 text-foreground lg:mt-12">
+      Si votre collégien écrit qu&apos;il veut se faire du mal, Tom s&apos;arrête. Un message écrit à l&apos;avance, sans intelligence artificielle,
+      lui donne le 3114, un numéro d&apos;écoute gratuit jour et nuit, et l&apos;invite à parler à un adulte de confiance.
+    </p>
   </div>
 </section>
