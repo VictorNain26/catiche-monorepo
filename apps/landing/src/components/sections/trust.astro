@@ -5,13 +5,13 @@ import ExternalLink from '@/components/atoms/external-link.astro';
 // - the research: docs/methode.md, "Ce qui vaut pour tous les élèves", sources [11], [13] and [17]; where the gestures
 //   come from, never that Catiche obtains these effects;
 // - the safeguards already built: docs/tuteur.md, § 3 (the ladder held by the server) and § 4 (the check before the
-//   pupil, the distress answer written by a human);
+//   pupil, the fixed distress answer written and approved by a human, with the 3114 and a trusted adult);
 // - the commitments: docs/architecture.md ("Hébergement"), docs/tuteur.md (§ 2, Mistral's EU endpoint), the privacy
 //   policy (pages/confidentialite.astro, linked from the footer), and docs/produit.md (no better grades).
 const RESEARCH = [
   {
-    gesture: 'Planifier et faire le point',
-    finding: '+8 mois de progrès en classe, en moyenne sur 355 études.',
+    gesture: "Planifier et faire le point, quand des enseignants l'enseignent",
+    finding: '+8 mois de progrès en moyenne, sur 355 études.',
     source: {
       href: 'https://educationendowmentfoundation.org.uk/education-evidence/teaching-learning-toolkit/metacognition-and-self-regulation',
       label: 'EEF',
@@ -19,7 +19,7 @@ const RESEARCH = [
   },
   {
     gesture: "Réviser en s'interrogeant, sur plusieurs jours",
-    finding: 'deux des techniques jugées les plus utiles.',
+    finding: 'deux techniques jugées très utiles, quand relire et surligner le sont peu.',
     source: { href: 'https://doi.org/10.1177/1529100612453266', label: 'Dunlosky et al., 2013' },
   },
   {
@@ -31,8 +31,8 @@ const RESEARCH = [
 
 const SAFEGUARDS = [
   "Chaque message de Tom est vérifié avant d'être affiché, et réécrit ou remplacé s'il contient la réponse.",
-  "C'est le serveur, pas l'IA, qui décide quand Tom aide davantage.",
-  "Si votre collégien semble aller mal, ce n'est pas Tom qui répond : une réponse écrite par un humain donne le 3114.",
+  "Ce sont nos règles, pas l'IA, qui décident quand Tom donne plus d'aide.",
+  "Si votre collégien écrit qu'il veut se faire du mal, ce n'est pas Tom qui répond : un message écrit à l'avance par un humain lui donne le 3114 et l'invite à parler à un adulte de confiance.",
 ];
 
 const COMMITMENTS = [

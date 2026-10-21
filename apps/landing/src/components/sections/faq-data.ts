@@ -17,11 +17,11 @@ export const FAQS: Faq[] = [
   {
     question: 'Et dans notre famille ?',
     answer:
-      "Le point du soir s'adaptera. Rentré tard, l'adulte le verra plus tard, et votre collégien trouvera son « Vu » le lendemain. Dans deux maisons, il ira à l'adulte chez qui il est ce soir-là. Si les devoirs sont un sujet de tension, vous pourrez le couper ; sans adulte disponible, il restera à votre collégien. Il sera proposé par défaut en 6e et en 5e ; en 4e et en 3e, votre collégien choisira de le partager.",
+      "Le point du soir s'adaptera. Si l'adulte rentre tard, il le verra plus tard, et votre collégien trouvera son « Vu » le lendemain. Dans deux maisons, il ira à l'adulte chez qui il est ce soir-là. Si les devoirs sont un sujet de tension, vous pourrez le couper ; sans adulte disponible, il restera à votre collégien. Il sera proposé par défaut en 6e et en 5e ; en 4e et en 3e, votre collégien choisira de le partager.",
   },
   {
     question: 'Ces gestes marcheront-ils avec Tom ?',
-    answer: `Les études citées portent sur des méthodes transmises par des enseignants ou des chercheurs, et ${BRAND_NAME} en reprend les gestes. Pour savoir ce qu'il en reste avec Tom, nous mesurerons dès les premiers élèves les soirées de devoirs par semaine, les devoirs rendus, et l'avis des familles par des questionnaires déjà validés.`,
+    answer: `Les études citées portent sur des méthodes enseignées par des enseignants ou des chercheurs, ou sur l'aide des adultes ; aucune ne porte sur un collégien qui travaille seul avec une IA. ${BRAND_NAME} en reprendra les gestes. Pour savoir ce qu'il en reste avec Tom, nous mesurerons dès les premiers élèves les soirées de devoirs par semaine, les devoirs rendus, et l'avis des familles par des questionnaires déjà validés.`,
   },
   {
     // The application is the web client served by the server, laid out for a phone and for a computer.
