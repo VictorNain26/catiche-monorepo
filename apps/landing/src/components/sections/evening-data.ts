@@ -3,13 +3,13 @@
 export const HOURS = { said: '17:30', ordered: '17:35', started: '17:40', ended: '18:50' } as const;
 
 /** What the pupil says, in a jumble, before Tom puts it in order. */
-export const SPOKEN = "J'ai les exercices 3 et 4 en maths pour demain, de l'anglais, et un contrôle d'histoire jeudi.";
+export const SPOKEN = "J'ai un contrôle d'histoire jeudi, de l'anglais, et les exercices 3 et 4 en maths pour demain.";
 
 /** The homework in Tom's order, its end state; `spoken` is its place in what the pupil said, `note` why it stands there. */
 export const HOMEWORK = [
-  { subject: 'Maths', note: 'pour demain', spoken: 1 },
+  { subject: 'Maths', note: 'pour demain', spoken: 3 },
   { subject: 'Anglais', note: '', spoken: 2 },
-  { subject: 'Histoire', note: 'une partie ce soir', spoken: 3 },
+  { subject: 'Histoire', note: 'une partie ce soir', spoken: 1 },
 ] as const;
 
 /** Tom's order, with its reasons; the pupil chooses (docs/produit.md: he can change it). */
