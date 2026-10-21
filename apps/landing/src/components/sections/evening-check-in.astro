@@ -1,39 +1,32 @@
 ---
 import CheckIn from '@/components/molecules/check-in.astro';
-import { CHECK_IN, EVENING, HOURS } from './evening-data';
+import { CHECK_IN } from './evening-data';
 
 // The evening check-in of docs/produit.md ("Le point du soir"), presented in the present (docs/charte.md, "Les mots");
-// its name above the title, because the FAQ uses it; how it fits each family is a question of the FAQ. The adult sees that it is done,
-// never the conversations (docs/tuteur.md, § 8); the pupil enters with a code of his own
-// (apps/server/src/platform/auth/student-sign-in.ts). The adult's side of the evening: the brand's deep plane, and the
-// adult's phone rather than the pupil's screen.
+// how it fits each family is a question of the FAQ. The adult sees that it is done, never the conversations
+// (docs/tuteur.md, § 8). The adult's side of the evening, with one focal point: the adult's phone on the brand's deep
+// plane, which grows slightly as it comes into view before the « Vu » lands, the strongest moment of the page.
 ---
 
-<section id="point-du-soir" class="scroll-mt-20 bg-panel py-10 text-panel-foreground md:py-20 lg:py-28">
-  <div class="container grid max-w-5xl items-center gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,18rem)] lg:gap-20">
+<section id="point-du-soir" class="scroll-mt-20 bg-panel py-14 text-panel-foreground md:py-20 lg:py-28">
+  <div class="container grid max-w-5xl items-center gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:gap-20">
     <div>
-      <p class="font-bold">Le point du soir</p>
-      <h2 class="mt-3 text-3xl text-balance sm:text-4xl">Vous savez ce qui est fait, sans surveiller.</h2>
-      <p class="mt-5 max-w-xl text-lg md:text-xl">
+      <h2 class="section-title">Vous savez ce qui est fait, sans surveiller.</h2>
+      <p class="mt-5 max-w-xl text-lg md:mt-6 md:text-xl">
         Votre collégien vous montre ce qu&apos;il a fait. Vous répondez «&nbsp;Vu&nbsp;», avec un mot d&apos;encouragement si vous voulez.
       </p>
-      <p class="mt-4 max-w-xl text-lg md:text-xl">Ses échanges avec Tom restent à lui&nbsp;: il ouvre son espace avec son propre code.</p>
     </div>
 
-    {/* The adult's phone, drawn in CSS: its frame, a speaker slot, and the evening's summary with the « Vu » that lands
-     * once, like a stamp, when it comes into view (src/scripts/evening.ts). */}
-    <figure class="mx-auto w-full max-w-72">
-      <play-once class="block rounded-3xl bg-overlay p-2.5 shadow-control-hover">
+    {/* The adult's phone, drawn in CSS: a thin frame, a speaker slot, and the evening's summary with its « Vu »
+     * (src/scripts/evening.ts plays it once). */}
+    <figure class="mx-auto w-full max-w-80">
+      <play-once class="phone block rounded-3xl bg-card p-1.5 shadow-control-hover ring-2 ring-panel-foreground/50">
         <div aria-hidden="true" class="rounded-2xl bg-card px-5 pt-3 pb-6 text-card-foreground">
-          <span class="mx-auto block h-1.5 w-14 rounded-full bg-border"></span>
-          <p class="mt-4 mb-4 flex items-baseline justify-between gap-4 border-b pb-3 text-sm">
-            <span class="font-heading font-extrabold">{EVENING}</span>
-            <span class="text-muted-foreground tabular-nums">{HOURS.ended}</span>
-          </p>
+          <span class="mx-auto mb-5 block h-1.5 w-14 rounded-full bg-border"></span>
           <CheckIn {...CHECK_IN} />
           <p class="mt-5 border-t pt-4">
             <span class="text-sm font-bold text-muted-foreground">Votre réponse</span>
-            <span class="seen mt-1 block w-fit font-heading text-5xl font-extrabold text-primary">Vu</span>
+            <span class="seen mt-1 block w-fit font-heading text-6xl font-extrabold text-primary">Vu</span>
           </p>
         </div>
       </play-once>
@@ -43,13 +36,24 @@ import { CHECK_IN, EVENING, HOURS } from './evening-data';
 </section>
 
 <style>
-  /* Your « Vu » lands last, once, like a stamp, when the script that holds it plays it (src/scripts/evening.ts); set at
-   * once while it waits, only its landing is a transition. */
+  /* The phone grows slightly as it comes into view, then your « Vu » lands, like a stamp; set at once while the script
+   * holds them (src/scripts/evening.ts), only their arrival is a transition. */
   @media (prefers-reduced-motion: no-preference) {
+    play-once.phone:not([data-armed]) {
+      transition:
+        scale var(--duration-reveal) var(--ease-out-expo),
+        opacity var(--duration-reveal) var(--ease-out-expo);
+    }
+
+    play-once.phone[data-armed] {
+      opacity: 0;
+      scale: 0.92;
+    }
+
     play-once:not([data-armed]) .seen {
       transition:
-        opacity var(--duration-fast) var(--ease-standard) var(--duration-slow),
-        scale var(--duration-base) var(--ease-standard) var(--duration-slow);
+        opacity var(--duration-fast) var(--ease-standard) var(--duration-reveal),
+        scale var(--duration-base) var(--ease-standard) var(--duration-reveal);
     }
 
     play-once[data-armed] .seen {
