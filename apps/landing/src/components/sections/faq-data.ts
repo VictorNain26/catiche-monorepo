@@ -8,8 +8,9 @@ interface Faq {
 // Each answer is checked against the docs, and none repeats the page: docs/produit.md ("L'accès pendant la préparation",
 // "Ouvert": the price; "Le point du soir": each family; "Pronote"; "Ce qu'on mesurera"), docs/methode.md ("À retenir" of
 // "Ce qui vaut pour tous les élèves"), docs/architecture.md ("Client web"); the shared device's 10 minutes are
-// IDLE_MINUTES in apps/server/src/platform/auth/student-sign-in.ts. In everyday words, saying what Catiche does; what is
-// not built is told in the present under a line that says so (docs/charte.md, "Les mots").
+// IDLE_MINUTES in apps/server/src/platform/auth/student-sign-in.ts. In everyday words, saying what Catiche does; the
+// product's state is said here once, in the first answer, and at the top of the page (docs/charte.md, "Les mots").
+// The page's FAQPage data (pages/index.astro) is built from these same answers.
 export const FAQS: Faq[] = [
   {
     question: 'Combien ça coûte, et quand ?',
@@ -18,11 +19,11 @@ export const FAQS: Faq[] = [
   {
     question: 'Et si je rentre tard, ou si nous vivons dans deux maisons ?',
     answer:
-      "Vous voyez le point du soir en rentrant, et votre collégien trouve votre « Vu » le lendemain. Dans deux maisons, il va à l'adulte chez qui votre collégien est ce soir-là. Sans adulte disponible, il reste à votre collégien. Vous pouvez aussi le couper. Il est proposé d'office en 6e et en 5e ; en 4e et en 3e, votre collégien choisit de le partager.",
+      "Vous voyez le point du soir en rentrant, et votre collégien trouve votre « Vu » le lendemain. S'il vit dans deux maisons, le point du soir va à l'adulte chez qui il est ce soir-là. Vous pouvez aussi le couper. En 6e et en 5e, il est proposé dès le départ ; en 4e et en 3e, votre collégien choisit de le partager.",
   },
   {
     question: 'Est-ce que ça marche ?',
-    answer: `${BRAND_NAME} reprend des méthodes qui ont fait leurs preuves quand des enseignants ou des chercheurs les transmettent. Nous le mesurerons dès les premiers élèves : combien de soirs par semaine ils font leurs devoirs avec Tom, les devoirs rendus, et l'avis des familles.`,
+    answer: `${BRAND_NAME} reprend des méthodes qui marchent quand des enseignants ou des chercheurs les transmettent. Avec Tom, nous le mesurons dès les premiers élèves : combien de soirs par semaine ils travaillent avec lui, les devoirs rendus et l'avis des familles.`,
   },
   {
     // The application is the web client served by the server, laid out for a phone and for a computer.
@@ -32,11 +33,10 @@ export const FAQS: Faq[] = [
   {
     question: 'Un seul ordinateur pour toute la famille ?',
     answer:
-      "Oui. Chaque collégien a son espace et y entre avec son propre code. Sur un ordinateur partagé, son espace se ferme tout seul après 10 minutes sans s'en servir, pour que ses échanges restent à lui.",
+      "Oui. Chaque collégien a son espace et y entre avec son propre code. Sur un ordinateur partagé, son espace se ferme tout seul après 10 minutes sans qu'il s'en serve, pour que ses échanges restent à lui.",
   },
   {
     question: 'Et Pronote ?',
-    answer:
-      "Dans la soirée que nous construisons, votre collégien dit ses devoirs à voix haute, en regardant ce qu'il a noté : pas besoin de Pronote.",
+    answer: "Votre collégien dit ses devoirs à voix haute, en regardant ce qu'il a noté : pas besoin de Pronote.",
   },
 ];

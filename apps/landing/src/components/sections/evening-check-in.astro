@@ -2,8 +2,8 @@
 import CheckIn from '@/components/molecules/check-in.astro';
 import { CHECK_IN, EVENING, HOURS } from './evening-data';
 
-// The evening check-in of docs/produit.md ("Le point du soir"), not built yet: told in the present under the line that
-// says so (docs/charte.md, "Les mots"); how it fits each family is a question of the FAQ. The adult sees that it is done,
+// The evening check-in of docs/produit.md ("Le point du soir"), presented in the present (docs/charte.md, "Les mots");
+// its name above the title, because the FAQ uses it; how it fits each family is a question of the FAQ. The adult sees that it is done,
 // never the conversations (docs/tuteur.md, § 8); the pupil enters with a code of his own
 // (apps/server/src/platform/auth/student-sign-in.ts). The adult's side of the evening: the brand's deep plane, and the
 // adult's phone rather than the pupil's screen.
@@ -12,12 +12,12 @@ import { CHECK_IN, EVENING, HOURS } from './evening-data';
 <section id="point-du-soir" class="scroll-mt-20 bg-panel py-10 text-panel-foreground md:py-20 lg:py-28">
   <div class="container grid max-w-5xl items-center gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,18rem)] lg:gap-20">
     <div>
-      <p class="text-panel-foreground">En préparation aussi&nbsp;: le point du soir.</p>
+      <p class="font-bold">Le point du soir</p>
       <h2 class="mt-3 text-3xl text-balance sm:text-4xl">Vous savez ce qui est fait, sans surveiller.</h2>
       <p class="mt-5 max-w-xl text-lg md:text-xl">
         Votre collégien vous montre ce qu&apos;il a fait. Vous répondez «&nbsp;Vu&nbsp;», avec un mot d&apos;encouragement si vous voulez.
       </p>
-      <p class="mt-4 max-w-xl text-lg md:text-xl">Ses échanges avec Tom restent à lui&nbsp;: il entre avec son propre code.</p>
+      <p class="mt-4 max-w-xl text-lg md:text-xl">Ses échanges avec Tom restent à lui&nbsp;: il ouvre son espace avec son propre code.</p>
     </div>
 
     {/* The adult's phone, drawn in CSS: its frame, a speaker slot, and the evening's summary with the « Vu » that lands

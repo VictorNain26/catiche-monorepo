@@ -17,7 +17,7 @@ export const SPOKEN = "Le contrôle d'histoire, c'est jeudi. L'anglais, pour ven
 /** The homework in Tom's order, its end state; `spoken` is its place in what the pupil said, `note` its due date. */
 export const HOMEWORK = [
   { subject: 'Maths', note: 'pour demain', spoken: 3 },
-  { subject: 'Histoire', note: 'une partie ce soir', spoken: 1 },
+  { subject: 'Histoire', note: 'contrôle jeudi', spoken: 1 },
   { subject: 'Anglais', note: 'pour vendredi', spoken: 2 },
 ] as const;
 

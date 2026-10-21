@@ -7,8 +7,8 @@ import TomSays from '@/components/molecules/tom-says.astro';
 import { BRAND_NAME } from '@/lib/brand';
 import { EVENING, HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
 
-// What Catiche is, for whom, and what to do now (docs/charte.md, "Les mots"): docs/produit.md, "En une phrase"; the
-// evening is what we are building ("À construire"), accounts open on invitation ("L'accès pendant la préparation").
+// What Catiche is, for whom, and what to do now (docs/charte.md, "Les mots"): docs/produit.md, "En une phrase", told in
+// the present; its state is said here once, in the pill ("L'accès pendant la préparation").
 // Beside it, Tom steps out of the evening: the homework said in a jumble falls into his order, once, as the page opens.
 ---
 
@@ -23,8 +23,8 @@ import { EVENING, HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data
         </span>
       </h1>
       <p class="mt-6 max-w-xl text-lg text-foreground">
-        Nous construisons Tom, le tuteur de {BRAND_NAME}&nbsp;: une intelligence artificielle qui l&apos;aide chaque soir à s&apos;organiser, sans
-        faire le travail à sa place.
+        Tom, le tuteur de {BRAND_NAME}, est une intelligence artificielle qui aide votre collégien chaque soir à s&apos;organiser, sans faire le
+        travail à sa place.
       </p>
       <RequestInvitation status="En préparation · ouverture sur invitation" class="mt-8" />
     </div>
@@ -35,9 +35,9 @@ import { EVENING, HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data
     <figure class="relative isolate mb-36 sm:mb-40 lg:mb-12">
       <span aria-hidden="true" class="halo absolute -inset-16 -z-10"></span>
       <figcaption class="sr-only">
-        Un exemple, un mardi soir à 17&nbsp;h&nbsp;35&nbsp;: votre collégien dit pour quand sont ses devoirs, dans le désordre, et Tom lui propose un
-        ordre&nbsp;: d&apos;abord les maths, pour demain, puis une partie de l&apos;histoire, pour le contrôle de jeudi, et l&apos;anglais, pour
-        vendredi. C&apos;est votre collégien qui choisit l&apos;ordre.
+        Un exemple, un mardi soir à 17&nbsp;h&nbsp;35&nbsp;: votre collégien dit, dans le désordre, pour quel jour est chaque devoir, et Tom lui
+        propose un ordre&nbsp;: d&apos;abord les maths, pour demain, puis une partie de l&apos;histoire, pour le contrôle de jeudi, et l&apos;anglais,
+        pour vendredi. C&apos;est votre collégien qui choisit l&apos;ordre.
       </figcaption>
       <tonight-order class="relative block">
         <Screen time={HOURS.ordered} title={EVENING} class="pb-24 shadow-control-hover lg:pb-5 lg:pl-32 xl:pl-40">
