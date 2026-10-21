@@ -30,6 +30,8 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-21 ; ce qui 
 
 ## Avant le premier élève réel
 
+- Aucune invitation pour un enfant réel tant que les bloquants (clause Mistral, base du staging
+  joignable) ne sont pas levés : les invitations se donnent à la main.
 - À la création d'un compte adulte, une déclaration horodatée : majeur, et représentant légal des
   enfants qu'il ajoute (un compte peut en porter plusieurs). Elle vaut consentement parental ; la
   vérification reste proportionnée, sans pièce d'identité (CNIL) (Victor, 2026-10-21).

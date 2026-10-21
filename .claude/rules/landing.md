@@ -37,10 +37,14 @@ Clever Cloud (`apps/landing/Caddyfile`).
   `@supports (animation-timeline: view())` ; ce que le CSS ne sait pas faire passe par les API
   natives (Web Animations, `IntersectionObserver`) dans `apps/landing/src/scripts/evening.ts`,
   sans bibliothèque. Une vidéo de Tom a son bouton Pause.
-- Jamais un état d'entrée masqué que le script qui le lève n'a pas posé lui-même (`data-armed`,
-  `apps/landing/src/scripts/evening.ts`), ni hors de `@media (prefers-reduced-motion: no-preference)` :
-  sans scripts, si le script échoue, ou sous le mouvement réduit, même activé en cours de visite,
-  la page s'affiche entière et immobile ; son HTML est l'état final.
+- Jamais un état d'entrée masqué hors de `@media (prefers-reduced-motion: no-preference)`, ni
+  posé par le CSS quand c'est un script qui le lève : ce script le pose lui-même (`data-armed`,
+  `apps/landing/src/scripts/evening.ts`), et rien n'attend un script qui ne vient pas. Seule une
+  animation en CSS pur, qui ne dépend d'aucun script, part d'un état masqué, si elle se termine
+  d'elle-même (le surligneur, `both` avec délai) ou suit le défilement (les écrans de la soirée,
+  sous `@supports (animation-timeline: view())`). Sans scripts, si un script échoue, ou sous le
+  mouvement réduit, même activé en cours de visite, la page s'affiche entière et immobile ; son
+  HTML est l'état final.
 - Jamais de `<script>` ni de `<style>` en `is:inline`, ni d'attribut `style` : la CSP
   (`security.csp`, `apps/landing/astro.config.mjs`) n'admet que ce qu'Astro a haché.
 - Jamais un texte suivi d'une balise qui ouvre la ligne suivante sans `{' '}` : Astro 7 compresse
