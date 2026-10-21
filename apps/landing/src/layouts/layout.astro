@@ -5,7 +5,7 @@ import '@/styles/global.css';
 import Header from '@/components/layout/header.astro';
 import Footer from '@/components/layout/footer.astro';
 import JsonLd from '@/components/json-ld.astro';
-import { BRAND_NAME } from '@/lib/brand';
+import { BRAND_NAME, SITE_DESCRIPTION, SITE_TITLE } from '@/lib/brand';
 import { OG_IMAGE } from '@/lib/open-graph';
 
 interface Props {
@@ -14,11 +14,9 @@ interface Props {
   noindex?: boolean;
 }
 
-const TITLE = `${BRAND_NAME} – Aide aux devoirs au collège : apprendre à s'organiser`;
-// The product in the present, from docs/produit.md, under 160 characters; its state is on the page (docs/charte.md).
-const DESCRIPTION = `${BRAND_NAME}, l'aide aux devoirs du collège, de la 6e à la 3e : chaque soir, Tom aide votre collégien à s'organiser, sans faire le travail à sa place.`;
-const { title, description = DESCRIPTION, noindex = false } = Astro.props;
-const pageTitle = title ? `${title} | ${BRAND_NAME}` : TITLE;
+// The description is under 160 characters; the product's state is on the page (docs/charte.md, "Les mots").
+const { title, description = SITE_DESCRIPTION, noindex = false } = Astro.props;
+const pageTitle = title ? `${title} | ${BRAND_NAME}` : SITE_TITLE;
 const site = Astro.site?.href ?? '';
 const ogImage = new URL('/opengraph-image.png', site).href;
 
@@ -60,14 +58,13 @@ const jsonLd = [
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content={String(OG_IMAGE.width)} />
     <meta property="og:image:height" content={String(OG_IMAGE.height)} />
-    {/* The same picture on every page: its alt says what it shows, not the page. */}
-    <meta property="og:image:alt" content={TITLE} />
+    <meta property="og:image:alt" content={OG_IMAGE.alt} />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
-    <meta name="twitter:image:alt" content={TITLE} />
+    <meta name="twitter:image:alt" content={OG_IMAGE.alt} />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" type="image/x-icon" />
     <link rel="icon" href="/icon.png" sizes="64x64" type="image/png" />

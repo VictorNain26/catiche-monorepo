@@ -3,25 +3,34 @@ import { cn } from '@repo/ui/classes';
 import ExternalLink from '@/components/atoms/external-link.astro';
 
 // A line of proof under what it supports, from docs/methode.md: where a gesture of the evening comes from, never that
-// Catiche obtains its effect. Its figure in bold inside the sentence; its source said in plain words, its scholarly name
-// only the link's title, in a new tab (docs/charte.md, "Les mots"). A screen reader hears whose source it is, so that
-// the page's « La source » links differ. Its ink is its plane's.
+// Catiche obtains its effect. One label, « Ce que dit la recherche »; its sources said in plain words, « La source »,
+// their scholarly names only in the links' titles, in a new tab (docs/charte.md, "Les mots"). A screen reader hears
+// whose source it is, so that the page's links differ. Its ink is its plane's.
+interface Source {
+  label: string;
+  href: string;
+  title: string;
+  name: string;
+}
+
 interface Props {
-  before: string;
-  figure: string;
-  after: string;
-  source: { href: string; title: string; name: string };
+  text: string;
+  sources: readonly Source[];
   class?: string;
 }
 
-const { before, figure, after, source, class: className } = Astro.props;
+const { text, sources, class: className } = Astro.props;
 ---
 
-<p class={cn('max-w-md', className)}>
-  {before} <strong class="font-bold">{figure}</strong>
-  {after}{' '}
-  <ExternalLink inline href={source.href} title={source.title} class="underline underline-offset-4">
-    La source
-    <span class="sr-only">{` : ${source.name}`}</span>
-  </ExternalLink>
+<p class={cn('max-w-md text-sm', className)}>
+  <strong class="font-bold">Ce que dit la recherche&nbsp;:</strong> {text}{' '}
+  {sources.map((source, index) => (
+    <>
+      {index > 0 && ' · '}
+      <ExternalLink inline href={source.href} title={source.title} class="underline underline-offset-4">
+        {source.label}
+        <span class="sr-only">{`\xa0: ${source.name}`}</span>
+      </ExternalLink>
+    </>
+  ))}
 </p>

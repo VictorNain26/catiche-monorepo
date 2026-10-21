@@ -8,7 +8,7 @@ import EveningCheckIn from '@/components/sections/evening-check-in.astro';
 import Trust from '@/components/sections/trust.astro';
 import FAQ from '@/components/sections/faq.astro';
 import Closing from '@/components/sections/closing.astro';
-import { FAQS } from '@/components/sections/faq-data';
+import { FAQS, plainAnswer } from '@/components/sections/faq-data';
 
 const faqJsonLd = {
   '@context': 'https://schema.org',
@@ -16,7 +16,7 @@ const faqJsonLd = {
   mainEntity: FAQS.map(({ question, answer }) => ({
     '@type': 'Question',
     name: question,
-    acceptedAnswer: { '@type': 'Answer', text: answer },
+    acceptedAnswer: { '@type': 'Answer', text: plainAnswer(answer) },
   })),
 };
 ---

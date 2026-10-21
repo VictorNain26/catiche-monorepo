@@ -11,16 +11,14 @@ interface Props {
 }
 
 const { class: className, start = 'load' } = Astro.props;
+// At the end of the page, his wave is the page's goodbye: a screen reader hears it too.
+const label = `Tom, le tuteur de ${BRAND_NAME}, a l’allure d’une loutre.${start === 'arrival' ? ' Il vous fait un signe de la main.' : ''}`;
 ---
 
 {/* Tom stands on the page itself, without a shape behind him. He waves once, in less than five seconds, so that no Pause
  * button is needed (WCAG 2.2.2), then stays on the wave's last frame. His still picture is the page without scripts. */}
 <tom-illustration data-start={start} class={cn('relative block w-full max-w-sm', className)}>
-  <span
-    role="img"
-    aria-label={`Tom, le tuteur de ${BRAND_NAME} : une loutre en pull bleu, un stylo dans la poche`}
-    class="relative block aspect-square w-full"
-  >
+  <span role="img" aria-label={label} class="relative block aspect-square w-full">
     <Image src={tom} alt="" width={384} height={384} densities={[1, 2]} class="relative size-full" />
     <video aria-hidden="true" muted playsinline preload="none" class="invisible absolute inset-0 size-full">
       {/* Safari drops VP9 alpha, so it must meet its HEVC source first. */}

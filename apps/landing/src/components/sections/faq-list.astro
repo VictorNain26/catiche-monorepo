@@ -1,6 +1,6 @@
 ---
 import { Plus } from '@lucide/astro';
-import { CONTACT_EMAIL } from '@/lib/brand';
+import InlineText from '@/components/atoms/inline-text.astro';
 import { FAQS } from './faq-data';
 ---
 
@@ -27,20 +27,23 @@ import { FAQS } from './faq-data';
             aria-hidden="true"
           />
         </summary>
-        <div class="max-w-2xl px-4 pb-5 text-foreground">
-          {/* The answers are plain text, for the page's FAQPage data too: our address becomes a link only here. */}
-          <p>
-            {faq.answer.split(CONTACT_EMAIL).map((part, index) => (
-              <>
-                {index > 0 && (
-                  <a href={`mailto:${CONTACT_EMAIL}`} class="text-primary underline underline-offset-4">
-                    {CONTACT_EMAIL}
-                  </a>
-                )}
-                {part}
-              </>
-            ))}
-          </p>
+        <div class="max-w-2xl space-y-3 px-4 pb-5 text-foreground">
+          {/* The answers are plain text, for the page's FAQPage data too: their classes and our address are set here. */}
+          {faq.answer.map((block) =>
+            typeof block === 'string' ? (
+              <p>
+                <InlineText text={block} />
+              </p>
+            ) : (
+              <ul class="list-disc space-y-1.5 pl-5">
+                {block.map((item) => (
+                  <li>
+                    <InlineText text={item} />
+                  </li>
+                ))}
+              </ul>
+            ),
+          )}
         </div>
       </details>
     </div>

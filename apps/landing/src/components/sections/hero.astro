@@ -5,29 +5,27 @@ import RequestInvitation from '@/components/molecules/request-invitation.astro';
 import Screen from '@/components/molecules/screen.astro';
 import TomSays from '@/components/molecules/tom-says.astro';
 import { BRAND_NAME } from '@/lib/brand';
-import { EVENING, HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
+import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN, screenTime } from './evening-data';
 
 // What Catiche is, for whom, and what to do now (docs/charte.md, "Les mots"): docs/produit.md, "En une phrase", told in
-// the present; its state is said here once, in the pill ("L'accès pendant la préparation").
-// Beside it, Tom steps out of the evening: the homework said in a jumble falls into his order, once, as the page opens.
+// the present, Tom introduced once as an artificial intelligence; its state is said here once, in the pill
+// ("L'accès pendant la préparation").
+// Beside it, Tom steps out of the evening: the homework said with its dates falls into his order, once, as the page opens.
 ---
 
 <section class="flex min-h-[calc(100svh-var(--spacing)*16)] items-center overflow-hidden py-10 lg:py-16">
   <div class="container grid max-w-7xl items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] xl:gap-16">
     {/* The text of the top of the page is shown at once, still: only what is scrolled to appears (.claude/rules/landing.md). */}
     <div>
-      {/* Balanced lines, and « du début à la fin. » kept together, so the stroke is never cut in two. */}
+      {/* Balanced lines, and « avec Tom » kept together, so the stroke is never cut in two. */}
       <h1 class="text-hero leading-tight text-balance text-foreground sm:text-5xl xl:text-6xl xl:leading-tight">
-        {BRAND_NAME} accompagne votre collégien pendant ses devoirs,{' '}
-        <span class="whitespace-nowrap">
-          <mark class="highlighter">du début à la fin</mark>.
-        </span>
+        Les devoirs du soir, votre enfant les organise <mark class="highlighter whitespace-nowrap">avec Tom</mark>
       </h1>
       <p class="mt-6 max-w-xl text-lg text-foreground">
-        Tom, le tuteur de {BRAND_NAME}, est une intelligence artificielle qui aide votre collégien chaque soir à s&apos;organiser, sans faire le
-        travail à sa place.
+        Tom, le tuteur de {BRAND_NAME}, est une intelligence artificielle. De la 6<sup>e</sup> à la 3<sup>e</sup>, votre enfant lui dit ses devoirs,
+        choisit par où commencer et avance pas à pas.
       </p>
-      <RequestInvitation status="En préparation · ouverture sur invitation" class="mt-8" />
+      <RequestInvitation status class="mt-8" />
     </div>
 
     {/* The card of the evening on a halo of water, and Tom stepping out of it: on a phone he stands under its lower edge,
@@ -37,12 +35,12 @@ import { EVENING, HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data
     <figure class="relative isolate mb-36 w-full sm:mb-40 md:mx-auto md:max-w-xl lg:mb-12 lg:max-w-none">
       <span aria-hidden="true" class="halo absolute -inset-16 -z-10"></span>
       <figcaption class="sr-only">
-        Un exemple, un mardi soir à 17&nbsp;h&nbsp;35&nbsp;: votre collégien dit, dans le désordre, pour quel jour est chaque devoir, et Tom lui
-        propose un ordre&nbsp;: d&apos;abord les maths, pour demain, puis une partie de l&apos;histoire, pour le contrôle de jeudi, et l&apos;anglais,
-        pour vendredi. C&apos;est votre collégien qui choisit l&apos;ordre.
+        Exemple d’écran, un mardi à 17&nbsp;h&nbsp;35. Votre enfant dit pour quand est chaque devoir&nbsp;: les maths pour demain, un contrôle
+        d’histoire jeudi, l’anglais pour vendredi. La liste se range&nbsp;: maths, histoire, anglais. Tom explique cet ordre et demande à votre enfant
+        s’il le garde.
       </figcaption>
       <tonight-order class="relative block">
-        <Screen time={HOURS.ordered} title={EVENING} class="shadow-control-hover">
+        <Screen time={screenTime(HOURS.ordered)} class="shadow-control-hover">
           {/* The screen's top line spans the card; its content leaves Tom his room, under it on a phone and on its left
            * at a computer. */}
           <div class="pb-24 lg:pb-0 lg:pl-32 xl:pl-40">
@@ -51,11 +49,11 @@ import { EVENING, HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data
               {HOMEWORK.map(({ subject, note, spoken }, position) => (
                 <li
                   data-before={spoken}
-                  class="flex items-baseline gap-3 rounded-control bg-accent px-3 py-2 text-accent-foreground ring-1 ring-border"
+                  class="flex flex-wrap items-baseline gap-x-3 rounded-control bg-accent px-3 py-2 text-accent-foreground ring-1 ring-border"
                 >
                   <span class="tonight-after font-heading font-extrabold tabular-nums">{position + 1}</span>
                   <span class="font-bold">{subject}</span>
-                  {note && <span class="ml-auto text-sm text-accent-muted-foreground">{note}</span>}
+                  <span class="ml-auto text-sm text-accent-muted-foreground">{note}</span>
                 </li>
               ))}
             </ol>
@@ -81,8 +79,8 @@ import { EVENING, HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data
     }
   }
 
-  /* The jumble: the homework in the order it was said (`tonight-order`, src/styles/global.css), and out of line, before
-   * Tom's order. */
+  /* The homework as it was said, out of line, before it falls into Tom's order (`tonight-order`,
+   * src/styles/global.css). */
   @media (prefers-reduced-motion: no-preference) {
     tonight-order[data-armed] {
       [data-before='1'] {

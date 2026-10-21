@@ -1,0 +1,14 @@
+---
+// The exercise a screen works on, as the application shows it: its subject and number, then its statement.
+interface Props {
+  title: string;
+  statement: string;
+}
+
+const { title, statement } = Astro.props;
+---
+
+<div class="rounded-control bg-accent px-3 py-2 text-accent-foreground">
+  <p class="font-heading font-extrabold">{title}</p>
+  <p class="mt-0.5">{statement}</p>
+</div>

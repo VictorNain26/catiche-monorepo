@@ -1,77 +1,88 @@
 ---
 import CheckIn from '@/components/molecules/check-in.astro';
 import Proof from '@/components/molecules/proof.astro';
-import { CHECK_IN } from './evening-data';
+import { CHECK_IN, HOURS, screenTime } from './evening-data';
 
 // The evening check-in of docs/produit.md ("Le point du soir"), presented in the present (docs/charte.md, "Les mots");
-// how it fits each family is a question of the FAQ. The adult sees that it is done, never the conversations
-// (docs/tuteur.md, § 8); without an adult, the summary stays the pupil's, and nothing is held against him. The proof of
-// the adult's part: docs/methode.md, "Ce qui vaut pour tous les élèves", source [17].
+// how it fits each family is a question of the FAQ. The adult sees what is done, never the conversations
+// (docs/tuteur.md, § 8). The proof of the adult's part: docs/methode.md, "Ce qui vaut pour tous les élèves", source [17].
 const SUPPORT = {
-  before: 'Chez',
-  figure: '1 685 élèves',
-  after: ", l'aide d'un adulte aux devoirs, vécue comme un soutien, va avec plus de progrès.",
-  source: { href: 'https://doi.org/10.1080/00220671.2014.901283', title: 'Moroni et al., 2015', name: 'Moroni, 2015' },
+  text: 'Chez 1\xa0685\xa0élèves suivis, l’aide aux devoirs reçue à la maison s’accompagne de plus de progrès quand l’élève la vit comme un soutien.',
+  sources: [{ label: 'La source', href: 'https://doi.org/10.1080/00220671.2014.901283', title: 'Moroni et al., 2015', name: 'Moroni, 2015' }],
 };
 
-// The adult's side of the evening, with one focal point: the adult's phone on the brand's deep plane, which grows
-// slightly as it comes into view before the « Vu » lands, the strongest moment of the page.
+// The adult's side of the evening, pared down: a title, a sentence, the adult's phone on the brand's deep plane with its
+// two buttons, then the state after the gesture, and a proof in small print.
 ---
 
 <section id="point-du-soir" class="scroll-mt-20 plane-panel py-28 text-panel-foreground md:py-32 lg:py-40">
-  {/* At 768 px, the phone narrows so that the title keeps two lines. */}
+  {/* At 768 px, the phone narrows so that the title keeps its lines. */}
   <div class="container grid max-w-5xl items-center gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] md:gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:gap-20">
     <play-once class="block">
-      {/* The evening leads here: its last moment is what the pupil shows. */}
-      <p data-reveal="rise" class="max-w-xl text-lg md:text-xl">
-        Ce point du soir, votre collégien peut vous le montrer.
-      </p>
-      <h2 data-reveal="rise" data-order="2" class="mt-3 section-title">
-        Vous savez ce qui est fait, sans surveiller.
+      <h2 data-reveal="rise" class="section-title">
+        En fin de soirée, votre enfant vous montre ce qu’il a fait
       </h2>
-      <p data-reveal="rise" data-order="3" class="mt-5 max-w-xl text-lg md:mt-6 md:text-xl">
-        C&apos;est le point du soir&nbsp;: votre collégien vous montre ce qu&apos;il a fait, et vous répondez «&nbsp;Vu&nbsp;», avec un mot
-        d&apos;encouragement si vous voulez.
+      <p data-reveal="rise" data-order="2" class="mt-5 max-w-xl text-lg md:mt-6 md:text-xl">
+        C’est le point du soir&nbsp;: vous répondez «&nbsp;Vu&nbsp;», avec un mot d’encouragement si vous le voulez.
       </p>
-      <p data-reveal="rise" data-order="4" class="mt-4 max-w-xl text-lg md:text-xl">
-        Si personne n&apos;est là ce soir, le point du soir reste à votre collégien, sans reproche.
-      </p>
-      <div data-reveal="fade" data-order="4" class="mt-6 md:mt-8">
+      <div data-reveal="fade" data-order="3" class="mt-8 md:mt-10">
         <Proof {...SUPPORT} />
       </div>
     </play-once>
 
-    {/* The adult's phone, drawn in CSS: a thin frame, a speaker slot, and the evening's summary with its « Vu »
-     * (src/scripts/reveal.ts plays it once). */}
+    {/* The adult's phone, drawn in CSS: a thin frame, a speaker slot, the evening's check-in and its two buttons; then
+     * « Vu » pressed and the word added (src/scripts/reveal.ts plays it once). Its HTML is the state after the gesture. */}
     <figure class="mx-auto w-full max-w-80 md:max-w-64 lg:max-w-80">
       <play-once data-reveal="pop" class="block rounded-3xl bg-card p-1.5 shadow-control-hover ring-2 ring-panel-foreground/50">
         <div aria-hidden="true" class="rounded-2xl bg-card px-5 pt-3 pb-6 text-card-foreground">
-          <span class="mx-auto mb-5 block h-1.5 w-14 rounded-full bg-border"></span>
+          <span class="mx-auto mb-3 block h-1.5 w-14 rounded-full bg-border"></span>
+          <p class="mb-4 border-b pb-3 text-sm font-bold text-muted-foreground tabular-nums">{screenTime(HOURS.seen)}</p>
+          <p class="mb-3 font-heading text-lg font-extrabold">Point du soir</p>
           <CheckIn {...CHECK_IN} />
-          <p class="mt-5 border-t pt-4">
-            <span class="text-sm font-bold text-muted-foreground">Votre réponse</span>
-            <span class="seen mt-1 block w-fit font-heading text-6xl font-extrabold text-primary">Vu</span>
+          <p class="mt-5 flex flex-wrap gap-2">
+            <span class="seen-button rounded-full bg-primary px-4 py-2 font-bold text-primary-foreground ring-2 ring-primary">Vu</span>
+            <span class="rounded-full px-4 py-2 font-bold text-primary ring-2 ring-input">Ajouter un mot</span>
+          </p>
+          <p class="seen mt-5 border-t pt-4">
+            <span class="block font-heading text-5xl font-extrabold text-primary">Vu</span>
+            <span class="mt-2 block">«&nbsp;Bon courage pour jeudi.&nbsp;»</span>
           </p>
         </div>
       </play-once>
-      <figcaption class="sr-only">Le point du soir sur votre téléphone&nbsp;: ce qui est fait, ce qui reste, et votre «&nbsp;Vu&nbsp;».</figcaption>
+      <figcaption class="sr-only">
+        Exemple d’écran sur votre téléphone, mardi à 19&nbsp;h&nbsp;10. Le point du soir montre ce que votre enfant a fait et ce qui reste. Vous
+        répondez «&nbsp;Vu&nbsp;» et ajoutez&nbsp;: «&nbsp;Bon courage pour jeudi.&nbsp;»
+      </figcaption>
     </figure>
   </div>
 </section>
 
 <style>
-  /* The phone rises and grows slightly as it comes into view (`pop`, src/styles/global.css), then your « Vu » lands,
-   * like a stamp; set at once while the script holds it (src/scripts/reveal.ts), only its arrival is a transition. */
+  /* The phone rises and grows slightly as it comes into view (`pop`, src/styles/global.css); then « Vu », outlined like
+   * its neighbour while it waits, is pressed, and your answer lands under it, like a stamp, with your word. Set at once
+   * while the script holds it (src/scripts/reveal.ts), only their change is a transition. */
   @media (prefers-reduced-motion: no-preference) {
+    play-once[data-played] .seen-button {
+      transition:
+        background-color var(--duration-fast) var(--ease-standard) var(--duration-reveal),
+        color var(--duration-fast) var(--ease-standard) var(--duration-reveal);
+    }
+
     play-once[data-played] .seen {
       transition:
-        opacity var(--duration-fast) var(--ease-standard) var(--duration-reveal),
-        scale var(--duration-base) var(--ease-standard) var(--duration-reveal);
+        opacity var(--duration-fast) var(--ease-standard) calc(var(--duration-reveal) + var(--duration-base)),
+        scale var(--duration-base) var(--ease-standard) calc(var(--duration-reveal) + var(--duration-base));
+    }
+
+    play-once[data-armed] .seen-button {
+      background-color: var(--color-card);
+      color: var(--color-primary);
+      --tw-ring-color: var(--color-input);
     }
 
     play-once[data-armed] .seen {
       opacity: 0;
-      scale: 1.6;
+      scale: 1.2;
     }
   }
 </style>

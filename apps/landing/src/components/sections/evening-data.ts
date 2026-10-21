@@ -1,36 +1,35 @@
 // The example evening of the home page, in one place: one Tuesday evening, from the top of the page to the moments of
-// the evening and the evening check-in, with the same homework at the same hours (docs/produit.md, "Ce que fait
-// Catiche"). Maths are due tomorrow, Wednesday; the history test is on Thursday; English is due on Friday. The pupil
-// chooses to start with English at 17:35, so the maths exercise comes after it, at 18:00, and English is done first.
-export const HOURS = { said: '17:30', ordered: '17:35', started: '18:00', ended: '18:50' } as const;
+// the evening, the help that answers with a question and the evening check-in, with the same homework at the same
+// hours (docs/produit.md, "Ce que fait Catiche"). Maths are due tomorrow, Wednesday; the history test is on Thursday;
+// English is due on Friday. At 17:35 the pupil chooses English first; then maths, exercise 3 at 18:00 and exercise 4
+// at 18:20; then history; the check-in at 18:50, and the adult's « Vu » at 19:10.
+export const HOURS = { said: '17:30', ordered: '17:35', started: '18:00', asked: '18:20', ended: '18:50', seen: '19:10' } as const;
 
-/** The evening the screens show. */
-export const EVENING = 'Mardi soir';
+/** The top line of a screen, as a phone's clock writes it: « Mardi · 17:35 ». */
+export function screenTime(time: string): string {
+  return `Mardi · ${time}`;
+}
 
-/** At 17:30, the pupil says his homework in a jumble, without dates, and Tom asks what is missing. */
-export const FIRST_SAID = "J'ai de l'histoire, de l'anglais et des maths.";
-export const MISSING = "Chaque devoir, c'est pour quel jour ? Et en maths, quels exercices ?";
-
-/** At 17:35, the pupil's answer, still in the order he said it, before Tom puts it in order. */
-export const SPOKEN = "Le contrôle d'histoire, c'est jeudi. L'anglais, pour vendredi. Et en maths, les exercices 3 et 4 pour demain.";
+/** At 17:35, on the top of the page, the pupil gives each homework's date. */
+export const SPOKEN = 'Les maths pour demain. L’histoire, c’est un contrôle jeudi. L’anglais, pour vendredi.';
 
 /** The homework in Tom's order, its end state; `spoken` is its place in what the pupil said, `note` its due date. */
 export const HOMEWORK = [
-  { subject: 'Maths', note: 'pour demain', spoken: 3 },
-  { subject: 'Histoire', note: 'contrôle jeudi', spoken: 1 },
-  { subject: 'Anglais', note: 'pour vendredi', spoken: 2 },
+  { subject: 'Maths', note: 'exercices 3 et 4 · pour demain', spoken: 1 },
+  { subject: 'Histoire', note: 'contrôle · jeudi', spoken: 2 },
+  { subject: 'Anglais', note: 'pour vendredi', spoken: 3 },
 ] as const;
 
 /** Tom's order, with its reasons; the pupil chooses (docs/produit.md: he can change it). */
 export const ORDER_PROPOSED =
-  "Je mettrais les maths d'abord, c'est pour demain. Puis une partie de l'histoire, pour le contrôle de jeudi. C'est toi qui choisis l'ordre.";
+  'Les maths passent en premier\xa0: elles sont pour demain. L’histoire suit, pour réviser le contrôle sur deux soirs, puis l’anglais. Tu gardes cet ordre\xa0?';
 
-/** Where the evening ends, at 18:50 and on the screen the adult of the house sees: the test comes back the day before
- * it. */
+/** Where the evening ends, at 18:50 and on the screen the adult of the house sees at 19:10: the test comes back the day
+ * before it. */
 export const CHECK_IN = {
-  done: "Anglais, maths, une partie de l'histoire",
-  left: "Réviser la suite de l'histoire demain, pour jeudi",
+  done: 'anglais · maths, exercices 3 et 4 · histoire, le début de la révision',
+  left: 'histoire, la suite de la révision demain, pour le contrôle de jeudi',
 } as const;
 
-/** Tomorrow's bag, Wednesday: the maths to hand in. Nothing says there is history or English on Wednesday. */
-export const BAG = ['Cahier de maths, exercices 3 et 4'] as const;
+/** Tomorrow's bag, Wednesday: the maths to hand in. */
+export const BAG = 'le cahier de maths, exercices 3 et 4';

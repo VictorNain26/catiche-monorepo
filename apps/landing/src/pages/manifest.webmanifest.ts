@@ -1,5 +1,5 @@
 import { light } from '@repo/tokens/scales.json';
-import { BRAND_NAME } from '@/lib/brand';
+import { BRAND_NAME, SITE_DESCRIPTION } from '@/lib/brand';
 
 // A manifest can't read CSS variables: the step theme.css's background points at.
 const MIST = light['mist-1'];
@@ -8,7 +8,7 @@ export function GET() {
   return Response.json({
     name: BRAND_NAME,
     short_name: BRAND_NAME,
-    description: "L'aide aux devoirs du collège, de la 6e à la 3e : chaque soir, Tom aide votre collégien à s'organiser.",
+    description: SITE_DESCRIPTION,
     start_url: '/',
     display: 'standalone',
     background_color: MIST,
