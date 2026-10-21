@@ -12,10 +12,10 @@ import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
 // Beside it, Tom steps out of the evening: the homework said in a jumble falls into his order, once, as the page opens.
 ---
 
-<section class="hero flex min-h-[calc(100svh-var(--spacing)*16)] items-center overflow-hidden py-10 lg:py-16">
-  <div class="container grid max-w-6xl items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:gap-20">
+<section class="flex min-h-[calc(100svh-var(--spacing)*16)] items-center overflow-hidden py-10 lg:py-16">
+  <div class="container grid max-w-7xl items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] xl:gap-16">
     <div>
-      <h1 class="text-4xl leading-tight text-pretty text-foreground sm:text-5xl lg:text-6xl lg:leading-tight">
+      <h1 class="text-4xl leading-tight text-pretty text-foreground sm:text-5xl xl:text-6xl xl:leading-tight">
         {BRAND_NAME} accompagne votre collégien pendant ses devoirs, <mark class="highlighter">du début à la fin</mark>.
       </h1>
       <p class="mt-6 max-w-xl text-lg text-foreground">
@@ -25,14 +25,17 @@ import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
       <RequestInvitation status="En préparation · ouverture sur invitation" class="mt-8" />
     </div>
 
-    {/* The card of the evening, and Tom standing in front of its lower corner, on a soft contact shadow. */}
-    <figure class="relative mb-24">
+    {/* The card of the evening on a halo of water, and Tom stepping out of it: on a phone he stands under its lower edge,
+     * which leaves him room; at a computer, in front of its left third, which its content leaves free. His feet are
+     * below the card, on a soft contact shadow. */}
+    <figure class="relative isolate mb-36 sm:mb-40 lg:mb-12">
+      <span aria-hidden="true" class="halo absolute -inset-16 -z-10"></span>
       <figcaption class="sr-only">
         Un exemple de soirée&nbsp;: votre collégien dit ses devoirs dans le désordre, et Tom lui propose par où commencer&nbsp;: les maths,
         l&apos;anglais, puis la révision du contrôle d&apos;histoire. Votre collégien peut changer l&apos;ordre.
       </figcaption>
-      <tonight-order class="relative ml-auto block w-11/12 sm:w-4/5 lg:w-full">
-        <Screen time={HOURS.ordered} title="Ce soir" class="shadow-control-hover">
+      <tonight-order class="relative block">
+        <Screen time={HOURS.ordered} title="Ce soir" class="pb-24 shadow-control-hover lg:pb-5 lg:pl-32 xl:pl-40">
           <PupilSays>{SPOKEN}</PupilSays>
           <ol class="mt-4 flex flex-col gap-2">
             {HOMEWORK.map(({ subject, length, spoken }, position) => (
@@ -43,14 +46,13 @@ import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
               </li>
             ))}
           </ol>
-          {/* Tom's line on the right: the lower left corner is where Tom stands. */}
-          <div class="tonight-after mt-4 ml-auto w-3/5">
+          <div class="tonight-after mt-4">
             <TomSays>{ORDER_PROPOSED}</TomSays>
           </div>
         </Screen>
       </tonight-order>
-      <div class="absolute -bottom-24 -left-4 w-44 sm:w-52 lg:-left-32 lg:w-52">
-        <span aria-hidden="true" class="absolute inset-x-1/4 bottom-1 h-3 rounded-full bg-overlay/25 blur-md"></span>
+      <div class="pointer-events-none absolute -bottom-36 left-0 w-60 sm:-bottom-40 sm:w-64 lg:-bottom-12 lg:-left-28 lg:w-80 xl:-left-40 xl:w-100">
+        <span aria-hidden="true" class="absolute inset-x-1/4 bottom-1 h-4 rounded-full bg-overlay/30 blur-md"></span>
         <TomIllustration class="max-w-none" />
       </div>
     </figure>
@@ -58,9 +60,9 @@ import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
 </section>
 
 <style>
-  /* A light matter behind the evening: a soft halo of water from the tokens. */
-  .hero {
-    background: radial-gradient(ellipse 60% 70% at 85% 45%, var(--color-halo), transparent), var(--color-background);
+  /* Depth behind the evening: a soft halo of water from the tokens, fading out from the card's middle. */
+  .halo {
+    background: radial-gradient(closest-side, var(--color-halo), transparent);
   }
 
   /* The reed lays itself behind the words, once, as the page opens. */
