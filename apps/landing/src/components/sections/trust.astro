@@ -22,20 +22,24 @@ const COMMITMENTS = [
 ---
 
 <section id="confiance" class="scroll-mt-20 bg-background py-28 md:py-32 lg:py-40">
-  <div class="container max-w-5xl">
-    <play-once class="block">
+  {/* On a phone, one column: the title, the commitments, the 3114. From lg, two: the title and the 3114 on the left, the
+   * commitments facing them on the right. */}
+  <div class="container grid max-w-5xl gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-x-16 lg:gap-y-10">
+    <play-once class="block lg:col-start-1 lg:row-start-1">
       <h2 data-reveal="rise" class="section-title max-w-3xl text-foreground">
         Votre enfant travaille dans un espace <mark class="highlighter">protégé</mark>
       </h2>
     </play-once>
 
-    {/* Each commitment by its key words, then its sentence: a list read at a glance, not three cards. */}
-    <play-once class="mt-10 block max-w-3xl lg:mt-14">
+    {/* Each commitment by its key words, then its sentence: a list read at a glance, not three cards. A reed dot marks
+     * each one, a mark of state (docs/charte.md, "Couleurs"). */}
+    <play-once class="block max-w-3xl lg:col-start-2 lg:row-span-2 lg:row-start-1">
       <ul data-reveal="rise" aria-label="Nos engagements" class="space-y-6 lg:space-y-8">
         {COMMITMENTS.map(({ key, text }) => (
-          <li>
+          <li class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4">
+            <span aria-hidden="true" class="mt-2.5 size-2.5 rounded-full bg-highlight lg:mt-3"></span>
             <p class="font-heading text-xl font-extrabold text-foreground lg:text-2xl">{key}</p>
-            <p class="mt-1 text-lg text-foreground">{text}</p>
+            <p class="col-start-2 mt-1 text-lg text-foreground">{text}</p>
           </li>
         ))}
       </ul>
@@ -43,7 +47,7 @@ const COMMITMENTS = [
 
     {/* The 3114 in one plain line. The number calls from a phone; its target is at least 44 px each way, its padding
      * taken back by margins so that neither the words nor the line move. */}
-    <play-once class="mt-12 block max-w-3xl lg:mt-16">
+    <play-once class="block max-w-3xl lg:col-start-1 lg:row-start-2">
       <p data-reveal="fade" class="text-lg text-foreground">
         <strong class="font-bold">3114.</strong> Si Tom repère dans un message que votre enfant veut se faire du mal, la séance s’arrête. Un message
         écrit à l’avance par une personne lui donne le{' '}
