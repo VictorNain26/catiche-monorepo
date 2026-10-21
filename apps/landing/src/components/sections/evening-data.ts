@@ -25,7 +25,8 @@ export const HOMEWORK = [
 export const ORDER_PROPOSED =
   "Je mettrais les maths d'abord, c'est pour demain. Puis une partie de l'histoire, pour le contrôle de jeudi. C'est toi qui choisis l'ordre.";
 
-/** Where the evening ends, on the screen the adult of the house sees: the test comes back the day before it. */
+/** Where the evening ends, at 18:50 and on the screen the adult of the house sees: the test comes back the day before
+ * it. */
 export const CHECK_IN = {
   done: "Anglais, maths, une partie de l'histoire",
   left: "Réviser la suite de l'histoire demain, pour jeudi",

@@ -1,0 +1,25 @@
+---
+import { cn } from '@repo/ui/classes';
+import ExternalLink from '@/components/atoms/external-link.astro';
+
+// A line of proof under what it supports, from docs/methode.md: where a gesture of the evening comes from, never that
+// Catiche obtains its effect. Its figure in bold inside the sentence; its source said in plain words, its scholarly name
+// only the link's title, in a new tab (docs/charte.md, "Les mots"). Its ink is its plane's.
+interface Props {
+  before: string;
+  figure: string;
+  after: string;
+  source: { href: string; title: string };
+  class?: string;
+}
+
+const { before, figure, after, source, class: className } = Astro.props;
+---
+
+<p class={cn('max-w-md', className)}>
+  {before} <strong class="font-bold">{figure}</strong>
+  {after}{' '}
+  <ExternalLink inline href={source.href} title={source.title} class="underline underline-offset-4">
+    La source
+  </ExternalLink>
+</p>

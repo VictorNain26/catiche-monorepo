@@ -1,23 +1,40 @@
 ---
+import CheckIn from '@/components/molecules/check-in.astro';
+import Proof from '@/components/molecules/proof.astro';
 import PupilSays from '@/components/molecules/pupil-says.astro';
 import Screen from '@/components/molecules/screen.astro';
 import TomSays from '@/components/molecules/tom-says.astro';
 import { spokenHour } from '@/lib/hours';
-import { BAG, FIRST_SAID, HOMEWORK, HOURS, MISSING } from './evening-data';
+import { BAG, CHECK_IN, FIRST_SAID, HOMEWORK, HOURS, MISSING } from './evening-data';
 
 // The evening of docs/produit.md, "Ce que fait Catiche", and its gestures in docs/methode.md, "Les gestes d'une soirée":
 // the product presented in the present, as docs/produit.md describes it (docs/charte.md, "Les mots").
 // A question or a hint is the bottom of Tom's ladder (docs/tuteur.md, § 3). One row per moment, like a chapter: its
-// hour, its title and its sentence on the left, its screen facing them on the right; on a phone, one under the other.
+// hour, its title and its sentence on the left, with the proof of its gesture under them (docs/methode.md, "Ce qui vaut
+// pour tous les élèves", sources [11] and [13]); its screen facing them on the right; on a phone, one under the other.
 // Each row rises once as it comes into view, its text first, then its screen, which grows slightly: the section's strong
-// moment. In the screen of 17:35, the list falls into the pupil's order (`tonight-order`).
+// moment; its proof fades in. In the screen of 17:35, the list falls into the pupil's order (`tonight-order`). The last
+// line leads to the evening check-in, the next section.
 const MOMENTS = [
   {
     time: HOURS.said,
     title: "Dire ce qu'il a ce soir",
     body: 'Votre collégien dit ses devoirs à voix haute, et Tom demande ce qui manque.',
   },
-  { time: HOURS.ordered, title: 'Choisir par où commencer', body: 'Tom propose un ordre, que votre collégien peut changer.' },
+  {
+    time: HOURS.ordered,
+    title: 'Choisir par où commencer',
+    body: "Tom propose les maths d'abord, pour demain. Votre collégien préfère l'anglais : c'est lui qui choisit.",
+    proof: {
+      before: "Planifier son travail et faire le point compte parmi les méthodes les mieux appuyées, d'après",
+      figure: '355 études',
+      after: '.',
+      source: {
+        href: 'https://educationendowmentfoundation.org.uk/education-evidence/teaching-learning-toolkit/metacognition-and-self-regulation',
+        title: 'Education Endowment Foundation, « Metacognition and self-regulation »',
+      },
+    },
+  },
   {
     time: HOURS.started,
     title: 'Avancer par petites étapes',
@@ -25,10 +42,16 @@ const MOMENTS = [
   },
   {
     time: HOURS.ended,
-    title: 'Préparer demain',
-    body: "Tom aide votre collégien à préparer son cartable, et note la suite de l'histoire pour demain soir, avant le contrôle de jeudi.",
+    title: 'Faire le point et préparer demain',
+    body: "Tom fait le point avec votre collégien : ce qui est fait, ce qui reste. Puis il l'aide à préparer son cartable pour demain.",
+    proof: {
+      before: 'Réviser un contrôle sur',
+      figure: 'plusieurs jours',
+      after: ', plutôt que la veille, est jugé très utile par la recherche.',
+      source: { href: 'https://doi.org/10.1177/1529100612453266', title: 'Dunlosky et al., 2013' },
+    },
   },
-] as const;
+];
 
 const STEPS = [
   { step: "Relire l'énoncé", state: 'fait' },
@@ -46,14 +69,15 @@ const CHANGED = [english, maths, history];
   <div class="container max-w-5xl">
     <play-once class="block">
       <h2 data-reveal="rise" class="section-title max-w-3xl text-foreground">
-        De 17&nbsp;h&nbsp;30 au cartable prêt.
+        Avec Tom, de 17&nbsp;h&nbsp;30 au cartable prêt.
       </h2>
     </play-once>
 
     <ol role="list" class="mt-8 space-y-12 lg:mt-14 lg:space-y-16">
-      {MOMENTS.map(({ time, title, body }, index) => (
+      {MOMENTS.map(({ time, title, body, proof }, index) => (
         <li role="listitem">
-          <play-once class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-16">
+          {/* At a computer, the screen spans both rows, and the proof stays right under the moment's sentence. */}
+          <play-once class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:grid-rows-[auto_1fr] lg:gap-x-16">
             <div data-reveal="rise">
               <h3 class="text-xl text-foreground sm:text-2xl">
                 <time datetime={time} class="block font-heading text-4xl font-extrabold text-primary tabular-nums">
@@ -63,7 +87,7 @@ const CHANGED = [english, maths, history];
               </h3>
               <p class="mt-2 max-w-md text-lg text-foreground">{body}</p>
             </div>
-            <div data-reveal="pop" data-order="2">
+            <div data-reveal="pop" data-order="2" class="lg:row-span-2">
               <Screen>
                 {index === 0 && (
                   <div class="space-y-3">
@@ -121,25 +145,40 @@ const CHANGED = [english, maths, history];
                   </div>
                 )}
                 {index === 3 && (
-                  <div>
-                    {/* The bag, drawn by its handle and its body. */}
-                    <span class="mx-auto block h-4 w-16 rounded-t-control border-2 border-b-0 border-input"></span>
-                    <div class="rounded-2xl border-2 border-input px-4 pt-3 pb-4">
-                      <p class="text-sm font-bold text-muted-foreground">Dans le cartable</p>
-                      <ul class="mt-2 space-y-1.5">
-                        {BAG.map((item) => (
-                          <li>{item}</li>
-                        ))}
-                      </ul>
+                  <div class="space-y-5">
+                    {/* What is done and what is left first, the same as on the evening check-in; then the bag, drawn by
+                     * its handle and its body. */}
+                    <CheckIn {...CHECK_IN} />
+                    <div>
+                      <span class="mx-auto block h-4 w-16 rounded-t-control border-2 border-b-0 border-input"></span>
+                      <div class="rounded-2xl border-2 border-input px-4 pt-3 pb-4">
+                        <p class="text-sm font-bold text-muted-foreground">Dans le cartable</p>
+                        <ul class="mt-2 space-y-1.5">
+                          {BAG.map((item) => (
+                            <li>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
                   </div>
                 )}
               </Screen>
             </div>
+            {proof && (
+              <div data-reveal="fade" data-order="3">
+                <Proof {...proof} class="text-muted-foreground" />
+              </div>
+            )}
           </play-once>
         </li>
       ))}
     </ol>
+
+    <play-once class="mt-12 block lg:mt-16">
+      <p data-reveal="rise" class="max-w-3xl text-xl font-bold text-foreground lg:text-2xl">
+        Ce point du soir, votre collégien peut vous le montrer.
+      </p>
+    </play-once>
   </div>
 </section>
 
