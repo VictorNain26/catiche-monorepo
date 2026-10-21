@@ -115,6 +115,17 @@ de Tom, qui parle à l'élève.
   qu'il ne lit : l'essentiel va en tête de chaque bloc.
 - Une idée et un verbe conjugué par phrase, sujet en tête. Environ 15 mots par phrase, 25 au plus.
   Pas de titre sans verbe, sauf une question.
+- **La syntaxe simple, celle qu'on dirait à voix haute** (Victor, 2026-10-21). Sujet, verbe,
+  complément, dans cet ordre. Ce qui fait un texte « généré » est interdit :
+  - un thème détaché puis repris (« Les devoirs du soir, votre enfant les organise ») ;
+  - une virgule qui coupe un titre en deux moitiés (« Votre enfant avance avec Tom, du premier
+    devoir au cartable ») ;
+  - le rythme ternaire mécanique, les doubles compléments, la phrase bilan qui résume ce qui
+    vient d'être dit ;
+  - les formules « ce n'est pas X, c'est Y », « sans X » et « soit… soit » ;
+  - un mot répété d'une phrase à la suivante.
+- Un titre est une seule affirmation simple, de 8 mots au plus, ou une vraie question. Il dit ce
+  qui change pour le lecteur, pas un thème.
 - Le présent. Les mots des familles, pas les nôtres (« ce qu'il a fait », pas « récapitulatif ») ;
   un mot du produit s'explique la première fois.
 - Aucun mot technique ou savant (« serveur », « navigateur », « IA » en abrégé, « bêta »). Aucun
