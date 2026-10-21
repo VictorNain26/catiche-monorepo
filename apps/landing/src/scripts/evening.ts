@@ -156,15 +156,24 @@ class EveningScenes extends HTMLElement {
     return held;
   }
 
+  // Fits the steps under the section's title, which never shrinks: their screens shrink first; if that is not enough,
+  // the scene's spacings tighten (`data-tight`, sections/evening.astro) and the screens are fitted again.
+  #fit(): boolean {
+    this.#unfit();
+    if (this.#fitScreens()) return true;
+    this.dataset['tight'] = '';
+    return this.#fitScreens();
+  }
+
   // Gives every step's text the height of the tallest, so that its screen always starts at the same place, and, at a
   // computer, every screen too, so that its one frame never jumps; on a phone, the frame follows each step. Then fits
   // the steps in the room the scene leaves them, their screens shrunk alike if need be; false if they would be too
   // small to read. The frames and `zoom` go through the CSS object model, which the CSP allows (no style attribute in
   // the HTML).
-  #fit(): boolean {
+  #fitScreens(): boolean {
     const list = this.querySelector<HTMLElement>('.steps');
     if (!list) return false;
-    this.#unfit();
+    this.#unframe();
     const tallest = (selector: string) => Math.max(...this.#steps.map((element) => element.querySelector<HTMLElement>(selector)?.offsetHeight ?? 0));
     this.style.setProperty('--text-frame', `${String(tallest('[data-text]'))}px`);
     if (!phone.matches) this.style.setProperty('--screen-frame', `${String(tallest('[data-screen] > *'))}px`);
@@ -182,6 +191,11 @@ class EveningScenes extends HTMLElement {
   }
 
   #unfit() {
+    delete this.dataset['tight'];
+    this.#unframe();
+  }
+
+  #unframe() {
     this.style.removeProperty('--text-frame');
     this.style.removeProperty('--screen-frame');
     for (const step of this.#steps) step.querySelector<HTMLElement>('[data-screen]')?.style.removeProperty('zoom');

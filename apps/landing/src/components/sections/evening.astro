@@ -77,7 +77,7 @@ const [maths, history, english] = HOMEWORK;
 const CHANGED = [english, maths, history];
 ---
 
-<section id="soiree" class="scroll-mt-20 bg-background py-12 md:py-16 lg:py-24">
+<section id="soiree" class="scroll-mt-20 bg-background pt-6 pb-12 md:pt-8 md:pb-16 lg:pt-12 lg:pb-24">
   {/* The moments, held while they are scrolled (src/scripts/evening.ts): the script makes the track several windows
    * high and holds the scene under the header, its title on top, where each step takes the place of the one before,
    * with its rank among the four. Without it, if it fails, or under reduced motion, the four steps follow one another,
@@ -334,14 +334,10 @@ const CHANGED = [english, maths, history];
         box-shadow: none;
       }
 
-      /* The title stays on top of the held scene, smaller, so that each step keeps its room under it. */
+      /* The title stays on top of the held scene, a section's title still: the room a step lacks is taken from its
+       * screen, then from the spacings (`data-tight`, src/scripts/evening.ts), never from the title. */
       .heading {
         margin: 0;
-      }
-
-      .heading h2 {
-        font-size: var(--text-2xl);
-        line-height: var(--text-2xl--line-height);
       }
 
       .heading p {
@@ -386,11 +382,6 @@ const CHANGED = [english, maths, history];
           gap: calc(var(--spacing) * 2);
         }
 
-        .heading h2 {
-          font-size: var(--text-lg);
-          line-height: var(--text-lg--line-height);
-        }
-
         /* The introduction stays for a screen reader; the hours below say the same to the eye. */
         .heading p {
           position: absolute;
@@ -428,6 +419,32 @@ const CHANGED = [english, maths, history];
           font-size: var(--text-sm);
           line-height: var(--text-sm--line-height);
         }
+      }
+    }
+
+    /* A window where the screens, shrunk as far as they go, still leave a step without room (src/scripts/evening.ts):
+     * the scene's spacings tighten, the title keeps its size. */
+    evening-scenes[data-held][data-tight] {
+      .scene {
+        gap: var(--spacing);
+        padding-block: var(--spacing);
+      }
+
+      [data-step] > div {
+        row-gap: var(--spacing);
+      }
+
+      [data-screen] > :global(*) {
+        padding: calc(var(--spacing) * 2);
+      }
+
+      [data-screen] > :global(* > p:first-child) {
+        margin-bottom: var(--spacing);
+        padding-bottom: var(--spacing);
+      }
+
+      [data-screen] :is(.space-y-3, .space-y-4) > :global(:not(:last-child)) {
+        margin-block-end: calc(var(--spacing) * 1.5);
       }
     }
   }
