@@ -1,6 +1,7 @@
 // The blocks of the page play once, when they are read (src/scripts/reveal.ts), and the evening is held while it is
-// scrolled (src/scripts/scenes.ts). Durations and curves come from the tokens, through the computed style.
+// scrolled (src/scripts/scenes.ts), and the hour of the evening that does not start runs (src/scripts/clock.ts). Durations and curves come from the tokens, through the computed style.
 
+import { CLOCK_MINUTES, clockMinute, clockTime } from './clock';
 import { type Entry, release, REVEAL_MARGIN, reveal } from './reveal';
 import {
   type Change,
@@ -417,6 +418,57 @@ class EveningScenes extends HTMLElement {
   }
 }
 
+// The hour of the evening that does not start (sections/problem.astro): outside reduced motion, it follows its title as
+// it is scrolled (src/scripts/clock.ts), up to 18 h, and never goes back. Its HTML is 17 h 30, which reduced motion
+// turned on during the visit brings back, for good.
+class ProblemClock extends HTMLElement {
+  #reached = 0;
+  #frame = 0;
+  #cleanups: (() => void)[] = [];
+
+  connectedCallback() {
+    const title = this.closest('h2');
+    const hour = this.querySelector<HTMLElement>('[data-clock]');
+    if (reducedMotion.matches || !title || !hour) return;
+    const header = document.querySelector('header');
+    const update = () => {
+      this.#frame = 0;
+      const view = { height: window.innerHeight, offset: header?.offsetHeight ?? 0 };
+      const minute = clockMinute(title.getBoundingClientRect().top, view, this.#reached);
+      if (minute === this.#reached) return;
+      this.#reached = minute;
+      hour.textContent = clockTime(minute);
+      if (minute === CLOCK_MINUTES) this.#stop();
+    };
+    const schedule = () => {
+      if (!this.#frame) this.#frame = requestAnimationFrame(update);
+    };
+    const onMotion = (event: MediaQueryListEvent) => {
+      if (!event.matches) return;
+      this.#stop();
+      hour.textContent = clockTime(0);
+    };
+    window.addEventListener('scroll', schedule, { passive: true });
+    reducedMotion.addEventListener('change', onMotion);
+    this.#cleanups.push(() => {
+      window.removeEventListener('scroll', schedule);
+      reducedMotion.removeEventListener('change', onMotion);
+      cancelAnimationFrame(this.#frame);
+      this.#frame = 0;
+    });
+    schedule();
+  }
+
+  disconnectedCallback() {
+    this.#stop();
+  }
+
+  #stop() {
+    for (const cleanup of this.#cleanups.splice(0)) cleanup();
+  }
+}
+
 customElements.define('play-once', PlayOnce);
+customElements.define('problem-clock', ProblemClock);
 customElements.define('tonight-order', TonightOrder);
 customElements.define('evening-scenes', EveningScenes);
