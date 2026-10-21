@@ -38,7 +38,7 @@ Clever Cloud (`apps/landing/Caddyfile`).
   la FAQ). Les classes partagées avec le web viennent de `@repo/ui/classes`.
 - Le mouvement anime les illustrations (les écrans, Tom, le surligneur). Un texte peut apparaître
   au défilement, une fois, si son état d'entrée n'est posé que par le script et hors mouvement
-  réduit ; sans script, il est visible (`reveal`, `apps/landing/src/styles/global.css`). CSS
+  réduit ; sans script, il est visible (`data-reveal`, `apps/landing/src/styles/global.css`). CSS
   d'abord, le lien au défilement sous
   `@supports (animation-timeline: view())` ; ce que le CSS ne sait pas faire passe par les API
   natives (Web Animations, `IntersectionObserver`) dans `apps/landing/src/scripts/evening.ts`,
@@ -46,7 +46,7 @@ Clever Cloud (`apps/landing/Caddyfile`).
   plus longue ou en boucle exige un bouton Pause (WCAG 2.2.2).
 - Jamais un état d'entrée masqué hors de `@media (prefers-reduced-motion: no-preference)`, ni
   posé par le CSS quand c'est un script qui le lève : ce script le pose lui-même (`data-armed`,
-  `apps/landing/src/scripts/evening.ts`), et rien n'attend un script qui ne vient pas. Seule une
+  `apps/landing/src/scripts/reveal.ts`), et rien n'attend un script qui ne vient pas. Seule une
   animation en CSS pur, qui ne dépend d'aucun script, part d'un état masqué, si elle se termine
   d'elle-même (le surligneur, `both` avec délai) ou suit le défilement, sous
   `@supports (animation-timeline: view())`. Sans scripts, si un script échoue, ou sous le

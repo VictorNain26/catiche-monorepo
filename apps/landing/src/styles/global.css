@@ -86,33 +86,95 @@
   @apply text-3xl text-balance sm:text-4xl lg:text-5xl;
 }
 
+/* A plane of colour that melts into the page's background at its top and its bottom, over `--plane-fade`: the planes
+ * still alternate, without a line where one stops. `plane-tint`, `plane-panel`, `plane-secondary`. Its section's padding
+ * is at least the fade, so that no text lies on it. The fade eases in and out (smoothstep), so that neither of its ends
+ * draws a line, even from the deep plane to the light background. */
+@utility plane-* {
+  --plane: --value(--color-*);
+  --plane-quarter: color-mix(in oklab, var(--plane) 16%, var(--color-background));
+  --plane-half: color-mix(in oklab, var(--plane) 50%, var(--color-background));
+  --plane-three-quarters: color-mix(in oklab, var(--plane) 84%, var(--color-background));
+  background: linear-gradient(
+    in oklab,
+    var(--color-background),
+    var(--plane-quarter) calc(var(--plane-fade) / 4),
+    var(--plane-half) calc(var(--plane-fade) / 2),
+    var(--plane-three-quarters) calc(var(--plane-fade) * 3 / 4),
+    var(--plane) var(--plane-fade),
+    var(--plane) calc(100% - var(--plane-fade)),
+    var(--plane-three-quarters) calc(100% - var(--plane-fade) * 3 / 4),
+    var(--plane-half) calc(100% - var(--plane-fade) / 2),
+    var(--plane-quarter) calc(100% - var(--plane-fade) / 4),
+    var(--color-background)
+  );
+}
+
 /* What appears as it is scrolled to, once (.claude/rules/landing.md): visible by default; its entry state exists only
- * while a `play-once` around it carries `data-armed`, which the script sets itself (src/scripts/evening.ts), and only
- * without reduced motion. `reveal` rises; `reveal-fade` only fades in. The items of one block follow one another,
- * by `reveal-2` and `reveal-3`. */
+ * while the block around it (`play-once`, `tonight-order`) carries `data-armed`, which the script sets itself
+ * (src/scripts/reveal.ts), and only without reduced motion; it moves once the block carries `data-played`, so that a
+ * block the window has jumped past shows at once. A role per element: `rise` for a text, `pop` for a screen or a card
+ * (it rises and grows), `fade` for a calm block; on the block itself or inside it. */
 @media (prefers-reduced-motion: no-preference) {
-  play-once[data-armed] :is(.reveal, .reveal-fade) {
+  :is([data-armed] [data-reveal], [data-armed][data-reveal]) {
     opacity: 0;
   }
 
-  play-once[data-armed] .reveal {
-    translate: 0 calc(var(--spacing) * 5);
+  :is([data-armed] [data-reveal='rise'], [data-armed][data-reveal='rise']) {
+    translate: 0 var(--motion-distance);
   }
 
-  play-once:not([data-armed]) :is(.reveal, .reveal-fade) {
+  :is([data-armed] [data-reveal='pop'], [data-armed][data-reveal='pop']) {
+    translate: 0 var(--motion-distance);
+    scale: var(--motion-scale);
+  }
+
+  :is([data-played] [data-reveal], [data-played][data-reveal]) {
     transition:
       opacity var(--duration-reveal) var(--ease-out-expo),
-      translate var(--duration-reveal) var(--ease-out-expo);
+      translate var(--duration-reveal) var(--ease-out-expo),
+      scale var(--duration-reveal) var(--ease-out-expo);
   }
 
-  /* The rank of an item in its block, set by a class rather than counted among siblings: the items of a block are not
-   * always siblings. */
-  play-once:not([data-armed]) .reveal-2 {
+  /* The rank of an item in its block, set by an attribute rather than counted among siblings: the items of a block are
+   * not always siblings. */
+  [data-played] [data-order='2'] {
     transition-delay: var(--duration-stagger);
   }
 
-  play-once:not([data-armed]) .reveal-3 {
+  [data-played] [data-order='3'] {
     transition-delay: calc(var(--duration-stagger) * 2);
+  }
+
+  [data-played] [data-order='4'] {
+    transition-delay: calc(var(--duration-stagger) * 3);
+  }
+
+  /* An order that falls into place (`tonight-order`, src/scripts/evening.ts): while it is armed, each item keeps the
+   * place it had before (`data-before`) and what follows it (`tonight-after`) waits; once played, the items move into
+   * the order and what follows fades in. */
+  tonight-order[data-armed] {
+    [data-before='1'] {
+      order: 1;
+    }
+
+    [data-before='2'] {
+      order: 2;
+    }
+
+    [data-before='3'] {
+      order: 3;
+    }
+
+    .tonight-after {
+      opacity: 0;
+    }
+  }
+
+  tonight-order[data-played] :is([data-before], .tonight-after) {
+    transition:
+      translate var(--duration-slow) var(--ease-standard) var(--duration-wait),
+      opacity var(--duration-slow) var(--ease-standard) var(--duration-wait);
   }
 }
 

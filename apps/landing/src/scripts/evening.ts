@@ -1,63 +1,48 @@
-// The scenes of the evening play once, when they are read. Each one's HTML is its end state. Its entry state exists only
-// while the element carries `data-armed`, which the script sets itself and takes off to play: if the script does not
-// run, nothing waits for it. Durations and curve come from the tokens, through the computed style.
+// The blocks of the page play once, when they are read (src/scripts/reveal.ts). Durations and curve come from the tokens,
+// through the computed style.
 
+import { release, reveal } from './reveal';
 import { orderTiming } from './timing';
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-// Taller than the page: what lies above the window counts as read.
+// Taller than the page: a block the window has jumped past is reported too, and shows at once.
 const ABOVE = '100000px';
+// A block plays once its top has risen past two thirds of the window, however tall it is.
+const TRIGGER = '-33%';
 
 class PlayOnce extends HTMLElement {
-  #observer: IntersectionObserver | undefined;
+  #stop: (() => void) | undefined;
 
   connectedCallback() {
-    if (reducedMotion.matches) return;
-    this.dataset['armed'] = '';
-    // The entry state is computed now, before the observer can play the scene: a scene already in view on load (the top
-    // of the page, an arrival on an anchor) then plays from it rather than from its end state. Its CSS sets it at once,
-    // without a transition.
-    this.getBoundingClientRect();
-    // A scene plays once its top has risen past the bottom fifth of the window, however tall it is. The band reaches far
-    // above the window: a scene already scrolled past, on load or by a jump to a link, plays too, rather than staying in
-    // its entry state.
-    this.#observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return;
-        this.#stop();
+    this.#stop = reveal(this, {
+      motion: reducedMotion,
+      observe: (report) => {
+        const observer = new IntersectionObserver(report, { rootMargin: `${ABOVE} 0px ${TRIGGER} 0px` });
+        observer.observe(this);
+        return () => {
+          observer.disconnect();
+        };
+      },
+      play: () => {
         this.play();
       },
-      { rootMargin: `${ABOVE} 0px -20% 0px` },
-    );
-    this.#observer.observe(this);
-    // Reduced motion turned on during the visit: everything shows, still.
-    reducedMotion.addEventListener('change', this.#reveal);
+    });
   }
 
   disconnectedCallback() {
-    this.#stop();
-  }
-
-  #reveal = (event: MediaQueryListEvent) => {
-    if (!event.matches) return;
-    this.#stop();
-    delete this.dataset['armed'];
-  };
-
-  #stop() {
-    this.#observer?.disconnect();
-    reducedMotion.removeEventListener('change', this.#reveal);
+    this.#stop?.();
   }
 
   play() {
-    delete this.dataset['armed'];
+    release(this);
   }
 }
 
-// From the jumble to Tom's order: each item leaves the place it was said in for its place in the order (FLIP).
+// From the order before to the order now: each item leaves the place it had for its place in the order (FLIP), by
+// `data-before`.
 class TonightOrder extends PlayOnce {
   override play() {
-    const items = [...this.querySelectorAll<HTMLElement>('[data-spoken]')];
+    const items = [...this.querySelectorAll<HTMLElement>('[data-before]')];
     const before = items.map((item) => item.getBoundingClientRect().top);
     super.play();
     const timing = orderTiming(getComputedStyle(document.documentElement));

@@ -8,20 +8,22 @@ import { CHECK_IN } from './evening-data';
 // plane, which grows slightly as it comes into view before the « Vu » lands, the strongest moment of the page.
 ---
 
-<section id="point-du-soir" class="scroll-mt-20 bg-panel py-14 text-panel-foreground md:py-20 lg:py-28">
+<section id="point-du-soir" class="scroll-mt-20 plane-panel py-28 text-panel-foreground md:py-32 lg:py-40">
   <div class="container grid max-w-5xl items-center gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:gap-20">
-    <div>
-      <h2 class="section-title">Vous savez ce qui est fait, sans surveiller.</h2>
-      <p class="mt-5 max-w-xl text-lg md:mt-6 md:text-xl">
+    <play-once class="block">
+      <h2 data-reveal="rise" class="section-title">
+        Vous savez ce qui est fait, sans surveiller.
+      </h2>
+      <p data-reveal="rise" data-order="2" class="mt-5 max-w-xl text-lg md:mt-6 md:text-xl">
         C&apos;est le point du soir&nbsp;: votre collégien vous montre ce qu&apos;il a fait, et vous répondez «&nbsp;Vu&nbsp;», avec un mot
         d&apos;encouragement si vous voulez.
       </p>
-    </div>
+    </play-once>
 
     {/* The adult's phone, drawn in CSS: a thin frame, a speaker slot, and the evening's summary with its « Vu »
-     * (src/scripts/evening.ts plays it once). */}
+     * (src/scripts/reveal.ts plays it once). */}
     <figure class="mx-auto w-full max-w-80">
-      <play-once class="phone block rounded-3xl bg-card p-1.5 shadow-control-hover ring-2 ring-panel-foreground/50">
+      <play-once data-reveal="pop" class="block rounded-3xl bg-card p-1.5 shadow-control-hover ring-2 ring-panel-foreground/50">
         <div aria-hidden="true" class="rounded-2xl bg-card px-5 pt-3 pb-6 text-card-foreground">
           <span class="mx-auto mb-5 block h-1.5 w-14 rounded-full bg-border"></span>
           <CheckIn {...CHECK_IN} />
@@ -37,21 +39,10 @@ import { CHECK_IN } from './evening-data';
 </section>
 
 <style>
-  /* The phone grows slightly as it comes into view, then your « Vu » lands, like a stamp; set at once while the script
-   * holds them (src/scripts/evening.ts), only their arrival is a transition. */
+  /* The phone rises and grows slightly as it comes into view (`pop`, src/styles/global.css), then your « Vu » lands,
+   * like a stamp; set at once while the script holds it (src/scripts/reveal.ts), only its arrival is a transition. */
   @media (prefers-reduced-motion: no-preference) {
-    play-once.phone:not([data-armed]) {
-      transition:
-        scale var(--duration-reveal) var(--ease-out-expo),
-        opacity var(--duration-reveal) var(--ease-out-expo);
-    }
-
-    play-once.phone[data-armed] {
-      opacity: 0;
-      scale: 0.92;
-    }
-
-    play-once:not([data-armed]) .seen {
+    play-once[data-played] .seen {
       transition:
         opacity var(--duration-fast) var(--ease-standard) var(--duration-reveal),
         scale var(--duration-base) var(--ease-standard) var(--duration-reveal);

@@ -68,7 +68,7 @@ const { class: className, start = 'load' } = Astro.props;
 
       const arrival = this.dataset['start'] === 'arrival' ? this.closest<HTMLElement>('.arrival') : null;
       if (arrival) {
-        // He waves once his arrival is over (its script plays it as it comes into view, src/scripts/evening.ts), so that
+        // He waves once his arrival is over (its script plays it as it comes into view, src/scripts/reveal.ts), so that
         // the start of the wave is not lost while he still fades in. No arrival, under reduced motion: no wave either.
         const onEnd = (event: TransitionEvent) => {
           if (!arrivalEnded(event, arrival)) return;

@@ -1,17 +1,28 @@
 ---
 // The evening of docs/produit.md, "Pour qui", told by the evening rather than by the child's faults: not knowing where to
 // start, no one to help, or everyone tired; that organisation can be learned, docs/methode.md, "À retenir". One large
-// column on the brand's light plane, at the size of a section title, its lines rising one after the other.
+// column on the brand's light plane, at the size of a section title, its lines rising one after the other, from further
+// down than elsewhere: the section's strong moment.
 ---
 
-<section class="bg-tint py-14 md:py-20 lg:py-28">
-  <play-once class="container block max-w-4xl">
+<section class="plane-tint py-28 md:py-32 lg:py-40">
+  <play-once class="strong container block max-w-4xl">
     <h2 class="section-title text-foreground">
-      <span class="reveal block font-extrabold">18&nbsp;h. Le cartable est ouvert, l&apos;agenda aussi, et rien n&apos;a commencé.</span>
-      <span class="reveal reveal-2 block text-primary">Personne n&apos;est là pour aider, ou tout le monde est déjà fatigué.</span>
+      <span data-reveal="rise" class="block font-extrabold">
+        18&nbsp;h. Le cartable est ouvert, l&apos;agenda aussi, et rien n&apos;a commencé.
+      </span>
+      <span data-reveal="rise" data-order="2" class="block text-primary">
+        Personne n&apos;est là pour aider, ou tout le monde est déjà fatigué.
+      </span>
     </h2>
-    <p class="reveal reveal-3 mt-6 text-xl text-foreground lg:mt-8 lg:text-2xl">
+    <p data-reveal="rise" data-order="3" class="mt-6 text-xl text-foreground lg:mt-8 lg:text-2xl">
       Souvent, ce n&apos;est pas la leçon qui bloque, c&apos;est par où commencer. Et ça s&apos;apprend.
     </p>
   </play-once>
 </section>
+
+<style>
+  .strong {
+    --motion-distance: var(--motion-distance-strong);
+  }
+</style>

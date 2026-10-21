@@ -14,20 +14,23 @@ import { EVENING, HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data
 
 <section class="flex min-h-[calc(100svh-var(--spacing)*16)] items-center overflow-hidden py-10 lg:py-16">
   <div class="container grid max-w-7xl items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] xl:gap-16">
-    <div>
+    {/* The title rises, then the sentence, then what to do now. */}
+    <play-once class="block">
       {/* Balanced lines, and « du début à la fin. » kept together, so the stroke is never cut in two. */}
-      <h1 class="text-4xl leading-tight text-balance text-foreground sm:text-5xl xl:text-6xl xl:leading-tight">
+      <h1 data-reveal="rise" class="text-4xl leading-tight text-balance text-foreground sm:text-5xl xl:text-6xl xl:leading-tight">
         {BRAND_NAME} accompagne votre collégien pendant ses devoirs,{' '}
         <span class="whitespace-nowrap">
           <mark class="highlighter">du début à la fin</mark>.
         </span>
       </h1>
-      <p class="mt-6 max-w-xl text-lg text-foreground">
+      <p data-reveal="rise" data-order="2" class="mt-6 max-w-xl text-lg text-foreground">
         Tom, le tuteur de {BRAND_NAME}, est une intelligence artificielle qui aide votre collégien chaque soir à s&apos;organiser, sans faire le
         travail à sa place.
       </p>
-      <RequestInvitation status="En préparation · ouverture sur invitation" class="mt-8" />
-    </div>
+      <div data-reveal="rise" data-order="3">
+        <RequestInvitation status="En préparation · ouverture sur invitation" class="mt-8" />
+      </div>
+    </play-once>
 
     {/* The card of the evening on a halo of water, and Tom stepping out of it: on a phone he stands under its lower edge,
      * which leaves him room; at a computer, in front of its left third, which its content leaves free. His feet are
@@ -44,7 +47,7 @@ import { EVENING, HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data
           <PupilSays>{SPOKEN}</PupilSays>
           <ol class="mt-4 flex flex-col gap-2">
             {HOMEWORK.map(({ subject, note, spoken }, position) => (
-              <li data-spoken={spoken} class="tonight-item flex items-baseline gap-3 rounded-control bg-accent px-3 py-2 text-accent-foreground">
+              <li data-before={spoken} class="flex items-baseline gap-3 rounded-control bg-accent px-3 py-2 text-accent-foreground">
                 <span class="tonight-after font-heading font-extrabold tabular-nums">{position + 1}</span>
                 <span class="font-bold">{subject}</span>
                 {note && <span class="ml-auto text-sm text-accent-muted-foreground">{note}</span>}
@@ -72,33 +75,20 @@ import { EVENING, HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data
     }
   }
 
-  /* The jumble: the homework in the order it was said, out of line, before Tom's order; only while the script that sorts
-   * it holds it (src/scripts/evening.ts). The jumble is set at once, and only its release is a transition. */
+  /* The jumble: the homework in the order it was said (`tonight-order`, src/styles/global.css), and out of line, before
+   * Tom's order. */
   @media (prefers-reduced-motion: no-preference) {
-    tonight-order:not([data-armed]) :is(.tonight-item, .tonight-after) {
-      transition:
-        translate var(--duration-slow) var(--ease-standard) var(--duration-wait),
-        opacity var(--duration-slow) var(--ease-standard) var(--duration-wait);
-    }
-
     tonight-order[data-armed] {
-      .tonight-item[data-spoken='1'] {
-        order: 1;
+      [data-before='1'] {
         translate: calc(var(--spacing) * 2) 0;
       }
 
-      .tonight-item[data-spoken='2'] {
-        order: 2;
+      [data-before='2'] {
         translate: calc(var(--spacing) * -1) 0;
       }
 
-      .tonight-item[data-spoken='3'] {
-        order: 3;
+      [data-before='3'] {
         translate: calc(var(--spacing) * 3) 0;
-      }
-
-      .tonight-after {
-        opacity: 0;
       }
     }
   }

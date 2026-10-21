@@ -9,7 +9,8 @@ import { BAG, FIRST_SAID, HOMEWORK, HOURS, MISSING } from './evening-data';
 // the product presented in the present, as docs/produit.md describes it (docs/charte.md, "Les mots").
 // A question or a hint is the bottom of Tom's ladder (docs/tuteur.md, § 3). One row per moment, like a chapter: its
 // hour, its title and its sentence on the left, its screen facing them on the right; on a phone, one under the other.
-// Each row rises once as it comes into view, its text first, then its screen.
+// Each row rises once as it comes into view, its text first, then its screen, which grows slightly: the section's strong
+// moment. In the screen of 17:35, the list falls into the pupil's order (`tonight-order`).
 const MOMENTS = [
   {
     time: HOURS.said,
@@ -43,13 +44,17 @@ const CHANGED = [english, maths, history];
 
 <section id="soiree" class="scroll-mt-20 bg-background py-12 md:py-16 lg:py-24">
   <div class="container max-w-5xl">
-    <h2 class="section-title max-w-3xl text-foreground">De 17&nbsp;h&nbsp;30 au cartable prêt.</h2>
+    <play-once class="block">
+      <h2 data-reveal="rise" class="section-title max-w-3xl text-foreground">
+        De 17&nbsp;h&nbsp;30 au cartable prêt.
+      </h2>
+    </play-once>
 
     <ol role="list" class="mt-8 space-y-12 lg:mt-14 lg:space-y-16">
       {MOMENTS.map(({ time, title, body }, index) => (
         <li role="listitem">
           <play-once class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-16">
-            <div class="reveal">
+            <div data-reveal="rise">
               <h3 class="text-xl text-foreground sm:text-2xl">
                 <time datetime={time} class="block font-heading text-4xl font-extrabold text-primary tabular-nums">
                   {spokenHour(time)}
@@ -58,7 +63,7 @@ const CHANGED = [english, maths, history];
               </h3>
               <p class="mt-2 max-w-md text-lg text-foreground">{body}</p>
             </div>
-            <div class="reveal reveal-2">
+            <div data-reveal="pop" data-order="2">
               <Screen>
                 {index === 0 && (
                   <div class="space-y-3">
@@ -68,19 +73,22 @@ const CHANGED = [english, maths, history];
                   </div>
                 )}
                 {index === 1 && (
-                  <div class="space-y-3">
+                  <tonight-order class="block space-y-3">
                     <PupilSays>Je préfère commencer par l&apos;anglais.</PupilSays>
-                    <TomSays>D&apos;accord. Puis les maths, elles sont pour demain.</TomSays>
-                    <ol class="divide-y rounded-control ring-1 ring-border">
-                      {CHANGED.map(({ subject, note }, position) => (
-                        <li class="flex items-baseline gap-3 px-3 py-2">
-                          <span class="font-heading font-extrabold tabular-nums">{position + 1}</span>
-                          <span class="font-bold">{subject}</span>
-                          {note && <span class="ml-auto text-sm text-muted-foreground">{note}</span>}
+                    <div class="tonight-after">
+                      <TomSays>D&apos;accord. Puis les maths, elles sont pour demain.</TomSays>
+                    </div>
+                    {/* Tom's order first, then the pupil's: each item leaves the place it had in Tom's order. */}
+                    <ol class="flex flex-col gap-2">
+                      {CHANGED.map((item, position) => (
+                        <li data-before={HOMEWORK.indexOf(item) + 1} class="flex items-baseline gap-3 rounded-control px-3 py-2 ring-1 ring-border">
+                          <span class="tonight-after font-heading font-extrabold tabular-nums">{position + 1}</span>
+                          <span class="font-bold">{item.subject}</span>
+                          {item.note && <span class="ml-auto text-sm text-muted-foreground">{item.note}</span>}
                         </li>
                       ))}
                     </ol>
-                  </div>
+                  </tonight-order>
                 )}
                 {index === 2 && (
                   <div class="space-y-3">
