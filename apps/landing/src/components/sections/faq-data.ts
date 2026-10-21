@@ -8,33 +8,34 @@ interface Faq {
 // Each answer is checked against the docs, and none repeats the page: docs/produit.md ("L'accès pendant la préparation",
 // "Ouvert": the price; "Le point du soir": each family; "Pronote"; "Ce qu'on mesurera"), docs/methode.md ("À retenir" of
 // "Ce qui vaut pour tous les élèves"), docs/architecture.md ("Client web"); the shared device's 10 minutes are
-// IDLE_MINUTES in apps/server/src/platform/auth/student-sign-in.ts. What is not built is told in the future.
+// IDLE_MINUTES in apps/server/src/platform/auth/student-sign-in.ts. In everyday words, saying what Catiche does; what is
+// not built is told in the present under a line that says so (docs/charte.md, "Les mots").
 export const FAQS: Faq[] = [
   {
     question: 'Combien ça coûte, et quand ?',
-    answer: `Le prix et la date d'ouverture ne sont pas encore fixés. D'ici là, les comptes s'ouvrent sur invitation : écrivez-nous à ${CONTACT_EMAIL}. Demander une invitation ne vous engage à rien.`,
+    answer: `Le prix et la date d'ouverture restent à fixer. D'ici là, les comptes s'ouvrent sur invitation : écrivez-nous à ${CONTACT_EMAIL}.`,
   },
   {
     question: 'Et dans notre famille ?',
     answer:
-      "Le point du soir s'adaptera. Si l'adulte rentre tard, il le verra plus tard, et votre collégien trouvera son « Vu » le lendemain. Dans deux maisons, il ira à l'adulte chez qui il est ce soir-là. Si les devoirs sont un sujet de tension, vous pourrez le couper ; sans adulte disponible, il restera à votre collégien. Il sera proposé par défaut en 6e et en 5e ; en 4e et en 3e, votre collégien choisira de le partager.",
+      "Le point du soir, que nous construisons, s'adapte à chaque famille. Si l'adulte rentre tard, il le voit plus tard, et votre collégien trouve son « Vu » le lendemain. Dans deux maisons, il va à l'adulte chez qui il est ce soir-là. Si les devoirs sont un sujet de tension, vous pouvez le couper. Sans adulte disponible, il reste à votre collégien. Il est proposé d'office en 6e et en 5e ; en 4e et en 3e, votre collégien choisit de le partager.",
   },
   {
-    question: 'Ces gestes marcheront-ils avec Tom ?',
-    answer: `Les études citées portent sur des méthodes enseignées par des enseignants ou des chercheurs, ou sur l'aide des adultes ; aucune ne porte sur un collégien qui travaille seul avec une IA. ${BRAND_NAME} en reprendra les gestes. Pour savoir ce qu'il en reste avec Tom, nous mesurerons dès les premiers élèves les soirées de devoirs par semaine, les devoirs rendus, et l'avis des familles par des questionnaires déjà validés.`,
+    question: 'Est-ce que ça marche avec Tom ?',
+    answer: `${BRAND_NAME} reprend des gestes qui ont fait leurs preuves quand des enseignants, des chercheurs ou des adultes de la maison les transmettent. Avec Tom, nous le mesurerons dès les premiers élèves : les soirées de devoirs par semaine, les devoirs rendus, et l'avis des familles par des questionnaires reconnus.`,
   },
   {
     // The application is the web client served by the server, laid out for a phone and for a computer.
     question: 'Sur quel appareil ?',
-    answer: 'Dans le navigateur, sur un téléphone, une tablette ou un ordinateur, sans rien installer.',
+    answer: `Sur un téléphone, une tablette ou un ordinateur : ${BRAND_NAME} s'ouvre comme un site, sans rien installer.`,
   },
   {
     question: 'Un seul ordinateur pour toute la famille ?',
     answer:
-      "Oui. Chacun a son profil et y entre avec son propre code. Sur un ordinateur partagé, son profil se ferme après 10 minutes sans activité, pour qu'un frère ou une sœur n'y entre pas.",
+      "Oui. Chacun a son espace et y entre avec son propre code. Sur un ordinateur partagé, son espace se ferme tout seul après 10 minutes sans s'en servir, pour que ses échanges restent à lui.",
   },
   {
     question: 'Et Pronote ?',
-    answer: `${BRAND_NAME} ne se connecte pas à Pronote : votre collégien dira ses devoirs à voix haute, en regardant ce qu'il a noté.`,
+    answer: "Votre collégien dit ses devoirs à voix haute, en regardant ce qu'il a noté, sans connexion à Pronote.",
   },
 ];

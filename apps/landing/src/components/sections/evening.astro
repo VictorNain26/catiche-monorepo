@@ -2,34 +2,36 @@
 import PupilSays from '@/components/molecules/pupil-says.astro';
 import Screen from '@/components/molecules/screen.astro';
 import TomSays from '@/components/molecules/tom-says.astro';
+import { BRAND_NAME } from '@/lib/brand';
 import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
 
 // The evening of docs/produit.md, "Ce que fait Catiche", and its gestures in docs/methode.md, "Les gestes d'une soirée":
-// what Catiche accompanies once built (docs/produit.md, "À construire"), told in the future, under a lead that says so.
+// what Catiche accompanies once built (docs/produit.md, "À construire"), told in the present under a lead that says
+// nothing of it exists yet (docs/charte.md, "Les mots": one tense on a page).
 // A question or a hint is the bottom of Tom's ladder (docs/tuteur.md, § 3). One sentence and one screen per moment.
 const MOMENTS = [
   {
     time: HOURS.said,
     title: "Dire ce qu'il a ce soir",
-    body: 'Votre collégien dira ses devoirs à voix haute, et Tom demandera ce qui manque.',
+    body: 'Votre collégien dit ses devoirs à voix haute, et Tom demande ce qui manque.',
     screen: 'Ce soir',
   },
   {
     time: HOURS.ordered,
     title: 'Choisir par quoi commencer',
-    body: 'Tom proposera un ordre et une durée, que votre collégien pourra changer.',
+    body: 'Tom propose un ordre et une durée, que votre collégien peut changer.',
     screen: "L'ordre",
   },
   {
     time: HOURS.started,
     title: 'Avancer par petites étapes',
-    body: 'Tom découpera chaque devoir en étapes courtes, et aidera par une question ou un indice.',
+    body: 'Tom découpe chaque devoir en étapes courtes, et aide par une question ou un indice.',
     screen: 'Maths · exercice 3',
   },
   {
     time: HOURS.ended,
     title: 'Préparer demain',
-    body: "Tom aidera à préparer le cartable, et ramènera chaque contrôle les jours d'avant pour le réviser.",
+    body: "Tom aide à préparer le cartable, et ramène chaque contrôle les jours d'avant pour le réviser.",
     screen: 'Pour demain',
   },
 ] as const;
@@ -47,7 +49,7 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
   <div class="container max-w-6xl">
     <div class="max-w-3xl">
       <h2 class="text-3xl text-balance text-foreground sm:text-5xl">Une soirée avec Tom</h2>
-      <p class="mt-4 text-lg text-muted-foreground md:mt-6 md:text-xl">Voici la soirée que nous construisons.</p>
+      <p class="mt-4 text-lg text-muted-foreground md:mt-6 md:text-xl">{BRAND_NAME} est en préparation. Voici la soirée que nous construisons.</p>
     </div>
 
     {/* The roles stay explicit: at a computer, a moment is laid out with `display: contents`. */}

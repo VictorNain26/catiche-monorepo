@@ -1,45 +1,46 @@
 ---
 import ExternalLink from '@/components/atoms/external-link.astro';
 
-// What makes Catiche worth trusting, each fact with its line in the docs:
+// What makes Catiche worth trusting, in everyday words, each fact with its line in the docs:
 // - the research: docs/methode.md, "Ce qui vaut pour tous les élèves", sources [11], [13] and [17]; where the gestures
-//   come from, never that Catiche obtains these effects;
-// - the safeguards already built: docs/tuteur.md, § 3 (the ladder held by the server) and § 4 (the check before the
-//   pupil, the fixed distress answer written and approved by a human, with the 3114 and a trusted adult);
-// - the commitments: docs/architecture.md ("Hébergement"), docs/tuteur.md (§ 2, Mistral's EU endpoint), the privacy
-//   policy (pages/confidentialite.astro, linked from the footer), and docs/produit.md (no better grades).
+//   come from, never that Catiche obtains these effects. A source is said in plain words; its scholarly name is only the
+//   link's title (docs/charte.md, "Les mots");
+// - what already protects the pupil: docs/tuteur.md, § 3 (the help level decided by the code, not the model) and § 4
+//   (the check before the pupil; the fixed distress answer, written and approved by a human, with the 3114 and a
+//   trusted adult);
+// - the commitments: docs/architecture.md ("Hébergement", Clever Cloud in France), docs/tuteur.md (§ 2, Mistral's EU
+//   endpoint), the privacy policy (pages/confidentialite.astro), and the aim of docs/produit.md, "Pour qui".
 const RESEARCH = [
   {
     gesture: "Planifier et faire le point, quand des enseignants l'enseignent",
-    finding: '+8 mois de progrès en moyenne, sur 355 études.',
+    finding: '+8 mois de progrès en moyenne, selon une synthèse de 355 études.',
     source: {
       href: 'https://educationendowmentfoundation.org.uk/education-evidence/teaching-learning-toolkit/metacognition-and-self-regulation',
-      label: 'EEF',
+      title: 'Education Endowment Foundation, « Metacognition and self-regulation »',
     },
   },
   {
     gesture: "Réviser en s'interrogeant, sur plusieurs jours",
-    finding: 'deux techniques jugées très utiles, quand relire et surligner le sont peu.',
-    source: { href: 'https://doi.org/10.1177/1529100612453266', label: 'Dunlosky et al., 2013' },
+    finding: 'deux méthodes jugées très utiles par une grande revue de la recherche, quand relire et surligner le sont peu.',
+    source: { href: 'https://doi.org/10.1177/1529100612453266', title: 'Dunlosky et al., 2013' },
   },
   {
     gesture: 'Un adulte qui soutient sans surveiller',
-    finding: 'une aide vécue comme un soutien va avec plus de progrès.',
-    source: { href: 'https://doi.org/10.1080/00220671.2014.901283', label: 'Moroni et al., 2015' },
+    finding: 'chez 1 685 élèves suivis, une aide vécue comme un soutien va avec plus de progrès.',
+    source: { href: 'https://doi.org/10.1080/00220671.2014.901283', title: 'Moroni et al., 2015' },
   },
 ];
 
 const SAFEGUARDS = [
-  "Chaque message de Tom est vérifié avant d'être affiché, et réécrit ou remplacé s'il contient la réponse.",
-  "Ce sont nos règles, pas l'IA, qui décident quand Tom donne plus d'aide.",
-  "Si votre collégien écrit qu'il veut se faire du mal, ce n'est pas Tom qui répond : un message écrit à l'avance par un humain lui donne le 3114 et l'invite à parler à un adulte de confiance.",
+  "Chaque message de Tom est vérifié avant d'être affiché, et corrigé s'il contient la réponse.",
+  "Ce sont nos règles, et non Tom, qui décident quand il donne plus d'aide.",
+  "Si votre collégien écrit qu'il veut se faire du mal, un message écrit à l'avance par une personne lui répond à la place de Tom : il lui donne le 3114 et l'invite à parler à un adulte de confiance.",
 ];
 
 const COMMITMENTS = [
-  "Hébergé en France, avec l'IA de Mistral AI en Europe.",
+  'Les données sont gardées en France, et Tom fonctionne avec Mistral AI, en Europe.',
   'Ni publicité, ni vente de données.',
-  "Pas d'adresse e-mail pour votre collégien.",
-  'Nous ne promettons pas de meilleures notes.',
+  'Notre but : des soirées de devoirs plus calmes et des devoirs rendus.',
 ];
 ---
 
@@ -50,13 +51,13 @@ const COMMITMENTS = [
     <div class="mt-8 grid gap-8 md:grid-cols-2 md:gap-10 lg:mt-16 lg:grid-cols-3 lg:gap-12">
       <div>
         <h3 class="text-2xl text-balance text-foreground">Les gestes viennent de la recherche</h3>
-        {/* Each source at the end of its line, opened in a new tab (atoms/external-link.astro). */}
+        {/* Each source at the end of its sentence, in the line, opened in a new tab (atoms/external-link.astro). */}
         <ul class="mt-4 space-y-3 text-foreground">
           {RESEARCH.map(({ gesture, finding, source }) => (
             <li class="border-l-2 border-annotation pl-4">
               <strong class="font-bold">{gesture}</strong>&nbsp;: {finding}{' '}
-              <ExternalLink href={source.href} class="min-h-11 align-middle text-sm text-primary underline underline-offset-4">
-                {source.label}
+              <ExternalLink inline href={source.href} title={source.title} class="text-primary underline underline-offset-4">
+                La source
               </ExternalLink>
             </li>
           ))}
@@ -64,7 +65,7 @@ const COMMITMENTS = [
       </div>
 
       <div>
-        <h3 class="text-2xl text-balance text-foreground">Les garde-fous sont déjà construits</h3>
+        <h3 class="text-2xl text-balance text-foreground">Ce qui protège déjà votre collégien</h3>
         <ul class="mt-4 space-y-3 text-foreground">
           {SAFEGUARDS.map((safeguard) => (
             <li class="border-l-2 border-annotation pl-4">{safeguard}</li>
