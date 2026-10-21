@@ -7,7 +7,7 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-21 ; ce qui 
 
 | Bloquant | Effet | Comment lever |
 |---|---|---|
-| Clause des mineurs de Mistral (2.2(c), version du 2026-09-25) | Aucun utilisateur réel de moins de 15 ans | Réponse écrite de Mistral, demandée le 2026-10-11 (ticket « legal request/GDPR ») |
+| Clause des mineurs de Mistral (§ 2.2(c), version du 2026-09-25) : deux interdictions, les données personnelles d'un enfant sous l'âge du consentement numérique (15 ans en France), et l'usage par un mineur sans consentement parental. Le consentement du parent lève la seconde, pas la première prise à la lettre | Aucun utilisateur réel de moins de 15 ans | Réponse écrite de Mistral, demandée le 2026-10-11 (ticket « legal request/GDPR ») |
 | Zero Data Retention non accordé | Mistral peut garder textes et audio d'élèves | Ouvert seulement en paiement à l'usage ([centre d'aide](https://help.mistral.ai/en/articles/347612-can-i-activate-zero-data-retention-zdr)) ; recevabilité demandée dans le même ticket |
 | La marque TOM ([FR 4873204](https://data.inpi.fr/marques/FR4873204)), classes 9, 41 et 42 | Tout nom de produit bâti sur Tom, et peut-être Tom comme mascotte | Avis d'un conseil en propriété industrielle |
 | Mistral en mode gratuit : 100 000 tokens par minute, une fiche d'exercice en prend environ 78 000 | Le harnais et deux élèves dans la même minute voient la fiche échouer | Le paiement à l'usage avec un plafond, puis relire Admin › Limites |
@@ -30,6 +30,13 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-21 ; ce qui 
 
 ## Avant le premier élève réel
 
+- À la création d'un compte adulte, une déclaration horodatée : majeur, et représentant légal des
+  enfants qu'il ajoute (un compte peut en porter plusieurs). Elle vaut consentement parental ; la
+  vérification reste proportionnée, sans pièce d'identité (CNIL) (Victor, 2026-10-21).
+- Le modèle et les mots « parent » et « enfant » de l'application, revus pour toutes les familles :
+  deux représentants légaux dans deux foyers, un beau-parent ou un grand-parent qui suit les
+  devoirs sans être représentant légal, une famille d'accueil, un tuteur. À la refonte de
+  l'application (Victor, 2026-10-21).
 - Bugsink auto-hébergé, avec sa base ; les erreurs des navigateurs par le serveur (`tunnel`), sans
   contenu d'élève.
 - La base du staging, joignable depuis internet : la placer dans un réseau privé Clever Cloud

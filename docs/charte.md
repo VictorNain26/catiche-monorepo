@@ -111,7 +111,8 @@ ne lit, l'essentiel va donc en tête de chaque bloc. Ces règles valent pour le 
   et ce qu'on peut faire maintenant.
 - Une idée et un verbe conjugué par phrase, sujet en tête ; pas de titre sans verbe, sauf une
   question. Des phrases courtes, au présent, un seul temps sur une page : ce qui n'est pas encore
-  construit se dit dans une section annoncée comme telle, pas au futur.
+  construit se dit au présent, sous une phrase qui l'annonce comme ce que nous construisons ; seule
+  cette phrase peut parler au futur.
 - Les mots des familles, pas les nôtres (« ce qu'il a fait », pas « récapitulatif ») ; un mot du
   produit s'explique la première fois. Un seul nom par chose : « votre enfant » pour le parent,
   Tom présenté une fois comme le tuteur de Catiche, « e-mail » avec son trait d'union.
