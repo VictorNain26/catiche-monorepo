@@ -106,7 +106,9 @@ Le lecteur trouve, comprend et peut agir (langage clair, ISO 24495-1:2023) ; il 
 ne lit, l'essentiel va donc en tête de chaque bloc. Ces règles valent pour le site et l'app
 (Victor, 2026-10-21).
 
-- On tutoie l'élève, on vouvoie le parent ; un texte pour l'un n'est jamais le texte pour l'autre.
+- On tutoie l'élève, on vouvoie l'adulte ; un texte pour l'un n'est jamais le texte pour l'autre.
+  Pour l'adulte, l'élève est « votre collégien » ou « il », et le site ne dit jamais « parent » :
+  l'adulte de la maison n'est pas toujours un parent (Victor, 2026-10-21).
 - En cinq secondes, le titre, la phrase dessous et le bouton disent ce qu'est le produit, pour qui,
   et ce qu'on peut faire maintenant.
 - Une idée et un verbe conjugué par phrase, sujet en tête ; pas de titre sans verbe, sauf une
@@ -114,8 +116,12 @@ ne lit, l'essentiel va donc en tête de chaque bloc. Ces règles valent pour le 
   construit se dit au présent, sous une phrase qui l'annonce comme ce que nous construisons ; seule
   cette phrase peut parler au futur.
 - Les mots des familles, pas les nôtres (« ce qu'il a fait », pas « récapitulatif ») ; un mot du
-  produit s'explique la première fois. Un seul nom par chose : « votre enfant » pour le parent,
+  produit s'explique la première fois. Un seul nom par chose : « votre collégien » pour l'adulte,
   Tom présenté une fois comme le tuteur de Catiche, « e-mail » avec son trait d'union.
+- Aucun mot technique ni savant dans un texte pour les familles (« serveur », « navigateur »,
+  « IA » en abrégé). Une source se dit en mots simples ; son nom savant ne va que dans le lien.
+- On dit ce que Catiche fait, pas ce qu'il ne fait pas ; pas de phrase défensive. Une limite se dit
+  une seule fois, là où on la cherche, et au positif quand c'est exact.
 - Rien sans appui : chaque phrase renvoie à `produit.md`, `methode.md` ou au code ; un exemple se
   lit comme un exemple. On parle de l'organisation qui bloque, jamais d'un enfant qui échoue.
 - Pas de point d'exclamation, pas d'emoji, pas de mot de jeu, pas le mot « enfant » dans ce que lit
