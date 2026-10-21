@@ -17,9 +17,9 @@ export const FAQS: Faq[] = [
     answer: `Le prix et la date d'ouverture restent à fixer. D'ici là, les comptes s'ouvrent sur invitation : écrivez-nous à ${CONTACT_EMAIL}.`,
   },
   {
-    question: "Et si je rentre tard, ou s'il vit dans deux maisons ?",
+    question: "Et si je rentre tard, s'il vit dans deux maisons, ou si personne n'est là le soir ?",
     answer:
-      "Vous voyez le point du soir en rentrant, et votre collégien trouve votre « Vu » le lendemain. S'il vit dans deux maisons, le point du soir va à l'adulte chez qui il est ce soir-là. Vous pouvez aussi le couper. En 6e et en 5e, le point du soir est proposé dès le départ ; en 4e et en 3e, votre collégien choisit de le partager.",
+      "Vous voyez le point du soir en rentrant, et votre collégien trouve votre « Vu » le lendemain. S'il vit dans deux maisons, le point du soir va à l'adulte chez qui il est ce soir-là. Sans adulte disponible, le point du soir reste à votre collégien. Vous pouvez aussi le couper. En 6e et en 5e, le point du soir est proposé dès le départ ; en 4e et en 3e, votre collégien choisit de le partager.",
   },
   {
     question: 'Est-ce que ça marche ?',
@@ -33,7 +33,7 @@ export const FAQS: Faq[] = [
   {
     question: 'Un seul ordinateur pour toute la famille ?',
     answer:
-      "Oui. Chaque collégien a son espace et y entre avec son propre code. Sur un ordinateur partagé, son espace se ferme tout seul après 10 minutes sans qu'il s'en serve, pour que ses échanges restent à lui.",
+      "Oui. Chaque collégien a son espace et y entre avec son propre code. Sur un ordinateur partagé, son espace se ferme tout seul après 10 minutes sans qu'il s'en serve.",
   },
   {
     question: 'Et Pronote ?',
