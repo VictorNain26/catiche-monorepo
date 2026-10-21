@@ -1,13 +1,15 @@
 ---
+import { BRAND_NAME } from '@/lib/brand';
+
 // Each fact is checked against the docs: docs/produit.md and docs/methode.md (no better grades: "À retenir"), docs/tuteur.md (no answer
 // given; § 2, Mistral's EU endpoint), docs/architecture.md ("Hébergement", "Serveur").
 const COMMITMENTS = [
-  "Tom ne fait pas les devoirs à la place de votre enfant, et il est conçu pour ne pas donner la réponse d'un exercice.",
-  "Nous ne promettons pas de meilleures notes : dans les programmes dont Tom reprend les gestes, menés par un adulte, l'organisation s'apprend avec un gain net, et les notes bougent peu.",
-  "Tom ne remplace ni l'enseignant, ni vous.",
-  "Le service est hébergé par Clever Cloud, à Paris. L'IA vient de Mistral AI, une entreprise française, appelée sur son service européen.",
-  'Aucune publicité, aucune revente de données.',
-  "Votre enfant n'a pas d'adresse e-mail chez nous. Vous pouvez consulter, corriger ou supprimer ses données sur simple demande.",
+  "Tom ne fait pas les devoirs à la place de votre enfant. Il est conçu pour ne pas donner la réponse d'un exercice.",
+  `Nous ne promettons pas de meilleures notes. Dans les programmes sur lesquels ${BRAND_NAME} s'appuie, menés par un adulte, l'organisation progresse nettement, et les notes bougent peu.`,
+  'Tom ne remplace ni les professeurs, ni vous.',
+  `${BRAND_NAME} est hébergé en France, à Paris, chez Clever Cloud. L'IA est celle de Mistral AI, une entreprise française, utilisée sur ses serveurs en Europe.`,
+  'Pas de publicité. Nous ne vendons aucune donnée.',
+  "Votre enfant n'a pas besoin d'adresse e-mail. Vous pouvez voir, corriger ou supprimer ses données sur simple demande.",
 ];
 ---
 
@@ -17,7 +19,7 @@ const COMMITMENTS = [
       <div class="lg:sticky lg:top-28">
         <h2 class="text-4xl text-balance text-foreground sm:text-5xl">Nos engagements</h2>
         <p class="mt-4 max-w-xs text-muted-foreground">
-          Le détail des données est dans notre{' '}
+          Le détail est dans notre{' '}
           <a href="/confidentialite" class="text-primary underline underline-offset-4">
             politique de confidentialité
           </a>

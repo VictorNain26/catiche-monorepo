@@ -4,10 +4,9 @@ import PageLayout from '@/layouts/page-layout.astro';
 import { CONTACT_EMAIL } from '@/lib/brand';
 ---
 
-<PageLayout title="Contactez-nous" description="Une question, une suggestion ? Écrivez-nous.">
+<PageLayout title="Nous écrire" description="Une question, une suggestion ? Écrivez-nous.">
   <div class="mt-12 max-w-xl">
-    <h2 class="mb-4 text-2xl">Par email</h2>
-    <p class="mb-8 text-muted-foreground">Nous lisons chaque message.</p>
+    <h2 class="mb-8 text-2xl">Par e-mail</h2>
     <a href={`mailto:${CONTACT_EMAIL}`} class={buttonVariants({ size: 'lg' })}>
       {CONTACT_EMAIL}
     </a>

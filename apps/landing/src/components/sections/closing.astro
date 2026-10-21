@@ -1,6 +1,6 @@
 ---
 import TomIllustration from '@/components/atoms/tom-illustration.astro';
-import OpenApp from '@/components/molecules/open-app.astro';
+import RequestInvitation from '@/components/molecules/request-invitation.astro';
 import { BRAND_NAME } from '@/lib/brand';
 ---
 
@@ -8,8 +8,11 @@ import { BRAND_NAME } from '@/lib/brand';
 <section class="border-t pt-20 pb-12 lg:pt-28 lg:pb-16">
   <div class="container grid max-w-6xl items-end gap-10 sm:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
     <div class="pb-8">
-      <h2 class="max-w-2xl text-4xl text-balance text-foreground sm:text-5xl">Ses devoirs, du début à la fin, sur {BRAND_NAME} avec Tom.</h2>
-      <OpenApp class="mt-8" />
+      <h2 class="max-w-2xl text-4xl text-balance text-foreground sm:text-5xl">Envie d&apos;essayer avec votre enfant&nbsp;?</h2>
+      <p class="mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">
+        {BRAND_NAME} est en préparation, et les comptes s&apos;ouvrent sur invitation.
+      </p>
+      <RequestInvitation class="mt-8" />
     </div>
     <TomIllustration start="view" class="w-48 sm:w-full" />
   </div>

@@ -20,6 +20,9 @@ const MUTED = light['mist-10'];
 // satori takes React's element shape, without React.
 const node = (type: string, style: Record<string, unknown>, children: unknown) => ({ type, key: null, props: { style, children } });
 
+// satori wraps between the spans of a line and trims the space at their end: the gap is a margin.
+const WORD = { marginRight: '0.25em' };
+
 export const GET: APIRoute = async () => {
   // WOFF: satori reads neither WOFF2 nor the fonts Astro downloads.
   const bricolage = await readFile(
@@ -42,11 +45,13 @@ export const GET: APIRoute = async () => {
       },
       [
         node('div', { display: 'flex', flexDirection: 'column', width: 640 }, [
-          node('div', { display: 'flex', fontSize: 44, color: PRIMARY }, BRAND_NAME),
-          node('div', { display: 'flex', flexWrap: 'wrap', marginTop: 40, fontSize: 64, lineHeight: 1.1 }, [
-            node('span', {}, 'Ce soir, votre enfant '),
-            node('span', {}, 'sait '),
-            node('span', { backgroundImage: `linear-gradient(to top, ${HIGHLIGHT} 50%, transparent 50%)` }, 'par où commencer'),
+          // The top of the page's title, its brand name in the primary ink.
+          node('div', { display: 'flex', flexWrap: 'wrap', fontSize: 56, lineHeight: 1.1 }, [
+            node('span', { ...WORD, color: PRIMARY }, BRAND_NAME),
+            node('span', WORD, 'accompagne'),
+            node('span', WORD, 'votre enfant'),
+            node('span', WORD, 'pendant ses devoirs,'),
+            node('span', { backgroundImage: `linear-gradient(to top, ${HIGHLIGHT} 50%, transparent 50%)` }, 'du début à la fin'),
             '.',
           ]),
           node('div', { display: 'flex', marginTop: 40, fontSize: 30, color: MUTED }, 'En préparation, pour le collège (6e à 3e)'),

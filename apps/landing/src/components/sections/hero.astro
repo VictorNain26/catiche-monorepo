@@ -1,7 +1,7 @@
 ---
 import { Mic } from '@lucide/astro';
 import TomIllustration from '@/components/atoms/tom-illustration.astro';
-import OpenApp from '@/components/molecules/open-app.astro';
+import RequestInvitation from '@/components/molecules/request-invitation.astro';
 import Screen from '@/components/molecules/screen.astro';
 import TomSays from '@/components/molecules/tom-says.astro';
 import { BRAND_NAME } from '@/lib/brand';
@@ -18,21 +18,23 @@ const TONIGHT = [
 <section class="overflow-hidden pt-10 pb-20 lg:pt-16 lg:pb-32">
   <div class="container grid max-w-6xl items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-16">
     <div>
-      <h1 class="text-5xl text-balance text-foreground sm:text-6xl xl:text-7xl">
-        Ce soir, votre enfant sait <mark class="highlighter">par où commencer</mark>.
+      <h1 class="text-4xl text-balance text-foreground sm:text-5xl xl:text-6xl">
+        {BRAND_NAME} accompagne votre enfant pendant ses devoirs, <mark class="highlighter">du début à la fin</mark>.
       </h1>
       <p class="mt-8 max-w-xl text-lg text-muted-foreground md:text-xl">
-        {BRAND_NAME} accompagne votre enfant pendant ses devoirs, du début à la fin&nbsp;: savoir quoi faire, s&apos;y mettre, aller au bout, préparer
-        les contrôles. Sans faire le travail à sa place.
+        Une aide aux devoirs pour le collège, de la 6e à la&nbsp;3e. Chaque soir, votre enfant dit ce qu&apos;il a à faire, et Tom, le tuteur de{' '}
+        {BRAND_NAME}, l&apos;aide à s&apos;organiser&nbsp;: par où commencer, des étapes courtes, le cartable du lendemain. Sans faire le travail à sa
+        place.
       </p>
-      <OpenApp class="mt-10" />
+      <RequestInvitation class="mt-10" />
+      <p class="mt-2 max-w-xl text-muted-foreground">{BRAND_NAME} est en préparation&nbsp;: les comptes s&apos;ouvrent sur invitation.</p>
     </div>
 
     {/* Tom in his arch, and the screen of the evening laid over its foot. */}
     <figure class="mx-auto flex w-full max-w-md flex-col lg:max-w-none">
       <figcaption class="sr-only">
-        Un exemple de soirée&nbsp;: votre enfant dit ses devoirs dans le désordre, et Tom propose un ordre&nbsp;: les maths, l&apos;anglais, puis la
-        révision du contrôle d&apos;histoire de jeudi.
+        Un exemple de soirée&nbsp;: votre enfant dit ses devoirs dans le désordre, et Tom lui propose par où commencer&nbsp;: les maths,
+        l&apos;anglais, puis la révision du contrôle d&apos;histoire de jeudi. Votre enfant peut changer l&apos;ordre.
       </figcaption>
       <TomIllustration arch class="-mb-16 w-2/3 max-w-none self-end sm:-mb-24" />
       <tonight-order class="relative block w-11/12 max-w-sm sm:w-4/5">

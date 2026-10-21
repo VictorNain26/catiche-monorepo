@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import { Pause, Play } from '@lucide/astro';
 import { cn } from '@repo/ui/classes';
 import tom from '@/assets/tom.png';
+import { BRAND_NAME } from '@/lib/brand';
 
 interface Props {
   class?: string;
@@ -17,7 +18,11 @@ const CLIPS = ['salut', 'respiration'] as const;
 ---
 
 <tom-illustration data-start={start} class={cn('relative block w-full max-w-sm', className)}>
-  <span role="img" aria-label="Tom, une loutre en pull bleu avec un stylo dans la poche" class="relative block aspect-square w-full">
+  <span
+    role="img"
+    aria-label={`Tom, le tuteur de ${BRAND_NAME} : une loutre en pull bleu, un stylo dans la poche`}
+    class="relative block aspect-square w-full"
+  >
     {arch && <span aria-hidden="true" class="absolute inset-x-1/16 top-1/24 bottom-0 rounded-t-full bg-arch"></span>}
     <Image src={tom} alt="" width={384} height={384} densities={[1, 2]} class="relative size-full" />
     {CLIPS.map((clip) => (

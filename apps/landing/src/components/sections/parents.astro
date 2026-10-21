@@ -2,12 +2,13 @@
 import Screen from '@/components/molecules/screen.astro';
 
 // The evening check-in of docs/produit.md ("Le point du soir") and how it fits each family; the parent will see that it is
-// done, never the conversations. Not built yet: told in the future.
+// done, never the conversations. Not built yet: told in the present, on a page that says Catiche is in preparation.
 const FAMILIES = [
-  'Si vous rentrez tard, vous verrez le récapitulatif plus tard, et votre enfant verra votre « Vu » le lendemain.',
-  'En garde alternée, le récapitulatif ira au parent chez qui votre enfant est ce soir-là.',
-  'Si les devoirs sont un sujet tendu, vous pourrez couper le point du soir.',
-  "En 4e et en 3e, c'est votre enfant qui choisira de le partager.",
+  'Vous rentrez tard ? Vous le regardez quand vous pouvez. Votre enfant verra votre « Vu » le lendemain.',
+  "En garde alternée, c'est le parent chez qui il est ce soir-là qui le reçoit.",
+  'Si les devoirs sont un sujet de tension, vous pouvez désactiver le point du soir.',
+  "Si personne n'est disponible, le point du soir reste à votre enfant, et rien ne lui est reproché.",
+  "En 4e et en 3e, c'est votre enfant qui décide de le partager.",
 ];
 ---
 
@@ -20,10 +21,11 @@ const FAMILIES = [
             20:45
           </time>
         </p>
-        <h2 class="mt-3 text-4xl text-balance text-foreground sm:text-5xl">Le point du soir</h2>
+        <h2 class="mt-3 text-4xl text-balance text-foreground sm:text-5xl">Vous savez que c&apos;est fait, sans surveiller.</h2>
         <p class="mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">
-          À la fin de la soirée, votre enfant vous montrera son récapitulatif. Vous répondrez «&nbsp;Vu&nbsp;», avec un encouragement si vous le
-          voulez. Vous ne vérifierez pas le contenu, et rien ne sera noté&nbsp;: ni score, ni série de jours, ni relance.
+          À la fin de la soirée, votre enfant vous montre ce qu&apos;il a fait&nbsp;: c&apos;est le point du soir. Vous répondez «&nbsp;Vu&nbsp;»,
+          avec un mot d&apos;encouragement si vous voulez. Vous n&apos;avez rien à vérifier, et il n&apos;y a ni note, ni compteur de jours, ni
+          rappel.
         </p>
       </div>
 
@@ -58,14 +60,14 @@ const FAMILIES = [
           </ul>
         </div>
         <figcaption class="sr-only">
-          Le récapitulatif du soir&nbsp;: ce qui est fait, ce qui reste, le cartable de demain, et votre «&nbsp;Vu&nbsp;».
+          Le point du soir&nbsp;: ce qui est fait, ce qui reste, le cartable de demain, et votre «&nbsp;Vu&nbsp;».
         </figcaption>
       </figure>
     </div>
 
     <p class="mt-20 max-w-4xl font-heading text-3xl leading-tight font-extrabold text-pretty text-foreground sm:text-4xl lg:mt-28">
-      Ses conversations avec Tom, vous ne les verrez pas.{' '}
-      <span class="text-muted-foreground">C&apos;est son espace à lui, qu&apos;il ouvre par son propre code.</span>
+      Vous ne voyez pas ses échanges avec Tom.{' '}
+      <span class="text-muted-foreground">C&apos;est son espace&nbsp;: il y entre avec un code qu&apos;il choisit lui-même.</span>
     </p>
   </div>
 </section>

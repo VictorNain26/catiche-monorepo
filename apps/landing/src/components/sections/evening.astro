@@ -9,26 +9,26 @@ import { BRAND_NAME } from '@/lib/brand';
 const MOMENTS = [
   {
     time: '17:30',
-    title: "« Qu'est-ce que tu as ce soir ? »",
-    body: 'Votre enfant dit ses devoirs à voix haute, depuis son agenda. Tom demande ce qui manque : pour quand, quels exercices, un contrôle bientôt ?',
+    title: "Dire ce qu'il a ce soir",
+    body: 'Votre enfant dit ses devoirs à voix haute, en regardant son agenda. Tom pose les questions qui manquent : pour quand ? quels exercices ? un contrôle bientôt ?',
     screen: 'Ce soir',
   },
   {
     time: '17:45',
-    title: 'Un ordre',
-    body: "Tom propose par quoi commencer, et le temps que prendra chaque devoir. Votre enfant peut changer l'ordre.",
+    title: 'Choisir par quoi commencer',
+    body: "Tom propose un ordre et le temps que prendra chaque devoir. Votre enfant peut changer l'ordre.",
     screen: "L'ordre",
   },
   {
     time: '18:30',
-    title: 'De petites étapes',
-    body: "Chaque devoir est coupé en étapes courtes, pour s'y mettre et tenir. Sur un exercice, Tom aide sans donner la réponse.",
+    title: 'Avancer par petites étapes',
+    body: "Tom découpe chaque devoir en étapes courtes, pour démarrer plus facilement et tenir jusqu'au bout. Si un exercice bloque, Tom aide sans donner la réponse.",
     screen: 'Maths · exercice 3',
   },
   {
     time: '20:45',
-    title: 'Le cartable de demain',
-    body: "Tom récapitule ce qui est fait et ce qui reste, puis le cartable du lendemain. Un contrôle annoncé revient les jours d'avant.",
+    title: 'Préparer demain',
+    body: "Tom fait le point avec votre enfant : ce qui est fait, ce qui reste. Puis il l'aide à préparer son cartable. Quand un contrôle approche, Tom le rappelle les jours d'avant, pour le réviser.",
     screen: 'Pour demain',
   },
 ] as const;
@@ -51,10 +51,9 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
 <section id="soiree" class="scroll-mt-20 border-t py-20 lg:py-32">
   <div class="container max-w-6xl">
     <div class="max-w-3xl">
-      <h2 class="text-4xl text-balance text-foreground sm:text-5xl">Une soirée avec {BRAND_NAME}, telle que nous la construisons</h2>
+      <h2 class="text-4xl text-balance text-foreground sm:text-5xl">Une soirée avec Tom</h2>
       <p class="mt-6 text-lg text-muted-foreground md:text-xl">
-        <strong class="font-bold text-foreground">En préparation.</strong> Du début à la fin, Tom accompagnera votre enfant, une étape après
-        l&apos;autre.
+        <strong class="font-bold text-foreground">{BRAND_NAME} est en préparation.</strong> Voici comment se passera une soirée de devoirs.
       </p>
     </div>
 

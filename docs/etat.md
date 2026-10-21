@@ -60,9 +60,10 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-21 ; ce qui 
 - Les durées de conservation annoncées (`apps/landing/src/pages/confidentialite.astro`, § 7) :
   aucune purge ne tient encore celles du compte inactif ni des journaux. Celles des e-mails reçus
   à `contact@` se tiennent à la main, dans la boîte Zimbra.
-- La landing, à la naissance de la production : son bouton et « Se connecter » mènent au staging
-  (`APP_URL`, `apps/landing/src/lib/brand.ts`) ; changer cette constante, et la phrase sur
-  l'invitation (`molecules/open-app.astro`) si l'inscription s'ouvre.
+- La landing, à la naissance de la production : ses liens « Se connecter » mènent au staging
+  (`APP_URL`, `apps/landing/src/lib/brand.ts`) ; changer cette constante, et le bouton « Demander
+  une invitation » (`molecules/request-invitation.astro`) avec les phrases « en préparation » si
+  l'inscription s'ouvre.
 - L'adresse de la connexion (`platform/http/client-address.ts`, `getConnInfo`) n'est exercée par
   aucun test, faute d'un vrai `Bun.serve`.
 - Le préfixe `__Host-` des cookies, quand better-auth le livre
