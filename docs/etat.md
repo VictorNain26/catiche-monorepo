@@ -84,13 +84,16 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-21 ; ce qui 
   applications et dépôt renommés, variables du staging, anciens domaines détachés. Reste, par
   Victor : supprimer l'image GHCR `tomai-server` (Settings du paquet sur GitHub) ; l'ancien
   domaine expire seul le 24 août 2027.
-- **L'ordre décidé par Victor (2026-10-20)**, un chantier après l'autre, la landing restructurée
-  autour de la soirée étant faite (#555) :
-  1. **La refonte de l'application**, pensée depuis le parent et l'enfant réels. Il faut d'abord
-     un parcours et des textes validés, puis l'écran à l'ordinateur comme au téléphone. Un
-     inventaire des écrans actuels est fait : vocabulaire technique, colonne unique, doublons,
-     écarts à la charte.
-  2. **La soirée de devoirs à l'oral et le point du soir** (`produit.md`), avec le volet IA.
+- **L'ordre décidé par Victor (2026-10-20, précisé le 2026-10-21)**, un chantier après
+  l'autre :
+  1. **La landing, jusqu'à sa validation par Victor.** Restructurée autour de la soirée (#555),
+     elle n'est pas encore validée : ses textes s'adressent encore aux « parents », alors que
+     `produit.md` vise tous les collégiens et toutes les familles.
+  2. **La refonte de l'application**, pensée depuis l'enfant et les adultes réels. Il faut
+     d'abord un parcours et des textes validés, puis l'écran à l'ordinateur comme au téléphone.
+     Un inventaire des écrans actuels est fait : vocabulaire technique, colonne unique,
+     doublons, écarts à la charte.
+  3. **La soirée de devoirs à l'oral et le point du soir** (`produit.md`), avec le volet IA.
 - **À vérifier, relevé par l'inventaire** : le résumé montre au parent « Ce qui résiste » même
   quand l'enfant a refusé la mémoire, alors que `/memoire` dit le contraire
   (`core/week-summary.ts`, `routes/memoire.tsx` du web).
