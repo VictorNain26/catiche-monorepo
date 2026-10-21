@@ -36,8 +36,10 @@ Clever Cloud (`apps/landing/Caddyfile`).
   a besoin du navigateur est un élément personnalisé (`customElements.define`) dans le `<script>`
   de son composant, sur l'élément natif quand il existe (`<dialog>` pour le menu, `<details>` pour
   la FAQ). Les classes partagées avec le web viennent de `@repo/ui/classes`.
-- Le mouvement anime les illustrations (les écrans, Tom, le surligneur), jamais un texte à lire
-  qui apparaît au défilement : elles le masquaient. CSS d'abord, le lien au défilement sous
+- Le mouvement anime les illustrations (les écrans, Tom, le surligneur). Un texte peut apparaître
+  au défilement, une fois, si son état d'entrée n'est posé que par le script et hors mouvement
+  réduit ; sans script, il est visible (`reveal`, `apps/landing/src/styles/global.css`). CSS
+  d'abord, le lien au défilement sous
   `@supports (animation-timeline: view())` ; ce que le CSS ne sait pas faire passe par les API
   natives (Web Animations, `IntersectionObserver`) dans `apps/landing/src/scripts/evening.ts`,
   sans bibliothèque. Une vidéo de Tom se joue une fois et dure moins de 5 secondes ; une animation
@@ -46,7 +48,7 @@ Clever Cloud (`apps/landing/Caddyfile`).
   posé par le CSS quand c'est un script qui le lève : ce script le pose lui-même (`data-armed`,
   `apps/landing/src/scripts/evening.ts`), et rien n'attend un script qui ne vient pas. Seule une
   animation en CSS pur, qui ne dépend d'aucun script, part d'un état masqué, si elle se termine
-  d'elle-même (le surligneur, `both` avec délai) ou suit le défilement (la ligne du temps de la soirée,
+  d'elle-même (le surligneur, `both` avec délai) ou suit le défilement (le moment de la soirée qui s'allume,
   sous `@supports (animation-timeline: view())`). Sans scripts, si un script échoue, ou sous le
   mouvement réduit, même activé en cours de visite, la page s'affiche entière et immobile ; son
   HTML est l'état final.

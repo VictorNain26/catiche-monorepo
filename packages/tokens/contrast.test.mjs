@@ -150,12 +150,10 @@ test('the highlighter is the same stroke in both modes', () => {
   assert.equal(theme.dark['highlight-height'], theme.light['highlight-height']);
 });
 
-// It is laid on the background, at the top of the page, and on the brand's light plane, under the problem's last line.
+// It is laid on the background, under the title at the top of the page, and nowhere else.
 for (const [mode, color] of modes) {
-  for (const plane of ['background', 'tint']) {
-    test(`${mode}: highlight on ${plane} meets WCAG 1.4.11 (3:1)`, () => {
-      const ratio = contrast(color('highlight'), color(plane));
-      assert.ok(ratio >= 3, `${color('highlight')} on ${color(plane)} = ${ratio.toFixed(2)}`);
-    });
-  }
+  test(`${mode}: highlight on background meets WCAG 1.4.11 (3:1)`, () => {
+    const ratio = contrast(color('highlight'), color('background'));
+    assert.ok(ratio >= 3, `${color('highlight')} on ${color('background')} = ${ratio.toFixed(2)}`);
+  });
 }

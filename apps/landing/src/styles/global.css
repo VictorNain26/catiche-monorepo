@@ -81,6 +81,42 @@
   }
 }
 
+/* Every section title at one size, well under the top of the page's and well above a step's or a block's. */
+@utility section-title {
+  @apply text-3xl text-balance text-foreground sm:text-4xl lg:text-5xl;
+}
+
+/* What appears as it is scrolled to, once (.claude/rules/landing.md): visible by default; its entry state exists only
+ * while a `play-once` around it carries `data-armed`, which the script sets itself (src/scripts/evening.ts), and only
+ * without reduced motion. `reveal` rises; `reveal-fade` only fades in. The items of one block follow one another. */
+@media (prefers-reduced-motion: no-preference) {
+  play-once[data-armed] :is(.reveal, .reveal-fade) {
+    opacity: 0;
+  }
+
+  play-once[data-armed] .reveal {
+    translate: 0 calc(var(--spacing) * 5);
+  }
+
+  play-once:not([data-armed]) :is(.reveal, .reveal-fade) {
+    transition:
+      opacity var(--duration-reveal) var(--ease-out-expo),
+      translate var(--duration-reveal) var(--ease-out-expo);
+  }
+
+  play-once:not([data-armed]) :is(.reveal, .reveal-fade):nth-child(2) {
+    transition-delay: var(--duration-stagger);
+  }
+
+  play-once:not([data-armed]) :is(.reveal, .reveal-fade):nth-child(3) {
+    transition-delay: calc(var(--duration-stagger) * 2);
+  }
+
+  play-once:not([data-armed]) :is(.reveal, .reveal-fade):nth-child(n + 4) {
+    transition-delay: calc(var(--duration-stagger) * 3);
+  }
+}
+
 /* A selection in the brand's water: the reed is a stroke, too light or too dark behind a whole line in one mode. */
 ::selection {
   @apply bg-primary text-primary-foreground;

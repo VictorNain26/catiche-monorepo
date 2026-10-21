@@ -91,6 +91,13 @@
   --duration-pulse: 1000ms;
   --duration-wait: 1000ms;
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  /* Une apparition au défilement, sur le site : une montée douce et longue, jouée une fois, en
+   * courbe expo-out ; stagger : le décalage entre les éléments d'un même bloc ; arrive : l'entrée
+   * lente de Tom en fin de page. */
+  --duration-reveal: 900ms;
+  --duration-stagger: 120ms;
+  --duration-arrive: 1500ms;
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
 
   /* Un squelette reste caché pendant l'attente, puis pulse ; sous le mouvement réduit, il paraît
    * sans pulser. */
