@@ -1,6 +1,7 @@
 ---
 import { Plus } from '@lucide/astro';
 import { cn } from '@repo/ui/classes';
+import ExternalLink from '@/components/atoms/external-link.astro';
 import { CONTACT_EMAIL } from '@/lib/brand';
 import { FAQS } from './faq-data';
 
@@ -39,14 +40,9 @@ const { class: className } = Astro.props;
           <ul class="flex flex-wrap gap-x-6">
             {faq.sources.map(({ href, label }) => (
               <li>
-                <a
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="inline-flex min-h-11 items-center text-primary underline underline-offset-4"
-                >
+                <ExternalLink href={href} class="min-h-11 text-primary underline underline-offset-4">
                   {label}
-                </a>
+                </ExternalLink>
               </li>
             ))}
           </ul>

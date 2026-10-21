@@ -1,5 +1,6 @@
 ---
 import { buttonVariants, cn } from '@repo/ui/classes';
+import ExternalLink from '@/components/atoms/external-link.astro';
 import Logo from '@/components/atoms/logo.astro';
 import MobileMenu from '@/components/molecules/mobile-menu.astro';
 import NavLinks from '@/components/molecules/nav-links.astro';
@@ -19,9 +20,9 @@ import { SIGN_IN_URL } from '@/lib/brand';
     {/* Outside the desktop navigation: the menu's dialog holds its own. */}
     <div class="z-20 flex items-center gap-2">
       {/* At phone width the logo and the menu leave no room: the link moves into the menu. */}
-      <a href={SIGN_IN_URL} class={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'hidden sm:inline-flex')}>
+      <ExternalLink href={SIGN_IN_URL} class={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'hidden sm:inline-flex')}>
         Se connecter
-      </a>
+      </ExternalLink>
       <MobileMenu />
     </div>
   </div>

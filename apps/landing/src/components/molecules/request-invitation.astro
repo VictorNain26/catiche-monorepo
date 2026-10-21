@@ -1,5 +1,6 @@
 ---
 import { buttonVariants, cn } from '@repo/ui/classes';
+import ExternalLink from '@/components/atoms/external-link.astro';
 import { BRAND_NAME, CONTACT_EMAIL, SIGN_IN_URL } from '@/lib/brand';
 
 // What a visitor can do today: accounts open on invitation (apps/server/src/platform/auth/auth.ts), asked for by e-mail,
@@ -18,8 +19,8 @@ const REQUEST_HREF = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`Dema
   </a>
   <p class="text-muted-foreground">
     Déjà invité&nbsp;?{' '}
-    <a href={SIGN_IN_URL} class="inline-flex min-h-11 items-center text-primary underline underline-offset-4">
+    <ExternalLink href={SIGN_IN_URL} class="min-h-11 text-primary underline underline-offset-4">
       Se connecter
-    </a>
+    </ExternalLink>
   </p>
 </div>

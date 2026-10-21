@@ -15,6 +15,9 @@ Clever Cloud (`apps/landing/Caddyfile`).
   seule constante (`APP_URL`, `apps/landing/src/lib/brand.ts`), le staging tant que la production
   n'existe pas (`docs/etat.md`). Ni liste d'attente ni formulaire : un formulaire public demande un
   service qui le reçoive.
+- Un lien qui quitte catiche.fr, l'application comprise, passe par
+  `apps/landing/src/components/atoms/external-link.astro` : nouvel onglet, signalé à l'œil et au
+  lecteur d'écran. Un lien interne reste dans l'onglet, pour que le retour arrière marche.
 - Les textes suivent `docs/charte.md`, « Les mots ».
 - Jamais un mot de soin ni un trouble ciblé : la liste et la raison sont dans `docs/produit.md`,
   « Ce qu'on dit, et ce qu'on ne dit pas ».
