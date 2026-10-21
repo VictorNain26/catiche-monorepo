@@ -14,23 +14,21 @@ import { EVENING, HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data
 
 <section class="flex min-h-[calc(100svh-var(--spacing)*16)] items-center overflow-hidden py-10 lg:py-16">
   <div class="container grid max-w-7xl items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] xl:gap-16">
-    {/* The title rises, then the sentence, then what to do now. */}
-    <play-once class="block">
+    {/* The text of the top of the page is shown at once, still: only what is scrolled to appears (.claude/rules/landing.md). */}
+    <div>
       {/* Balanced lines, and « du début à la fin. » kept together, so the stroke is never cut in two. */}
-      <h1 data-reveal="rise" class="text-4xl leading-tight text-balance text-foreground sm:text-5xl xl:text-6xl xl:leading-tight">
+      <h1 class="text-4xl leading-tight text-balance text-foreground sm:text-5xl xl:text-6xl xl:leading-tight">
         {BRAND_NAME} accompagne votre collégien pendant ses devoirs,{' '}
         <span class="whitespace-nowrap">
           <mark class="highlighter">du début à la fin</mark>.
         </span>
       </h1>
-      <p data-reveal="rise" data-order="2" class="mt-6 max-w-xl text-lg text-foreground">
+      <p class="mt-6 max-w-xl text-lg text-foreground">
         Tom, le tuteur de {BRAND_NAME}, est une intelligence artificielle qui aide votre collégien chaque soir à s&apos;organiser, sans faire le
         travail à sa place.
       </p>
-      <div data-reveal="rise" data-order="3">
-        <RequestInvitation status="En préparation · ouverture sur invitation" class="mt-8" />
-      </div>
-    </play-once>
+      <RequestInvitation status="En préparation · ouverture sur invitation" class="mt-8" />
+    </div>
 
     {/* The card of the evening on a halo of water, and Tom stepping out of it: on a phone he stands under its lower edge,
      * which leaves him room; at a computer, in front of its left third, which its content leaves free. His feet are

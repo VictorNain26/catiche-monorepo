@@ -3,6 +3,11 @@
 // carries `data-played` (src/styles/global.css). If the script does not run, nothing waits for it; a block the window
 // has jumped past shows at once, without a move.
 
+// The observer's margin around the window (top right bottom left). A block plays once its top has risen past two thirds of
+// the window, however tall it is; the margin reaches far above the window, taller than the page, so that a block the
+// window has jumped past is reported too, and shows at once.
+export const REVEAL_MARGIN = '100000px 0px -33% 0px';
+
 // What the observer of the window reports: whether the block has crossed the trigger line, and where it lies.
 export interface Entry {
   readonly isIntersecting: boolean;

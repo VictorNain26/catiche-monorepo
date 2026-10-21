@@ -1,14 +1,10 @@
 // The blocks of the page play once, when they are read (src/scripts/reveal.ts). Durations and curve come from the tokens,
 // through the computed style.
 
-import { release, reveal } from './reveal';
+import { release, REVEAL_MARGIN, reveal } from './reveal';
 import { orderTiming } from './timing';
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-// Taller than the page: a block the window has jumped past is reported too, and shows at once.
-const ABOVE = '100000px';
-// A block plays once its top has risen past two thirds of the window, however tall it is.
-const TRIGGER = '-33%';
 
 class PlayOnce extends HTMLElement {
   #stop: (() => void) | undefined;
@@ -17,7 +13,7 @@ class PlayOnce extends HTMLElement {
     this.#stop = reveal(this, {
       motion: reducedMotion,
       observe: (report) => {
-        const observer = new IntersectionObserver(report, { rootMargin: `${ABOVE} 0px ${TRIGGER} 0px` });
+        const observer = new IntersectionObserver(report, { rootMargin: REVEAL_MARGIN });
         observer.observe(this);
         return () => {
           observer.disconnect();

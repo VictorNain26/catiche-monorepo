@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { type Entry, release, reveal, type RevealHost } from './reveal';
+import { type Entry, release, REVEAL_MARGIN, reveal, type RevealHost } from './reveal';
 
 // A block on the page: where it lies against the window (its bottom, in pixels from the window's top), and its data.
 const block = (bottom = 900): RevealHost & { dataset: Record<string, string | undefined> } => ({
@@ -158,6 +158,27 @@ describe('reveal: reduced motion turned on during the visit', () => {
     reveal(host, { motion: settings, observe: watch.observe, play: played(host) });
     watch.report(true);
     expect(settings.listeners.size).toBe(0);
+  });
+});
+
+// The window as the observer sees it through a rootMargin (top right bottom left): a block crosses once its top is
+// above the bottom edge, moved by the bottom margin, a percentage of the window's height.
+const crosses = (margin: string, top: number, height: number) => {
+  const [, , bottom = ''] = margin.split(' ');
+  expect(bottom).toMatch(/^-?\d+(\.\d+)?%$/u);
+  return top < height * (1 + Number.parseFloat(bottom) / 100);
+};
+
+describe('REVEAL_MARGIN', () => {
+  it('plays a block once its top has risen past two thirds of the window', () => {
+    expect(crosses(REVEAL_MARGIN, 700, 1000)).toBe(false);
+    expect(crosses(REVEAL_MARGIN, 600, 1000)).toBe(true);
+  });
+
+  it('reaches far above the window, so that a block jumped past is reported', () => {
+    const [top = ''] = REVEAL_MARGIN.split(' ');
+    expect(Number.parseFloat(top)).toBeGreaterThanOrEqual(100000);
+    expect(crosses(REVEAL_MARGIN, -50000, 1000)).toBe(true);
   });
 });
 
