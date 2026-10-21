@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { milliseconds, orderTiming } from './timing';
+import { arrivalEnded, milliseconds, orderTiming } from './timing';
 
 describe('milliseconds', () => {
   it('reads a duration in milliseconds or in seconds', () => {
@@ -52,5 +52,21 @@ describe('orderTiming', () => {
   it('gives no timing when a duration cannot be read', () => {
     expect(orderTiming(tokens({ ...TOKENS, '--duration-slow': 'slow' }))).toBeUndefined();
     expect(orderTiming(tokens({ ...TOKENS, '--duration-wait': '1000' }))).toBeUndefined();
+  });
+});
+
+describe('arrivalEnded', () => {
+  const host = {};
+
+  it('ends with the arrival of the element that arrives itself', () => {
+    expect(arrivalEnded({ target: host, propertyName: 'translate' }, host)).toBe(true);
+  });
+
+  it('waits past the end of another property of that element', () => {
+    expect(arrivalEnded({ target: host, propertyName: 'opacity' }, host)).toBe(false);
+  });
+
+  it('waits past a transition that bubbles up from inside it', () => {
+    expect(arrivalEnded({ target: {}, propertyName: 'translate' }, host)).toBe(false);
   });
 });

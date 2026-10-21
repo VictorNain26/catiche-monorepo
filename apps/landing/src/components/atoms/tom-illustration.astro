@@ -6,8 +6,8 @@ import { BRAND_NAME } from '@/lib/brand';
 
 interface Props {
   class?: string;
-  // On the top of the page Tom waves at once; further down, once he is in view.
-  start?: 'load' | 'view';
+  // On the top of the page Tom waves at once; at the end, once his arrival (an `.arrival` around him) is over.
+  start?: 'load' | 'arrival';
 }
 
 const { class: className, start = 'load' } = Astro.props;
@@ -31,6 +31,8 @@ const { class: className, start = 'load' } = Astro.props;
 </tom-illustration>
 
 <script>
+  import { arrivalEnded } from '@/scripts/timing';
+
   class TomIllustration extends HTMLElement {
     connectedCallback() {
       const picture = this.querySelector('img');
@@ -40,13 +42,11 @@ const { class: className, start = 'load' } = Astro.props;
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
       if (reducedMotion.matches) return;
 
-      let observer: IntersectionObserver | undefined;
       const show = (shown: HTMLElement) => {
         for (const frame of [picture, wave]) frame.classList.toggle('invisible', frame !== shown);
       };
       // Reduced motion turned on during the visit: Tom stops on his still picture, for good.
       const still = () => {
-        observer?.disconnect();
         wave.pause();
         show(picture);
       };
@@ -66,17 +66,16 @@ const { class: className, start = 'load' } = Astro.props;
         });
       };
 
-      if (this.dataset['start'] === 'view') {
-        observer = new IntersectionObserver(
-          (entries) => {
-            if (entries.some((entry) => entry.isIntersecting)) {
-              observer?.disconnect();
-              waveOnce();
-            }
-          },
-          { threshold: 0.6 },
-        );
-        observer.observe(this);
+      const arrival = this.dataset['start'] === 'arrival' ? this.closest<HTMLElement>('.arrival') : null;
+      if (arrival) {
+        // He waves once his arrival is over (its script plays it as it comes into view, src/scripts/evening.ts), so that
+        // the start of the wave is not lost while he still fades in. No arrival, under reduced motion: no wave either.
+        const onEnd = (event: TransitionEvent) => {
+          if (!arrivalEnded(event, arrival)) return;
+          arrival.removeEventListener('transitionend', onEnd);
+          waveOnce();
+        };
+        arrival.addEventListener('transitionend', onEnd);
       } else {
         waveOnce();
       }

@@ -88,7 +88,8 @@
 
 /* What appears as it is scrolled to, once (.claude/rules/landing.md): visible by default; its entry state exists only
  * while a `play-once` around it carries `data-armed`, which the script sets itself (src/scripts/evening.ts), and only
- * without reduced motion. `reveal` rises; `reveal-fade` only fades in. The items of one block follow one another. */
+ * without reduced motion. `reveal` rises; `reveal-fade` only fades in. The items of one block follow one another,
+ * by `reveal-2` and `reveal-3`. */
 @media (prefers-reduced-motion: no-preference) {
   play-once[data-armed] :is(.reveal, .reveal-fade) {
     opacity: 0;
@@ -104,16 +105,14 @@
       translate var(--duration-reveal) var(--ease-out-expo);
   }
 
-  play-once:not([data-armed]) :is(.reveal, .reveal-fade):nth-child(2) {
+  /* The rank of an item in its block, set by a class rather than counted among siblings: the items of a block are not
+   * always siblings. */
+  play-once:not([data-armed]) .reveal-2 {
     transition-delay: var(--duration-stagger);
   }
 
-  play-once:not([data-armed]) :is(.reveal, .reveal-fade):nth-child(3) {
+  play-once:not([data-armed]) .reveal-3 {
     transition-delay: calc(var(--duration-stagger) * 2);
-  }
-
-  play-once:not([data-armed]) :is(.reveal, .reveal-fade):nth-child(n + 4) {
-    transition-delay: calc(var(--duration-stagger) * 3);
   }
 }
 

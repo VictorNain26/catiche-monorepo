@@ -11,6 +11,12 @@ export function orderTiming(style: Tokens): KeyframeAnimationOptions | undefined
   return { duration, delay, easing, fill: 'backwards' };
 }
 
+// Tom's arrival at the end of the page is over when the arriving element's own move ends, not another of its properties
+// nor a transition that bubbles up from inside it: then he waves (atoms/tom-illustration.astro).
+export function arrivalEnded(event: { target: unknown; propertyName: string }, host: unknown): boolean {
+  return event.target === host && event.propertyName === 'translate';
+}
+
 // A CSS <time>: a number and its unit, `ms` or `s`, in any case (https://www.w3.org/TR/css-values-4/#time).
 const TIME = /^(?<number>\d*\.?\d+)(?<unit>ms|s)$/iu;
 
