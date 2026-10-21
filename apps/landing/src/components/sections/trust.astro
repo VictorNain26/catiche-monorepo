@@ -1,43 +1,15 @@
 ---
-import ExternalLink from '@/components/atoms/external-link.astro';
-
 // What makes Catiche worth trusting, in everyday words, each fact with its line in the docs, the most important first:
 // - Tom does not give the answer: docs/tuteur.md, § 3 (the help level rises with real attempts, never under the mere
 //   demand for the answer) and § 4 (the check before the pupil; the fixed distress answer, written and approved by a
 //   human, with the 3114 and a trusted adult);
 // - the commitments: docs/architecture.md ("Hébergement", Clever Cloud in France), docs/tuteur.md (§ 2, Mistral's EU
-//   endpoint), the privacy policy (pages/confidentialite.astro), and the pupil's own code (tuteur.md, § 8);
-// - the research: docs/methode.md, "Ce qui vaut pour tous les élèves", sources [11], [13] and [17]; where the evening's
-//   gestures come from, never that Catiche obtains these effects. A source is said in plain words; its scholarly name
-//   is only the link's title (docs/charte.md, "Les mots").
+//   endpoint), the privacy policy (pages/confidentialite.astro), and the pupil's own code (tuteur.md, § 8).
+// The research sits under what it supports, in the evening and the evening check-in (molecules/proof.astro).
 const COMMITMENTS = [
   { key: 'Hébergé en France', rest: 'les données restent en France, et Tom fonctionne avec Mistral AI, en Europe.' },
   { key: 'Sans publicité', rest: 'nous ne vendons aucune donnée.' },
   { key: "L'espace de votre collégien", rest: "ses échanges avec Tom restent à lui : il l'ouvre avec son propre code." },
-];
-
-const RESEARCH = [
-  {
-    before: "Planifier son travail et faire le point compte parmi les méthodes les mieux appuyées, d'après",
-    figure: '355 études',
-    after: '.',
-    source: {
-      href: 'https://educationendowmentfoundation.org.uk/education-evidence/teaching-learning-toolkit/metacognition-and-self-regulation',
-      title: 'Education Endowment Foundation, « Metacognition and self-regulation »',
-    },
-  },
-  {
-    before: 'Réviser un contrôle sur',
-    figure: 'plusieurs jours',
-    after: ', plutôt que la veille, est jugé très utile par la recherche.',
-    source: { href: 'https://doi.org/10.1177/1529100612453266', title: 'Dunlosky et al., 2013' },
-  },
-  {
-    before: 'Chez',
-    figure: '1 685 élèves',
-    after: ", l'aide d'un adulte aux devoirs, vécue comme un soutien, va avec plus de progrès.",
-    source: { href: 'https://doi.org/10.1080/00220671.2014.901283', title: 'Moroni et al., 2015' },
-  },
 ];
 ---
 
@@ -66,32 +38,18 @@ const RESEARCH = [
       </p>
     </play-once>
 
-    <play-once class="mt-14 grid gap-12 md:grid-cols-2 md:gap-16 lg:mt-20">
-      <div data-reveal="rise">
-        <h3 class="text-2xl text-foreground">Nos engagements</h3>
-        <ul class="mt-4 space-y-3 text-foreground">
-          {COMMITMENTS.map(({ key, rest }) => (
-            <li>
-              <strong class="font-bold text-primary">{key}</strong> — {rest}
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div data-reveal="rise" data-order="2">
-        <h3 class="text-2xl text-foreground">Ce que dit la recherche</h3>
-        {/* Each figure in bold inside its sentence, and its source in a new tab (atoms/external-link.astro). */}
-        <ul class="mt-4 space-y-3 text-foreground">
-          {RESEARCH.map(({ before, figure, after, source }) => (
-            <li>
-              {before} <strong class="font-bold">{figure}</strong>
-              {after}{' '}
-              <ExternalLink inline href={source.href} title={source.title} class="text-primary underline underline-offset-4">
-                La source
-              </ExternalLink>
-            </li>
-          ))}
-        </ul>
-      </div>
+    {/* The commitments rise one after the other. */}
+    <play-once class="mt-14 block max-w-3xl lg:mt-20">
+      <h3 data-reveal="rise" class="text-2xl text-foreground">
+        Nos engagements
+      </h3>
+      <ul class="mt-4 space-y-3 text-foreground">
+        {COMMITMENTS.map(({ key, rest }, index) => (
+          <li data-reveal="rise" data-order={index + 2}>
+            <strong class="font-bold text-primary">{key}</strong> — {rest}
+          </li>
+        ))}
+      </ul>
     </play-once>
   </div>
 </section>
