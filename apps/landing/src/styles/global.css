@@ -174,9 +174,22 @@
 
   tonight-order[data-played] :is([data-before], .tonight-after) {
     transition:
-      translate var(--duration-slow) var(--ease-standard) var(--duration-wait),
-      opacity var(--duration-slow) var(--ease-standard) var(--duration-wait);
+      translate var(--duration-slow) var(--ease-standard) var(--order-delay),
+      opacity var(--duration-slow) var(--ease-standard) var(--order-delay);
   }
+}
+
+/* How long an order waits before it falls into place: at the top of the page, the wait after the jumble is said; where
+ * a screen brings it in, the screen's own arrival (sections/evening.astro). Registered as a time, so that its script
+ * reads it resolved (src/scripts/timing.ts). */
+@property --order-delay {
+  syntax: '<time>';
+  inherits: true;
+  initial-value: 0s;
+}
+
+tonight-order {
+  --order-delay: var(--duration-wait);
 }
 
 /* A selection in the brand's water: the reed is a stroke, too light or too dark behind a whole line in one mode. */

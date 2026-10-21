@@ -1,4 +1,5 @@
 ---
+import { Backpack } from '@lucide/astro';
 import CheckIn from '@/components/molecules/check-in.astro';
 import Proof from '@/components/molecules/proof.astro';
 import PupilSays from '@/components/molecules/pupil-says.astro';
@@ -12,9 +13,9 @@ import { BAG, CHECK_IN, FIRST_SAID, HOMEWORK, HOURS, MISSING } from './evening-d
 // A question or a hint is the bottom of Tom's ladder (docs/tuteur.md, § 3). One row per moment, like a chapter: its
 // hour, its title and its sentence on the left, with the proof of its gesture under them (docs/methode.md, "Ce qui vaut
 // pour tous les élèves", sources [11] and [13]); its screen facing them on the right; on a phone, one under the other.
-// Each row rises once as it comes into view, its text first, then its screen, which grows slightly: the section's strong
-// moment; its proof fades in. In the screen of 17:35, the list falls into the pupil's order (`tonight-order`). The last
-// line leads to the evening check-in, the next section.
+// The rows' text stays still; each screen rises and grows slightly once as it comes into view, the section's strong
+// moment, then its proof fades in. Two screens carry a gesture: at 17:35 the list falls into the pupil's order
+// (`tonight-order`), at 18:00 a line strikes the step done.
 const MOMENTS = [
   {
     time: HOURS.said,
@@ -77,18 +78,20 @@ const CHANGED = [english, maths, history];
     <ol role="list" class="mt-8 space-y-12 lg:mt-14 lg:space-y-16">
       {MOMENTS.map(({ time, title, body, proof }, index) => (
         <li role="listitem">
-          {/* At a computer, the screen spans both rows, and the proof stays right under the moment's sentence. */}
-          <play-once class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:grid-rows-[auto_1fr] lg:gap-x-16">
-            <div data-reveal="rise">
+          {/* In two columns (as in the evening check-in), the screen spans both rows, and the proof stays right under the
+           * moment's sentence. The text stays still; only the screen arrives, then its proof. */}
+          <play-once class="grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] md:grid-rows-[auto_1fr] md:gap-x-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-x-16">
+            <div>
+              {/* The hour stays under the section's title at every width. */}
               <h3 class="text-xl text-foreground sm:text-2xl">
-                <time datetime={time} class="block font-heading text-4xl font-extrabold text-primary tabular-nums">
+                <time datetime={time} class="block font-heading text-3xl font-extrabold text-primary tabular-nums lg:text-4xl">
                   {spokenHour(time)}
                 </time>
                 <span class="mt-1 block">{title}</span>
               </h3>
               <p class="mt-2 max-w-md text-lg text-foreground">{body}</p>
             </div>
-            <div data-reveal="pop" data-order="2" class="lg:row-span-2">
+            <div data-reveal="pop" class="md:row-span-2">
               <Screen>
                 {index === 0 && (
                   <div class="space-y-3">
@@ -121,8 +124,8 @@ const CHANGED = [english, maths, history];
                       {STEPS.map(({ step, state }, position) => (
                         <li
                           class:list={[
-                            'flex items-baseline gap-3 rounded-control px-3 py-2',
-                            state === 'en cours' ? 'bg-accent text-accent-foreground' : 'ring-1 ring-border',
+                            'flex items-baseline gap-3 rounded-control px-3 py-2 ring-1 ring-border',
+                            state === 'en cours' && 'bg-accent text-accent-foreground',
                           ]}
                         >
                           <span class="font-heading font-extrabold tabular-nums">{position + 1}</span>
@@ -130,7 +133,7 @@ const CHANGED = [english, maths, history];
                             {step}
                             {state === 'fait' && (
                               <svg class="strike" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true">
-                                <path d="M1 4 C 25 2, 60 5, 99 2" />
+                                <path pathLength="1" d="M1 4 C 25 2, 60 5, 99 2" />
                               </svg>
                             )}
                           </span>
@@ -147,26 +150,25 @@ const CHANGED = [english, maths, history];
                 )}
                 {index === 3 && (
                   <div class="space-y-5">
-                    {/* What is done and what is left first, the same as on the evening check-in; then the bag, drawn by
-                     * its handle and its body. */}
+                    {/* What is done and what is left first, the same as on the evening check-in; then the bag. */}
                     <CheckIn {...CHECK_IN} />
-                    <div>
-                      <span class="mx-auto block h-4 w-16 rounded-t-control border-2 border-b-0 border-input"></span>
-                      <div class="rounded-2xl border-2 border-input px-4 pt-3 pb-4">
-                        <p class="text-sm font-bold text-muted-foreground">Dans le cartable</p>
-                        <ul class="mt-2 space-y-1.5">
-                          {BAG.map((item) => (
-                            <li>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
+                    <div class="rounded-2xl border-2 border-input px-4 pt-3 pb-4">
+                      <p class="flex items-center gap-2 text-sm font-bold text-muted-foreground">
+                        <Backpack class="size-4 shrink-0" aria-hidden="true" />
+                        Dans le cartable
+                      </p>
+                      <ul class="mt-2 space-y-1.5">
+                        {BAG.map((item) => (
+                          <li>{item}</li>
+                        ))}
+                      </ul>
                     </div>
                   </div>
                 )}
               </Screen>
             </div>
             {proof && (
-              <div data-reveal="fade" data-order="3">
+              <div data-reveal="fade" data-order="2">
                 <Proof {...proof} class="text-muted-foreground" />
               </div>
             )}
@@ -174,27 +176,41 @@ const CHANGED = [english, maths, history];
         </li>
       ))}
     </ol>
-
-    <play-once class="mt-12 block lg:mt-16">
-      <p data-reveal="rise" class="max-w-3xl text-xl font-bold text-foreground lg:text-2xl">
-        Ce point du soir, votre collégien peut vous le montrer.
-      </p>
-    </play-once>
   </div>
 </section>
 
 <style>
-  /* The line that strikes the step done. */
+  /* The list falls into the pupil's order once its screen has arrived. */
+  tonight-order {
+    --order-delay: var(--duration-reveal);
+  }
+
+  /* The line that strikes the step done, within the words, in a quiet ink. */
   .strike {
     position: absolute;
-    inset-inline: calc(var(--spacing) * -1);
+    inset-inline: 0;
     top: 50%;
-    width: calc(100% + var(--spacing) * 2);
+    width: 100%;
     height: calc(var(--spacing) * 1.5);
     overflow: visible;
     fill: none;
-    stroke: var(--color-foreground);
+    stroke: var(--color-muted-foreground);
     stroke-width: calc(var(--spacing) / 2);
     stroke-linecap: round;
+    stroke-dasharray: 1;
+  }
+
+  /* It is drawn once, when its screen has arrived (docs/charte.md, "Mouvement": the line that strikes the step done);
+   * without a played screen, it is already drawn. */
+  @media (prefers-reduced-motion: no-preference) {
+    [data-played] .strike {
+      animation: strike-through var(--duration-slow) var(--ease-standard) var(--duration-reveal) both;
+    }
+  }
+
+  @keyframes strike-through {
+    from {
+      stroke-dashoffset: 1;
+    }
   }
 </style>

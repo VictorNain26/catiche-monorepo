@@ -41,7 +41,7 @@ class TonightOrder extends PlayOnce {
     const items = [...this.querySelectorAll<HTMLElement>('[data-before]')];
     const before = items.map((item) => item.getBoundingClientRect().top);
     super.play();
-    const timing = orderTiming(getComputedStyle(document.documentElement));
+    const timing = orderTiming(getComputedStyle(this));
     // A token that cannot be read leaves the order as it is, without a move.
     if (!timing) return;
     items.forEach((item, index) => {

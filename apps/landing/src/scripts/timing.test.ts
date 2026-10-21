@@ -36,11 +36,12 @@ const tokens = (values: Record<string, string>) => ({
   getPropertyValue: (name: string) => values[name] ?? '',
 });
 
-const TOKENS = { '--duration-slow': '400ms', '--duration-wait': '1000ms', '--ease-standard': ' cubic-bezier(0.2, 0, 0, 1)' };
+// `--order-delay` is registered as a <time>: the computed style gives it resolved, in seconds.
+const TOKENS = { '--duration-slow': '400ms', '--order-delay': '1.02s', '--ease-standard': ' cubic-bezier(0.2, 0, 0, 1)' };
 
 describe('orderTiming', () => {
-  it('times the move from the tokens, held on its start until its delay', () => {
-    expect(orderTiming(tokens(TOKENS))).toEqual({ duration: 400, delay: 1000, easing: 'cubic-bezier(0.2, 0, 0, 1)', fill: 'backwards' });
+  it("times the move from the tokens, held on its start until the order's own delay", () => {
+    expect(orderTiming(tokens(TOKENS))).toEqual({ duration: 400, delay: 1020, easing: 'cubic-bezier(0.2, 0, 0, 1)', fill: 'backwards' });
   });
 
   it('gives no timing when a token is missing', () => {
@@ -51,7 +52,7 @@ describe('orderTiming', () => {
 
   it('gives no timing when a duration cannot be read', () => {
     expect(orderTiming(tokens({ ...TOKENS, '--duration-slow': 'slow' }))).toBeUndefined();
-    expect(orderTiming(tokens({ ...TOKENS, '--duration-wait': '1000' }))).toBeUndefined();
+    expect(orderTiming(tokens({ ...TOKENS, '--order-delay': '1000' }))).toBeUndefined();
   });
 });
 
