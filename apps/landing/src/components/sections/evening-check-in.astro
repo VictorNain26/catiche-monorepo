@@ -19,16 +19,21 @@ const SUPPORT = {
 ---
 
 <section id="point-du-soir" class="scroll-mt-20 plane-panel py-28 text-panel-foreground md:py-32 lg:py-40">
-  <div class="container grid max-w-5xl items-center gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:gap-20">
+  {/* At 768 px, the phone narrows so that the title keeps two lines. */}
+  <div class="container grid max-w-5xl items-center gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] md:gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:gap-20">
     <play-once class="block">
-      <h2 data-reveal="rise" class="section-title">
+      {/* The evening leads here: its last moment is what the pupil shows. */}
+      <p data-reveal="rise" class="max-w-xl text-lg md:text-xl">
+        Ce point du soir, votre collégien peut vous le montrer.
+      </p>
+      <h2 data-reveal="rise" data-order="2" class="mt-3 section-title">
         Vous savez ce qui est fait, sans surveiller.
       </h2>
-      <p data-reveal="rise" data-order="2" class="mt-5 max-w-xl text-lg md:mt-6 md:text-xl">
+      <p data-reveal="rise" data-order="3" class="mt-5 max-w-xl text-lg md:mt-6 md:text-xl">
         C&apos;est le point du soir&nbsp;: votre collégien vous montre ce qu&apos;il a fait, et vous répondez «&nbsp;Vu&nbsp;», avec un mot
         d&apos;encouragement si vous voulez.
       </p>
-      <p data-reveal="rise" data-order="3" class="mt-4 max-w-xl text-lg md:text-xl">
+      <p data-reveal="rise" data-order="4" class="mt-4 max-w-xl text-lg md:text-xl">
         Si personne n&apos;est là ce soir, le point du soir reste à votre collégien, sans reproche.
       </p>
       <div data-reveal="fade" data-order="4" class="mt-6 md:mt-8">
@@ -38,7 +43,7 @@ const SUPPORT = {
 
     {/* The adult's phone, drawn in CSS: a thin frame, a speaker slot, and the evening's summary with its « Vu »
      * (src/scripts/reveal.ts plays it once). */}
-    <figure class="mx-auto w-full max-w-80">
+    <figure class="mx-auto w-full max-w-80 md:max-w-64 lg:max-w-80">
       <play-once data-reveal="pop" class="block rounded-3xl bg-card p-1.5 shadow-control-hover ring-2 ring-panel-foreground/50">
         <div aria-hidden="true" class="rounded-2xl bg-card px-5 pt-3 pb-6 text-card-foreground">
           <span class="mx-auto mb-5 block h-1.5 w-14 rounded-full bg-border"></span>

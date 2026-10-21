@@ -90,14 +90,15 @@
 /* A plane of colour that melts into the page's background at its top and its bottom, over `--plane-fade`: the planes
  * still alternate, without a line where one stops. `plane-tint`, `plane-panel`, `plane-secondary`. Its section's padding
  * is at least the fade, so that no text lies on it. The fade eases in and out (smoothstep), so that neither of its ends
- * draws a line, even from the deep plane to the light background. */
+ * draws a line, even from the deep plane to the light background; it keeps the water's colour on its way (oklch)
+ * rather than going through a grey band. */
 @utility plane-* {
   --plane: --value(--color-*);
-  --plane-quarter: color-mix(in oklab, var(--plane) 16%, var(--color-background));
-  --plane-half: color-mix(in oklab, var(--plane) 50%, var(--color-background));
-  --plane-three-quarters: color-mix(in oklab, var(--plane) 84%, var(--color-background));
+  --plane-quarter: color-mix(in oklch, var(--plane) 16%, var(--color-background));
+  --plane-half: color-mix(in oklch, var(--plane) 50%, var(--color-background));
+  --plane-three-quarters: color-mix(in oklch, var(--plane) 84%, var(--color-background));
   background: linear-gradient(
-    in oklab,
+    in oklch,
     var(--color-background),
     var(--plane-quarter) calc(var(--plane-fade) / 4),
     var(--plane-half) calc(var(--plane-fade) / 2),

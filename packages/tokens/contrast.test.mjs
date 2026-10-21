@@ -130,6 +130,15 @@ for (const [mode, color] of modes) {
   }
 }
 
+// The site's planes alternate: the deep plane and the light one, one after the other on the page, differ in lightness
+// as two chart series do, in each mode.
+for (const [mode, color] of modes) {
+  test(`${mode}: panel and tint differ in lightness by ${String(CHART_STEP)}:1`, () => {
+    const ratio = contrast(color('panel'), color('tint'));
+    assert.ok(ratio >= CHART_STEP, `${color('panel')} next to ${color('tint')} = ${ratio.toFixed(2)}`);
+  });
+}
+
 for (const [mode, color] of modes) {
   for (const [pairs, minimum, criterion] of [
     [TEXT, 4.5, 'WCAG 1.4.3 (4.5:1)'],

@@ -157,7 +157,8 @@
     --color-highlight: var(--reed-10);
     --color-halo: var(--water-6);
     --color-tint: var(--water-3);
-    --color-panel: var(--water-4);
+    /* L'eau profonde reste distincte du plan clair en sombre aussi (test : panel et tint). */
+    --color-panel: var(--water-7);
     --color-panel-foreground: var(--mist-12);
   }
 }
