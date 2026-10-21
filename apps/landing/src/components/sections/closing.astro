@@ -1,23 +1,36 @@
 ---
 import TomIllustration from '@/components/atoms/tom-illustration.astro';
 import RequestInvitation from '@/components/molecules/request-invitation.astro';
-import { BRAND_NAME } from '@/lib/brand';
 ---
 
-{/* The end of the evening, an echo of the top of the page: the same halo, and Tom stepping out of the brand's light plane.
- * He waves once as he comes into view (docs/charte.md, "Tom": out of a session, he does not speak); on a phone he stays,
- * small, above the title, half in the plane. */}
-<section class="overflow-hidden bg-background pt-24 pb-14 md:pt-28 lg:py-28">
-  <div class="container max-w-5xl">
-    <div class="relative isolate">
-      <span aria-hidden="true" class="halo absolute -inset-16 -z-10"></span>
-      <div class="rounded-3xl bg-tint px-6 pt-24 pb-8 sm:px-10 sm:pt-28 lg:py-16 lg:pr-80">
-        <h2 class="max-w-xl text-3xl text-balance text-foreground sm:text-4xl">{BRAND_NAME} accompagne la soirée de devoirs, du début à la fin.</h2>
-        <RequestInvitation class="mt-6 sm:mt-8" />
-      </div>
-      <div class="pointer-events-none absolute -top-16 left-4 w-36 sm:left-8 sm:w-44 lg:top-auto lg:right-6 lg:bottom-0 lg:left-auto lg:w-96">
-        <TomIllustration start="view" class="max-w-none" />
-      </div>
+{/* The end of the page: a short title above the sections' scale, one button, and Tom large as the last word, on the
+ * brand's light plane. He arrives slowly as he comes into view (src/scripts/evening.ts), then waves once
+ * (docs/charte.md, "Tom": out of a session, he does not speak). */}
+<section class="overflow-hidden bg-tint pt-14 md:pt-20 lg:pt-24">
+  <div class="container grid max-w-6xl items-end gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-12">
+    <div class="pb-6 md:pb-16 lg:pb-24">
+      <h2 class="text-5xl text-balance text-foreground lg:text-7xl">Ce soir, on commence par quoi&nbsp;?</h2>
+      <RequestInvitation class="mt-8 lg:mt-10" />
     </div>
+    <play-once class="arrival mx-auto block w-64 sm:w-72 md:w-full">
+      <TomIllustration start="view" class="max-w-none" />
+    </play-once>
   </div>
 </section>
+
+<style>
+  /* Tom arrives slowly from below, once, while the script holds him (src/scripts/evening.ts); set at once while he
+   * waits, only his arrival is a transition. */
+  @media (prefers-reduced-motion: no-preference) {
+    .arrival:not([data-armed]) {
+      transition:
+        translate var(--duration-arrive) var(--ease-out-expo),
+        opacity var(--duration-arrive) var(--ease-out-expo);
+    }
+
+    .arrival[data-armed] {
+      opacity: 0;
+      translate: 0 calc(var(--spacing) * 12);
+    }
+  }
+</style>
