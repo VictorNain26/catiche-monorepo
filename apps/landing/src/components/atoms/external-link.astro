@@ -1,0 +1,19 @@
+---
+import { ArrowUpRight } from '@lucide/astro';
+import { cn } from '@repo/ui/classes';
+
+// A link that leaves catiche.fr: it opens in a new tab, and says so to the eye and to a screen reader
+// (WCAG technique G201). A link inside the site stays in the same tab, so the back button still works.
+interface Props {
+  href: string;
+  class?: string;
+}
+
+const { href, class: className } = Astro.props;
+---
+
+<a href={href} target="_blank" rel="noopener noreferrer" class={cn('inline-flex items-center gap-1', className)}>
+  <slot />
+  <ArrowUpRight class="size-4 shrink-0" aria-hidden="true" />
+  <span class="sr-only">(nouvel onglet)</span>
+</a>

@@ -1,4 +1,5 @@
 ---
+import ExternalLink from '@/components/atoms/external-link.astro';
 import Logo from '@/components/atoms/logo.astro';
 import { AUTHOR_URL, BRAND_NAME, CONTACT_EMAIL } from '@/lib/brand';
 
@@ -28,9 +29,9 @@ const LINKS = [
       {/* Its publisher, as the legal notice names him (pages/mentions-legales.astro). */}
       <p class="text-sm text-muted-foreground">
         {BRAND_NAME} est conçu et développé par{' '}
-        <a href={AUTHOR_URL} class="inline-flex min-h-11 items-center underline underline-offset-4">
+        <ExternalLink href={AUTHOR_URL} class="min-h-11 underline underline-offset-4">
           Victor Lenain
-        </a>
+        </ExternalLink>
         .
       </p>
     </div>
