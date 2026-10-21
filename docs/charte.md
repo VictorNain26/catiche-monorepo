@@ -32,6 +32,11 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
 | Jonc (`highlight`) | `reed` | Le surligneur, fil conducteur dans les deux modes : le même trait épais sous la ligne de base, qui ne touche pas les lettres ; jamais en texte ni en bordure. Il se détache du fond comme une marque, à 3:1 dans les deux modes (`packages/tokens/contrast.test.mjs`) |
 | Pelage (`annotation`) | `fur` | Une note, un accent rare |
 
+- Le jonc revient une fois par section : sous le mot qui porte le sens du titre (« organiser »,
+  « lui-même »), posé une fois quand le titre apparaît, du geste du haut de page ; et sur les
+  marques d'état (l'étape de la soirée affichée, le trait d'une étape faite). Il rythme la page et
+  relie les sections. Il reste une marque derrière une encre lisible, jamais une couleur de texte,
+  et il est posé d'emblée sous le mouvement réduit.
 - Chaque couleur a son échelle de douze pas, chaque pas à son rôle : 1 et 2 les fonds, 3 à 5 les
   aplats des composants, 6 à 8 les bordures, 9 ce qui n'est pas du texte (3:1 au moins), 10 et 11
   le texte et les aplats pleins (4,5:1 au moins), 12 l'encre. Les pas sont générés à des

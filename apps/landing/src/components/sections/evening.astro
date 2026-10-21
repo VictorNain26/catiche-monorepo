@@ -77,21 +77,21 @@ const CHANGED = [english, maths, history];
 ---
 
 <section id="soiree" class="scroll-mt-20 bg-background py-12 md:py-16 lg:py-24">
-  <play-once class="container block max-w-5xl">
-    <h2 data-reveal="rise" class="section-title max-w-3xl text-foreground">
-      Votre enfant avance avec Tom, du premier devoir au cartable
-    </h2>
-    <p data-reveal="rise" data-order="2" class="mt-4 text-lg text-foreground md:text-xl">
-      Voici un mardi soir, moment par moment.
-    </p>
-  </play-once>
-
   {/* The moments, held while they are scrolled (src/scripts/evening.ts): the script makes the track several windows
-   * high and holds the scene under the header, where each step takes the place of the one before, with its rank among
-   * the four. Without it, if it fails, or under reduced motion, the four steps follow one another, all shown; the
-   * hidden steps of the held scene stay in the page, in their order, for a screen reader and the keyboard. */}
-  <evening-scenes class="mt-8 block lg:mt-14">
+   * high and holds the scene under the header, its title on top, where each step takes the place of the one before,
+   * with its rank among the four. Without it, if it fails, or under reduced motion, the four steps follow one another,
+   * all shown; the hidden steps of the held scene stay in the page, in their order, for a screen reader and the
+   * keyboard. */}
+  <evening-scenes class="block">
     <div class="scene container max-w-5xl">
+      <play-once class="heading mb-8 block lg:mb-14">
+        <h2 data-reveal="rise" class="section-title max-w-3xl text-foreground">
+          Tom suit votre enfant <mark class="highlighter">jusqu’au cartable</mark>
+        </h2>
+        <p data-reveal="rise" data-order="2" class="mt-4 text-lg text-foreground md:text-xl">
+          Voici un mardi soir, moment par moment.
+        </p>
+      </play-once>
       <ol role="list" class="steps space-y-12 lg:space-y-16">
         {MOMENTS.map(({ time, title, body, described, proof }, index) => (
           <li role="listitem" data-step class="scroll-mt-20">
@@ -231,7 +231,7 @@ const CHANGED = [english, maths, history];
     }
   }
 
-  /* The line that strikes the step done, within the words, in a quiet ink. */
+  /* The line that strikes the step done, within the words, on the reed: a mark of state (docs/charte.md, "Couleurs"). */
   .strike {
     position: absolute;
     inset-inline: 0;
@@ -240,7 +240,7 @@ const CHANGED = [english, maths, history];
     height: calc(var(--spacing) * 1.5);
     overflow: visible;
     fill: none;
-    stroke: var(--color-muted-foreground);
+    stroke: var(--color-highlight);
     stroke-width: calc(var(--spacing) / 2);
     stroke-linecap: round;
     stroke-dasharray: 1;
@@ -316,8 +316,58 @@ const CHANGED = [english, maths, history];
         gap: calc(var(--spacing) * 2);
       }
 
+      /* The rank of the step shown, on the reed: a mark of state (docs/charte.md, "Couleurs"). */
       .ranks [data-shown] {
-        background-color: var(--color-primary);
+        background-color: var(--color-highlight);
+      }
+
+      /* The title stays on top of the held scene, smaller, so that each step keeps its room under it. */
+      .heading {
+        margin: 0;
+      }
+
+      .heading h2 {
+        font-size: var(--text-2xl);
+        line-height: var(--text-2xl--line-height);
+      }
+
+      .heading p {
+        margin-top: calc(var(--spacing) * 1);
+        font-size: var(--text-base);
+        line-height: var(--text-base--line-height);
+      }
+
+      /* On a phone, the scene's margins, the step's own text and the lines of its lists are set a size down too, so
+       * that its screen keeps a readable size. */
+      @media (width < 48rem) {
+        .scene {
+          gap: calc(var(--spacing) * 2);
+          padding-block: calc(var(--spacing) * 2);
+        }
+
+        [data-screen] li {
+          padding-block: var(--spacing);
+        }
+
+        .heading h2 {
+          font-size: var(--text-xl);
+          line-height: var(--text-xl--line-height);
+        }
+
+        [data-step] time {
+          font-size: var(--text-2xl);
+          line-height: var(--text-2xl--line-height);
+        }
+
+        [data-step] h3 {
+          font-size: var(--text-lg);
+          line-height: var(--text-lg--line-height);
+        }
+
+        [data-step] h3 + p {
+          font-size: var(--text-base);
+          line-height: var(--text-base--line-height);
+        }
       }
     }
   }

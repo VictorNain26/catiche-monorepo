@@ -13,8 +13,8 @@ class PlayOnce extends HTMLElement {
   #stop: (() => void) | undefined;
 
   connectedCallback() {
-    // A block of the held evening plays when its step is shown: its scene starts it (`evening-scenes`).
-    if (this.closest('evening-scenes')) return;
+    // A block of a step of the held evening plays when its step is shown: its scene starts it (`evening-scenes`).
+    if (this.closest('evening-scenes [data-step]')) return;
     this.start(this.inView);
   }
 

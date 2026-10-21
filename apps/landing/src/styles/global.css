@@ -137,6 +137,16 @@
       scale var(--duration-reveal) var(--ease-out-expo);
   }
 
+  /* The word a section title rests on (docs/charte.md, "Couleurs"): its reed is laid once, as its title rises, the
+   * gesture of the top of the page. */
+  [data-armed] .highlighter {
+    background-size: 0% var(--highlight-height);
+  }
+
+  [data-played] .highlighter {
+    transition: background-size var(--duration-slow) var(--ease-standard) var(--duration-slow);
+  }
+
   /* The rank of an item in its block, set by an attribute rather than counted among siblings: the items of a block are
    * not always siblings. */
   [data-played] [data-order='2'] {

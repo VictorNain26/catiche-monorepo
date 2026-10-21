@@ -3,7 +3,7 @@ export const CONTACT_EMAIL = 'contact@catiche.fr';
 
 // The site in a title and a description, for the home page's metadata and the web manifest: the product in the present
 // (docs/produit.md), Tom introduced as an artificial intelligence (docs/charte.md, "Les mots").
-export const SITE_TITLE = `${BRAND_NAME}\xa0: les devoirs du soir, organisés avec Tom`;
+export const SITE_TITLE = `${BRAND_NAME}\xa0: votre enfant apprend à organiser ses devoirs`;
 export const SITE_DESCRIPTION = `Tom, le tuteur de ${BRAND_NAME}, est une intelligence artificielle. De la 6ᵉ à la 3ᵉ, votre enfant lui dit ses devoirs et choisit par où commencer.`;
 
 // The e-mail the button « Demander une invitation par e-mail » prepares: accounts open on invitation

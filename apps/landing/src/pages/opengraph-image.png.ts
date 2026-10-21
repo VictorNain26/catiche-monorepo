@@ -47,13 +47,13 @@ export const GET: APIRoute = async () => {
       },
       [
         node('div', { display: 'flex', flexDirection: 'column', width: 640 }, [
-          // The brand name, then the top of the page's title, « avec Tom » on the reed as there.
+          // The brand name, then the top of the page's title, « organiser » on the reed as there.
           node('div', { display: 'flex', fontSize: 34, color: PRIMARY }, BRAND_NAME),
           node('div', { display: 'flex', flexWrap: 'wrap', marginTop: 24, fontSize: 56, lineHeight: 1.1 }, [
-            node('span', WORD, 'Les devoirs du soir,'),
-            node('span', WORD, 'votre enfant'),
-            node('span', WORD, 'les organise'),
-            node('span', { backgroundImage: `linear-gradient(to top, ${HIGHLIGHT} 50%, transparent 50%)` }, 'avec Tom'),
+            node('span', WORD, 'Votre enfant'),
+            node('span', WORD, 'apprend à'),
+            node('span', { ...WORD, backgroundImage: `linear-gradient(to top, ${HIGHLIGHT} 50%, transparent 50%)` }, 'organiser'),
+            node('span', {}, 'ses devoirs'),
           ]),
           // For whom, from docs/produit.md, each class's e raised; the state stays on the page.
           node('div', { display: 'flex', alignItems: 'flex-start', marginTop: 40, fontSize: 30, color: MUTED }, [
