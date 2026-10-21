@@ -53,14 +53,14 @@
   --color-success-foreground: var(--mist-1);
   --color-warning: var(--amber-4);
   --color-warning-foreground: var(--mist-12);
-  /* Le surligneur, le même trait dans les deux modes : un jonc épais sous le bas des mots, qui gardent
-   * leur encre ; jamais en texte ni en bordure. */
-  --color-highlight: var(--reed-4);
+  /* Le surligneur, le même trait dans les deux modes : un jonc épais sous la ligne de base, qui ne
+   * touche pas les lettres et se détache du fond (3:1) ; jamais en texte ni en bordure. */
+  --color-highlight: var(--reed-9);
   /* Le halo derrière la soirée du haut du site, une eau claire qui donne de la profondeur ; rien
    * n'est écrit dessus. */
   --color-halo: var(--water-4);
-  /* Sa hauteur derrière un mot : le bas des lettres, comme un trait de surligneur. */
-  --highlight-height: 0.42em;
+  /* Son épaisseur, posée au bas de la ligne, sous les lettres. */
+  --highlight-height: 0.14em;
   /* Le pelage, une note, un accent rare. */
   --color-annotation: var(--fur-10);
   --color-border: var(--mist-4);
@@ -114,7 +114,7 @@
     color-scheme: dark;
     --color-card: var(--mist-2);
     --color-popover: var(--mist-2);
-    /* En sombre, un jonc vif qui se détache du fond (3:1) sous l'encre claire. */
+    /* En sombre, un pas plus vif du jonc, qui se détache du fond sombre. */
     --color-highlight: var(--reed-10);
     --color-halo: var(--water-6);
     --color-panel: var(--water-4);
