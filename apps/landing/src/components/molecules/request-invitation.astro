@@ -3,7 +3,7 @@ import { buttonVariants, cn } from '@repo/ui/classes';
 import { BRAND_NAME, CONTACT_EMAIL, SIGN_IN_URL } from '@/lib/brand';
 
 // What a visitor can do today: accounts open on invitation (apps/server/src/platform/auth/auth.ts), asked for by e-mail,
-// without a waiting list; a parent who has one signs in to the application.
+// without a waiting list; an invited parent signs in to the application.
 interface Props {
   class?: string;
 }
@@ -17,7 +17,7 @@ const REQUEST_HREF = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`Dema
     Demander une invitation
   </a>
   <p class="text-muted-foreground">
-    Vous avez déjà un compte&nbsp;?{' '}
+    Déjà invité&nbsp;?{' '}
     <a href={SIGN_IN_URL} class="inline-flex min-h-11 items-center text-primary underline underline-offset-4">
       Se connecter
     </a>

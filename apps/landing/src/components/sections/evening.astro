@@ -3,41 +3,36 @@ import { Mic } from '@lucide/astro';
 import Screen from '@/components/molecules/screen.astro';
 import TomSays from '@/components/molecules/tom-says.astro';
 import { BRAND_NAME } from '@/lib/brand';
+import { CHECK_IN, HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
 
 // The evening of docs/produit.md, "Ce que fait Catiche", and its gestures in docs/methode.md, "Les gestes d'une soirée":
-// what Catiche will accompany, not yet built (docs/produit.md, "À construire"). The hours are an example evening.
+// what Catiche accompanies once built (docs/produit.md, "À construire"), told in the present under a lead that says so.
 const MOMENTS = [
   {
-    time: '17:30',
+    time: HOURS.said,
     title: "Dire ce qu'il a ce soir",
     body: 'Votre enfant dit ses devoirs à voix haute, en regardant son agenda. Tom pose les questions qui manquent : pour quand ? quels exercices ? un contrôle bientôt ?',
     screen: 'Ce soir',
   },
   {
-    time: '17:45',
+    time: HOURS.ordered,
     title: 'Choisir par quoi commencer',
     body: "Tom propose un ordre et le temps que prendra chaque devoir. Votre enfant peut changer l'ordre.",
     screen: "L'ordre",
   },
   {
-    time: '18:30',
+    time: HOURS.started,
     title: 'Avancer par petites étapes',
     body: "Tom découpe chaque devoir en étapes courtes, pour démarrer plus facilement et tenir jusqu'au bout. Si un exercice bloque, Tom aide sans donner la réponse.",
     screen: 'Maths · exercice 3',
   },
   {
-    time: '20:45',
+    time: HOURS.ended,
     title: 'Préparer demain',
     body: "Tom fait le point avec votre enfant : ce qui est fait, ce qui reste. Puis il l'aide à préparer son cartable. Quand un contrôle approche, Tom le remet au programme les jours d'avant, pour le réviser.",
     screen: 'Pour demain',
   },
 ] as const;
-
-const ORDER = [
-  { subject: 'Maths', length: 'environ 30 min' },
-  { subject: 'Anglais', length: 'environ 15 min' },
-  { subject: 'Histoire', length: 'environ 20 min' },
-];
 
 const STEPS = [
   { step: "Relire l'énoncé", state: 'fait' },
@@ -52,9 +47,7 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
   <div class="container max-w-6xl">
     <div class="max-w-3xl">
       <h2 class="text-4xl text-balance text-foreground sm:text-5xl">Une soirée avec Tom</h2>
-      <p class="mt-6 text-lg text-muted-foreground md:text-xl">
-        <strong class="font-bold text-foreground">{BRAND_NAME} est en préparation.</strong> Voici comment se passera une soirée de devoirs.
-      </p>
+      <p class="mt-6 text-lg text-muted-foreground md:text-xl">Voici une soirée de devoirs avec {BRAND_NAME}, telle que nous la construisons.</p>
     </div>
 
     {/* The roles stay explicit: at a computer, a moment is laid out with `display: contents`. */}
@@ -77,7 +70,7 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
                 <div class="space-y-3">
                   <p class="ml-auto flex w-fit max-w-11/12 items-start gap-2 rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground">
                     <Mic class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                    J&apos;ai anglais, un contrôle d&apos;histoire, et les exercices 3 et 4 en maths.
+                    {SPOKEN}
                   </p>
                   <TomSays>Le contrôle d&apos;histoire, c&apos;est pour quel jour&nbsp;?</TomSays>
                   <p class="ml-auto w-fit rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground">Jeudi.</p>
@@ -85,9 +78,9 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
               )}
               {index === 1 && (
                 <div class="space-y-3">
-                  <TomSays>Je te propose de commencer par les maths. Tu peux changer l&apos;ordre.</TomSays>
+                  <TomSays>{ORDER_PROPOSED}</TomSays>
                   <ol class="divide-y rounded-control ring-1 ring-border">
-                    {ORDER.map(({ subject, length }, position) => (
+                    {HOMEWORK.map(({ subject, length }, position) => (
                       <li class="flex items-baseline gap-3 px-3 py-2">
                         <span class="font-heading font-extrabold tabular-nums">{position + 1}</span>
                         <span class="font-bold">{subject}</span>
@@ -131,9 +124,9 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
                 <div class="space-y-4">
                   <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
                     <dt class="text-sm font-bold text-muted-foreground">Fait</dt>
-                    <dd>Maths, anglais</dd>
+                    <dd>{CHECK_IN.done}</dd>
                     <dt class="text-sm font-bold text-muted-foreground">Reste</dt>
-                    <dd>Réviser l&apos;histoire, pour jeudi</dd>
+                    <dd>{CHECK_IN.left}</dd>
                   </dl>
                   {/* The bag, drawn by its handle and its body. */}
                   <span class="mx-auto -mb-4 block h-4 w-16 rounded-t-control border-2 border-b-0 border-input"></span>
@@ -191,30 +184,35 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
     stroke-width: calc(var(--spacing) / 2);
     stroke-linecap: round;
     stroke-dasharray: 1;
-    transition: stroke-dashoffset var(--duration-base) var(--ease-standard) var(--duration-slow);
-  }
-
-  .step-current {
-    transition: background-color var(--duration-base) var(--ease-standard) calc(var(--duration-slow) + var(--duration-base));
-  }
-
-  .bag-item {
-    transition:
-      translate var(--duration-slow) var(--ease-standard) var(--duration-slow),
-      opacity var(--duration-slow) var(--ease-standard) var(--duration-slow);
-  }
-
-  .bag-item:nth-child(2) {
-    transition-delay: calc(var(--duration-slow) + var(--duration-fast));
-  }
-
-  .bag-item:nth-child(3) {
-    transition-delay: calc(var(--duration-slow) + var(--duration-fast) * 2);
   }
 
   /* Before a screen is read, while the script that plays it holds it (src/scripts/evening.ts): the line not drawn, the
-   * next step not yet current, the bag still empty. */
+   * next step not yet current, the bag still empty. That state is set at once; only its release is a transition. */
   @media (prefers-reduced-motion: no-preference) {
+    play-once:not([data-armed]) {
+      .strike {
+        transition: stroke-dashoffset var(--duration-base) var(--ease-standard) var(--duration-slow);
+      }
+
+      .step-current {
+        transition: background-color var(--duration-base) var(--ease-standard) calc(var(--duration-slow) + var(--duration-base));
+      }
+
+      .bag-item {
+        transition:
+          translate var(--duration-slow) var(--ease-standard) var(--duration-slow),
+          opacity var(--duration-slow) var(--ease-standard) var(--duration-slow);
+      }
+
+      .bag-item:nth-child(2) {
+        transition-delay: calc(var(--duration-slow) + var(--duration-fast));
+      }
+
+      .bag-item:nth-child(3) {
+        transition-delay: calc(var(--duration-slow) + var(--duration-fast) * 2);
+      }
+    }
+
     play-once[data-armed] {
       .strike {
         stroke-dashoffset: 1;

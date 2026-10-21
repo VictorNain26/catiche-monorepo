@@ -5,14 +5,9 @@ import RequestInvitation from '@/components/molecules/request-invitation.astro';
 import Screen from '@/components/molecules/screen.astro';
 import TomSays from '@/components/molecules/tom-says.astro';
 import { BRAND_NAME } from '@/lib/brand';
+import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
 
-// The evening of docs/produit.md, "Ce que fait Catiche": the homework said in a jumble, then the order Tom proposes.
-// `spoken` is each one's place in what the pupil said; the list is written in Tom's order, its end state.
-const TONIGHT = [
-  { subject: 'Maths', task: 'Exercices 3 et 4', spoken: 3 },
-  { subject: 'Anglais', task: "Les mots de l'unité 2", spoken: 1 },
-  { subject: 'Histoire', task: 'Réviser, contrôle jeudi', spoken: 2 },
-];
+// The first two moments of the evening in one screen: the homework said in a jumble, then the order Tom proposes.
 ---
 
 <section class="overflow-hidden pt-10 pb-20 lg:pt-16 lg:pb-32">
@@ -27,7 +22,7 @@ const TONIGHT = [
         place.
       </p>
       <RequestInvitation class="mt-10" />
-      <p class="mt-2 max-w-xl text-muted-foreground">{BRAND_NAME} est en préparation&nbsp;: les comptes s&apos;ouvrent sur invitation.</p>
+      <p class="mt-2 max-w-xl text-muted-foreground">{BRAND_NAME} est en préparation&nbsp;: voici ce que votre enfant y fera.</p>
     </div>
 
     {/* Tom in his arch, and the screen of the evening laid over its foot. */}
@@ -38,16 +33,16 @@ const TONIGHT = [
       </figcaption>
       <TomIllustration arch class="-mb-16 w-2/3 max-w-none self-end sm:-mb-24" />
       <tonight-order class="relative block w-11/12 max-w-sm sm:w-4/5">
-        <Screen time="17:30" title="Ce soir">
+        <Screen time={HOURS.ordered} title="Ce soir">
           <p class="ml-auto flex w-fit max-w-11/12 items-start gap-2 rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground">
             <Mic class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-            J&apos;ai anglais, un contrôle d&apos;histoire jeudi, et les exercices 3 et 4 en maths.
+            {SPOKEN}
           </p>
           <div class="tonight-after mt-4">
-            <TomSays>Je te propose cet ordre. Tu peux le changer.</TomSays>
+            <TomSays>{ORDER_PROPOSED}</TomSays>
           </div>
           <ol class="mt-3 flex flex-col gap-2">
-            {TONIGHT.map(({ subject, task, spoken }, index) => (
+            {HOMEWORK.map(({ subject, task, spoken }, index) => (
               <li data-spoken={spoken} class="tonight-item flex items-baseline gap-3 rounded-control bg-accent px-3 py-2 text-accent-foreground">
                 <span class="tonight-after font-heading font-extrabold tabular-nums">{index + 1}</span>
                 <span class="min-w-0">
@@ -71,15 +66,14 @@ const TONIGHT = [
   }
 
   /* The jumble: the homework in the order it was said, out of line, before Tom's order; only while the script that sorts
-   * it holds it (src/scripts/evening.ts). */
-  .tonight-item,
-  .tonight-after {
-    transition:
-      translate var(--duration-slow) var(--ease-standard) var(--duration-wait),
-      opacity var(--duration-slow) var(--ease-standard) var(--duration-wait);
-  }
-
+   * it holds it (src/scripts/evening.ts). The jumble is set at once, and only its release is a transition. */
   @media (prefers-reduced-motion: no-preference) {
+    tonight-order:not([data-armed]) :is(.tonight-item, .tonight-after) {
+      transition:
+        translate var(--duration-slow) var(--ease-standard) var(--duration-wait),
+        opacity var(--duration-slow) var(--ease-standard) var(--duration-wait);
+    }
+
     tonight-order[data-armed] {
       .tonight-item[data-spoken='1'] {
         order: 1;
