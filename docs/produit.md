@@ -13,13 +13,18 @@ place.
 
 ## Pour qui
 
-- **L'élève** : un collégien, de la 6e à la 3e, qui peine à cause de l'organisation, pas des
-  notions. Il ne sait pas par où commencer, oublie un contrôle, ne finit pas.
-- **Le parent** : celui pour qui la soirée de devoirs est un conflit, ou qui n'a pas le temps de
-  la tenir. Il cherche la paix du soir et des devoirs rendus, pas un tableau de notes.
-- **La cible de départ** : les familles concernées par le TDAH et les troubles dys, pour qui des
-  solutions payantes existent déjà (`concurrence.md`, « Le créneau de l'organisation »). Leurs associations et les professionnels qui les suivent sont le canal pour
-  les trouver.
+- **L'élève** : tout collégien, de la 6e à la 3e, que l'organisation des devoirs met en
+  difficulté. Il ne sait pas par où commencer, oublie un contrôle, ne finit pas.
+- **Les adultes autour de lui** : celui ou ceux pour qui la soirée de devoirs est un conflit, ou
+  qui n'ont pas le temps de la tenir. Ils cherchent la paix du soir et des devoirs rendus, pas
+  un tableau de notes. Ce n'est pas toujours « le parent » : deux foyers en garde alternée, un
+  parent seul, un tuteur, un grand-parent qui garde le soir. Le compte est ouvert par un adulte
+  qui déclare être majeur et représentant légal des enfants qu'il ajoute ; le modèle de comptes
+  pour toutes ces familles est à revoir (`etat.md`).
+- **Inclusif, sans cible médicale** (Victor, 2026-10-21) : Catiche s'adresse à tous les
+  collégiens. Il répond aussi aux familles concernées par le TDAH ou les troubles dys, pour qui
+  des solutions payantes existent (`concurrence.md`, « Le créneau de l'organisation »), sans en
+  faire sa cible principale.
 - **Jamais de diagnostic demandé** : le produit s'adresse à un besoin, pas à un trouble.
 
 ## Ce que fait Catiche
@@ -32,14 +37,14 @@ Une soirée suit les gestes de `methode.md` :
 3. Il découpe le travail en étapes courtes et aide l'élève à démarrer, puis à tenir.
 4. Il aide sur le contenu sans donner la réponse (`tuteur.md`).
 5. À la fin, il récapitule ce qui est fait, ce qui reste, et le cartable du lendemain.
-   **Le point du soir** (idée de Victor, 2026-10-20) : si le parent le peut, l'enfant lui
-   montre ce récapitulatif. Le parent répond « Vu », avec un encouragement s'il le veut. Il ne
-   vérifie pas le contenu et ne note rien. Ce point s'adapte à chaque famille :
-   - parent rentré tard : il voit le récapitulatif plus tard, et l'enfant voit le « Vu » le
+   **Le point du soir** (idée de Victor, 2026-10-20) : si un adulte de la maison le peut,
+   l'enfant lui montre ce récapitulatif. L'adulte répond « Vu », avec un encouragement s'il le
+   veut. Il ne vérifie pas le contenu et ne note rien. Ce point s'adapte à chaque famille :
+   - adulte rentré tard : il voit le récapitulatif plus tard, et l'enfant voit le « Vu » le
      lendemain ;
-   - garde alternée : le récapitulatif va au parent chez qui l'enfant est ce soir-là ;
-   - relation tendue autour des devoirs : le parent peut couper le point du soir ;
-   - sans parent disponible : le récapitulatif reste à l'enfant, et rien ne lui est reproché ;
+   - garde alternée : le récapitulatif va à l'adulte chez qui l'enfant est ce soir-là ;
+   - relation tendue autour des devoirs : l'adulte peut couper le point du soir ;
+   - sans adulte disponible : le récapitulatif reste à l'enfant, et rien ne lui est reproché ;
    - selon l'âge : proposé par défaut en 6e-5e ; en 4e-3e, l'enfant choisit de partager.
 
    Jamais de série de jours, de relance ni de score. La raison est dans `methode.md`, « Le rôle
@@ -47,7 +52,7 @@ Une soirée suit les gestes de `methode.md` :
 6. D'un soir à l'autre, il garde les contrôles annoncés et ramène leur révision les jours
    d'avant.
 
-Le parent verra que c'est fait ; les conversations ne lui sont jamais envoyées. Dès la 6e,
+L'adulte verra que c'est fait ; les conversations ne lui sont jamais envoyées. Dès la 6e,
 l'enfant travaille dans son espace à lui, qu'il ouvre par son propre code, sur son appareil ou sur
 l'ordinateur de la famille (`tuteur.md`, § 8).
 
@@ -92,9 +97,9 @@ devoirs à l'oral.
 - **À construire** : la soirée à l'oral, avec le micro à ouvrir (`etat.md`), les contrôles
   gardés d'un soir à l'autre, et le cartable du lendemain.
 
-**Ordre décidé par Victor le 2026-10-20** : d'abord le design et la refonte (la landing, faite
-dans #550, puis le passage à `catiche.fr`, puis l'application). La soirée et le volet IA viennent
-ensuite.
+**Ordre décidé par Victor** (2026-10-20, précisé le 2026-10-21) : d'abord la landing, jusqu'à
+ce que Victor la valide lui-même, car elle fixe la vision et les promesses que l'application
+devra tenir ; puis l'application. La soirée et le volet IA viennent ensuite.
 
 **L'accès pendant la préparation** (Victor, 2026-10-21) : les comptes s'ouvrent sur invitation,
 demandée par e-mail ; aucune promotion tant que les bloquants de `etat.md` ne sont pas levés.
@@ -104,8 +109,11 @@ demandée par e-mail ; aucune promotion tant que les bloquants de `etat.md` ne s
 - **Rien ne prouve qu'une IA remplace l'adulte qui vérifie** : c'est l'hypothèse centrale
   (`methode.md`).
 - **L'élève doit revenir chaque soir**, sans adulte pour le relancer.
-- **La clause de Mistral sur les moins de 15 ans** bloque tout utilisateur de moins de 15 ans,
-  soit presque tous les collégiens (`etat.md`).
+- **La clause de Mistral sur les mineurs** : lue à la lettre, elle peut exclure les données des
+  moins de 15 ans même avec l'accord d'un représentant légal, soit presque tous les
+  collégiens ; une réponse écrite de Mistral est attendue (`etat.md`).
+- **Les preuves viennent surtout d'élèves TDAH** : rien ne montre encore que la méthode vaut
+  autant pour tous les collégiens (`methode.md`, « Ce que la fiche ne permet pas d'affirmer »).
 - **PANDAH** pourrait publier des résultats positifs et devenir la référence gratuite des
   cliniciens.
 - **Les mots** : un seul message « pour les TDAH » fait basculer le produit vers les données de
