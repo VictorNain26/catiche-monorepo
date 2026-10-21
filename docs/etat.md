@@ -87,8 +87,8 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-21 ; ce qui 
 - **L'ordre décidé par Victor (2026-10-20, précisé le 2026-10-21)**, un chantier après
   l'autre :
   1. **La landing, jusqu'à sa validation par Victor.** Restructurée autour de la soirée (#555),
-     elle n'est pas encore validée : ses textes s'adressent encore aux « parents », alors que
-     `produit.md` vise tous les collégiens et toutes les familles.
+     puis réécrite pour tous les collégiens et toutes les familles (#559), elle attend la
+     validation de Victor.
   2. **La refonte de l'application**, pensée depuis l'enfant et les adultes réels. Il faut
      d'abord un parcours et des textes validés, puis l'écran à l'ordinateur comme au téléphone.
      Un inventaire des écrans actuels est fait : vocabulaire technique, colonne unique,

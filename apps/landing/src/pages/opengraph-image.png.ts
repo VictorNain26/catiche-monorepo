@@ -49,12 +49,13 @@ export const GET: APIRoute = async () => {
           node('div', { display: 'flex', flexWrap: 'wrap', fontSize: 56, lineHeight: 1.1 }, [
             node('span', { ...WORD, color: PRIMARY }, BRAND_NAME),
             node('span', WORD, 'accompagne'),
-            node('span', WORD, 'votre enfant'),
+            node('span', WORD, 'votre collégien'),
             node('span', WORD, 'pendant ses devoirs,'),
             node('span', { backgroundImage: `linear-gradient(to top, ${HIGHLIGHT} 50%, transparent 50%)` }, 'du début à la fin'),
             '.',
           ]),
-          node('div', { display: 'flex', marginTop: 40, fontSize: 30, color: MUTED }, 'En préparation, pour le collège (6e à 3e)'),
+          // The state under the top of the page's button.
+          node('div', { display: 'flex', marginTop: 40, fontSize: 30, color: MUTED }, 'Ouverture sur invitation'),
         ]),
         { type: 'img', key: null, props: { src: tom, width: 560, height: 560 } },
       ],
