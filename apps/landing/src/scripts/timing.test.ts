@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { arrivalEnded, milliseconds, orderTiming } from './timing';
+import { arrivalEnded, IN_VIEW, inView, milliseconds, orderTiming } from './timing';
 
 describe('milliseconds', () => {
   it('reads a duration in milliseconds or in seconds', () => {
@@ -52,6 +52,25 @@ describe('orderTiming', () => {
   it('gives no timing when a duration cannot be read', () => {
     expect(orderTiming(tokens({ ...TOKENS, '--duration-slow': 'slow' }))).toBeUndefined();
     expect(orderTiming(tokens({ ...TOKENS, '--duration-wait': '1000' }))).toBeUndefined();
+  });
+});
+
+describe('inView', () => {
+  it('sees Tom once half of him is in the window', () => {
+    expect(inView({ isIntersecting: true, intersectionRatio: 0.5 })).toBe(true);
+    expect(inView({ isIntersecting: true, intersectionRatio: 1 })).toBe(true);
+  });
+
+  it('waits while less than half of him is in the window', () => {
+    expect(inView({ isIntersecting: true, intersectionRatio: 0.49 })).toBe(false);
+  });
+
+  it('waits while he is out of the window', () => {
+    expect(inView({ isIntersecting: false, intersectionRatio: 0 })).toBe(false);
+  });
+
+  it('asks the observer to report at half of him', () => {
+    expect(IN_VIEW).toBe(0.5);
   });
 });
 

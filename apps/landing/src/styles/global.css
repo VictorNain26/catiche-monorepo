@@ -60,12 +60,13 @@
   }
 }
 
-/* The reed laid under the baseline, at the bottom of the line box, without touching the letters: the same stroke in
- * both modes (docs/charte.md, "Couleurs": the reed highlights); `lay-highlight` lays it from the left, where a
- * component lets it. */
+/* The reed laid just under the baseline, raised from the bottom of the line box so that it grazes the letters without
+ * touching them, where a link's underline would not sit: the same stroke in both modes (docs/charte.md, "Couleurs":
+ * the reed highlights); `lay-highlight` lays it from the left, where a component lets it. */
 @utility highlighter {
   color: inherit;
-  background: linear-gradient(var(--color-highlight), var(--color-highlight)) no-repeat 0 100% / 100% var(--highlight-height);
+  background: linear-gradient(var(--color-highlight), var(--color-highlight)) no-repeat 0 calc(100% - var(--highlight-offset)) / 100%
+    var(--highlight-height);
   box-decoration-break: clone;
 }
 

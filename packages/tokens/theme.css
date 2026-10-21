@@ -21,6 +21,10 @@
   /* Le corps à 17 px : jamais moins au téléphone (charte, « Typographie »). */
   --text-base: 1.0625rem;
   --text-base--line-height: 1.5;
+  /* Le titre du haut du site au téléphone : un cran au-dessus des titres de section (3xl), sous
+   * le 4xl qui laisserait le nom seul sur sa ligne à 375 px. */
+  --text-hero: 2rem;
+  --text-hero--line-height: 1.25;
 
   /* Deux rayons, les cartes et les bulles puis les boutons et les champs ; une ombre légère pour
    * ce qui se pose sur le fond. */
@@ -59,10 +63,12 @@
   /* Le plan clair de la marque, où une section du site respire : l'eau très claire. */
   --color-tint: var(--water-2);
   /* Le halo derrière la soirée du haut du site, une eau claire qui donne de la profondeur ; rien
-   * n'est écrit dessus. */
-  --color-halo: var(--water-4);
-  /* Son épaisseur, posée au bas de la ligne, sous les lettres. */
+   * n'est écrit dessus ; le surligneur y garde 3:1. */
+  --color-halo: var(--water-3);
+  /* Son épaisseur, et sa hauteur depuis le bas de la ligne : il effleure le bas des lettres sans
+   * les toucher, plus haut qu'un soulignement de lien. */
   --highlight-height: 0.14em;
+  --highlight-offset: 0.08em;
   /* Le pelage, une note, un accent rare. */
   --color-annotation: var(--fur-10);
   --color-border: var(--mist-4);

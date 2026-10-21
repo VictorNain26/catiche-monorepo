@@ -150,10 +150,13 @@ test('the highlighter is the same stroke in both modes', () => {
   assert.equal(theme.dark['highlight-height'], theme.light['highlight-height']);
 });
 
-// It is laid on the background, under the title at the top of the page, and nowhere else.
+// It is laid on the background, under the title at the top of the page, and nowhere else; the halo behind the evening
+// there can reach under it.
 for (const [mode, color] of modes) {
-  test(`${mode}: highlight on background meets WCAG 1.4.11 (3:1)`, () => {
-    const ratio = contrast(color('highlight'), color('background'));
-    assert.ok(ratio >= 3, `${color('highlight')} on ${color('background')} = ${ratio.toFixed(2)}`);
-  });
+  for (const ground of ['background', 'halo']) {
+    test(`${mode}: highlight on ${ground} meets WCAG 1.4.11 (3:1)`, () => {
+      const ratio = contrast(color('highlight'), color(ground));
+      assert.ok(ratio >= 3, `${color('highlight')} on ${color(ground)} = ${ratio.toFixed(2)}`);
+    });
+  }
 }

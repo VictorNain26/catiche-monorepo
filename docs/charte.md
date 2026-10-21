@@ -59,6 +59,7 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
   jamais de graisse fine ; 45 à 75 caractères par ligne.
 - Les chiffres qu'on compare en chiffres tabulaires ; les fractions des maths en `frac`.
 - Le gras pour faire ressortir, jamais l'italique ; le texte de Tom à 18 px au moins, interligne 1,5.
+  Dans les écrans réduits qui illustrent la landing, 16 px est admis.
 
 ## Formes et composition
 

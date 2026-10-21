@@ -1,4 +1,5 @@
 ---
+import { Mail } from '@lucide/astro';
 import { buttonVariants, cn } from '@repo/ui/classes';
 import ExternalLink from '@/components/atoms/external-link.astro';
 import { BRAND_NAME, CONTACT_EMAIL, SIGN_IN_URL } from '@/lib/brand';
@@ -16,7 +17,9 @@ const REQUEST_HREF = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`Dema
 ---
 
 <div class={cn('flex flex-col items-start gap-4', className)}>
+  {/* The envelope says the button opens an e-mail. */}
   <a href={REQUEST_HREF} class={cn(buttonVariants({ size: 'lg' }), 'h-14 px-8 text-lg shadow-control')}>
+    <Mail class="size-5" aria-hidden="true" />
     Demander une invitation
   </a>
   {status ? (

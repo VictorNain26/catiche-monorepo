@@ -17,7 +17,7 @@ import { EVENING, HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data
     {/* The text of the top of the page is shown at once, still: only what is scrolled to appears (.claude/rules/landing.md). */}
     <div>
       {/* Balanced lines, and « du début à la fin. » kept together, so the stroke is never cut in two. */}
-      <h1 class="text-4xl leading-tight text-balance text-foreground sm:text-5xl xl:text-6xl xl:leading-tight">
+      <h1 class="text-hero leading-tight text-balance text-foreground sm:text-5xl xl:text-6xl xl:leading-tight">
         {BRAND_NAME} accompagne votre collégien pendant ses devoirs,{' '}
         <span class="whitespace-nowrap">
           <mark class="highlighter">du début à la fin</mark>.
@@ -33,7 +33,8 @@ import { EVENING, HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data
     {/* The card of the evening on a halo of water, and Tom stepping out of it: on a phone he stands under its lower edge,
      * which leaves him room; at a computer, in front of its left third, which its content leaves free. His feet are
      * below the card, on a soft contact shadow. */}
-    <figure class="relative isolate mb-36 sm:mb-40 lg:mb-12">
+    {/* Until two columns hold it, the card keeps a readable width, centred with Tom. */}
+    <figure class="relative isolate mb-36 w-full sm:mb-40 md:mx-auto md:max-w-xl lg:mb-12 lg:max-w-none">
       <span aria-hidden="true" class="halo absolute -inset-16 -z-10"></span>
       <figcaption class="sr-only">
         Un exemple, un mardi soir à 17&nbsp;h&nbsp;35&nbsp;: votre collégien dit, dans le désordre, pour quel jour est chaque devoir, et Tom lui
@@ -41,19 +42,26 @@ import { EVENING, HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data
         pour vendredi. C&apos;est votre collégien qui choisit l&apos;ordre.
       </figcaption>
       <tonight-order class="relative block">
-        <Screen time={HOURS.ordered} title={EVENING} class="pb-24 shadow-control-hover lg:pb-5 lg:pl-32 xl:pl-40">
-          <PupilSays>{SPOKEN}</PupilSays>
-          <ol class="mt-4 flex flex-col gap-2">
-            {HOMEWORK.map(({ subject, note, spoken }, position) => (
-              <li data-before={spoken} class="flex items-baseline gap-3 rounded-control bg-accent px-3 py-2 text-accent-foreground">
-                <span class="tonight-after font-heading font-extrabold tabular-nums">{position + 1}</span>
-                <span class="font-bold">{subject}</span>
-                {note && <span class="ml-auto text-sm text-accent-muted-foreground">{note}</span>}
-              </li>
-            ))}
-          </ol>
-          <div class="tonight-after mt-4">
-            <TomSays>{ORDER_PROPOSED}</TomSays>
+        <Screen time={HOURS.ordered} title={EVENING} class="shadow-control-hover">
+          {/* The screen's top line spans the card; its content leaves Tom his room, under it on a phone and on its left
+           * at a computer. */}
+          <div class="pb-24 lg:pb-0 lg:pl-32 xl:pl-40">
+            <PupilSays>{SPOKEN}</PupilSays>
+            <ol class="mt-4 flex flex-col gap-2">
+              {HOMEWORK.map(({ subject, note, spoken }, position) => (
+                <li
+                  data-before={spoken}
+                  class="flex items-baseline gap-3 rounded-control bg-accent px-3 py-2 text-accent-foreground ring-1 ring-border"
+                >
+                  <span class="tonight-after font-heading font-extrabold tabular-nums">{position + 1}</span>
+                  <span class="font-bold">{subject}</span>
+                  {note && <span class="ml-auto text-sm text-accent-muted-foreground">{note}</span>}
+                </li>
+              ))}
+            </ol>
+            <div class="tonight-after mt-4">
+              <TomSays>{ORDER_PROPOSED}</TomSays>
+            </div>
           </div>
         </Screen>
       </tonight-order>

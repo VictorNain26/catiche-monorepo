@@ -11,6 +11,14 @@ export function orderTiming(style: Tokens): KeyframeAnimationOptions | undefined
   return { duration, delay, easing, fill: 'backwards' };
 }
 
+// Tom waves only once he is seen: half of him in the window, the threshold the observer reports at
+// (atoms/tom-illustration.astro). On a phone, Tom at the top of the page starts below the window.
+export const IN_VIEW = 0.5;
+
+export function inView(entry: { isIntersecting: boolean; intersectionRatio: number }): boolean {
+  return entry.isIntersecting && entry.intersectionRatio >= IN_VIEW;
+}
+
 // Tom's arrival at the end of the page is over when the arriving element's own move ends, not another of its properties
 // nor a transition that bubbles up from inside it: then he waves (atoms/tom-illustration.astro).
 export function arrivalEnded(event: { target: unknown; propertyName: string }, host: unknown): boolean {
