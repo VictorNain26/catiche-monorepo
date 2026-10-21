@@ -115,17 +115,15 @@ de Tom, qui parle à l'élève.
   qu'il ne lit : l'essentiel va en tête de chaque bloc.
 - Une idée et un verbe conjugué par phrase, sujet en tête. Environ 15 mots par phrase, 25 au plus.
   Pas de titre sans verbe, sauf une question.
-- **La syntaxe simple, celle qu'on dirait à voix haute** (Victor, 2026-10-21). Sujet, verbe,
-  complément, dans cet ordre. Ce qui fait un texte « généré » est interdit :
-  - un thème détaché puis repris (« Les devoirs du soir, votre enfant les organise ») ;
-  - une virgule qui coupe un titre en deux moitiés (« Votre enfant avance avec Tom, du premier
-    devoir au cartable ») ;
-  - le rythme ternaire mécanique, les doubles compléments, la phrase bilan qui résume ce qui
-    vient d'être dit ;
-  - les formules « ce n'est pas X, c'est Y », « sans X » et « soit… soit » ;
-  - un mot répété d'une phrase à la suivante.
-- Un titre est une seule affirmation simple, de 8 mots au plus, ou une vraie question. Il dit ce
-  qui change pour le lecteur, pas un thème.
+- **La syntaxe de la voix parlée** (Victor, 2026-10-21) : sujet, verbe, complément, dans cet
+  ordre, comme on le dirait à quelqu'un. Un lecteur pressé comprend une phrase droite du premier
+  coup ; une phrase construite comme un slogan sonne « générée » et fait douter du reste.
+  Avant : « Les devoirs du soir, votre enfant les organise avec Tom ». Après : « Tom aide votre
+  enfant à organiser ses devoirs ». Chaque phrase avance d'une idée : elle ne résume pas la
+  précédente, ne reprend pas ses mots, et garde le nombre d'éléments qu'il lui faut plutôt
+  qu'un rythme en trois temps.
+- Un titre est une affirmation simple de 8 mots au plus, ou une vraie question. Il dit ce qui
+  change pour le lecteur.
 - Le présent. Les mots des familles, pas les nôtres (« ce qu'il a fait », pas « récapitulatif ») ;
   un mot du produit s'explique la première fois.
 - Aucun mot technique ou savant (« serveur », « navigateur », « IA » en abrégé, « bêta »). Aucun
