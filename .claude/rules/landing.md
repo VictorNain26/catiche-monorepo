@@ -10,10 +10,12 @@ Vitrine marketing et SEO, statique, en Astro 7, servie par Caddy dans une applic
 Clever Cloud (`apps/landing/Caddyfile`).
 
 - Sans appel au serveur, et rien qui ne vienne de `docs/produit.md` : `CLAUDE.md`, « Interdits ».
-- Le seul appel à l'action ouvre l'application, par un lien : son adresse est une seule constante
-  (`APP_URL`, `apps/landing/src/lib/brand.ts`), le staging tant que la production n'existe pas
-  (`docs/etat.md`). Ni liste d'attente ni formulaire : un formulaire public demande un service qui
-  le reçoive. Sous le bouton, une invitation se demande par e-mail (`CONTACT_EMAIL`).
+- L'appel à l'action est ce qu'un visiteur peut faire aujourd'hui : demander une invitation par
+  e-mail (`CONTACT_EMAIL`), ou se connecter à l'application par un lien, dont l'adresse est une
+  seule constante (`APP_URL`, `apps/landing/src/lib/brand.ts`), le staging tant que la production
+  n'existe pas (`docs/etat.md`). Ni liste d'attente ni formulaire : un formulaire public demande un
+  service qui le reçoive.
+- Les textes suivent `docs/charte.md`, « Les mots ».
 - Jamais un mot de soin ni un trouble ciblé : la liste et la raison sont dans `docs/produit.md`,
   « Ce qu'on dit, et ce qu'on ne dit pas ».
 - Ce qu'on peut prouver (`CLAUDE.md`, « Carte »), sur la landing : chaque chiffre a une source
