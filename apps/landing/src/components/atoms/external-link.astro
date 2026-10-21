@@ -15,5 +15,6 @@ const { href, class: className } = Astro.props;
 <a href={href} target="_blank" rel="noopener noreferrer" class={cn('inline-flex items-center gap-1', className)}>
   <slot />
   <ArrowUpRight class="size-4 shrink-0" aria-hidden="true" />
-  <span class="sr-only">(nouvel onglet)</span>
+  {/* The space is in the expression: the compressed HTML would drop one written before it. */}
+  <span class="sr-only">{' (nouvel onglet)'}</span>
 </a>
