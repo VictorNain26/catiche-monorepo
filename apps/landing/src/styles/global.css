@@ -61,16 +61,21 @@
 }
 
 /* The reed laid behind the ink's words (docs/charte.md, "Couleurs": the reed highlights); `lay-highlight`
- * lays it from the left, where a component lets it. */
+ * lays it from the left, where a component lets it. In the dark, every step of the reed turns olive behind the
+ * light ink: the words stand without it. */
 @utility highlighter {
   color: inherit;
-  background: linear-gradient(var(--color-highlight), var(--color-highlight)) no-repeat 0 88% / 100% 0.42em;
+  background: linear-gradient(var(--color-highlight), var(--color-highlight)) no-repeat 0 88% / 100% var(--highlight-height);
   box-decoration-break: clone;
+
+  @media (prefers-color-scheme: dark) {
+    background: none;
+  }
 }
 
 @keyframes lay-highlight {
   from {
-    background-size: 0% 0.42em;
+    background-size: 0% var(--highlight-height);
   }
 }
 

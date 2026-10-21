@@ -13,7 +13,7 @@ Clever Cloud (`apps/landing/Caddyfile`).
 - Le seul appel à l'action ouvre l'application, par un lien : son adresse est une seule constante
   (`APP_URL`, `apps/landing/src/lib/brand.ts`), le staging tant que la production n'existe pas
   (`docs/etat.md`). Ni liste d'attente ni formulaire : un formulaire public demande un service qui
-  le reçoive.
+  le reçoive. Sous le bouton, une invitation se demande par e-mail (`CONTACT_EMAIL`).
 - Jamais un mot de soin ni un trouble ciblé : la liste et la raison sont dans `docs/produit.md`,
   « Ce qu'on dit, et ce qu'on ne dit pas ».
 - Ce qu'on peut prouver (`CLAUDE.md`, « Carte »), sur la landing : chaque chiffre a une source
@@ -35,9 +35,10 @@ Clever Cloud (`apps/landing/Caddyfile`).
   `@supports (animation-timeline: view())` ; ce que le CSS ne sait pas faire passe par les API
   natives (Web Animations, `IntersectionObserver`) dans `apps/landing/src/scripts/evening.ts`,
   sans bibliothèque. Une vidéo de Tom a son bouton Pause.
-- Jamais un état d'entrée masqué hors de
-  `@media (scripting: enabled) and (prefers-reduced-motion: no-preference)` : sans scripts, ou sous
-  le mouvement réduit, la page s'affiche entière et immobile ; son HTML est l'état final.
+- Jamais un état d'entrée masqué que le script qui le lève n'a pas posé lui-même (`data-armed`,
+  `apps/landing/src/scripts/evening.ts`), ni hors de `@media (prefers-reduced-motion: no-preference)` :
+  sans scripts, si le script échoue, ou sous le mouvement réduit, même activé en cours de visite,
+  la page s'affiche entière et immobile ; son HTML est l'état final.
 - Jamais de `<script>` ni de `<style>` en `is:inline`, ni d'attribut `style` : la CSP
   (`security.csp`, `apps/landing/astro.config.mjs`) n'admet que ce qu'Astro a haché.
 - Jamais un texte suivi d'une balise qui ouvre la ligne suivante sans `{' '}` : Astro 7 compresse

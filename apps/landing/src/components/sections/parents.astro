@@ -75,9 +75,9 @@ const FAMILIES = [
     transition: opacity var(--duration-base) var(--ease-standard) var(--duration-slow);
   }
 
-  /* The parent's « Vu » comes last, without a stamp (src/scripts/evening.ts). */
-  @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-    play-once:not([data-played]) .seen {
+  /* The parent's « Vu » comes last, without a stamp, once the script that holds it plays it (src/scripts/evening.ts). */
+  @media (prefers-reduced-motion: no-preference) {
+    play-once[data-armed] .seen {
       opacity: 0;
     }
   }

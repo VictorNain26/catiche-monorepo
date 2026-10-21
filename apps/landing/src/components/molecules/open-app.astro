@@ -1,8 +1,9 @@
 ---
 import { buttonVariants, cn } from '@repo/ui/classes';
-import { SIGN_IN_URL } from '@/lib/brand';
+import { CONTACT_EMAIL, SIGN_IN_URL } from '@/lib/brand';
 
-// The one call to action: the application's sign-in page, where accounts open on invitation (apps/server/src/platform/auth/auth.ts).
+// The one call to action: the application's sign-in page, where accounts open on invitation (apps/server/src/platform/auth/auth.ts);
+// an invitation is asked for by e-mail, without a waiting list.
 interface Props {
   class?: string;
 }
@@ -15,6 +16,10 @@ const { class: className } = Astro.props;
     Ouvrir l&apos;application
   </a>
   <p class="max-w-sm text-muted-foreground">
-    En préparation, pour le collège de la 6e à la&nbsp;3e&nbsp;: les comptes s&apos;ouvrent sur invitation.
+    En préparation, pour le collège de la 6e à la&nbsp;3e&nbsp;: les comptes s&apos;ouvrent sur invitation. Pour en demander une, écrivez-nous à{' '}
+    <a href={`mailto:${CONTACT_EMAIL}`} class="text-primary underline underline-offset-4">
+      {CONTACT_EMAIL}
+    </a>
+    .
   </p>
 </div>

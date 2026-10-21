@@ -55,6 +55,8 @@
   --color-warning-foreground: var(--mist-12);
   /* Le jonc, derrière le texte de l'encre ; jamais en texte ni en bordure. */
   --color-highlight: var(--reed-4);
+  /* Sa hauteur derrière un mot : le bas des lettres, comme un trait de surligneur. */
+  --highlight-height: 0.42em;
   /* Le pelage, une note, un accent rare. */
   --color-annotation: var(--fur-10);
   --color-border: var(--mist-4);

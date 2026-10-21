@@ -29,15 +29,15 @@ const TONIGHT = [
     </div>
 
     {/* Tom in his arch, and the screen of the evening laid over its foot. */}
-    <figure class="mx-auto grid w-full max-w-md lg:max-w-none">
+    <figure class="mx-auto flex w-full max-w-md flex-col lg:max-w-none">
       <figcaption class="sr-only">
         Un exemple de soirée&nbsp;: votre enfant dit ses devoirs dans le désordre, et Tom propose un ordre&nbsp;: les maths, l&apos;anglais, puis la
         révision du contrôle d&apos;histoire de jeudi.
       </figcaption>
-      <TomIllustration arch class="col-start-1 row-start-1 w-[68%] max-w-none justify-self-end" />
-      <tonight-order class="relative col-start-1 row-start-1 mt-[46%] block w-[92%] max-w-sm self-start sm:w-[80%]">
+      <TomIllustration arch class="-mb-16 w-2/3 max-w-none self-end sm:-mb-24" />
+      <tonight-order class="relative block w-11/12 max-w-sm sm:w-4/5">
         <Screen time="17:30" title="Ce soir">
-          <p class="ml-auto flex w-fit max-w-[92%] items-start gap-2 rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground">
+          <p class="ml-auto flex w-fit max-w-11/12 items-start gap-2 rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground">
             <Mic class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
             J&apos;ai anglais, un contrôle d&apos;histoire jeudi, et les exercices 3 et 4 en maths.
           </p>
@@ -68,32 +68,29 @@ const TONIGHT = [
     }
   }
 
-  /* The jumble: the homework in the order it was said, askew, before Tom's order; only with scripts, which sort it (src/scripts/evening.ts). */
+  /* The jumble: the homework in the order it was said, out of line, before Tom's order; only while the script that sorts
+   * it holds it (src/scripts/evening.ts). */
   .tonight-item,
   .tonight-after {
     transition:
       translate var(--duration-slow) var(--ease-standard) var(--duration-wait),
-      rotate var(--duration-slow) var(--ease-standard) var(--duration-wait),
       opacity var(--duration-slow) var(--ease-standard) var(--duration-wait);
   }
 
-  @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-    tonight-order:not([data-played]) {
+  @media (prefers-reduced-motion: no-preference) {
+    tonight-order[data-armed] {
       .tonight-item[data-spoken='1'] {
         order: 1;
-        rotate: -1.5deg;
         translate: calc(var(--spacing) * 2) 0;
       }
 
       .tonight-item[data-spoken='2'] {
         order: 2;
-        rotate: 1deg;
         translate: calc(var(--spacing) * -1) 0;
       }
 
       .tonight-item[data-spoken='3'] {
         order: 3;
-        rotate: -0.5deg;
         translate: calc(var(--spacing) * 3) 0;
       }
 

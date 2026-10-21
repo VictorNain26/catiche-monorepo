@@ -18,7 +18,7 @@ const CLIPS = ['salut', 'respiration'] as const;
 
 <tom-illustration data-start={start} class={cn('relative block w-full max-w-sm', className)}>
   <span role="img" aria-label="Tom, une loutre en pull bleu avec un stylo dans la poche" class="relative block aspect-square w-full">
-    {arch && <span aria-hidden="true" class="absolute inset-x-[6%] top-[4%] bottom-0 rounded-t-full bg-arch"></span>}
+    {arch && <span aria-hidden="true" class="absolute inset-x-1/16 top-1/24 bottom-0 rounded-t-full bg-arch"></span>}
     <Image src={tom} alt="" width={384} height={384} densities={[1, 2]} class="relative size-full" />
     {CLIPS.map((clip) => (
       <video
@@ -64,12 +64,17 @@ const CLIPS = ['salut', 'respiration'] as const;
       const show = (shown: HTMLElement) => {
         for (const frame of [picture, salut, respiration]) frame.classList.toggle('invisible', frame !== shown);
       };
-      // The button says what it does next: its label changes, not a pressed state.
-      const setPaused = (paused: boolean) => {
+      // The button says what it does next: its label changes, not a pressed state. It follows the video itself, so a
+      // refused play() leaves it on « Lecture ».
+      const sync = () => {
+        const paused = current.paused;
         toggle.querySelector('[data-icon="pause"]')?.classList.toggle('hidden', paused);
         toggle.querySelector('[data-icon="play"]')?.classList.toggle('hidden', !paused);
         const label = toggle.querySelector('[data-label]');
         if (label) label.textContent = paused ? 'Lecture' : 'Pause';
+      };
+      const resume = () => {
+        current.play().catch(sync);
       };
 
       salut.addEventListener('playing', () => {
@@ -78,37 +83,33 @@ const CLIPS = ['salut', 'respiration'] as const;
       });
       salut.addEventListener('ended', () => {
         current = respiration;
-        respiration.play().catch(() => undefined);
+        resume();
       });
       respiration.addEventListener('playing', () => {
         show(respiration);
       });
+      for (const video of [salut, respiration]) {
+        video.addEventListener('play', sync);
+        video.addEventListener('pause', sync);
+      }
       toggle.addEventListener('click', () => {
-        if (current.paused) {
-          current.play().catch(() => undefined);
-          setPaused(false);
-        } else {
-          current.pause();
-          setPaused(true);
-        }
+        if (current.paused) resume();
+        else current.pause();
       });
 
-      const play = () => {
-        salut.play().catch(() => undefined);
-      };
       if (this.dataset['start'] === 'view') {
         const observer = new IntersectionObserver(
           (entries) => {
             if (entries.some((entry) => entry.isIntersecting)) {
               observer.disconnect();
-              play();
+              resume();
             }
           },
           { threshold: 0.6 },
         );
         observer.observe(this);
       } else {
-        play();
+        resume();
       }
     }
   }

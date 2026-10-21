@@ -58,12 +58,13 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
       </p>
     </div>
 
-    <ol class="evening mt-14 lg:mt-20">
+    {/* The roles stay explicit: at a computer, a moment is laid out with `display: contents`. */}
+    <ol role="list" class="evening mt-14 lg:mt-20">
       {MOMENTS.map(({ time, title, body, screen }, index) => (
-        <li class="moment">
+        <li role="listitem" class="moment">
           <div id={`moment-${String(index + 1)}`} class="moment-text">
             <h3 class="text-2xl text-balance text-foreground">
-              <time datetime={time} class="moment-hour highlighter mb-3 block w-fit text-5xl tabular-nums lg:text-6xl">
+              <time datetime={time} class="moment-hour mb-3 block w-fit text-5xl tabular-nums lg:text-6xl">
                 {time}
               </time>
               {title}
@@ -75,7 +76,7 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
             <Screen time={time} title={screen}>
               {index === 0 && (
                 <div class="space-y-3">
-                  <p class="ml-auto flex w-fit max-w-[90%] items-start gap-2 rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground">
+                  <p class="ml-auto flex w-fit max-w-11/12 items-start gap-2 rounded-2xl bg-accent px-3 py-2 text-sm text-accent-foreground">
                     <Mic class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                     J&apos;ai anglais, un contrôle d&apos;histoire, et les exercices 3 et 4 en maths.
                   </p>
@@ -188,7 +189,7 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
     overflow: visible;
     fill: none;
     stroke: var(--color-foreground);
-    stroke-width: 2;
+    stroke-width: calc(var(--spacing) / 2);
     stroke-linecap: round;
     stroke-dasharray: 1;
     transition: stroke-dashoffset var(--duration-base) var(--ease-standard) var(--duration-slow);
@@ -212,9 +213,10 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
     transition-delay: calc(var(--duration-slow) + var(--duration-fast) * 2);
   }
 
-  /* Before a screen is read: the line not drawn, the next step not yet current, the bag still empty (src/scripts/evening.ts). */
-  @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-    play-once:not([data-played]) {
+  /* Before a screen is read, while the script that plays it holds it (src/scripts/evening.ts): the line not drawn, the
+   * next step not yet current, the bag still empty. */
+  @media (prefers-reduced-motion: no-preference) {
+    play-once[data-armed] {
       .strike {
         stroke-dashoffset: 1;
       }
@@ -231,17 +233,17 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
   }
 
   /* At a computer, where the browser ties animations to the scroll: one screen stays in the middle of the window and
-   * changes as each moment is read, while the hour of the moment read takes its reed. Elsewhere, and under reduced
-   * motion, each moment keeps its own screen. */
+   * changes as each moment is read, beside it, while the hour of the moment read takes the ink. Elsewhere, and under
+   * reduced motion, each moment keeps its own screen. */
   @supports (animation-timeline: view()) {
     @media (width >= 64rem) and (prefers-reduced-motion: no-preference) {
       .evening {
+        /* Every screen the same height, and every moment's row as high: each moment is read level with its screen. */
+        --evening-screen: calc(var(--spacing) * 96);
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
         column-gap: calc(var(--spacing) * 24);
         timeline-scope: --moment-1, --moment-2, --moment-3, --moment-4;
-        /* The first moment's row already opens with room. */
-        margin-top: 0;
       }
 
       .moment {
@@ -254,32 +256,31 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
 
       .moment-text {
         grid-column: 1;
-        min-height: 75svh;
+        min-height: var(--evening-screen);
         display: flex;
         flex-direction: column;
         justify-content: center;
+        /* The moment is read while it holds the middle of the window. */
+        view-timeline-inset: 50%;
       }
 
       .moment-screen {
         grid-column: 2;
         grid-row: 1 / span 4;
         align-self: start;
-        /* Level with the first moment's text, in the middle of its row, then held in the middle of the window. */
-        margin-top: calc(37.5svh - var(--spacing) * 44);
+        margin-top: 0;
+        /* Level with the first moment, then held in the middle of the window until the last. */
         position: sticky;
-        top: calc(50svh - var(--spacing) * 44);
+        top: calc(50% - var(--evening-screen) / 2);
         animation: moment-screen linear both;
-        animation-range: cover 20% cover 80%;
       }
 
-      /* Every screen the same size, so that they read as one. */
       .moment-screen > :global(*) {
-        min-height: calc(var(--spacing) * 88);
+        min-height: var(--evening-screen);
       }
 
       .moment-hour {
-        animation: lay-highlight linear both;
-        animation-range: cover 25% cover 45%;
+        animation: moment-hour linear both;
       }
 
       .moment:nth-child(1) .moment-text {
@@ -333,8 +334,8 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
     0% {
       opacity: 0;
     }
-    15%,
-    85% {
+    10%,
+    90% {
       opacity: 1;
     }
     100% {
@@ -344,7 +345,7 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
 
   @keyframes moment-screen-first {
     0%,
-    85% {
+    90% {
       opacity: 1;
     }
     100% {
@@ -356,9 +357,21 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
     0% {
       opacity: 0;
     }
-    15%,
+    10%,
     100% {
       opacity: 1;
+    }
+  }
+
+  /* The hour of the moment read in the ink, the others in the muted ink: the hour itself still says which moment it is. */
+  @keyframes moment-hour {
+    0%,
+    100% {
+      color: var(--color-muted-foreground);
+    }
+    10%,
+    90% {
+      color: var(--color-foreground);
     }
   }
 </style>

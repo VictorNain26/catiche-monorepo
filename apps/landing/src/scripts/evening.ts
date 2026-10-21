@@ -1,30 +1,60 @@
-// The scenes of the evening play once, when they are read. Each one's HTML is its end state; its entry state
-// exists only under `@media (scripting: enabled) and (prefers-reduced-motion: no-preference)`, in its component's
-// style, and `data-played` lets it go. Durations and curve come from the tokens, through the computed style.
+// The scenes of the evening play once, when they are read. Each one's HTML is its end state. Its entry state exists only
+// while the element carries `data-armed`, which the script sets itself and takes off to play: if the script does not
+// run, nothing waits for it. Durations and curve come from the tokens, through the computed style.
 
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+// Where the evening's screens become sticky (evening.astro): the observed element changes with it.
+const wide = window.matchMedia('(width >= 64rem)');
 
 class PlayOnce extends HTMLElement {
+  #observer: IntersectionObserver | undefined;
+
   connectedCallback() {
-    if (reducedMotion) return;
-    // A sticky screen of the evening is always on screen, faded until its moment is read: it plays when the
-    // moment's text crosses the middle of the window, rather than when it is itself in view.
+    if (reducedMotion.matches) return;
+    this.dataset['armed'] = '';
+    this.#observe();
+    wide.addEventListener('change', this.#observe);
+    // Reduced motion turned on during the visit: everything shows, still.
+    reducedMotion.addEventListener('change', this.#reveal);
+  }
+
+  disconnectedCallback() {
+    this.#stop();
+  }
+
+  #observe = () => {
+    this.#observer?.disconnect();
+    // A sticky screen of the evening is always on screen, faded until its moment is read: it plays when the moment's
+    // text crosses the middle of the window, rather than when it is itself in view.
     const moment = this.dataset['for'] ? document.getElementById(this.dataset['for']) : null;
     const sticky = getComputedStyle(this).position === 'sticky';
     const target = sticky && moment ? moment : this;
-    const observer = new IntersectionObserver(
+    this.#observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
-        observer.disconnect();
+        this.#stop();
         this.play();
       },
-      sticky ? { rootMargin: '-45% 0px -45% 0px' } : { threshold: 0.6 },
+      // A scene plays once its top has risen past the bottom fifth of the window, however tall it is.
+      { rootMargin: sticky ? '-45% 0px -45% 0px' : '0px 0px -20% 0px' },
     );
-    observer.observe(target);
+    this.#observer.observe(target);
+  };
+
+  #reveal = (event: MediaQueryListEvent) => {
+    if (!event.matches) return;
+    this.#stop();
+    delete this.dataset['armed'];
+  };
+
+  #stop() {
+    this.#observer?.disconnect();
+    wide.removeEventListener('change', this.#observe);
+    reducedMotion.removeEventListener('change', this.#reveal);
   }
 
   play() {
-    this.dataset['played'] = '';
+    delete this.dataset['armed'];
   }
 }
 
