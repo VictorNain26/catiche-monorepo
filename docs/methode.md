@@ -45,6 +45,48 @@ enfant suit le programme. Les notes bougent peu. Ces effets
 viennent d'un adulte qui vérifie à chaque séance. Aucune source ne montre qu'une application
 ou une IA obtient le même effet.
 
+## Ce qui vaut pour tous les élèves (2026-10-21)
+
+Recherche demandée par Victor pour ne pas s'appuyer seulement sur des élèves TDAH. Chaque chiffre
+a été revérifié à sa source par un second relecteur.
+
+- **Planifier, suivre son travail, faire le point.** C'est l'une des approches les mieux
+  étayées du Toolkit de l'EEF : +8 mois de progrès, 355 études, un impact « similar across all
+  age groups ». L'EEF prévient qu'il est « difficult to realise this impact in practice » [11]
+  (T). Une méta-analyse de 84 études (49 en primaire, 35 au secondaire) montre que cette
+  autorégulation s'enseigne aux deux niveaux, avec un effet moyen de 0,69, plus fort quand des
+  chercheurs mènent la formation [12] (Rés.). Gestes appuyés : ordonner, découper, faire le
+  point.
+- **Réviser en s'interrogeant, sur plusieurs jours.** L'auto-test et la pratique espacée sont
+  jugés très utiles ; la relecture et le surlignage, peu utiles [13] (Rés.). En classe, sur
+  222 études et 48 478 élèves, se tester améliore la réussite, g = 0,499 [14] (Rés.). Geste
+  appuyé : préparer un contrôle les jours d'avant.
+- **Les devoirs eux-mêmes.** +5 mois au secondaire contre +3 au primaire, sur 43 études, mais
+  « very limited evidence » ; le retour sur le travail fait augmenter l'effet [15] (T).
+- **La place de l'adulte.**
+  - Former les parents à aider aux devoirs fait faire plus de devoirs au primaire. Au collège,
+    plus les parents s'impliquent dans les devoirs, moins les résultats sont bons, dans des
+    études corrélationnelles. Tous âges confondus, poser des règles est la forme d'implication
+    la plus liée à la réussite [16] (Rés.).
+  - Chez 1 685 élèves de 6e année suivis dans le temps, la fréquence de l'aide parentale va
+    avec moins de progrès. Une aide vécue comme un soutien va avec plus de progrès, une aide
+    vécue comme intrusive avec moins [17] (Rés.).
+  - Des SMS de l'école aux parents, sur les contrôles à venir et les devoirs non rendus, ont eu
+    un petit effet en maths (+1 mois environ) chez 15 697 élèves anglais de 11 à 16 ans [18]
+    (T).
+
+**À retenir.** Chaque geste de la soirée a un appui en population générale : planifier et faire
+le point, réviser en s'interrogeant sur plusieurs jours, un adulte qui soutient sans surveiller.
+Ces effets viennent de méthodes transmises par des enseignants, des chercheurs ou l'école.
+Aucune de ces sources ne porte sur un collégien qui travaille seul avec une IA : on peut dire
+d'où viennent les gestes de Catiche, jamais que Catiche obtient ces effets.
+
+Écartés ou à manier avec prudence : les intentions de mise en œuvre (« quand et comment je
+commence »), dont la méta-analyse porte sur des enfants de 4 à 13 ans avec un effet qui baisse
+avec l'âge (Breitwieser et Reinelt 2026, DOI 10.1111/bjop.70065). Aucune source solide n'a été
+trouvée en population générale sur le découpage des tâches au collège, le cartable ou
+l'installation.
+
 ## Les gestes d'une soirée
 
 | Moment | Geste | Source | Ce que ferait Tom |
@@ -76,7 +118,8 @@ ou une IA obtient le même effet.
   sur les tests standardisés [10] (R).
 
 Pour Tom :
-- l'élève travaille sans qu'un parent le surveille ;
+- l'élève travaille sans qu'un adulte le surveille ; au collège, l'aide fréquente ou intrusive
+  va avec moins de progrès [16] [17] (Rés.) ;
 - le parent voit « c'est fait », pas les conversations ;
 - **le point du soir** (`produit.md`) : un soutien et un encouragement, pas un contrôle. HOPS
   montre que la surveillance seule n'apporte rien ; OST et le message au parent montrent que la
@@ -100,9 +143,10 @@ Des mesures déjà validées, plutôt qu'un score maison :
 - **Que les notes montent.** Les sources annoncent des effets faibles sur les notes.
 - **Le bon dosage.** Les programmes tiennent en 16 à 20 séances, sur 10 à 12 semaines pour
   OST [2], alors que Tom serait là chaque soir.
-- **Que l'effet vaut hors TDAH**, ou au collège pour OST, dont l'essai principal porte sur le
-  primaire. La réplication de HOPS d'où viennent les gestes du tableau [7] accueille les élèves
-  quel que soit leur diagnostic, et n'a pas encore de résultat.
+- **Que les programmes HOPS et OST valent hors TDAH**, ou au collège pour OST, dont l'essai
+  principal porte sur le primaire. La réplication de HOPS d'où viennent les gestes du tableau [7]
+  accueille les élèves quel que soit leur diagnostic, et n'a pas encore de résultat. Les gestes
+  eux-mêmes ont un appui en population générale (« Ce qui vaut pour tous les élèves »).
 - **Le contenu exact des séances.** Il est dans les manuels de HOPS et d'OST, non lus ici.
 - **Un effet de soin** : les mots à éviter et leur raison sont dans `produit.md`, « Ce qu'on
   dit, et ce qu'on ne dit pas ».
@@ -141,3 +185,23 @@ Consultées le 2026-10-20.
     DOI 10.3368/jhr.56.1.1118-9837R1 ; résumé de J-PAL : 1 137 parents de 22 collèges et lycées,
     0,71 cours échoué contre 0,97, présence en hausse de 12 %
     ([J-PAL](https://www.povertyactionlab.org/node/2353)), consulté le 2026-10-20.
+
+Consultées le 2026-10-21.
+
+11. Education Endowment Foundation, Teaching and Learning Toolkit, « Metacognition and
+    self-regulation »,
+    [page](https://educationendowmentfoundation.org.uk/education-evidence/teaching-learning-toolkit/metacognition-and-self-regulation).
+12. Dignath et Büttner, « Components of fostering self-regulated learning among students »,
+    *Metacognition and Learning* 3(3), 2008, 231-264, DOI 10.1007/s11409-008-9029-x.
+13. Dunlosky et al., « Improving Students' Learning With Effective Learning Techniques »,
+    *Psychol Sci Public Interest* 14(1), 2013, 4-58, DOI 10.1177/1529100612453266.
+14. Yang et al., « Testing (quizzing) boosts classroom learning », *Psychol Bull* 147(4), 2021,
+    399-435, DOI 10.1037/bul0000309.
+15. Education Endowment Foundation, Teaching and Learning Toolkit, « Homework »,
+    [page](https://educationendowmentfoundation.org.uk/education-evidence/teaching-learning-toolkit/homework).
+16. Patall, Cooper et Robinson, « Parent Involvement in Homework: A Research Synthesis »,
+    *Rev Educ Res* 78(4), 2008, 1039-1101, DOI 10.3102/0034654308325185.
+17. Moroni et al., « The Need to Distinguish Between Quantity and Quality in Research on Parental
+    Involvement », *J Educ Res* 108(5), 2015, 417-431, DOI 10.1080/00220671.2014.901283.
+18. Education Endowment Foundation, « Texting parents », évalué par Queen's University Belfast,
+    [page](https://educationendowmentfoundation.org.uk/projects-and-evaluation/projects/texting-parents).
