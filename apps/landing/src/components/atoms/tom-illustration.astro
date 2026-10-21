@@ -63,12 +63,24 @@ const CLIPS = ['salut', 'respiration'] as const;
       const toggle = this.querySelector<HTMLButtonElement>('[data-toggle]');
       if (!picture || !salut || !respiration || !toggle) return;
       // Autoplay can be refused (iOS Low Power Mode), and nothing moves under reduced motion: Tom then stays still.
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      if (reducedMotion.matches) return;
 
       let current = salut;
+      let observer: IntersectionObserver | undefined;
       const show = (shown: HTMLElement) => {
         for (const frame of [picture, salut, respiration]) frame.classList.toggle('invisible', frame !== shown);
       };
+      // Reduced motion turned on during the visit: Tom stops on his still picture, for good, and the button goes.
+      const still = () => {
+        observer?.disconnect();
+        for (const video of [salut, respiration]) video.pause();
+        show(picture);
+        toggle.hidden = true;
+      };
+      reducedMotion.addEventListener('change', (event) => {
+        if (event.matches) still();
+      });
       // The button says what it does next: its label changes, not a pressed state. It follows the video itself, so a
       // refused play() leaves it on « Lecture ».
       const sync = () => {
@@ -79,23 +91,35 @@ const CLIPS = ['salut', 'respiration'] as const;
         if (label) label.textContent = paused ? 'Lecture' : 'Pause';
       };
       const resume = () => {
+        if (reducedMotion.matches) return;
         current.play().catch(sync);
+      };
+      // A play() that resolves after reduced motion turned on stops at once.
+      const playing = (video: HTMLVideoElement) => {
+        if (reducedMotion.matches) {
+          still();
+          return;
+        }
+        show(video);
+        if (video === salut) toggle.hidden = false;
       };
 
       salut.addEventListener('playing', () => {
-        show(salut);
-        toggle.hidden = false;
+        playing(salut);
       });
       salut.addEventListener('ended', () => {
         current = respiration;
         resume();
       });
       respiration.addEventListener('playing', () => {
-        show(respiration);
+        playing(respiration);
       });
       for (const video of [salut, respiration]) {
         video.addEventListener('play', sync);
-        video.addEventListener('pause', sync);
+        // The wave pauses as it ends, just before the breath starts: the button keeps « Pause » through it.
+        video.addEventListener('pause', () => {
+          if (!video.ended) sync();
+        });
       }
       toggle.addEventListener('click', () => {
         if (current.paused) resume();
@@ -103,10 +127,10 @@ const CLIPS = ['salut', 'respiration'] as const;
       });
 
       if (this.dataset['start'] === 'view') {
-        const observer = new IntersectionObserver(
+        observer = new IntersectionObserver(
           (entries) => {
             if (entries.some((entry) => entry.isIntersecting)) {
-              observer.disconnect();
+              observer?.disconnect();
               resume();
             }
           },

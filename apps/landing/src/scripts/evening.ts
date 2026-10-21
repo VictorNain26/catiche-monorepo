@@ -5,6 +5,8 @@
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 // Where the evening's screens become sticky (evening.astro): the observed element changes with it.
 const wide = window.matchMedia('(width >= 64rem)');
+// Taller than the page: what lies above the window counts as read.
+const ABOVE = '100000px';
 
 class PlayOnce extends HTMLElement {
   #observer: IntersectionObserver | undefined;
@@ -12,6 +14,10 @@ class PlayOnce extends HTMLElement {
   connectedCallback() {
     if (reducedMotion.matches) return;
     this.dataset['armed'] = '';
+    // The entry state is computed now, before the observer can play the scene: a scene already in view on load (the top
+    // of the page, an arrival on /#soiree) then plays from it rather than from its end state. Its CSS sets it at once,
+    // without a transition.
+    this.getBoundingClientRect();
     this.#observe();
     wide.addEventListener('change', this.#observe);
     // Reduced motion turned on during the visit: everything shows, still.
@@ -35,8 +41,10 @@ class PlayOnce extends HTMLElement {
         this.#stop();
         this.play();
       },
-      // A scene plays once its top has risen past the bottom fifth of the window, however tall it is.
-      { rootMargin: sticky ? '-45% 0px -45% 0px' : '0px 0px -20% 0px' },
+      // A scene plays once its top has risen past the bottom fifth of the window (a sticky one's moment, past the middle),
+      // however tall it is. The band reaches far above the window: a scene already scrolled past, on load or by a jump
+      // to a link, plays too, rather than staying in its entry state.
+      { rootMargin: sticky ? `${ABOVE} 0px -45% 0px` : `${ABOVE} 0px -20% 0px` },
     );
     this.#observer.observe(target);
   };
@@ -64,13 +72,9 @@ class TonightOrder extends PlayOnce {
     const items = [...this.querySelectorAll<HTMLElement>('[data-spoken]')];
     const before = items.map((item) => item.getBoundingClientRect().top);
     super.play();
-    // The same timing as the transitions that straighten the items (hero.astro).
-    const timing = {
-      duration: token('--duration-slow'),
-      delay: token('--duration-wait'),
-      easing: token('--ease-standard'),
-      fill: 'backwards',
-    } as const;
+    const timing = orderTiming();
+    // A token that cannot be read leaves the order as it is, without a move.
+    if (!timing) return;
     items.forEach((item, index) => {
       const shift = (before[index] ?? 0) - item.getBoundingClientRect().top;
       item.animate([{ transform: `translateY(${String(shift)}px)` }, { transform: 'none' }], timing);
@@ -78,13 +82,21 @@ class TonightOrder extends PlayOnce {
   }
 }
 
-// A duration token in milliseconds, or the curve token as it is written.
-function token(name: '--duration-slow' | '--duration-wait'): number;
-function token(name: '--ease-standard'): string;
-function token(name: string): number | string {
-  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  if (!name.startsWith('--duration')) return value;
-  return value.endsWith('ms') ? parseFloat(value) : parseFloat(value) * 1000;
+// The same timing as the transitions that straighten the items (hero.astro), from the tokens; none if one is missing.
+function orderTiming(): KeyframeAnimationOptions | undefined {
+  const style = getComputedStyle(document.documentElement);
+  const duration = milliseconds(style.getPropertyValue('--duration-slow'));
+  const delay = milliseconds(style.getPropertyValue('--duration-wait'));
+  const easing = style.getPropertyValue('--ease-standard').trim();
+  if (duration === undefined || delay === undefined || !easing) return undefined;
+  return { duration, delay, easing, fill: 'backwards' };
+}
+
+// A CSS duration (`200ms`, `0.2s`) in milliseconds; none if it is empty or not a number.
+function milliseconds(value: string): number | undefined {
+  const number = parseFloat(value);
+  if (!Number.isFinite(number)) return undefined;
+  return value.trim().endsWith('ms') ? number : number * 1000;
 }
 
 customElements.define('play-once', PlayOnce);
