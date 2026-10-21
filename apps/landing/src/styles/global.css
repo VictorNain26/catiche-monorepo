@@ -28,7 +28,6 @@
     margin-bottom: 0.5rem;
     font-size: var(--text-xl);
     line-height: 2rem;
-    color: var(--color-foreground);
   }
 
   & h2:first-child {
@@ -57,7 +56,6 @@
 
   & strong {
     font-weight: 700;
-    color: var(--color-foreground);
   }
 }
 
