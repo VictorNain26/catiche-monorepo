@@ -3,19 +3,35 @@ import { Image } from 'astro:assets';
 import { BRAND_NAME } from '@/lib/brand';
 import tomTete from '@repo/ui/assets/tom-tete.png';
 
-// On the home page the logo brings back the top of the page without reloading it: « #top » is a mark at the top of
-// the page (layouts/layout.astro), which takes the focus with the scroll, smooth unless reduced motion asks otherwise
-// (styles/global.css); elsewhere, the home.
-// Built as files (astro.config.mjs), the home page's path is « /index.html ».
-const HOME = /^\/(?:index(?:\.html)?)?$/u;
-const HREF = HOME.test(Astro.url.pathname) ? '#top' : '/';
+// The logo leads home. On the home page, its script brings back the top without reloading it and without an anchor in
+// the address: the scroll, smooth unless reduced motion asks otherwise, then the focus on the page's top mark
+// (layouts/layout.astro), so that the next Tab starts again from the header (src/scripts/home-link.ts).
 ---
 
 <a
-  href={HREF}
+  href="/"
+  data-home
   aria-label={`${BRAND_NAME} - Accueil`}
   class="inline-flex min-h-11 items-center gap-2 font-heading text-2xl font-extrabold text-primary transition-opacity duration-base hover:opacity-80"
 >
   <Image src={tomTete} alt="" width={40} height={40} densities={[1, 2]} class="size-10" />
   {BRAND_NAME}
 </a>
+
+<script>
+  import { returnsToTop } from '@/scripts/home-link';
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  for (const link of document.querySelectorAll<HTMLAnchorElement>('a[data-home]')) {
+    link.addEventListener('click', (event) => {
+      if (!returnsToTop(window.location.pathname, event)) return;
+      event.preventDefault();
+      window.scrollTo({ top: 0, behavior: reducedMotion.matches ? 'instant' : 'smooth' });
+      const top = document.querySelector('[data-page-top]');
+      if (top instanceof HTMLElement) top.focus({ preventScroll: true });
+      // An anchor followed earlier leaves the address: it goes back to the page's own.
+      if (window.location.hash) history.replaceState(history.state, '', `${window.location.pathname}${window.location.search}`);
+    });
+  }
+</script>

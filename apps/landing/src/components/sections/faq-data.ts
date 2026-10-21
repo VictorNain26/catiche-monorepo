@@ -25,7 +25,7 @@ export const FAQS: readonly Faq[] = [
     answer: [
       'Le point du soir s’adapte à votre famille.',
       [
-        'Vous rentrez tard\xa0: vous le voyez en rentrant et votre enfant voit votre «\xa0Vu\xa0» le lendemain.',
+        'Vous rentrez tard\xa0: vous le voyez en rentrant et votre enfant voit votre réponse le lendemain.',
         'Votre enfant vit dans deux maisons\xa0: le point du soir va à l’adulte chez qui il est ce soir-là.',
         'Personne n’est là\xa0: le point du soir reste à votre enfant et rien ne lui est reproché.',
         'Les devoirs sont un sujet tendu chez vous\xa0: vous pouvez couper le point du soir.',

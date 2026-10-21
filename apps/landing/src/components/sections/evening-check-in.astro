@@ -1,88 +1,140 @@
 ---
-import CheckIn from '@/components/molecules/check-in.astro';
+import { Check } from '@lucide/astro';
 import Proof from '@/components/molecules/proof.astro';
-import { CHECK_IN, HOURS, screenTime } from './evening-data';
+import { HOURS, screenTime } from './evening-data';
 
-// The evening check-in of docs/produit.md ("Le point du soir"), presented in the present (docs/charte.md, "Les mots");
-// how it fits each family is a question of the FAQ. The adult sees what is done, never the conversations
-// (docs/tuteur.md, § 8). The proof of the adult's part: docs/methode.md, "Ce qui vaut pour tous les élèves", source [17].
+// The evening check-in of docs/produit.md (point 5), as docs/methode.md ("Le rôle de l'adulte au collège") has it: the
+// pupil shows his plan for tomorrow and what he expects of the adult, never a check of the work; the adult answers that
+// he takes care of it, and may add a word. Presented in the present (docs/charte.md, "Les mots"); how it fits each
+// family is a question of the FAQ. The proof of the adult's part: docs/methode.md, "Ce qui vaut pour tous les élèves",
+// source [17].
 const SUPPORT = {
   text: 'Chez 1\xa0685\xa0élèves suivis, l’aide aux devoirs reçue à la maison s’accompagne de plus de progrès quand l’élève la vit comme un soutien.',
   sources: [{ label: 'La source', href: 'https://doi.org/10.1080/00220671.2014.901283', title: 'Moroni et al., 2015', name: 'Moroni, 2015' }],
 };
 
-// The adult's side of the evening, pared down: a title, a sentence, the adult's phone on the brand's deep plane with its
-// two buttons, then the state after the gesture, and a proof in small print.
+// What the pupil shows on the adult's phone, at 19:10 on the example Tuesday (sections/evening-data.ts).
+const NOTES = [
+  { title: 'Demain', items: ['Histoire\xa0: la suite de la révision, pour le contrôle de jeudi', 'Dans le cartable\xa0: le cahier de maths'] },
+  { title: 'Il me faut', items: ['Signer le mot pour la sortie de jeudi'] },
+  { title: 'Content de', items: ['Les fractions de l’exercice 3'] },
+];
 ---
 
 <section id="point-du-soir" class="scroll-mt-20 plane-panel py-28 text-panel-foreground md:py-32 lg:py-40">
   {/* At 768 px, the phone narrows so that the title keeps its lines. */}
   <div class="container grid max-w-5xl items-center gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] md:gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:gap-20">
     <play-once class="block">
-      <h2 data-reveal="rise" class="section-title">
-        Vous répondez «&nbsp;Vu&nbsp;»
+      {/* The reed in its lighter step, the one that stands out from the deep plane (packages/tokens/theme.css). */}
+      <h2 data-reveal="rise" class="on-panel section-title">
+        Votre enfant vous dit <mark class="highlighter">ce qu’il lui faut</mark>
       </h2>
       <p data-reveal="rise" data-order="2" class="mt-5 max-w-xl text-lg md:mt-6 md:text-xl">
-        C’est le point du soir&nbsp;: vous répondez «&nbsp;Vu&nbsp;», avec un mot d’encouragement si vous le voulez.
+        C’est le point du soir. Votre enfant vous montre son plan de demain et ce qu’il attend de vous. Vous répondez{' '}
+        <span class="whitespace-nowrap">«&nbsp;Je m’en occupe&nbsp;»</span>, et vous pouvez ajouter un mot.
       </p>
       <div data-reveal="fade" data-order="3" class="mt-8 md:mt-10">
         <Proof {...SUPPORT} />
       </div>
     </play-once>
 
-    {/* The adult's phone, drawn in CSS: a thin frame, a speaker slot, the evening's check-in and its two buttons; then
-     * « Vu » pressed and the word added (src/scripts/reveal.ts plays it once). Its HTML is the state after the gesture. */}
+    {/* The adult's phone, drawn in CSS: a thin frame, a speaker slot, what the pupil shows in three blocks, the two
+     * buttons, then « Je m'en occupe » ticked and the word added. It rises as it comes into view, then the blocks come
+     * one by one, then the tick, then the word (src/scripts/reveal.ts plays it once). Its HTML is the state after the
+     * gesture. */}
     <figure class="mx-auto w-full max-w-80 md:max-w-64 lg:max-w-80">
       <play-once data-reveal="pop" class="block rounded-3xl bg-card p-1.5 shadow-control-hover ring-2 ring-panel-foreground/50">
         <div aria-hidden="true" class="rounded-2xl bg-card px-5 pt-3 pb-6 text-card-foreground">
           <span class="mx-auto mb-3 block h-1.5 w-14 rounded-full bg-border"></span>
-          <p class="mb-4 border-b pb-3 text-sm font-bold text-muted-foreground tabular-nums">{screenTime(HOURS.seen)}</p>
-          <p class="mb-3 font-heading text-lg font-extrabold">Point du soir</p>
-          <CheckIn {...CHECK_IN} />
+          <p class="mb-4 border-b pb-3 text-sm font-bold text-muted-foreground tabular-nums">{screenTime(HOURS.answered)}</p>
+          <div class="space-y-4">
+            {NOTES.map(({ title, items }) => (
+              <div class="note">
+                <p class="text-sm font-bold text-muted-foreground">{title}</p>
+                <ul class="mt-1 space-y-1">
+                  {items.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
           <p class="mt-5 flex flex-wrap gap-2">
-            <span class="seen-button rounded-full bg-primary px-4 py-2 font-bold text-primary-foreground ring-2 ring-primary">Vu</span>
+            <span class="inline-flex items-center gap-2 rounded-full px-4 py-2 font-bold text-primary ring-2 ring-input">
+              <span class="tick inline-flex size-5 items-center justify-center rounded-md bg-highlight text-card">
+                <Check class="size-4" aria-hidden="true" />
+              </span>
+              Je m’en occupe
+            </span>
             <span class="rounded-full px-4 py-2 font-bold text-primary ring-2 ring-input">Ajouter un mot</span>
           </p>
-          <p class="seen mt-5 border-t pt-4">
-            <span class="block font-heading text-5xl font-extrabold text-primary">Vu</span>
-            <span class="mt-2 block">«&nbsp;Bon courage pour jeudi.&nbsp;»</span>
-          </p>
+          <p class="word mt-4 rounded-2xl bg-secondary px-3 py-2 text-secondary-foreground">«&nbsp;Bien joué pour les fractions.&nbsp;»</p>
         </div>
       </play-once>
       <figcaption class="sr-only">
-        Exemple d’écran sur votre téléphone, mardi à 19&nbsp;h&nbsp;10. Le point du soir montre ce que votre enfant a fait et ce qui reste. Vous
-        répondez «&nbsp;Vu&nbsp;» et ajoutez&nbsp;: «&nbsp;Bon courage pour jeudi.&nbsp;»
+        Exemple d’écran sur votre téléphone, mardi à 19&nbsp;h&nbsp;10. Votre enfant montre son plan de demain, demande que vous signiez le mot pour
+        la sortie de jeudi, et montre l’exercice de fractions dont il est content. Vous répondez «&nbsp;Je m’en occupe&nbsp;» et ajoutez «&nbsp;Bien
+        joué pour les fractions.&nbsp;»
       </figcaption>
     </figure>
   </div>
 </section>
 
 <style>
-  /* The phone rises and grows slightly as it comes into view (`pop`, src/styles/global.css); then « Vu », outlined like
-   * its neighbour while it waits, is pressed, and your answer lands under it, like a stamp, with your word. Set at once
-   * while the script holds it (src/scripts/reveal.ts), only their change is a transition. */
+  .on-panel {
+    --color-highlight: var(--color-panel-highlight);
+  }
+
+  /* After the phone's rise: the three blocks one by one, then the tick of « Je m'en occupe », on the reed, a mark of
+   * state (docs/charte.md, "Couleurs"), then the word. Waiting while the script holds them, they are in place without
+   * it, and still under reduced motion. */
   @media (prefers-reduced-motion: no-preference) {
-    play-once[data-played] .seen-button {
-      transition:
-        background-color var(--duration-fast) var(--ease-standard) var(--duration-reveal),
-        color var(--duration-fast) var(--ease-standard) var(--duration-reveal);
+    play-once[data-armed] {
+      :is(.note, .word) {
+        opacity: 0;
+        translate: 0 calc(var(--spacing) * 2);
+      }
+
+      .tick {
+        background-color: transparent;
+        box-shadow: inset 0 0 0 calc(var(--spacing) / 2) var(--color-input);
+        color: transparent;
+      }
     }
 
-    play-once[data-played] .seen {
-      transition:
-        opacity var(--duration-fast) var(--ease-standard) calc(var(--duration-reveal) + var(--duration-base)),
-        scale var(--duration-base) var(--ease-standard) calc(var(--duration-reveal) + var(--duration-base));
+    play-once[data-played] {
+      :is(.note, .word) {
+        transition:
+          opacity var(--duration-base) var(--ease-standard) var(--delay),
+          translate var(--duration-base) var(--ease-standard) var(--delay);
+      }
+
+      .tick {
+        transition:
+          background-color var(--duration-fast) var(--ease-standard) var(--delay),
+          box-shadow var(--duration-fast) var(--ease-standard) var(--delay),
+          color var(--duration-fast) var(--ease-standard) var(--delay);
+      }
     }
 
-    play-once[data-armed] .seen-button {
-      background-color: var(--color-card);
-      color: var(--color-primary);
-      --tw-ring-color: var(--color-input);
+    .note {
+      --delay: var(--duration-slow);
     }
 
-    play-once[data-armed] .seen {
-      opacity: 0;
-      scale: 1.2;
+    .note:nth-child(2) {
+      --delay: calc(var(--duration-slow) + var(--duration-stagger) * 2);
+    }
+
+    .note:nth-child(3) {
+      --delay: calc(var(--duration-slow) + var(--duration-stagger) * 4);
+    }
+
+    .tick {
+      --delay: calc(var(--duration-slow) + var(--duration-stagger) * 4 + var(--duration-slow));
+    }
+
+    .word {
+      --delay: calc(var(--duration-slow) * 3 + var(--duration-stagger) * 4);
     }
   }
 </style>

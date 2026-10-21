@@ -102,6 +102,8 @@ const MARKS = [
   ['input', 'secondary'],
   ['ring', 'background'],
   ['ring', 'card'],
+  // The highlighter on the brand's deep plane, under the evening check-in's title (docs/charte.md, "Couleurs").
+  ['panel-highlight', 'panel'],
   ...[1, 2, 3, 4].flatMap((n) => [
     [`chart-${String(n)}`, 'background'],
     [`chart-${String(n)}`, 'card'],
@@ -165,7 +167,8 @@ test('the highlighter is the same stroke in both modes', () => {
 
 // It comes back once per section of the site, under the word that carries its title and on the marks of a state
 // (docs/charte.md, "Couleurs"): on the background, where the halo at the top of the page can reach under it; on the
-// light plane, and on a card, where the evening's screens strike the step done.
+// light plane, and on a card, where the evening's screens strike the step done and the adult's phone ticks « Je m'en
+// occupe ». On the deep plane, the same reed in a lighter step (`panel-highlight`, in MARKS).
 for (const [mode, color] of modes) {
   for (const ground of ['background', 'halo', 'tint', 'card']) {
     test(`${mode}: highlight on ${ground} meets WCAG 1.4.11 (3:1)`, () => {

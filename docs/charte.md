@@ -34,7 +34,8 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
 
 - Le jonc revient une fois par section : sous le mot qui porte le sens du titre (« organiser »,
   « lui-même »), posé une fois quand le titre apparaît, du geste du haut de page ; et sur les
-  marques d'état (l'étape de la soirée affichée, le trait d'une étape faite). Il rythme la page et
+  marques d'état (l'heure de la soirée affichée, le trait d'une étape faite, la coche de « Je m'en
+  occupe »). Il rythme la page et
   relie les sections. Il reste une marque derrière une encre lisible, jamais une couleur de texte,
   et il est posé d'emblée sous le mouvement réduit.
 - Chaque couleur a son échelle de douze pas, chaque pas à son rôle : 1 et 2 les fonds, 3 à 5 les

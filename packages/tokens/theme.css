@@ -64,6 +64,8 @@
   /* Le surligneur, le même trait dans les deux modes : un jonc épais sous la ligne de base, qui ne
    * touche pas les lettres et se détache du fond (3:1) ; jamais en texte ni en bordure. */
   --color-highlight: var(--reed-9);
+  /* Le même jonc sur le plan profond de la marque, un pas plus clair pour s'en détacher (3:1). */
+  --color-panel-highlight: var(--reed-4);
   /* Le plan clair de la marque, où une section du site respire : l'eau très claire. */
   --color-tint: var(--water-2);
   /* Le halo derrière la soirée du haut du site, une eau claire qui donne de la profondeur ; rien
@@ -161,6 +163,7 @@
     --color-popover: var(--mist-2);
     /* En sombre, un pas plus vif du jonc, qui se détache du fond sombre. */
     --color-highlight: var(--reed-10);
+    --color-panel-highlight: var(--reed-11);
     --color-halo: var(--water-6);
     --color-tint: var(--water-3);
     /* L'eau profonde reste distincte du plan clair en sombre aussi (test : panel et tint). */

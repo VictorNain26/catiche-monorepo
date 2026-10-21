@@ -1,14 +1,18 @@
 ---
-// What is done and what is left at the end of the evening, on the screen of the evening check-in
-// (docs/produit.md, "Le point du soir"); on the pupil's screen, what goes in the bag too.
+// What is done, what is left and what goes in the bag at the end of the evening, on the pupil's screen at 18:50
+// (sections/evening.astro).
 interface Props {
   done: string;
   left: string;
-  bag?: string;
+  bag: string;
 }
 
 const { done, left, bag } = Astro.props;
-const LINES = [{ term: 'Fait', detail: done }, { term: 'Reste', detail: left }, ...(bag ? [{ term: 'Dans le cartable', detail: bag }] : [])];
+const LINES = [
+  { term: 'Fait', detail: done },
+  { term: 'Reste', detail: left },
+  { term: 'Dans le cartable', detail: bag },
+];
 ---
 
 <dl class="space-y-3">
