@@ -110,9 +110,10 @@ ne lit, l'essentiel va donc en tête de chaque bloc. Ces règles valent pour le 
 - En cinq secondes, le titre, la phrase dessous et le bouton disent ce qu'est le produit, pour qui,
   et ce qu'on peut faire maintenant.
 - Une idée et un verbe conjugué par phrase, sujet en tête ; pas de titre sans verbe, sauf une
-  question. Des phrases courtes, au présent, un seul temps sur une page : ce qui n'est pas encore
-  construit se dit au présent, sous une phrase qui l'annonce comme ce que nous construisons ; seule
-  cette phrase peut parler au futur.
+  question. Des phrases courtes, au présent. La landing présente le produit au présent, tel que
+  `produit.md` le décrit ; son statut (en préparation, sur invitation) se dit une seule fois, en haut
+  de page, et dans la FAQ sur le prix et l'ouverture. Aucune fonction hors de `produit.md`, aucun
+  résultat promis (Victor, 2026-10-21).
 - Les mots des familles, pas les nôtres (« ce qu'il a fait », pas « récapitulatif ») ; un mot du
   produit s'explique la première fois. Un seul nom par chose : « votre collégien » pour l'adulte,
   Tom présenté une fois comme le tuteur de Catiche, « e-mail » avec son trait d'union.

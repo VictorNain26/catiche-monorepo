@@ -22,8 +22,9 @@ Clever Cloud (`apps/landing/Caddyfile`).
 - Jamais un mot de soin ni un trouble ciblé : la liste et la raison sont dans `docs/produit.md`,
   « Ce qu'on dit, et ce qu'on ne dit pas ».
 - Ce qu'on peut prouver (`CLAUDE.md`, « Carte »), sur la landing : chaque chiffre a une source
-  primaire datée, chaque différence face à un concurrent est mesurée, ce qui n'est pas construit
-  ne se promet pas. Une phrase qu'on ne peut adosser à une source ou à une mesure se retire.
+  primaire datée, chaque différence face à un concurrent est mesurée, ce qui n'est pas dans
+  `produit.md` ne s'écrit pas ; le statut du produit se dit une fois (`docs/charte.md`, « Les
+  mots »). Une phrase qu'on ne peut adosser à une source ou à une mesure se retire.
 - Jamais de promesse de progrès scolaire ni de meilleures notes, jamais « le seul » ; jamais
   « conforme au cadre d'usage de l'IA du ministère », « agréé » ou « recommandé par l'Éducation
   nationale », « aligné sur les programmes » sans la métrique publiée, ni « fait les devoirs ».
