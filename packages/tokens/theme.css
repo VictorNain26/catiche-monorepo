@@ -25,6 +25,10 @@
    * le 4xl qui laisserait le nom seul sur sa ligne à 375 px. */
   --text-hero: 2rem;
   --text-hero--line-height: 1.25;
+  /* Le titre de la fin du site, dès xl : il grandit avec l'écran, de 52 px à 1 280 px jusqu'à
+   * 58 px, entre les titres de section (48) et celui du haut (60). */
+  --text-closing: clamp(3.25rem, 2.5rem + 0.9375vw, 3.625rem);
+  --text-closing--line-height: 1.15;
 
   /* Deux rayons, les cartes et les bulles puis les boutons et les champs ; une ombre légère pour
    * ce qui se pose sur le fond. */

@@ -11,9 +11,10 @@ import RequestInvitation from '@/components/molecules/request-invitation.astro';
  * shadow, then waves once (docs/charte.md, "Tom": out of a session, he does not speak). The section's padding is at
  * least its plane's fade, so that neither the text nor Tom's feet lie on it. */}
 <section class="overflow-hidden plane-tint py-28 md:py-32 lg:py-36">
-  <div class="container grid max-w-5xl items-center gap-4 lg:grid-cols-[auto_minmax(0,20rem)] lg:justify-center lg:gap-12">
+  {/* From xl the title grows with the screen, and the container widens so that it keeps its two lines beside Tom. */}
+  <div class="container grid max-w-5xl items-center gap-4 lg:grid-cols-[auto_minmax(0,20rem)] lg:justify-center lg:gap-12 xl:max-w-6xl">
     <play-once class="block">
-      <h2 data-reveal="rise" class="text-hero tracking-normal text-balance text-foreground sm:text-5xl lg:text-wrap">
+      <h2 data-reveal="rise" class="text-hero tracking-normal text-balance text-foreground sm:text-5xl lg:text-wrap xl:text-closing">
         <span class="lg:block">Ce soir, on commence</span> par quoi&nbsp;?
       </h2>
       <div data-reveal="rise" data-order="2">
