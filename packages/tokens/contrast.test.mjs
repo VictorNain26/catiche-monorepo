@@ -60,8 +60,6 @@ const TEXT = [
   ['foreground', 'background'],
   ['foreground', 'card'],
   ['foreground', 'secondary'],
-  // The highlighter lies behind the ink's words in both modes: a bright reed, and the words on it in its own dark ink.
-  ['highlight-foreground', 'highlight'],
   ['card-foreground', 'card'],
   ['popover-foreground', 'popover'],
   ['secondary-foreground', 'secondary'],
@@ -141,4 +139,20 @@ for (const [mode, color] of modes) {
       });
     }
   }
+}
+
+// The highlighter is one gesture in both modes: a thick reed stroke under the lower part of the words, which keep their
+// own ink. In the light, the dark ink on the pale reed is tested; in the dark, the light ink keeps its contrast on the
+// background, and the stroke itself must stand out from it as a mark (3:1). A pale reed cannot reach 3:1 on the light
+// background without turning olive: there, the ink on it carries the contrast.
+test('the highlighter is the same stroke in both modes', () => {
+  assert.equal(theme.dark['highlight-height'], theme.light['highlight-height']);
+});
+
+for (const [mode, color] of modes) {
+  const [fg, bg, minimum] = mode === 'light' ? ['foreground', 'highlight', 4.5] : ['highlight', 'background', 3];
+  test(`${mode}: ${fg} on ${bg} meets ${String(minimum)}:1`, () => {
+    const ratio = contrast(color(fg), color(bg));
+    assert.ok(ratio >= minimum, `${color(fg)} on ${color(bg)} = ${ratio.toFixed(2)}`);
+  });
 }

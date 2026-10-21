@@ -53,10 +53,9 @@
   --color-success-foreground: var(--mist-1);
   --color-warning: var(--amber-4);
   --color-warning-foreground: var(--mist-12);
-  /* Le surligneur, dans les deux modes : un jonc vif, et dessus les mots à l'encre sombre ; jamais en
-   * texte ni en bordure. */
+  /* Le surligneur, le même trait dans les deux modes : un jonc épais sous le bas des mots, qui gardent
+   * leur encre ; jamais en texte ni en bordure. */
   --color-highlight: var(--reed-4);
-  --color-highlight-foreground: var(--mist-12);
   /* Le halo derrière la soirée du haut du site, une eau claire qui donne de la profondeur ; rien
    * n'est écrit dessus. */
   --color-halo: var(--water-4);
@@ -115,10 +114,8 @@
     color-scheme: dark;
     --color-card: var(--mist-2);
     --color-popover: var(--mist-2);
-    /* En sombre, un jonc lumineux sur toute la hauteur des mots, et les mots à l'encre du fond. */
-    --color-highlight: var(--reed-12);
-    --color-highlight-foreground: var(--mist-1);
-    --highlight-height: 100%;
+    /* En sombre, un jonc vif qui se détache du fond (3:1) sous l'encre claire. */
+    --color-highlight: var(--reed-10);
     --color-halo: var(--water-6);
     --color-panel: var(--water-4);
     --color-panel-foreground: var(--mist-12);

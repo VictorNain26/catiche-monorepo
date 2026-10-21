@@ -60,24 +60,23 @@
   }
 }
 
-/* The reed laid behind the words, in both modes, and the words on it in the highlighter's own ink (docs/charte.md,
- * "Couleurs": the reed highlights); `lay-highlight` lays it from the left, where a component lets it, the words
- * taking that ink as it comes. */
+/* The reed laid under the lower part of the words, the same stroke in both modes (docs/charte.md, "Couleurs": the
+ * reed highlights); `lay-highlight` lays it from the left, where a component lets it. */
 @utility highlighter {
-  color: var(--color-highlight-foreground);
+  color: inherit;
   background: linear-gradient(var(--color-highlight), var(--color-highlight)) no-repeat 0 88% / 100% var(--highlight-height);
   box-decoration-break: clone;
 }
 
 @keyframes lay-highlight {
   from {
-    color: var(--color-foreground);
     background-size: 0% var(--highlight-height);
   }
 }
 
+/* A selection in the brand's water: the reed is a stroke, too light or too dark behind a whole line in one mode. */
 ::selection {
-  @apply bg-highlight text-highlight-foreground;
+  @apply bg-primary text-primary-foreground;
 }
 
 @layer base {

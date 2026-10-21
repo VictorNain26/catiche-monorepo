@@ -15,8 +15,12 @@ import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
 <section class="flex min-h-[calc(100svh-var(--spacing)*16)] items-center overflow-hidden py-10 lg:py-16">
   <div class="container grid max-w-7xl items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] xl:gap-16">
     <div>
-      <h1 class="text-4xl leading-tight text-pretty text-foreground sm:text-5xl xl:text-6xl xl:leading-tight">
-        {BRAND_NAME} accompagne votre collégien pendant ses devoirs, <mark class="highlighter">du début à la fin</mark>.
+      {/* Balanced lines, and « du début à la fin. » kept together, so the stroke is never cut in two. */}
+      <h1 class="text-4xl leading-tight text-balance text-foreground sm:text-5xl xl:text-6xl xl:leading-tight">
+        {BRAND_NAME} accompagne votre collégien pendant ses devoirs,{' '}
+        <span class="whitespace-nowrap">
+          <mark class="highlighter">du début à la fin</mark>.
+        </span>
       </h1>
       <p class="mt-6 max-w-xl text-lg text-foreground">
         Nous construisons Tom, le tuteur de {BRAND_NAME}&nbsp;: une intelligence artificielle qui l&apos;aide chaque soir à s&apos;organiser, sans
