@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { heldStep, nextMove, sceneProgress, screenScale, scrollForStep, stepAt } from './scenes';
+import { entered, heldStep, left, request, sceneProgress, screenScale, scrollForStep, stepAt, stillScene } from './scenes';
 
 // A window 800 px high under a header of 64 px: the scene, held under the header, is 736 px high. The track around it
 // is four windows high, so the scene stays held over 3200 - 736 = 2464 px of scrolling.
@@ -64,24 +64,45 @@ describe('heldStep', () => {
   });
 });
 
-describe('nextMove', () => {
-  it('does nothing while the step reached is the one shown, or the one already on its way', () => {
-    expect(nextMove({ shown: 1, heading: 1 }, 1)).toBeUndefined();
-    expect(nextMove({ shown: 1, heading: 2 }, 2)).toBeUndefined();
+// What the scene plays for a run of events: a step reached by the scroll, the text shown having left, the step
+// reached having come in.
+type Event = number | 'left' | 'entered';
+
+const run = (from: number, events: readonly Event[]) => {
+  let scene = stillScene(from);
+  const played: string[] = [];
+  for (const event of events) {
+    const change = event === 'left' ? left(scene) : event === 'entered' ? { scene: entered(scene), finish: false } : request(scene, event);
+    scene = change.scene;
+    if (change.finish) played.push('finish');
+    if (change.play) played.push(`${change.play.kind} ${String(change.play.step)} ${change.play.direction > 0 ? 'down' : 'up'}`);
+  }
+  return { played, scene };
+};
+
+describe('the change of step', () => {
+  it('leaves the step shown, then comes into the step reached, down or up', () => {
+    expect(run(1, [2, 'left', 'entered']).played).toEqual(['leave 1 down', 'enter 2 down']);
+    expect(run(2, [0, 'left', 'entered']).played).toEqual(['leave 2 up', 'enter 0 up']);
+    expect(run(1, [2, 'left', 'entered']).scene).toEqual(stillScene(2));
   });
 
-  it('goes from the step shown to the step reached, down or up', () => {
-    expect(nextMove({ shown: 1, heading: 1 }, 2)).toEqual({ from: 1, to: 2, direction: 1 });
-    expect(nextMove({ shown: 2, heading: 2 }, 0)).toEqual({ from: 2, to: 0, direction: -1 });
+  it('plays nothing for the step already shown, or already on its way', () => {
+    expect(run(1, [1]).played).toEqual([]);
+    expect(run(1, [2, 2, 2]).played).toEqual(['leave 1 down']);
   });
 
-  it('skips the steps in between when the scroll runs past them, from the step still shown', () => {
-    expect(nextMove({ shown: 0, heading: 1 }, 3)).toEqual({ from: 0, to: 3, direction: 1 });
+  it('goes straight to the last step reached by a fast scroll, never through the steps in between', () => {
+    expect(run(0, [1, 2, 3, 'left', 'entered']).played).toEqual(['leave 0 down', 'enter 3 down']);
   });
 
-  it('comes back to the step shown when the scroll turns back while it leaves', () => {
-    expect(nextMove({ shown: 1, heading: 2 }, 1)).toEqual({ from: 1, to: 1, direction: -1 });
-    expect(nextMove({ shown: 2, heading: 1 }, 2)).toEqual({ from: 2, to: 2, direction: 1 });
+  it('ends the coming in under way when the step reached changes, and leaves for the new one', () => {
+    expect(run(0, [1, 'left', 3, 'left']).played).toEqual(['leave 0 down', 'enter 1 down', 'finish', 'leave 1 down', 'enter 3 down']);
+  });
+
+  it('comes back into the step it was leaving when the scroll turns back, the way it turned', () => {
+    expect(run(1, [2, 1, 'left']).played).toEqual(['leave 1 down', 'enter 1 up']);
+    expect(run(2, [1, 2, 'left']).played).toEqual(['leave 2 up', 'enter 2 down']);
   });
 });
 

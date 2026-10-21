@@ -147,6 +147,36 @@
     transition: background-size var(--duration-slow) var(--ease-standard) var(--duration-slow);
   }
 
+  /* The items of a `stagger` block (the messages of a screen, the blocks of a phone) come one after the other once it
+   * plays. */
+  .stagger[data-armed] > * {
+    opacity: 0;
+  }
+
+  .stagger[data-played] > * {
+    transition: opacity var(--duration-base) var(--ease-standard);
+  }
+
+  .stagger[data-played] > :nth-child(2) {
+    transition-delay: var(--duration-stagger);
+  }
+
+  .stagger[data-played] > :nth-child(3) {
+    transition-delay: calc(var(--duration-stagger) * 2);
+  }
+
+  .stagger[data-played] > :nth-child(4) {
+    transition-delay: calc(var(--duration-stagger) * 3);
+  }
+
+  .stagger[data-played] > :nth-child(5) {
+    transition-delay: calc(var(--duration-stagger) * 4);
+  }
+
+  .stagger[data-played] > :nth-child(6) {
+    transition-delay: calc(var(--duration-stagger) * 5);
+  }
+
   /* The rank of an item in its block, set by an attribute rather than counted among siblings: the items of a block are
    * not always siblings. */
   [data-played] [data-order='2'] {

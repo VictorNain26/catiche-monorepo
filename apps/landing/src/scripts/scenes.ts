@@ -41,20 +41,62 @@ export function heldStep(progress: number, count: number, shown: number | undefi
   return progress >= lower && progress < upper ? shown : step;
 }
 
-/** A change of step: from the step still shown to the one reached, down (1) or up (-1). */
-export interface Move {
-  readonly from: number;
-  readonly to: number;
+/** The held scene between two steps: the step shown, the step it heads to, whether the step shown is still, leaving
+ * or coming in, and the way the scroll went, down (1) or up (-1). */
+export interface Scene {
+  readonly shown: number;
+  readonly heading: number;
+  readonly phase: 'still' | 'leaving' | 'entering';
   readonly direction: 1 | -1;
 }
 
-/** The change a reached step asks for, the step shown and the one the scene is heading to being known: none if it is
- * already on its way; the steps in between are skipped. Back to the step shown while it leaves, it comes back the way
- * the scroll turned. */
-export function nextMove({ shown, heading }: { shown: number; heading: number }, target: number): Move | undefined {
-  if (target === heading) return undefined;
-  const towards = target === shown ? shown - heading : target - shown;
-  return { from: shown, to: target, direction: towards > 0 ? 1 : -1 };
+/** What the scene plays: a step that leaves or comes in, and the way it goes. */
+export interface Play {
+  readonly kind: 'leave' | 'enter';
+  readonly step: number;
+  readonly direction: 1 | -1;
+}
+
+/** A change of the scene: the scene after it, whether the moves under way end at once, and what then plays. */
+export interface Change {
+  readonly scene: Scene;
+  readonly finish: boolean;
+  readonly play?: Play;
+}
+
+export function stillScene(step: number): Scene {
+  return { shown: step, heading: step, phase: 'still', direction: 1 };
+}
+
+const way = (from: number, to: number): 1 | -1 => (to >= from ? 1 : -1);
+
+/** A step reached by the scroll. While the step shown leaves, the scene only heads elsewhere: whatever the scroll runs
+ * past in the meantime is never played. While a step comes in, it ends at once and leaves for the new one. */
+export function request(scene: Scene, target: number): Change {
+  if (target === scene.heading) return { scene, finish: false };
+  if (scene.phase === 'leaving') return { scene: { ...scene, heading: target }, finish: false };
+  const direction = way(scene.shown, target);
+  return {
+    scene: { shown: scene.shown, heading: target, phase: 'leaving', direction },
+    finish: scene.phase === 'entering',
+    play: { kind: 'leave', step: scene.shown, direction },
+  };
+}
+
+/** The text shown has left: the step the scene heads to comes in, the way the scroll went; back into the step it was
+ * leaving, the way the scroll turned. */
+export function left(scene: Scene): Change {
+  const direction = scene.heading === scene.shown ? (-scene.direction as 1 | -1) : way(scene.shown, scene.heading);
+  return {
+    scene: { shown: scene.heading, heading: scene.heading, phase: 'entering', direction },
+    finish: false,
+    play: { kind: 'enter', step: scene.heading, direction },
+  };
+}
+
+/** The step reached has come in. */
+export function entered(scene: Scene): Scene {
+  return { ...scene, phase: 'still' };
 }
 
 /** The page's scroll position that shows a step, in the middle of its share: where a focused link of that step brings

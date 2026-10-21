@@ -2,7 +2,19 @@
 // scrolled (src/scripts/scenes.ts). Durations and curves come from the tokens, through the computed style.
 
 import { type Entry, release, REVEAL_MARGIN, reveal } from './reveal';
-import { heldStep, type Move, nextMove, sceneProgress, screenScale, scrollForStep, type View } from './scenes';
+import {
+  type Change,
+  entered,
+  heldStep,
+  left,
+  request,
+  type Scene,
+  sceneProgress,
+  screenScale,
+  scrollForStep,
+  stillScene,
+  type View,
+} from './scenes';
 import { orderTiming, type SceneTiming, sceneTiming } from './timing';
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -64,9 +76,12 @@ class TonightOrder extends PlayOnce {
   }
 }
 
+// Under `md`, a phone: the screen's frame follows each step's height rather than the tallest one's.
+const phone = window.matchMedia('(width < 48rem)');
+
 // The smallest a step's screen shrinks to, on a short window, so that the step is still read whole: below it, the
-// scene is not held and the steps follow one another.
-const SMALLEST_SCREEN = 0.75;
+// scene is not held and the steps follow one another. On a phone, where its text is already small, hardly at all.
+const SMALLEST_SCREEN = { phone: 0.9, wide: 0.75 };
 
 // How far a screen's content slides as it leaves or comes in, and a line of text as it leaves.
 const SCREEN_SHIFT = 'calc(var(--spacing) * 6)';
@@ -83,11 +98,7 @@ const ignore = () => undefined;
 class EveningScenes extends HTMLElement {
   #steps: HTMLElement[] = [];
   #links: HTMLAnchorElement[] = [];
-  // The step whose text and screen are on, the step the scene is heading to, and whether the content of the step shown
-  // has left.
-  #shown = 0;
-  #heading = 0;
-  #left = false;
+  #scene: Scene = stillScene(0);
   #moves: Animation[] = [];
   #generation = 0;
   #frame = 0;
@@ -107,7 +118,7 @@ class EveningScenes extends HTMLElement {
     if (!held) return;
     const first = heldStep(this.#progress(), this.#steps.length, undefined);
     this.#setShown(first);
-    this.#heading = first;
+    this.#scene = stillScene(first);
     this.#mark(first);
     this.#play(first);
     this.#listen(window, 'scroll', this.#schedule, { passive: true });
@@ -144,21 +155,27 @@ class EveningScenes extends HTMLElement {
     return held;
   }
 
-  // Gives every step's text and screen the size of the tallest, so that the screen's one frame never jumps, and fits
-  // the step in the room the scene leaves it, its screen shrunk if need be; false if it would be too small to read.
-  // The frames and `zoom` go through the CSS object model, which the CSP allows (no style attribute in the HTML).
+  // Gives every step's text the height of the tallest, so that its screen always starts at the same place, and, at a
+  // computer, every screen too, so that its one frame never jumps; on a phone, the frame follows each step. Then fits
+  // the steps in the room the scene leaves them, their screens shrunk alike if need be; false if they would be too
+  // small to read. The frames and `zoom` go through the CSS object model, which the CSP allows (no style attribute in
+  // the HTML).
   #fit(): boolean {
     const list = this.querySelector<HTMLElement>('.steps');
-    const screens = this.#steps.map((step) => step.querySelector<HTMLElement>('[data-screen]'));
-    const [step, screen] = [this.#steps[0], screens[0]];
-    if (!list || !step || !screen) return false;
+    if (!list) return false;
     this.#unfit();
     const tallest = (selector: string) => Math.max(...this.#steps.map((element) => element.querySelector<HTMLElement>(selector)?.offsetHeight ?? 0));
     this.style.setProperty('--text-frame', `${String(tallest('[data-text]'))}px`);
-    this.style.setProperty('--screen-frame', `${String(tallest('[data-screen] > *'))}px`);
+    if (!phone.matches) this.style.setProperty('--screen-frame', `${String(tallest('[data-screen] > *'))}px`);
     const room = list.clientHeight;
-    const scale = screenScale(room - (step.offsetHeight - screen.offsetHeight), screen.offsetHeight, SMALLEST_SCREEN);
-    if (scale === undefined) return false;
+    const smallest = phone.matches ? SMALLEST_SCREEN.phone : SMALLEST_SCREEN.wide;
+    const screens = this.#steps.map((step) => step.querySelector<HTMLElement>('[data-screen]'));
+    const scales = this.#steps.map((step, index) => {
+      const screen = screens[index];
+      return screen ? screenScale(room - (step.offsetHeight - screen.offsetHeight), screen.offsetHeight, smallest) : 1;
+    });
+    if (scales.some((scale) => scale === undefined)) return false;
+    const scale = Math.min(...scales.map((value) => value ?? 1));
     if (scale < 1) for (const element of screens) element?.style.setProperty('zoom', String(scale));
     return this.#steps.every((element) => element.offsetHeight <= room);
   }
@@ -195,27 +212,30 @@ class EveningScenes extends HTMLElement {
   };
 
   #update() {
-    const move = nextMove({ shown: this.#shown, heading: this.#heading }, heldStep(this.#progress(), this.#steps.length, this.#heading));
-    if (move) this.#go(move);
+    this.#apply(request(this.#scene, heldStep(this.#progress(), this.#steps.length, this.#scene.heading)));
   }
 
-  // A change of step. The moves under way end at once: a step only passed by is never played.
-  #go(move: Move) {
+  // Plays a change of the scene (src/scripts/scenes.ts): the moves under way end at once when it says so; a leave is
+  // followed by the coming in of the step the scene heads to by then, so that a step only passed by is never played.
+  #apply(change: Change) {
+    this.#scene = change.scene;
+    if (change.finish) for (const animation of this.#moves.splice(0)) animation.finish();
+    this.#mark(this.#scene.heading);
+    const { play } = change;
+    if (!play) return;
     this.#generation += 1;
     const generation = this.#generation;
-    for (const animation of this.#moves.splice(0)) animation.finish();
-    this.#heading = move.to;
-    this.#mark(move.to);
     const timing = sceneTiming(getComputedStyle(this));
-    if (!timing) {
-      this.#enter(move.to, move.direction, undefined);
+    const step = this.#steps[play.step];
+    if (play.kind === 'leave') {
+      const gone = timing && step ? this.#leave(step, play.direction, timing) : Promise.resolve();
+      gone.then(() => {
+        if (generation === this.#generation) this.#apply(left(this.#scene));
+      }, ignore);
       return;
     }
-    const from = this.#steps[move.from];
-    const left = this.#left || !from ? Promise.resolve() : this.#leave(from, move.direction, timing);
-    this.#left = true;
-    left.then(() => {
-      if (generation === this.#generation) this.#enter(move.to, move.direction, timing);
+    this.#enter(play.step, play.direction, timing).then(() => {
+      if (generation === this.#generation) this.#scene = entered(this.#scene);
     }, ignore);
   }
 
@@ -251,18 +271,26 @@ class EveningScenes extends HTMLElement {
 
   // The step reached comes in: its hour, its title and its sentence rise into their masks one after the other, its
   // proof fades in; once the screen's former content has left, the new one slides in, and its messages and gestures play.
-  #enter(to: number, direction: 1 | -1, timing: SceneTiming | undefined) {
+  // On a phone, the screen's frame takes the new content's height at the same pace. Resolves once it has come in.
+  #enter(to: number, direction: 1 | -1, timing: SceneTiming | undefined): Promise<unknown> {
     const step = this.#steps[to];
-    if (!step) return;
+    if (!step) return Promise.resolve();
+    const before = this.querySelector<HTMLElement>('[data-step][data-shown] [data-screen] > *')?.offsetHeight;
     // What its last exit left behind (held on its end) lets go: its content is shown by its own style again.
     for (const animation of step.getAnimations({ subtree: true })) {
       if (!(animation instanceof CSSAnimation) && !(animation instanceof CSSTransition)) animation.cancel();
     }
     this.#setShown(to);
-    this.#left = false;
     if (!timing) {
       this.#play(to);
-      return;
+      return Promise.resolve();
+    }
+    const frame = step.querySelector<HTMLElement>('[data-screen] > *');
+    if (frame && before !== undefined && phone.matches && before !== frame.offsetHeight) {
+      this.#move(frame, [{ height: `${String(before)}px` }, { height: `${String(frame.offsetHeight)}px` }], {
+        duration: timing.slow,
+        easing: timing.enter,
+      });
     }
     const lines = [...step.querySelectorAll<HTMLElement>('[data-line]')];
     const gap = timing.stagger / 2;
@@ -302,6 +330,8 @@ class EveningScenes extends HTMLElement {
     window.setTimeout(() => {
       if (generation === this.#generation) this.#play(to);
     }, wait);
+    const entering = this.#moves.filter((animation) => animation.effect instanceof KeyframeEffect && step.contains(animation.effect.target));
+    return Promise.all(entering.map((animation) => animation.finished));
   }
 
   #move(element: HTMLElement, keyframes: Keyframe[], options: KeyframeAnimationOptions): Animation {
@@ -315,7 +345,6 @@ class EveningScenes extends HTMLElement {
 
   // Only the step shown is on, and reachable; the others are inert.
   #setShown(to: number) {
-    this.#shown = to;
     this.#steps.forEach((element, index) => {
       element.toggleAttribute('data-shown', index === to);
       element.inert = index !== to;
@@ -367,7 +396,7 @@ class EveningScenes extends HTMLElement {
   // The steps follow one another again, all shown: the step shown stays in view, and every gesture still waiting plays.
   #release() {
     if (this.dataset['held'] === undefined) return;
-    const shown = this.#steps[this.#shown];
+    const shown = this.#steps[this.#scene.shown];
     for (const cleanup of this.#cleanups.splice(0)) cleanup();
     cancelAnimationFrame(this.#frame);
     this.#frame = 0;

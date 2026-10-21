@@ -270,38 +270,6 @@ const CHANGED = [english, maths, history];
     }
   }
 
-  /* The messages of a screen come one after the other once it is shown (`data-played`). They come from other
-   * components (the bubbles), so the selectors reach past this one's scope (`:global`). */
-  @media (prefers-reduced-motion: no-preference) {
-    .stagger[data-armed] > :global(*) {
-      opacity: 0;
-    }
-
-    .stagger[data-played] > :global(*) {
-      transition: opacity var(--duration-base) var(--ease-standard);
-    }
-
-    .stagger[data-played] > :global(:nth-child(2)) {
-      transition-delay: var(--duration-stagger);
-    }
-
-    .stagger[data-played] > :global(:nth-child(3)) {
-      transition-delay: calc(var(--duration-stagger) * 2);
-    }
-
-    .stagger[data-played] > :global(:nth-child(4)) {
-      transition-delay: calc(var(--duration-stagger) * 3);
-    }
-
-    .stagger[data-played] > :global(:nth-child(5)) {
-      transition-delay: calc(var(--duration-stagger) * 4);
-    }
-
-    .stagger[data-played] > :global(:nth-child(6)) {
-      transition-delay: calc(var(--duration-stagger) * 5);
-    }
-  }
-
   /* The held scene, only while the script holds it (`data-held`) and only without reduced motion: the track is about
    * four windows high, the scene stays under the header (h-16), and its steps lie on one another, each step's text and
    * screen at the size of the tallest (`--text-frame`, `--screen-frame`), so that the screen's frame never jumps. Only
@@ -394,24 +362,71 @@ const CHANGED = [english, maths, history];
           padding-block: var(--spacing);
         }
 
+        /* The frame follows each step's height (src/scripts/evening.ts): its content is clipped while it changes. Its
+         * padding and the room between its messages are a size down. */
+        [data-screen] > :global(*) {
+          overflow: clip;
+          padding: calc(var(--spacing) * 3);
+        }
+
+        [data-screen] > :global(* > p:first-child) {
+          margin-bottom: calc(var(--spacing) * 2);
+          padding-bottom: calc(var(--spacing) * 2);
+        }
+
+        [data-screen] :is(.space-y-3, .space-y-4) > :global(:not(:last-child)) {
+          margin-block-end: calc(var(--spacing) * 2);
+        }
+
+        [data-screen] ol {
+          gap: var(--spacing);
+        }
+
+        [data-step] > div {
+          gap: calc(var(--spacing) * 2);
+        }
+
         .heading h2 {
-          font-size: var(--text-xl);
-          line-height: var(--text-xl--line-height);
-        }
-
-        [data-step] time {
-          font-size: var(--text-2xl);
-          line-height: var(--text-2xl--line-height);
-        }
-
-        [data-step] h3 {
           font-size: var(--text-lg);
           line-height: var(--text-lg--line-height);
         }
 
-        [data-step] h3 + .mask p {
+        /* The introduction stays for a screen reader; the hours below say the same to the eye. */
+        .heading p {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          overflow: hidden;
+          clip-path: inset(50%);
+          white-space: nowrap;
+        }
+
+        /* The hour and the step's title on one line where they fit. */
+        [data-step] h3 {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: baseline;
+          column-gap: calc(var(--spacing) * 2);
           font-size: var(--text-base);
           line-height: var(--text-base--line-height);
+        }
+
+        [data-step] h3 .mask {
+          margin-top: 0;
+        }
+
+        [data-step] time {
+          font-size: var(--text-xl);
+          line-height: var(--text-xl--line-height);
+        }
+
+        [data-step] h3 + .mask {
+          margin-top: var(--spacing);
+        }
+
+        [data-step] h3 + .mask p {
+          font-size: var(--text-sm);
+          line-height: var(--text-sm--line-height);
         }
       }
     }
