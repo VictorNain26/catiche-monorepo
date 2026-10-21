@@ -68,12 +68,16 @@ const CLIPS = ['salut', 'respiration'] as const;
 
       let current = salut;
       let observer: IntersectionObserver | undefined;
+      // Paused by the page because Tom left the window, not by the visitor: he takes up again on his return.
+      let away = false;
       const show = (shown: HTMLElement) => {
         for (const frame of [picture, salut, respiration]) frame.classList.toggle('invisible', frame !== shown);
       };
       // Reduced motion turned on during the visit: Tom stops on his still picture, for good, and the button goes.
       const still = () => {
         observer?.disconnect();
+        view.disconnect();
+        away = false;
         for (const video of [salut, respiration]) video.pause();
         show(picture);
         toggle.hidden = true;
@@ -82,9 +86,9 @@ const CLIPS = ['salut', 'respiration'] as const;
         if (event.matches) still();
       });
       // The button says what it does next: its label changes, not a pressed state. It follows the video itself, so a
-      // refused play() leaves it on « Lecture ».
+      // refused play() leaves it on « Lecture », but not a pause made because Tom is out of the window.
       const sync = () => {
-        const paused = current.paused;
+        const paused = current.paused && !away;
         toggle.querySelector('[data-icon="pause"]')?.classList.toggle('hidden', paused);
         toggle.querySelector('[data-icon="play"]')?.classList.toggle('hidden', !paused);
         const label = toggle.querySelector('[data-label]');
@@ -94,6 +98,17 @@ const CLIPS = ['salut', 'respiration'] as const;
         if (reducedMotion.matches) return;
         current.play().catch(sync);
       };
+      // Out of the window, Tom stops moving, and moves again when he comes back; a pause the visitor asked for stays.
+      const view = new IntersectionObserver((entries) => {
+        const seen = entries.some((entry) => entry.isIntersecting);
+        if (!seen && !current.paused) {
+          away = true;
+          current.pause();
+        } else if (seen && away) {
+          away = false;
+          resume();
+        }
+      });
       // A play() that resolves after reduced motion turned on stops at once.
       const playing = (video: HTMLVideoElement) => {
         if (reducedMotion.matches) {
@@ -125,6 +140,7 @@ const CLIPS = ['salut', 'respiration'] as const;
         if (current.paused) resume();
         else current.pause();
       });
+      view.observe(this);
 
       if (this.dataset['start'] === 'view') {
         observer = new IntersectionObserver(
