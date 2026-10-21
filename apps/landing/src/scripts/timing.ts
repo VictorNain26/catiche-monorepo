@@ -12,6 +12,27 @@ export function orderTiming(style: Tokens): KeyframeAnimationOptions | undefined
   return { duration, delay, easing, fill: 'backwards' };
 }
 
+/** The timing of a change of step in the held evening (src/scripts/evening.ts): an exit, then an entry. */
+export interface SceneTiming {
+  readonly fast: number;
+  readonly base: number;
+  readonly slow: number;
+  readonly stagger: number;
+  readonly exit: string;
+  readonly enter: string;
+}
+
+// Read from the tokens; none if one is missing, and the steps then change without a move.
+export function sceneTiming(style: Tokens): SceneTiming | undefined {
+  const [fast, base, slow, stagger] = ['--duration-fast', '--duration-base', '--duration-slow', '--duration-stagger'].map((name) =>
+    milliseconds(style.getPropertyValue(name)),
+  );
+  const exit = style.getPropertyValue('--ease-exit').trim();
+  const enter = style.getPropertyValue('--ease-out-expo').trim();
+  if (fast === undefined || base === undefined || slow === undefined || stagger === undefined || !exit || !enter) return undefined;
+  return { fast, base, slow, stagger, exit, enter };
+}
+
 // How long an order waits before it falls into place, read on the order: `--order-delay` is registered as a <time>
 // (src/styles/global.css), so its computed value is resolved; none if it is missing or not a time.
 export function orderDelay(style: Tokens): number | undefined {

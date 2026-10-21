@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { arrivalEnded, inView, milliseconds, orderDelay, orderTiming } from './timing';
+import { arrivalEnded, inView, milliseconds, orderDelay, orderTiming, sceneTiming } from './timing';
 
 describe('milliseconds', () => {
   it('reads a duration in milliseconds or in seconds', () => {
@@ -53,6 +53,35 @@ describe('orderTiming', () => {
   it('gives no timing when a duration cannot be read', () => {
     expect(orderTiming(tokens({ ...TOKENS, '--duration-slow': 'slow' }))).toBeUndefined();
     expect(orderTiming(tokens({ ...TOKENS, '--order-delay': '1000' }))).toBeUndefined();
+  });
+});
+
+describe('sceneTiming', () => {
+  const SCENE = {
+    '--duration-fast': '150ms',
+    '--duration-base': '250ms',
+    '--duration-slow': '400ms',
+    '--duration-stagger': '120ms',
+    '--ease-exit': ' cubic-bezier(0.4, 0, 1, 1)',
+    '--ease-out-expo': ' cubic-bezier(0.19, 1, 0.22, 1)',
+  };
+
+  it('reads the durations and the two curves of a change of step', () => {
+    expect(sceneTiming(tokens(SCENE))).toEqual({
+      fast: 150,
+      base: 250,
+      slow: 400,
+      stagger: 120,
+      exit: 'cubic-bezier(0.4, 0, 1, 1)',
+      enter: 'cubic-bezier(0.19, 1, 0.22, 1)',
+    });
+  });
+
+  it('gives no timing when a token is missing or not a duration: the steps then change without a move', () => {
+    for (const missing of Object.keys(SCENE)) {
+      expect(sceneTiming(tokens({ ...SCENE, [missing]: '' }))).toBeUndefined();
+    }
+    expect(sceneTiming(tokens({ ...SCENE, '--duration-slow': 'slow' }))).toBeUndefined();
   });
 });
 

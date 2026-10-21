@@ -108,6 +108,8 @@
   --duration-stagger: 120ms;
   --duration-arrive: 1500ms;
   --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  /* Une sortie : une courbe qui accélère, pour qu'un texte parte avant que le suivant entre. */
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
   /* Son amplitude : la montée d'un bloc, plus grande pour le temps fort d'une section, et l'échelle
    * d'où part un écran ; réduites de moitié au téléphone. */
   --motion-distance: 40px;

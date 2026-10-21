@@ -1,9 +1,9 @@
 // The blocks of the page play once, when they are read (src/scripts/reveal.ts), and the evening is held while it is
-// scrolled (src/scripts/scenes.ts). Durations and curve come from the tokens, through the computed style.
+// scrolled (src/scripts/scenes.ts). Durations and curves come from the tokens, through the computed style.
 
 import { type Entry, release, REVEAL_MARGIN, reveal } from './reveal';
-import { sceneProgress, screenScale, scrollForStep, stepAt, type View } from './scenes';
-import { orderTiming } from './timing';
+import { heldStep, type Move, nextMove, sceneProgress, screenScale, scrollForStep, type View } from './scenes';
+import { orderTiming, type SceneTiming, sceneTiming } from './timing';
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -68,14 +68,28 @@ class TonightOrder extends PlayOnce {
 // scene is not held and the steps follow one another.
 const SMALLEST_SCREEN = 0.75;
 
+// How far a screen's content slides as it leaves or comes in, and a line of text as it leaves.
+const SCREEN_SHIFT = 'calc(var(--spacing) * 6)';
+const TEXT_SHIFT = '0.25em';
+
+const ignore = () => undefined;
+
 // The evening, held while it is scrolled: its script alone sets `data-held` (sections/evening.astro), outside reduced
-// motion and only if every step fits the window; then the scroll picks the step shown (src/scripts/scenes.ts). The
-// gestures of its screens play when their step is shown. Reduced motion turned on during the visit lets the steps
-// follow one another again, for good.
+// motion and only if every step fits the window; then the scroll picks the step shown (src/scripts/scenes.ts), and a
+// change of step plays here, in Web Animations: the text shown leaves, then the next comes in, line after line, never
+// both together; in the one frame of the screen, its content slides out, then the next slides in and its messages
+// come one after the other. A fast scroll ends the moves under way and goes straight to the step reached. The steps
+// hidden are inert. Reduced motion turned on during the visit lets the steps follow one another again, for good.
 class EveningScenes extends HTMLElement {
   #steps: HTMLElement[] = [];
-  #ranks: HTMLElement[] = [];
-  #shown = -1;
+  #links: HTMLAnchorElement[] = [];
+  // The step whose text and screen are on, the step the scene is heading to, and whether the content of the step shown
+  // has left.
+  #shown = 0;
+  #heading = 0;
+  #left = false;
+  #moves: Animation[] = [];
+  #generation = 0;
   #frame = 0;
   // The gestures waiting for their step, by step.
   #waiting = new Map<number, Set<{ block: HTMLElement; report: Report }>>();
@@ -83,7 +97,7 @@ class EveningScenes extends HTMLElement {
 
   connectedCallback() {
     this.#steps = [...this.querySelectorAll<HTMLElement>('[data-step]')];
-    this.#ranks = [...this.querySelectorAll<HTMLElement>('.ranks > li')];
+    this.#links = [...this.querySelectorAll<HTMLAnchorElement>('.timeline a')];
     const held = !reducedMotion.matches && this.#hold();
     for (const [step, element] of this.#steps.entries()) {
       for (const block of element.querySelectorAll<PlayOnce>('play-once, tonight-order')) {
@@ -91,13 +105,21 @@ class EveningScenes extends HTMLElement {
       }
     }
     if (!held) return;
-    this.#update();
+    const first = heldStep(this.#progress(), this.#steps.length, undefined);
+    this.#setShown(first);
+    this.#heading = first;
+    this.#mark(first);
+    this.#play(first);
     this.#listen(window, 'scroll', this.#schedule, { passive: true });
     this.#listen(window, 'resize', this.#refit);
     // The fonts change the heights the fit was measured on.
     void document.fonts.ready.then(this.#refit);
-    // A focused link of a hidden step (a proof's source) brings its step into view.
-    this.#listen(this, 'focusin', this.#onFocus);
+    this.#links.forEach((link, step) => {
+      this.#listen(link, 'click', (event) => {
+        event.preventDefault();
+        this.#scrollTo(step);
+      });
+    });
     this.#listen(reducedMotion, 'change', (event) => {
       if ((event as MediaQueryListEvent).matches) this.#release();
     });
@@ -114,29 +136,37 @@ class EveningScenes extends HTMLElement {
     const reading = window.scrollY;
     this.dataset['held'] = '';
     const held = this.#fit();
-    if (!held) delete this.dataset['held'];
+    if (!held) {
+      this.#unfit();
+      delete this.dataset['held'];
+    }
     if (window.scrollY !== reading) window.scrollTo({ top: reading, behavior: 'instant' });
     return held;
   }
 
-  // Fits each step's screen in the room its text leaves it in the scene; false if one would be too small to read.
+  // Gives every step's text and screen the size of the tallest, so that the screen's one frame never jumps, and fits
+  // the step in the room the scene leaves it, its screen shrunk if need be; false if it would be too small to read.
+  // The frames and `zoom` go through the CSS object model, which the CSP allows (no style attribute in the HTML).
   #fit(): boolean {
     const list = this.querySelector<HTMLElement>('.steps');
-    if (!list) return false;
     const screens = this.#steps.map((step) => step.querySelector<HTMLElement>('[data-screen]'));
-    for (const screen of screens) screen?.style.removeProperty('zoom');
+    const [step, screen] = [this.#steps[0], screens[0]];
+    if (!list || !step || !screen) return false;
+    this.#unfit();
+    const tallest = (selector: string) => Math.max(...this.#steps.map((element) => element.querySelector<HTMLElement>(selector)?.offsetHeight ?? 0));
+    this.style.setProperty('--text-frame', `${String(tallest('[data-text]'))}px`);
+    this.style.setProperty('--screen-frame', `${String(tallest('[data-screen] > *'))}px`);
     const room = list.clientHeight;
-    const scales = this.#steps.map((step, index) => {
-      const screen = screens[index];
-      if (!screen) return 1;
-      return screenScale(room - (step.offsetHeight - screen.offsetHeight), screen.offsetHeight, SMALLEST_SCREEN);
-    });
-    if (scales.some((scale) => scale === undefined)) return false;
-    // `zoom` through the CSS object model, which the CSP allows (no style attribute is written in the HTML).
-    scales.forEach((scale, index) => {
-      if (scale !== undefined && scale < 1) screens[index]?.style.setProperty('zoom', String(scale));
-    });
-    return this.#steps.every((step) => step.offsetHeight <= room);
+    const scale = screenScale(room - (step.offsetHeight - screen.offsetHeight), screen.offsetHeight, SMALLEST_SCREEN);
+    if (scale === undefined) return false;
+    if (scale < 1) for (const element of screens) element?.style.setProperty('zoom', String(scale));
+    return this.#steps.every((element) => element.offsetHeight <= room);
+  }
+
+  #unfit() {
+    this.style.removeProperty('--text-frame');
+    this.style.removeProperty('--screen-frame');
+    for (const step of this.#steps) step.querySelector<HTMLElement>('[data-screen]')?.style.removeProperty('zoom');
   }
 
   readonly #refit = () => {
@@ -152,6 +182,10 @@ class EveningScenes extends HTMLElement {
     return { height: offset + (scene?.offsetHeight ?? window.innerHeight), offset };
   }
 
+  #progress(): number {
+    return sceneProgress(this.getBoundingClientRect(), this.#view());
+  }
+
   readonly #schedule = () => {
     if (this.#frame) return;
     this.#frame = requestAnimationFrame(() => {
@@ -161,19 +195,144 @@ class EveningScenes extends HTMLElement {
   };
 
   #update() {
-    const step = stepAt(sceneProgress(this.getBoundingClientRect(), this.#view()), this.#steps.length);
-    if (step === this.#shown) return;
-    this.#shown = step;
-    this.#steps.forEach((element, index) => {
-      element.toggleAttribute('data-shown', index === step);
-      element.toggleAttribute('data-past', index < step);
+    const move = nextMove({ shown: this.#shown, heading: this.#heading }, heldStep(this.#progress(), this.#steps.length, this.#heading));
+    if (move) this.#go(move);
+  }
+
+  // A change of step. The moves under way end at once: a step only passed by is never played.
+  #go(move: Move) {
+    this.#generation += 1;
+    const generation = this.#generation;
+    for (const animation of this.#moves.splice(0)) animation.finish();
+    this.#heading = move.to;
+    this.#mark(move.to);
+    const timing = sceneTiming(getComputedStyle(this));
+    if (!timing) {
+      this.#enter(move.to, move.direction, undefined);
+      return;
+    }
+    const from = this.#steps[move.from];
+    const left = this.#left || !from ? Promise.resolve() : this.#leave(from, move.direction, timing);
+    this.#left = true;
+    left.then(() => {
+      if (generation === this.#generation) this.#enter(move.to, move.direction, timing);
+    }, ignore);
+  }
+
+  // The step shown leaves: its text rises out quickly, its screen's content slides out a little slower, both at once.
+  // The text has left when the promise resolves; the screen's content goes on, and lets go once it has left.
+  #leave(step: HTMLElement, direction: 1 | -1, timing: SceneTiming): Promise<unknown> {
+    const out = { duration: timing.fast, easing: timing.exit, fill: 'forwards' } as const;
+    const text = [...step.querySelectorAll<HTMLElement>('[data-line], [data-proof]')].map((line) =>
+      this.#move(
+        line,
+        [
+          { opacity: 1, translate: '0 0' },
+          { opacity: 0, translate: `0 calc(${TEXT_SHIFT} * ${String(-direction)})` },
+        ],
+        out,
+      ),
+    );
+    for (const content of step.querySelectorAll<HTMLElement>('[data-screen] > * > *')) {
+      const leaving = this.#move(
+        content,
+        [
+          { opacity: 1, translate: '0 0' },
+          { opacity: 0, translate: `0 calc(${SCREEN_SHIFT} * ${String(-direction)})` },
+        ],
+        { ...out, duration: timing.base },
+      );
+      leaving.finished.then(() => {
+        if (!step.hasAttribute('data-shown')) leaving.cancel();
+      }, ignore);
+    }
+    return Promise.all(text.map((animation) => animation.finished));
+  }
+
+  // The step reached comes in: its hour, its title and its sentence rise into their masks one after the other, its
+  // proof fades in; once the screen's former content has left, the new one slides in, and its messages and gestures play.
+  #enter(to: number, direction: 1 | -1, timing: SceneTiming | undefined) {
+    const step = this.#steps[to];
+    if (!step) return;
+    // What its last exit left behind (held on its end) lets go: its content is shown by its own style again.
+    for (const animation of step.getAnimations({ subtree: true })) {
+      if (!(animation instanceof CSSAnimation) && !(animation instanceof CSSTransition)) animation.cancel();
+    }
+    this.#setShown(to);
+    this.#left = false;
+    if (!timing) {
+      this.#play(to);
+      return;
+    }
+    const lines = [...step.querySelectorAll<HTMLElement>('[data-line]')];
+    const gap = timing.stagger / 2;
+    lines.forEach((line, index) => {
+      this.#move(line, [{ translate: `0 ${String(direction * 100)}%` }, { translate: '0 0' }], {
+        duration: timing.slow,
+        delay: index * gap,
+        easing: timing.enter,
+        fill: 'backwards',
+      });
     });
-    this.#ranks.forEach((rank, index) => rank.toggleAttribute('data-shown', index === step));
-    this.#show(step);
+    const proof = step.querySelector<HTMLElement>('[data-proof]');
+    if (proof)
+      this.#move(proof, [{ opacity: 0 }, { opacity: 1 }], {
+        duration: timing.slow,
+        delay: lines.length * gap,
+        easing: timing.enter,
+        fill: 'backwards',
+      });
+    const wait = timing.base - timing.fast;
+    for (const content of step.querySelectorAll<HTMLElement>('[data-screen] > * > *')) {
+      this.#move(
+        content,
+        [
+          { opacity: 0, translate: `0 calc(${SCREEN_SHIFT} * ${String(direction)})` },
+          { opacity: 1, translate: '0 0' },
+        ],
+        {
+          duration: timing.slow,
+          delay: wait,
+          easing: timing.enter,
+          fill: 'backwards',
+        },
+      );
+    }
+    const generation = this.#generation;
+    window.setTimeout(() => {
+      if (generation === this.#generation) this.#play(to);
+    }, wait);
+  }
+
+  #move(element: HTMLElement, keyframes: Keyframe[], options: KeyframeAnimationOptions): Animation {
+    const animation = element.animate(keyframes, options);
+    this.#moves.push(animation);
+    animation.finished.then(() => {
+      this.#moves = this.#moves.filter((move) => move !== animation);
+    }, ignore);
+    return animation;
+  }
+
+  // Only the step shown is on, and reachable; the others are inert.
+  #setShown(to: number) {
+    this.#shown = to;
+    this.#steps.forEach((element, index) => {
+      element.toggleAttribute('data-shown', index === to);
+      element.inert = index !== to;
+    });
+  }
+
+  // The hours: the one reached is the current step, the ones before it passed.
+  #mark(to: number) {
+    this.#links.forEach((link, index) => {
+      if (index === to) link.setAttribute('aria-current', 'step');
+      else link.removeAttribute('aria-current');
+      link.parentElement?.toggleAttribute('data-past', index < to);
+    });
   }
 
   // Plays the gestures of a step now shown.
-  #show(step: number) {
+  #play(step: number) {
     for (const { block, report } of this.#waiting.get(step) ?? []) {
       report([{ isIntersecting: true, boundingClientRect: { bottom: block.getBoundingClientRect().bottom } }]);
     }
@@ -191,13 +350,12 @@ class EveningScenes extends HTMLElement {
     };
   }
 
-  readonly #onFocus = (event: Event) => {
-    const step = this.#steps.findIndex((element) => element.contains(event.target as Node));
-    if (step < 0 || step === this.#shown) return;
+  // An hour of the timeline brings the window to its step.
+  #scrollTo(step: number) {
     const track = this.getBoundingClientRect();
     const top = scrollForStep(step, this.#steps.length, { top: track.top + window.scrollY, height: track.height }, this.#view());
     window.scrollTo({ top, behavior: 'instant' });
-  };
+  }
 
   #listen(target: EventTarget, type: string, listener: (event: Event) => void, options?: AddEventListenerOptions) {
     target.addEventListener(type, listener, options);
@@ -206,21 +364,27 @@ class EveningScenes extends HTMLElement {
     });
   }
 
-  // The steps follow one another again: the step shown stays in view, and every gesture still waiting plays.
+  // The steps follow one another again, all shown: the step shown stays in view, and every gesture still waiting plays.
   #release() {
     if (this.dataset['held'] === undefined) return;
     const shown = this.#steps[this.#shown];
     for (const cleanup of this.#cleanups.splice(0)) cleanup();
     cancelAnimationFrame(this.#frame);
     this.#frame = 0;
+    this.#generation += 1;
+    for (const animation of this.#moves.splice(0)) animation.cancel();
     delete this.dataset['held'];
-    for (const element of [...this.#steps, ...this.#ranks]) {
+    this.#unfit();
+    for (const element of this.#steps) {
       element.removeAttribute('data-shown');
-      element.removeAttribute('data-past');
-      element.querySelector<HTMLElement>('[data-screen]')?.style.removeProperty('zoom');
+      element.inert = false;
+    }
+    for (const link of this.#links) {
+      link.removeAttribute('aria-current');
+      link.parentElement?.removeAttribute('data-past');
     }
     shown?.scrollIntoView({ block: 'start', behavior: 'instant' });
-    for (const step of this.#waiting.keys()) this.#show(step);
+    for (const step of this.#waiting.keys()) this.#play(step);
   }
 }
 

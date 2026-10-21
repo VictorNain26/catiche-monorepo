@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { sceneProgress, screenScale, scrollForStep, stepAt } from './scenes';
+import { heldStep, nextMove, sceneProgress, screenScale, scrollForStep, stepAt } from './scenes';
 
 // A window 800 px high under a header of 64 px: the scene, held under the header, is 736 px high. The track around it
 // is four windows high, so the scene stays held over 3200 - 736 = 2464 px of scrolling.
@@ -38,6 +38,50 @@ describe('stepAt', () => {
     expect(stepAt(1, 4)).toBe(3);
     expect(stepAt(1.2, 4)).toBe(3);
     expect(stepAt(-0.1, 4)).toBe(0);
+  });
+});
+
+describe('heldStep', () => {
+  // Four steps: each holds a quarter of the progress; 10 % of a quarter is 0.025.
+  it('picks the step of the progress when none is shown yet', () => {
+    expect(heldStep(0.3, 4, undefined)).toBe(1);
+  });
+
+  it('keeps the step shown a little past its edges, so that it does not flicker at a boundary', () => {
+    expect(heldStep(0.26, 4, 0)).toBe(0);
+    expect(heldStep(0.27, 4, 0)).toBe(0);
+    expect(heldStep(0.24, 4, 1)).toBe(1);
+    expect(heldStep(0.23, 4, 1)).toBe(1);
+  });
+
+  it('moves on once the progress is clearly in another step', () => {
+    expect(heldStep(0.28, 4, 0)).toBe(1);
+    expect(heldStep(0.22, 4, 1)).toBe(0);
+  });
+
+  it('jumps straight to a far step', () => {
+    expect(heldStep(0.9, 4, 0)).toBe(3);
+  });
+});
+
+describe('nextMove', () => {
+  it('does nothing while the step reached is the one shown, or the one already on its way', () => {
+    expect(nextMove({ shown: 1, heading: 1 }, 1)).toBeUndefined();
+    expect(nextMove({ shown: 1, heading: 2 }, 2)).toBeUndefined();
+  });
+
+  it('goes from the step shown to the step reached, down or up', () => {
+    expect(nextMove({ shown: 1, heading: 1 }, 2)).toEqual({ from: 1, to: 2, direction: 1 });
+    expect(nextMove({ shown: 2, heading: 2 }, 0)).toEqual({ from: 2, to: 0, direction: -1 });
+  });
+
+  it('skips the steps in between when the scroll runs past them, from the step still shown', () => {
+    expect(nextMove({ shown: 0, heading: 1 }, 3)).toEqual({ from: 0, to: 3, direction: 1 });
+  });
+
+  it('comes back to the step shown when the scroll turns back while it leaves', () => {
+    expect(nextMove({ shown: 1, heading: 2 }, 1)).toEqual({ from: 1, to: 1, direction: -1 });
+    expect(nextMove({ shown: 2, heading: 1 }, 2)).toEqual({ from: 2, to: 2, direction: 1 });
   });
 });
 

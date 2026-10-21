@@ -1,5 +1,6 @@
 ---
 import CheckIn from '@/components/molecules/check-in.astro';
+import EveningTimeline from '@/components/molecules/evening-timeline.astro';
 import Exercise from '@/components/molecules/exercise.astro';
 import Proof from '@/components/molecules/proof.astro';
 import PupilSays from '@/components/molecules/pupil-says.astro';
@@ -94,27 +95,38 @@ const CHANGED = [english, maths, history];
       </play-once>
       <ol role="list" class="steps space-y-12 lg:space-y-16">
         {MOMENTS.map(({ time, title, body, described, proof }, index) => (
-          <li role="listitem" data-step class="scroll-mt-20">
-            {/* In two columns, the screen spans both rows, and the proof stays right under the moment's sentence. */}
+          <li role="listitem" data-step id={`etape-${String(index + 1)}`} class="scroll-mt-20">
+            {/* In two columns, the screen spans both rows, and the proof stays right under the moment's sentence. Each
+             * line of the text sits in its own mask, which it rises into when its step is shown. */}
             <div class="grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] md:grid-rows-[auto_1fr] md:gap-x-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-x-16">
-              <div>
+              <div data-text>
                 {/* The hour stays under the section's title at every width. */}
                 <h3 class="text-xl text-foreground sm:text-2xl">
-                  <time datetime={time} class="block font-heading text-3xl font-extrabold text-primary tabular-nums lg:text-4xl">
-                    {spokenHour(time)}
-                  </time>
-                  <span class="mt-1 block">{title}</span>
+                  <span class="mask block">
+                    <time data-line datetime={time} class="block font-heading text-3xl font-extrabold text-primary tabular-nums lg:text-4xl">
+                      {spokenHour(time)}
+                    </time>
+                  </span>
+                  <span class="mask mt-1 block">
+                    <span data-line class="block">
+                      {title}
+                    </span>
+                  </span>
                 </h3>
-                <p class="mt-2 max-w-md text-lg text-foreground">{body}</p>
+                <div class="mask mt-2">
+                  <p data-line class="max-w-md text-lg text-foreground">
+                    {body}
+                  </p>
+                </div>
                 <p class="sr-only">{described}</p>
               </div>
               <div data-screen class="md:row-span-2">
                 <Screen time={screenTime(time)}>
                   {index === 0 && (
-                    <div class="space-y-3">
+                    <play-once class="stagger block space-y-3">
                       <PupilSays>J’ai de l’histoire, de l’anglais, et les exercices 3 et 4 de maths.</PupilSays>
                       <TomSays>Chaque devoir est pour quand&nbsp;?</TomSays>
-                    </div>
+                    </play-once>
                   )}
                   {index === 1 && (
                     <tonight-order class="block space-y-3">
@@ -147,7 +159,7 @@ const CHANGED = [english, maths, history];
                     </tonight-order>
                   )}
                   {index === 2 && (
-                    <play-once class="block space-y-3">
+                    <play-once class="stagger block space-y-3">
                       <Exercise title="Maths · Exercice 3" statement={'Calcule 3/4\xa0+\xa05/6.'} />
                       <ol class="space-y-1.5 text-sm">
                         {STEPS.map(({ step, state }, position) => (
@@ -183,28 +195,26 @@ const CHANGED = [english, maths, history];
                     </play-once>
                   )}
                   {index === 3 && (
-                    <div class="space-y-4">
+                    <play-once class="stagger block space-y-4">
                       <TomSays>Voici le point de ce soir.</TomSays>
                       <CheckIn {...CHECK_IN} bag={BAG} />
                       <TomSays>Le cahier de maths est dans ton cartable&nbsp;?</TomSays>
                       {/* The screen's button, drawn: the screen only illustrates. */}
                       <p class="rounded-full px-4 py-2 text-center font-bold text-primary ring-2 ring-input">Montrer à un adulte de la maison</p>
-                    </div>
+                    </play-once>
                   )}
                 </Screen>
               </div>
-              {proof && <Proof {...proof} class="text-muted-foreground" />}
+              {proof && (
+                <div data-proof>
+                  <Proof {...proof} class="text-muted-foreground" />
+                </div>
+              )}
             </div>
           </li>
         ))}
       </ol>
-      {/* The rank of the step shown, among the four: only while the scene is held, for the eye; the steps themselves
-       * are what a screen reader reads. */}
-      <ol aria-hidden="true" class="ranks">
-        {MOMENTS.map(() => (
-          <li class="h-1 w-8 rounded-full bg-input"></li>
-        ))}
-      </ol>
+      <EveningTimeline times={MOMENTS.map(({ time }) => time)} />
     </div>
   </evening-scenes>
 </section>
@@ -260,17 +270,47 @@ const CHANGED = [english, maths, history];
     }
   }
 
-  .ranks {
-    display: none;
+  /* The messages of a screen come one after the other once it is shown (`data-played`). They come from other
+   * components (the bubbles), so the selectors reach past this one's scope (`:global`). */
+  @media (prefers-reduced-motion: no-preference) {
+    .stagger[data-armed] > :global(*) {
+      opacity: 0;
+    }
+
+    .stagger[data-played] > :global(*) {
+      transition: opacity var(--duration-base) var(--ease-standard);
+    }
+
+    .stagger[data-played] > :global(:nth-child(2)) {
+      transition-delay: var(--duration-stagger);
+    }
+
+    .stagger[data-played] > :global(:nth-child(3)) {
+      transition-delay: calc(var(--duration-stagger) * 2);
+    }
+
+    .stagger[data-played] > :global(:nth-child(4)) {
+      transition-delay: calc(var(--duration-stagger) * 3);
+    }
+
+    .stagger[data-played] > :global(:nth-child(5)) {
+      transition-delay: calc(var(--duration-stagger) * 4);
+    }
+
+    .stagger[data-played] > :global(:nth-child(6)) {
+      transition-delay: calc(var(--duration-stagger) * 5);
+    }
   }
 
   /* The held scene, only while the script holds it (`data-held`) and only without reduced motion: the track is about
-   * four windows high, the scene stays under the header (h-16), and its steps lie on one another; the step shown fades
-   * in and rises slightly, the one before goes up, the next waits below. A screen that does not fit under its text
-   * shrinks (`zoom`, set by the script). */
+   * four windows high, the scene stays under the header (h-16), and its steps lie on one another, each step's text and
+   * screen at the size of the tallest (`--text-frame`, `--screen-frame`), so that the screen's frame never jumps. Only
+   * the step shown has its text, its screen's content and its frame; the script plays the change between two steps
+   * (src/scripts/evening.ts). A screen that does not fit under its text shrinks (`zoom`, set by the script). */
   @media (prefers-reduced-motion: no-preference) {
     evening-scenes[data-held] {
       height: calc(100svh * 4);
+      view-timeline: --evening block;
 
       .scene {
         position: sticky;
@@ -292,33 +332,38 @@ const CHANGED = [english, maths, history];
         grid-area: 1 / 1;
         align-self: start;
         margin: 0;
-        opacity: 0;
-        translate: 0 calc(var(--motion-distance) / 2);
         pointer-events: none;
-        transition:
-          opacity var(--duration-slow) var(--ease-standard),
-          translate var(--duration-slow) var(--ease-standard);
-      }
-
-      [data-step][data-past] {
-        translate: 0 calc(var(--motion-distance) / -2);
       }
 
       [data-step][data-shown] {
-        opacity: 1;
-        translate: 0 0;
         pointer-events: auto;
       }
 
-      .ranks {
-        display: flex;
-        justify-content: center;
-        gap: calc(var(--spacing) * 2);
+      .mask {
+        overflow: clip;
+        overflow-clip-margin: 0.1em;
       }
 
-      /* The rank of the step shown, on the reed: a mark of state (docs/charte.md, "Couleurs"). */
-      .ranks [data-shown] {
-        background-color: var(--color-highlight);
+      [data-text] {
+        min-height: var(--text-frame);
+      }
+
+      /* The screen's card and its content belong to the screen's component (`:global`). */
+      [data-screen] > :global(*) {
+        min-height: var(--screen-frame);
+      }
+
+      [data-step]:not([data-shown]) :is([data-line], [data-proof]) {
+        opacity: 0;
+      }
+
+      [data-step]:not([data-shown]) [data-screen] > :global(* > *) {
+        opacity: 0;
+      }
+
+      [data-step]:not([data-shown]) [data-screen] > :global(*) {
+        background: transparent;
+        box-shadow: none;
       }
 
       /* The title stays on top of the held scene, smaller, so that each step keeps its room under it. */
@@ -364,7 +409,7 @@ const CHANGED = [english, maths, history];
           line-height: var(--text-lg--line-height);
         }
 
-        [data-step] h3 + p {
+        [data-step] h3 + .mask p {
           font-size: var(--text-base);
           line-height: var(--text-base--line-height);
         }

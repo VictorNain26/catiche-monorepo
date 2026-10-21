@@ -1,0 +1,118 @@
+---
+import { spokenHour } from '@/lib/hours';
+
+// The four hours of the held evening (sections/evening.astro), shown only while the scene is held: each one leads to
+// its step (`#etape-N`); src/scripts/evening.ts marks the hour of the step shown (`aria-current="step"`) and the hours
+// passed (`data-past`). One reed dot, a mark of state (docs/charte.md, "Couleurs"), slides under the hour shown; the
+// hours passed are in full ink, the next ones muted; the rail fills as the evening is scrolled, the only move tied to
+// the scroll itself.
+interface Props {
+  times: readonly string[];
+}
+
+const { times } = Astro.props;
+---
+
+<div class="timeline">
+  <span aria-hidden="true" class="rail">
+    <span class="fill"></span>
+  </span>
+  <span aria-hidden="true" class="puck"></span>
+  <ol role="list" class="grid grid-cols-4">
+    {times.map((time, index) => (
+      <li role="listitem" class="flex justify-center">
+        <a href={`#etape-${String(index + 1)}`} class="inline-flex min-h-11 items-center px-2 text-sm text-muted-foreground tabular-nums">
+          {spokenHour(time)}
+        </a>
+      </li>
+    ))}
+  </ol>
+</div>
+
+<style>
+  .timeline {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(evening-scenes[data-held]) {
+      .timeline {
+        position: relative;
+        display: block;
+        padding-top: calc(var(--spacing) * 3);
+      }
+
+      .rail {
+        position: absolute;
+        top: calc(var(--spacing) * 1);
+        inset-inline: 12.5%;
+        height: calc(var(--spacing) / 2);
+        border-radius: calc(infinity * 1px);
+        background-color: var(--color-input);
+      }
+
+      .fill {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background-color: var(--color-primary);
+        transform-origin: left;
+        scale: 0 1;
+      }
+
+      .puck {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        justify-content: center;
+        width: 25%;
+        transition: translate var(--duration-slow) var(--ease-out-expo);
+      }
+
+      .puck::after {
+        content: '';
+        width: calc(var(--spacing) * 2.5);
+        height: calc(var(--spacing) * 2.5);
+        border-radius: calc(infinity * 1px);
+        background-color: var(--color-highlight);
+      }
+
+      .timeline:has(li:nth-child(2) [aria-current]) .puck {
+        translate: 100% 0;
+      }
+
+      .timeline:has(li:nth-child(3) [aria-current]) .puck {
+        translate: 200% 0;
+      }
+
+      .timeline:has(li:nth-child(4) [aria-current]) .puck {
+        translate: 300% 0;
+      }
+
+      li[data-past] a {
+        color: var(--color-foreground);
+      }
+
+      a[aria-current] {
+        color: var(--color-foreground);
+        font-weight: 700;
+      }
+    }
+
+    /* The rail fills with the evening's own view timeline (`--evening`, on the held track). */
+    @supports (animation-timeline: view()) {
+      :global(evening-scenes[data-held]) .fill {
+        animation: timeline-fill linear both;
+        animation-timeline: --evening;
+        animation-range: contain 0% contain 100%;
+      }
+    }
+  }
+
+  @keyframes timeline-fill {
+    to {
+      scale: 1 1;
+    }
+  }
+</style>
