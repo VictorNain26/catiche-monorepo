@@ -15,7 +15,8 @@ interface Props {
 }
 
 const TITLE = `${BRAND_NAME} – Aide aux devoirs au collège : apprendre à s'organiser`;
-const DESCRIPTION = `${BRAND_NAME} aide les collégiens, de la 6e à la 3e, à s'organiser pour leurs devoirs : par où commencer, des petites étapes, le cartable du lendemain. Sans faire le travail à leur place. En préparation.`;
+// The product in the present, from docs/produit.md, under 160 characters; its state is on the page (docs/charte.md).
+const DESCRIPTION = `${BRAND_NAME}, l'aide aux devoirs du collège, de la 6e à la 3e : chaque soir, Tom aide votre collégien à s'organiser, sans faire le travail à sa place.`;
 const { title, description = DESCRIPTION, noindex = false } = Astro.props;
 const pageTitle = title ? `${title} | ${BRAND_NAME}` : TITLE;
 const site = Astro.site?.href ?? '';

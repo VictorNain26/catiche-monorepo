@@ -54,8 +54,8 @@ export const GET: APIRoute = async () => {
             node('span', { backgroundImage: `linear-gradient(to top, ${HIGHLIGHT} 50%, transparent 50%)` }, 'du début à la fin'),
             '.',
           ]),
-          // The state under the top of the page's button.
-          node('div', { display: 'flex', marginTop: 40, fontSize: 30, color: MUTED }, 'Ouverture sur invitation'),
+          // For whom, from docs/produit.md; the state stays on the page.
+          node('div', { display: 'flex', marginTop: 40, fontSize: 30, color: MUTED }, 'Au collège, de la 6e à la 3e'),
         ]),
         { type: 'img', key: null, props: { src: tom, width: 560, height: 560 } },
       ],

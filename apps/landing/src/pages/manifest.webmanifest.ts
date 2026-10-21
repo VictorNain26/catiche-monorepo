@@ -8,7 +8,7 @@ export function GET() {
   return Response.json({
     name: BRAND_NAME,
     short_name: BRAND_NAME,
-    description: "L'aide aux devoirs du collège, de la 6e à la 3e, en préparation.",
+    description: "L'aide aux devoirs du collège, de la 6e à la 3e : chaque soir, Tom aide votre collégien à s'organiser.",
     start_url: '/',
     display: 'standalone',
     background_color: MIST,
