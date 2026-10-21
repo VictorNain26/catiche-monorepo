@@ -2,7 +2,7 @@
 
 type Tokens = Pick<CSSStyleDeclaration, 'getPropertyValue'>;
 
-// The same timing as the transitions that straighten the items (hero.astro); none if one is missing.
+// The same timing as the transitions that straighten the items (evening.astro); none if one is missing.
 export function orderTiming(style: Tokens): KeyframeAnimationOptions | undefined {
   const duration = milliseconds(style.getPropertyValue('--duration-slow'));
   const delay = milliseconds(style.getPropertyValue('--duration-wait'));

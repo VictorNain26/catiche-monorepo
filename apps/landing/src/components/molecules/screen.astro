@@ -13,7 +13,7 @@ interface Props {
 const { time, title, class: className } = Astro.props;
 ---
 
-<div aria-hidden="true" class={cn('rounded-2xl bg-card p-5 text-card-foreground shadow-control ring-1 ring-border', className)}>
+<div aria-hidden="true" class={cn('rounded-2xl bg-card p-4 text-card-foreground sm:p-5 shadow-control ring-1 ring-border', className)}>
   {(time ?? title) && (
     <p class="mb-4 flex items-baseline justify-between gap-4 border-b pb-3 text-sm">
       <span class="font-heading font-extrabold">{title}</span>

@@ -1,0 +1,51 @@
+---
+import CheckIn from '@/components/molecules/check-in.astro';
+import Screen from '@/components/molecules/screen.astro';
+import { CHECK_IN, HOURS } from './evening-data';
+
+// The evening check-in of docs/produit.md ("Le point du soir"), not built yet, so told in the future; how it fits each
+// family is a question of the FAQ. The adult sees that it is done, never the conversations (docs/tuteur.md, § 8). The
+// code has six digits (STUDENT_CODE_LENGTH, apps/server/src/domain/student-code.ts).
+---
+
+<section id="point-du-soir" class="scroll-mt-20 border-t py-12 md:py-16 lg:py-32">
+  <div class="container grid max-w-6xl items-center gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:gap-24">
+    <div>
+      <h2 class="text-3xl text-balance text-foreground sm:text-5xl">Vous saurez ce qui est fait, sans surveiller.</h2>
+      <p class="mt-5 max-w-xl text-lg text-muted-foreground md:mt-6 md:text-xl">
+        C&apos;est le point du soir&nbsp;: votre collégien montrera ce qu&apos;il a fait à l&apos;adulte de la maison, qui répondra «&nbsp;Vu&nbsp;»,
+        sans note ni rappel.
+      </p>
+      <p class="mt-4 max-w-xl text-lg text-muted-foreground md:text-xl">
+        Ses échanges avec Tom restent à lui, derrière un code de six chiffres qu&apos;il choisit.
+      </p>
+    </div>
+
+    <figure>
+      <play-once class="block">
+        <Screen time={HOURS.ended} title="Mardi soir">
+          <CheckIn {...CHECK_IN} />
+          <p class="seen mt-4 border-t pt-3">
+            <span class="text-sm font-bold text-muted-foreground">Votre réponse</span>
+            <span class="mt-1 block font-heading text-2xl font-extrabold text-primary">Vu</span>
+          </p>
+        </Screen>
+      </play-once>
+      <figcaption class="sr-only">Le point du soir&nbsp;: ce qui est fait, ce qui reste, et votre «&nbsp;Vu&nbsp;».</figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  /* Your « Vu » comes last, without a stamp, once the script that holds it plays it (src/scripts/evening.ts); set at
+   * once while it waits, only its arrival is a transition. */
+  @media (prefers-reduced-motion: no-preference) {
+    play-once:not([data-armed]) .seen {
+      transition: opacity var(--duration-base) var(--ease-standard) var(--duration-slow);
+    }
+
+    play-once[data-armed] .seen {
+      opacity: 0;
+    }
+  }
+</style>

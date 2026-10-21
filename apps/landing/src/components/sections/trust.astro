@@ -1,0 +1,85 @@
+---
+import ExternalLink from '@/components/atoms/external-link.astro';
+
+// What makes Catiche worth trusting, each fact with its line in the docs:
+// - the research: docs/methode.md, "Ce qui vaut pour tous les élèves", sources [11], [13] and [17]; where the gestures
+//   come from, never that Catiche obtains these effects;
+// - the safeguards already built: docs/tuteur.md, § 3 (the ladder held by the server) and § 4 (the check before the
+//   pupil, the distress answer written by a human);
+// - the commitments: docs/architecture.md ("Hébergement"), docs/tuteur.md (§ 2, Mistral's EU endpoint), the privacy
+//   policy (pages/confidentialite.astro, linked from the footer), and docs/produit.md (no better grades).
+const RESEARCH = [
+  {
+    gesture: 'Planifier et faire le point',
+    finding: '+8 mois de progrès en classe, en moyenne sur 355 études.',
+    source: {
+      href: 'https://educationendowmentfoundation.org.uk/education-evidence/teaching-learning-toolkit/metacognition-and-self-regulation',
+      label: 'EEF',
+    },
+  },
+  {
+    gesture: "Réviser en s'interrogeant, sur plusieurs jours",
+    finding: 'deux des techniques jugées les plus utiles.',
+    source: { href: 'https://doi.org/10.1177/1529100612453266', label: 'Dunlosky et al., 2013' },
+  },
+  {
+    gesture: 'Un adulte qui soutient sans surveiller',
+    finding: 'une aide vécue comme un soutien va avec plus de progrès.',
+    source: { href: 'https://doi.org/10.1080/00220671.2014.901283', label: 'Moroni et al., 2015' },
+  },
+];
+
+const SAFEGUARDS = [
+  "Chaque message de Tom est vérifié avant d'être affiché, et réécrit ou remplacé s'il contient la réponse.",
+  "C'est le serveur, pas l'IA, qui décide quand Tom aide davantage.",
+  "Si votre collégien semble aller mal, ce n'est pas Tom qui répond : une réponse écrite par un humain donne le 3114.",
+];
+
+const COMMITMENTS = [
+  "Hébergé en France, avec l'IA de Mistral AI en Europe.",
+  'Ni publicité, ni vente de données.',
+  "Pas d'adresse e-mail pour votre collégien.",
+  'Nous ne promettons pas de meilleures notes.',
+];
+---
+
+<section id="confiance" class="scroll-mt-20 border-t py-12 md:py-16 lg:py-32">
+  <div class="container max-w-6xl">
+    <h2 class="max-w-3xl text-3xl text-balance text-foreground sm:text-5xl">Pourquoi nous faire confiance</h2>
+
+    <div class="mt-8 grid gap-8 md:grid-cols-2 md:gap-10 lg:mt-16 lg:grid-cols-3 lg:gap-12">
+      <div>
+        <h3 class="text-2xl text-balance text-foreground">Les gestes viennent de la recherche</h3>
+        {/* Each source at the end of its line, opened in a new tab (atoms/external-link.astro). */}
+        <ul class="mt-4 space-y-3 text-foreground">
+          {RESEARCH.map(({ gesture, finding, source }) => (
+            <li class="border-l-2 border-annotation pl-4">
+              <strong class="font-bold">{gesture}</strong>&nbsp;: {finding}{' '}
+              <ExternalLink href={source.href} class="min-h-11 align-middle text-sm text-primary underline underline-offset-4">
+                {source.label}
+              </ExternalLink>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-2xl text-balance text-foreground">Les garde-fous sont déjà construits</h3>
+        <ul class="mt-4 space-y-3 text-foreground">
+          {SAFEGUARDS.map((safeguard) => (
+            <li class="border-l-2 border-annotation pl-4">{safeguard}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-2xl text-balance text-foreground">Nous nous engageons</h3>
+        <ul class="mt-4 space-y-3 text-foreground">
+          {COMMITMENTS.map((commitment) => (
+            <li class="border-l-2 border-annotation pl-4">{commitment}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>

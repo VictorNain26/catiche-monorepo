@@ -41,16 +41,19 @@ const CLIPS = ['salut', 'respiration'] as const;
       </video>
     ))}
   </span>
-  {/* Tom moves for more than five seconds: the visitor can stop him (WCAG 2.2.2). Shown only once he moves. */}
+  {/* Tom moves for more than five seconds: the visitor can stop him (WCAG 2.2.2). Shown only once he moves. An icon in
+   * the corner, outside the arch, so that it never covers a small Tom; its label is read by screen readers. */}
   <button
     type="button"
     data-toggle
     hidden
-    class="absolute top-0 right-0 inline-flex min-h-11 items-center gap-2 rounded-control px-3 text-sm font-bold text-foreground transition-colors duration-base hover:bg-accent"
+    class="absolute top-0 right-0 inline-flex size-11 items-center justify-center rounded-full text-foreground transition-colors duration-base hover:bg-accent"
   >
     <Pause data-icon="pause" class="size-4" aria-hidden="true" />
     <Play data-icon="play" class="hidden size-4" aria-hidden="true" />
-    <span data-label>Pause</span>
+    <span data-label class="sr-only">
+      Pause
+    </span>
   </button>
 </tom-illustration>
 

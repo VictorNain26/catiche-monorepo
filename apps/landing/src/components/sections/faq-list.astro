@@ -1,7 +1,6 @@
 ---
 import { Plus } from '@lucide/astro';
 import { cn } from '@repo/ui/classes';
-import ExternalLink from '@/components/atoms/external-link.astro';
 import { CONTACT_EMAIL } from '@/lib/brand';
 import { FAQS } from './faq-data';
 
@@ -15,14 +14,14 @@ const { class: className } = Astro.props;
 <div class={cn('border-y divide-y', className)}>
   {FAQS.map((faq) => (
     <details name="faq" class="group">
-      <summary class="flex min-h-11 cursor-pointer list-none items-start justify-between gap-6 py-5 text-left focus-visible:ring-inset sm:py-6 [&::-webkit-details-marker]:hidden">
+      <summary class="flex min-h-11 cursor-pointer list-none items-start justify-between gap-6 py-4 text-left focus-visible:ring-inset sm:py-6 [&::-webkit-details-marker]:hidden">
         <span class="font-heading text-lg font-extrabold text-foreground sm:text-xl">{faq.question}</span>
         <Plus
           class="mt-1 size-5 shrink-0 text-muted-foreground transition-transform duration-base group-open:rotate-45 group-hover:text-foreground"
           aria-hidden="true"
         />
       </summary>
-      <div class="max-w-2xl space-y-3 pb-6 text-muted-foreground">
+      <div class="max-w-2xl pb-6 text-muted-foreground">
         {/* The answers are plain text, for the page's FAQPage data too: our address becomes a link only here. */}
         <p>
           {faq.answer.split(CONTACT_EMAIL).map((part, index) => (
@@ -36,17 +35,6 @@ const { class: className } = Astro.props;
             </>
           ))}
         </p>
-        {faq.sources && (
-          <ul class="flex flex-wrap gap-x-6">
-            {faq.sources.map(({ href, label }) => (
-              <li>
-                <ExternalLink href={href} class="min-h-11 text-primary underline underline-offset-4">
-                  {label}
-                </ExternalLink>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </details>
   ))}

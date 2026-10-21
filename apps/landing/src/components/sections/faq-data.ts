@@ -3,54 +3,38 @@ import { BRAND_NAME, CONTACT_EMAIL } from '@/lib/brand';
 interface Faq {
   question: string;
   answer: string;
-  sources?: { href: string; label: string }[];
 }
 
-// Each answer is checked against the docs: docs/produit.md, docs/methode.md, docs/tuteur.md (§ 2, Mistral; § 4, the check before
-// the pupil), docs/architecture.md, docs/charte.md ("Les mots") and apps/server/src/modules/tutor/core/prompt.ts (never a friend); the shared device's 10 minutes are
-// IDLE_MINUTES in apps/server/src/platform/auth/student-sign-in.ts.
+// Each answer is checked against the docs, and none repeats the page: docs/produit.md ("L'accès pendant la préparation",
+// "Ouvert": the price; "Le point du soir": each family; "Pronote"; "Ce qu'on mesurera"), docs/methode.md ("À retenir" of
+// "Ce qui vaut pour tous les élèves"), docs/architecture.md ("Client web"); the shared device's 10 minutes are
+// IDLE_MINUTES in apps/server/src/platform/auth/student-sign-in.ts. What is not built is told in the future.
 export const FAQS: Faq[] = [
   {
-    question: 'Dès quelle classe ?',
-    answer: `De la 6e à la 3e. ${BRAND_NAME} est pensé pour le collège.`,
+    question: 'Combien ça coûte, et quand ?',
+    answer: `Le prix et la date d'ouverture ne sont pas encore fixés. D'ici là, les comptes s'ouvrent sur invitation : écrivez-nous à ${CONTACT_EMAIL}. Demander une invitation ne vous engage à rien.`,
   },
   {
-    question: 'Comment avoir un compte, et combien ça coûte ?',
-    answer: `Pour l'instant, les comptes s'ouvrent sur invitation : écrivez-nous à ${CONTACT_EMAIL} pour en demander une. Le prix n'est pas encore fixé, et demander une invitation ne vous engage à rien.`,
+    question: 'Et dans notre famille ?',
+    answer:
+      "Le point du soir s'adaptera. Rentré tard, l'adulte le verra plus tard, et votre collégien trouvera son « Vu » le lendemain. Dans deux maisons, il ira à l'adulte chez qui il est ce soir-là. Si les devoirs sont un sujet de tension, vous pourrez le couper ; sans adulte disponible, il restera à votre collégien. Il sera proposé par défaut en 6e et en 5e ; en 4e et en 3e, votre collégien choisira de le partager.",
   },
   {
-    // The application is the web client served by the server, laid out for a phone and for a computer
-    // (docs/architecture.md, "Client web").
+    question: 'Ces gestes marcheront-ils avec Tom ?',
+    answer: `Les études citées portent sur des méthodes transmises par des enseignants ou des chercheurs, et ${BRAND_NAME} en reprend les gestes. Pour savoir ce qu'il en reste avec Tom, nous mesurerons dès les premiers élèves les soirées de devoirs par semaine, les devoirs rendus, et l'avis des familles par des questionnaires déjà validés.`,
+  },
+  {
+    // The application is the web client served by the server, laid out for a phone and for a computer.
     question: 'Sur quel appareil ?',
     answer: 'Dans le navigateur, sur un téléphone, une tablette ou un ordinateur, sans rien installer.',
   },
   {
-    question: 'Sur quoi repose la méthode ?',
+    question: 'Un seul ordinateur pour toute la famille ?',
     answer:
-      "Sur les gestes d'un programme d'aide à l'organisation pour collégiens, HOPS, testé dans un essai scientifique : noter ses devoirs et ses contrôles, vérifier ses affaires, découper la révision d'un contrôle, réviser un contrôle les jours d'avant. Dans ce programme, un adulte vérifie à chaque séance. Rien ne prouve encore qu'une application fasse aussi bien, et nous ne l'affirmons pas.",
-    // HOPS in docs/methode.md, "Sources": its trial [1], and the protocol [7] the gestures come from; no effect size on the page.
-    sources: [
-      { href: 'https://europepmc.org/article/MED/29172596', label: 'Essai de HOPS, Langberg et al., 2018' },
-      { href: 'https://www.medrxiv.org/content/10.64898/2026.02.13.26346294v1', label: 'Protocole de HOPS, Nissley-Tsiopinis et al., 2026' },
-    ],
-  },
-  {
-    question: 'Tom donne-t-il les réponses ?',
-    answer:
-      "Il est conçu pour ne pas les donner. Tom cherche d'abord où votre enfant bloque, puis l'aide pas à pas : une question, un indice, une étape. S'il bloque encore, Tom montre un exemple proche, déjà résolu. Chaque message de Tom passe par un contrôle automatique avant d'être affiché : s'il contient la réponse de l'exercice, il est réécrit ou remplacé.",
-  },
-  {
-    question: 'Tom est-il une intelligence artificielle ?',
-    answer:
-      "Oui. Tom fonctionne avec les modèles de Mistral AI, une entreprise française. Il ne se fait pas passer pour un ami, et chaque message passe par un contrôle automatique avant d'être affiché à votre enfant.",
+      "Oui. Chacun a son profil et y entre avec son propre code. Sur un ordinateur partagé, son profil se ferme après 10 minutes sans activité, pour qu'un frère ou une sœur n'y entre pas.",
   },
   {
     question: 'Et Pronote ?',
-    answer: `${BRAND_NAME} ne se connecte pas à Pronote. Avec ${BRAND_NAME}, votre enfant dit ses devoirs à voix haute, en regardant son agenda ou ce qu'il a noté.`,
-  },
-  {
-    question: 'Un seul ordinateur pour toute la famille ?',
-    answer:
-      "Oui. Chaque enfant a son profil et y entre avec son propre code. Sur un ordinateur partagé, son profil se ferme après 10 minutes sans activité, pour qu'un frère ou une sœur n'y entre pas.",
+    answer: `${BRAND_NAME} ne se connecte pas à Pronote : votre collégien dira ses devoirs à voix haute, en regardant ce qu'il a noté.`,
   },
 ];

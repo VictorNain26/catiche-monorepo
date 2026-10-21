@@ -1,16 +1,17 @@
 ---
 import TomIllustration from '@/components/atoms/tom-illustration.astro';
 import RequestInvitation from '@/components/molecules/request-invitation.astro';
+import { BRAND_NAME } from '@/lib/brand';
 ---
 
-{/* The end of the evening: Tom waves, without a word (docs/charte.md, "Tom": out of a session, he does not speak). */}
-<section class="border-t pt-20 pb-12 lg:pt-28 lg:pb-16">
-  <div class="container grid max-w-6xl items-end gap-10 sm:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
-    <div class="pb-8">
-      <h2 class="max-w-2xl text-4xl text-balance text-foreground sm:text-5xl">Envie d&apos;essayer avec votre enfant&nbsp;?</h2>
-      <p class="mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">Les comptes s&apos;ouvrent sur invitation.</p>
-      <RequestInvitation class="mt-8" />
+{/* The end of the evening: Tom waves, without a word (docs/charte.md, "Tom": out of a session, he does not speak). On a
+ * phone he already opens the page, right above the title: the end keeps only the question and the button. */}
+<section class="border-t pt-12 pb-12 md:pt-20 lg:pt-28 lg:pb-16">
+  <div class="container grid max-w-6xl items-end gap-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
+    <div class="sm:pb-8">
+      <h2 class="max-w-2xl text-3xl text-balance text-foreground sm:text-5xl">{BRAND_NAME} vous intéresse&nbsp;?</h2>
+      <RequestInvitation class="mt-6 sm:mt-8" />
     </div>
-    <TomIllustration start="view" class="w-48 sm:w-full" />
+    <TomIllustration start="view" class="hidden sm:block sm:w-full" />
   </div>
 </section>

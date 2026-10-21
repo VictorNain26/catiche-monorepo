@@ -1,6 +1,6 @@
 ---
-// What is done and what is left at the end of the evening, on the pupil's screen and on the parent's
-// (docs/produit.md, "Le point du soir"); a screen adds its own lines after them.
+// What is done and what is left at the end of the evening, on the screen of the evening check-in
+// (docs/produit.md, "Le point du soir").
 interface Props {
   done: string;
   left: string;
@@ -18,5 +18,4 @@ const { done, left } = Astro.props;
     <dt class="text-sm font-bold text-muted-foreground">Reste</dt>
     <dd>{left}</dd>
   </div>
-  <slot />
 </dl>

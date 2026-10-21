@@ -4,7 +4,8 @@ import ExternalLink from '@/components/atoms/external-link.astro';
 import { BRAND_NAME, CONTACT_EMAIL, SIGN_IN_URL } from '@/lib/brand';
 
 // What a visitor can do today: accounts open on invitation (apps/server/src/platform/auth/auth.ts), asked for by e-mail,
-// without a waiting list; an invited parent signs in to the application.
+// without a waiting list; an invited adult signs in to the application. What the slot holds is read right under the
+// button.
 interface Props {
   class?: string;
 }
@@ -13,10 +14,11 @@ const { class: className } = Astro.props;
 const REQUEST_HREF = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`Demande d'invitation à ${BRAND_NAME}`)}`;
 ---
 
-<div class={cn('flex flex-col items-start gap-4', className)}>
+<div class={cn('flex flex-col items-start gap-3', className)}>
   <a href={REQUEST_HREF} class={buttonVariants({ size: 'lg' })}>
     Demander une invitation
   </a>
+  <slot />
   <p class="text-muted-foreground">
     Déjà invité&nbsp;?{' '}
     <ExternalLink href={SIGN_IN_URL} class="min-h-11 text-primary underline underline-offset-4">
