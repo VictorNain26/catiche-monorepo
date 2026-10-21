@@ -7,15 +7,24 @@ import { BAG, FIRST_SAID, HOMEWORK, HOURS, MISSING } from './evening-data';
 
 // The evening of docs/produit.md, "Ce que fait Catiche", and its gestures in docs/methode.md, "Les gestes d'une soirée":
 // the product presented in the present, as docs/produit.md describes it (docs/charte.md, "Les mots").
-// A question or a hint is the bottom of Tom's ladder (docs/tuteur.md, § 3). One sentence and one screen per moment.
-// At a computer, the four moments stay in a column on the left while their screens pass on the right, and the moment
-// whose screen is in the middle of the window lights up; on a phone, each moment sits above its screen.
+// A question or a hint is the bottom of Tom's ladder (docs/tuteur.md, § 3). One row per moment, like a chapter: its
+// hour, its title and its sentence on the left, its screen facing them on the right; on a phone, one under the other.
+// Each row rises once as it comes into view, its text first, then its screen.
 const MOMENTS = [
-  { time: HOURS.said, body: 'Votre collégien dit ses devoirs à voix haute, et Tom demande ce qui manque.' },
-  { time: HOURS.ordered, body: 'Tom propose un ordre, que votre collégien peut changer.' },
-  { time: HOURS.started, body: 'Tom découpe chaque devoir en étapes courtes, et aide par une question ou un indice.' },
+  {
+    time: HOURS.said,
+    title: "Dire ce qu'il a ce soir",
+    body: 'Votre collégien dit ses devoirs à voix haute, et Tom demande ce qui manque.',
+  },
+  { time: HOURS.ordered, title: 'Choisir par où commencer', body: 'Tom propose un ordre, que votre collégien peut changer.' },
+  {
+    time: HOURS.started,
+    title: 'Avancer par petites étapes',
+    body: 'Tom découpe chaque devoir en étapes courtes, et aide par une question ou un indice.',
+  },
   {
     time: HOURS.ended,
+    title: 'Préparer demain',
     body: "Tom aide votre collégien à préparer son cartable, et note la suite de l'histoire pour demain soir, avant le contrôle de jeudi.",
   },
 ] as const;
@@ -36,31 +45,21 @@ const CHANGED = [english, maths, history];
   <div class="container max-w-5xl">
     <h2 class="section-title max-w-3xl text-foreground">De 17&nbsp;h&nbsp;30 au cartable prêt.</h2>
 
-    <div class="evening mt-8 lg:mt-14 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-20">
-      {/* At a computer only: the moments, held under the header, each lit while its screen is read. */}
-      <ol role="list" class="hidden space-y-8 lg:sticky lg:top-28 lg:block lg:self-start">
-        {MOMENTS.map(({ time, body }) => (
-          <li role="listitem" class="moment-label text-foreground">
-            <time datetime={time} class="block text-sm font-bold text-primary tabular-nums">
-              {spokenHour(time)}
-            </time>
-            <h3 class="mt-1 text-xl">{body}</h3>
-          </li>
-        ))}
-      </ol>
-
-      <ol role="list" class="space-y-10 lg:space-y-24">
-        {MOMENTS.map(({ time, body }, index) => (
-          <li role="listitem" class="moment-screen">
-            {/* On a phone, the moment above its screen. */}
-            <div class="mb-4 lg:hidden">
-              <time datetime={time} class="block text-sm font-bold text-primary tabular-nums">
-                {spokenHour(time)}
-              </time>
-              <h3 class="mt-1 text-xl text-foreground">{body}</h3>
+    <ol role="list" class="mt-8 space-y-12 lg:mt-14 lg:space-y-16">
+      {MOMENTS.map(({ time, title, body }, index) => (
+        <li role="listitem">
+          <play-once class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-16">
+            <div class="reveal">
+              <h3 class="text-xl text-foreground sm:text-2xl">
+                <time datetime={time} class="block font-heading text-4xl font-extrabold text-primary tabular-nums">
+                  {spokenHour(time)}
+                </time>
+                <span class="mt-1 block">{title}</span>
+              </h3>
+              <p class="mt-2 max-w-md text-lg text-foreground">{body}</p>
             </div>
-            <play-once class="block">
-              <Screen class="reveal">
+            <div class="reveal reveal-2">
+              <Screen>
                 {index === 0 && (
                   <div class="space-y-3">
                     {/* The screen stops on Tom's question: his answer is the top of the page, at 17:35. */}
@@ -128,72 +127,15 @@ const CHANGED = [english, maths, history];
                   </div>
                 )}
               </Screen>
-            </play-once>
-          </li>
-        ))}
-      </ol>
-    </div>
+            </div>
+          </play-once>
+        </li>
+      ))}
+    </ol>
   </div>
 </section>
 
 <style>
-  /* At a computer, where the browser ties animations to the scroll: the moment whose screen holds the middle of the
-   * window takes the ink, the others the muted ink. Elsewhere, and under reduced motion, every moment is lit. */
-  @supports (animation-timeline: view()) {
-    @media (width >= 64rem) and (prefers-reduced-motion: no-preference) {
-      .evening {
-        timeline-scope: --moment-1, --moment-2, --moment-3, --moment-4;
-      }
-
-      .moment-label {
-        animation: moment-lit linear both;
-      }
-
-      .moment-label:nth-child(1) {
-        animation-timeline: --moment-1;
-      }
-
-      .moment-label:nth-child(2) {
-        animation-timeline: --moment-2;
-      }
-
-      .moment-label:nth-child(3) {
-        animation-timeline: --moment-3;
-      }
-
-      .moment-label:nth-child(4) {
-        animation-timeline: --moment-4;
-      }
-
-      .moment-screen:nth-child(1) {
-        view-timeline-name: --moment-1;
-      }
-
-      .moment-screen:nth-child(2) {
-        view-timeline-name: --moment-2;
-      }
-
-      .moment-screen:nth-child(3) {
-        view-timeline-name: --moment-3;
-      }
-
-      .moment-screen:nth-child(4) {
-        view-timeline-name: --moment-4;
-      }
-    }
-  }
-
-  @keyframes moment-lit {
-    0%,
-    100% {
-      color: var(--color-muted-foreground);
-    }
-    35%,
-    65% {
-      color: var(--color-foreground);
-    }
-  }
-
   /* The line that strikes the step done. */
   .strike {
     position: absolute;
