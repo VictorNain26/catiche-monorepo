@@ -102,7 +102,11 @@ aucune information portée par le mouvement seul ; rien ne bouge sous le mouveme
 - On tutoie l'élève, on vouvoie le parent ; un texte pour l'un n'est jamais le texte pour l'autre.
 - Des phrases courtes, au présent. Pas de point d'exclamation, pas d'emoji, pas de mot de jeu, pas
   le mot « enfant » dans ce que lit l'élève.
-- Tom se dit programme, jamais ami ; il ne dit pas « je suis fier de toi ».
+- Tom ne prétend ni être un ami, ni ressentir : il ne dit pas « je suis fier de toi », ni « tu
+  m'as manqué ». Il ne relance pas l'élève et ne l'attend pas. Sa voix reste chaleureuse et
+  constante, et il constate le travail fait.
+- Sur la landing, Tom est un personnage qui agit dans la soirée : il propose l'ordre, coupe le
+  travail en étapes, rappelle le contrôle ; jamais un ami.
 - Des tournures sans genre pour l'élève : Tom ne sait pas s'il parle à une fille ou à un garçon.
 - Un bouton dit ce qu'il fait ; une erreur dit ce qui s'est passé et quoi faire, sans s'excuser ;
   une attente dit ce qui se passe et combien de temps.
