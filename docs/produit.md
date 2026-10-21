@@ -37,18 +37,23 @@ Une soirée suit les gestes de `methode.md` :
 3. Il découpe le travail en étapes courtes et aide l'élève à démarrer, puis à tenir.
 4. Il aide sur le contenu sans donner la réponse (`tuteur.md`).
 5. À la fin, il récapitule ce qui est fait, ce qui reste, et le cartable du lendemain.
-   **Le point du soir** (idée de Victor, 2026-10-20) : si un adulte de la maison le peut,
-   l'enfant lui montre ce récapitulatif. L'adulte répond « Vu », avec un encouragement s'il le
-   veut. Il ne vérifie pas le contenu et ne note rien. Ce point s'adapte à chaque famille :
-   - adulte rentré tard : il voit le récapitulatif plus tard, et l'enfant voit le « Vu » le
-     lendemain ;
-   - garde alternée : le récapitulatif va à l'adulte chez qui l'enfant est ce soir-là ;
+   **Le point du soir** (idée de Victor, 2026-10-20, revue le 2026-10-21 d'après `methode.md`,
+   « Le rôle de l'adulte au collège ») : l'enfant choisit ce qu'il montre à un adulte de la
+   maison. Il montre au moins le plan de demain (ce qui reste, le contrôle qui approche, le
+   cartable), et s'il le veut une étape dont il est content. Il dit aussi ce qu'il lui faut d'un
+   adulte : un mot à signer, une fourniture, l'heure de demain. L'adulte fait le geste demandé
+   (« Je m'en occupe ») et peut ajouter un mot sur l'étape montrée. Catiche ne lui propose
+   jamais de corriger, de vérifier le contenu ni de sanctionner : ce qui reste se présente comme
+   un plan. Ce point s'adapte à chaque famille :
+   - adulte rentré tard : il le voit plus tard, et l'enfant trouve sa réponse le lendemain ;
+   - garde alternée : il va à l'adulte chez qui l'enfant est ce soir-là ;
    - relation tendue autour des devoirs : l'adulte peut couper le point du soir ;
-   - sans adulte disponible : le récapitulatif reste à l'enfant, et rien ne lui est reproché ;
+   - sans adulte disponible : il reste à l'enfant, sans reproche ; Tom propose de garder la
+     demande pour le professeur ;
    - selon l'âge : proposé par défaut en 6e-5e ; en 4e-3e, l'enfant choisit de partager.
 
-   Jamais de série de jours, de relance ni de score. La raison est dans `methode.md`, « Le rôle
-   du parent ».
+   Jamais de série de jours, de relance ni de score. Les raisons sont dans `methode.md`, « Le
+   rôle du parent » et « Le rôle de l'adulte au collège ».
 6. D'un soir à l'autre, il garde les contrôles annoncés et ramène leur révision les jours
    d'avant.
 
