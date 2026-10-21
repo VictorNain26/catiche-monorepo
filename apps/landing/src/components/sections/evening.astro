@@ -282,8 +282,9 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
   @supports (animation-timeline: view()) {
     @media (width >= 64rem) and (prefers-reduced-motion: no-preference) {
       .evening {
-        /* Every screen the same height, and every moment's row as high: each moment is read level with its screen. */
-        --evening-screen: calc(var(--spacing) * 96);
+        /* Every moment's row about as high as a screen, which keeps the height of its content: each moment is read
+         * level with its screen, without an empty card or a long gap between moments. */
+        --evening-screen: calc(var(--spacing) * 72);
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
         column-gap: calc(var(--spacing) * 24);
@@ -317,10 +318,6 @@ const BAG = ['Cahier de maths', "Manuel d'anglais", "Fiche d'histoire"];
         position: sticky;
         top: calc(50% - var(--evening-screen) / 2);
         animation: moment-screen linear both;
-      }
-
-      .moment-screen > :global(*) {
-        min-height: var(--evening-screen);
       }
 
       .moment-hour {
