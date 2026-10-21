@@ -46,16 +46,16 @@ const LISTS = [
 ];
 ---
 
-<section id="confiance" class="scroll-mt-20 bg-background py-14 md:py-20 lg:py-28">
+<section id="confiance" class="scroll-mt-20 bg-background py-10 md:py-20 lg:py-28">
   <div class="container max-w-5xl">
     <h2 class="max-w-3xl text-3xl text-balance text-foreground sm:text-4xl">Pourquoi nous faire confiance</h2>
     <p class="mt-3 max-w-2xl text-lg text-foreground">La soirée que nous construisons s&apos;appuie sur la recherche.</p>
 
     {/* Three proofs, each a large mark, one line, and its source in a new tab (atoms/external-link.astro). */}
-    <ul class="mt-8 grid gap-8 md:grid-cols-3 md:gap-10 lg:mt-12">
+    <ul class="mt-6 grid gap-6 md:grid-cols-3 md:gap-10 lg:mt-12">
       {PROOFS.map(({ mark, line, source }) => (
         <li>
-          <p class="font-heading text-3xl font-extrabold text-primary lg:text-4xl">{mark}</p>
+          <p class="font-heading text-2xl font-extrabold text-primary sm:text-3xl lg:text-4xl">{mark}</p>
           <p class="mt-2 text-foreground">
             {line}{' '}
             <ExternalLink inline href={source.href} title={source.title} class="text-primary underline underline-offset-4">
@@ -66,7 +66,7 @@ const LISTS = [
       ))}
     </ul>
 
-    <div class="mt-12 grid gap-8 md:grid-cols-2 md:gap-10 lg:mt-16">
+    <div class="mt-8 grid gap-6 md:grid-cols-2 md:gap-10 lg:mt-16">
       {LISTS.map(({ title, items }) => (
         <div>
           <h3 class="text-xl text-foreground">{title}</h3>
@@ -79,7 +79,7 @@ const LISTS = [
       ))}
     </div>
 
-    <p class="mt-10 rounded-2xl bg-secondary p-5 text-foreground lg:mt-12">
+    <p class="mt-8 rounded-2xl bg-secondary p-5 text-foreground lg:mt-12">
       Si votre collégien écrit qu&apos;il veut se faire du mal, Tom s&apos;arrête. Un message écrit à l&apos;avance, sans intelligence artificielle,
       lui donne le 3114, un numéro d&apos;écoute gratuit jour et nuit, et l&apos;invite à parler à un adulte de confiance.
     </p>

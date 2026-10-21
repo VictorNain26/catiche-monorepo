@@ -49,7 +49,7 @@ const [maths, history, english] = HOMEWORK;
 const CHANGED = [english, maths, history];
 ---
 
-<section id="soiree" class="scroll-mt-20 bg-background py-14 md:py-20 lg:py-28">
+<section id="soiree" class="scroll-mt-20 bg-background py-10 md:py-20 lg:py-28">
   <div class="container max-w-5xl">
     <div class="max-w-3xl">
       <h2 class="text-3xl text-balance text-foreground sm:text-4xl">Une soirée avec Tom</h2>
@@ -75,7 +75,7 @@ const CHANGED = [english, maths, history];
               </time>
               {title}
             </h3>
-            <p class="mt-2 max-w-md text-lg text-foreground">{body}</p>
+            <p class="mt-1 max-w-md text-foreground sm:mt-2 sm:text-lg">{body}</p>
           </div>
 
           <div class:list={['mt-4 lg:mt-0', index % 2 === 1 && 'lg:order-1']}>
@@ -157,7 +157,7 @@ const CHANGED = [english, maths, history];
 
 <style>
   .moment + .moment {
-    margin-top: calc(var(--spacing) * 10);
+    margin-top: calc(var(--spacing) * 8);
   }
 
   @media (width >= 64rem) {
