@@ -1,27 +1,24 @@
 ---
-import { cn } from '@repo/ui/classes';
 import Layout from './layout.astro';
-import SectionHeader from '@/components/atoms/section-header.astro';
 
-const MAX_WIDTHS = {
-  '3xl': 'max-w-3xl',
-  '4xl': 'max-w-4xl',
-} as const;
-
+// An annex page (help, contact, the legal pages, the 404): its title at the scale of the home page's section titles, a
+// line under it when it has one, and one reading width for all.
 interface Props {
   title: string;
   description?: string;
   metaDescription?: string;
   noindex?: boolean;
-  maxWidth?: keyof typeof MAX_WIDTHS;
 }
 
-const { title, description, metaDescription = description, noindex = false, maxWidth = '4xl' } = Astro.props;
+const { title, description, metaDescription = description, noindex = false } = Astro.props;
 ---
 
 <Layout title={title} noindex={noindex} {...(metaDescription && { description: metaDescription })}>
-  <div class={cn('container py-12 md:py-24', MAX_WIDTHS[maxWidth])}>
-    <SectionHeader as="h1" title={title} {...(description && { description })} align="left" class="mb-8" />
+  <div class="container max-w-3xl py-12 md:py-24">
+    <div class="mb-8">
+      <h1 class="section-title text-foreground">{title}</h1>
+      {description && <p class="mt-4 text-lg text-muted-foreground">{description}</p>}
+    </div>
     <slot />
   </div>
 </Layout>
