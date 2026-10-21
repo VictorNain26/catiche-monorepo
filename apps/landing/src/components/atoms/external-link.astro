@@ -5,7 +5,8 @@ import { cn } from '@repo/ui/classes';
 // A link that leaves catiche.fr: it opens in a new tab, and says so to the eye and to a screen reader
 // (WCAG technique G201). A link inside the site stays in the same tab, so the back button still works.
 // `inline` keeps it in a running sentence without changing the line height: a link in a sentence is exempt from the
-// target size (WCAG 2.5.8, "Inline"). `title` names the source in full, out of the running text.
+// target size (WCAG 2.5.8, "Inline"); it is never cut, and as a flex box its text drops the space its slot keeps before
+// the arrow, which the underline would cross. `title` names the source in full, out of the running text.
 interface Props {
   href: string;
   class?: string;
@@ -16,9 +17,15 @@ interface Props {
 const { href, class: className, inline = false, title } = Astro.props;
 ---
 
-<a href={href} title={title} target="_blank" rel="noopener noreferrer" class={cn(inline ? 'inline' : 'inline-flex items-center gap-1', className)}>
+<a
+  href={href}
+  title={title}
+  target="_blank"
+  rel="noopener noreferrer"
+  class={cn(inline ? 'inline-flex items-baseline whitespace-nowrap' : 'inline-flex items-center gap-1', className)}
+>
   <slot />
-  <ArrowUpRight class={cn('size-4 shrink-0', inline && 'ml-0.5 inline align-text-bottom')} aria-hidden="true" />
+  <ArrowUpRight class={cn('size-4 shrink-0', inline && 'ml-0.5 self-center')} aria-hidden="true" />
   {/* The space is in the expression: the compressed HTML would drop one written before it. */}
   <span class="sr-only">{' (nouvel onglet)'}</span>
 </a>
