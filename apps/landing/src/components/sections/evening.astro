@@ -31,7 +31,7 @@ const MOMENTS = [
   {
     time: HOURS.ended,
     title: 'Préparer demain',
-    body: "Tom aide votre collégien à préparer son cartable, et lui rappelle de réviser l'histoire demain, pour le contrôle de jeudi.",
+    body: "Tom aide votre collégien à préparer son cartable. Il garde l'histoire à réviser demain, pour le contrôle de jeudi.",
     screen: 'Pour demain',
   },
 ] as const;
@@ -90,7 +90,7 @@ const CHANGED = [english, maths, history];
                 )}
                 {index === 1 && (
                   <div class="space-y-3">
-                    <PupilSays>Tu proposes les maths d&apos;abord, mais je préfère commencer par l&apos;anglais.</PupilSays>
+                    <PupilSays>Je préfère commencer par l&apos;anglais.</PupilSays>
                     <TomSays>D&apos;accord. Puis les maths, elles sont pour demain.</TomSays>
                     <ol class="divide-y rounded-control ring-1 ring-border">
                       {CHANGED.map(({ subject, note }, position) => (

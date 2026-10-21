@@ -17,13 +17,13 @@ export const FAQS: Faq[] = [
     answer: `Le prix et la date d'ouverture restent à fixer. D'ici là, les comptes s'ouvrent sur invitation : écrivez-nous à ${CONTACT_EMAIL}.`,
   },
   {
-    question: 'Et si je rentre tard, ou si nous vivons dans deux maisons ?',
+    question: "Et si je rentre tard, ou s'il vit dans deux maisons ?",
     answer:
       "Vous voyez le point du soir en rentrant, et votre collégien trouve votre « Vu » le lendemain. S'il vit dans deux maisons, le point du soir va à l'adulte chez qui il est ce soir-là. Vous pouvez aussi le couper. En 6e et en 5e, il est proposé dès le départ ; en 4e et en 3e, votre collégien choisit de le partager.",
   },
   {
     question: 'Est-ce que ça marche ?',
-    answer: `${BRAND_NAME} reprend des méthodes qui marchent quand des enseignants ou des chercheurs les transmettent. Avec Tom, nous le mesurons dès les premiers élèves : combien de soirs par semaine ils travaillent avec lui, les devoirs rendus et l'avis des familles.`,
+    answer: `${BRAND_NAME} reprend des méthodes qui marchent quand des enseignants ou des chercheurs les transmettent. Avec Tom, nous mesurons combien de soirs par semaine les élèves travaillent avec lui, les devoirs rendus et l'avis des familles.`,
   },
   {
     // The application is the web client served by the server, laid out for a phone and for a computer.
