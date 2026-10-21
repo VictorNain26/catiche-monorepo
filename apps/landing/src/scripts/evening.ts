@@ -5,8 +5,6 @@
 import { orderTiming } from './timing';
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-// Where the evening's screens become sticky (evening.astro): the observed element changes with it.
-const wide = window.matchMedia('(width >= 64rem)');
 // Taller than the page: what lies above the window counts as read.
 const ABOVE = '100000px';
 
@@ -17,11 +15,21 @@ class PlayOnce extends HTMLElement {
     if (reducedMotion.matches) return;
     this.dataset['armed'] = '';
     // The entry state is computed now, before the observer can play the scene: a scene already in view on load (the top
-    // of the page, an arrival on /#soiree) then plays from it rather than from its end state. Its CSS sets it at once,
+    // of the page, an arrival on an anchor) then plays from it rather than from its end state. Its CSS sets it at once,
     // without a transition.
     this.getBoundingClientRect();
-    this.#observe();
-    wide.addEventListener('change', this.#observe);
+    // A scene plays once its top has risen past the bottom fifth of the window, however tall it is. The band reaches far
+    // above the window: a scene already scrolled past, on load or by a jump to a link, plays too, rather than staying in
+    // its entry state.
+    this.#observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        this.#stop();
+        this.play();
+      },
+      { rootMargin: `${ABOVE} 0px -20% 0px` },
+    );
+    this.#observer.observe(this);
     // Reduced motion turned on during the visit: everything shows, still.
     reducedMotion.addEventListener('change', this.#reveal);
   }
@@ -29,27 +37,6 @@ class PlayOnce extends HTMLElement {
   disconnectedCallback() {
     this.#stop();
   }
-
-  #observe = () => {
-    this.#observer?.disconnect();
-    // A sticky screen of the evening is always on screen, faded until its moment is read: it plays when the moment's
-    // text crosses the middle of the window, rather than when it is itself in view.
-    const moment = this.dataset['for'] ? document.getElementById(this.dataset['for']) : null;
-    const sticky = getComputedStyle(this).position === 'sticky';
-    const target = sticky && moment ? moment : this;
-    this.#observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return;
-        this.#stop();
-        this.play();
-      },
-      // A scene plays once its top has risen past the bottom fifth of the window (a sticky one's moment, past the middle),
-      // however tall it is. The band reaches far above the window: a scene already scrolled past, on load or by a jump
-      // to a link, plays too, rather than staying in its entry state.
-      { rootMargin: sticky ? `${ABOVE} 0px -45% 0px` : `${ABOVE} 0px -20% 0px` },
-    );
-    this.#observer.observe(target);
-  };
 
   #reveal = (event: MediaQueryListEvent) => {
     if (!event.matches) return;
@@ -59,7 +46,6 @@ class PlayOnce extends HTMLElement {
 
   #stop() {
     this.#observer?.disconnect();
-    wide.removeEventListener('change', this.#observe);
     reducedMotion.removeEventListener('change', this.#reveal);
   }
 

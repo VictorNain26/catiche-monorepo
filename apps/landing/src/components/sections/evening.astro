@@ -8,7 +8,8 @@ import { BAG, EVENING, FIRST_SAID, HOMEWORK, HOURS, MISSING } from './evening-da
 // The evening of docs/produit.md, "Ce que fait Catiche", and its gestures in docs/methode.md, "Les gestes d'une soirée":
 // what Catiche accompanies once built (docs/produit.md, "À construire"), told in the present under a lead that says
 // nothing of it exists yet (docs/charte.md, "Les mots": one tense on a page).
-// A question or a hint is the bottom of Tom's ladder (docs/tuteur.md, § 3). One sentence and one screen per moment.
+// A question or a hint is the bottom of Tom's ladder (docs/tuteur.md, § 3). One sentence and one screen per moment, on a
+// single line of time from 17:30 to 18:50.
 const MOMENTS = [
   {
     time: HOURS.said,
@@ -31,7 +32,7 @@ const MOMENTS = [
   {
     time: HOURS.ended,
     title: 'Préparer demain',
-    body: "Tom aide votre collégien à préparer son cartable, et lui rappelle de réviser un contrôle les jours d'avant.",
+    body: "Tom aide votre collégien à préparer son cartable, et lui rappelle de réviser l'histoire demain, pour le contrôle de jeudi.",
     screen: 'Pour demain',
   },
 ] as const;
@@ -48,29 +49,36 @@ const [maths, history, english] = HOMEWORK;
 const CHANGED = [english, maths, history];
 ---
 
-<section id="soiree" class="scroll-mt-20 py-12 md:py-16 lg:py-32">
-  <div class="container max-w-6xl">
+<section id="soiree" class="scroll-mt-20 bg-background py-14 md:py-20 lg:py-28">
+  <div class="container max-w-5xl">
     <div class="max-w-3xl">
       <h2 class="text-3xl text-balance text-foreground sm:text-4xl">Une soirée avec Tom</h2>
-      <p class="mt-4 text-lg text-muted-foreground md:mt-6 md:text-xl">{BRAND_NAME} est en préparation. Voici la soirée que nous construisons.</p>
+      <p class="mt-3 text-lg text-foreground md:mt-4 md:text-xl">{BRAND_NAME} est en préparation. Voici la soirée que nous construisons.</p>
     </div>
 
-    {/* The roles stay explicit: at a computer, a moment is laid out with `display: contents`. */}
-    <ol role="list" class="evening mt-10 lg:mt-20">
+    {/* One line of time, the thread of the evening: on a phone on the left, at a computer in the middle, the screens
+     * changing side from one moment to the next. */}
+    <ol role="list" class="evening relative mt-10 lg:mt-16">
+      <span aria-hidden="true" class="rail absolute top-2 bottom-2 left-3 w-0.5 rounded-full bg-border lg:left-1/2 lg:-translate-x-1/2">
+        <span class="rail-fill absolute inset-0 rounded-full bg-primary"></span>
+      </span>
       {MOMENTS.map(({ time, title, body, screen }, index) => (
-        <li role="listitem" class="moment">
-          <div id={`moment-${String(index + 1)}`} class="moment-text">
-            {/* On a phone, the hour beside the title; from a tablet, above it. */}
-            <h3 class="flex items-baseline gap-3 text-xl text-balance text-foreground sm:block sm:text-2xl">
-              <time datetime={time} class="moment-hour block w-fit shrink-0 text-3xl tabular-nums sm:mb-3 sm:text-5xl lg:text-6xl">
+        <li role="listitem" class="moment relative pl-10 lg:grid lg:grid-cols-2 lg:items-center lg:gap-20 lg:pl-0">
+          <span
+            aria-hidden="true"
+            class="absolute top-2 left-3 size-3 -translate-x-1/2 rounded-full bg-primary ring-4 ring-background lg:top-1/2 lg:left-1/2 lg:-translate-y-1/2"
+          ></span>
+          <div class:list={[index % 2 === 1 && 'lg:order-2']}>
+            <h3 class="text-xl text-balance text-foreground sm:text-2xl">
+              <time datetime={time} class="mb-1 block font-heading text-2xl font-extrabold text-primary tabular-nums lg:text-3xl">
                 {time}
               </time>
               {title}
             </h3>
-            <p class="mt-2 max-w-md text-lg text-muted-foreground sm:mt-3">{body}</p>
+            <p class="mt-2 max-w-md text-lg text-foreground">{body}</p>
           </div>
 
-          <play-once data-for={`moment-${String(index + 1)}`} class="moment-screen block">
+          <div class:list={['mt-4 lg:mt-0', index % 2 === 1 && 'lg:order-1']}>
             {/* The hour is the moment's, just above or beside it: the screen keeps only its name. */}
             <Screen title={screen}>
               {index === 0 && (
@@ -83,6 +91,7 @@ const CHANGED = [english, maths, history];
               {index === 1 && (
                 <div class="space-y-3">
                   <PupilSays>Je préfère commencer par l&apos;anglais.</PupilSays>
+                  <TomSays>D&apos;accord. Puis les maths, elles sont pour demain.</TomSays>
                   <ol class="divide-y rounded-control ring-1 ring-border">
                     {CHANGED.map(({ subject, note }, position) => (
                       <li class="flex items-baseline gap-3 px-3 py-2">
@@ -100,8 +109,8 @@ const CHANGED = [english, maths, history];
                     {STEPS.map(({ step, state }, position) => (
                       <li
                         class:list={[
-                          'step flex items-baseline gap-3 rounded-control px-3 py-2',
-                          state === 'en cours' ? 'step-current bg-accent text-accent-foreground' : 'ring-1 ring-border',
+                          'flex items-baseline gap-3 rounded-control px-3 py-2',
+                          state === 'en cours' ? 'bg-accent text-accent-foreground' : 'ring-1 ring-border',
                         ]}
                       >
                         <span class="font-heading font-extrabold tabular-nums">{position + 1}</span>
@@ -109,7 +118,7 @@ const CHANGED = [english, maths, history];
                           {step}
                           {state === 'fait' && (
                             <svg class="strike" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true">
-                              <path d="M1 4 C 25 2, 60 5, 99 2" pathLength="1" />
+                              <path d="M1 4 C 25 2, 60 5, 99 2" />
                             </svg>
                           )}
                         </span>
@@ -132,14 +141,14 @@ const CHANGED = [english, maths, history];
                     <p class="text-sm font-bold text-muted-foreground">Dans le cartable</p>
                     <ul class="mt-2 space-y-1.5">
                       {BAG.map((item) => (
-                        <li class="bag-item">{item}</li>
+                        <li>{item}</li>
                       ))}
                     </ul>
                   </div>
                 </div>
               )}
             </Screen>
-          </play-once>
+          </div>
         </li>
       ))}
     </ol>
@@ -147,41 +156,40 @@ const CHANGED = [english, maths, history];
 </section>
 
 <style>
-  /* Each moment is its text, then its screen: one under the other on a phone, side by side from a tablet, where the
-   * screen keeps a bounded width rather than stretching under a short text. */
   .moment + .moment {
     margin-top: calc(var(--spacing) * 10);
   }
 
-  .moment-screen {
-    margin-top: calc(var(--spacing) * 4);
-  }
-
-  @media (width >= 48rem) {
-    .moment {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
-      align-items: center;
-      column-gap: calc(var(--spacing) * 10);
-    }
-
-    .moment + .moment {
-      margin-top: calc(var(--spacing) * 14);
-    }
-
-    .moment-screen {
-      margin-top: 0;
-    }
-  }
-
   @media (width >= 64rem) {
-    .moment {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
-      column-gap: calc(var(--spacing) * 24);
+    .moment + .moment {
+      margin-top: calc(var(--spacing) * 16);
     }
   }
 
-  /* The line that strikes the step done; drawn, it is the end state. */
+  /* The line of time fills as the evening is read: the only move of the section, tied to the scroll where the browser
+   * can; elsewhere, and under reduced motion, it is full. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .evening {
+        view-timeline: --evening block;
+      }
+
+      .rail-fill {
+        transform-origin: top;
+        animation: rail-fill linear both;
+        animation-timeline: --evening;
+        animation-range: entry 25% exit 75%;
+      }
+    }
+  }
+
+  @keyframes rail-fill {
+    from {
+      scale: 1 0;
+    }
+  }
+
+  /* The line that strikes the step done. */
   .strike {
     position: absolute;
     inset-inline: calc(var(--spacing) * -1);
@@ -193,189 +201,5 @@ const CHANGED = [english, maths, history];
     stroke: var(--color-foreground);
     stroke-width: calc(var(--spacing) / 2);
     stroke-linecap: round;
-    stroke-dasharray: 1;
-  }
-
-  /* Before a screen is read, while the script that plays it holds it (src/scripts/evening.ts): the line not drawn, the
-   * next step not yet current, the bag still empty. That state is set at once; only its release is a transition. */
-  @media (prefers-reduced-motion: no-preference) {
-    play-once:not([data-armed]) {
-      .strike {
-        transition: stroke-dashoffset var(--duration-base) var(--ease-standard) var(--duration-slow);
-      }
-
-      .step-current {
-        transition: background-color var(--duration-base) var(--ease-standard) calc(var(--duration-slow) + var(--duration-base));
-      }
-
-      .bag-item {
-        transition:
-          translate var(--duration-slow) var(--ease-standard) var(--duration-slow),
-          opacity var(--duration-slow) var(--ease-standard) var(--duration-slow);
-      }
-
-      .bag-item:nth-child(2) {
-        transition-delay: calc(var(--duration-slow) + var(--duration-fast));
-      }
-
-      .bag-item:nth-child(3) {
-        transition-delay: calc(var(--duration-slow) + var(--duration-fast) * 2);
-      }
-    }
-
-    play-once[data-armed] {
-      .strike {
-        stroke-dashoffset: 1;
-      }
-
-      .step-current {
-        background-color: transparent;
-      }
-
-      .bag-item {
-        opacity: 0;
-        translate: 0 calc(var(--spacing) * -3);
-      }
-    }
-  }
-
-  /* At a computer, where the browser ties animations to the scroll: one screen stays in the middle of the window and
-   * changes as each moment is read, beside it, while the hour of the moment read takes the ink. Elsewhere, and under
-   * reduced motion, each moment keeps its own screen. */
-  @supports (animation-timeline: view()) {
-    @media (width >= 64rem) and (prefers-reduced-motion: no-preference) {
-      .evening {
-        /* Every moment's row about as high as a screen, which keeps the height of its content: each moment is read
-         * level with its screen, without an empty card or a long gap between moments. */
-        --evening-screen: calc(var(--spacing) * 72);
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
-        column-gap: calc(var(--spacing) * 24);
-        timeline-scope: --moment-1, --moment-2, --moment-3, --moment-4;
-      }
-
-      .moment {
-        display: contents;
-      }
-
-      .moment + .moment {
-        margin-top: 0;
-      }
-
-      .moment-text {
-        grid-column: 1;
-        min-height: var(--evening-screen);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        /* The moment is read while it holds the middle of the window. */
-        view-timeline-inset: 50%;
-      }
-
-      .moment-screen {
-        grid-column: 2;
-        grid-row: 1 / span 4;
-        align-self: start;
-        margin-top: 0;
-        /* Level with the first moment, then held in the middle of the window until the last. */
-        position: sticky;
-        top: calc(50% - var(--evening-screen) / 2);
-        animation: moment-screen linear both;
-      }
-
-      .moment-hour {
-        animation: moment-hour linear both;
-      }
-
-      .moment:nth-child(1) .moment-text {
-        grid-row: 1;
-        view-timeline-name: --moment-1;
-      }
-
-      .moment:nth-child(2) .moment-text {
-        grid-row: 2;
-        view-timeline-name: --moment-2;
-      }
-
-      .moment:nth-child(3) .moment-text {
-        grid-row: 3;
-        view-timeline-name: --moment-3;
-      }
-
-      .moment:nth-child(4) .moment-text {
-        grid-row: 4;
-        view-timeline-name: --moment-4;
-      }
-
-      .moment:nth-child(1) :is(.moment-screen, .moment-hour) {
-        animation-timeline: --moment-1;
-      }
-
-      .moment:nth-child(2) :is(.moment-screen, .moment-hour) {
-        animation-timeline: --moment-2;
-      }
-
-      .moment:nth-child(3) :is(.moment-screen, .moment-hour) {
-        animation-timeline: --moment-3;
-      }
-
-      .moment:nth-child(4) :is(.moment-screen, .moment-hour) {
-        animation-timeline: --moment-4;
-      }
-
-      /* The first screen is there from the start, the last one stays. */
-      .moment:first-child .moment-screen {
-        animation-name: moment-screen-first;
-      }
-
-      .moment:last-child .moment-screen {
-        animation-name: moment-screen-last;
-      }
-    }
-  }
-
-  @keyframes moment-screen {
-    0% {
-      opacity: 0;
-    }
-    10%,
-    90% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-    }
-  }
-
-  @keyframes moment-screen-first {
-    0%,
-    90% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-    }
-  }
-
-  @keyframes moment-screen-last {
-    0% {
-      opacity: 0;
-    }
-    10%,
-    100% {
-      opacity: 1;
-    }
-  }
-
-  /* The hour of the moment read in the ink, the others in the muted ink: the hour itself still says which moment it is. */
-  @keyframes moment-hour {
-    0%,
-    100% {
-      color: var(--color-muted-foreground);
-    }
-    10%,
-    90% {
-      color: var(--color-foreground);
-    }
   }
 </style>

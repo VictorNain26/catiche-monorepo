@@ -45,7 +45,7 @@ Clever Cloud (`apps/landing/Caddyfile`).
   posé par le CSS quand c'est un script qui le lève : ce script le pose lui-même (`data-armed`,
   `apps/landing/src/scripts/evening.ts`), et rien n'attend un script qui ne vient pas. Seule une
   animation en CSS pur, qui ne dépend d'aucun script, part d'un état masqué, si elle se termine
-  d'elle-même (le surligneur, `both` avec délai) ou suit le défilement (les écrans de la soirée,
+  d'elle-même (le surligneur, `both` avec délai) ou suit le défilement (la ligne du temps de la soirée,
   sous `@supports (animation-timeline: view())`). Sans scripts, si un script échoue, ou sous le
   mouvement réduit, même activé en cours de visite, la page s'affiche entière et immobile ; son
   HTML est l'état final.

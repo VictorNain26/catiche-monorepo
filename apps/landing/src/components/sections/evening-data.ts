@@ -26,7 +26,10 @@ export const ORDER_PROPOSED =
   "Je mettrais les maths d'abord, c'est pour demain. Puis une partie de l'histoire, pour le contrôle de jeudi. C'est toi qui choisis l'ordre.";
 
 /** Where the evening ends, on the screen the adult of the house sees: the test comes back the day before it. */
-export const CHECK_IN = { done: 'Anglais, maths, histoire', left: "Réviser la suite de l'histoire demain, pour jeudi" } as const;
+export const CHECK_IN = {
+  done: "Anglais, maths, une partie de l'histoire",
+  left: "Réviser la suite de l'histoire demain, pour jeudi",
+} as const;
 
-/** Tomorrow's bag, Wednesday: the maths to hand in, the history sheet to revise; English waits for Friday. */
-export const BAG = ['Cahier de maths, le devoir à rendre', "Fiche d'histoire, à réviser"] as const;
+/** Tomorrow's bag, Wednesday: the maths to hand in. Nothing says there is history or English on Wednesday. */
+export const BAG = ['Cahier de maths, exercices 3 et 4'] as const;
