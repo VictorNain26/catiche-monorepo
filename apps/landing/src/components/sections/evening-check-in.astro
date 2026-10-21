@@ -1,11 +1,21 @@
 ---
 import CheckIn from '@/components/molecules/check-in.astro';
+import Proof from '@/components/molecules/proof.astro';
 import { CHECK_IN } from './evening-data';
 
 // The evening check-in of docs/produit.md ("Le point du soir"), presented in the present (docs/charte.md, "Les mots");
 // how it fits each family is a question of the FAQ. The adult sees that it is done, never the conversations
-// (docs/tuteur.md, § 8). The adult's side of the evening, with one focal point: the adult's phone on the brand's deep
-// plane, which grows slightly as it comes into view before the « Vu » lands, the strongest moment of the page.
+// (docs/tuteur.md, § 8); without an adult, the summary stays the pupil's, and nothing is held against him. The proof of
+// the adult's part: docs/methode.md, "Ce qui vaut pour tous les élèves", source [17].
+const SUPPORT = {
+  before: 'Chez',
+  figure: '1 685 élèves',
+  after: ", l'aide d'un adulte aux devoirs, vécue comme un soutien, va avec plus de progrès.",
+  source: { href: 'https://doi.org/10.1080/00220671.2014.901283', title: 'Moroni et al., 2015' },
+};
+
+// The adult's side of the evening, with one focal point: the adult's phone on the brand's deep plane, which grows
+// slightly as it comes into view before the « Vu » lands, the strongest moment of the page.
 ---
 
 <section id="point-du-soir" class="scroll-mt-20 plane-panel py-28 text-panel-foreground md:py-32 lg:py-40">
@@ -18,6 +28,12 @@ import { CHECK_IN } from './evening-data';
         C&apos;est le point du soir&nbsp;: votre collégien vous montre ce qu&apos;il a fait, et vous répondez «&nbsp;Vu&nbsp;», avec un mot
         d&apos;encouragement si vous voulez.
       </p>
+      <p data-reveal="rise" data-order="3" class="mt-4 max-w-xl text-lg md:text-xl">
+        Si personne n&apos;est là ce soir, le point du soir reste à votre collégien, sans reproche.
+      </p>
+      <div data-reveal="fade" data-order="4" class="mt-6 md:mt-8">
+        <Proof {...SUPPORT} />
+      </div>
     </play-once>
 
     {/* The adult's phone, drawn in CSS: a thin frame, a speaker slot, and the evening's summary with its « Vu »
