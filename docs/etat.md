@@ -26,7 +26,9 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-21 ; ce qui 
 - **CNIL** : écrire sur l'hébergement de données de santé ; garder une copie du DPA de Clever
   Cloud pour l'AIPD.
 - **Landing** : le texte de « Qui fait Catiche », court et sans photo, si la section doit
-  revenir ; rien n'y est écrit sans lui. Les demandes d'invitation arrivent à `contact@`.
+  revenir ; rien n'y est écrit sans lui. Les demandes d'invitation arrivent à `contact@`. La
+  soirée figée n'a été mesurée que sur des tailles émulées : la regarder sur un vrai iPhone, où
+  les barres de Safari peuvent la faire passer en étapes empilées.
 
 ## Avant le premier élève réel
 
@@ -97,8 +99,11 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-21 ; ce qui 
   3. **La refonte de l'application**, pensée depuis l'enfant et les adultes réels. Il faut
      d'abord un parcours et des textes validés, puis l'écran à l'ordinateur comme au téléphone.
      Un inventaire des écrans actuels est fait : vocabulaire technique, colonne unique,
-     doublons, écarts à la charte.
+     doublons, écarts à la charte. Les rôles `accent` et `secondary` du mode sombre ont monté
+     d'un pas pour la landing (#559) ; les écrans de l'app ne sont pas encore revus avec eux.
   4. **La soirée de devoirs à l'oral et le point du soir** (`produit.md`), avec le volet IA.
+     La politique de confidentialité ne décrit encore ni la voix de l'élève ni les messages du
+     point du soir : à compléter dans la PR qui les construit.
 - **À vérifier, relevé par l'inventaire** : le résumé montre au parent « Ce qui résiste » même
   quand l'enfant a refusé la mémoire, alors que `/memoire` dit le contraire
   (`core/week-summary.ts`, `routes/memoire.tsx` du web).

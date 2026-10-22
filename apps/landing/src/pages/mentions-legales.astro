@@ -4,11 +4,11 @@ import { BRAND_NAME } from '@/lib/brand';
 
 const DESCRIPTION = `Mentions légales de ${BRAND_NAME}\xa0: éditeur du site, hébergement et propriété intellectuelle.`;
 
-// The publisher, an individual entrepreneur, as Victor gave him (2026-10-22): his address and his SIREN in the
-// national register of businesses. His phone number comes later, from Victor: it will take its own line, under the
-// address, rather than an empty field now.
+// The publisher, an individual entrepreneur, as Victor gave him (2026-10-22): his address, his phone number and his
+// SIREN in the national register of businesses, which a professional publisher must show (LCEN, art. 1-1).
 const PUBLISHER = {
   address: ['19 rue Jean-Jacques-Rousseau', '94200 Ivry-sur-Seine', 'France'],
+  phone: { href: 'tel:+33664422529', label: '+33\xa06\xa064\xa042\xa025\xa029' },
   siren: '937\xa0817\xa0914',
 };
 ---
@@ -24,6 +24,9 @@ const PUBLISHER = {
           {line}
         </>
       ))}
+    </p>
+    <p>
+      <strong>Téléphone&nbsp;:</strong> <a href={PUBLISHER.phone.href}>{PUBLISHER.phone.label}</a>
     </p>
     <p>
       <strong>SIREN&nbsp;:</strong> {PUBLISHER.siren}, inscrit au Registre national des entreprises (RNE)
