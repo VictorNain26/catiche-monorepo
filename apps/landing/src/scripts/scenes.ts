@@ -99,11 +99,68 @@ export function entered(scene: Scene): Scene {
   return { ...scene, phase: 'still' };
 }
 
-/** The page's scroll position that shows a step, in the middle of its share: where a focused link of that step brings
- * the window. `track.top` is the track's top in the page. */
+/** The page's scroll position that shows a step, in the middle of its share: where the keyboard's focus, gone into a
+ * step that is not shown, brings the window (src/scripts/evening.ts), and where an hour of the timeline does. `track.top`
+ * is the track's top in the page. */
 export function scrollForStep(step: number, count: number, track: Track, view: View): number {
   const travel = Math.max(0, track.height - (view.height - view.offset));
   return track.top - view.offset + ((step + 0.5) / count) * travel;
+}
+
+/** What follows the hold of the scene, which makes its track several windows high: on a reload or a return, the reading
+ * position the browser restored, which is the held scene's own (`position`); on a visit by a link to a section, its
+ * target, which the track's growth has moved (`fragment`); otherwise nothing. `navigation` is the navigation's type
+ * (`PerformanceNavigationTiming.type`), `hash` the address's fragment. */
+export function afterHold(navigation: string | undefined, hash: string): 'position' | 'fragment' | 'none' {
+  if (navigation === 'reload' || navigation === 'back_forward') return 'position';
+  return hash.length > 1 ? 'fragment' : 'none';
+}
+
+/** The gestures of the held scene's steps (a screen's messages, the order that falls into place): each one waits for its
+ * step to be shown while the scene is in view, then plays, once. */
+export class Gestures<G> {
+  readonly #play: (gesture: G) => void;
+  readonly #waiting = new Map<number, Set<G>>();
+  #shown: number | undefined;
+  #inView = false;
+
+  constructor(play: (gesture: G) => void) {
+    this.#play = play;
+  }
+
+  /** A gesture of a step waits; returns how to forget it. */
+  wait(step: number, gesture: G): () => void {
+    const waiting = this.#waiting.get(step) ?? new Set<G>();
+    waiting.add(gesture);
+    this.#waiting.set(step, waiting);
+    return () => {
+      waiting.delete(gesture);
+    };
+  }
+
+  /** The step shown on the scene. */
+  show(step: number): void {
+    this.#shown = step;
+    this.#flush();
+  }
+
+  /** Whether the scene is in view. */
+  see(inView: boolean): void {
+    this.#inView = inView;
+    this.#flush();
+  }
+
+  /** The scene lets go: the gestures still waiting are given back, and none waits here any more. */
+  release(): G[] {
+    const waiting = [...this.#waiting.values()].flatMap((gestures) => [...gestures]);
+    this.#waiting.clear();
+    return waiting;
+  }
+
+  #flush() {
+    if (!this.#inView || this.#shown === undefined) return;
+    for (const gesture of [...(this.#waiting.get(this.#shown) ?? [])]) this.#play(gesture);
+  }
 }
 
 /** How much a step's screen shrinks to fit the room its text leaves it: not at all if it fits, never past `minimum`,

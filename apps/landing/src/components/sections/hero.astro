@@ -35,9 +35,9 @@ import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN, screenTime } from './evening-d
     <figure class="relative isolate mb-36 w-full sm:mb-40 md:mx-auto md:max-w-xl lg:mb-12 lg:max-w-none">
       <span aria-hidden="true" class="halo absolute -inset-16 -z-10"></span>
       <figcaption class="sr-only">
-        Exemple d’écran, un mardi à 17&nbsp;h&nbsp;35. Votre enfant dit pour quand est chaque devoir&nbsp;: les maths pour demain, un contrôle
-        d’histoire jeudi, l’anglais pour vendredi. La liste se range&nbsp;: maths, histoire, anglais. Tom explique cet ordre et demande à votre enfant
-        s’il le garde.
+        Exemple d’écran, un mardi à 17&nbsp;h&nbsp;35. Votre enfant dit pour quand est chaque devoir&nbsp;: l’anglais pour vendredi, les maths pour
+        demain, un contrôle d’histoire jeudi. La liste se range&nbsp;: maths, histoire, anglais. Tom explique cet ordre et demande à votre enfant s’il
+        le garde.
       </figcaption>
       <tonight-order class="relative block">
         <Screen time={screenTime(HOURS.ordered)} class="shadow-control-hover">
@@ -79,8 +79,8 @@ import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN, screenTime } from './evening-d
     }
   }
 
-  /* The homework as it was said, out of line, before it falls into Tom's order (`tonight-order`,
-   * src/styles/global.css). */
+  /* The homework as it was said, in its order (`data-before`) and out of line, before it falls into Tom's order
+   * (`tonight-order`, src/styles/global.css and src/scripts/evening.ts). */
   @media (prefers-reduced-motion: no-preference) {
     tonight-order[data-armed] {
       [data-before='1'] {

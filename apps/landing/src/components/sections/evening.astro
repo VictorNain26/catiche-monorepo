@@ -80,9 +80,9 @@ const CHANGED = [english, maths, history];
 <section id="soiree" class="scroll-mt-20 bg-background pt-6 pb-12 md:pt-8 md:pb-16 lg:pt-12 lg:pb-24">
   {/* The moments, held while they are scrolled (src/scripts/evening.ts): the script makes the track several windows
    * high and holds the scene under the header, its title on top, where each step takes the place of the one before,
-   * with its rank among the four. Without it, if it fails, or under reduced motion, the four steps follow one another,
-   * all shown; the hidden steps of the held scene stay in the page, in their order, for a screen reader and the
-   * keyboard. */}
+   * with its hour on the timeline. Without it, if it fails, or under reduced motion, the steps follow one another, all
+   * shown. The hidden steps of the held scene are hidden from the eye and the pointer only: a screen reader reads them
+   * in their order, and the keyboard's focus, gone into one of them, brings the window to its step. */}
   <evening-scenes class="block">
     <div class="scene container max-w-5xl">
       <play-once class="heading mb-8 block lg:mb-14">
@@ -98,7 +98,7 @@ const CHANGED = [english, maths, history];
           <li role="listitem" data-step id={`etape-${String(index + 1)}`} class="scroll-mt-20">
             {/* In two columns, the screen spans both rows, and the proof stays right under the moment's sentence. Each
              * line of the text sits in its own mask, which it rises into when its step is shown. */}
-            <div class="grid items-start gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] md:grid-rows-[auto_1fr] md:gap-x-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-x-16">
+            <div class="grid grid-cols-[minmax(0,1fr)] items-start gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] md:grid-rows-[auto_1fr] md:gap-x-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-x-16">
               <div data-text>
                 {/* The hour stays under the section's title at every width. */}
                 <h3 class="text-xl text-foreground sm:text-2xl">
@@ -310,7 +310,7 @@ const CHANGED = [english, maths, history];
 
       .mask {
         overflow: clip;
-        overflow-clip-margin: 0.1em;
+        overflow-clip-margin: var(--mask-margin);
       }
 
       [data-text] {

@@ -1,11 +1,12 @@
 ---
 import { spokenHour } from '@/lib/hours';
 
-// The four hours of the held evening (sections/evening.astro), shown only while the scene is held: each one leads to
-// its step (`#etape-N`); src/scripts/evening.ts marks the hour of the step shown (`aria-current="step"`) and the hours
+// The hours of the held evening (sections/evening.astro), shown only while the scene is held: each one leads to its
+// step (`#etape-N`); src/scripts/evening.ts marks the hour of the step shown (`aria-current="step"`) and the hours
 // passed (`data-past`). One reed dot, a mark of state (docs/charte.md, "Couleurs"), slides under the hour shown; the
 // hours passed are in full ink, the next ones muted; the rail fills as the evening is scrolled, the only move tied to
-// the scroll itself.
+// the scroll itself. Its columns, its rail and its dot follow the number of moments and the moment shown, which the
+// script sets (`--moments`, `--moment`), whatever their number.
 interface Props {
   times: readonly string[];
 }
@@ -18,7 +19,7 @@ const { times } = Astro.props;
     <span class="fill"></span>
   </span>
   <span aria-hidden="true" class="puck"></span>
-  <ol role="list" class="grid grid-cols-4">
+  <ol role="list" aria-label="Moments de la soirée" class="hours">
     {times.map((time, index) => (
       <li role="listitem" class="flex justify-center">
         <a href={`#etape-${String(index + 1)}`} class="inline-flex min-h-11 items-center px-2 text-sm text-muted-foreground tabular-nums">
@@ -42,10 +43,16 @@ const { times } = Astro.props;
         padding-top: calc(var(--spacing) * 3);
       }
 
+      /* A class, not the element: the rules nested under `:global` are not scoped, and the steps are a list too. */
+      .hours {
+        display: grid;
+        grid-template-columns: repeat(var(--moments), minmax(0, 1fr));
+      }
+
       .rail {
         position: absolute;
         top: calc(var(--spacing) * 1);
-        inset-inline: 12.5%;
+        inset-inline: calc(50% / var(--moments));
         height: calc(var(--spacing) / 2);
         border-radius: calc(infinity * 1px);
         background-color: var(--color-input);
@@ -66,7 +73,8 @@ const { times } = Astro.props;
         left: 0;
         display: flex;
         justify-content: center;
-        width: 25%;
+        width: calc(100% / var(--moments));
+        translate: calc(100% * var(--moment, 0)) 0;
         transition: translate var(--duration-slow) var(--ease-out-expo);
       }
 
@@ -76,18 +84,6 @@ const { times } = Astro.props;
         height: calc(var(--spacing) * 2.5);
         border-radius: calc(infinity * 1px);
         background-color: var(--color-highlight);
-      }
-
-      .timeline:has(li:nth-child(2) [aria-current]) .puck {
-        translate: 100% 0;
-      }
-
-      .timeline:has(li:nth-child(3) [aria-current]) .puck {
-        translate: 200% 0;
-      }
-
-      .timeline:has(li:nth-child(4) [aria-current]) .puck {
-        translate: 300% 0;
       }
 
       li[data-past] a {

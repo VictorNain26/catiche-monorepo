@@ -117,6 +117,10 @@
   --motion-distance: 40px;
   --motion-distance-strong: 64px;
   --motion-scale: 0.96;
+  /* Une ligne de texte qui quitte son masque, dans la soirée du site : un quart de sa hauteur ; et
+   * la marge que le masque laisse aux accents et aux jambages, pour ne pas les couper. */
+  --motion-distance-text: 0.25em;
+  --mask-margin: 0.1em;
   /* Le fondu d'un plan de couleur dans le fond de la page, en haut et en bas d'une section du site ;
    * plus haut à l'ordinateur. Aucun texte ne s'y pose. */
   --plane-fade: 6rem;

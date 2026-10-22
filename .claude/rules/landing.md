@@ -41,7 +41,9 @@ Clever Cloud (`apps/landing/Caddyfile`).
   réduit ; sans script, il est visible (`data-reveal`, `apps/landing/src/styles/global.css`). Une
   scène peut rester figée au défilement, une étape remplaçant l'autre, aux mêmes conditions : son
   état figé n'est posé que par le script, hors mouvement réduit et si chaque étape tient dans
-  l'écran ; sinon ses étapes s'empilent (`evening-scenes`, `apps/landing/src/scripts/evening.ts`). CSS
+  l'écran ; sinon ses étapes s'empilent (`evening-scenes`, `apps/landing/src/scripts/evening.ts`).
+  Ses étapes cachées ne le sont qu'à l'œil et au pointeur : un lecteur d'écran les lit, et le focus
+  du clavier qui entre dans l'une d'elles amène la page à son étape. CSS
   d'abord, le lien au défilement sous
   `@supports (animation-timeline: view())` ; ce que le CSS ne sait pas faire passe par les API
   natives (Web Animations, `IntersectionObserver`) dans `apps/landing/src/scripts/evening.ts`,

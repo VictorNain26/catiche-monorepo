@@ -10,14 +10,15 @@ export function screenTime(time: string): string {
   return `Mardi · ${time}`;
 }
 
-/** At 17:35, on the top of the page, the pupil gives each homework's date. */
-export const SPOKEN = 'Les maths pour demain. L’histoire, c’est un contrôle jeudi. L’anglais, pour vendredi.';
+/** At 17:35, on the top of the page, the pupil gives each homework's date, in the order they come to him. */
+export const SPOKEN = 'L’anglais, pour vendredi. Les maths, pour demain. L’histoire, c’est un contrôle jeudi.';
 
-/** The homework in Tom's order, its end state; `spoken` is its place in what the pupil said, `note` its due date. */
+/** The homework in Tom's order, its end state; `spoken` is its place in what the pupil said, where the list starts
+ * before it falls into Tom's order (sections/hero.astro), `note` its due date. */
 export const HOMEWORK = [
-  { subject: 'Maths', note: 'exercices 3 et 4 · pour demain', spoken: 1 },
-  { subject: 'Histoire', note: 'contrôle · jeudi', spoken: 2 },
-  { subject: 'Anglais', note: 'pour vendredi', spoken: 3 },
+  { subject: 'Maths', note: 'exercices 3 et 4 · pour demain', spoken: 2 },
+  { subject: 'Histoire', note: 'contrôle · jeudi', spoken: 3 },
+  { subject: 'Anglais', note: 'pour vendredi', spoken: 1 },
 ] as const;
 
 /** Tom's order, with its reasons; the pupil chooses (docs/produit.md: he can change it). */

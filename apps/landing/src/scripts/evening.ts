@@ -1,10 +1,13 @@
 // The blocks of the page play once, when they are read (src/scripts/reveal.ts), and the evening is held while it is
 // scrolled (src/scripts/scenes.ts). Durations and curves come from the tokens, through the computed style.
 
+import { flipShift, Moves, ownMoves } from './moves';
 import { type Entry, release, REVEAL_MARGIN, reveal } from './reveal';
 import {
+  afterHold,
   type Change,
   entered,
+  Gestures,
   heldStep,
   left,
   request,
@@ -45,6 +48,13 @@ class PlayOnce extends HTMLElement {
     });
   }
 
+  // A block that waited for its step, once the scene lets go of it: it plays as any other, once read (`inView`).
+  watch() {
+    this.#stop?.();
+    delete this.dataset['armed'];
+    this.start(this.inView);
+  }
+
   // Read once it has risen into the window.
   readonly inView = (report: Report) => {
     const observer = new IntersectionObserver(report, { rootMargin: REVEAL_MARGIN });
@@ -70,7 +80,7 @@ class TonightOrder extends PlayOnce {
     // A token that cannot be read leaves the order as it is, without a move.
     if (!timing) return;
     items.forEach((item, index) => {
-      const shift = (before[index] ?? 0) - item.getBoundingClientRect().top;
+      const shift = flipShift(before[index] ?? 0, item.getBoundingClientRect().top, item.currentCSSZoom);
       item.animate([{ transform: `translateY(${String(shift)}px)` }, { transform: 'none' }], timing);
     });
   }
@@ -83,46 +93,81 @@ const phone = window.matchMedia('(width < 48rem)');
 // scene is not held and the steps follow one another. On a phone, where its text is already small, hardly at all.
 const SMALLEST_SCREEN = { phone: 0.9, wide: 0.75 };
 
-// How far a screen's content slides as it leaves or comes in, and a line of text as it leaves.
+// How far a screen's content slides as it leaves or comes in, and a line of text as it leaves (packages/tokens).
 const SCREEN_SHIFT = 'calc(var(--spacing) * 6)';
-const TEXT_SHIFT = '0.25em';
+const TEXT_SHIFT = 'var(--motion-distance-text)';
+
+// The scene is in view once its track has risen past two thirds of the window, as a block is read (src/scripts/reveal.ts),
+// and until it has left the window.
+const SCENE_IN_VIEW = '0px 0px -33% 0px';
 
 const ignore = () => undefined;
+
+// A gesture of a step: its block, and how to tell it that it is read.
+interface Gesture {
+  readonly block: PlayOnce;
+  readonly report: Report;
+}
 
 // The evening, held while it is scrolled: its script alone sets `data-held` (sections/evening.astro), outside reduced
 // motion and only if every step fits the window; then the scroll picks the step shown (src/scripts/scenes.ts), and a
 // change of step plays here, in Web Animations: the text shown leaves, then the next comes in, line after line, never
 // both together; in the one frame of the screen, its content slides out, then the next slides in and its messages
-// come one after the other. A fast scroll ends the moves under way and goes straight to the step reached. The steps
-// hidden are inert. Reduced motion turned on during the visit lets the steps follow one another again, for good.
+// come one after the other, once the scene is in view. A fast scroll ends the moves under way and goes straight to the
+// step reached. The steps hidden stay in the page for a screen reader; the keyboard's focus brings the window to them.
+// Reduced motion turned on during the visit lets the steps follow one another again, for good.
 class EveningScenes extends HTMLElement {
   #steps: HTMLElement[] = [];
   #links: HTMLAnchorElement[] = [];
   #scene: Scene = stillScene(0);
-  #moves: Animation[] = [];
+  #marked: number | undefined;
+  readonly #moves = new Moves<Animation>();
   #generation = 0;
   #frame = 0;
-  // The gestures waiting for their step, by step.
-  #waiting = new Map<number, Set<{ block: HTMLElement; report: Report }>>();
+  #fitFrame = 0;
+  readonly #gestures = new Gestures<Gesture>(({ block, report }) => {
+    report([{ isIntersecting: true, boundingClientRect: { bottom: block.getBoundingClientRect().bottom } }]);
+  });
   #cleanups: (() => void)[] = [];
 
   connectedCallback() {
     this.#steps = [...this.querySelectorAll<HTMLElement>('[data-step]')];
     this.#links = [...this.querySelectorAll<HTMLAnchorElement>('.timeline a')];
-    const held = !reducedMotion.matches && this.#hold();
-    for (const [step, element] of this.#steps.entries()) {
-      for (const block of element.querySelectorAll<PlayOnce>('play-once, tonight-order')) {
-        block.start(held ? this.#whenShown(step, block) : block.inView);
-      }
+    if (reducedMotion.matches || !this.#hold()) {
+      for (const block of this.querySelectorAll<PlayOnce>('[data-step] :is(play-once, tonight-order)')) block.start(block.inView);
+      return;
     }
-    if (!held) return;
+    // Whatever fails while the scene is set up lets its steps follow one another, all shown.
+    try {
+      this.#start();
+    } catch (error) {
+      this.#release();
+      throw error;
+    }
+  }
+
+  disconnectedCallback() {
+    for (const cleanup of this.#cleanups.splice(0)) cleanup();
+  }
+
+  #start() {
     const first = heldStep(this.#progress(), this.#steps.length, undefined);
     this.#setShown(first);
     this.#scene = stillScene(first);
+    for (const [step, element] of this.#steps.entries()) {
+      for (const block of element.querySelectorAll<PlayOnce>('play-once, tonight-order')) {
+        block.start((report) => this.#gestures.wait(step, { block, report }));
+      }
+    }
     this.#mark(first);
-    this.#play(first);
+    this.#gestures.show(first);
+    const observer = new IntersectionObserver(this.#see, { rootMargin: SCENE_IN_VIEW });
+    observer.observe(this);
+    this.#cleanups.push(() => {
+      observer.disconnect();
+    });
     this.#listen(window, 'scroll', this.#schedule, { passive: true });
-    this.#listen(window, 'resize', this.#refit);
+    this.#listen(window, 'resize', this.#scheduleRefit);
     // The fonts change the heights the fit was measured on.
     void document.fonts.ready.then(this.#refit);
     this.#links.forEach((link, step) => {
@@ -131,28 +176,51 @@ class EveningScenes extends HTMLElement {
         this.#scrollTo(step);
       });
     });
+    // The keyboard's focus, gone into a step that is not shown, brings the window to it, which shows it.
+    this.#steps.forEach((element, step) => {
+      this.#listen(element, 'focusin', () => {
+        if (step !== this.#scene.heading) this.#scrollTo(step);
+      });
+    });
     this.#listen(reducedMotion, 'change', (event) => {
       if ((event as MediaQueryListEvent).matches) this.#release();
     });
   }
 
-  disconnectedCallback() {
-    for (const cleanup of this.#cleanups.splice(0)) cleanup();
-  }
+  readonly #see = (entries: IntersectionObserverEntry[]) => {
+    this.#gestures.see(entries.at(-1)?.isIntersecting ?? false);
+  };
 
   // Holds the scene if every step fits the window, its screen shrunk if need be; otherwise leaves the steps as they are.
   #hold(): boolean {
     // The browser keeps what is in view in place when the track grows (scroll anchoring): a reload in the middle would
-    // land past the evening. The reading position it restored is the held scene's own, so it is kept.
+    // land past the evening, and a link to a later section short of it (src/scripts/scenes.ts, `afterHold`).
     const reading = window.scrollY;
     this.dataset['held'] = '';
+    this.style.setProperty('--moments', String(this.#steps.length));
     const held = this.#fit();
-    if (!held) {
-      this.#unfit();
-      delete this.dataset['held'];
-    }
-    if (window.scrollY !== reading) window.scrollTo({ top: reading, behavior: 'instant' });
+    if (!held) this.#unhold();
+    const [navigation] = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+    const after = afterHold(navigation?.type, window.location.hash);
+    if (after === 'position' && window.scrollY !== reading) window.scrollTo({ top: reading, behavior: 'instant' });
+    if (after === 'fragment') this.#toFragment(held);
     return held;
+  }
+
+  #unhold() {
+    delete this.dataset['held'];
+    this.style.removeProperty('--moments');
+    this.style.removeProperty('--moment');
+    this.#unfit();
+  }
+
+  // The target of the address, back in view: a step of the held scene is shown, anything else is scrolled to.
+  #toFragment(held: boolean) {
+    const target = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+    if (!target) return;
+    const step = this.#steps.indexOf(target);
+    if (held && step >= 0) this.#scrollTo(step);
+    else target.scrollIntoView({ behavior: 'instant' });
   }
 
   // Fits the steps under the section's title, which never shrinks: their screens shrink first; if that is not enough,
@@ -200,6 +268,15 @@ class EveningScenes extends HTMLElement {
     for (const step of this.#steps) step.querySelector<HTMLElement>('[data-screen]')?.style.removeProperty('zoom');
   }
 
+  // A resize fits the scene again once per frame, however many it fires.
+  readonly #scheduleRefit = () => {
+    if (this.#fitFrame) return;
+    this.#fitFrame = requestAnimationFrame(() => {
+      this.#fitFrame = 0;
+      this.#refit();
+    });
+  };
+
   readonly #refit = () => {
     if (this.dataset['held'] === undefined) return;
     if (this.#fit()) this.#update();
@@ -233,7 +310,7 @@ class EveningScenes extends HTMLElement {
   // followed by the coming in of the step the scene heads to by then, so that a step only passed by is never played.
   #apply(change: Change) {
     this.#scene = change.scene;
-    if (change.finish) for (const animation of this.#moves.splice(0)) animation.finish();
+    if (change.finish) this.#moves.finish();
     this.#mark(this.#scene.heading);
     const { play } = change;
     if (!play) return;
@@ -291,12 +368,10 @@ class EveningScenes extends HTMLElement {
     if (!step) return Promise.resolve();
     const before = this.querySelector<HTMLElement>('[data-step][data-shown] [data-screen] > *')?.offsetHeight;
     // What its last exit left behind (held on its end) lets go: its content is shown by its own style again.
-    for (const animation of step.getAnimations({ subtree: true })) {
-      if (!(animation instanceof CSSAnimation) && !(animation instanceof CSSTransition)) animation.cancel();
-    }
+    this.#letGo(step);
     this.#setShown(to);
     if (!timing) {
-      this.#play(to);
+      this.#gestures.show(to);
       return Promise.resolve();
     }
     const frame = step.querySelector<HTMLElement>('[data-screen] > *');
@@ -342,31 +417,34 @@ class EveningScenes extends HTMLElement {
     }
     const generation = this.#generation;
     window.setTimeout(() => {
-      if (generation === this.#generation) this.#play(to);
+      if (generation === this.#generation) this.#gestures.show(to);
     }, wait);
-    const entering = this.#moves.filter((animation) => animation.effect instanceof KeyframeEffect && step.contains(animation.effect.target));
+    const entering = this.#moves.under((animation) => animation.effect instanceof KeyframeEffect && step.contains(animation.effect.target));
     return Promise.all(entering.map((animation) => animation.finished));
   }
 
   #move(element: HTMLElement, keyframes: Keyframe[], options: KeyframeAnimationOptions): Animation {
-    const animation = element.animate(keyframes, options);
-    this.#moves.push(animation);
-    animation.finished.then(() => {
-      this.#moves = this.#moves.filter((move) => move !== animation);
-    }, ignore);
-    return animation;
+    return this.#moves.add(element.animate(keyframes, options));
   }
 
-  // Only the step shown is on, and reachable; the others are inert.
+  // Cancels the script's moves on a step, those its exit left held on their end included; the CSS's own animations and
+  // transitions play on.
+  #letGo(step: HTMLElement) {
+    for (const animation of ownMoves(step.getAnimations({ subtree: true }))) animation.cancel();
+  }
+
+  // Only the step shown is on: the others are hidden from the eye and the pointer, not from a screen reader.
   #setShown(to: number) {
     this.#steps.forEach((element, index) => {
       element.toggleAttribute('data-shown', index === to);
-      element.inert = index !== to;
     });
   }
 
-  // The hours: the one reached is the current step, the ones before it passed.
+  // The hours: the one reached is the current step, the ones before it passed; `--moment` places the timeline's dot.
   #mark(to: number) {
+    if (to === this.#marked) return;
+    this.#marked = to;
+    this.style.setProperty('--moment', String(to));
     this.#links.forEach((link, index) => {
       if (index === to) link.setAttribute('aria-current', 'step');
       else link.removeAttribute('aria-current');
@@ -374,26 +452,7 @@ class EveningScenes extends HTMLElement {
     });
   }
 
-  // Plays the gestures of a step now shown.
-  #play(step: number) {
-    for (const { block, report } of this.#waiting.get(step) ?? []) {
-      report([{ isIntersecting: true, boundingClientRect: { bottom: block.getBoundingClientRect().bottom } }]);
-    }
-  }
-
-  #whenShown(step: number, block: HTMLElement) {
-    return (report: Report) => {
-      const waiting = { block, report };
-      const set = this.#waiting.get(step) ?? new Set();
-      set.add(waiting);
-      this.#waiting.set(step, set);
-      return () => {
-        set.delete(waiting);
-      };
-    };
-  }
-
-  // An hour of the timeline brings the window to its step.
+  // An hour of the timeline, or the focus gone into a step, brings the window to that step.
   #scrollTo(step: number) {
     const track = this.getBoundingClientRect();
     const top = scrollForStep(step, this.#steps.length, { top: track.top + window.scrollY, height: track.height }, this.#view());
@@ -407,27 +466,30 @@ class EveningScenes extends HTMLElement {
     });
   }
 
-  // The steps follow one another again, all shown: the step shown stays in view, and every gesture still waiting plays.
+  // The steps follow one another again, all shown: every move of the script is cancelled, the step shown stays in view,
+  // and every block still waiting for its step plays as it is read, like any other.
   #release() {
     if (this.dataset['held'] === undefined) return;
     const shown = this.#steps[this.#scene.shown];
     for (const cleanup of this.#cleanups.splice(0)) cleanup();
     cancelAnimationFrame(this.#frame);
+    cancelAnimationFrame(this.#fitFrame);
     this.#frame = 0;
+    this.#fitFrame = 0;
     this.#generation += 1;
-    for (const animation of this.#moves.splice(0)) animation.cancel();
-    delete this.dataset['held'];
-    this.#unfit();
-    for (const element of this.#steps) {
-      element.removeAttribute('data-shown');
-      element.inert = false;
+    this.#moves.cancel();
+    for (const step of this.#steps) {
+      this.#letGo(step);
+      step.removeAttribute('data-shown');
     }
+    this.#unhold();
+    this.#marked = undefined;
     for (const link of this.#links) {
       link.removeAttribute('aria-current');
       link.parentElement?.removeAttribute('data-past');
     }
     shown?.scrollIntoView({ block: 'start', behavior: 'instant' });
-    for (const step of this.#waiting.keys()) this.#play(step);
+    for (const { block } of this.#gestures.release()) block.watch();
   }
 }
 

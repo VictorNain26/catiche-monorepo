@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { entered, heldStep, left, request, sceneProgress, screenScale, scrollForStep, stepAt, stillScene } from './scenes';
+import { afterHold, entered, Gestures, heldStep, left, request, sceneProgress, screenScale, scrollForStep, stepAt, stillScene } from './scenes';
 
 // A window 800 px high under a header of 64 px: the scene, held under the header, is 736 px high. The track around it
 // is four windows high, so the scene stays held over 3200 - 736 = 2464 px of scrolling.
@@ -136,5 +136,83 @@ describe('screenScale', () => {
   it('gives no scale when the screen would shrink past the smallest readable size', () => {
     expect(screenScale(200, 400, 0.7)).toBeUndefined();
     expect(screenScale(0, 400, 0.7)).toBeUndefined();
+  });
+});
+
+describe('afterHold', () => {
+  it('keeps the reading position the browser restored on a reload or a return', () => {
+    expect(afterHold('reload', '')).toBe('position');
+    expect(afterHold('back_forward', '#faq')).toBe('position');
+  });
+
+  it('brings back the target of the address on a new visit by a link to a section', () => {
+    expect(afterHold('navigate', '#faq')).toBe('fragment');
+    expect(afterHold(undefined, '#protection')).toBe('fragment');
+  });
+
+  it('leaves the page where it is on a new visit without a target', () => {
+    expect(afterHold('navigate', '')).toBe('none');
+    expect(afterHold('navigate', '#')).toBe('none');
+  });
+});
+
+describe('Gestures', () => {
+  const gestures = () => {
+    const played: string[] = [];
+    return { played, gestures: new Gestures<string>((gesture) => played.push(gesture)) };
+  };
+
+  it('waits while the scene is out of view, even for the step shown', () => {
+    const { played, gestures: waiting } = gestures();
+    waiting.wait(0, 'first');
+    waiting.show(0);
+    expect(played).toEqual([]);
+  });
+
+  it('plays the gestures of the step shown once the scene comes into view', () => {
+    const { played, gestures: waiting } = gestures();
+    waiting.wait(0, 'first');
+    waiting.wait(1, 'second');
+    waiting.show(0);
+    waiting.see(true);
+    expect(played).toEqual(['first']);
+  });
+
+  it('plays the gestures of a step as it is shown, while the scene is in view', () => {
+    const { played, gestures: waiting } = gestures();
+    waiting.wait(1, 'second');
+    waiting.see(true);
+    waiting.show(0);
+    expect(played).toEqual([]);
+    waiting.show(1);
+    expect(played).toEqual(['second']);
+  });
+
+  it('plays nothing once the scene has left the view', () => {
+    const { played, gestures: waiting } = gestures();
+    waiting.wait(1, 'second');
+    waiting.see(true);
+    waiting.see(false);
+    waiting.show(1);
+    expect(played).toEqual([]);
+  });
+
+  it('forgets a gesture that no longer waits', () => {
+    const { played, gestures: waiting } = gestures();
+    const forget = waiting.wait(0, 'first');
+    forget();
+    waiting.show(0);
+    waiting.see(true);
+    expect(played).toEqual([]);
+  });
+
+  it('lets go of every gesture still waiting when the scene is released, and plays none of them itself', () => {
+    const { played, gestures: waiting } = gestures();
+    waiting.wait(0, 'first');
+    waiting.wait(2, 'third');
+    expect(waiting.release()).toEqual(['first', 'third']);
+    waiting.show(0);
+    waiting.see(true);
+    expect(played).toEqual([]);
   });
 });
