@@ -5,7 +5,8 @@ import tomTete from '@repo/ui/assets/tom-tete.png';
 
 // The logo leads home. On the home page, its script brings back the top without reloading it and without an anchor in
 // the address: the scroll, smooth unless reduced motion asks otherwise, then the focus on the page's top mark
-// (layouts/layout.astro), so that the next Tab starts again from the header (src/scripts/home-link.ts).
+// (layouts/layout.astro), so that the next Tab starts again from the header (src/scripts/home-link.ts). In a container
+// under 14rem, the header of a phone whose text is enlarged to about 200 %, the head is dropped: the name stays.
 ---
 
 <a
@@ -14,7 +15,7 @@ import tomTete from '@repo/ui/assets/tom-tete.png';
   aria-label={`${BRAND_NAME}, accueil`}
   class="inline-flex min-h-11 items-center gap-2 font-heading text-2xl font-extrabold text-primary transition-opacity duration-base hover:opacity-80"
 >
-  <Image src={tomTete} alt="" width={40} height={40} densities={[1, 2]} class="size-10" />
+  <Image src={tomTete} alt="" width={40} height={40} densities={[1, 2]} class="size-10 @max-[14rem]:hidden" />
   {BRAND_NAME}
 </a>
 

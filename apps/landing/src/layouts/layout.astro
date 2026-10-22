@@ -77,17 +77,18 @@ const jsonLd = [
     ))}
   </head>
   <body>
+    {/* The top the logo brings back (atoms/logo.astro): an empty mark first in the page, focusable by script only, so
+     * that the keyboard's focus follows the page up and the next Tab starts again from the skip link, then the header.
+     * It wraps nothing: a click elsewhere keeps its own place. */}
+    <span data-page-top tabindex="-1" class="absolute top-0 outline-none"></span>
+    {/* Fixed above the sticky header (z-50) once focused, so that it is never under it. */}
     <a
       href="#main-content"
-      class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-full"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-60 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-full"
     >
       Aller au contenu principal
     </a>
     <div class="relative flex min-h-screen flex-col">
-      {/* The top the logo brings back (atoms/logo.astro): an empty mark before the header, focusable by script only, so
-       * that the keyboard's focus follows the page up and the next Tab starts again from the header. It wraps nothing:
-       * a click elsewhere keeps its own place. */}
-      <span data-page-top tabindex="-1" class="absolute top-0 outline-none"></span>
       <Header />
       <main id="main-content" class="flex-1">
         <slot />

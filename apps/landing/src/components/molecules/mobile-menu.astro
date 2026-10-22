@@ -47,6 +47,12 @@ import { SIGN_IN_URL } from '@/lib/brand';
 </mobile-menu>
 
 <style>
+  /* The button opens the menu only once its script has defined the element: until then, and without scripts, it is
+   * not shown, rather than a button that does nothing. */
+  mobile-menu:not(:defined) [data-open] {
+    display: none;
+  }
+
   /* A modal dialog leaves the page behind it scrollable: the open menu locks it. */
   :global(html:has(dialog[open])) {
     overflow: hidden;

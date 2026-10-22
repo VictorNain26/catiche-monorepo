@@ -1,11 +1,21 @@
 import { describe, expect, it } from 'bun:test';
 import { type Entry, release, REVEAL_MARGIN, reveal, type RevealHost } from './reveal';
 
-// A block on the page: where it lies against the window (its bottom, in pixels from the window's top), and its data.
-const block = (bottom = 900): RevealHost & { dataset: Record<string, string | undefined> } => ({
-  dataset: {},
-  getBoundingClientRect: () => ({ bottom }),
-});
+// A block on the page: where it lies against the window (its bottom, in pixels from the window's top), its data, and
+// the focus that can enter it.
+const block = (bottom = 900) => {
+  const focus = new Set<() => void>();
+  return {
+    dataset: {} as Record<string, string | undefined>,
+    getBoundingClientRect: () => ({ bottom }),
+    addEventListener: (_type: 'focusin', listener: () => void) => focus.add(listener),
+    removeEventListener: (_type: 'focusin', listener: () => void) => focus.delete(listener),
+    focus() {
+      for (const listener of [...focus]) listener();
+    },
+    focusListeners: focus,
+  } satisfies RevealHost & Record<string, unknown>;
+};
 
 // The visitor's reduced motion setting, which can change during the visit.
 const motion = (reduce = false) => {
@@ -124,6 +134,31 @@ describe('reveal: when it plays', () => {
     watch.report(true);
     expect(plays).toBe(0);
     expect(settings.listeners.size).toBe(0);
+  });
+});
+
+describe('reveal: the keyboard reaches a waiting block', () => {
+  it('shows it at once, without a move, and no longer watches it', () => {
+    const host = block();
+    const watch = observer();
+    const settings = motion();
+    let plays = 0;
+    reveal(host, { motion: settings, observe: watch.observe, play: () => (plays += 1) });
+    host.focus();
+    expect(host.dataset['armed']).toBeUndefined();
+    expect(host.dataset['played']).toBeUndefined();
+    expect(watch.state.observing).toBe(false);
+    expect(settings.listeners.size).toBe(0);
+    watch.report(true);
+    expect(plays).toBe(0);
+  });
+
+  it('no longer listens for the focus once the block has played', () => {
+    const host = block();
+    const watch = observer();
+    reveal(host, { motion: motion(), observe: watch.observe, play: played(host) });
+    watch.report(true);
+    expect(host.focusListeners.size).toBe(0);
   });
 });
 

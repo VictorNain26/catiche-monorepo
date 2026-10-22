@@ -17,6 +17,8 @@ export interface Entry {
 export interface RevealHost {
   readonly dataset: Record<string, string | undefined>;
   getBoundingClientRect(): { readonly bottom: number };
+  addEventListener(type: 'focusin', listener: () => void): void;
+  removeEventListener(type: 'focusin', listener: () => void): void;
 }
 
 interface Motion {
@@ -65,9 +67,16 @@ export function reveal(host: RevealHost, { motion, observe, play }: Reveal): () 
     delete host.dataset['armed'];
   };
   motion.addEventListener('change', onMotion);
+  // The keyboard's focus gone into a waiting block: it shows at once, still, so that what is focused is seen.
+  const onFocus = () => {
+    stop();
+    delete host.dataset['armed'];
+  };
+  host.addEventListener('focusin', onFocus);
   function stop() {
     unobserve();
     motion.removeEventListener('change', onMotion);
+    host.removeEventListener('focusin', onFocus);
   }
   return stop;
 }
