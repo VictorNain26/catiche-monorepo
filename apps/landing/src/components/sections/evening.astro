@@ -162,7 +162,8 @@ const CHANGED = [english, maths, history];
                         {STEPS.map(({ step, state }, position) => (
                           <li
                             class:list={[
-                              'flex items-baseline gap-2 rounded-control px-3 py-1.5 ring-1 ring-border',
+                              // It wraps where enlarged text leaves no room for the step's state on its line.
+                              'flex flex-wrap items-baseline gap-x-2 rounded-control px-3 py-1.5 ring-1 ring-border',
                               state === 'en cours' && 'bg-accent text-accent-foreground',
                             ]}
                           >
