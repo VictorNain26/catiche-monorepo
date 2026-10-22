@@ -1,5 +1,18 @@
 import { describe, expect, it } from 'bun:test';
-import { afterHold, entered, Gestures, heldStep, left, request, sceneProgress, screenScale, scrollForStep, stepAt, stillScene } from './scenes';
+import {
+  afterHold,
+  entered,
+  Gestures,
+  heldStep,
+  layouts,
+  left,
+  request,
+  sceneProgress,
+  sceneScale,
+  scrollForStep,
+  stepAt,
+  stillScene,
+} from './scenes';
 
 // A window 800 px high under a header of 64 px: the scene, held under the header, is 736 px high. The track around it
 // is four windows high, so the scene stays held over 3200 - 736 = 2464 px of scrolling.
@@ -123,19 +136,62 @@ describe('scrollForStep', () => {
   });
 });
 
-describe('screenScale', () => {
-  it('keeps a screen that fits at its size', () => {
-    expect(screenScale(400, 300, 0.7)).toBe(1);
-    expect(screenScale(300, 300, 0.7)).toBe(1);
+describe('sceneScale', () => {
+  // Whether the steps fit at a scale of their screens, and the scales tried. A screen shrunk is laid out wider and
+  // wraps less, so how much it gains is measured, not computed: the steps fit up to some scale.
+  const fitsUpTo = (largest: number) => {
+    const tried: number[] = [];
+    const fits = (scale: number) => {
+      tried.push(scale);
+      return scale <= largest;
+    };
+    return { fits, tried };
+  };
+
+  it('keeps the screens at their size when the steps fit, and tries no other', () => {
+    const { fits, tried } = fitsUpTo(1);
+    expect(sceneScale(fits)).toBe(1);
+    expect(tried).toEqual([1]);
   });
 
-  it('shrinks a screen that does not fit to the room left', () => {
-    expect(screenScale(300, 400, 0.7)).toBe(0.75);
+  it('shrinks the screens as little as the steps allow, to within a hundredth', () => {
+    const scale = sceneScale(fitsUpTo(0.93).fits);
+    expect(scale).toBeLessThanOrEqual(0.93);
+    expect(scale).toBeGreaterThan(0.92);
   });
 
-  it('gives no scale when the screen would shrink past the smallest readable size', () => {
-    expect(screenScale(200, 400, 0.7)).toBeUndefined();
-    expect(screenScale(0, 400, 0.7)).toBeUndefined();
+  it('shrinks the screens down to where their 14 px text reaches 12 px, the least the charte allows', () => {
+    expect(sceneScale(fitsUpTo(12 / 14).fits)).toBeCloseTo(12 / 14);
+  });
+
+  it('does not hold the scene when the steps fit only with a screen text under 12 px', () => {
+    const { fits, tried } = fitsUpTo(0.85);
+    expect(sceneScale(fits)).toBeUndefined();
+    expect(Math.min(...tried)).toBeCloseTo(12 / 14);
+    expect(sceneScale(fitsUpTo(0.75).fits)).toBeUndefined();
+  });
+
+  it('ends on the scale it gives, so that the steps are left laid out at it', () => {
+    const { fits, tried } = fitsUpTo(0.9);
+    const scale = sceneScale(fits);
+    expect(tried.at(-1)).toBe(scale);
+  });
+});
+
+describe('layouts', () => {
+  it('first keeps everything in the step, then tightens the spacings, at a computer', () => {
+    expect(layouts(false)).toEqual([
+      { proofsApart: false, tight: false },
+      { proofsApart: false, tight: true },
+    ]);
+  });
+
+  it('on a phone, sets the proofs after the scene before it tightens the spacings', () => {
+    expect(layouts(true)).toEqual([
+      { proofsApart: false, tight: false },
+      { proofsApart: true, tight: false },
+      { proofsApart: true, tight: true },
+    ]);
   });
 });
 

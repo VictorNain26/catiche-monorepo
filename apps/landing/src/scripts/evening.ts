@@ -1,98 +1,29 @@
-// The blocks of the page play once, when they are read (src/scripts/reveal.ts), and the evening is held while it is
-// scrolled (src/scripts/scenes.ts). Durations and curves come from the tokens, through the computed style.
+// The evening is held while it is scrolled (src/scripts/scenes.ts), its blocks played as its steps are shown
+// (src/scripts/play-once.ts). Durations and curves come from the tokens, through the computed style.
 
-import { flipShift, Moves, ownMoves } from './moves';
-import { type Entry, release, REVEAL_MARGIN, reveal } from './reveal';
+import { Moves, ownMoves } from './moves';
+import { type PlayOnce, reducedMotion, type Report } from './play-once';
 import {
   afterHold,
   type Change,
   entered,
   Gestures,
   heldStep,
+  type Layout,
+  layouts,
   left,
   request,
   type Scene,
   sceneProgress,
-  screenScale,
+  sceneScale,
   scrollForStep,
   stillScene,
   type View,
 } from './scenes';
-import { orderTiming, type SceneTiming, sceneTiming } from './timing';
-
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-type Report = (entries: readonly Entry[]) => void;
-
-class PlayOnce extends HTMLElement {
-  #stop: (() => void) | undefined;
-
-  connectedCallback() {
-    // A block of a step of the held evening plays when its step is shown: its scene starts it (`evening-scenes`).
-    if (this.closest('evening-scenes [data-step]')) return;
-    this.start(this.inView);
-  }
-
-  disconnectedCallback() {
-    this.#stop?.();
-  }
-
-  // Arms the block and plays it once `observe` reports it read.
-  start(observe: (report: Report) => () => void) {
-    this.#stop = reveal(this, {
-      motion: reducedMotion,
-      observe,
-      play: () => {
-        this.play();
-      },
-    });
-  }
-
-  // A block that waited for its step, once the scene lets go of it: it plays as any other, once read (`inView`).
-  watch() {
-    this.#stop?.();
-    delete this.dataset['armed'];
-    this.start(this.inView);
-  }
-
-  // Read once it has risen into the window.
-  readonly inView = (report: Report) => {
-    const observer = new IntersectionObserver(report, { rootMargin: REVEAL_MARGIN });
-    observer.observe(this);
-    return () => {
-      observer.disconnect();
-    };
-  };
-
-  play() {
-    release(this);
-  }
-}
-
-// From the order before to the order now: each item leaves the place it had for its place in the order (FLIP), by
-// `data-before`.
-class TonightOrder extends PlayOnce {
-  override play() {
-    const items = [...this.querySelectorAll<HTMLElement>('[data-before]')];
-    const before = items.map((item) => item.getBoundingClientRect().top);
-    super.play();
-    const timing = orderTiming(getComputedStyle(this));
-    // A token that cannot be read leaves the order as it is, without a move.
-    if (!timing) return;
-    items.forEach((item, index) => {
-      const shift = flipShift(before[index] ?? 0, item.getBoundingClientRect().top, item.currentCSSZoom);
-      item.animate([{ transform: `translateY(${String(shift)}px)` }, { transform: 'none' }], timing);
-    });
-  }
-}
+import { type SceneTiming, sceneTiming } from './timing';
 
 // Under `md`, a phone: the screen's frame follows each step's height rather than the tallest one's.
 const phone = window.matchMedia('(width < 48rem)');
-
-// The smallest a step's screen shrinks to, on a short window, so that the step is still read whole: below it, the
-// scene is not held and the steps follow one another. On a phone, until its smallest text (14 px) reaches 12 px, the
-// least the charte allows (docs/charte.md, "Typographie").
-const SMALLEST_SCREEN = { phone: 12 / 14, wide: 0.75 };
 
 // How far a screen's content slides as it leaves or comes in, and a line of text as it leaves (packages/tokens).
 const SCREEN_SHIFT = 'calc(var(--spacing) * 6)';
@@ -118,8 +49,12 @@ interface Gesture {
 // step reached. The steps hidden stay in the page for a screen reader; the keyboard's focus brings the window to them.
 // Reduced motion turned on during the visit lets the steps follow one another again, for good.
 class EveningScenes extends HTMLElement {
+  #track: HTMLElement = this;
   #steps: HTMLElement[] = [];
   #links: HTMLAnchorElement[] = [];
+  // Each step's proof, and the place in its step it goes back to; where the proofs go when they are set apart.
+  #proofs = new Map<HTMLElement, HTMLElement>();
+  #apart: HTMLElement | null = null;
   #scene: Scene = stillScene(0);
   #marked: number | undefined;
   readonly #moves = new Moves<Animation>();
@@ -134,6 +69,13 @@ class EveningScenes extends HTMLElement {
   connectedCallback() {
     this.#steps = [...this.querySelectorAll<HTMLElement>('[data-step]')];
     this.#links = [...this.querySelectorAll<HTMLAnchorElement>('.timeline a')];
+    this.#track = this.querySelector<HTMLElement>('.track') ?? this;
+    this.#apart = this.querySelector<HTMLElement>('.proofs');
+    this.#proofs = new Map(
+      [...this.querySelectorAll<HTMLElement>('[data-step] [data-proof]')].flatMap((proof) =>
+        proof.parentElement ? [[proof, proof.parentElement] as const] : [],
+      ),
+    );
     if (reducedMotion.matches || !this.#hold()) {
       for (const block of this.querySelectorAll<PlayOnce>('[data-step] :is(play-once, tonight-order)')) block.start(block.inView);
       return;
@@ -163,7 +105,7 @@ class EveningScenes extends HTMLElement {
     this.#mark(first);
     this.#gestures.show(first);
     const observer = new IntersectionObserver(this.#see, { rootMargin: SCENE_IN_VIEW });
-    observer.observe(this);
+    observer.observe(this.#track);
     this.#cleanups.push(() => {
       observer.disconnect();
     });
@@ -224,42 +166,54 @@ class EveningScenes extends HTMLElement {
     else target.scrollIntoView({ behavior: 'instant' });
   }
 
-  // Fits the steps under the section's title, which never shrinks: their screens shrink first; if that is not enough,
-  // the scene's spacings tighten (`data-tight`, sections/evening.astro) and the screens are fitted again.
+  // Fits the steps under the section's title, which never shrinks, in the first layout where they fit
+  // (src/scripts/scenes.ts, `layouts`): their screens shrink first; if that is not enough, on a phone the proofs go
+  // after the scene, then the scene's spacings tighten (`data-tight`, sections/evening.astro), and the screens are
+  // fitted again each time.
   #fit(): boolean {
-    this.#unfit();
-    if (this.#fitScreens()) return true;
-    this.dataset['tight'] = '';
-    return this.#fitScreens();
+    return layouts(phone.matches).some((layout) => {
+      this.#unfit();
+      this.#lay(layout);
+      return this.#fitScreens();
+    });
+  }
+
+  // The proofs set apart move, not copied, to their place after the scene, in their order: a screen reader reads them
+  // after the steps, and the keyboard reaches their source there.
+  #lay({ proofsApart, tight }: Layout) {
+    this.toggleAttribute('data-tight', tight);
+    if (proofsApart) for (const proof of this.#proofs.keys()) this.#apart?.append(proof);
   }
 
   // Gives every step's text the height of the tallest, so that its screen always starts at the same place, and, at a
   // computer, every screen too, so that its one frame never jumps; on a phone, the frame follows each step. Then fits
-  // the steps in the room the scene leaves them, their screens shrunk alike if need be; false if they would be too
-  // small to read. The frames and `zoom` go through the CSS object model, which the CSP allows (no style attribute in
-  // the HTML).
+  // the steps in the room the scene leaves them, their screens shrunk alike as little as they allow, each scale laid out
+  // and measured (src/scripts/scenes.ts, `sceneScale`); false if they would be too small to read. The frames and `zoom`
+  // go through the CSS object model, which the CSP allows (no style attribute in the HTML).
   #fitScreens(): boolean {
     const list = this.querySelector<HTMLElement>('.steps');
     if (!list) return false;
     this.#unframe();
     const tallest = (selector: string) => Math.max(...this.#steps.map((element) => element.querySelector<HTMLElement>(selector)?.offsetHeight ?? 0));
     this.style.setProperty('--text-frame', `${String(tallest('[data-text]'))}px`);
-    if (!phone.matches) this.style.setProperty('--screen-frame', `${String(tallest('[data-screen] > *'))}px`);
     const room = list.clientHeight;
-    const smallest = phone.matches ? SMALLEST_SCREEN.phone : SMALLEST_SCREEN.wide;
-    const screens = this.#steps.map((step) => step.querySelector<HTMLElement>('[data-screen]'));
-    const scales = this.#steps.map((step, index) => {
-      const screen = screens[index];
-      return screen ? screenScale(room - (step.offsetHeight - screen.offsetHeight), screen.offsetHeight, smallest) : 1;
+    const screens = this.#steps.flatMap((step) => step.querySelector<HTMLElement>('[data-screen]') ?? []);
+    const scale = sceneScale((value) => {
+      for (const screen of screens) screen.style.setProperty('zoom', String(value));
+      // A screen shrunk wraps less: the tallest frame is measured again at each scale.
+      if (!phone.matches) {
+        this.style.removeProperty('--screen-frame');
+        this.style.setProperty('--screen-frame', `${String(tallest('[data-screen] > *'))}px`);
+      }
+      return this.#steps.every((element) => element.offsetHeight <= room);
     });
-    if (scales.some((scale) => scale === undefined)) return false;
-    const scale = Math.min(...scales.map((value) => value ?? 1));
-    if (scale < 1) for (const element of screens) element?.style.setProperty('zoom', String(scale));
-    return this.#steps.every((element) => element.offsetHeight <= room);
+    return scale !== undefined;
   }
 
+  // Back to the steps as written: the spacings loose, each proof in its step, the frames and screens undone.
   #unfit() {
     delete this.dataset['tight'];
+    for (const [proof, home] of this.#proofs) if (proof.parentElement !== home) home.append(proof);
     this.#unframe();
   }
 
@@ -292,7 +246,7 @@ class EveningScenes extends HTMLElement {
   }
 
   #progress(): number {
-    return sceneProgress(this.getBoundingClientRect(), this.#view());
+    return sceneProgress(this.#track.getBoundingClientRect(), this.#view());
   }
 
   readonly #schedule = () => {
@@ -455,7 +409,7 @@ class EveningScenes extends HTMLElement {
 
   // An hour of the timeline, or the focus gone into a step, brings the window to that step.
   #scrollTo(step: number) {
-    const track = this.getBoundingClientRect();
+    const track = this.#track.getBoundingClientRect();
     const top = scrollForStep(step, this.#steps.length, { top: track.top + window.scrollY, height: track.height }, this.#view());
     window.scrollTo({ top, behavior: 'instant' });
   }
@@ -494,6 +448,4 @@ class EveningScenes extends HTMLElement {
   }
 }
 
-customElements.define('play-once', PlayOnce);
-customElements.define('tonight-order', TonightOrder);
 customElements.define('evening-scenes', EveningScenes);

@@ -163,10 +163,50 @@ export class Gestures<G> {
   }
 }
 
-/** How much a step's screen shrinks to fit the room its text leaves it: not at all if it fits, never past `minimum`,
- * below which the step is no longer read whole (none: the scene is then not held). */
-export function screenScale(available: number, natural: number, minimum: number): number | undefined {
-  if (natural <= available) return 1;
-  const scale = available / natural;
-  return scale >= minimum ? scale : undefined;
+// The smallest a step's screen shrinks to, so that the step is still read whole: until its smallest text (14 px)
+// reaches 12 px, the least the charte allows (docs/charte.md, "Typographie").
+const SMALLEST_SCREEN = 12 / 14;
+
+// How close to the largest scale that fits the search comes.
+const SCALE_PRECISION = 0.01;
+
+/** How much the steps' screens shrink, all alike, so that every step fits the room under the section's title, as
+ * little as they allow: not at all if they fit; none if a screen would shrink past the smallest readable size, and the
+ * scene is then not held. A screen shrunk is laid out wider and wraps less, so `fits` lays the steps out at a scale
+ * and measures them; the scale tried last is the one given, so that the steps are left laid out at it. */
+export function sceneScale(fits: (scale: number) => boolean): number | undefined {
+  if (fits(1)) return 1;
+  if (!fits(SMALLEST_SCREEN)) return undefined;
+  let fitting = SMALLEST_SCREEN;
+  let tooLarge = 1;
+  let last = fitting;
+  while (tooLarge - fitting > SCALE_PRECISION) {
+    last = (fitting + tooLarge) / 2;
+    if (fits(last)) fitting = last;
+    else tooLarge = last;
+  }
+  if (last !== fitting) fits(fitting);
+  return fitting;
+}
+
+/** A way to lay the held scene out: its steps' proofs set apart after the scene, its spacings tightened. */
+export interface Layout {
+  readonly proofsApart: boolean;
+  readonly tight: boolean;
+}
+
+/** The layouts the held scene tries, until its steps fit: everything in its step first, and the spacings tightened
+ * last. On a phone, where the proof falls under the screen and adds to the step's height, the proofs go after the
+ * scene before that; at a computer, the proof lies beside the screen. */
+export function layouts(phone: boolean): readonly Layout[] {
+  if (!phone)
+    return [
+      { proofsApart: false, tight: false },
+      { proofsApart: false, tight: true },
+    ];
+  return [
+    { proofsApart: false, tight: false },
+    { proofsApart: true, tight: false },
+    { proofsApart: true, tight: true },
+  ];
 }

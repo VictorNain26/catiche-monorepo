@@ -88,6 +88,14 @@ const { times } = Astro.props;
         background-color: var(--color-highlight);
       }
 
+      /* A phone where the scene's spacings tighten (sections/evening.astro, `data-tight`): the dot sits on the room
+       * above the hour, which its link of 44 px leaves empty. */
+      @media (width < 48rem) {
+        &[data-tight] .timeline {
+          padding-top: var(--spacing);
+        }
+      }
+
       li[data-past] a {
         color: var(--color-foreground);
       }

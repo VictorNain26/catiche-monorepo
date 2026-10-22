@@ -201,7 +201,7 @@
     transition-delay: calc(var(--duration-stagger) * 3);
   }
 
-  /* An order that falls into place (`tonight-order`, src/scripts/evening.ts): while it is armed, each item keeps the
+  /* An order that falls into place (`tonight-order`, src/scripts/play-once.ts): while it is armed, each item keeps the
    * place it had before (`data-before`) and what follows it (`tonight-after`) waits; once played, the items move into
    * the order and what follows fades in. */
   tonight-order[data-armed] {
