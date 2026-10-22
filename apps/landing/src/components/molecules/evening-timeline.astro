@@ -21,8 +21,8 @@ const { times } = Astro.props;
   <span aria-hidden="true" class="puck"></span>
   <ol role="list" aria-label="Moments de la soirée" class="hours">
     {times.map((time, index) => (
-      <li role="listitem" class="flex justify-center">
-        <a href={`#etape-${String(index + 1)}`} class="inline-flex min-h-11 items-center px-2 text-sm text-muted-foreground tabular-nums">
+      <li role="listitem" class="flex">
+        <a href={`#etape-${String(index + 1)}`} class="-ms-2 inline-flex min-h-11 items-center px-2 text-sm text-muted-foreground tabular-nums">
           {spokenHour(time)}
         </a>
       </li>
@@ -49,13 +49,16 @@ const { times } = Astro.props;
         grid-template-columns: repeat(var(--moments), minmax(0, 1fr));
       }
 
+      /* Each hour starts its column, the first on the text's left edge; its dot is under its first figure, and the rail
+       * runs from the first dot's middle to the last one's, thick enough for its fill to read. */
       .rail {
         position: absolute;
-        top: calc(var(--spacing) * 1);
-        inset-inline: calc(50% / var(--moments));
-        height: calc(var(--spacing) / 2);
+        top: calc(var(--spacing) * 0.75);
+        right: calc(100% / var(--moments) - var(--spacing) * 1.25);
+        left: calc(var(--spacing) * 1.25);
+        height: var(--spacing);
         border-radius: calc(infinity * 1px);
-        background-color: var(--color-input);
+        background-color: var(--color-border);
       }
 
       .fill {
@@ -72,7 +75,6 @@ const { times } = Astro.props;
         top: 0;
         left: 0;
         display: flex;
-        justify-content: center;
         width: calc(100% / var(--moments));
         translate: calc(100% * var(--moment, 0)) 0;
         transition: translate var(--duration-slow) var(--ease-out-expo);
@@ -96,12 +98,19 @@ const { times } = Astro.props;
       }
     }
 
-    /* The rail fills with the evening's own view timeline (`--evening`, on the held track). */
+    /* The rail fills with the evening's own view timeline (`--evening`, on the held track). In longhands, and the
+     * timeline apart: the minifier would fold it into the `animation` shorthand, which does not take it, and the whole
+     * declaration would be dropped. */
     @supports (animation-timeline: view()) {
       :global(evening-scenes[data-held]) .fill {
-        animation: timeline-fill linear both;
-        animation-timeline: --evening;
+        animation-name: timeline-fill;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
         animation-range: contain 0% contain 100%;
+      }
+
+      :global(evening-scenes[data-held]) .timeline .fill {
+        animation-timeline: --evening;
       }
     }
   }

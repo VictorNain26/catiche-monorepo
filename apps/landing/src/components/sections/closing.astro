@@ -4,18 +4,19 @@ import RequestInvitation from '@/components/molecules/request-invitation.astro';
 ---
 
 {/* The end of the page, the last impression: a short title, the largest after the top of the page's, one button, and
- * Tom beside them as the last word, on the brand's light plane. At a computer the title keeps two lines, « On commence par
- * quoi / ce soir ? », its letters less tight than the other titles'; Tom stands near the text, on a contact shadow,
- * with the plane under his feet. On a phone and at 768 px: the title, the button and the link, then Tom.
+ * Tom beside them as the last word, on the brand's light plane. Its title is set as the other titles are, in a container
+ * that starts where the sections' do; at a computer it keeps two lines, « On commence par quoi / ce soir ? », the reed
+ * under « ce soir »; Tom stands near the text, on a contact shadow, with the plane under his feet. On a phone and at
+ * 768 px: the title, the button and the link, then Tom.
  * The title rises, then the button; Tom arrives slowly as he comes into view (src/scripts/reveal.ts), onto his
  * shadow, then waves once (docs/charte.md, "Tom": out of a session, he does not speak). The section's padding is at
  * least its plane's fade, so that neither the text nor Tom's feet lie on it. */}
 <section class="overflow-hidden plane-tint py-28 md:py-32 lg:py-36">
-  {/* From xl the title grows with the screen, and the container widens so that it keeps its two lines beside Tom. */}
-  <div class="container grid max-w-5xl items-center gap-4 lg:grid-cols-[auto_minmax(0,20rem)] lg:justify-center lg:gap-12 xl:max-w-6xl">
+  {/* From xl the title grows with the screen. */}
+  <div class="container grid max-w-5xl items-center gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:gap-12">
     <play-once class="block">
-      <h2 data-reveal="rise" class="text-hero tracking-normal text-balance text-foreground sm:text-5xl lg:text-wrap xl:text-closing">
-        <span class="lg:block">On commence par quoi</span> ce soir&nbsp;?
+      <h2 data-reveal="rise" class="text-hero text-balance text-foreground sm:text-5xl lg:text-wrap xl:text-closing">
+        <span class="lg:block">On commence par quoi</span> <span class="highlighter">ce soir</span>&nbsp;?
       </h2>
       <div data-reveal="rise" data-order="2">
         <RequestInvitation class="mt-10 lg:mt-12" />

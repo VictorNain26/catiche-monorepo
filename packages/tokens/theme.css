@@ -29,6 +29,8 @@
    * 58 px, entre les titres de section (48) et celui du haut (60). */
   --text-closing: clamp(3.25rem, 2.5rem + 0.9375vw, 3.625rem);
   --text-closing--line-height: 1.15;
+  /* L'interligne d'un titre de section du site, sur deux lignes ou plus. */
+  --leading-title: 1.1;
 
   /* Deux rayons, les cartes et les bulles puis les boutons et les champs ; une ombre légère pour
    * ce qui se pose sur le fond. */
@@ -75,6 +77,8 @@
    * les toucher, plus haut qu'un soulignement de lien. */
   --highlight-height: 0.14em;
   --highlight-offset: 0.08em;
+  /* L'écart qu'il laisse autour des jambages (g, j, q) qui le traversent, pour ne pas les toucher. */
+  --highlight-gap: 0.05em;
   /* Le pelage, une note, un accent rare. */
   --color-annotation: var(--fur-10);
   --color-border: var(--mist-4);
@@ -124,6 +128,8 @@
   /* Le fondu d'un plan de couleur dans le fond de la page, en haut et en bas d'une section du site ;
    * plus haut à l'ordinateur. Aucun texte ne s'y pose. */
   --plane-fade: 6rem;
+  /* Celui du plan profond, plus court : sur un tel écart de clarté, un long fondu fait une bavure. */
+  --plane-fade-deep: 3rem;
 
   /* Un squelette reste caché pendant l'attente, puis pulse ; sous le mouvement réduit, il paraît
    * sans pulser. */
@@ -165,6 +171,10 @@
     color-scheme: dark;
     --color-card: var(--mist-2);
     --color-popover: var(--mist-2);
+    /* La bulle de l'élève et le survol, un pas au-dessus de la carte, qui est elle-même un pas
+     * au-dessus du fond : sans cela, ils s'y confondent. */
+    --color-secondary: var(--mist-3);
+    --color-accent: var(--mist-4);
     /* En sombre, un pas plus vif du jonc, qui se détache du fond sombre. */
     --color-highlight: var(--reed-10);
     --color-panel-highlight: var(--reed-11);

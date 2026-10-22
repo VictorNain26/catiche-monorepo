@@ -19,7 +19,7 @@ const { class: className, status = false } = Astro.props;
   {/* The envelope says the button opens an e-mail. */}
   <a href={INVITATION_HREF} class={cn(buttonVariants({ size: 'lg' }), 'h-auto min-h-14 px-8 py-3 text-lg whitespace-normal shadow-control')}>
     <Mail class="size-5 shrink-0" aria-hidden="true" />
-    Demander une invitation par e-mail
+    Demander une invitation par e&#8209;mail
   </a>
   {status ? (
     <p class="inline-flex items-center gap-2 rounded-2xl bg-secondary px-3 py-1 text-foreground">

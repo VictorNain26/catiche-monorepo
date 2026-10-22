@@ -1,4 +1,5 @@
 ---
+import { KeyRound, MapPin, ShieldCheck } from '@lucide/astro';
 import { BRAND_NAME } from '@/lib/brand';
 
 // Why a family can trust Catiche, in everyday words: the commitments of docs/produit.md, "Nos engagements", the pupil's
@@ -7,14 +8,17 @@ import { BRAND_NAME } from '@/lib/brand';
 // distress answer, written by a person, with the 3114 and a trusted adult, is docs/tuteur.md, § 4.
 const COMMITMENTS = [
   {
+    icon: KeyRound,
     key: 'Son espace est à lui',
-    text: 'Votre enfant l’ouvre avec son propre code, sans adresse e-mail. Vous voyez ce qu’il a fait, jamais ses conversations avec Tom.',
+    text: 'Votre enfant l’ouvre avec son propre code, sans adresse e‑mail. Vous voyez ce qu’il a fait, jamais ses conversations avec Tom.',
   },
   {
+    icon: MapPin,
     key: 'Hébergé en France',
     text: `${BRAND_NAME} est hébergé à Paris, chez Clever Cloud. Mistral AI calcule les réponses de Tom en Europe.`,
   },
   {
+    icon: ShieldCheck,
     key: 'Rien n’est revendu',
     text: 'Nous ne revendons aucune donnée, ni la vôtre ni celle de votre enfant.',
   },
@@ -31,13 +35,14 @@ const COMMITMENTS = [
       </h2>
     </play-once>
 
-    {/* Each commitment by its key words, then its sentence: a list read at a glance, not three cards. A reed dot marks
-     * each one, a mark of state (docs/charte.md, "Couleurs"). */}
+    {/* Each commitment by its key words, then its sentence: a list read at a glance, not three cards. A plain Lucide icon
+     * in the ink marks each one beside its words (docs/charte.md, "Icônes"); the reed stays under the title, once in the
+     * section ("Couleurs"). */}
     <play-once class="block max-w-3xl lg:col-start-2 lg:row-span-2 lg:row-start-1">
       <ul data-reveal="rise" aria-label="Nos engagements" class="space-y-6 lg:space-y-8">
-        {COMMITMENTS.map(({ key, text }) => (
+        {COMMITMENTS.map(({ icon: Icon, key, text }) => (
           <li class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4">
-            <span aria-hidden="true" class="mt-2.5 size-2.5 rounded-full bg-highlight lg:mt-3"></span>
+            <Icon class="mt-0.5 size-6 text-foreground lg:mt-1" aria-hidden="true" />
             <p class="font-heading text-xl font-extrabold text-foreground lg:text-2xl">{key}</p>
             <p class="col-start-2 mt-1 text-lg text-foreground">{text}</p>
           </li>

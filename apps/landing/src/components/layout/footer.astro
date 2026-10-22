@@ -38,7 +38,8 @@ const LINKS = [
       </p>
     </div>
     <nav aria-label="Aide et informations légales">
-      <ul class="flex flex-wrap gap-x-6 text-sm">
+      {/* In two columns on a phone, so that no link is left alone on a line; in a row from a computer's width. */}
+      <ul class="grid grid-cols-2 gap-x-6 text-sm lg:flex lg:flex-wrap">
         {LINKS.map((link) => (
           <li>
             <a

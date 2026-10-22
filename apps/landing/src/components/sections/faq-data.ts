@@ -15,7 +15,7 @@ interface Faq {
 // top of the page (docs/charte.md, "Les mots"). A class is written « 6ᵉ », raised on the page (atoms/inline-text.astro).
 export const FAQS: readonly Faq[] = [
   {
-    question: 'Combien ça coûte, et quand est-ce que ça ouvre\xa0?',
+    question: 'Combien ça coûte, et quand est‑ce que ça ouvre\xa0?',
     answer: [
       `En préparation\xa0: les comptes s’ouvrent sur invitation. Le prix de ${BRAND_NAME} n’est pas encore fixé. Pour demander une invitation, écrivez à ${CONTACT_EMAIL}.`,
     ],
@@ -34,7 +34,7 @@ export const FAQS: readonly Faq[] = [
     ],
   },
   {
-    question: 'Est-ce que ça marche\xa0?',
+    question: 'Est‑ce que ça marche\xa0?',
     answer: [
       `${BRAND_NAME} reprend des méthodes qui ont fait leurs preuves quand des enseignants ou des chercheurs les ont apprises aux élèves. Dès les premiers élèves, nous mesurerons les soirs de devoirs par semaine, les devoirs rendus et l’avis des familles.`,
     ],

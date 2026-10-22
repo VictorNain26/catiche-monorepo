@@ -72,7 +72,8 @@ const TEXT = [
   ['primary', 'accent'],
   ['muted-foreground', 'background'],
   ['muted-foreground', 'card'],
-  ['muted-foreground', 'secondary'],
+  // The secondary, raised a step above the card in dark mode, takes the accent's secondary words, as the accent does.
+  ['accent-muted-foreground', 'secondary'],
   ['primary', 'background'],
   ['primary', 'card'],
   ['primary', 'secondary'],
@@ -86,7 +87,6 @@ const TEXT = [
   ['destructive', 'card'],
   ['annotation', 'background'],
   ['annotation', 'card'],
-  ['annotation', 'secondary'],
   ['disabled-foreground', 'disabled'],
   // The brand's light plane, where a section of the site breathes: the ink, and its second line in the brand's water.
   ['foreground', 'tint'],
@@ -102,6 +102,10 @@ const MARKS = [
   ['input', 'secondary'],
   ['ring', 'background'],
   ['ring', 'card'],
+  // The dot of the site's status pill, a mark on the secondary.
+  ['annotation', 'secondary'],
+  // The evening's timeline, which fills in the brand's water on a rail of the border's colour.
+  ['primary', 'border'],
   // The highlighter on the brand's deep plane, under the evening check-in's title (docs/charte.md, "Couleurs").
   ['panel-highlight', 'panel'],
   ...[1, 2, 3, 4].flatMap((n) => [
@@ -134,6 +138,18 @@ for (const [mode, color] of modes) {
       assert.ok(ratio >= CHART_STEP, `${color(`chart-${String(n)}`)} next to ${color(`chart-${String(n + 1)}`)} = ${ratio.toFixed(2)}`);
     });
   }
+}
+
+// The raised surfaces on a card (the pupil's bubble and a list's lines on the accent, a word on the secondary) stand
+// apart from it in each mode, the accent further than the secondary: in dark mode, the card is already a step above the
+// background, so they take a step more.
+for (const [mode, color] of modes) {
+  test(`${mode}: secondary and accent stand apart from the card, the accent further`, () => {
+    const secondary = contrast(color('secondary'), color('card'));
+    const accent = contrast(color('accent'), color('card'));
+    assert.ok(secondary > 1, `secondary ${color('secondary')} on card ${color('card')} = ${secondary.toFixed(2)}`);
+    assert.ok(accent > secondary, `accent ${accent.toFixed(2)} against secondary ${secondary.toFixed(2)}`);
+  });
 }
 
 // The site's planes alternate: the deep plane and the light one, one after the other on the page, differ in lightness

@@ -77,7 +77,8 @@ const [maths, history, english] = HOMEWORK;
 const CHANGED = [english, maths, history];
 ---
 
-<section id="soiree" class="scroll-mt-20 bg-background pt-6 pb-12 md:pt-8 md:pb-16 lg:pt-12 lg:pb-24">
+{/* No padding on top: the problem's plane ends in its own fade just above, which is room enough. */}
+<section id="soiree" class="scroll-mt-20 bg-background pb-12 md:pb-16 lg:pb-24">
   {/* The moments, held while they are scrolled (src/scripts/evening.ts): the script makes the track several windows
    * high and holds the scene under the header, its title on top, where each step takes the place of the one before,
    * with its hour on the timeline. Without it, if it fails, or under reduced motion, the steps follow one another, all
@@ -143,7 +144,9 @@ const CHANGED = [english, maths, history];
                       </ol>
                       <PupilSays>Je préfère commencer par l’anglais, c’est rapide.</PupilSays>
                       <div class="reply">
-                        <TomSays>L’anglais passe en premier, puis les maths, puis l’histoire. Qu’est-ce que tu as à faire en anglais&nbsp;?</TomSays>
+                        <TomSays>
+                          L’anglais passe en premier, puis les maths, puis l’histoire. Qu’est&#8209;ce que tu as à faire en anglais&nbsp;?
+                        </TomSays>
                       </div>
                       <ol class="reordered flex flex-col gap-2">
                         {CHANGED.map((item, position) => (
@@ -317,9 +320,16 @@ const CHANGED = [english, maths, history];
         min-height: var(--text-frame);
       }
 
-      /* The screen's card and its content belong to the screen's component (`:global`). */
+      /* The screen's card and its content belong to the screen's component (`:global`). In the tallest screen's frame,
+       * the content sits at the bottom, under the screen's top line, as a conversation does. */
       [data-screen] > :global(*) {
+        display: flex;
+        flex-direction: column;
         min-height: var(--screen-frame);
+      }
+
+      [data-screen] > :global(* > :nth-child(2)) {
+        margin-top: auto;
       }
 
       [data-step]:not([data-shown]) :is([data-line], [data-proof]),
@@ -344,17 +354,13 @@ const CHANGED = [english, maths, history];
         line-height: var(--text-base--line-height);
       }
 
-      /* On a phone, the scene's margins, the step's own text and the lines of its lists are set a size down too, so
-       * that its screen keeps a readable size. */
+      /* On a phone, the scene's margins and the lines of its lists are set a size down, so that its screen keeps a
+       * readable size; the step's own text stays at the body's size (docs/charte.md, "Typographie"). Each step has its
+       * own height here, in the middle of the room, as at a computer. */
       @media (width < 48rem) {
         .scene {
           gap: calc(var(--spacing) * 2);
           padding-block: calc(var(--spacing) * 2);
-        }
-
-        /* Each step has its own height here: it starts under the title, so that its hour never moves. */
-        [data-step] {
-          align-self: start;
         }
 
         [data-screen] li {
@@ -395,12 +401,8 @@ const CHANGED = [english, maths, history];
           white-space: nowrap;
         }
 
-        /* The hour and the step's title on one line where they fit. */
+        /* The hour, always above the step's title, so that neither moves from one step to the next. */
         [data-step] h3 {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: baseline;
-          column-gap: calc(var(--spacing) * 2);
           font-size: var(--text-base);
           line-height: var(--text-base--line-height);
         }
@@ -417,19 +419,15 @@ const CHANGED = [english, maths, history];
         [data-step] h3 + .mask {
           margin-top: var(--spacing);
         }
-
-        [data-step] h3 + .mask p {
-          font-size: var(--text-sm);
-          line-height: var(--text-sm--line-height);
-        }
       }
     }
 
     /* A window where the screens, shrunk as far as they go, still leave a step without room (src/scripts/evening.ts):
-     * the scene's spacings tighten, the title keeps its size. */
+     * the scene's spacings tighten, the title keeps its size; the screen keeps its margin, and the proof keeps its
+     * distance from the timeline. */
     evening-scenes[data-held][data-tight] {
       .scene {
-        gap: var(--spacing);
+        gap: calc(var(--spacing) * 2);
         padding-block: var(--spacing);
       }
 
@@ -438,7 +436,7 @@ const CHANGED = [english, maths, history];
       }
 
       [data-screen] > :global(*) {
-        padding: calc(var(--spacing) * 2);
+        padding: calc(var(--spacing) * 3);
       }
 
       [data-screen] > :global(* > p:first-child) {

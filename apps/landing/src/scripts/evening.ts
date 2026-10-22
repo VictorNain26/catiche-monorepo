@@ -90,8 +90,9 @@ class TonightOrder extends PlayOnce {
 const phone = window.matchMedia('(width < 48rem)');
 
 // The smallest a step's screen shrinks to, on a short window, so that the step is still read whole: below it, the
-// scene is not held and the steps follow one another. On a phone, where its text is already small, hardly at all.
-const SMALLEST_SCREEN = { phone: 0.9, wide: 0.75 };
+// scene is not held and the steps follow one another. On a phone, until its smallest text (14 px) reaches 12 px, the
+// least the charte allows (docs/charte.md, "Typographie").
+const SMALLEST_SCREEN = { phone: 12 / 14, wide: 0.75 };
 
 // How far a screen's content slides as it leaves or comes in, and a line of text as it leaves (packages/tokens).
 const SCREEN_SHIFT = 'calc(var(--spacing) * 6)';

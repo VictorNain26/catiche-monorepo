@@ -14,7 +14,7 @@ import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN, screenTime } from './evening-d
 ---
 
 <section class="flex min-h-[calc(100svh-var(--spacing)*16)] items-center overflow-hidden py-10 lg:py-16">
-  <div class="container grid max-w-7xl items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] xl:gap-16">
+  <div class="container grid max-w-7xl items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] xl:gap-16">
     {/* The text of the top of the page is shown at once, still: only what is scrolled to appears (.claude/rules/landing.md). */}
     <div>
       {/* Balanced lines; the reed under the word that carries the sentence (docs/charte.md, "Couleurs"). */}
@@ -32,7 +32,7 @@ import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN, screenTime } from './evening-d
      * which leaves him room; at a computer, in front of its left third, which its content leaves free. His feet are
      * below the card, on a soft contact shadow. */}
     {/* Until two columns hold it, the card keeps a readable width, centred with Tom. */}
-    <figure class="relative isolate mb-36 w-full sm:mb-40 md:mx-auto md:max-w-xl lg:mb-12 lg:max-w-none">
+    <figure class="relative isolate mb-36 w-full sm:mb-40 md:mx-auto md:max-w-xl lg:mb-12 lg:max-w-none xl:mb-20">
       <span aria-hidden="true" class="halo absolute -inset-16 -z-10"></span>
       <figcaption class="sr-only">
         Exemple d’écran, un mardi à 17&nbsp;h&nbsp;35. Votre enfant dit pour quand est chaque devoir&nbsp;: l’anglais pour vendredi, les maths pour
@@ -43,7 +43,7 @@ import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN, screenTime } from './evening-d
         <Screen time={screenTime(HOURS.ordered)} class="shadow-control-hover">
           {/* The screen's top line spans the card; its content leaves Tom his room, under it on a phone and on its left
            * at a computer. */}
-          <div class="pb-24 lg:pb-0 lg:pl-32 xl:pl-40">
+          <div class="pb-24 lg:pb-0 lg:pl-32 xl:pl-28">
             <PupilSays>{SPOKEN}</PupilSays>
             <ol class="mt-4 flex flex-col gap-2">
               {HOMEWORK.map(({ subject, note, spoken }, position) => (
@@ -63,7 +63,7 @@ import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN, screenTime } from './evening-d
           </div>
         </Screen>
       </tonight-order>
-      <div class="pointer-events-none absolute -bottom-36 left-0 w-60 sm:-bottom-40 sm:w-64 lg:-bottom-12 lg:-left-28 lg:w-80 xl:-left-40 xl:w-100">
+      <div class="pointer-events-none absolute -bottom-36 left-0 w-60 sm:-bottom-40 sm:w-64 lg:-bottom-12 lg:-left-28 lg:w-80 xl:-bottom-20 xl:-left-44 xl:w-100">
         <span aria-hidden="true" class="absolute inset-x-1/4 bottom-1 h-4 rounded-full bg-overlay/30 blur-md"></span>
         <TomIllustration class="max-w-none" />
       </div>

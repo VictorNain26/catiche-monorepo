@@ -44,7 +44,7 @@ const NOTES = [
      * gesture. */}
     <figure class="mx-auto w-full max-w-80 md:max-w-64 lg:max-w-80">
       <play-once data-reveal="pop" class="block rounded-3xl bg-card p-1.5 shadow-control-hover ring-2 ring-panel-foreground/50">
-        <div aria-hidden="true" class="rounded-2xl bg-card px-5 pt-3 pb-6 text-card-foreground">
+        <div aria-hidden="true" class="rounded-2xl bg-card px-4 pt-3 pb-6 text-card-foreground">
           <span class="mx-auto mb-3 block h-1.5 w-14 rounded-full bg-border"></span>
           <p class="mb-4 border-b pb-3 text-sm font-bold text-muted-foreground tabular-nums">{screenTime(HOURS.answered)}</p>
           <div class="space-y-4">
@@ -59,14 +59,15 @@ const NOTES = [
               </div>
             ))}
           </div>
+          {/* Side by side, as the app sets them; they wrap only if the phone is too narrow. */}
           <p class="mt-5 flex flex-wrap gap-2">
-            <span class="inline-flex items-center gap-2 rounded-full px-4 py-2 font-bold text-primary ring-2 ring-input">
+            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-bold text-primary ring-2 ring-input">
               <span class="tick inline-flex size-5 items-center justify-center rounded-md bg-highlight text-card">
                 <Check class="size-4" aria-hidden="true" />
               </span>
               Je m’en occupe
             </span>
-            <span class="rounded-full px-4 py-2 font-bold text-primary ring-2 ring-input">Ajouter un mot</span>
+            <span class="rounded-full px-3 py-2 text-sm font-bold text-primary ring-2 ring-input">Ajouter un mot</span>
           </p>
           <p class="word mt-4 rounded-2xl bg-secondary px-3 py-2 text-secondary-foreground">«&nbsp;Bien joué pour les fractions.&nbsp;»</p>
         </div>
@@ -81,6 +82,11 @@ const NOTES = [
 </section>
 
 <style>
+  /* The deep plane melts into the background over a shorter fade than the light ones (packages/tokens/theme.css). */
+  section {
+    --plane-fade: var(--plane-fade-deep);
+  }
+
   .on-panel {
     --color-highlight: var(--color-panel-highlight);
   }
