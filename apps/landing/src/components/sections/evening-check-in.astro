@@ -6,17 +6,18 @@ import { HOURS, screenTime } from './evening-data';
 // The evening check-in of docs/produit.md (point 5), as docs/methode.md ("Le rôle de l'adulte au collège") has it: the
 // pupil shows his plan for tomorrow and what he expects of the adult, never a check of the work; the adult answers that
 // he takes care of it, and may add a word. Presented in the present (docs/charte.md, "Les mots"); how it fits each
-// family is a question of the FAQ. The proof of the adult's part: docs/methode.md, "Ce qui vaut pour tous les élèves",
-// source [17].
+// family is a question of the FAQ. The proof of the adult's part: docs/methode.md, "Le rôle de l'adulte au collège",
+// source [22], a structure rather than a control; a link it found, never an effect, nor a better mark.
 const SUPPORT = {
-  text: 'Une étude a suivi 1\xa0685\xa0élèves. Ceux qui vivent l’aide aux devoirs à la maison comme un soutien progressent davantage.',
-  sources: [{ label: 'La source', href: 'https://doi.org/10.1080/00220671.2014.901283', title: 'Moroni et al., 2015', name: 'Moroni, 2015' }],
+  text: 'Une étude a suivi 2\xa0830\xa0élèves pendant deux ans. Une aide aux devoirs qui donne un cadre va avec un meilleur travail en lecture ensuite\xa0; une aide qui contrôle, avec un moins bon.',
+  source: { href: 'https://doi.org/10.1037/a0034100', title: 'Dumont et al., 2014', name: 'Dumont, 2014' },
 };
 
-// What the pupil shows on the adult's phone, at 19:10 on the example Tuesday (sections/evening-data.ts).
+// What the pupil shows on the adult's phone, at 19:10 on the example Tuesday (sections/evening-data.ts): the outing is
+// on Friday, the day after the history test.
 const NOTES = [
   { title: 'Demain', items: ['Histoire\xa0: la suite de la révision, pour le contrôle de jeudi', 'Dans le cartable\xa0: le cahier de maths'] },
-  { title: 'Il me faut', items: ['Signer le mot pour la sortie de jeudi'] },
+  { title: 'Il me faut', items: ['Signer le mot pour la sortie de vendredi'] },
   { title: 'Ce que j’ai réussi', items: ['Les fractions de l’exercice 3'] },
 ];
 ---
@@ -73,9 +74,9 @@ const NOTES = [
         </div>
       </play-once>
       <figcaption class="sr-only">
-        Exemple d’écran sur votre téléphone, mardi à 19&nbsp;h&nbsp;10. Votre enfant montre son plan de demain et l’exercice de fractions dont il est
-        content. Il vous demande de signer le mot pour la sortie de jeudi. Vous répondez «&nbsp;Je m’en occupe&nbsp;» et ajoutez «&nbsp;Bien joué pour
-        les fractions.&nbsp;»
+        Exemple d’écran, mardi à 19&nbsp;h&nbsp;10, sur votre téléphone. Votre enfant montre son plan de demain et l’exercice de fractions dont il est
+        content. Il vous demande de signer le mot pour la sortie de vendredi. Vous répondez «&nbsp;Je m’en occupe&nbsp;» et ajoutez «&nbsp;Bien joué
+        pour les fractions.&nbsp;»
       </figcaption>
     </figure>
   </div>

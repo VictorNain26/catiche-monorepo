@@ -27,16 +27,16 @@ export const FAQS: readonly Faq[] = [
       [
         'Vous rentrez tard\xa0: vous lisez le point du soir en arrivant, et votre enfant voit votre réponse le lendemain.',
         'Votre enfant vit dans deux maisons\xa0: le point du soir va à l’adulte chez qui il est ce soir-là.',
-        'Personne n’est là\xa0: le point du soir reste à votre enfant et rien ne lui est reproché.',
+        'Personne n’est là\xa0: le point du soir reste à votre enfant, pour lui seul.',
         'Les devoirs sont un sujet tendu chez vous\xa0: vous pouvez couper le point du soir.',
       ],
-      'En 6ᵉ et en 5ᵉ, le point du soir est proposé d’office. En 4ᵉ et en 3ᵉ, votre enfant choisit de le partager.',
+      'En 6ᵉ et en 5ᵉ, le point du soir est activé dès le départ. En 4ᵉ et en 3ᵉ, votre enfant décide de l’activer.',
     ],
   },
   {
     question: 'Est‑ce que ça marche\xa0?',
     answer: [
-      `${BRAND_NAME} reprend des méthodes qui ont fait leurs preuves quand des enseignants ou des chercheurs les ont apprises aux élèves. Dès les premiers élèves, nous mesurerons les soirs de devoirs par semaine, les devoirs rendus et l’avis des familles.`,
+      `${BRAND_NAME} reprend des méthodes qui ont fait leurs preuves quand des enseignants ou des chercheurs les ont enseignées aux élèves. Dès les premiers élèves, nous mesurerons combien de soirs par semaine les devoirs sont faits, combien de devoirs sont rendus, et l’avis des familles.`,
     ],
   },
   {
@@ -47,7 +47,7 @@ export const FAQS: readonly Faq[] = [
   {
     question: 'Nous n’avons qu’un ordinateur pour toute la famille. Comment faire\xa0?',
     answer: [
-      'Chaque enfant a son espace et son code. Il choisit son profil, tape son code et retrouve ses devoirs. Son espace se ferme seul quand personne ne s’en sert pendant 10\xa0minutes.',
+      'Chaque enfant a son espace et son code. Il choisit son profil, tape son code et retrouve son espace. Son espace se ferme seul quand personne ne s’en sert pendant 10\xa0minutes.',
     ],
   },
   {
