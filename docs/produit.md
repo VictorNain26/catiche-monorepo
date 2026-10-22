@@ -122,6 +122,9 @@ devra tenir ; puis l'application. La soirée et le volet IA viennent ensuite.
 
 **L'accès pendant la préparation** (Victor, 2026-10-21) : les comptes s'ouvrent sur invitation,
 demandée par e-mail ; aucune promotion tant que les bloquants de `etat.md` ne sont pas levés.
+Dans la FAQ du site, la réponse sur le prix dit, après la formule de statut, que la soirée se
+construit et ce que Tom fait déjà : l'aide sur un exercice, à l'écrit ou en photo (Victor,
+2026-10-22 ; le texte dans `apps/landing/src/components/sections/faq-data.ts`).
 
 ## Les risques
 

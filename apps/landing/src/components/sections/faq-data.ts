@@ -17,7 +17,9 @@ export const FAQS: readonly Faq[] = [
   {
     question: 'Combien ça coûte, et quand est‑ce que ça ouvre\xa0?',
     answer: [
-      `En préparation\xa0: les comptes s’ouvrent sur invitation. Le prix de ${BRAND_NAME} n’est pas encore fixé. Pour demander une invitation, écrivez à ${CONTACT_EMAIL}.`,
+      // What exists today, after the status (Victor, 2026-10-22): the help on an exercise, typed or photographed
+      // (docs/tuteur.md); the evening is still to build (docs/etat.md, "Prochain chantier").
+      `En préparation\xa0: les comptes s’ouvrent sur invitation. La soirée montrée sur cette page se construit. Aujourd’hui, Tom aide déjà votre enfant sur un exercice, à l’écrit ou en photo. Le prix de ${BRAND_NAME} n’est pas encore fixé. Pour demander une invitation, écrivez à ${CONTACT_EMAIL}.`,
     ],
   },
   {
