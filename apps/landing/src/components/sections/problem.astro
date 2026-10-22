@@ -9,17 +9,8 @@
 <section class="plane-tint pt-28 pb-24 md:pt-32 lg:pt-40 lg:pb-32">
   {/* The column starts where the other sections' do (max-w-5xl); its lines keep their own measure. */}
   <play-once class="strong container block max-w-5xl">
-    {/* While the title is scrolled, its hour moves a minute at a time up to 18 h, and never goes back
-     * (src/scripts/evening.ts, `problem-clock`): the time lost. A screen reader reads the hour of the HTML, once; the
-     * moving one is hidden from it. Its cell keeps the width of « 17 h 30 », so that the title's lines never move. */}
     <h2 data-reveal="rise" class="section-title max-w-4xl font-extrabold text-foreground">
-      <mark class="highlighter">Rien n’a commencé</mark> à <span class="sr-only">17&nbsp;h&nbsp;30</span>
-      <problem-clock aria-hidden="true" class="inline-grid tabular-nums">
-        <span class="invisible col-start-1 row-start-1">17&nbsp;h&nbsp;30</span>
-        <span data-clock class="col-start-1 row-start-1">
-          17&nbsp;h&nbsp;30
-        </span>
-      </problem-clock>
+      <mark class="highlighter">Rien n’a commencé</mark> à 17&nbsp;h&nbsp;30
     </h2>
     <div class="mt-6 max-w-3xl space-y-4 text-xl text-pretty text-foreground lg:mt-8 lg:text-2xl">
       <p data-reveal="rise" data-order="2">
