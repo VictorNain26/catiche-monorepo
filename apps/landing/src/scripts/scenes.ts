@@ -51,7 +51,7 @@ export interface Scene {
 }
 
 /** What the scene plays: a step that leaves or comes in, and the way it goes. */
-export interface Play {
+interface Play {
   readonly kind: 'leave' | 'enter';
   readonly step: number;
   readonly direction: 1 | -1;
