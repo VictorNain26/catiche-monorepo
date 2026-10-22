@@ -2,7 +2,15 @@
 import PageLayout from '@/layouts/page-layout.astro';
 import { BRAND_NAME } from '@/lib/brand';
 
-const DESCRIPTION = `Mentions légales de ${BRAND_NAME} : éditeur du site, hébergement et propriété intellectuelle.`;
+const DESCRIPTION = `Mentions légales de ${BRAND_NAME}\xa0: éditeur du site, hébergement et propriété intellectuelle.`;
+
+// The publisher, an individual entrepreneur, as Victor gave him (2026-10-22): his address and his SIREN in the
+// national register of businesses. His phone number comes later, from Victor: it will take its own line, under the
+// address, rather than an empty field now.
+const PUBLISHER = {
+  address: ['19 rue Jean-Jacques-Rousseau', '94200 Ivry-sur-Seine', 'France'],
+  siren: '937\xa0817\xa0914',
+};
 ---
 
 <PageLayout title="Mentions légales" metaDescription={DESCRIPTION}>
@@ -10,10 +18,21 @@ const DESCRIPTION = `Mentions légales de ${BRAND_NAME} : éditeur du site, héb
     <h2>Éditeur du site</h2>
     <p>Le site catiche.fr est édité par Victor Lenain, entrepreneur individuel (micro-entrepreneur).</p>
     <p>
-      <strong>Directeur de la publication :</strong> Victor Lenain
+      {PUBLISHER.address.map((line, index) => (
+        <>
+          {index > 0 && <br />}
+          {line}
+        </>
+      ))}
     </p>
     <p>
-      <strong>Contact :</strong> <a href="mailto:contact@catiche.fr">contact@catiche.fr</a>
+      <strong>SIREN&nbsp;:</strong> {PUBLISHER.siren}, inscrit au Registre national des entreprises (RNE)
+    </p>
+    <p>
+      <strong>Directeur de la publication&nbsp;:</strong> Victor Lenain
+    </p>
+    <p>
+      <strong>Contact&nbsp;:</strong> <a href="mailto:contact@catiche.fr">contact@catiche.fr</a>
     </p>
 
     <h2>Hébergement</h2>
