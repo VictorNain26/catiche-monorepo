@@ -18,16 +18,16 @@
   }
 }
 
+/* A long text (the legal pages): read in the text's own ink; grey is kept for the date under the title. */
 @utility legal-copy {
   @apply max-w-lg;
-  color: var(--color-muted-foreground);
+  color: var(--color-foreground);
 
   & h2 {
     margin-top: 2rem;
     margin-bottom: 0.5rem;
     font-size: var(--text-xl);
     line-height: 2rem;
-    color: var(--color-foreground);
   }
 
   & h2:first-child {
@@ -56,21 +56,32 @@
 
   & strong {
     font-weight: 700;
-    color: var(--color-foreground);
   }
 }
 
-/* The reed laid behind the ink's words (docs/charte.md, "Couleurs": the reed highlights); `lay-highlight`
- * lays it from the left, where a component lets it. In the dark, every step of the reed turns olive behind the
- * light ink: the words stand without it. */
+/* The reed laid just under the baseline, raised from the bottom of the line box so that it grazes the letters without
+ * touching them, where a link's underline would not sit: the same stroke in both modes (docs/charte.md, "Couleurs":
+ * the reed highlights); `lay-highlight` lays it from the left, where a component lets it. It stays behind the ink and
+ * breaks under the descenders (g, j, q), as `text-decoration-skip-ink` would: a thin halo of the surface around the
+ * letters, the section's plane (`--plane`) or the page's background, is painted over it. A text decoration would skip
+ * the ink too, but it cannot be laid from the left. */
 @utility highlighter {
+  --highlight-halo: var(--plane, var(--color-background));
   color: inherit;
-  background: linear-gradient(var(--color-highlight), var(--color-highlight)) no-repeat 0 88% / 100% var(--highlight-height);
+  background: linear-gradient(var(--color-highlight), var(--color-highlight)) no-repeat 0 calc(100% - var(--highlight-offset)) / 100%
+    var(--highlight-height);
   box-decoration-break: clone;
+  text-shadow:
+    var(--highlight-gap) 0 var(--highlight-halo),
+    calc(var(--highlight-gap) * -1) 0 var(--highlight-halo),
+    0 var(--highlight-gap) var(--highlight-halo),
+    var(--highlight-gap) var(--highlight-gap) var(--highlight-halo),
+    calc(var(--highlight-gap) * -1) var(--highlight-gap) var(--highlight-halo);
+}
 
-  @media (prefers-color-scheme: dark) {
-    background: none;
-  }
+/* Depth behind Tom and the evening at the top of the page: a soft halo of water, fading out from its middle. */
+@utility halo {
+  background: radial-gradient(closest-side, var(--color-halo), transparent);
 }
 
 @keyframes lay-highlight {
@@ -79,8 +90,161 @@
   }
 }
 
+/* Every section title at one size, well under the top of the page's and well above a step's or a block's; its ink is
+ * its plane's. */
+@utility section-title {
+  @apply text-3xl leading-title text-balance sm:text-4xl lg:text-5xl;
+}
+
+/* A plane of colour that melts into the page's background at its top and its bottom, over `--plane-fade`: the planes
+ * still alternate, without a line where one stops. `plane-tint`, `plane-panel`, `plane-secondary`. Its section's padding
+ * is at least the fade, so that no text lies on it. The fade eases in and out (smoothstep), so that neither of its ends
+ * draws a line, even from the deep plane to the light background. It mixes in oklab, straight between the two colours:
+ * in oklch, the hue of a near-grey swings round the wheel and paints a pink band on the way. */
+@utility plane-* {
+  --plane: --value(--color-*);
+  --plane-quarter: color-mix(in oklab, var(--plane) 16%, var(--color-background));
+  --plane-half: color-mix(in oklab, var(--plane) 50%, var(--color-background));
+  --plane-three-quarters: color-mix(in oklab, var(--plane) 84%, var(--color-background));
+  background: linear-gradient(
+    in oklab,
+    var(--color-background),
+    var(--plane-quarter) calc(var(--plane-fade) / 4),
+    var(--plane-half) calc(var(--plane-fade) / 2),
+    var(--plane-three-quarters) calc(var(--plane-fade) * 3 / 4),
+    var(--plane) var(--plane-fade),
+    var(--plane) calc(100% - var(--plane-fade)),
+    var(--plane-three-quarters) calc(100% - var(--plane-fade) * 3 / 4),
+    var(--plane-half) calc(100% - var(--plane-fade) / 2),
+    var(--plane-quarter) calc(100% - var(--plane-fade) / 4),
+    var(--color-background)
+  );
+}
+
+/* What appears as it is scrolled to, once (.claude/rules/landing.md): visible by default; its entry state exists only
+ * while the block around it (`play-once`, `tonight-order`) carries `data-armed`, which the script sets itself
+ * (src/scripts/reveal.ts), and only without reduced motion; it moves once the block carries `data-played`, so that a
+ * block the window has jumped past shows at once. A role per element: `rise` for a text, `pop` for a screen or a card
+ * (it rises and grows), `fade` for a calm block; on the block itself or inside it. */
+@media (prefers-reduced-motion: no-preference) {
+  :is([data-armed] [data-reveal], [data-armed][data-reveal]) {
+    opacity: 0;
+  }
+
+  :is([data-armed] [data-reveal='rise'], [data-armed][data-reveal='rise']) {
+    translate: 0 var(--motion-distance);
+  }
+
+  :is([data-armed] [data-reveal='pop'], [data-armed][data-reveal='pop']) {
+    translate: 0 var(--motion-distance);
+    scale: var(--motion-scale);
+  }
+
+  :is([data-played] [data-reveal], [data-played][data-reveal]) {
+    transition:
+      opacity var(--duration-reveal) var(--ease-out-expo),
+      translate var(--duration-reveal) var(--ease-out-expo),
+      scale var(--duration-reveal) var(--ease-out-expo);
+  }
+
+  /* The word a section title rests on (docs/charte.md, "Couleurs"): its reed is laid once, as its title rises, the
+   * gesture of the top of the page. */
+  [data-armed] .highlighter {
+    background-size: 0% var(--highlight-height);
+  }
+
+  [data-played] .highlighter {
+    transition: background-size var(--duration-slow) var(--ease-standard) var(--duration-slow);
+  }
+
+  /* The items of a `stagger` block (the messages of a screen, the blocks of a phone) come one after the other once it
+   * plays. */
+  .stagger[data-armed] > * {
+    opacity: 0;
+  }
+
+  .stagger[data-played] > * {
+    transition: opacity var(--duration-base) var(--ease-standard);
+  }
+
+  .stagger[data-played] > :nth-child(2) {
+    transition-delay: var(--duration-stagger);
+  }
+
+  .stagger[data-played] > :nth-child(3) {
+    transition-delay: calc(var(--duration-stagger) * 2);
+  }
+
+  .stagger[data-played] > :nth-child(4) {
+    transition-delay: calc(var(--duration-stagger) * 3);
+  }
+
+  .stagger[data-played] > :nth-child(5) {
+    transition-delay: calc(var(--duration-stagger) * 4);
+  }
+
+  .stagger[data-played] > :nth-child(6) {
+    transition-delay: calc(var(--duration-stagger) * 5);
+  }
+
+  /* The rank of an item in its block, set by an attribute rather than counted among siblings: the items of a block are
+   * not always siblings. */
+  [data-played] [data-order='2'] {
+    transition-delay: var(--duration-stagger);
+  }
+
+  [data-played] [data-order='3'] {
+    transition-delay: calc(var(--duration-stagger) * 2);
+  }
+
+  [data-played] [data-order='4'] {
+    transition-delay: calc(var(--duration-stagger) * 3);
+  }
+
+  /* An order that falls into place (`tonight-order`, src/scripts/play-once.ts): while it is armed, each item keeps the
+   * place it had before (`data-before`) and what follows it (`tonight-after`) waits; once played, the items move into
+   * the order and what follows fades in. */
+  tonight-order[data-armed] {
+    [data-before='1'] {
+      order: 1;
+    }
+
+    [data-before='2'] {
+      order: 2;
+    }
+
+    [data-before='3'] {
+      order: 3;
+    }
+
+    .tonight-after {
+      opacity: 0;
+    }
+  }
+
+  tonight-order[data-played] :is([data-before], .tonight-after) {
+    transition:
+      translate var(--duration-slow) var(--ease-standard) var(--order-delay),
+      opacity var(--duration-slow) var(--ease-standard) var(--order-delay);
+  }
+}
+
+/* How long an order waits before it falls into place: at the top of the page, the wait after the jumble is said; where
+ * a screen brings it in, the screen's own arrival (sections/evening.astro). Registered as a time, so that its script
+ * reads it resolved (src/scripts/timing.ts). */
+@property --order-delay {
+  syntax: '<time>';
+  inherits: true;
+  initial-value: 0s;
+}
+
+tonight-order {
+  --order-delay: var(--duration-wait);
+}
+
+/* A selection in the brand's water: the reed is a stroke, too light or too dark behind a whole line in one mode. */
 ::selection {
-  @apply bg-highlight text-foreground;
+  @apply bg-primary text-primary-foreground;
 }
 
 @layer base {

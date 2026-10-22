@@ -5,54 +5,68 @@ import RequestInvitation from '@/components/molecules/request-invitation.astro';
 import Screen from '@/components/molecules/screen.astro';
 import TomSays from '@/components/molecules/tom-says.astro';
 import { BRAND_NAME } from '@/lib/brand';
-import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
+import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN, screenTime } from './evening-data';
 
-// The first two moments of the evening in one screen: the homework said in a jumble, then the order Tom proposes.
+// What Catiche is, for whom, and what to do now (docs/charte.md, "Les mots"): docs/produit.md, "En une phrase", told in
+// the present, Tom introduced once as an artificial intelligence; its state is said here once, in the pill
+// ("L'accès pendant la préparation").
+// Beside it, Tom steps out of the evening: the homework said with its dates falls into his order, once, as the page opens.
 ---
 
-<section class="overflow-hidden pt-10 pb-20 lg:pt-16 lg:pb-32">
-  <div class="container grid max-w-6xl items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-16">
+<section class="flex min-h-[calc(100svh-var(--spacing)*16)] items-center overflow-hidden py-10 lg:py-16">
+  <div class="container grid max-w-7xl items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] xl:gap-16">
+    {/* The text of the top of the page is shown at once, still: only what is scrolled to appears (.claude/rules/landing.md). */}
     <div>
-      <h1 class="text-4xl text-balance text-foreground sm:text-5xl xl:text-6xl">
-        {BRAND_NAME} accompagne votre enfant pendant ses devoirs, <mark class="highlighter">du début à la fin</mark>.
+      {/* Balanced lines; the reed under the word that carries the sentence (docs/charte.md, "Couleurs"). */}
+      <h1 class="text-hero leading-tight text-balance text-foreground sm:text-5xl xl:text-6xl xl:leading-tight">
+        Votre enfant apprend à <span class="highlighter">organiser</span> ses devoirs
       </h1>
-      <p class="mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">
-        Une aide aux devoirs pour le collège, de la 6e à la&nbsp;3e. Chaque soir, votre enfant dit ce qu&apos;il a à faire, et Tom, le tuteur de{' '}
-        {BRAND_NAME}, une intelligence artificielle, l&apos;aide à s&apos;organiser&nbsp;: par où commencer, des étapes courtes, le cartable du
-        lendemain. Sans faire le travail à sa place.
+      <p class="mt-6 max-w-xl text-lg text-foreground">
+        Tom, le tuteur de {BRAND_NAME}, est une intelligence artificielle. Votre enfant lui dit ses devoirs et choisit par où commencer,
+        de&nbsp;la&nbsp;6<sup>e</sup>&nbsp;à&nbsp;la&nbsp;3<sup>e</sup>.
       </p>
-      {/* The frame of the present tense above, read before the button (docs/charte.md, "Les mots"). */}
-      <p class="mt-4 max-w-xl text-lg font-bold text-foreground md:text-xl">
-        {BRAND_NAME} est en préparation&nbsp;: voici ce que votre enfant y fera.
-      </p>
-      <RequestInvitation class="mt-6" />
+      <RequestInvitation status class="mt-8" />
     </div>
 
-    {/* Tom in his arch, and the screen of the evening laid over its foot. */}
-    <figure class="mx-auto flex w-full max-w-md flex-col lg:max-w-none">
+    {/* The card of the evening on a halo of water, and Tom stepping out of it: on a phone he stands under its lower edge,
+     * which leaves him room; at a computer, in front of its left third, which its content leaves free. His feet are
+     * below the card, on a soft contact shadow. */}
+    {/* Until two columns hold it, the card keeps a readable width, centred with Tom. */}
+    <figure class="relative isolate mb-36 w-full sm:mb-40 md:mx-auto md:max-w-xl lg:mb-12 lg:max-w-none xl:mb-20">
+      <span aria-hidden="true" class="halo absolute -inset-16 -z-10"></span>
       <figcaption class="sr-only">
-        Un exemple de soirée&nbsp;: votre enfant dit ses devoirs dans le désordre, et Tom lui propose par où commencer&nbsp;: les maths,
-        l&apos;anglais, puis la révision du contrôle d&apos;histoire de jeudi. Votre enfant peut changer l&apos;ordre.
+        Exemple d’écran, mardi à 17&nbsp;h&nbsp;35. Votre enfant donne la date de chaque devoir&nbsp;: l’anglais pour vendredi, les maths pour demain,
+        un contrôle d’histoire jeudi. Tom range la liste&nbsp;: maths, histoire, anglais. Il explique cet ordre et demande à votre enfant s’il le
+        garde.
       </figcaption>
-      <TomIllustration arch class="-mb-16 w-2/3 max-w-none self-end sm:-mb-24" />
-      <tonight-order class="relative block w-11/12 max-w-sm sm:w-4/5">
-        <Screen time={HOURS.ordered} title="Ce soir">
-          <PupilSays>{SPOKEN}</PupilSays>
-          <div class="tonight-after mt-4">
-            <TomSays>{ORDER_PROPOSED}</TomSays>
+      <tonight-order class="relative block">
+        <Screen time={screenTime(HOURS.ordered)} class="shadow-control-hover">
+          {/* The screen's top line spans the card; its content leaves Tom his room, under it on a phone and on its left
+           * at a computer. */}
+          <div class="pb-24 lg:pb-0 lg:pl-32 xl:pl-28">
+            <PupilSays>{SPOKEN}</PupilSays>
+            <ol class="mt-4 flex flex-col gap-2">
+              {HOMEWORK.map(({ subject, note, spoken }, position) => (
+                <li
+                  data-before={spoken}
+                  class="flex flex-wrap items-baseline gap-x-3 rounded-control bg-accent px-3 py-2 text-accent-foreground ring-1 ring-border"
+                >
+                  <span class="tonight-after font-heading font-extrabold tabular-nums">{position + 1}</span>
+                  <span class="font-bold">{subject}</span>
+                  <span class="ml-auto text-sm text-accent-muted-foreground">{note}</span>
+                </li>
+              ))}
+            </ol>
+            <div class="tonight-after mt-4">
+              <TomSays>{ORDER_PROPOSED}</TomSays>
+            </div>
           </div>
-          <ol class="mt-3 flex flex-col gap-2">
-            {HOMEWORK.map(({ subject, task, spoken }, index) => (
-              <li data-spoken={spoken} class="tonight-item flex items-baseline gap-3 rounded-control bg-accent px-3 py-2 text-accent-foreground">
-                <span class="tonight-after font-heading font-extrabold tabular-nums">{index + 1}</span>
-                <span class="min-w-0">
-                  <span class="font-bold">{subject}</span> <span class="text-sm text-accent-muted-foreground">{task}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
         </Screen>
       </tonight-order>
+      <div class="pointer-events-none absolute -bottom-36 left-0 w-60 sm:-bottom-40 sm:w-64 lg:-bottom-12 lg:-left-28 lg:w-80 xl:-bottom-20 xl:-left-44 xl:w-100">
+        <span aria-hidden="true" class="absolute inset-x-1/4 bottom-1 h-4 rounded-full bg-overlay/30 blur-md"></span>
+        <TomIllustration class="max-w-none" />
+      </div>
     </figure>
   </div>
 </section>
@@ -65,33 +79,20 @@ import { HOMEWORK, HOURS, ORDER_PROPOSED, SPOKEN } from './evening-data';
     }
   }
 
-  /* The jumble: the homework in the order it was said, out of line, before Tom's order; only while the script that sorts
-   * it holds it (src/scripts/evening.ts). The jumble is set at once, and only its release is a transition. */
+  /* The homework as it was said, in its order (`data-before`) and out of line, before it falls into Tom's order
+   * (`tonight-order`, src/styles/global.css and src/scripts/play-once.ts). */
   @media (prefers-reduced-motion: no-preference) {
-    tonight-order:not([data-armed]) :is(.tonight-item, .tonight-after) {
-      transition:
-        translate var(--duration-slow) var(--ease-standard) var(--duration-wait),
-        opacity var(--duration-slow) var(--ease-standard) var(--duration-wait);
-    }
-
     tonight-order[data-armed] {
-      .tonight-item[data-spoken='1'] {
-        order: 1;
+      [data-before='1'] {
         translate: calc(var(--spacing) * 2) 0;
       }
 
-      .tonight-item[data-spoken='2'] {
-        order: 2;
+      [data-before='2'] {
         translate: calc(var(--spacing) * -1) 0;
       }
 
-      .tonight-item[data-spoken='3'] {
-        order: 3;
+      [data-before='3'] {
         translate: calc(var(--spacing) * 3) 0;
-      }
-
-      .tonight-after {
-        opacity: 0;
       }
     }
   }

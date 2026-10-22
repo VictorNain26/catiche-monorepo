@@ -8,12 +8,15 @@ import { SIGN_IN_URL } from '@/lib/brand';
 ---
 
 <header class="sticky top-0 z-50 w-full border-b border-transparent bg-background/70 backdrop-blur transition-colors duration-base data-scrolled:border-border data-scrolled:bg-background/90 data-scrolled:backdrop-blur-md">
-  <div class="container relative flex h-16 items-center justify-between">
+  {/* A size container: with the text enlarged on a phone, the logo drops its head (atoms/logo.astro) rather than run
+   * into the menu's button. */}
+  <div class="@container container relative flex h-16 items-center justify-between gap-2">
     <div class="z-20 flex items-center">
       <Logo />
     </div>
 
-    <nav aria-label="Principale" class="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:flex">
+    {/* Four sections: below a computer's width they would crowd the logo, so the menu holds them. */}
+    <nav aria-label="Principale" class="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 lg:flex">
       <NavLinks />
     </nav>
 

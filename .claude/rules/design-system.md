@@ -39,7 +39,6 @@ l'app. Les composants ne dépendent de l'identité que par les rôles.
   (`utils/styles.js`), ni le dialogue de Radix ni `sonner`.
 - Aucun graphique en anneau, en camembert ou en 3D, aucune couleur seule porteuse d'une
   information, aucun graphique sans sa phrase et son tableau de valeurs.
-- Aucune arche ailleurs que derrière Tom, sur le haut du site et à l'entrée de l'app.
 
 ## Un écran n'est pas fini
 

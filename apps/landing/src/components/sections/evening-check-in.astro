@@ -1,0 +1,147 @@
+---
+import { Check } from '@lucide/astro';
+import Proof from '@/components/molecules/proof.astro';
+import { HOURS, screenTime } from './evening-data';
+
+// The evening check-in of docs/produit.md (point 5), as docs/methode.md ("Le rôle de l'adulte au collège") has it: the
+// pupil shows his plan for tomorrow and what he expects of the adult, never a check of the work; the adult answers that
+// he takes care of it, and may add a word. Presented in the present (docs/charte.md, "Les mots"); how it fits each
+// family is a question of the FAQ. The proof of the adult's part: docs/methode.md, "Le rôle de l'adulte au collège",
+// source [22], a structure rather than a control; a link it found, never an effect, nor a better mark.
+const SUPPORT = {
+  text: 'Une étude a suivi 2\xa0830\xa0élèves pendant deux ans. Une aide aux devoirs qui donne un cadre va avec un meilleur travail en lecture ensuite\xa0; une aide qui contrôle, avec un moins bon.',
+  source: { href: 'https://doi.org/10.1037/a0034100', title: 'Dumont et al., 2014', name: 'Dumont, 2014' },
+};
+
+// What the pupil shows on the adult's phone, at 19:10 on the example Tuesday (sections/evening-data.ts): the outing is
+// on Friday, the day after the history test.
+const NOTES = [
+  { title: 'Demain', items: ['Histoire\xa0: la suite de la révision, pour le contrôle de jeudi', 'Dans le cartable\xa0: le cahier de maths'] },
+  { title: 'Il me faut', items: ['Signer le mot pour la sortie de vendredi'] },
+  { title: 'Ce que j’ai réussi', items: ['Les fractions de l’exercice 3'] },
+];
+---
+
+<section id="point-du-soir" class="scroll-mt-20 plane-panel py-28 text-panel-foreground md:py-32 lg:py-40">
+  {/* At 768 px, the phone narrows so that the title keeps its lines. */}
+  <div class="container grid max-w-5xl items-center gap-12 md:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] md:gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:gap-20">
+    <play-once class="block">
+      {/* The reed in its lighter step, the one that stands out from the deep plane (packages/tokens/theme.css). */}
+      <h2 data-reveal="rise" class="on-panel section-title">
+        Votre enfant vous dit <span class="highlighter">ce qu’il lui faut</span>
+      </h2>
+      <p data-reveal="rise" data-order="2" class="mt-5 max-w-xl text-lg md:mt-6 md:text-xl">
+        Avec le point du soir, votre enfant vous montre son plan de demain et ce qu’il attend de vous. Vous répondez{' '}
+        <span class="whitespace-nowrap">«&nbsp;Je m’en occupe&nbsp;»</span>, et vous pouvez ajouter un mot.
+      </p>
+      <div data-reveal="fade" data-order="3" class="mt-8 md:mt-10">
+        <Proof {...SUPPORT} />
+      </div>
+    </play-once>
+
+    {/* The adult's phone, drawn in CSS: a thin frame, a speaker slot, what the pupil shows in three blocks, the two
+     * buttons, then « Je m'en occupe » ticked and the word added. It rises as it comes into view, then the blocks come
+     * one by one, then the tick, then the word (src/scripts/reveal.ts plays it once). Its HTML is the state after the
+     * gesture. */}
+    <figure class="mx-auto w-full max-w-80 md:max-w-64 lg:max-w-80">
+      <play-once data-reveal="pop" class="block rounded-3xl bg-card p-1.5 shadow-control-hover ring-2 ring-panel-foreground/50">
+        <div aria-hidden="true" class="rounded-2xl bg-card px-4 pt-3 pb-6 text-card-foreground">
+          <span class="mx-auto mb-3 block h-1.5 w-14 rounded-full bg-border"></span>
+          <p class="mb-4 border-b pb-3 text-sm font-bold text-muted-foreground tabular-nums">{screenTime(HOURS.answered)}</p>
+          <div class="space-y-4">
+            {NOTES.map(({ title, items }) => (
+              <div class="note">
+                <p class="text-sm font-bold text-muted-foreground">{title}</p>
+                <ul class="mt-1 space-y-1">
+                  {items.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          {/* Side by side, as the app sets them; they wrap only if the phone is too narrow. */}
+          <p class="mt-5 flex flex-wrap gap-2">
+            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-bold text-primary ring-2 ring-input">
+              <span class="tick inline-flex size-5 items-center justify-center rounded-md bg-highlight text-card">
+                <Check class="size-4" aria-hidden="true" />
+              </span>
+              Je m’en occupe
+            </span>
+            <span class="rounded-full px-3 py-2 text-sm font-bold text-primary ring-2 ring-input">Ajouter un mot</span>
+          </p>
+          <p class="word mt-4 rounded-2xl bg-secondary px-3 py-2 text-secondary-foreground">«&nbsp;Bien joué pour les fractions.&nbsp;»</p>
+        </div>
+      </play-once>
+      <figcaption class="sr-only">
+        Exemple d’écran, mardi à 19&nbsp;h&nbsp;10, sur votre téléphone. Votre enfant montre son plan de demain et l’exercice de fractions dont il est
+        content. Il vous demande de signer le mot pour la sortie de vendredi. Vous répondez «&nbsp;Je m’en occupe&nbsp;» et ajoutez «&nbsp;Bien joué
+        pour les fractions.&nbsp;»
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  /* The deep plane melts into the background over a shorter fade than the light ones (packages/tokens/theme.css). */
+  section {
+    --plane-fade: var(--plane-fade-deep);
+  }
+
+  .on-panel {
+    --color-highlight: var(--color-panel-highlight);
+  }
+
+  /* After the phone's rise: the three blocks one by one, then the tick of « Je m'en occupe », on the reed, a mark of
+   * state (docs/charte.md, "Couleurs"), then the word. Waiting while the script holds them, they are in place without
+   * it, and still under reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    play-once[data-armed] {
+      :is(.note, .word) {
+        opacity: 0;
+        translate: 0 calc(var(--spacing) * 2);
+      }
+
+      .tick {
+        background-color: transparent;
+        box-shadow: inset 0 0 0 calc(var(--spacing) / 2) var(--color-input);
+        color: transparent;
+      }
+    }
+
+    play-once[data-played] {
+      :is(.note, .word) {
+        transition:
+          opacity var(--duration-base) var(--ease-standard) var(--delay),
+          translate var(--duration-base) var(--ease-standard) var(--delay);
+      }
+
+      .tick {
+        transition:
+          background-color var(--duration-fast) var(--ease-standard) var(--delay),
+          box-shadow var(--duration-fast) var(--ease-standard) var(--delay),
+          color var(--duration-fast) var(--ease-standard) var(--delay);
+      }
+    }
+
+    .note {
+      --delay: var(--duration-slow);
+    }
+
+    .note:nth-child(2) {
+      --delay: calc(var(--duration-slow) + var(--duration-stagger) * 2);
+    }
+
+    .note:nth-child(3) {
+      --delay: calc(var(--duration-slow) + var(--duration-stagger) * 4);
+    }
+
+    .tick {
+      --delay: calc(var(--duration-slow) + var(--duration-stagger) * 4 + var(--duration-slow));
+    }
+
+    .word {
+      --delay: calc(var(--duration-slow) * 3 + var(--duration-stagger) * 4);
+    }
+  }
+</style>

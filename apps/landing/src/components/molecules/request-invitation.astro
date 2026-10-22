@@ -1,26 +1,37 @@
 ---
+import { Mail } from '@lucide/astro';
 import { buttonVariants, cn } from '@repo/ui/classes';
 import ExternalLink from '@/components/atoms/external-link.astro';
-import { BRAND_NAME, CONTACT_EMAIL, SIGN_IN_URL } from '@/lib/brand';
+import { INVITATION_HREF, SIGN_IN_URL } from '@/lib/brand';
 
-// What a visitor can do today: accounts open on invitation (apps/server/src/platform/auth/auth.ts), asked for by e-mail,
-// without a waiting list; an invited parent signs in to the application.
+// What a visitor can do today: ask for an invitation, in an e-mail ready to send (src/lib/brand.ts), without a waiting
+// list; an invited adult signs in to the application. With `status`, the line under the button is the state of
+// Catiche, as a pill, and signing in stays in the header; without it, the sign-in link.
 interface Props {
   class?: string;
+  status?: boolean;
 }
 
-const { class: className } = Astro.props;
-const REQUEST_HREF = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`Demande d'invitation à ${BRAND_NAME}`)}`;
+const { class: className, status = false } = Astro.props;
 ---
 
-<div class={cn('flex flex-col items-start gap-4', className)}>
-  <a href={REQUEST_HREF} class={buttonVariants({ size: 'lg' })}>
-    Demander une invitation
+<div class={cn('flex flex-col items-start gap-5', className)}>
+  {/* The envelope says the button opens an e-mail. */}
+  <a href={INVITATION_HREF} class={cn(buttonVariants({ size: 'lg' }), 'h-auto min-h-14 px-8 py-3 text-lg whitespace-normal shadow-control')}>
+    <Mail class="size-5 shrink-0" aria-hidden="true" />
+    Demander une invitation par e&#8209;mail
   </a>
-  <p class="text-muted-foreground">
-    Déjà invité&nbsp;?{' '}
-    <ExternalLink href={SIGN_IN_URL} class="min-h-11 text-primary underline underline-offset-4">
-      Se connecter
-    </ExternalLink>
-  </p>
+  {status ? (
+    <p class="inline-flex items-center gap-2 rounded-2xl bg-secondary px-3 py-1 text-foreground">
+      <span aria-hidden="true" class="size-2 shrink-0 rounded-full bg-annotation" />
+      En préparation&nbsp;: les comptes s’ouvrent sur invitation.
+    </p>
+  ) : (
+    <p class="text-foreground">
+      Vous avez déjà une invitation&nbsp;?{' '}
+      <ExternalLink href={SIGN_IN_URL} class="min-h-11 text-primary underline underline-offset-4">
+        Se connecter
+      </ExternalLink>
+    </p>
+  )}
 </div>

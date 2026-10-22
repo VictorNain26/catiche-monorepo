@@ -6,9 +6,9 @@ est construit dans `tuteur.md` et `architecture.md`.
 
 ## En une phrase
 
-Catiche accompagne le collégien pendant ses devoirs, du début à la fin, et lui apprend à
-s'organiser. Chaque soir, l'élève
-dit ce qu'il a à faire, et Tom l'aide à le faire, du début à la fin, sans faire le travail à sa
+Catiche apprend au collégien à s'organiser pour ses devoirs du soir. Chaque soir, l'élève dit ce
+qu'il a à faire. Tom, le tuteur de Catiche, une intelligence artificielle, l'aide à choisir par
+où commencer, à avancer par petites étapes et à préparer le cartable, sans faire le travail à sa
 place.
 
 ## Pour qui
@@ -37,24 +37,41 @@ Une soirée suit les gestes de `methode.md` :
 3. Il découpe le travail en étapes courtes et aide l'élève à démarrer, puis à tenir.
 4. Il aide sur le contenu sans donner la réponse (`tuteur.md`).
 5. À la fin, il récapitule ce qui est fait, ce qui reste, et le cartable du lendemain.
-   **Le point du soir** (idée de Victor, 2026-10-20) : si un adulte de la maison le peut,
-   l'enfant lui montre ce récapitulatif. L'adulte répond « Vu », avec un encouragement s'il le
-   veut. Il ne vérifie pas le contenu et ne note rien. Ce point s'adapte à chaque famille :
-   - adulte rentré tard : il voit le récapitulatif plus tard, et l'enfant voit le « Vu » le
-     lendemain ;
-   - garde alternée : le récapitulatif va à l'adulte chez qui l'enfant est ce soir-là ;
+   **Le point du soir** (idée de Victor, 2026-10-20, revue le 2026-10-21 d'après `methode.md`,
+   « Le rôle de l'adulte au collège ») : l'enfant choisit ce qu'il montre à un adulte de la
+   maison. Il montre au moins le plan de demain (ce qui reste, le contrôle qui approche, le
+   cartable), et s'il le veut une étape dont il est content. Il dit aussi ce qu'il lui faut d'un
+   adulte : un mot à signer, une fourniture, l'heure de demain. L'adulte fait le geste demandé
+   (« Je m'en occupe ») et peut ajouter un mot sur l'étape montrée. Catiche ne lui propose
+   jamais de corriger, de vérifier le contenu ni de sanctionner : ce qui reste se présente comme
+   un plan. Ce point s'adapte à chaque famille :
+   - adulte rentré tard : il le voit plus tard, et l'enfant trouve sa réponse le lendemain ;
+   - garde alternée : il va à l'adulte chez qui l'enfant est ce soir-là ;
    - relation tendue autour des devoirs : l'adulte peut couper le point du soir ;
-   - sans adulte disponible : le récapitulatif reste à l'enfant, et rien ne lui est reproché ;
+   - sans adulte disponible : il reste à l'enfant, sans reproche ; Tom propose de garder la
+     demande pour le professeur ;
    - selon l'âge : proposé par défaut en 6e-5e ; en 4e-3e, l'enfant choisit de partager.
 
-   Jamais de série de jours, de relance ni de score. La raison est dans `methode.md`, « Le rôle
-   du parent ».
+   Jamais de série de jours, de relance ni de score. Les raisons sont dans `methode.md`, « Le
+   rôle du parent » et « Le rôle de l'adulte au collège ».
 6. D'un soir à l'autre, il garde les contrôles annoncés et ramène leur révision les jours
    d'avant.
 
 L'adulte verra que c'est fait ; les conversations ne lui sont jamais envoyées. Dès la 6e,
 l'enfant travaille dans son espace à lui, qu'il ouvre par son propre code, sur son appareil ou sur
 l'ordinateur de la famille (`tuteur.md`, § 8).
+
+## Nos engagements
+
+Ce que la page d'accueil peut promettre, et rien d'autre :
+
+- **Hébergé en France** : Clever Cloud, région Paris (`architecture.md`). Les réponses de Tom sont
+  calculées en Europe, par Mistral AI (`tuteur.md` § 2).
+- **Aucune donnée revendue** (Victor, 2026-10-21).
+- **L'espace de l'élève est à lui** : il l'ouvre par son propre code, sans adresse e-mail ;
+  l'adulte voit ce qui est fait, jamais les conversations (`tuteur.md` § 8).
+- **Tom ne fait pas le travail** : chaque message est vérifié avant d'être affiché, et remplacé
+  s'il contient la réponse (`tuteur.md` § 4).
 
 ## Pourquoi pas le gratuit
 
@@ -65,7 +82,9 @@ Klixo reste à essayer. Le plus proche, PANDAH, n'est accessible que dans un ess
 
 ## Ce qu'on dit, et ce qu'on ne dit pas
 
-- **On dit** « apprendre à s'organiser pour les devoirs ».
+- **On dit** « apprendre à s'organiser pour les devoirs ». Les deux voix, celle de Catiche aux
+  adultes et celle de Tom à l'élève, sont dans `charte.md`, « Les mots ». La page d'accueil
+  présente le produit au présent et dit son statut une seule fois.
 - **On ne dit jamais** « réduire les symptômes », « rééduquer », « compenser », « traiter » :
   ces mots font du produit un dispositif médical. Pour l'ANSM, c'est la destination annoncée par
   l'éditeur, matériel promotionnel compris, qui en décide
@@ -103,6 +122,9 @@ devra tenir ; puis l'application. La soirée et le volet IA viennent ensuite.
 
 **L'accès pendant la préparation** (Victor, 2026-10-21) : les comptes s'ouvrent sur invitation,
 demandée par e-mail ; aucune promotion tant que les bloquants de `etat.md` ne sont pas levés.
+Dans la FAQ du site, la réponse sur le prix dit, après la formule de statut, que la soirée se
+construit et ce que Tom fait déjà : l'aide sur un exercice, à l'écrit ou en photo (Victor,
+2026-10-22 ; le texte dans `apps/landing/src/components/sections/faq-data.ts`).
 
 ## Les risques
 
@@ -112,8 +134,9 @@ demandée par e-mail ; aucune promotion tant que les bloquants de `etat.md` ne s
 - **La clause de Mistral sur les mineurs** : lue à la lettre, elle peut exclure les données des
   moins de 15 ans même avec l'accord d'un représentant légal, soit presque tous les
   collégiens ; une réponse écrite de Mistral est attendue (`etat.md`).
-- **Les preuves viennent surtout d'élèves TDAH** : rien ne montre encore que la méthode vaut
-  autant pour tous les collégiens (`methode.md`, « Ce que la fiche ne permet pas d'affirmer »).
+- **Aucune étude ne porte sur un collégien seul avec une IA** : les gestes ont un appui en
+  population générale, mais par des méthodes transmises par des adultes (`methode.md`, « Ce qui
+  vaut pour tous les élèves »).
 - **PANDAH** pourrait publier des résultats positifs et devenir la référence gratuite des
   cliniciens.
 - **Les mots** : un seul message « pour les TDAH » fait basculer le produit vers les données de

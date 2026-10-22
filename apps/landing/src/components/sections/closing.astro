@@ -3,14 +3,51 @@ import TomIllustration from '@/components/atoms/tom-illustration.astro';
 import RequestInvitation from '@/components/molecules/request-invitation.astro';
 ---
 
-{/* The end of the evening: Tom waves, without a word (docs/charte.md, "Tom": out of a session, he does not speak). */}
-<section class="border-t pt-20 pb-12 lg:pt-28 lg:pb-16">
-  <div class="container grid max-w-6xl items-end gap-10 sm:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
-    <div class="pb-8">
-      <h2 class="max-w-2xl text-4xl text-balance text-foreground sm:text-5xl">Envie d&apos;essayer avec votre enfant&nbsp;?</h2>
-      <p class="mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">Les comptes s&apos;ouvrent sur invitation.</p>
-      <RequestInvitation class="mt-8" />
+{/* The end of the page, the last impression: a short title, the largest after the top of the page's, one button, and
+ * Tom beside them as the last word, on the brand's light plane. Its title is set as the other titles are, in a container
+ * that starts where the sections' do; at a computer it holds on one line across the container, the reed under
+ * « ce soir », and the button stands under it with Tom beside it, on a contact shadow, with the plane under his feet. On
+ * a phone and at 768 px: the title, the button and the link, then Tom.
+ * The title rises, then the button; Tom arrives slowly as he comes into view (src/scripts/reveal.ts), onto his
+ * shadow, then waves once (docs/charte.md, "Tom": out of a session, he does not speak). The section's padding is at
+ * least its plane's fade, so that neither the text nor Tom's feet lie on it. */}
+<section class="overflow-hidden plane-tint py-28 md:py-32 lg:py-36">
+  {/* From xl the title grows with the screen. */}
+  <div class="container max-w-5xl">
+    <play-once class="block">
+      <h2 data-reveal="rise" class="text-hero text-balance text-foreground sm:text-5xl lg:text-nowrap xl:text-closing">
+        On commence par quoi <span class="highlighter">ce soir</span>&nbsp;?
+      </h2>
+    </play-once>
+    <div class="mt-10 grid items-center gap-4 lg:mt-12 lg:items-start lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:gap-12">
+      <play-once class="block">
+        <div data-reveal="rise" data-order="2">
+          <RequestInvitation />
+        </div>
+      </play-once>
+      <div class="relative mx-auto w-56 sm:w-64 lg:mx-0 lg:w-full lg:max-w-80">
+        <span aria-hidden="true" class="absolute inset-x-1/4 bottom-1 h-4 rounded-full bg-overlay/30 blur-md"></span>
+        <play-once class="arrival relative block">
+          <TomIllustration start="arrival" class="max-w-none" />
+        </play-once>
+      </div>
     </div>
-    <TomIllustration start="view" class="w-48 sm:w-full" />
   </div>
 </section>
+
+<style>
+  /* Tom arrives slowly from below, once, while the script holds him (src/scripts/reveal.ts); set at once while he
+   * waits, only his arrival is a transition. His shadow waits for him on the ground. */
+  @media (prefers-reduced-motion: no-preference) {
+    .arrival[data-played] {
+      transition:
+        translate var(--duration-arrive) var(--ease-out-expo),
+        opacity var(--duration-arrive) var(--ease-out-expo);
+    }
+
+    .arrival[data-armed] {
+      opacity: 0;
+      translate: 0 calc(var(--spacing) * 12);
+    }
+  }
+</style>

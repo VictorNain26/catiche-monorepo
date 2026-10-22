@@ -2,23 +2,17 @@
 import { cn } from '@repo/ui/classes';
 
 // A fragment of the application's screen, drawn in HTML until the app's redesign gives real ones. It only
-// illustrates: the text beside it, or its figure's caption, says what it shows, so screen readers skip it.
-// Its top line holds the hour of the evening it shows, and what the screen is.
+// illustrates: a text beside it, for screen readers, says what it shows, so they skip it.
+// Its top line is the day and the hour, as a phone's clock writes them (sections/evening-data.ts, `screenTime`).
 interface Props {
-  time?: string;
-  title?: string;
+  time: string;
   class?: string;
 }
 
-const { time, title, class: className } = Astro.props;
+const { time, class: className } = Astro.props;
 ---
 
-<div aria-hidden="true" class={cn('rounded-2xl bg-card p-5 text-card-foreground shadow-control ring-1 ring-border', className)}>
-  {(time ?? title) && (
-    <p class="mb-4 flex items-baseline justify-between gap-4 border-b pb-3 text-sm">
-      <span class="font-heading font-extrabold">{title}</span>
-      {time && <span class="text-muted-foreground tabular-nums">{time}</span>}
-    </p>
-  )}
+<div aria-hidden="true" class={cn('rounded-2xl bg-card p-4 text-card-foreground sm:p-5 shadow-control ring-1 ring-border', className)}>
+  <p class="mb-4 border-b pb-3 text-sm font-bold text-muted-foreground tabular-nums">{time}</p>
   <slot />
 </div>

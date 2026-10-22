@@ -1,0 +1,131 @@
+---
+import { spokenHour } from '@/lib/hours';
+
+// The hours of the held evening (sections/evening.astro), shown only while the scene is held: each one leads to its
+// step (`#etape-N`); src/scripts/evening.ts marks the hour of the step shown (`aria-current="step"`) and the hours
+// passed (`data-past`). One reed dot, a mark of state (docs/charte.md, "Couleurs"), slides under the hour shown; the
+// hours passed are in full ink, the next ones muted; the rail fills as the evening is scrolled, the only move tied to
+// the scroll itself. Its columns, its rail and its dot follow the number of moments and the moment shown, which the
+// script sets (`--moments`, `--moment`), whatever their number.
+interface Props {
+  times: readonly string[];
+}
+
+const { times } = Astro.props;
+---
+
+<div class="timeline">
+  <span aria-hidden="true" class="rail">
+    <span class="fill"></span>
+  </span>
+  <span aria-hidden="true" class="puck"></span>
+  <ol role="list" aria-label="Moments de la soirée" class="hours">
+    {times.map((time, index) => (
+      <li role="listitem" class="flex">
+        <a href={`#etape-${String(index + 1)}`} class="-ms-2 inline-flex min-h-11 items-center px-2 text-sm text-muted-foreground tabular-nums">
+          {spokenHour(time)}
+        </a>
+      </li>
+    ))}
+  </ol>
+</div>
+
+<style>
+  .timeline {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(evening-scenes[data-held]) {
+      .timeline {
+        position: relative;
+        display: block;
+        padding-top: calc(var(--spacing) * 3);
+      }
+
+      /* A class, not the element: the rules nested under `:global` are not scoped, and the steps are a list too. */
+      .hours {
+        display: grid;
+        grid-template-columns: repeat(var(--moments), minmax(0, 1fr));
+      }
+
+      /* Each hour starts its column, the first on the text's left edge; its dot is under its first figure, and the rail
+       * runs from the first dot's middle to the last one's, thick enough for its fill to read. */
+      .rail {
+        position: absolute;
+        top: calc(var(--spacing) * 0.75);
+        right: calc(100% / var(--moments) - var(--spacing) * 1.25);
+        left: calc(var(--spacing) * 1.25);
+        height: var(--spacing);
+        border-radius: calc(infinity * 1px);
+        background-color: var(--color-border);
+      }
+
+      .fill {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background-color: var(--color-primary);
+        transform-origin: left;
+        scale: 0 1;
+      }
+
+      .puck {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        width: calc(100% / var(--moments));
+        translate: calc(100% * var(--moment, 0)) 0;
+        transition: translate var(--duration-slow) var(--ease-out-expo);
+      }
+
+      .puck::after {
+        content: '';
+        width: calc(var(--spacing) * 2.5);
+        height: calc(var(--spacing) * 2.5);
+        border-radius: calc(infinity * 1px);
+        background-color: var(--color-highlight);
+      }
+
+      /* A phone where the scene's spacings tighten (sections/evening.astro, `data-tight`): the dot sits on the room
+       * above the hour, which its link of 44 px leaves empty. */
+      @media (width < 48rem) {
+        &[data-tight] .timeline {
+          padding-top: var(--spacing);
+        }
+      }
+
+      li[data-past] a {
+        color: var(--color-foreground);
+      }
+
+      a[aria-current] {
+        color: var(--color-foreground);
+        font-weight: 700;
+      }
+    }
+
+    /* The rail fills with the evening's own view timeline (`--evening`, on the held track). In longhands, and the
+     * timeline apart: the minifier would fold it into the `animation` shorthand, which does not take it, and the whole
+     * declaration would be dropped. */
+    @supports (animation-timeline: view()) {
+      :global(evening-scenes[data-held]) .fill {
+        animation-name: timeline-fill;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-range: contain 0% contain 100%;
+      }
+
+      :global(evening-scenes[data-held]) .timeline .fill {
+        animation-timeline: --evening;
+      }
+    }
+  }
+
+  @keyframes timeline-fill {
+    to {
+      scale: 1 1;
+    }
+  }
+</style>

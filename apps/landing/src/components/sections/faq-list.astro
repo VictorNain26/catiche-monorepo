@@ -1,54 +1,52 @@
 ---
 import { Plus } from '@lucide/astro';
-import { cn } from '@repo/ui/classes';
-import ExternalLink from '@/components/atoms/external-link.astro';
-import { CONTACT_EMAIL } from '@/lib/brand';
+import InlineText from '@/components/atoms/inline-text.astro';
 import { FAQS } from './faq-data';
-
-interface Props {
-  class?: string;
-}
-
-const { class: className } = Astro.props;
 ---
 
-<div class={cn('border-y divide-y', className)}>
-  {FAQS.map((faq) => (
-    <details name="faq" class="group">
-      <summary class="flex min-h-11 cursor-pointer list-none items-start justify-between gap-6 py-5 text-left focus-visible:ring-inset sm:py-6 [&::-webkit-details-marker]:hidden">
-        <span class="font-heading text-lg font-extrabold text-foreground sm:text-xl">{faq.question}</span>
-        <Plus
-          class="mt-1 size-5 shrink-0 text-muted-foreground transition-transform duration-base group-open:rotate-45 group-hover:text-foreground"
-          aria-hidden="true"
-        />
-      </summary>
-      <div class="max-w-2xl space-y-3 pb-6 text-muted-foreground">
-        {/* The answers are plain text, for the page's FAQPage data too: our address becomes a link only here. */}
-        <p>
-          {faq.answer.split(CONTACT_EMAIL).map((part, index) => (
-            <>
-              {index > 0 && (
-                <a href={`mailto:${CONTACT_EMAIL}`} class="text-primary underline underline-offset-4">
-                  {CONTACT_EMAIL}
-                </a>
-              )}
-              {part}
-            </>
-          ))}
-        </p>
-        {faq.sources && (
-          <ul class="flex flex-wrap gap-x-6">
-            {faq.sources.map(({ href, label }) => (
-              <li>
-                <ExternalLink href={href} class="min-h-11 text-primary underline underline-offset-4">
-                  {label}
-                </ExternalLink>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </details>
+{/* An open answer lifts onto a card, onto the accent in dark mode, where the card is the section's own plane; its « + »,
+ * in the brand's water, turns into a « × », the list's only move. Each question is the plain text of its summary,
+ * which names it in every browser (a heading inside is not exposed by WebKit), at the weight of running text, under
+ * the section's title; the first, on price and opening, is open. A question lights up under the pointer, and its
+ * focus ring follows its corners. From sm, the list reaches into its padding, so that the questions' words fall on the
+ * column of the title; on a phone, an open answer keeps off the screen's edges.
+ * Inside a `play-once`, they rise in a quick cascade, the fourth and the next ones together; the rise is on a wrapper,
+ * so that it leaves the ground's own transition alone. */}
+<div class="space-y-1 sm:-mx-4">
+  {FAQS.map((faq, index) => (
+    <div data-reveal="rise" data-order={Math.min(index + 1, 4)}>
+      <details
+        name="faq"
+        open={index === 0}
+        class="group rounded-2xl transition-colors duration-base open:bg-card motion-reduce:transition-none dark:open:bg-accent"
+      >
+        <summary class="flex min-h-11 cursor-pointer list-none items-start justify-between gap-6 rounded-2xl px-4 py-4 text-left transition-colors duration-base hover:bg-accent focus-visible:ring-inset motion-reduce:transition-none sm:py-5 [&::-webkit-details-marker]:hidden">
+          <span class="text-lg text-foreground sm:text-xl">{faq.question}</span>
+          <Plus
+            class="mt-1 size-5 shrink-0 text-primary transition-transform duration-base group-open:rotate-45 motion-reduce:transition-none"
+            aria-hidden="true"
+          />
+        </summary>
+        <div class="max-w-2xl space-y-3 px-4 pb-5 text-foreground">
+          {/* The answers are plain text, for the page's FAQPage data too: their classes and our address are set here. */}
+          {faq.answer.map((block) =>
+            typeof block === 'string' ? (
+              <p>
+                <InlineText text={block} />
+              </p>
+            ) : (
+              <ul class="list-disc space-y-1.5 pl-5">
+                {block.map((item) => (
+                  <li>
+                    <InlineText text={item} />
+                  </li>
+                ))}
+              </ul>
+            ),
+          )}
+        </div>
+      </details>
+    </div>
   ))}
 </div>
 

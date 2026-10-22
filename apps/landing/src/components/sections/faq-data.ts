@@ -1,56 +1,64 @@
 import { BRAND_NAME, CONTACT_EMAIL } from '@/lib/brand';
 
+// An answer: its paragraphs, and a list as the array of its items.
+type Block = string | readonly string[];
+
 interface Faq {
   question: string;
-  answer: string;
-  sources?: { href: string; label: string }[];
+  answer: readonly Block[];
 }
 
-// Each answer is checked against the docs: docs/produit.md, docs/methode.md, docs/tuteur.md (§ 2, Mistral; § 4, the check before
-// the pupil), docs/architecture.md, docs/charte.md ("Les mots") and apps/server/src/modules/tutor/core/prompt.ts (never a friend); the shared device's 10 minutes are
-// IDLE_MINUTES in apps/server/src/platform/auth/student-sign-in.ts.
-export const FAQS: Faq[] = [
+// Each answer is checked against the docs: docs/produit.md ("L'accès pendant la préparation", "Le point du soir": each
+// family, "Pronote", "Ce qu'on mesurera"), docs/methode.md ("À retenir" of "Ce qui vaut pour tous les élèves"),
+// docs/architecture.md ("Client web"); the shared device's 10 minutes are the application's
+// (apps/web/src/routes/profils.$studentId.tsx). The product's state is said here once, in the first answer, and at the
+// top of the page (docs/charte.md, "Les mots"). A class is written « 6ᵉ », raised on the page (atoms/inline-text.astro).
+export const FAQS: readonly Faq[] = [
   {
-    question: 'Dès quelle classe ?',
-    answer: `De la 6e à la 3e. ${BRAND_NAME} est pensé pour le collège.`,
-  },
-  {
-    question: 'Comment avoir un compte, et combien ça coûte ?',
-    answer: `Pour l'instant, les comptes s'ouvrent sur invitation : écrivez-nous à ${CONTACT_EMAIL} pour en demander une. Le prix n'est pas encore fixé, et demander une invitation ne vous engage à rien.`,
-  },
-  {
-    // The application is the web client served by the server, laid out for a phone and for a computer
-    // (docs/architecture.md, "Client web").
-    question: 'Sur quel appareil ?',
-    answer: 'Dans le navigateur, sur un téléphone, une tablette ou un ordinateur, sans rien installer.',
-  },
-  {
-    question: 'Sur quoi repose la méthode ?',
-    answer:
-      "Sur les gestes d'un programme d'aide à l'organisation pour collégiens, HOPS, testé dans un essai scientifique : noter ses devoirs et ses contrôles, vérifier ses affaires, découper la révision d'un contrôle, réviser un contrôle les jours d'avant. Dans ce programme, un adulte vérifie à chaque séance. Rien ne prouve encore qu'une application fasse aussi bien, et nous ne l'affirmons pas.",
-    // HOPS in docs/methode.md, "Sources": its trial [1], and the protocol [7] the gestures come from; no effect size on the page.
-    sources: [
-      { href: 'https://europepmc.org/article/MED/29172596', label: 'Essai de HOPS, Langberg et al., 2018' },
-      { href: 'https://www.medrxiv.org/content/10.64898/2026.02.13.26346294v1', label: 'Protocole de HOPS, Nissley-Tsiopinis et al., 2026' },
+    question: 'Combien ça coûte, et quand est‑ce que ça ouvre\xa0?',
+    answer: [
+      // What exists today, after the status (Victor, 2026-10-22): the help on an exercise, typed or photographed
+      // (docs/tuteur.md); the evening is still to build (docs/etat.md, "Prochain chantier").
+      `En préparation\xa0: les comptes s’ouvrent sur invitation. La soirée montrée sur cette page se construit. Aujourd’hui, Tom aide déjà votre enfant sur un exercice, à l’écrit ou en photo. Le prix de ${BRAND_NAME} n’est pas encore fixé. Pour demander une invitation, écrivez à ${CONTACT_EMAIL}.`,
     ],
   },
   {
-    question: 'Tom donne-t-il les réponses ?',
-    answer:
-      "Il est conçu pour ne pas les donner. Tom cherche d'abord où votre enfant bloque, puis l'aide pas à pas : une question, un indice, une étape. S'il bloque encore, Tom montre un exemple proche, déjà résolu. Chaque message de Tom passe par un contrôle automatique avant d'être affiché : s'il contient la réponse de l'exercice, il est réécrit ou remplacé.",
+    question: 'Vous rentrez tard, ou personne n’est là le soir. Comment ça se passe\xa0?',
+    answer: [
+      'Le point du soir s’adapte à votre famille.',
+      [
+        'Vous rentrez tard\xa0: vous lisez le point du soir en arrivant, et votre enfant voit votre réponse le lendemain.',
+        'Votre enfant vit dans deux maisons\xa0: le point du soir va à l’adulte chez qui il est ce soir-là.',
+        'Personne n’est là\xa0: le point du soir reste à votre enfant, pour lui seul.',
+        'Les devoirs sont un sujet tendu chez vous\xa0: vous pouvez couper le point du soir.',
+      ],
+      'En 6ᵉ et en 5ᵉ, le point du soir est activé dès le départ. En 4ᵉ et en 3ᵉ, votre enfant décide de l’activer.',
+    ],
   },
   {
-    question: 'Tom est-il une intelligence artificielle ?',
-    answer:
-      "Oui. Tom fonctionne avec les modèles de Mistral AI, une entreprise française. Il ne se fait pas passer pour un ami, et chaque message passe par un contrôle automatique avant d'être affiché à votre enfant.",
+    question: 'Est‑ce que ça marche\xa0?',
+    answer: [
+      `${BRAND_NAME} reprend des méthodes qui ont fait leurs preuves quand des enseignants ou des chercheurs les ont enseignées aux élèves. Dès les premiers élèves, nous mesurerons combien de soirs par semaine les devoirs sont faits, combien de devoirs sont rendus, et l’avis des familles.`,
+    ],
   },
   {
-    question: 'Et Pronote ?',
-    answer: `${BRAND_NAME} ne se connecte pas à Pronote. Avec ${BRAND_NAME}, votre enfant dit ses devoirs à voix haute, en regardant son agenda ou ce qu'il a noté.`,
+    // The application is the web client served by the server, laid out for a phone and for a computer.
+    question: 'Sur quel appareil\xa0?',
+    answer: [`${BRAND_NAME} marche sur un téléphone, une tablette ou un ordinateur. Il s’ouvre comme un site\xa0: il n’y a rien à installer.`],
   },
   {
-    question: 'Un seul ordinateur pour toute la famille ?',
-    answer:
-      "Oui. Chaque enfant a son profil et y entre avec son propre code. Sur un ordinateur partagé, son profil se ferme après 10 minutes sans activité, pour qu'un frère ou une sœur n'y entre pas.",
+    question: 'Nous n’avons qu’un ordinateur pour toute la famille. Comment faire\xa0?',
+    answer: [
+      'Chaque enfant a son espace et son code. Il choisit son profil, tape son code et retrouve son espace. Son espace se ferme seul quand personne ne s’en sert pendant 10\xa0minutes.',
+    ],
+  },
+  {
+    question: 'Faut-il utiliser Pronote\xa0?',
+    answer: [`${BRAND_NAME} fonctionne sans Pronote. Votre enfant dit ses devoirs à voix haute, en regardant ce qu’il a noté.`],
   },
 ];
+
+// An answer in plain text, for the page's FAQPage data (pages/index.astro): one line per paragraph or item.
+export function plainAnswer(answer: readonly Block[]): string {
+  return answer.map((block) => (typeof block === 'string' ? block : block.map((item) => `– ${item}`).join('\n'))).join('\n');
+}

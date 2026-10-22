@@ -8,16 +8,18 @@ const YEAR = new Date().getFullYear();
 
 // Help and the legal pages only: the home page's sections are in the header.
 const LINKS = [
-  { href: '/aide', label: "Centre d'aide" },
+  { href: '/aide', label: 'Centre d’aide' },
   { href: '/contact', label: 'Contact' },
   { href: '/confidentialite', label: 'Confidentialité' },
-  { href: '/cgu', label: 'CGU' },
+  { href: '/cgu', label: 'Conditions d’utilisation' },
   { href: '/mentions-legales', label: 'Mentions légales' },
 ];
 ---
 
-<footer class="bg-secondary text-secondary-foreground">
-  <div class="container flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
+{/* On the page's own background, where the last section's plane ends: one end, without a band of its own. In a row
+ * from a computer's width; stacked below it, where a row would squeeze the links. */}
+<footer class="bg-background text-foreground">
+  <div class="container flex flex-col gap-6 py-12 lg:flex-row lg:items-center lg:justify-between">
     <div class="space-y-1">
       <Logo />
       <p class="text-sm text-muted-foreground">
@@ -36,12 +38,13 @@ const LINKS = [
       </p>
     </div>
     <nav aria-label="Aide et informations légales">
-      <ul class="flex flex-wrap gap-x-6 text-sm">
+      {/* In two columns on a phone, so that no link is left alone on a line; in a row from a computer's width. */}
+      <ul class="grid grid-cols-2 gap-x-6 text-sm lg:flex lg:flex-wrap">
         {LINKS.map((link) => (
           <li>
             <a
               href={link.href}
-              class="inline-flex min-h-11 items-center text-foreground underline-offset-4 transition-colors duration-base hover:underline"
+              class="inline-flex min-h-11 min-w-11 items-center text-foreground underline-offset-4 transition-colors duration-base hover:underline"
             >
               {link.label}
             </a>

@@ -60,16 +60,20 @@ const TEXT = [
   ['foreground', 'background'],
   ['foreground', 'card'],
   ['foreground', 'secondary'],
-  ['foreground', 'highlight'],
   ['card-foreground', 'card'],
   ['popover-foreground', 'popover'],
   ['secondary-foreground', 'secondary'],
   ['accent-foreground', 'accent'],
+  // The site's FAQ: a question under the pointer, and an open answer in dark mode.
+  ['foreground', 'accent'],
   // The secondary words of a hovered line of a list: muted-foreground would fall to 4.3:1 there.
   ['accent-muted-foreground', 'accent'],
+  // An open answer of the site's FAQ lifts onto the accent in dark mode, with its links.
+  ['primary', 'accent'],
   ['muted-foreground', 'background'],
   ['muted-foreground', 'card'],
-  ['muted-foreground', 'secondary'],
+  // The secondary, raised a step above the card in dark mode, takes the accent's secondary words, as the accent does.
+  ['accent-muted-foreground', 'secondary'],
   ['primary', 'background'],
   ['primary', 'card'],
   ['primary', 'secondary'],
@@ -83,8 +87,10 @@ const TEXT = [
   ['destructive', 'card'],
   ['annotation', 'background'],
   ['annotation', 'card'],
-  ['annotation', 'secondary'],
   ['disabled-foreground', 'disabled'],
+  // The brand's light plane, where a section of the site breathes: the ink, and its second line in the brand's water.
+  ['foreground', 'tint'],
+  ['primary', 'tint'],
   ['panel-foreground', 'panel'],
 ];
 
@@ -96,6 +102,12 @@ const MARKS = [
   ['input', 'secondary'],
   ['ring', 'background'],
   ['ring', 'card'],
+  // The dot of the site's status pill, a mark on the secondary.
+  ['annotation', 'secondary'],
+  // The evening's timeline, which fills in the brand's water on a rail of the border's colour.
+  ['primary', 'border'],
+  // The highlighter on the brand's deep plane, under the evening check-in's title (docs/charte.md, "Couleurs").
+  ['panel-highlight', 'panel'],
   ...[1, 2, 3, 4].flatMap((n) => [
     [`chart-${String(n)}`, 'background'],
     [`chart-${String(n)}`, 'card'],
@@ -128,6 +140,27 @@ for (const [mode, color] of modes) {
   }
 }
 
+// The raised surfaces on a card (the pupil's bubble and a list's lines on the accent, a word on the secondary) stand
+// apart from it in each mode, the accent further than the secondary: in dark mode, the card is already a step above the
+// background, so they take a step more.
+for (const [mode, color] of modes) {
+  test(`${mode}: secondary and accent stand apart from the card, the accent further`, () => {
+    const secondary = contrast(color('secondary'), color('card'));
+    const accent = contrast(color('accent'), color('card'));
+    assert.ok(secondary > 1, `secondary ${color('secondary')} on card ${color('card')} = ${secondary.toFixed(2)}`);
+    assert.ok(accent > secondary, `accent ${accent.toFixed(2)} against secondary ${secondary.toFixed(2)}`);
+  });
+}
+
+// The site's planes alternate: the deep plane and the light one, one after the other on the page, differ in lightness
+// as two chart series do, in each mode.
+for (const [mode, color] of modes) {
+  test(`${mode}: panel and tint differ in lightness by ${String(CHART_STEP)}:1`, () => {
+    const ratio = contrast(color('panel'), color('tint'));
+    assert.ok(ratio >= CHART_STEP, `${color('panel')} next to ${color('tint')} = ${ratio.toFixed(2)}`);
+  });
+}
+
 for (const [mode, color] of modes) {
   for (const [pairs, minimum, criterion] of [
     [TEXT, 4.5, 'WCAG 1.4.3 (4.5:1)'],
@@ -139,5 +172,24 @@ for (const [mode, color] of modes) {
         assert.ok(ratio >= minimum, `${color(fg)} on ${color(bg)} = ${ratio.toFixed(2)}`);
       });
     }
+  }
+}
+
+// The highlighter is one gesture in both modes: a thick reed stroke under the baseline, which never touches the
+// letters; the words keep their own ink on the background, and the stroke stands out from it as a mark (3:1).
+test('the highlighter is the same stroke in both modes', () => {
+  assert.equal(theme.dark['highlight-height'], theme.light['highlight-height']);
+});
+
+// It comes back once per section of the site, under the word that carries its title and on the marks of a state
+// (docs/charte.md, "Couleurs"): on the background, where the halo at the top of the page can reach under it; on the
+// light plane, and on a card, where the evening's screens strike the step done and the adult's phone ticks « Je m'en
+// occupe ». On the deep plane, the same reed in a lighter step (`panel-highlight`, in MARKS).
+for (const [mode, color] of modes) {
+  for (const ground of ['background', 'halo', 'tint', 'card']) {
+    test(`${mode}: highlight on ${ground} meets WCAG 1.4.11 (3:1)`, () => {
+      const ratio = contrast(color('highlight'), color(ground));
+      assert.ok(ratio >= 3, `${color('highlight')} on ${color(ground)} = ${ratio.toFixed(2)}`);
+    });
   }
 }

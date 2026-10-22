@@ -22,8 +22,9 @@ Clever Cloud (`apps/landing/Caddyfile`).
 - Jamais un mot de soin ni un trouble ciblé : la liste et la raison sont dans `docs/produit.md`,
   « Ce qu'on dit, et ce qu'on ne dit pas ».
 - Ce qu'on peut prouver (`CLAUDE.md`, « Carte »), sur la landing : chaque chiffre a une source
-  primaire datée, chaque différence face à un concurrent est mesurée, ce qui n'est pas construit
-  ne se promet pas. Une phrase qu'on ne peut adosser à une source ou à une mesure se retire.
+  primaire datée, chaque différence face à un concurrent est mesurée, ce qui n'est pas dans
+  `produit.md` ne s'écrit pas ; le statut du produit se dit une fois (`docs/charte.md`, « Les
+  mots »). Une phrase qu'on ne peut adosser à une source ou à une mesure se retire.
 - Jamais de promesse de progrès scolaire ni de meilleures notes, jamais « le seul » ; jamais
   « conforme au cadre d'usage de l'IA du ministère », « agréé » ou « recommandé par l'Éducation
   nationale », « aligné sur les programmes » sans la métrique publiée, ni « fait les devoirs ».
@@ -35,17 +36,25 @@ Clever Cloud (`apps/landing/Caddyfile`).
   a besoin du navigateur est un élément personnalisé (`customElements.define`) dans le `<script>`
   de son composant, sur l'élément natif quand il existe (`<dialog>` pour le menu, `<details>` pour
   la FAQ). Les classes partagées avec le web viennent de `@repo/ui/classes`.
-- Le mouvement anime les illustrations (les écrans, Tom, le surligneur), jamais un texte à lire
-  qui apparaît au défilement : elles le masquaient. CSS d'abord, le lien au défilement sous
+- Le mouvement anime les illustrations (les écrans, Tom, le surligneur). Un texte peut apparaître
+  au défilement, une fois, si son état d'entrée n'est posé que par le script et hors mouvement
+  réduit ; sans script, il est visible (`data-reveal`, `apps/landing/src/styles/global.css`). Une
+  scène peut rester figée au défilement, une étape remplaçant l'autre, aux mêmes conditions : son
+  état figé n'est posé que par le script, hors mouvement réduit et si chaque étape tient dans
+  l'écran ; sinon ses étapes s'empilent (`evening-scenes`, `apps/landing/src/scripts/evening.ts`).
+  Ses étapes cachées ne le sont qu'à l'œil et au pointeur : un lecteur d'écran les lit, et le focus
+  du clavier qui entre dans l'une d'elles amène la page à son étape. CSS
+  d'abord, le lien au défilement sous
   `@supports (animation-timeline: view())` ; ce que le CSS ne sait pas faire passe par les API
   natives (Web Animations, `IntersectionObserver`) dans `apps/landing/src/scripts/evening.ts`,
-  sans bibliothèque. Une vidéo de Tom a son bouton Pause.
+  sans bibliothèque. Une vidéo de Tom se joue une fois et dure moins de 5 secondes ; une animation
+  plus longue ou en boucle exige un bouton Pause (WCAG 2.2.2).
 - Jamais un état d'entrée masqué hors de `@media (prefers-reduced-motion: no-preference)`, ni
   posé par le CSS quand c'est un script qui le lève : ce script le pose lui-même (`data-armed`,
-  `apps/landing/src/scripts/evening.ts`), et rien n'attend un script qui ne vient pas. Seule une
+  `apps/landing/src/scripts/reveal.ts`), et rien n'attend un script qui ne vient pas. Seule une
   animation en CSS pur, qui ne dépend d'aucun script, part d'un état masqué, si elle se termine
-  d'elle-même (le surligneur, `both` avec délai) ou suit le défilement (les écrans de la soirée,
-  sous `@supports (animation-timeline: view())`). Sans scripts, si un script échoue, ou sous le
+  d'elle-même (le surligneur, `both` avec délai) ou suit le défilement, sous
+  `@supports (animation-timeline: view())`. Sans scripts, si un script échoue, ou sous le
   mouvement réduit, même activé en cours de visite, la page s'affiche entière et immobile ; son
   HTML est l'état final.
 - Jamais de `<script>` ni de `<style>` en `is:inline`, ni d'attribut `style` : la CSP

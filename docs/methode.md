@@ -126,6 +126,37 @@ Pour Tom :
   reconnaissance de ce qui est fait compte ;
 - il peut choisir une récompense, sans que le produit en dépende.
 
+## Le rôle de l'adulte au collège (2026-10-21)
+
+Recherche demandée par Victor pour revoir le point du soir. Chaque chiffre a été revérifié à sa
+source par un second relecteur. Presque tout est corrélationnel, et surtout américain.
+
+- **Aider sur le contenu ne va pas avec la réussite.** Au collège, l'aide aux devoirs va avec des
+  résultats un peu plus bas : r = −.11 sur 6 études [19] (T). La plus large méta-analyse
+  (448 études, 480 830 familles) trouve r = −.15 [20] (Rés.). Superviser les devoirs : 0,02 [21]
+  (Rés.).
+- **Les attentes et le fait de parler de l'école vont au moins autant avec la réussite que les
+  autres formes d'implication** : r = .39 pour la « socialisation académique » [19] (T) ; 0,22
+  pour les attentes, 0,20 pour en parler [21] (Rés.). La méta-analyse la plus large trouve les
+  formes d'implication associées de façon semblable [20] (Rés.).
+- **Le contrôle nuit, la structure aide.** Chez 2 830 élèves suivis de la 5e à la 7e année, le
+  contrôle va avec un moins bon fonctionnement ensuite, la structure et la réactivité avec un
+  meilleur ; les liens jouent dans les deux sens [22] (Rés.). Chez 719 élèves estoniens de 6e à
+  9e année, sortir d'un contrôle élevé va avec de meilleures maths en 9e année (β = 0,12) [23] (T).
+- **Les recommandations de l'EEF** : installer une routine régulière, et rester prudent avant de
+  pousser l'aide directe au contenu, surtout pour les plus âgés [24] (T).
+- **Informer le parent** a un effet causal mesuré au lycée, aux États-Unis, par des messages de
+  l'école : devoirs rendus +25 %, moyenne +0,19 écart-type ; les parents informés retirent aussi
+  près de deux fois plus de privilèges [25] (R). Dans des collèges français, impliquer les parents
+  réduit l'absentéisme et les sanctions, sans gain aux tests [26] (Rés.).
+
+**À retenir pour le point du soir.** L'enfant choisit ce qu'il montre et dit ce qu'il lui faut
+(autonomie, structure) ; l'adulte fait le geste demandé (cadre) ; Catiche ne lui propose jamais
+de corriger ni de vérifier (contenu, contrôle). Aucune de ces études ne porte sur un geste fait
+dans une application ; la reconnaissance précise d'une étape ne s'appuie que sur des études menées
+avant le collège ; montrer ce qui reste peut pousser au contrôle [25], d'où un « reste » présenté
+comme le plan de demain.
+
 ## Ce qu'on mesurerait
 
 Des mesures déjà validées, plutôt qu'un score maison :
@@ -205,3 +236,18 @@ Consultées le 2026-10-21.
     Involvement », *J Educ Res* 108(5), 2015, 417-431, DOI 10.1080/00220671.2014.901283.
 18. Education Endowment Foundation, « Texting parents », évalué par Queen's University Belfast,
     [page](https://educationendowmentfoundation.org.uk/projects-and-evaluation/projects/texting-parents).
+19. Hill et Tyson, méta-analyse de l'implication parentale au collège, *Dev Psychol* 45(3), 2009,
+    DOI 10.1037/a0015362 ([PMC2782391](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2782391/)).
+20. Barger et al., méta-analyse de l'implication parentale, *Psychol Bull* 145(9), 2019,
+    DOI 10.1037/bul0000201.
+21. Castro et al., méta-analyse de l'implication parentale, *Educ Res Rev*, 2015,
+    DOI 10.1016/j.edurev.2015.01.002 ; jugée de qualité faible par la revue de l'EEF.
+22. Dumont et al., aide aux devoirs et fonctionnement de l'élève, *J Educ Psychol*, 2014,
+    DOI 10.1037/a0034100.
+23. Kikas, Mädamürk et Šilinskas, profils d'aide parentale, *Front Educ*, 2022,
+    DOI 10.3389/feduc.2022.914992.
+24. Education Endowment Foundation, « Working with Parents to Support Children's Learning »,
+    2018, [rapport](https://dera.ioe.ac.uk//32623/1/EEF_Parental_Engagement_Guidance_Report.pdf).
+25. Bergman, essai d'information des parents, *J Polit Econ*, 2021, DOI 10.1086/711410.
+26. Avvisati et al., implication des parents dans des collèges défavorisés, *Rev Econ Stud*,
+    2014, DOI 10.1093/restud/rdt027.

@@ -4,11 +4,11 @@ import JsonLd from '@/components/json-ld.astro';
 import Hero from '@/components/sections/hero.astro';
 import Problem from '@/components/sections/problem.astro';
 import Evening from '@/components/sections/evening.astro';
-import Parents from '@/components/sections/parents.astro';
-import Commitments from '@/components/sections/commitments.astro';
+import EveningCheckIn from '@/components/sections/evening-check-in.astro';
+import Trust from '@/components/sections/trust.astro';
 import FAQ from '@/components/sections/faq.astro';
 import Closing from '@/components/sections/closing.astro';
-import { FAQS } from '@/components/sections/faq-data';
+import { FAQS, plainAnswer } from '@/components/sections/faq-data';
 
 const faqJsonLd = {
   '@context': 'https://schema.org',
@@ -16,7 +16,7 @@ const faqJsonLd = {
   mainEntity: FAQS.map(({ question, answer }) => ({
     '@type': 'Question',
     name: question,
-    acceptedAnswer: { '@type': 'Answer', text: answer },
+    acceptedAnswer: { '@type': 'Answer', text: plainAnswer(answer) },
   })),
 };
 ---
@@ -26,8 +26,8 @@ const faqJsonLd = {
   <Hero />
   <Problem />
   <Evening />
-  <Parents />
-  <Commitments />
+  <EveningCheckIn />
+  <Trust />
   <FAQ />
   <Closing />
 </Layout>

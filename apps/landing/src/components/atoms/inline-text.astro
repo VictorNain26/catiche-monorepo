@@ -1,0 +1,25 @@
+---
+import { inline } from '@/lib/inline';
+
+// A plain text in HTML (src/lib/inline.ts): a class's e raised, our address a link.
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+---
+
+{inline(text).map(({ kind, value }) =>
+  kind === 'ordinal' ? (
+    <>
+      {value}
+      <sup>e</sup>
+    </>
+  ) : kind === 'email' ? (
+    <a href={`mailto:${value}`} class="text-primary underline underline-offset-4">
+      {value}
+    </a>
+  ) : (
+    value
+  ),
+)}

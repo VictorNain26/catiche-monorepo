@@ -1,14 +1,18 @@
 ---
-import { buttonVariants } from '@repo/ui/classes';
+import RequestInvitation from '@/components/molecules/request-invitation.astro';
 import PageLayout from '@/layouts/page-layout.astro';
 import { CONTACT_EMAIL } from '@/lib/brand';
+
+// What a visitor writes for first: an invitation, the same button as on the home page; then any other question.
 ---
 
 <PageLayout title="Nous écrire" description="Une question, une suggestion ? Écrivez-nous.">
-  <div class="mt-12 max-w-xl">
-    <h2 class="mb-8 text-2xl">Par e-mail</h2>
-    <a href={`mailto:${CONTACT_EMAIL}`} class={buttonVariants({ size: 'lg' })}>
+  <RequestInvitation class="mt-4" />
+  <p class="mt-10 text-lg text-foreground">
+    Pour toute autre question, écrivez à{' '}
+    <a href={`mailto:${CONTACT_EMAIL}`} class="text-primary underline underline-offset-4">
       {CONTACT_EMAIL}
     </a>
-  </div>
+    .
+  </p>
 </PageLayout>

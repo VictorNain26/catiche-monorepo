@@ -1,160 +1,91 @@
 ---
 import { Image } from 'astro:assets';
-import { Pause, Play } from '@lucide/astro';
 import { cn } from '@repo/ui/classes';
 import tom from '@/assets/tom.png';
 import { BRAND_NAME } from '@/lib/brand';
 
 interface Props {
   class?: string;
-  // On the top of the page Tom moves at once; further down, once he is in view.
-  start?: 'load' | 'view';
-  // The arch, the entrance of the holt, behind Tom on the top of the site only (docs/charte.md, "Formes et composition").
-  arch?: boolean;
+  // On the top of the page Tom waves the first time he is seen; at the end, once his arrival (an `.arrival` around him) is over.
+  start?: 'load' | 'arrival';
 }
 
-const { class: className, start = 'load', arch = false } = Astro.props;
-const CLIPS = ['salut', 'respiration'] as const;
+const { class: className, start = 'load' } = Astro.props;
+// At the end of the page, his wave is the page's goodbye: a screen reader hears it too.
+const label = `Tom, le tuteur de ${BRAND_NAME}, a l’allure d’une loutre.${start === 'arrival' ? ' Il vous fait un signe de la main.' : ''}`;
 ---
 
+{/* Tom stands on the page itself, without a shape behind him. He waves once, in less than five seconds, so that no Pause
+ * button is needed (WCAG 2.2.2), then stays on the wave's last frame. His still picture is the page without scripts. */}
 <tom-illustration data-start={start} class={cn('relative block w-full max-w-sm', className)}>
-  <span
-    role="img"
-    aria-label={`Tom, le tuteur de ${BRAND_NAME} : une loutre en pull bleu, un stylo dans la poche`}
-    class="relative block aspect-square w-full"
-  >
-    {arch && <span aria-hidden="true" class="absolute inset-x-1/16 top-1/24 bottom-0 rounded-t-full bg-arch"></span>}
+  <span role="img" aria-label={label} class="relative block aspect-square w-full">
     <Image src={tom} alt="" width={384} height={384} densities={[1, 2]} class="relative size-full" />
-    {CLIPS.map((clip) => (
-      <video
-        data-clip={clip}
-        aria-hidden="true"
-        muted
-        playsinline
-        loop={clip === 'respiration'}
-        preload="none"
-        class="invisible absolute inset-0 size-full"
-      >
-        {/* Safari drops VP9 alpha, so it must meet its HEVC source first. */}
-        <source src={`/tom/${clip}.mov`} type='video/mp4; codecs="hvc1"' />
-        <source src={`/tom/${clip}.webm`} type="video/webm" />
-      </video>
-    ))}
+    <video aria-hidden="true" muted playsinline preload="none" class="invisible absolute inset-0 size-full">
+      {/* Safari drops VP9 alpha, so it must meet its HEVC source first. */}
+      <source src="/tom/salut.mov" type='video/mp4; codecs="hvc1"' />
+      <source src="/tom/salut.webm" type="video/webm" />
+    </video>
   </span>
-  {/* Tom moves for more than five seconds: the visitor can stop him (WCAG 2.2.2). Shown only once he moves. */}
-  <button
-    type="button"
-    data-toggle
-    hidden
-    class="absolute top-0 right-0 inline-flex min-h-11 items-center gap-2 rounded-control px-3 text-sm font-bold text-foreground transition-colors duration-base hover:bg-accent"
-  >
-    <Pause data-icon="pause" class="size-4" aria-hidden="true" />
-    <Play data-icon="play" class="hidden size-4" aria-hidden="true" />
-    <span data-label>Pause</span>
-  </button>
 </tom-illustration>
 
 <script>
+  import { arrivalEnded, IN_VIEW, inView } from '@/scripts/timing';
+
   class TomIllustration extends HTMLElement {
     connectedCallback() {
       const picture = this.querySelector('img');
-      const salut = this.querySelector<HTMLVideoElement>('video[data-clip="salut"]');
-      const respiration = this.querySelector<HTMLVideoElement>('video[data-clip="respiration"]');
-      const toggle = this.querySelector<HTMLButtonElement>('[data-toggle]');
-      if (!picture || !salut || !respiration || !toggle) return;
+      const wave = this.querySelector('video');
+      if (!picture || !wave) return;
       // Autoplay can be refused (iOS Low Power Mode), and nothing moves under reduced motion: Tom then stays still.
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
       if (reducedMotion.matches) return;
 
-      let current = salut;
-      let observer: IntersectionObserver | undefined;
-      // Paused by the page because Tom left the window, not by the visitor: he takes up again on his return.
-      let away = false;
       const show = (shown: HTMLElement) => {
-        for (const frame of [picture, salut, respiration]) frame.classList.toggle('invisible', frame !== shown);
+        for (const frame of [picture, wave]) frame.classList.toggle('invisible', frame !== shown);
       };
-      // Reduced motion turned on during the visit: Tom stops on his still picture, for good, and the button goes.
+      // Reduced motion turned on during the visit: Tom stops on his still picture, for good.
       const still = () => {
-        observer?.disconnect();
-        view.disconnect();
-        away = false;
-        for (const video of [salut, respiration]) video.pause();
+        wave.pause();
         show(picture);
-        toggle.hidden = true;
       };
       reducedMotion.addEventListener('change', (event) => {
         if (event.matches) still();
       });
-      // The button says what it does next: its label changes, not a pressed state. It follows the video itself, so a
-      // refused play() leaves it on « Lecture », but not a pause made because Tom is out of the window.
-      const sync = () => {
-        const paused = current.paused && !away;
-        toggle.querySelector('[data-icon="pause"]')?.classList.toggle('hidden', paused);
-        toggle.querySelector('[data-icon="play"]')?.classList.toggle('hidden', !paused);
-        const label = toggle.querySelector('[data-label]');
-        if (label) label.textContent = paused ? 'Lecture' : 'Pause';
-      };
-      const resume = () => {
+      // The video shows only once it plays; a play() that resolves after reduced motion turned on stops at once. Once
+      // ended, it stays on its last frame.
+      wave.addEventListener('playing', () => {
+        if (reducedMotion.matches) still();
+        else show(wave);
+      });
+      const waveOnce = () => {
         if (reducedMotion.matches) return;
-        current.play().catch(sync);
-      };
-      // Out of the window, Tom stops moving, and moves again when he comes back; a pause the visitor asked for stays.
-      const view = new IntersectionObserver((entries) => {
-        const seen = entries.some((entry) => entry.isIntersecting);
-        if (!seen && !current.paused) {
-          away = true;
-          current.pause();
-        } else if (seen && away) {
-          away = false;
-          resume();
-        }
-      });
-      // A play() that resolves after reduced motion turned on stops at once.
-      const playing = (video: HTMLVideoElement) => {
-        if (reducedMotion.matches) {
-          still();
-          return;
-        }
-        show(video);
-        if (video === salut) toggle.hidden = false;
-      };
-
-      salut.addEventListener('playing', () => {
-        playing(salut);
-      });
-      salut.addEventListener('ended', () => {
-        current = respiration;
-        resume();
-      });
-      respiration.addEventListener('playing', () => {
-        playing(respiration);
-      });
-      for (const video of [salut, respiration]) {
-        video.addEventListener('play', sync);
-        // The wave pauses as it ends, just before the breath starts: the button keeps « Pause » through it.
-        video.addEventListener('pause', () => {
-          if (!video.ended) sync();
+        wave.play().catch(() => {
+          show(picture);
         });
-      }
-      toggle.addEventListener('click', () => {
-        if (current.paused) resume();
-        else current.pause();
-      });
-      view.observe(this);
+      };
 
-      if (this.dataset['start'] === 'view') {
-        observer = new IntersectionObserver(
+      const arrival = this.dataset['start'] === 'arrival' ? this.closest<HTMLElement>('.arrival') : null;
+      if (arrival) {
+        // He waves once his arrival is over (its script plays it as it comes into view, src/scripts/reveal.ts), so that
+        // the start of the wave is not lost while he still fades in. No arrival, under reduced motion: no wave either.
+        const onEnd = (event: TransitionEvent) => {
+          if (!arrivalEnded(event, arrival)) return;
+          arrival.removeEventListener('transitionend', onEnd);
+          waveOnce();
+        };
+        arrival.addEventListener('transitionend', onEnd);
+      } else {
+        // He waves the first time he is seen: at a computer, at once; on a phone, where he stands below the window, once
+        // he is scrolled to.
+        const observer = new IntersectionObserver(
           (entries) => {
-            if (entries.some((entry) => entry.isIntersecting)) {
-              observer?.disconnect();
-              resume();
-            }
+            if (!entries.some(inView)) return;
+            observer.disconnect();
+            waveOnce();
           },
-          { threshold: 0.6 },
+          { threshold: IN_VIEW },
         );
         observer.observe(this);
-      } else {
-        resume();
       }
     }
   }

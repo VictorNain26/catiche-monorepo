@@ -1,19 +1,34 @@
 ---
-import { BRAND_NAME } from '@/lib/brand';
-
-// The pupil and the parent of docs/produit.md, "Pour qui", told by the evening rather than by the child's faults; that
-// organisation can be learned, docs/methode.md, "À retenir".
+// The evening of docs/produit.md, "Pour qui", told by the evening rather than by the child's faults: not knowing where to
+// start, no one to help, or everyone tired; that organisation can be learned, docs/methode.md, "À retenir". One large
+// column on the brand's light plane, its title at the size of a section title, its lines rising one after the other,
+// from further down than elsewhere: the section's strong moment.
 ---
 
-<section class="border-t py-20 lg:py-32">
-  <div class="container grid max-w-6xl gap-10 lg:grid-cols-12">
-    <h2 class="text-3xl leading-tight text-pretty text-foreground sm:text-4xl lg:col-span-10 lg:text-5xl lg:leading-tight">
-      Le soir, savoir par où commencer n&apos;est pas simple. Un contrôle s&apos;oublie, un devoir reste à moitié fait, et la soirée tourne à la
-      dispute. <span class="text-muted-foreground">Ou personne n&apos;est là pour aider ce soir-là.</span>
+{/* Its bottom padding is the plane's fade (`--plane-fade`, 6rem then 8rem from lg), no more: the evening follows close. */}
+<section class="plane-tint pt-28 pb-24 md:pt-32 lg:pt-40 lg:pb-32">
+  {/* The column starts where the other sections' do (max-w-5xl); its lines keep their own measure. */}
+  <play-once class="strong container block max-w-5xl">
+    <h2 data-reveal="rise" class="section-title max-w-4xl font-extrabold text-foreground">
+      <span class="highlighter">Rien n’a commencé</span> à 17&nbsp;h&nbsp;30
     </h2>
-    <p class="max-w-md text-lg text-muted-foreground lg:col-span-5 lg:col-start-6 lg:text-xl">
-      Quand c&apos;est l&apos;organisation qui bloque plus que les leçons, {BRAND_NAME} est fait pour ça.{' '}
-      <strong class="font-bold text-foreground">Et l&apos;organisation, ça s&apos;apprend.</strong>
-    </p>
-  </div>
+    <div class="mt-6 max-w-3xl space-y-4 text-xl text-pretty text-foreground lg:mt-8 lg:text-2xl">
+      <p data-reveal="rise" data-order="2">
+        Votre enfant a des maths, de l’histoire et de l’anglais. Il tourne les pages et rien ne démarre. Personne n’est là pour l’aider. Ou bien tout
+        le monde est fatigué et le ton monte.
+      </p>
+      <p data-reveal="rise" data-order="3">
+        Parfois, le choix du premier devoir bloque tout. Ça s’apprend.
+      </p>
+      <p data-reveal="rise" data-order="4" class="font-bold text-primary">
+        Tom aide votre enfant à s’organiser, un soir après l’autre.
+      </p>
+    </div>
+  </play-once>
 </section>
+
+<style>
+  .strong {
+    --motion-distance: var(--motion-distance-strong);
+  }
+</style>

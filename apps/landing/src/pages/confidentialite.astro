@@ -3,72 +3,100 @@ import ExternalLink from '@/components/atoms/external-link.astro';
 import PageLayout from '@/layouts/page-layout.astro';
 import { BRAND_NAME } from '@/lib/brand';
 
-const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfant\u00a0: données collectées, bases légales, prestataires, durées de conservation et vos droits.`;
+// The sections, in one place: each heading's anchor and words, and the contents under the date that link to them.
+// French typography: a non-breaking space before « : ; ? ! » (docs/charte.md, "Les mots").
+const SECTIONS = {
+  responsable: '1. Qui est responsable de vos données\xa0?',
+  donnees: '2. Quelles données collectons-nous\xa0?',
+  bases: '3. Pourquoi, et sur quelle base légale\xa0?',
+  memoire: '4. La mémoire d’apprentissage',
+  acces: '5. Qui accède à vos données\xa0?',
+  transferts: '6. Transferts hors de l’Union européenne',
+  conservation: '7. Combien de temps conservons-nous vos données\xa0?',
+  droits: '8. Vos droits',
+  securite: '9. Sécurité',
+  mineurs: '10. Protection des mineurs',
+  evolution: '11. Évolution de cette politique',
+} as const;
+
+const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfant\xa0: données collectées, bases légales, prestataires, durées de conservation et vos droits.`;
 ---
 
-<PageLayout title="Politique de Confidentialité" description="Dernière mise à jour : 21 octobre 2026" maxWidth="3xl" metaDescription={DESCRIPTION}>
+<PageLayout title="Politique de confidentialité" description={'Dernière mise à jour\xa0: 22 octobre 2026'} metaDescription={DESCRIPTION}>
+  <nav aria-label="Sommaire" class="mb-10">
+    <ol class="space-y-1">
+      {Object.entries(SECTIONS).map(([id, title]) => (
+        <li>
+          <a href={`#${id}`} class="inline-flex min-h-11 items-center text-primary underline underline-offset-4">
+            {title}
+          </a>
+        </li>
+      ))}
+    </ol>
+  </nav>
   <div class="legal-copy">
     <p>
-      <strong>Service en préparation&nbsp;:</strong> cette politique décrit le service tel qu&apos;il fonctionnera à son ouverture. L&apos;application
-      n&apos;est pas encore ouverte&nbsp;: aujourd&apos;hui, aucune donnée d&apos;élève n&apos;est collectée.
+      <strong>Service en préparation&nbsp;:</strong> cette politique décrit le service tel qu’il fonctionnera à son ouverture. L’application n’est pas
+      encore ouverte&nbsp;: aujourd’hui, aucune donnée d’élève n’est collectée.
     </p>
     <p>
-      <strong>En bref :</strong> {BRAND_NAME} est conçu pour aider votre enfant à apprendre. Pour cela, nous traitons les données strictement
-      nécessaires au tutorat, en France et en Europe autant que possible. Nous ne vendons jamais vos données, nous ne diffusons aucune publicité, et
-      vous gardez le contrôle : consultation, correction et suppression sur simple demande.
+      <strong>En bref&nbsp;:</strong> {BRAND_NAME} est conçu pour aider votre enfant à apprendre. Pour cela, nous traitons les données strictement
+      nécessaires au tutorat, hébergées en France et traitées dans l’Union européenne. Nous ne vendons jamais vos données, nous ne diffusons aucune
+      publicité, et vous gardez le contrôle&nbsp;: consultation, correction et suppression sur simple demande.
     </p>
 
-    <h2>1. Qui est responsable de vos données ?</h2>
+    <h2 id="responsable">{SECTIONS.responsable}</h2>
     <p>
-      Le responsable du traitement est Victor Lenain, entrepreneur individuel (micro-entrepreneur), éditeur de l&apos;application {BRAND_NAME} (voir
-      les <a href="/mentions-legales">mentions légales</a>). Pour toute question relative à vos données personnelles ou pour exercer vos droits :{' '}
+      Le responsable du traitement est Victor Lenain, entrepreneur individuel (micro-entrepreneur), éditeur de l’application {BRAND_NAME} (voir les{' '}
+      <a href="/mentions-legales">mentions légales</a>). Pour toute question relative à vos données personnelles ou pour exercer vos droits&nbsp;:{' '}
       <a href="mailto:contact@catiche.fr">contact@catiche.fr</a>.
     </p>
 
-    <h2>2. Quelles données collectons-nous ?</h2>
+    <h2 id="donnees">{SECTIONS.donnees}</h2>
     <p>
-      <strong>Compte parent :</strong> prénom et adresse e-mail. Aucun mot de passe : un code à usage unique, envoyé à cette adresse, permet de se
-      connecter. Le parent qui crée une clé d&apos;accès entre ensuite par le verrouillage de son appareil : Tom n&apos;en garde que la partie
-      publique, le type de gestionnaire de clés, le navigateur et le système de l&apos;appareil qui l&apos;a créée, et sa date. L&apos;empreinte, le
-      visage ou le code de déverrouillage ne quittent jamais l&apos;appareil.
+      <strong>Compte parent&nbsp;:</strong> prénom et adresse e&#8209;mail. Aucun mot de passe&nbsp;: un code à usage unique, envoyé à cette adresse,
+      permet de se connecter. Le parent qui crée une clé d’accès entre ensuite par le verrouillage de son appareil&nbsp;: nous n’en gardons que la
+      partie publique, le type de gestionnaire de clés, le navigateur et le système de l’appareil qui l’a créée, et sa date. L’empreinte digitale, le
+      visage ou le code de déverrouillage ne quittent jamais l’appareil.
     </p>
     <p>
-      <strong>Compte enfant :</strong> prénom, niveau scolaire et mois de naissance. L&apos;enfant n&apos;a ni identifiant, ni adresse e-mail : le
-      parent reconnaît son appareil par un code à usage unique, puis l&apos;enfant y choisit un code de 6 chiffres, que le parent ne voit pas et dont
-      nous ne gardons qu&apos;une empreinte.
+      <strong>Compte enfant&nbsp;:</strong> prénom, niveau scolaire et mois de naissance. L’enfant n’a ni identifiant, ni adresse e&#8209;mail&nbsp;:
+      le parent fait reconnaître l’appareil de l’enfant par un code à usage unique, puis l’enfant y choisit un code de 6 chiffres, que le parent ne
+      voit pas. Nous ne gardons pas ce code lui-même, seulement une version transformée qui ne permet pas de le retrouver.
     </p>
     <p>
-      <strong>Contenus d&apos;apprentissage :</strong> les messages échangés avec le tuteur et le texte des photos d&apos;exercices envoyées. La photo
-      elle-même est lue par le modèle puis n&apos;est pas gardée : seul le texte qu&apos;il en tire reste avec le message.
+      <strong>Contenus d’apprentissage&nbsp;:</strong> les messages échangés avec le tuteur et le texte des photos d’exercices envoyées. La photo
+      elle-même est lue par l’intelligence artificielle de Mistral AI, puis n’est pas gardée&nbsp;: seul le texte qu’elle en tire reste avec le
+      message.
     </p>
     <p>
-      <strong>Suivi de la séance :</strong> un résumé de la conversation en cours, pour que le tuteur garde le fil.
+      <strong>Suivi de la séance&nbsp;:</strong> un résumé de la conversation en cours, pour que le tuteur garde le fil.
     </p>
     <p>
-      <strong>Mémoire d&apos;apprentissage, si elle est acceptée :</strong> pour chaque notion du programme travaillée dans les exercices, le nombre
-      d&apos;exercices, le dernier niveau d&apos;aide et les types d&apos;erreur qui reviennent (section 4).
+      <strong>Mémoire d’apprentissage, si elle est acceptée&nbsp;:</strong> pour chaque notion du programme travaillée dans les exercices, le nombre
+      d’exercices, le dernier niveau d’aide et les types d’erreur qui reviennent (section 4).
     </p>
     <p>
-      <strong>Données techniques :</strong> adresse IP et type de navigateur lors des connexions (sécurité du compte).
+      <strong>Données techniques&nbsp;:</strong> adresse IP et type de navigateur lors des connexions (sécurité du compte).
     </p>
     <p>
-      <strong>Site vitrine :</strong> votre adresse e-mail et votre message, si vous nous écrivez à{' '}
+      <strong>Site vitrine&nbsp;:</strong> votre adresse e&#8209;mail et votre message, si vous nous écrivez à{' '}
       <a href="mailto:contact@catiche.fr">contact@catiche.fr</a>, que nous gardons le temps de vous répondre, et au plus 3 ans après votre dernier
-      message. Le site n&apos;a ni formulaire ni mesure d&apos;audience.
+      message. Le site n’a ni formulaire ni mesure d’audience.
     </p>
 
-    <h2>3. Pourquoi, et sur quelle base légale ?</h2>
+    <h2 id="bases">{SECTIONS.bases}</h2>
     <ul>
       <li>
         <strong>Fournir le service de tutorat</strong> (compte, conversations) — exécution du contrat.
       </li>
       <li>
-        <strong>Créer et gérer le compte d&apos;un enfant</strong> — consentement du titulaire de l&apos;autorité parentale et, conjointement, de
-        l&apos;enfant (article 45 de la loi Informatique et Libertés pour les moins de 15 ans).
+        <strong>Créer et gérer le compte d’un enfant</strong> — consentement du titulaire de l’autorité parentale et, conjointement, de l’enfant
+        (article 45 de la loi Informatique et Libertés pour les moins de 15 ans).
       </li>
       <li>
-        <strong>Mémoire d&apos;apprentissage</strong> — consentement : avant 15 ans, proposée par le titulaire de l&apos;autorité parentale et
-        acceptée par l&apos;enfant ; à partir de 15 ans, l&apos;élève décide seul. L&apos;un ou l&apos;autre peut la retirer à tout moment.
+        <strong>Mémoire d’apprentissage</strong> — consentement&nbsp;: avant 15 ans, proposée par le titulaire de l’autorité parentale et acceptée par
+        l’enfant&nbsp;; à partir de 15 ans, l’élève décide seul. L’un ou l’autre peut la retirer à tout moment.
       </li>
       <li>
         <strong>Sécurité du service</strong> (journaux de connexion, limitation de débit) — intérêt légitime.
@@ -78,112 +106,116 @@ const DESCRIPTION = `Comment ${BRAND_NAME} protégera les données de votre enfa
       </li>
     </ul>
 
-    <h2>4. La mémoire d&apos;apprentissage</h2>
+    <h2 id="memoire">{SECTIONS.memoire}</h2>
     <p>
-      Si elle est acceptée, la mémoire d&apos;apprentissage retient, notion par notion, ce que disent les exercices de l&apos;élève depuis la rentrée
-      : combien il en a travaillé, le dernier niveau d&apos;aide et les types d&apos;erreur qui reviennent. Elle ne garde jamais le texte des
-      conversations. Elle sert seulement à adapter l&apos;aide de Tom et ne produit aucune décision automatisée ayant un effet juridique (article 22
-      du RGPD).
+      Si elle est acceptée, la mémoire d’apprentissage retient, notion par notion, ce que disent les exercices de l’élève depuis la rentrée&nbsp;:
+      combien il en a travaillé, le dernier niveau d’aide et les types d’erreur qui reviennent. Elle ne garde jamais le texte des conversations. Elle
+      sert seulement à adapter l’aide de Tom et ne produit aucune décision automatisée ayant un effet juridique (article 22 du RGPD).
     </p>
     <p>
-      L&apos;élève voit ce qu&apos;elle retient et peut effacer une notion ou tout. Elle repart de zéro à chaque rentrée, et elle est effacée quand
-      l&apos;accord est retiré ou que le compte est supprimé. Sans mémoire, une séance ne sert pas à la suivante ; pendant une séance, un résumé de la
-      conversation permet à Tom de garder le fil.
+      L’élève voit ce qu’elle retient et peut effacer une notion ou tout. Elle repart de zéro à chaque rentrée, et elle est effacée quand l’accord est
+      retiré ou que le compte est supprimé. Sans mémoire, Tom ne se souvient pas d’une séance à l’autre&nbsp;; pendant une séance, un résumé de la
+      conversation lui permet de garder le fil.
     </p>
     <p>
-      <strong>Pour toi, élève :</strong> si tu l&apos;acceptes, Tom se souvient des notions que tu as travaillées et des erreurs qui reviennent, pas
-      de vos conversations. Tu vois ce qu&apos;il retient, et tu peux l&apos;effacer quand tu veux.
+      <strong>Pour toi, élève&nbsp;:</strong> si tu l’acceptes, Tom se souvient des notions que tu as travaillées et des erreurs qui reviennent, pas
+      de tes conversations avec lui. Tu vois ce qu’il retient, et tu peux l’effacer quand tu veux.
     </p>
 
-    <h2>5. Qui accède à vos données ?</h2>
+    <h2 id="acces">{SECTIONS.acces}</h2>
     <p>
       Vos données ne sont jamais vendues ni louées, et nous ne diffusons aucune publicité. Elles sont traitées par les prestataires suivants, chacun
-      limité à sa mission :
+      limité à sa mission&nbsp;:
     </p>
     <ul>
       <li>
-        <strong>Mistral AI</strong> (France) — modèles d&apos;intelligence artificielle : traite les messages, photos d&apos;exercices et la mémoire
-        d&apos;apprentissage pour générer la réponse. Sans accord de conservation zéro (Zero Data Retention), Mistral AI peut garder ces contenus
-        selon ses propres conditions : nous lui avons demandé cet accord, qui n&apos;est pas encore donné, et le service n&apos;ouvrira pas aux élèves
-        sans lui.
+        <strong>Mistral AI</strong> (France) — modèles d’intelligence artificielle&nbsp;: traite les messages, photos d’exercices et la mémoire
+        d’apprentissage pour générer la réponse. Sans accord de conservation zéro (Zero Data Retention), Mistral AI peut garder ces contenus selon ses
+        propres conditions&nbsp;: nous lui avons demandé cet accord, qui n’est pas encore donné, et le service n’ouvrira pas aux élèves sans lui.
       </li>
       <li>
-        <strong>Clever Cloud</strong> (France, données hébergées à Paris) — hébergement du site, du service et de sa base de données. Les photos
-        envoyées n&apos;y sont pas stockées.
+        <strong>Clever Cloud</strong> (France, données hébergées à Paris) — hébergement du site, du service et de ses données. Les photos envoyées n’y
+        sont pas stockées.
       </li>
       <li>
-        <strong>Scaleway</strong> (France, données traitées dans l&apos;Union européenne) — envoi des e-mails du compte parent.
+        <strong>Scaleway</strong> (France, données traitées dans l’Union européenne) — envoi des e&#8209;mails du compte parent.
       </li>
       <li>
-        <strong>OVH</strong> (France, boîte hébergée en France) — réception des e-mails envoyés à contact@catiche.fr.
+        <strong>OVH</strong> (France, boîte hébergée en France) — réception des e&#8209;mails envoyés à{' '}
+        <a href="mailto:contact@catiche.fr">contact@catiche.fr</a>.
       </li>
     </ul>
 
-    <h2>6. Transferts hors de l&apos;Union européenne</h2>
-    <p>Mistral AI, Clever Cloud, Scaleway et OVH traitent vos données dans l&apos;Union européenne.</p>
-
-    <h2>7. Combien de temps conservons-nous vos données ?</h2>
+    <h2 id="transferts">{SECTIONS.transferts}</h2>
     <p>
-      Ces durées sont nos engagements pour l&apos;ouverture du service. Aujourd&apos;hui, la suppression d&apos;un compte efface ses données de la
-      base, et les sessions de connexion expirent comme indiqué ; l&apos;effacement des comptes inactifs et des journaux reste à construire d&apos;ici
-      là.
+      Aucun transfert&nbsp;: vos données ne quittent pas l’Union européenne. Mistral AI, Clever Cloud, Scaleway et OVH les traitent dans l’Union
+      européenne.
+    </p>
+
+    <h2 id="conservation">{SECTIONS.conservation}</h2>
+    <p>
+      Ces durées sont nos engagements pour l’ouverture du service. Aujourd’hui, la suppression d’un compte efface ses données, et les sessions de
+      connexion expirent comme indiqué&nbsp;; l’effacement des comptes inactifs et des journaux reste à construire d’ici là.
     </p>
     <ul>
       <li>
-        <strong>Compte et contenus d&apos;apprentissage</strong> (messages, texte des photos) : pendant l&apos;utilisation du service, puis effacés
-        dans un délai de 30 jours après la suppression du compte.
+        <strong>Compte et contenus d’apprentissage</strong> (messages, texte des photos)&nbsp;: pendant l’utilisation du service, puis effacés dans un
+        délai de 30 jours après la suppression du compte.
       </li>
       <li>
-        <strong>Compte inactif</strong> : supprimé après 3 ans sans connexion, après relance par e-mail.
+        <strong>Compte inactif</strong>&nbsp;: supprimé après 3 ans sans connexion, après relance par e&#8209;mail.
       </li>
       <li>
-        <strong>Sessions de connexion</strong> : fermées après 90 jours sans utilisation sur l&apos;appareil de l&apos;enfant, pour qu&apos;il reste
-        ouvert après des vacances ; sur un appareil partagé par la famille, après 10 minutes sans utilisation et au plus 2 heures.
+        <strong>Sessions de connexion</strong>&nbsp;: fermées après 90 jours sans utilisation sur l’appareil de l’enfant, pour que son espace reste
+        ouvert après des vacances&nbsp;; sur un appareil partagé par la famille, après 10 minutes sans utilisation et au plus 2 heures.
       </li>
       <li>
-        <strong>Appareil reconnu</strong> : un cookie qui ne porte que l&apos;identifiant de l&apos;appareil, 400 jours au plus, pour que
-        l&apos;enfant y retrouve son prénom et y entre par son code.
+        <strong>Appareil reconnu</strong>&nbsp;: un cookie qui ne porte que l’identifiant de l’appareil, 400 jours au plus, pour que l’enfant y
+        retrouve son prénom et y entre par son code.
       </li>
       <li>
-        <strong>Journaux techniques et de sécurité</strong> : 12 mois.
+        <strong>Journaux techniques et de sécurité</strong>&nbsp;: 12 mois.
       </li>
       <li>
-        <strong>E-mails reçus à contact@catiche.fr</strong> : le temps d&apos;y répondre, et au plus 3 ans après votre dernier message.
+        <strong>
+          E&#8209;mails reçus à <a href="mailto:contact@catiche.fr">contact@catiche.fr</a>
+        </strong>
+        &nbsp;: le temps d’y répondre, et au plus 3 ans après votre dernier message.
       </li>
     </ul>
 
-    <h2>8. Vos droits</h2>
+    <h2 id="droits">{SECTIONS.droits}</h2>
     <p>
-      Conformément au RGPD et à la loi Informatique et Libertés, vous disposez des droits d&apos;accès, de rectification, d&apos;effacement, de
-      limitation, d&apos;opposition et de portabilité, du droit de retirer votre consentement à tout moment, et du droit de définir des directives sur
-      le sort de vos données après votre décès. L&apos;enfant peut exercer ses droits lui-même ou par l&apos;intermédiaire de ses parents.
+      Conformément au RGPD et à la loi Informatique et Libertés, vous disposez des droits d’accès, de rectification, d’effacement, de limitation,
+      d’opposition et de portabilité, du droit de retirer votre consentement à tout moment, et du droit de définir des directives sur le sort de vos
+      données après votre décès. L’enfant peut exercer ses droits lui-même ou par l’intermédiaire de ses parents.
     </p>
     <p>
-      Pour les exercer : <a href="mailto:contact@catiche.fr">contact@catiche.fr</a> (réponse sous un mois ; une vérification d&apos;identité pourra
-      être demandée). Les comptes enfants peuvent être supprimés directement depuis l&apos;espace parent de l&apos;application ; l&apos;application ne
-      propose pas encore la suppression du compte parent, qui s&apos;effectue sur demande à la même adresse. Vous pouvez également adresser une
-      réclamation à la CNIL (<ExternalLink href="https://www.cnil.fr">cnil.fr</ExternalLink>
-      ).
-    </p>
-
-    <h2>9. Sécurité</h2>
-    <p>
-      Les échanges sont chiffrés (TLS). Les cookies de session sont protégés (httpOnly, secure) et l&apos;accès aux données d&apos;un enfant est
-      strictement réservé à son parent.
+      Pour les exercer&nbsp;: <a href="mailto:contact@catiche.fr">contact@catiche.fr</a> (réponse sous un mois&nbsp;; une vérification d’identité
+      pourra être demandée). Les comptes enfants peuvent être supprimés directement depuis l’espace parent de l’application&nbsp;; l’application ne
+      propose pas encore la suppression du compte parent, qui s’effectue sur demande à la même adresse. Vous pouvez également adresser une réclamation
+      à la CNIL (<ExternalLink href="https://www.cnil.fr">cnil.fr</ExternalLink>).
     </p>
 
-    <h2>10. Protection des mineurs</h2>
+    <h2 id="securite">{SECTIONS.securite}</h2>
     <p>
-      {BRAND_NAME} est conçu pour des élèves mineurs, sous le contrôle de leurs parents : le compte enfant est créé par le parent, et pour les enfants
-      de moins de 15 ans le traitement repose sur le consentement conjoint du parent et de l&apos;enfant (article 45 de la loi Informatique et
-      Libertés). Aucune publicité n&apos;est diffusée, aucun profil n&apos;est exploité à des fins commerciales, et l&apos;information destinée aux
-      élèves est rédigée en langage simple, conformément aux recommandations de la CNIL sur les droits numériques des mineurs.
+      Les échanges avec {BRAND_NAME} sont chiffrés. Les cookies de connexion sont protégés&nbsp;: ils ne passent que par une connexion chiffrée, et
+      aucun script d’une page ne peut les lire. Dans l’application, seuls l’enfant et l’adulte qui a ouvert son compte accèdent à ses données&nbsp;;
+      l’adulte ne voit jamais ses conversations.
     </p>
 
-    <h2>11. Évolution de cette politique</h2>
+    <h2 id="mineurs">{SECTIONS.mineurs}</h2>
     <p>
-      En cas de modification substantielle de cette politique, vous serez informé par e-mail ou via l&apos;application avant son entrée en vigueur. La
-      date de dernière mise à jour figure en haut de cette page.
+      {BRAND_NAME} est conçu pour des élèves mineurs, sous le contrôle de leurs parents&nbsp;: le compte enfant est créé par le parent, et pour les
+      enfants de moins de 15 ans le traitement repose sur le consentement conjoint du parent et de l’enfant (article 45 de la loi Informatique et
+      Libertés). Aucune publicité n’est diffusée, aucun profil n’est exploité à des fins commerciales, et l’information destinée aux élèves est
+      rédigée en langage simple, conformément aux recommandations de la CNIL sur les droits numériques des mineurs.
+    </p>
+
+    <h2 id="evolution">{SECTIONS.evolution}</h2>
+    <p>
+      En cas de modification substantielle de cette politique, vous serez informé par e&#8209;mail ou via l’application avant son entrée en vigueur.
+      La date de dernière mise à jour figure en haut de cette page.
     </p>
   </div>
 </PageLayout>

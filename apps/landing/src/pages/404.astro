@@ -1,10 +1,18 @@
 ---
 import { buttonVariants } from '@repo/ui/classes';
 import PageLayout from '@/layouts/page-layout.astro';
+
+// Two ways on: the home page, or the answers.
 ---
 
-<PageLayout title="Page introuvable" noindex description="Cette page n'existe pas, ou plus.">
-  <a href="/" class={buttonVariants({ size: 'lg' })}>
-    Revenir à l&apos;accueil
-  </a>
+<PageLayout title="Cette page n’existe pas" noindex>
+  <p class="text-lg text-foreground">L’adresse a peut-être changé. Repartez de l’accueil, ou cherchez votre réponse dans les questions.</p>
+  <div class="mt-8 flex flex-wrap gap-4">
+    <a href="/" class={buttonVariants({ size: 'lg' })}>
+      Revenir à l’accueil
+    </a>
+    <a href="/aide" class={buttonVariants({ variant: 'outline', size: 'lg' })}>
+      Voir les questions
+    </a>
+  </div>
 </PageLayout>
