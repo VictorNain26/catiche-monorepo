@@ -7,6 +7,7 @@
  */
 
 import { parseJsonEventStream, readUIMessageStream, uiMessageChunkSchema, type UIMessage, type UIMessageChunk } from 'ai';
+import type { Auth } from '../platform/auth/auth';
 import { invite } from '../platform/auth/invitation';
 import type { Db } from '../platform/db/client';
 import type { memoryMailer } from './mailer';
@@ -96,7 +97,7 @@ async function readTurn(res: Response) {
   return { status: res.status, chunks, reply, error, body };
 }
 
-export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: Db, origin = ORIGIN) {
+export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, { db, auth }: { db: Db; auth: Auth }, origin = ORIGIN) {
   const request = (
     method: string,
     path: string,
@@ -124,9 +125,11 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
 
   const api = {
     request,
+    /** The address invited, its email sent: when the invitation ends. */
+    invite: (email: string) => invite({ db, auth }, email),
     /** Invited, in by the code their address received, then declared 18 or over: the session it opens. */
     async guardian(email: string) {
-      await invite(db, email);
+      await api.invite(email);
       const cookie = await api.signIn(email);
       await expectStatus(request('POST', '/api/me/declarations', { cookie, body: { adult: true } }), 204, 'adult declaration');
       return cookie;

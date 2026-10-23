@@ -4,6 +4,7 @@
  */
 
 import type { Auth } from '../../platform/auth/auth';
+import { createStudentDevices } from '../../platform/auth/student-devices';
 import { createActivationCode, type StudentAccess } from '../../platform/auth/student-sign-in';
 import type { Db } from '../../platform/db/client';
 import { createHouseholdRepository } from './repository';
@@ -14,6 +15,7 @@ export function householdModule({ db, auth }: { db: Db; auth: Auth }) {
   const service = createHouseholdService({
     repository: createHouseholdRepository(db),
     createActivationCode: (userId, reason) => createActivationCode(auth, userId, reason),
+    sharedDevice: (deviceId, userId) => createStudentDevices(db).isShortSession(deviceId, userId),
   });
   return { routes: householdRoutes({ auth, service }), me: meRoutes({ auth, service }), authGuard: studentAuthGuard({ auth, service }) };
 }
@@ -48,6 +50,12 @@ export function studentAccess(db: Db): StudentAccess {
     follows: studentDirectory(db).follows,
     birthMonth: async (studentId) => (await repository.findProfile(studentId))?.birthMonth ?? null,
   };
+}
+
+/** An adult in by an email, counted for the passkey's offer, which main.ts hands to better-auth. */
+export function emailEntries(db: Db) {
+  const repository = createHouseholdRepository(db);
+  return (adultId: string) => repository.countEmailEntry(adultId);
 }
 
 /** A user's deletion, with the students no other adult follows, in one transaction. */

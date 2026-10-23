@@ -8,7 +8,7 @@ import { and, desc, eq, gte, inArray, isNull, ne, notExists, type SQL, sql } fro
 import { alias } from 'drizzle-orm/pg-core';
 import type { SchoolLevel } from '../../domain/levels';
 import type { MemoryAnswer } from '../../domain/memory-consent';
-import { device, deviceProfile, session, studentCode, user } from '../../platform/auth/schema';
+import { device, deviceProfile, passkey, session, studentCode, user } from '../../platform/auth/schema';
 import { CODE_TRIES, DEVICE_TRIES } from '../../platform/auth/student-devices';
 import type { Db } from '../../platform/db/client';
 import { adultProfile, guardianship, studentProfile } from './schema';
@@ -96,12 +96,47 @@ export function createHouseholdRepository(db: Db) {
           .where(and(eq(guardianship.adultId, adultId), isNull(guardianship.declaredAt)))
           .orderBy(guardianship.createdAt),
       ]);
-      return { adult: declared === undefined, guardianOf: undeclared.map(({ studentId }) => studentId) };
+      return { adult: !declared?.at, guardianOf: undeclared.map(({ studentId }) => studentId) };
     },
 
     /** The adult declares being 18 or over; the first declaration's date stays. */
     async declareAdult(adultId: string) {
-      await db.insert(adultProfile).values({ userId: adultId, declaredAdultAt: new Date() }).onConflictDoNothing();
+      await db
+        .insert(adultProfile)
+        .values({ userId: adultId, declaredAdultAt: new Date() })
+        .onConflictDoUpdate({ target: adultProfile.userId, set: { declaredAdultAt: sql`coalesce(${adultProfile.declaredAdultAt}, now())` } });
+    },
+
+    /** An email let the adult in once more (a student has no address that receives one). */
+    async countEmailEntry(adultId: string) {
+      await db
+        .insert(adultProfile)
+        .values({ userId: adultId, emailEntries: 1 })
+        .onConflictDoUpdate({ target: adultProfile.userId, set: { emailEntries: sql`${adultProfile.emailEntries} + 1` } });
+    },
+
+    /**
+     * What the passkey's offer reads of the adult: their entries by email, their passkeys, and
+     * whether they put it away.
+     */
+    async passkeyOffer(adultId: string) {
+      const [profile] = await db
+        .select({
+          emailEntries: adultProfile.emailEntries,
+          closed: sql<boolean>`${adultProfile.passkeyOfferClosedAt} IS NOT NULL`,
+          passkeys: sql<number>`(select count(*) from ${passkey} where ${passkey.userId} = ${adultProfile.userId})`.mapWith(Number),
+        })
+        .from(adultProfile)
+        .where(eq(adultProfile.userId, adultId));
+      return profile ?? { emailEntries: 0, closed: false, passkeys: 0 };
+    },
+
+    /** The adult puts the passkey's offer away; the first date stays. */
+    async closePasskeyOffer(adultId: string) {
+      await db
+        .update(adultProfile)
+        .set({ passkeyOfferClosedAt: sql`coalesce(${adultProfile.passkeyOfferClosedAt}, now())` })
+        .where(eq(adultProfile.userId, adultId));
     },
 
     /** The adult declares holding parental authority over a student they are linked to; `false` when no such link. */

@@ -279,7 +279,7 @@ export function studentSignIn({ devices, students }: { devices: StudentDevices; 
         {
           // A guardian entering on a recognised device: the session is the device's, short on a
           // shared one or on their child's, so that the child who takes it back never finds it open.
-          matcher: (ctx) => ctx.path === '/sign-in/email-otp' || ctx.path === '/passkey/verify-authentication',
+          matcher: (ctx) => ctx.path === '/sign-in/email-otp' || ctx.path === '/magic-link/verify' || ctx.path === '/passkey/verify-authentication',
           handler: createAuthMiddleware(async (ctx) => {
             const created = ctx.context.newSession;
             const device = created ? await requestDevice(ctx) : undefined;

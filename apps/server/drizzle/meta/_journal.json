@@ -141,6 +141,13 @@
       "when": 1792764816315,
       "tag": "0019_drop_households",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792781185723,
+      "tag": "0020_adult_entry",
+      "breakpoints": true
     }
   ]
 }

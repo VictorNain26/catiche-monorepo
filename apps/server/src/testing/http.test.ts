@@ -25,8 +25,8 @@ describe('httpClient', () => {
   });
 
   it('fails a sign-in whose code is refused without leaving the wait for its email to reject unhandled', async () => {
-    const { app } = testApp(db);
-    const api = httpClient(app, memoryMailer({ waitMs: 20 }), db);
+    const { app, auth } = testApp(db);
+    const api = httpClient(app, memoryMailer({ waitMs: 20 }), { db, auth });
     const refused = await api.signIn('not-an-address').then(
       () => 'signed in',
       (caught: unknown) => String(caught),

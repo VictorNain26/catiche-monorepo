@@ -29,6 +29,7 @@ const STUDENT_AUTH_PATHS = new Set([
   '/api/auth/sign-out',
   '/api/auth/email-otp/send-verification-otp',
   '/api/auth/sign-in/email-otp',
+  '/api/auth/magic-link/verify',
   '/api/auth/passkey/generate-authenticate-options',
   '/api/auth/passkey/verify-authentication',
 ]);
@@ -76,14 +77,22 @@ export function studentAuthGuard({ auth, service }: { auth: Auth; service: House
  * too, and when a guardian last replaced their code; an adult's declaration of being 18 or over.
  */
 export function meRoutes({ auth, service }: { auth: Auth; service: HouseholdService }) {
-  return new Hono<SessionEnv>()
-    .use(requireSession(auth))
-    .get('/', async (c) => c.json(await service.me(c.var.userId, c.var.userName)))
-    .get('/devices', async (c) => c.json(await service.listOwnDevices(c.var.userId)))
-    .post('/declarations', jsonBody(adultDeclaration), async (c) => {
-      await service.declareAdult(c.var.userId);
-      return c.body(null, 204);
-    });
+  return (
+    new Hono<SessionEnv>()
+      .use(requireSession(auth))
+      .get('/', async (c) => c.json(await service.me({ id: c.var.userId, name: c.var.userName, email: c.var.userEmail, deviceId: c.var.deviceId })))
+      .get('/devices', async (c) => c.json(await service.listOwnDevices(c.var.userId)))
+      .post('/declarations', jsonBody(adultDeclaration), async (c) => {
+        await service.declareAdult(c.var.userId);
+        return c.body(null, 204);
+      })
+      // « Plus tard » on the passkey's offer.
+      .post('/passkey-offer', async (c) => {
+        await service.assertNotStudent(c.var.userId);
+        await service.closePasskeyOffer(c.var.userId);
+        return c.body(null, 204);
+      })
+  );
 }
 
 export function householdRoutes({ auth, service }: { auth: Auth; service: HouseholdService }) {

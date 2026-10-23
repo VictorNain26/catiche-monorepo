@@ -7,7 +7,6 @@ import { afterAll, describe, expect, it } from 'bun:test';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { invite } from './platform/auth/invitation';
 import { testApp } from './testing/app';
 import { testDatabase } from './testing/database';
 import { ORIGIN } from './testing/http';
@@ -30,7 +29,7 @@ describe('auth', () => {
   let cookie = '';
 
   it('opens a session by the code the address received, its cookie for this host only', async () => {
-    await invite(db, email);
+    await api.invite(email);
     const received = mail.next(email);
     expect((await post('/api/auth/email-otp/send-verification-otp', { email, type: 'sign-in' })).status).toBe(200);
     const res = await post('/api/auth/sign-in/email-otp', { email, otp: mail.codeIn(await received) });

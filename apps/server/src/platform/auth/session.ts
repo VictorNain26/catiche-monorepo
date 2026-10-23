@@ -10,7 +10,8 @@ import { Problem } from '../http/problem';
 import type { Auth } from './auth';
 
 export interface SessionEnv extends AppEnv {
-  Variables: AppEnv['Variables'] & { userId: string; userName: string };
+  /** `deviceId`: the device the session was opened on, when it is one the household knows. */
+  Variables: AppEnv['Variables'] & { userId: string; userName: string; userEmail: string; deviceId: string | null };
 }
 
 export function requireSession(auth: Auth) {
@@ -19,6 +20,8 @@ export function requireSession(auth: Auth) {
     if (!session) throw new Problem('UNAUTHENTICATED');
     c.set('userId', session.user.id);
     c.set('userName', session.user.name);
+    c.set('userEmail', session.user.email);
+    c.set('deviceId', session.session.deviceId ?? null);
     await next();
     for (const cookie of headers.getSetCookie()) c.res.headers.append('Set-Cookie', cookie);
   });

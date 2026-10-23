@@ -5,14 +5,14 @@
  * follows. A student's `.invalid` address is never sent to.
  */
 
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it, setSystemTime } from 'bun:test';
 import { eq, inArray } from 'drizzle-orm';
 import { accountDeletion } from '../../modules/household';
 import { adultProfile, guardianship } from '../../modules/household/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { ORIGIN } from '../../testing/http';
-import { invitationIdentifier, invite } from './invitation';
+import { invitationIdentifier } from './invitation';
 import { session, user, verification } from './schema';
 
 const { db } = await testDatabase();
@@ -41,12 +41,12 @@ const expire = (email: string) =>
 
 describe('sign-in by code', () => {
   it("creates an invited address's account at its first code, the address proven, the invitation spent", async () => {
-    await invite(db, ' Nouvelle@Example.com ');
+    await api.invite(' Nouvelle@Example.com ');
     const email = await asked('nouvelle@example.com');
     // The parent reads the product's name, Catiche; Tom is the tutor inside it. The code stays out of
     // the subject, which a locked phone shows in its notifications.
-    expect(email.subject).toBe('Votre code pour entrer dans Catiche');
-    expect(email.text).toContain('pour entrer dans Catiche');
+    expect(email.subject).toBe('Votre lien pour entrer dans Catiche');
+    expect(email.text).toContain('Entrer dans Catiche');
     const res = await signIn('nouvelle@example.com', mail.codeIn(email));
     expect(res.status).toBe(200);
     expect((await accounts('nouvelle@example.com'))[0]?.emailVerified).toBe(true);
@@ -54,7 +54,7 @@ describe('sign-in by code', () => {
   });
 
   it('records the address the proxy appended, never one the client wrote before it', async () => {
-    await invite(db, 'adresse@example.com');
+    await api.invite('adresse@example.com');
     const otp = mail.codeIn(await asked('adresse@example.com'));
     const res = await api.request('POST', '/api/auth/sign-in/email-otp', {
       body: { email: 'adresse@example.com', otp },
@@ -85,13 +85,13 @@ describe('sign-in by code', () => {
   });
 
   it('tells an expired invitation of the closed beta', async () => {
-    await invite(db, 'en-retard@example.com');
+    await api.invite('en-retard@example.com');
     await expire('en-retard@example.com');
     expect((await asked('en-retard@example.com')).subject).toBe('Catiche est en bêta fermée');
   });
 
   it('creates no account once the invitation has expired, even with a valid code', async () => {
-    await invite(db, 'trop-tard@example.com');
+    await api.invite('trop-tard@example.com');
     const email = await asked('trop-tard@example.com');
     await expire('trop-tard@example.com');
     const res = await signIn('trop-tard@example.com', mail.codeIn(email));
@@ -111,7 +111,7 @@ describe('sign-in by code', () => {
   });
 
   it('refuses the right code after three wrong ones', async () => {
-    await invite(db, 'maladroit@example.com');
+    await api.invite('maladroit@example.com');
     const code = mail.codeIn(await asked('maladroit@example.com'));
     const wrong = code === '111111' ? '222222' : '111111';
     for (let attempt = 0; attempt < 3; attempt++) expect((await signIn('maladroit@example.com', wrong)).status).toBe(400);
@@ -120,7 +120,7 @@ describe('sign-in by code', () => {
   });
 
   it('stores the code hashed, never in clear', async () => {
-    await invite(db, 'secret@example.com');
+    await api.invite('secret@example.com');
     const code = mail.codeIn(await asked('secret@example.com'));
     const rows = await db
       .select({ value: verification.value })
@@ -131,7 +131,7 @@ describe('sign-in by code', () => {
   });
 
   it('has no password: its routes are gone', async () => {
-    await invite(db, 'mot-de-passe@example.com');
+    await api.invite('mot-de-passe@example.com');
     const signUp = await api.request('POST', '/api/auth/sign-up/email', {
       body: { name: 'Parent', email: 'mot-de-passe@example.com', password: 'un mot de passe solide' },
     });
@@ -141,9 +141,40 @@ describe('sign-in by code', () => {
   });
 
   it('keeps one invitation per address, inviting again replacing it', async () => {
-    await invite(db, 'deux-fois@example.com');
-    const { expiresAt } = await invite(db, 'deux-fois@example.com');
+    await api.invite('deux-fois@example.com');
+    const { expiresAt } = await api.invite('deux-fois@example.com');
     expect((await invitations('deux-fois@example.com')).map((row) => row.expiresAt)).toEqual([expiresAt]);
+  });
+});
+
+describe('the sign-in email', () => {
+  it('carries a button to the web, the address and the code after its #, and the code itself', async () => {
+    await api.invite('bouton@example.com');
+    const email = await asked('bouton@example.com');
+    expect(email.subject).toBe('Votre lien pour entrer dans Catiche');
+    const code = mail.codeIn(email);
+    // The fragment never reaches a server, nor its logs: the page reads it.
+    expect(email.text).toContain(`Entrer dans Catiche : ${ORIGIN}/entrer#email=bouton%40example.com&code=${code}`);
+    expect(email.text).toContain(`Ou tapez ce code : ${code}`);
+    expect(email.text).toContain('Il marche 15 minutes.');
+    expect(email.text).toContain('Si vous n’avez rien demandé, ignorez ce message : personne n’entre sans lui.');
+  });
+
+  it('keeps its code 15 minutes: still good at 14, refused at 16', async () => {
+    // better-auth reads the clock itself: Bun's, set here, not a module replaced.
+    const sent = Date.now();
+    try {
+      await api.invite('quatorze@example.com');
+      await api.invite('seize@example.com');
+      const early = mail.codeIn(await asked('quatorze@example.com'));
+      const late = mail.codeIn(await asked('seize@example.com'));
+      setSystemTime(new Date(sent + 14 * 60_000));
+      expect((await signIn('quatorze@example.com', early)).status).toBe(200);
+      setSystemTime(new Date(sent + 16 * 60_000));
+      expect((await signIn('seize@example.com', late)).status).toBe(400);
+    } finally {
+      setSystemTime();
+    }
   });
 });
 
