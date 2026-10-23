@@ -18,9 +18,12 @@ place.
 - **Les adultes autour de lui** : celui ou ceux pour qui la soirée de devoirs est un conflit, ou
   qui n'ont pas le temps de la tenir. Ils cherchent la paix du soir et des devoirs rendus, pas
   un tableau de notes. Ce n'est pas toujours « le parent » : deux foyers en garde alternée, un
-  parent seul, un tuteur, un grand-parent qui garde le soir. Le compte est ouvert par un adulte
-  qui déclare être majeur et représentant légal des enfants qu'il ajoute ; le modèle de comptes
-  pour toutes ces familles est à revoir (`etat.md`).
+  parent seul, un tuteur, un grand-parent qui garde le soir. Un enfant a donc un ou plusieurs
+  adultes, dans une ou deux maisons, avec deux rôles (Victor, 2026-10-23) : le **parent ou
+  tuteur**, qui déclare exercer l'autorité parentale et décide pour l'enfant ; le **proche**,
+  qui reçoit le point du soir quand l'enfant le lui envoie. Le compte est ouvert par un parent
+  ou tuteur, qui déclare être majeur ; l'accord d'un seul suffit, l'autre peut s'y opposer.
+  Les droits de chacun : `docs/plans/app-cible.md`, « Le modèle de famille ».
 - **Inclusif, sans cible médicale** (Victor, 2026-10-21) : Catiche s'adresse à tous les
   collégiens. Il répond aussi aux familles concernées par le TDAH ou les troubles dys, pour qui
   des solutions payantes existent (`concurrence.md`, « Le créneau de l'organisation »), sans en
@@ -108,7 +111,7 @@ devoirs à l'oral.
 
 ## Ce que devient l'existant
 
-- **Gardé** : le tuteur et ses garde-fous, la mémoire d'apprentissage, le foyer et les appareils,
+- **Gardé** : le tuteur et ses garde-fous, la mémoire d'apprentissage, les appareils,
   la charte.
 - **Retiré** : le mode accompagné de la 6e et de la 5e (2026-10-20).
 - **À revoir dans les PR qui construisent la soirée** : le résumé de la semaine, remplacé par le
