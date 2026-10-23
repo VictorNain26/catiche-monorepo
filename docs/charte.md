@@ -73,8 +73,13 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
   ce qui se pose sur le fond, rien de plus.
 - Une liste pour des éléments semblables, une carte pour un bloc à part qui mène à un détail ; un
   seul bouton principal par écran.
-- Au téléphone, une colonne et des onglets en bas ; à l'ordinateur, la navigation sur le côté et
-  une vraie mise en page, jamais une colonne étirée.
+- Un écran où l'on revient, et des pages qui s'ouvrent depuis lui et se referment par un « ← »
+  qui nomme où il ramène (Victor, 2026-10-23 : une navigation comprise par un enfant et par un
+  adulte peu habitué aux écrans). Des onglets seulement quand il y a plusieurs destinations
+  fréquentes. Au téléphone, une colonne ; à l'ordinateur, une vraie mise en page, jamais une
+  colonne étirée.
+- Un mot de l'écran dit ce que la personne fait, pas le nom d'une fonction : « tes devoirs »,
+  pas « ta soirée » (Victor, 2026-10-23).
 
 ## Tom
 

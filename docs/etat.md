@@ -85,52 +85,19 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
   de l'app et la soirée forment un seul chantier : conçu une fois sur le parcours final, pour ne
   pas refaire deux fois l'accueil de l'enfant, la séance et l'espace de l'adulte. Il se construit
   dans cet ordre, une étape validée avant la suivante :
-  1. **Le parcours et les textes**, validés par Victor avant tout code : l'enfant, puis
-     l'adulte, soirée comprise, au téléphone et à l'ordinateur, dans les voix de `charte.md`.
-     Il part de l'inventaire des écrans actuels (vocabulaire technique, colonne unique,
-     doublons, écarts à la charte) et des familles réelles : deux représentants légaux dans
-     deux foyers, un beau-parent ou un grand-parent qui suit les devoirs sans être représentant
-     légal, une famille d'accueil, un tuteur (Victor, 2026-10-21).
-  2. **Le socle, sans IA**, qui remplace les écrans actuels au lieu de les retoucher. Ses
-     messages prennent la bonne voix : pas de vouvoiement côté élève, pas de « bêta fermée »,
-     pas de « Reviens demain ! ». Il comprend :
-     - l'entrée de l'adulte, avec une déclaration horodatée à la création du compte : majeur, et
-       représentant légal des enfants qu'il ajoute (un compte peut en porter plusieurs). Elle
-       vaut consentement parental ; la vérification reste proportionnée, sans pièce d'identité
-       (CNIL) (Victor, 2026-10-21) ;
-     - le modèle de comptes et les mots « parent » et « enfant », revus pour toutes ces familles ;
-     - l'entrée de l'enfant par son code, vue au téléphone, avec ses trois finitions : un code
-       trop facile refusé dès sa première saisie, « Ajouter cet ordinateur » caché sur un
-       ordinateur déjà ajouté, le titre et les prénoms de « Qui fait ses devoirs ? » alignés ;
-       l'élève prévenu quand un nouvel appareil porte son profil ;
-     - l'espace de l'adulte : la suppression de son compte, que le serveur porte
-       (`POST /api/auth/delete-user`, session de moins de 10 minutes) et qui se fait sur demande
-       d'ici là, comme le disent les CGU et la politique de confidentialité ; une session
-       fraîche pour un code « oublié » et la suppression d'un enfant, comme pour une clé
-       d'accès, si un parent laisse sa session ouverte ;
-     - la mise en page de la charte, avec les rôles `accent` et `secondary` du mode sombre
-       montés d'un pas pour la landing (#559), et Tom au trait.
-  3. **La soirée**, avec le volet IA (`produit.md`, « Ce que fait Catiche ») : l'élève dit ses
-     devoirs à l'oral, Tom propose un ordre, découpe en étapes, aide sur un exercice, puis
-     récapitule et prépare le cartable. Dans la même PR :
-     - le prompt et la réponse de repli suivent `charte.md`, « La voix de Tom », écarts listés
-       dans `tuteur.md` § 5, dont l'annonce d'une IA dès la première interaction (AI Act,
-       art. 50(1)) ;
-     - le micro, que la `Permissions-Policy` du serveur ferme
-       (`platform/http/security-headers.ts`), s'ouvre à `self` ; la transcription impose le
-       français ;
-     - la politique de confidentialité décrit la voix de l'élève ;
-     - les formules de Tom : sur Chrome de bureau, chaque formule montre des flèches de
-       défilement vertical, son conteneur (`[&_.katex]:overflow-x-auto`,
-       `components/tom-text.tsx`) débordant de 6 px en hauteur.
-  4. **Le point du soir**, qui remplace le résumé de la semaine. À corriger en passant : le
-     résumé montre au parent « Ce qui résiste » même quand l'enfant a refusé la mémoire, alors
-     que `/memoire` dit le contraire (`core/week-summary.ts`, `routes/memoire.tsx` du web). La
-     politique de confidentialité décrit ses messages. Les offres Gratuit et Complet se revoient
-     avec lui.
-  5. **Les contrôles gardés d'un soir à l'autre**, et leur révision ramenée les jours d'avant.
+  1. **Le parcours et les textes : faits, validés par Victor le 2026-10-23.** Ils sont dans
+     `docs/plans/app-cible.md` : les user stories, le modèle de famille, la navigation, chaque
+     écran avec ses textes, le tableau avant / après et le découpage en PR. Ce document porte
+     le détail des étapes 2 à 5 ; chaque étape en retire ce qu'elle construit.
+  2. **Le socle, sans IA** : le modèle de famille et ses droits, l'entrée de l'adulte et de
+     l'enfant, l'accueil, « Gérer », la navigation, Tom au trait.
+  3. **La soirée**, avec le volet IA et le prompt de Tom.
+  4. **Le point du soir**, qui remplace le résumé de la semaine.
+  5. **Les contrôles gardés d'un soir à l'autre.**
 
   Les bloquants ne freinent pas la construction, seulement l'arrivée du premier élève réel.
+- **Une famille d'accueil sans délégation ne peut pas ouvrir de compte** : il faut qu'un parent
+  ou un tuteur l'ouvre (Victor, 2026-10-23). À revoir si une famille d'accueil le demande.
 
 ## Technique reporté
 
