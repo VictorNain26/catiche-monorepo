@@ -5,7 +5,7 @@
 
 import type { Logger } from 'pino';
 import type { Auth } from '../../platform/auth/auth';
-import { AccountExists, invite } from '../../platform/auth/invitation';
+import { AccountExists, invite, revokeInvitation } from '../../platform/auth/invitation';
 import { createStudentDevices } from '../../platform/auth/student-devices';
 import type { Mailer } from '../../platform/email/mailer';
 import { createActivationCode, type StudentAccess } from '../../platform/auth/student-sign-in';
@@ -41,6 +41,7 @@ export function householdModule({ db, auth, mailer, logger, background, publicUr
         throw error;
       }
     },
+    revokeAddress: (email) => revokeInvitation(db, email),
     send: mailer,
     later: (task) => {
       background(

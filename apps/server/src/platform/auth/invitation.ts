@@ -62,6 +62,15 @@ export const invitationEmail = (to: string, { subject, intro }: InvitationLetter
   text: `Bonjour,\n\n${intro}\n\n${action}\n\nL’invitation vaut ${String(INVITATION_DAYS)} jours.`,
 });
 
+/**
+ * The invitation of an address without an account taken back, with the links it sent: they let
+ * no one in any more. An address with an account has none left, spent when its account was made.
+ */
+export async function revokeInvitation(db: Db, email: string) {
+  await db.delete(verification).where(eq(verification.identifier, invitationIdentifier(email)));
+  await spendInvitationLinks(db, email);
+}
+
 export async function invite({ db, auth }: { db: Db; auth: Auth }, email: string, letter?: InvitationLetter) {
   const address = normalised(email);
   const [existing] = await db.select({ id: user.id }).from(user).where(eq(user.email, address));

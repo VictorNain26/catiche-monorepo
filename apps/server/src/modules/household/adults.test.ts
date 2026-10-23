@@ -241,6 +241,34 @@ describe('the adults of a child', () => {
     expect((await withdraw(nadia)).status).toBe(404);
   });
 
+  it('takes back, with the last invitation withdrawn, the way into the closed beta it gave', async () => {
+    const { nadia, lea } = await family('beta-retiree');
+    const tom = await api.student(nadia, { name: 'Tom' });
+    const address = 'retiree-deux-fois@example.com';
+    await api.inviteAdult(nadia, lea.id, address, 'relative');
+    // The last link sent: each invitation spends the links before it.
+    const link = mail.invitationIn(await api.inviteAdult(nadia, tom.id, address, 'relative'));
+    const withdraw = async (studentId: string) => {
+      const [invitation] = await invitationsOf(studentId);
+      expect(
+        (await api.request('DELETE', `/api/household/students/${studentId}/invitations/${invitation?.id ?? ''}`, { cookie: nadia })).status,
+      ).toBe(204);
+    };
+    const betaInvitation = () =>
+      db
+        .select()
+        .from(verification)
+        .where(eq(verification.identifier, invitationIdentifier(address)));
+    // Another child's invitation still waits for the address: its way in stays.
+    await withdraw(lea.id);
+    expect(await betaInvitation()).toHaveLength(1);
+    await withdraw(tom.id);
+    expect(await betaInvitation()).toEqual([]);
+    const res = await api.acceptInvitation(link);
+    expect(res.headers.get('location')).toStartWith(`${ORIGIN}/entrer?error=`);
+    expect(await db.select().from(user).where(eq(user.email, address))).toEqual([]);
+  });
+
   it('lets a parent remove a relative, never another parent', async () => {
     const { nadia, lea } = await family('retire');
     const karim = await api.adult(nadia, lea.id, 'karim-retire@example.com', 'guardian');

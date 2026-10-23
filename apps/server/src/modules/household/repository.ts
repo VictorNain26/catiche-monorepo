@@ -437,15 +437,20 @@ export function createHouseholdRepository(db: Db) {
       return declined.length > 0;
     },
 
-    /** A parent of the student withdraws an invitation for them; `false` when no such invitation. */
+    /**
+     * A parent of the student withdraws an invitation for them: its address, and whether another
+     * child's invitation still waits for it; undefined when no such invitation.
+     */
     async withdrawInvitation(adultId: string, studentId: string, invitationId: string) {
-      const withdrawn = await db
+      const [withdrawn] = await db
         .delete(adultInvitation)
         .where(
           and(eq(adultInvitation.id, invitationId), eq(adultInvitation.studentId, studentId), inArray(adultInvitation.studentId, managedBy(adultId))),
         )
-        .returning({ id: adultInvitation.id });
-      return withdrawn.length > 0;
+        .returning({ email: adultInvitation.email });
+      if (!withdrawn) return undefined;
+      const [another] = await db.select({ id: adultInvitation.id }).from(adultInvitation).where(waiting(withdrawn.email)).limit(1);
+      return { email: withdrawn.email, stillInvited: another !== undefined };
     },
 
     /** For a parent of the student: the other adults linked to them, the earliest first, and the invitations still waiting. */

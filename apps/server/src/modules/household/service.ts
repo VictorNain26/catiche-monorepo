@@ -39,6 +39,8 @@ interface Deps {
    * above its button; `false`, sending nothing, when the address has an account already.
    */
   inviteAddress: (email: string, letter: InvitationLetter) => Promise<boolean>;
+  /** The closed beta's invitation of the address taken back, with its links. */
+  revokeAddress: (email: string) => Promise<void>;
   send: Mailer;
   /** Runs a task after the request has answered, its failure logged. */
   later: (task: () => Promise<void>) => void;
@@ -81,7 +83,16 @@ const toStudent = ({ birthMonth, memoryProposedAt, memoryAnswer, ...student }: S
   };
 };
 
-export function createHouseholdService({ repository, createActivationCode, sharedDevice, inviteAddress, send, later, publicUrl }: Deps) {
+export function createHouseholdService({
+  repository,
+  createActivationCode,
+  sharedDevice,
+  inviteAddress,
+  revokeAddress,
+  send,
+  later,
+  publicUrl,
+}: Deps) {
   const found = async (adultId: string, studentId: string) => {
     const student = await repository.findStudent(adultId, studentId);
     if (!student) throw new Problem('NOT_FOUND');
@@ -248,9 +259,14 @@ export function createHouseholdService({ repository, createActivationCode, share
       if (!(await repository.declineInvitation(email, invitationId))) throw new Problem('NOT_FOUND');
     },
 
-    /** A parent withdraws an invitation still waiting: a mistyped address keeps no way to the child. */
+    /**
+     * A parent withdraws an invitation still waiting: a mistyped address keeps no way to the
+     * child, nor, once no other child's invitation waits for it, into the closed beta.
+     */
     async withdrawInvitation(adultId: string, studentId: string, invitationId: string) {
-      if (!(await repository.withdrawInvitation(adultId, studentId, invitationId))) throw new Problem('NOT_FOUND');
+      const withdrawn = await repository.withdrawInvitation(adultId, studentId, invitationId);
+      if (!withdrawn) throw new Problem('NOT_FOUND');
+      if (!withdrawn.stillInvited) await revokeAddress(withdrawn.email);
     },
 
     /** For a parent: the other adults of the student, and the invitations still waiting. */
