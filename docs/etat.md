@@ -78,7 +78,7 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
   Victor : supprimer l'image GHCR `tomai-server` (Settings du paquet sur GitHub) ; l'ancien
   domaine expire seul le 24 août 2027.
 - **La landing est validée par Victor le 2026-10-22**, vue en local (#555, #559).
-- **Tom en 3D**, en parallèle, dans le dépôt `tom-mascotte` (plan dans son `docs/plan.md`) : le
+- **Tom en 3D**, en parallèle, dans le dépôt `tom-mascotte`, qui porte son plan : le
   modèle, le pull, le cahier, les poses et des animations souples. Sa dernière PR, ici, intègre
   les livrables à la landing et met à jour `charte.md`.
 - **L'application cible (ordre revu par Victor le 2026-10-23)**. La refonte des écrans, la voix
@@ -91,7 +91,9 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
      doublons, écarts à la charte) et des familles réelles : deux représentants légaux dans
      deux foyers, un beau-parent ou un grand-parent qui suit les devoirs sans être représentant
      légal, une famille d'accueil, un tuteur (Victor, 2026-10-21).
-  2. **Le socle, sans IA**, qui remplace les écrans actuels au lieu de les retoucher :
+  2. **Le socle, sans IA**, qui remplace les écrans actuels au lieu de les retoucher. Ses
+     messages prennent la bonne voix : pas de vouvoiement côté élève, pas de « bêta fermée »,
+     pas de « Reviens demain ! ». Il comprend :
      - l'entrée de l'adulte, avec une déclaration horodatée à la création du compte : majeur, et
        représentant légal des enfants qu'il ajoute (un compte peut en porter plusieurs). Elle
        vaut consentement parental ; la vérification reste proportionnée, sans pièce d'identité
@@ -101,9 +103,11 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
        trop facile refusé dès sa première saisie, « Ajouter cet ordinateur » caché sur un
        ordinateur déjà ajouté, le titre et les prénoms de « Qui fait ses devoirs ? » alignés ;
        l'élève prévenu quand un nouvel appareil porte son profil ;
-     - l'espace de l'adulte : la suppression de son compte (le serveur la porte,
-       `POST /api/auth/delete-user`), une session fraîche pour un code « oublié » et la
-       suppression d'un enfant, comme pour une clé d'accès ;
+     - l'espace de l'adulte : la suppression de son compte, que le serveur porte
+       (`POST /api/auth/delete-user`, session de moins de 10 minutes) et qui se fait sur demande
+       d'ici là, comme le disent les CGU et la politique de confidentialité ; une session
+       fraîche pour un code « oublié » et la suppression d'un enfant, comme pour une clé
+       d'accès, si un parent laisse sa session ouverte ;
      - la mise en page de la charte, avec les rôles `accent` et `secondary` du mode sombre
        montés d'un pas pour la landing (#559), et Tom au trait.
   3. **La soirée**, avec le volet IA (`produit.md`, « Ce que fait Catiche ») : l'élève dit ses
@@ -122,15 +126,14 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
   4. **Le point du soir**, qui remplace le résumé de la semaine. À corriger en passant : le
      résumé montre au parent « Ce qui résiste » même quand l'enfant a refusé la mémoire, alors
      que `/memoire` dit le contraire (`core/week-summary.ts`, `routes/memoire.tsx` du web). La
-     politique de confidentialité décrit ses messages.
+     politique de confidentialité décrit ses messages. Les offres Gratuit et Complet se revoient
+     avec lui.
   5. **Les contrôles gardés d'un soir à l'autre**, et leur révision ramenée les jours d'avant.
 
   Les bloquants ne freinent pas la construction, seulement l'arrivée du premier élève réel.
 
 ## Technique reporté
 
-- La suppression du compte parent se fait sur demande, comme le disent les CGU et la politique de
-  confidentialité, jusqu'au socle de l'application cible qui lui donne son bouton.
 - L'e-mail de suppression invite à répondre (`platform/auth/auth.ts`), mais le mailer ne pose
   aucun `Reply-To` : la réponse irait à `MAIL_FROM`, que personne ne lit ; à faire pointer vers
   `contact@catiche.fr`, avec son test.

@@ -111,8 +111,8 @@ devoirs à l'oral.
 - **Gardé** : le tuteur et ses garde-fous, la mémoire d'apprentissage, le foyer et les appareils,
   la charte.
 - **Retiré** : le mode accompagné de la 6e et de la 5e (2026-10-20).
-- **À revoir dans les PR qui construisent la soirée** : le résumé de la semaine, vers « c'est
-  fait » ; les offres Gratuit et Complet.
+- **À revoir dans les PR qui construisent la soirée** : le résumé de la semaine, remplacé par le
+  point du soir ; les offres Gratuit et Complet.
 - **À construire** : la soirée à l'oral, avec le micro à ouvrir (`etat.md`), les contrôles
   gardés d'un soir à l'autre, et le cartable du lendemain.
 
