@@ -1,19 +1,21 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Banner, Button, CheckboxField, Field } from '@repo/ui';
+import { Banner, Button, CheckboxField, Field, Section } from '@repo/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import type { z } from '../lib/zod';
+import { ChildFields } from '../components/child-fields';
 import { Page } from '../components/page';
 import { authClient, authData } from '../lib/auth';
+import { CHILD_AGES, addStudent, householdMessage, studentsQuery } from '../lib/household';
 import { ADULT_LABEL, declareAdult, meQuery, welcomeSchema } from '../lib/me';
-import { profilesQuery } from '../lib/student';
+import type { z } from '../lib/zod';
 
 /**
- * A new guardian's first name and their age declared: their account was created by their first
- * code, nameless. A screen of its own, which the household sends them to until they give it,
- * whatever they reloaded. Then the passkey's offer, while the session is fresh, except on a
- * device that holds a child's profile: a passkey there would open to the lock the child knows.
+ * A new adult's first screen, where the invitation's button leads: their first name and their age
+ * declared, then their child, on one screen. Their account was created nameless, by the link or by
+ * their first code; the household sends them here until they give their name, whatever they
+ * reloaded. Then the child's page, which says how to reach their device.
  */
 export const Route = createFileRoute('/bienvenue')({
   beforeLoad: async ({ context }) => {
@@ -27,27 +29,60 @@ export const Route = createFileRoute('/bienvenue')({
 function Welcome() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const form = useForm({ resolver: zodResolver(welcomeSchema), defaultValues: { name: '', adult: false } });
-  const name = useMutation({
-    mutationFn: async ({ name }: z.output<typeof welcomeSchema>) => {
+  const [schema] = useState(() => welcomeSchema());
+  const form = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: { you: { name: '', adult: false }, child: { name: '', month: '', year: '', declaredGuardian: false } },
+  });
+  const { errors } = form.formState;
+
+  // In this order: a child is added only by a named adult who declared their age. Sent again after
+  // a failure, the first two change nothing.
+  const start = useMutation({
+    mutationFn: async ({ you, child }: z.output<ReturnType<typeof welcomeSchema>>) => {
+      await authData(authClient.updateUser({ name: you.name }));
       await declareAdult();
-      await authData(authClient.updateUser({ name }));
+      const created = await addStudent(child);
+      queryClient.setQueryData(studentsQuery.queryKey, [created]);
       await queryClient.invalidateQueries({ queryKey: meQuery.queryKey });
-      const { profiles } = await queryClient.query(profilesQuery);
-      await navigate({ to: profiles.length > 0 ? '/foyer' : '/foyer/cle' });
+      await navigate({ to: '/foyer/$studentId', params: { studentId: created.id } });
     },
   });
   const submit = form.handleSubmit((values) => {
-    name.mutate(values);
+    start.mutate(values);
   });
 
   return (
-    <Page title="Bienvenue">
-      <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-4">
-        <Field label="Votre prénom" autoComplete="given-name" {...form.register('name')} error={form.formState.errors.name?.message} />
-        <CheckboxField label={ADULT_LABEL} {...form.register('adult')} error={form.formState.errors.adult?.message} />
-        {name.error && <Banner tone="error" title={name.error.message} />}
-        <Button type="submit" disabled={name.isPending}>
+    <Page title="Présentez-vous, puis votre enfant" wide>
+      <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-6">
+        <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
+          <Section title="Vous">
+            <Field
+              label="Votre prénom"
+              hint="Votre enfant le verra."
+              autoComplete="given-name"
+              {...form.register('you.name')}
+              error={errors.you?.name?.message}
+            />
+            <CheckboxField label={ADULT_LABEL} {...form.register('you.adult')} error={errors.you?.adult?.message} />
+          </Section>
+          <Section title="Votre enfant">
+            <ChildFields
+              register={(field) => form.register(`child.${field}`)}
+              errors={{
+                name: errors.child?.name?.message,
+                level: errors.child?.level?.message,
+                month: errors.child?.month?.message,
+                year: errors.child?.year?.message,
+                declaredGuardian: errors.child?.declaredGuardian?.message,
+              }}
+            />
+          </Section>
+        </div>
+        {start.error && (
+          <Banner tone="error" title={householdMessage(start.error, `Vérifiez le prénom et le mois de naissance : votre enfant a ${CHILD_AGES}.`)} />
+        )}
+        <Button type="submit" disabled={start.isPending} className="lg:self-start">
           Continuer
         </Button>
       </form>

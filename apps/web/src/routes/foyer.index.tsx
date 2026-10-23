@@ -1,13 +1,17 @@
 import { Button, Card, Section, Skeleton } from '@repo/ui';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, Navigate, createFileRoute, redirect } from '@tanstack/react-router';
-import { UserRoundIcon } from 'lucide-react';
-import { HeaderLink, Page } from '../components/page';
+import { useState } from 'react';
+import { AdultPage } from '../components/page';
+import { PasskeyOffer } from '../components/passkey-offer';
 import { LEVEL_LABELS, studentsQuery, type Student } from '../lib/household';
 import { meQuery } from '../lib/me';
 import { minutesText, summaryQuery } from '../lib/summary';
 
-/** The guardian's household: a card per child with their week. Without a child, the adding of one. */
+/**
+ * The adult's home: the passkey's offer when it is due, then a card per child with their week.
+ * Without a child, the adding of one.
+ */
 export const Route = createFileRoute('/foyer/')({
   loader: async ({ context }) => {
     const students = await context.queryClient.query(studentsQuery);
@@ -21,18 +25,14 @@ export const Route = createFileRoute('/foyer/')({
 function Household() {
   const { data: me } = useSuspenseQuery(meQuery);
   const { data: students } = useSuspenseQuery(studentsQuery);
+  // Read once: the card stays, to say it is done, or goes by its own « Plus tard ».
+  const [offered] = useState(me?.role === 'guardian' && me.passkeyOffer);
   // The last child gone while the page is open, from another device say: the adding, as on arrival.
   if (students.length === 0) return <Navigate to="/foyer/ajouter" />;
 
   return (
-    <Page
-      title={`Bonjour ${me?.name ?? ''}`}
-      action={
-        <HeaderLink to="/foyer/compte" icon={UserRoundIcon}>
-          Mon compte
-        </HeaderLink>
-      }
-    >
+    <AdultPage title="Suivez les devoirs de vos enfants" withBack={false}>
+      {offered && <PasskeyOffer />}
       <Section title="Vos enfants">
         <ul className="flex flex-col gap-2">
           {students.map((student) => (
@@ -45,7 +45,7 @@ function Household() {
       <Button render={<Link to="/foyer/ajouter" />} variant="outline">
         Ajouter un enfant
       </Button>
-    </Page>
+    </AdultPage>
   );
 }
 

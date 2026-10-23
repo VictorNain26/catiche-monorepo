@@ -41,14 +41,14 @@ describe('isLevel', () => {
 describe('newChildSchema', () => {
   // The server's rule (domain/student-age.ts): 5 to 20 years, in UTC. On 15 June 2026, from 2005-06 to 2021-05.
   const now = new Date('2026-06-15T12:00:00Z');
-  const child = (month: string, year: string) => ({ name: '  Léa ', level: 'sixieme', month, year, memoryProposed: true, declaredGuardian: true });
+  const child = (month: string, year: string) => ({ name: '  Léa ', level: 'sixieme', month, year, declaredGuardian: true });
 
-  it('gives the server a trimmed first name, a level, the month the two menus make and the declaration', () => {
-    expect(newChildSchema(now).parse(child('03', '2014'))).toEqual({
+  // The memory is proposed later, from the child's page: never while adding them.
+  it('gives the server a trimmed first name, a level, the month the two menus make and the declaration, nothing else', () => {
+    expect(newChildSchema(now).parse({ ...child('03', '2014'), memoryProposed: true })).toEqual({
       name: 'Léa',
       level: 'sixieme',
       birthMonth: '2014-03',
-      memoryProposed: true,
       declaredGuardian: true,
     });
   });
@@ -70,7 +70,7 @@ describe('newChildSchema', () => {
   });
 
   it('asks for each menu, and refuses an empty name or no level', () => {
-    const empty = newChildSchema(now).safeParse({ name: ' ', level: '', month: '', year: '', memoryProposed: false, declaredGuardian: true });
+    const empty = newChildSchema(now).safeParse({ name: ' ', level: '', month: '', year: '', declaredGuardian: true });
     expect(empty.error?.issues.map(({ path, message }) => [path[0], message])).toEqual([
       ['name', 'Son prénom.'],
       ['level', 'Sa classe.'],

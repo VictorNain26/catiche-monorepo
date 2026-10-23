@@ -32,6 +32,13 @@ describe('authMessage', () => {
     expect(authMessage({ code: 'INVALID_OTP', status: 400 })).toBe('Ce code ne correspond pas. Vérifiez-le, ou demandez-en un nouveau.');
   });
 
+  it('shows how an address is written, and tells an address without invitation how to ask for one', () => {
+    expect(authMessage({ code: 'INVALID_EMAIL', status: 400 })).toBe('Écrivez une adresse e-mail complète, par exemple nom@exemple.fr.');
+    expect(authMessage({ code: 'INVITATION_REQUIRED', status: 403 })).toBe(
+      'En préparation : les comptes s’ouvrent sur invitation. Pour en demander une, écrivez à contact@catiche.fr.',
+    );
+  });
+
   it('sends to the code a passkey Tom no longer knows', () => {
     expect(authMessage({ code: 'PASSKEY_NOT_FOUND', status: 401 })).toEndWith('entrez avec un code reçu par e-mail.');
   });

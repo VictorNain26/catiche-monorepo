@@ -53,7 +53,7 @@ export function PasskeyCreate({ label, onCreated }: { label: string; onCreated: 
         />
       ) : stale ? (
         <>
-          <Banner tone="info" title="Confirmez d’abord avec un code reçu par e-mail">
+          <Banner tone="info" title="Pour confirmer, nous allons vous envoyer un e-mail.">
             Par sécurité, une clé d’accès se crée dans les 10 minutes qui suivent votre entrée.
           </Banner>
           <Button
@@ -63,7 +63,7 @@ export function PasskeyCreate({ label, onCreated }: { label: string; onCreated: 
               askCode.mutate();
             }}
           >
-            Recevoir un code
+            Recevoir l’e-mail
           </Button>
         </>
       ) : (

@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tansta
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { ChildAccess, useActivation } from '../components/child-access';
-import { BackLink, Page } from '../components/page';
+import { AdultPage } from '../components/page';
 import { WeekSummary } from '../components/week-summary';
 import { isProblem } from '../lib/api';
 import { useConfirmation } from '../lib/confirmation';
@@ -48,7 +48,7 @@ function StudentPage() {
   const first = activation.devices.length === 0;
 
   return (
-    <Page title={child.name} subtitle={LEVEL_LABELS[child.level]} back={<BackLink to="/foyer">Retour au foyer</BackLink>} wide>
+    <AdultPage title={child.name} subtitle={LEVEL_LABELS[child.level]} wide>
       {first && <ChildAccess child={child} activation={activation} />}
       <WeekSummary week={week.data} failed={week.isError} name={child.name} reader="guardian" />
       {!first && <ChildAccess child={child} activation={activation} />}
@@ -63,7 +63,7 @@ function StudentPage() {
           <DeleteStudent child={child} />
         </Fold>
       </div>
-    </Page>
+    </AdultPage>
   );
 }
 

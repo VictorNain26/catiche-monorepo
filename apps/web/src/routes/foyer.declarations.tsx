@@ -2,10 +2,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Banner, Button, CheckboxField } from '@repo/ui';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { Navigate, createFileRoute, useNavigate } from '@tanstack/react-router';
-import { UserRoundIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { HeaderLink, Page } from '../components/page';
+import { AdultPage } from '../components/page';
 import { GUARDIAN_HINT, GUARDIAN_LABEL, declareGuardian, householdMessage, studentsQuery } from '../lib/household';
 import { ADULT_LABEL, declarationsSchema, declareAdult, hasMissingDeclarations, meQuery } from '../lib/me';
 
@@ -45,14 +44,8 @@ function Declarations() {
   if (!hasMissingDeclarations(missing)) return <Navigate to="/foyer" />;
 
   return (
-    <Page
-      title="Confirmez vos déclarations"
-      action={
-        <HeaderLink to="/foyer/compte" icon={UserRoundIcon}>
-          Mon compte
-        </HeaderLink>
-      }
-    >
+    // Asked before anything else: no way back to the home, which would send here again.
+    <AdultPage title="Confirmez vos déclarations" withBack={false}>
       <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-6">
         {missing.adult && <CheckboxField label={ADULT_LABEL} {...form.register('adult')} error={form.formState.errors.adult?.message} />}
         {children.map(({ id, name }) => (
@@ -71,6 +64,6 @@ function Declarations() {
           Continuer
         </Button>
       </form>
-    </Page>
+    </AdultPage>
   );
 }

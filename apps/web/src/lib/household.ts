@@ -96,7 +96,6 @@ export const newChildSchema = (now = new Date()) =>
     .extend({
       month: z.string().regex(/^(0[1-9]|1[0-2])$/, 'Son mois.'),
       year: z.string().regex(/^\d{4}$/, 'Son année.'),
-      memoryProposed: z.boolean(),
       declaredGuardian: ticked,
     })
     .refine(({ month, year }) => isStudentBirthMonth(`${year}-${month}`, now), {

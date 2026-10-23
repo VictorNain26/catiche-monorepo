@@ -19,12 +19,23 @@ describe('declarationsSchema', () => {
 });
 
 describe('welcomeSchema', () => {
-  it('asks a first name and the box of the age', () => {
-    expect(welcomeSchema.parse({ name: ' Nadia ', adult: true })).toEqual({ name: 'Nadia', adult: true });
-    const empty = welcomeSchema.safeParse({ name: ' ', adult: false });
-    expect(empty.error?.issues.map(({ path, message }) => [path[0], message])).toEqual([
-      ['name', 'Votre prénom.'],
-      ['adult', 'Cochez cette case pour continuer.'],
+  const now = new Date('2026-06-15T12:00:00Z');
+  const child = { name: ' Léa ', level: 'cinquieme', month: '03', year: '2014', declaredGuardian: true };
+
+  it('asks the adult’s first name and age, then the child, as the server takes them', () => {
+    expect(welcomeSchema(now).parse({ you: { name: ' Nadia ', adult: true }, child })).toEqual({
+      you: { name: 'Nadia', adult: true },
+      child: { name: 'Léa', level: 'cinquieme', birthMonth: '2014-03', declaredGuardian: true },
+    });
+  });
+
+  it('says, under each field left empty or unticked, what to do', () => {
+    const empty = welcomeSchema(now).safeParse({ you: { name: ' ', adult: false }, child: { ...child, name: '', declaredGuardian: false } });
+    expect(empty.error?.issues.map(({ path, message }) => [path.join('.'), message])).toEqual([
+      ['you.name', 'Votre prénom.'],
+      ['you.adult', 'Cochez cette case pour continuer.'],
+      ['child.name', 'Son prénom.'],
+      ['child.declaredGuardian', 'Cochez cette case pour continuer.'],
     ]);
   });
 });

@@ -2,7 +2,8 @@ import { Banner, Button } from '@repo/ui';
 import { buttonVariants, cn } from '@repo/ui/classes';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { UsersRoundIcon } from 'lucide-react';
+import { LogOutIcon, UsersRoundIcon, type LucideIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { authClient, authData } from '../lib/auth';
 import { announceProfileChange, tabChannel } from '../lib/student';
 
@@ -41,8 +42,8 @@ export function SignOut({ label }: { label: string }) {
   );
 }
 
-/** In the header of the student's screens: their name, and the way back to the list of profiles. */
-export function ChangeProfile({ name }: { name: string }) {
+/** A sign-out in a screen's header, drawn as its links are. */
+function HeaderSignOut({ icon: Icon, children }: { icon: LucideIcon; children: ReactNode }) {
   const signOut = useSignOut();
   return (
     <button
@@ -53,8 +54,18 @@ export function ChangeProfile({ name }: { name: string }) {
       }}
       className={cn(buttonVariants({ variant: 'link' }), 'gap-1 py-0')}
     >
-      <UsersRoundIcon aria-hidden="true" nonScalingStroke className="size-6" />
-      {name} · Changer de profil
+      <Icon aria-hidden="true" nonScalingStroke className="size-6" />
+      {children}
     </button>
   );
+}
+
+/** In the header of the student's screens: their name, and the way back to the list of profiles. */
+export function ChangeProfile({ name }: { name: string }) {
+  return <HeaderSignOut icon={UsersRoundIcon}>{name} · Changer de profil</HeaderSignOut>;
+}
+
+/** In the header of the adult's screens. */
+export function Quit() {
+  return <HeaderSignOut icon={LogOutIcon}>Quitter</HeaderSignOut>;
 }
