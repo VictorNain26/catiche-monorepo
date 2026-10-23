@@ -11,6 +11,7 @@ import { useConfirmation } from '../lib/confirmation';
 import { summaryQuery } from '../lib/summary';
 import {
   LEVEL_LABELS,
+  LEVEL_OPTIONS,
   deleteStudent,
   householdMessage,
   memoryStatus,
@@ -151,7 +152,7 @@ function EditStudent({ child }: { child: Student }) {
       className="flex flex-col gap-4"
     >
       <Field label="Son prénom" autoComplete="off" {...form.register('name')} error={form.formState.errors.name?.message} />
-      <SelectField label="Sa classe" options={LEVEL_LABELS} {...form.register('level')} error={form.formState.errors.level?.message} />
+      <SelectField label="Sa classe" options={LEVEL_OPTIONS} {...form.register('level')} error={form.formState.errors.level?.message} />
       {update.error && <Banner tone="error" title={householdMessage(update.error)} />}
       <Button type="submit" variant="outline" disabled={update.isPending}>
         Enregistrer

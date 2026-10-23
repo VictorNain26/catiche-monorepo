@@ -37,7 +37,12 @@ function Field({ label, hint, error, ...input }: FieldProps) {
   );
 }
 
-type SelectFieldProps = React.ComponentProps<'select'> & { label: string; options: Record<string, string>; error?: string | undefined };
+/** `options`: each value with its label, in the order the menu lists them. */
+type SelectFieldProps = React.ComponentProps<'select'> & {
+  label: string;
+  options: readonly (readonly [value: string, label: string])[];
+  error?: string | undefined;
+};
 
 /** A labelled native select, which a phone shows as its own picker. */
 function SelectField({ label, options, error, ...select }: SelectFieldProps) {
@@ -56,7 +61,7 @@ function SelectField({ label, options, error, ...select }: SelectFieldProps) {
         {...select}
       >
         <NativeSelectOption value="">Choisir</NativeSelectOption>
-        {Object.entries(options).map(([value, text]) => (
+        {options.map(([value, text]) => (
           <NativeSelectOption key={value} value={value}>
             {text}
           </NativeSelectOption>

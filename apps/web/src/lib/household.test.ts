@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test';
 import { Hono } from 'hono';
 import { hc } from 'hono/client';
 import { parseResponse } from './api';
-import { birthYears, householdMessage, isLevel, memoryStatus, newChildSchema } from './household';
+import { MONTHS, birthYears, householdMessage, isLevel, memoryStatus, newChildSchema } from './household';
 
 const problem = (code: string, status: 400 | 404 | 429 | 500) =>
   new Hono().get('/', (c) => c.json({ status, code }, status, { 'Content-Type': 'application/problem+json' }));
@@ -77,6 +77,28 @@ describe('newChildSchema', () => {
       ['month', 'Son mois.'],
       ['year', 'Son année.'],
     ]);
+  });
+});
+
+describe('MONTHS', () => {
+  // As a menu lists them: an object with « 10 » for a key would put October first.
+  it('runs from January to December, each with the value the schema takes', () => {
+    expect(MONTHS.map(([, label]) => label)).toEqual([
+      'Janvier',
+      'Février',
+      'Mars',
+      'Avril',
+      'Mai',
+      'Juin',
+      'Juillet',
+      'Août',
+      'Septembre',
+      'Octobre',
+      'Novembre',
+      'Décembre',
+    ]);
+    expect(MONTHS[0]?.[0]).toBe('01');
+    expect(MONTHS.at(-1)?.[0]).toBe('12');
   });
 });
 

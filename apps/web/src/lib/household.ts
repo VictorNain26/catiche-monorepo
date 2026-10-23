@@ -20,6 +20,17 @@ export const LEVEL_LABELS: Record<Level, string> = {
   troisieme: 'Troisième',
 };
 
+/** The levels as a menu lists them, in school order. */
+export const LEVEL_OPTIONS = Object.entries(LEVEL_LABELS);
+
+/**
+ * The months as a menu lists them, from January: a list, since an object with « 10 » for a key
+ * would put October first (integer-like keys come first in JavaScript).
+ */
+export const MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'].map(
+  (label, index) => [String(index + 1).padStart(2, '0'), label] as const,
+);
+
 export const isLevel = (value: unknown): value is Level => typeof value === 'string' && Object.hasOwn(LEVEL_LABELS, value);
 
 export const studentsQuery = queryOptions({
