@@ -228,6 +228,29 @@ describe('account deletion', () => {
     expect(list.map(({ id }) => id)).toEqual([shared.id]);
   });
 
+  // A child left with a relative alone would have no one to manage them.
+  it('takes a student only a relative would still follow, and leaves the relative their account', async () => {
+    const parent = await api.guardian('depart-du-parent@example.com');
+    const lea = await api.student(parent);
+    const relative = await api.adult(parent, lea.id, 'reste-proche@example.com', 'relative');
+
+    expect((await api.request('POST', '/api/auth/delete-user', { cookie: parent, body: {} })).status).toBe(200);
+    expect(await db.select().from(user).where(eq(user.id, lea.id))).toEqual([]);
+    expect(await accounts('reste-proche@example.com')).toHaveLength(1);
+    expect((await api.sessionUser(relative))?.id).toBeDefined();
+  });
+
+  it('keeps every student when a relative leaves', async () => {
+    const parent = await api.guardian('parent-qui-reste@example.com');
+    const lea = await api.student(parent);
+    const relative = await api.adult(parent, lea.id, 'proche-qui-part@example.com', 'relative');
+
+    expect((await api.request('POST', '/api/auth/delete-user', { cookie: relative, body: {} })).status).toBe(200);
+    expect(await db.select({ adultId: guardianship.adultId }).from(guardianship).where(eq(guardianship.studentId, lea.id))).toEqual([
+      { adultId: (await api.sessionUser(parent))?.id ?? '' },
+    ]);
+  });
+
   it('takes a student whose two adults leave at the same time, never leaving them without an adult', async () => {
     const deleteAccount = accountDeletion(db);
     // Five pairs, set up at once: one pair alone could leave in turn by chance.

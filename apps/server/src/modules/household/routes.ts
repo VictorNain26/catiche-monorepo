@@ -1,5 +1,6 @@
 /**
- * /api/household: a signed-in adult manages the students they are linked to. Every route
+ * /api/household: a signed-in adult reads the students they are linked to, and a parent manages
+ * them; a relative is refused what manages, as an adult without a link would be. Every route
  * needs a session, and refuses a student. Of better-auth's own routes, a signed-in student reaches
  * only those in STUDENT_AUTH_PATHS: the rest (update-user…) would let them change what their
  * guardian manages.
@@ -8,14 +9,15 @@
 import { Hono } from 'hono';
 import { createMiddleware } from 'hono/factory';
 import { z } from 'zod';
+import { ADULT_ROLES } from '../../domain/adult-roles';
 import { schoolLevelSchema } from '../../domain/levels';
 import { isStudentBirthMonth, STUDENT_AGE_YEARS } from '../../domain/student-age';
 import type { Auth } from '../../platform/auth/auth';
 import { requireSession, type SessionEnv } from '../../platform/auth/session';
-import { ADULT_SIGN_INS } from '../../platform/auth/student-sign-in';
+import { ADULT_SIGN_INS, isStudentEmail } from '../../platform/auth/student-sign-in';
 import type { AppEnv } from '../../platform/http/env';
 import { Problem } from '../../platform/http/problem';
-import { jsonBody } from '../../platform/http/validate';
+import { jsonBody, uuidParam } from '../../platform/http/validate';
 import type { HouseholdService } from './service';
 
 // A student's own routes, and the guardian's ways in: on a device that holds a child's profile, a
@@ -53,6 +55,17 @@ const studentPatch = z
 
 // A new device of the child's, or a code they forgot.
 const activationRequest = z.object({ reason: z.enum(['device', 'forgotten']) });
+
+// An adult's address, in lowercase as better-auth stores it; never a student's, which receives nothing.
+const adultEmail = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(z.email('une adresse e-mail'))
+  .refine((email) => !isStudentEmail(email), 'une adresse e-mail');
+const adultInvitation = z.object({ email: adultEmail, role: z.enum(ADULT_ROLES) });
+// A parent declares holding parental authority as they accept; a relative has nothing to declare.
+const invitationAnswer = z.object({ declaredGuardian: z.literal(true).optional() });
 
 /**
  * Before better-auth's handler: a signed-in student is refused every route but STUDENT_AUTH_PATHS.
@@ -92,6 +105,17 @@ export function meRoutes({ auth, service }: { auth: Auth; service: HouseholdServ
         await service.closePasskeyOffer(c.var.userId);
         return c.body(null, 204);
       })
+      // An invitation waiting for the adult's address, accepted or declined.
+      .post('/invitations/:id/accept', uuidParam('id'), jsonBody(invitationAnswer), async (c) => {
+        await service.assertNotStudent(c.var.userId);
+        const { declaredGuardian = false } = c.req.valid('json');
+        return c.json(await service.acceptInvitation({ id: c.var.userId, email: c.var.userEmail }, c.req.valid('param').id, declaredGuardian));
+      })
+      .post('/invitations/:id/decline', uuidParam('id'), async (c) => {
+        await service.assertNotStudent(c.var.userId);
+        await service.declineInvitation(c.var.userEmail, c.req.valid('param').id);
+        return c.body(null, 204);
+      })
   );
 }
 
@@ -122,6 +146,15 @@ export function householdRoutes({ auth, service }: { auth: Auth; service: Househ
     })
     .delete('/students/:id/devices/:deviceId', async (c) => {
       await service.removeDevice(c.var.userId, c.req.param('id'), c.req.param('deviceId'));
+      return c.body(null, 204);
+    })
+    .post('/students/:id/invitations', jsonBody(adultInvitation), async (c) => {
+      await service.inviteAdult(c.var.userId, c.req.param('id'), c.req.valid('json'));
+      return c.body(null, 204);
+    })
+    .get('/students/:id/adults', async (c) => c.json(await service.listAdults(c.var.userId, c.req.param('id'))))
+    .delete('/students/:id/adults/:adultId', async (c) => {
+      await service.removeAdult(c.var.userId, c.req.param('id'), c.req.param('adultId'));
       return c.body(null, 204);
     })
     .delete('/students/:id', async (c) => {

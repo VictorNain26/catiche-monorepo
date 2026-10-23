@@ -37,9 +37,10 @@ export function testApp(
     { mailer: mail.mailer, logger: silent, background: tasks.run, ...householdAuth(db), ...household },
   );
   const app = createApp({
-    config: { production: false, webDistDir: undefined, apiRateLimit: 1000, trustedProxyHops: 0, ...config },
+    config: { production: false, webDistDir: undefined, apiRateLimit: 1000, trustedProxyHops: 0, publicUrl: origin, ...config },
     logger: silent,
     db,
+    mailer: mail.mailer,
     ...mistral.deps(db, silent),
     auth,
     lifecycle: createLifecycle(),

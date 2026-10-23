@@ -19,7 +19,7 @@ import type { Config } from '../../config';
 import type { Db } from '../db/client';
 import type { Mailer } from '../email/mailer';
 import { CLIENT_ADDRESS_HEADER } from '../http/client-address';
-import { INVITATION_DAYS, invitationIdentifier, spendInvitationLinks } from './invitation';
+import { INVITATION_DAYS, invitationIdentifier, spendInvitationLinks, type InvitationLetter } from './invitation';
 import { account, passkey as passkeyTable, session, user, verification } from './schema';
 import { createStudentDevices } from './student-devices';
 import { ACTIVATION_PREFIX, EMAIL_SIGN_INS, isStudentEmail, studentSignIn, type StudentAccess } from './student-sign-in';
@@ -42,6 +42,18 @@ interface AuthDeps {
 
 /** The sign-in code's life, in the email and on the screen. */
 const CODE_MINUTES = 15;
+
+/** Victor's invitation, in general words: no one invites for a named child. */
+const BETA_LETTER: InvitationLetter = {
+  subject: 'Votre invitation à Catiche',
+  intro: 'Voici votre invitation à suivre les devoirs du soir de votre enfant sur Catiche.',
+};
+
+/** The letter an invitation passed to its link, which only the server makes; Victor's otherwise. */
+const invitationLetter = (metadata: Record<string, unknown> | undefined): InvitationLetter =>
+  typeof metadata?.['subject'] === 'string' && typeof metadata['intro'] === 'string'
+    ? { subject: metadata['subject'], intro: metadata['intro'] }
+    : BETA_LETTER;
 
 export function createAuth(
   db: Db,
@@ -165,12 +177,14 @@ export function createAuth(
       magicLink({
         expiresIn: INVITATION_DAYS * 24 * 60 * 60,
         storeToken: 'hashed',
-        sendMagicLink: async ({ email, url }) => {
+        // A parent's invitation of another adult says who invites, for which child (./invitation.ts).
+        sendMagicLink: async ({ email, url, metadata }) => {
           const link = `${origin}/invitation#${new URL(url).searchParams.toString()}`;
+          const letter = invitationLetter(metadata);
           await send({
             to: email,
-            subject: 'Votre invitation à Catiche',
-            text: `Bonjour,\n\nVoici votre invitation à suivre les devoirs du soir de votre enfant sur Catiche.\n\nAccepter l’invitation : ${link}\n\nSur un autre appareil ? Ouvrez ${host} et donnez cette adresse.\n\nL’invitation vaut ${String(INVITATION_DAYS)} jours.`,
+            subject: letter.subject,
+            text: `Bonjour,\n\n${letter.intro}\n\nAccepter l’invitation : ${link}\n\nSur un autre appareil ? Ouvrez ${host} et donnez cette adresse.\n\nL’invitation vaut ${String(INVITATION_DAYS)} jours.`,
           });
         },
       }),

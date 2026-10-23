@@ -40,7 +40,16 @@ export class AccountExists extends Error {
   }
 }
 
-export async function invite({ db, auth }: { db: Db; auth: Auth }, email: string) {
+/**
+ * What the email says above its button, when someone invites: who, for which child. Victor's own
+ * invitation says it in general words (./auth.ts).
+ */
+export interface InvitationLetter {
+  subject: string;
+  intro: string;
+}
+
+export async function invite({ db, auth }: { db: Db; auth: Auth }, email: string, letter?: InvitationLetter) {
   const address = normalised(email);
   const [existing] = await db.select({ id: user.id }).from(user).where(eq(user.email, address));
   if (existing) throw new AccountExists(address);
@@ -53,6 +62,9 @@ export async function invite({ db, auth }: { db: Db; auth: Auth }, email: string
   await spendInvitationLinks(db, address);
   // A call of the server's own: the route itself is disabled (better-auth enforces `disabledPaths`
   // on requests only, api/index.mjs), so no one else asks for a link.
-  await auth.api.signInMagicLink({ body: { email: address, ...INVITATION_LINK }, headers: new Headers() });
+  await auth.api.signInMagicLink({
+    body: { email: address, ...INVITATION_LINK, ...(letter === undefined ? {} : { metadata: { ...letter } }) },
+    headers: new Headers(),
+  });
   return { expiresAt };
 }

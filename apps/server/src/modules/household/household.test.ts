@@ -11,7 +11,7 @@ import { account, device as deviceTable, deviceProfile, session, user } from '..
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { birthMonthAged, STUDENT_CODE, type Student } from '../../testing/http';
-import { adultProfile, guardianship, studentProfile } from './schema';
+import { adultInvitation, adultProfile, guardianship, studentProfile } from './schema';
 
 const { db } = await testDatabase();
 
@@ -36,6 +36,8 @@ const asStudentB = await matrix.pair(guardianB, studentOfB.id);
 const [deviceOfA] = (await matrix.devices(guardianA, studentOfA.id)).devices;
 // Without it the device route would read « /devices/ », refused all the same: the matrix would prove nothing.
 if (!deviceOfA) throw new Error('The student of A has no device');
+const relativeOfA = await matrix.adult(guardianA, studentOfA.id, 'proche@example.com', 'relative');
+const guardianAId = await idOf(guardianA);
 
 describe('access matrix', () => {
   const api = matrix;
@@ -54,13 +56,18 @@ describe('access matrix', () => {
     { method: 'GET', path: `${target}/devices` },
     { method: 'POST', path: `${target}/devices/${deviceOfA.id}/unblock` },
     { method: 'DELETE', path: `${target}/devices/${deviceOfA.id}` },
+    { method: 'POST', path: `${target}/invitations`, body: { email: 'invite@example.com', role: 'guardian' } },
+    { method: 'GET', path: `${target}/adults` },
+    { method: 'DELETE', path: `${target}/adults/${guardianAId}` },
     { method: 'DELETE', path: target },
   ];
+  // A relative follows the student, and manages nothing of them: refused as an adult without a link.
   const refused = [
     { actor: 'anonymous', cookie: undefined, status: 401, routes },
     { actor: 'the student', cookie: asStudentA, status: 403, routes },
     { actor: 'another student', cookie: asStudentB, status: 403, routes },
     { actor: 'an adult without a link to the student', cookie: guardianB, status: 404, routes: routes.slice(2) },
+    { actor: 'a relative of the student', cookie: relativeOfA, status: 404, routes: routes.slice(2) },
   ];
 
   for (const { actor, cookie, status, routes: denied } of refused) {
@@ -72,6 +79,8 @@ describe('access matrix', () => {
         const [row] = await db.select({ name: user.name }).from(user).where(eq(user.id, studentOfA.id));
         expect(row?.name).toBe('Léa');
         expect((await api.sessionUser(asStudentA))?.id).toBe(studentOfA.id);
+        expect((await linksOf(studentOfA.id)).map(({ adultId }) => adultId)).toContain(guardianAId);
+        expect(await db.select().from(adultInvitation).where(eq(adultInvitation.studentId, studentOfA.id))).toEqual([]);
       });
     }
   }

@@ -14,6 +14,7 @@ import type { Ai } from './platform/ai/client';
 import type { Moderation } from './platform/ai/moderation';
 import type { Auth } from './platform/auth/auth';
 import type { Db } from './platform/db/client';
+import type { Mailer } from './platform/email/mailer';
 import type { AppEnv } from './platform/http/env';
 import { CLIENT_ADDRESS_HEADER, clientAddress } from './platform/http/client-address';
 import { notFound, problemHandler } from './platform/http/problem';
@@ -24,10 +25,12 @@ import { healthRoutes } from './platform/lifecycle/health';
 import type { Lifecycle } from './platform/lifecycle/shutdown';
 
 export interface AppDeps {
-  config: Pick<Config, 'production' | 'webDistDir' | 'apiRateLimit' | 'trustedProxyHops'>;
+  config: Pick<Config, 'production' | 'webDistDir' | 'apiRateLimit' | 'trustedProxyHops' | 'publicUrl'>;
   logger: Logger;
   db: Db;
   auth: Auth;
+  /** The household's emails: an adult invited, the other parents told. */
+  mailer: Mailer;
   ai: Ai;
   moderation: Moderation;
   lifecycle: Lifecycle;
@@ -35,8 +38,8 @@ export interface AppDeps {
   background: (task: Promise<unknown>) => void;
 }
 
-export function createApp({ config, logger, db, auth, ai, moderation, lifecycle, background }: AppDeps) {
-  const household = householdModule({ db, auth });
+export function createApp({ config, logger, db, auth, mailer, ai, moderation, lifecycle, background }: AppDeps) {
+  const household = householdModule({ db, auth, mailer, logger, background, publicUrl: config.publicUrl });
   const tutor = tutorModule({ db, auth, ai, moderation, logger, background });
   // One budget for the API and the probes: /health/ready runs a query on every call. The web's
   // files don't count, a page load fetches a dozen of them.

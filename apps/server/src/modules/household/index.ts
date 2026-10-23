@@ -3,20 +3,50 @@
  * better-auth, and a user's deletion with what it takes, which main.ts hands to better-auth.
  */
 
+import type { Logger } from 'pino';
 import type { Auth } from '../../platform/auth/auth';
+import { AccountExists, invite } from '../../platform/auth/invitation';
 import { createStudentDevices } from '../../platform/auth/student-devices';
+import type { Mailer } from '../../platform/email/mailer';
 import { createActivationCode, type StudentAccess } from '../../platform/auth/student-sign-in';
 import type { Db } from '../../platform/db/client';
 import { createHouseholdRepository } from './repository';
 import { householdRoutes, meRoutes, studentAuthGuard } from './routes';
 import { createHouseholdService, learnerMemory, type MemoryAnswer } from './service';
 
-export function householdModule({ db, auth }: { db: Db; auth: Auth }) {
+interface ModuleDeps {
+  db: Db;
+  auth: Auth;
+  mailer: Mailer;
+  logger: Logger;
+  /** Runs a task after its request has answered: an email's timing tells nothing. */
+  background: (task: Promise<unknown>) => void;
+  publicUrl: string;
+}
+
+export function householdModule({ db, auth, mailer, logger, background, publicUrl }: ModuleDeps) {
   const devices = createStudentDevices(db);
   const service = createHouseholdService({
     repository: createHouseholdRepository(db),
     createActivationCode: (userId, reason) => createActivationCode(auth, userId, reason),
     sharedDevice: (deviceId, userId) => devices.isShortSession(deviceId, userId),
+    inviteAddress: async (email, letter) => {
+      try {
+        await invite({ db, auth }, email, letter);
+        return true;
+      } catch (error) {
+        if (error instanceof AccountExists) return false;
+        throw error;
+      }
+    },
+    notify: (email) => {
+      background(
+        mailer(email).catch((error: unknown) => {
+          logger.error({ err: error }, 'Household email not sent');
+        }),
+      );
+    },
+    publicUrl,
   });
   return { routes: householdRoutes({ auth, service }), me: meRoutes({ auth, service }), authGuard: studentAuthGuard({ auth, service }) };
 }
@@ -37,7 +67,7 @@ export function studentDirectory(db: Db) {
     },
     answerMemory: (studentId: string, answer: MemoryAnswer, afterPosition: number) => repository.answerMemory(studentId, answer, afterPosition),
     resetMemory: (studentId: string, afterPosition: number) => repository.resetMemory(studentId, afterPosition),
-    /** Whether the adult is linked to the student. */
+    /** Whether the adult is linked to the student, as a parent or a relative: they read the student's week. */
     follows: async (adultId: string, studentId: string) => (await repository.findStudent(adultId, studentId)) !== undefined,
   };
 }
@@ -51,7 +81,7 @@ export type StudentDirectory = ReturnType<typeof studentDirectory>;
 export function householdAuth(db: Db) {
   const repository = createHouseholdRepository(db);
   const students: StudentAccess = {
-    follows: studentDirectory(db).follows,
+    manages: (adultId, studentId) => repository.manages(adultId, studentId),
     birthMonth: async (studentId) => (await repository.findProfile(studentId))?.birthMonth ?? null,
   };
   return { deleteUser: accountDeletion(db), students, emailEntered: (adultId: string) => repository.countEmailEntry(adultId) };
