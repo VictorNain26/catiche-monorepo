@@ -57,6 +57,7 @@ describe('access matrix', () => {
     { method: 'POST', path: `${target}/devices/${deviceOfA.id}/unblock` },
     { method: 'DELETE', path: `${target}/devices/${deviceOfA.id}` },
     { method: 'POST', path: `${target}/invitations`, body: { email: 'invite@example.com', role: 'guardian' } },
+    { method: 'DELETE', path: `${target}/invitations/${crypto.randomUUID()}` },
     { method: 'GET', path: `${target}/adults` },
     { method: 'DELETE', path: `${target}/adults/${guardianAId}` },
     { method: 'DELETE', path: target },

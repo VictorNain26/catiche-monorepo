@@ -24,6 +24,7 @@ import {
   studentSchema,
   studentsQuery,
   updateStudent,
+  withdrawInvitation,
   type Student,
 } from '../lib/household';
 
@@ -74,7 +75,9 @@ function LeaveChild({ child }: { child: Student }) {
   const leaving = useConfirmation();
   const leave = useMutation({
     mutationFn: () => removeAdult(child.id, me?.id ?? ''),
+    // The child out of the list first: the home never shows them again, even for a moment.
     onSuccess: async () => {
+      queryClient.setQueryData(studentsQuery.queryKey, (list) => list?.filter(({ id }) => id !== child.id));
       await navigate({ to: '/foyer' });
       await queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey });
     },
@@ -155,6 +158,11 @@ function ChildAdults({ child }: { child: Student }) {
       return queryClient.invalidateQueries({ queryKey: adultsQuery(child.id).queryKey });
     },
   });
+  // A mistyped address keeps no way to the child: the invitation is withdrawn at once, and can be sent again.
+  const withdraw = useMutation({
+    mutationFn: (invitationId: string) => withdrawInvitation(child.id, invitationId),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: adultsQuery(child.id).queryKey }),
+  });
   const nobody = data.adults.length === 0 && data.invitations.length === 0;
 
   return (
@@ -183,10 +191,21 @@ function ChildAdults({ child }: { child: Student }) {
               key={invitation.id}
               title={invitation.email}
               meta={`${capitalised(ROLE_LABELS[invitation.role])}, invitation du ${formatDay(invitation.createdAt)}, en attente`}
-            />
+            >
+              <Button
+                variant="outline"
+                disabled={withdraw.isPending}
+                onClick={() => {
+                  withdraw.mutate(invitation.id);
+                }}
+              >
+                Annuler l’invitation
+              </Button>
+            </ListItem>
           ))}
         </List>
       )}
+      {withdraw.error && <Banner tone="error" title={householdMessage(withdraw.error)} />}
       {removal.confirming !== null && (
         <>
           <Banner

@@ -430,6 +430,17 @@ export function createHouseholdRepository(db: Db) {
       return declined.length > 0;
     },
 
+    /** A parent of the student withdraws an invitation for them; `false` when no such invitation. */
+    async withdrawInvitation(adultId: string, studentId: string, invitationId: string) {
+      const withdrawn = await db
+        .delete(adultInvitation)
+        .where(
+          and(eq(adultInvitation.id, invitationId), eq(adultInvitation.studentId, studentId), inArray(adultInvitation.studentId, managedBy(adultId))),
+        )
+        .returning({ id: adultInvitation.id });
+      return withdrawn.length > 0;
+    },
+
     /** For a parent of the student: the other adults linked to them, the earliest first, and the invitations still waiting. */
     async adultsOf(adultId: string, studentId: string) {
       const [adults, invitations] = await Promise.all([

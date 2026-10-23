@@ -27,7 +27,9 @@ En place (`apps/server/src`) :
   compte reçoit l'invitation de bêta fermée, dont l'e-mail dit qui invite et pour quel enfant ;
   une adresse avec un compte, un lien vers Catiche ; les autres parents sont prévenus. L'adulte
   l'accepte depuis son premier écran ou son accueil (`GET /api/me`, `invitations`), son adresse
-  prouvée par l'e-mail d'entrée. Un parent retire un proche, un proche se retire lui-même, aucun
+  prouvée par l'e-mail d'entrée ; un parent annule une invitation en attente. Les noms d'un
+  e-mail y tiennent sur une ligne : le mailer fait un lien d'une ligne « libellé : https://… ».
+  Un parent retire un proche, un proche se retire lui-même, aucun
   parent ne retire l'autre.
 - `platform/email` : l'envoi d'un e-mail, Scaleway TEM par son SDK en production, le journal en
   développement. Le gardien n'a pas de mot de passe : il entre par un e-mail envoyé à son adresse

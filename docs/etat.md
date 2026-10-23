@@ -106,6 +106,13 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
   Un hook `before` sur `/passkey/generate-register-options`, lisant `isShortSession`
   (`platform/auth/student-devices.ts`), avec son test, fermerait la règle au serveur.
 
+- L'invitation d'un adulte (`POST /api/household/students/:id/invitations`) n'a que le budget
+  global de l'API par adresse IP : un parent déclaré peut faire envoyer beaucoup d'e-mails depuis
+  le domaine de Catiche. Un plafond par parent et par jour, avec son test, le fermerait avant
+  d'ouvrir les invitations au-delà de Victor.
+- Une invitation d'adulte expirée (`adult_invitation`) n'est plus lue, mais sa ligne reste, avec
+  l'adresse de quelqu'un qui n'est pas entré. La supprimer à l'expiration, par une tâche régulière
+  ou à la lecture, avec son test, avant le premier élève réel.
 - L'e-mail de suppression invite à répondre (`platform/auth/auth.ts`), mais le mailer ne pose
   aucun `Reply-To` : la réponse irait à `MAIL_FROM`, que personne ne lit ; à faire pointer vers
   `contact@catiche.fr`, avec son test.

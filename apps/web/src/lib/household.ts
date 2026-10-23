@@ -85,6 +85,10 @@ export const inviteAdult = (id: string, json: InvitationInput) => parseResponse(
 /** A parent removes a relative, or a relative themselves. */
 export const removeAdult = (id: string, adultId: string) => parseResponse(students[':id'].adults[':adultId'].$delete({ param: { id, adultId } }));
 
+/** A parent withdraws an invitation still waiting. */
+export const withdrawInvitation = (id: string, invitationId: string) =>
+  parseResponse(students[':id'].invitations[':invitationId'].$delete({ param: { id, invitationId } }));
+
 /** The role as a list of adults says it. */
 export const ROLE_LABELS: Record<AdultRole, string> = { guardian: 'parent', relative: 'proche' };
 

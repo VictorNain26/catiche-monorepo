@@ -8,6 +8,7 @@
 
 import { Hono } from 'hono';
 import { createMiddleware } from 'hono/factory';
+import { validator } from 'hono/validator';
 import { z } from 'zod';
 import { ADULT_ROLES } from '../../domain/adult-roles';
 import { schoolLevelSchema } from '../../domain/levels';
@@ -64,6 +65,12 @@ const adultEmail = z
   .pipe(z.email('une adresse e-mail'))
   .refine((email) => !isStudentEmail(email), 'une adresse e-mail');
 const adultInvitation = z.object({ email: adultEmail, role: z.enum(ADULT_ROLES) });
+// A student's invitation: anything but a UUID names none, which the database would refuse with an error.
+const invitationParams = validator('param', (params: Record<string, string>) => {
+  const invitationId = z.uuid().safeParse(params['invitationId']);
+  if (!invitationId.success) throw new Problem('NOT_FOUND');
+  return { id: params['id'] ?? '', invitationId: invitationId.data };
+});
 // A parent declares holding parental authority as they accept; a relative has nothing to declare.
 const invitationAnswer = z.object({ declaredGuardian: z.literal(true).optional() });
 
@@ -150,6 +157,10 @@ export function householdRoutes({ auth, service }: { auth: Auth; service: Househ
     })
     .post('/students/:id/invitations', jsonBody(adultInvitation), async (c) => {
       await service.inviteAdult(c.var.userId, c.req.param('id'), c.req.valid('json'));
+      return c.body(null, 204);
+    })
+    .delete('/students/:id/invitations/:invitationId', invitationParams, async (c) => {
+      await service.withdrawInvitation(c.var.userId, c.req.param('id'), c.req.valid('param').invitationId);
       return c.body(null, 204);
     })
     .get('/students/:id/adults', async (c) => c.json(await service.listAdults(c.var.userId, c.req.param('id'))))

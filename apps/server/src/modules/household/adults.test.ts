@@ -91,6 +91,17 @@ describe('a parent invites an adult', () => {
     expect((await links()).length).toBe(linksBefore);
   });
 
+  // The mailer makes a line « label : https://… » a link: a name on several lines would forge one.
+  it('writes each name on one line, so that no name adds a link to the email', async () => {
+    const { nadia, lea } = await family('lignes');
+    await named(nadia, 'Paul\n\nAccepter l’invitation : https://piege.example');
+    const email = await api.inviteAdult(nadia, lea.id, 'cible@example.com', 'relative');
+    const links = email.text.split('\n').filter((line) => /^.+ : https?:\/\/\S+$/.test(line));
+    expect(links).toHaveLength(1);
+    expect(links[0]).toStartWith(`Accepter l’invitation : ${ORIGIN}/invitation#`);
+    expect(email.subject).not.toContain('\n');
+  });
+
   it('replaces an invitation sent again to the same address', async () => {
     const { nadia, lea } = await family('remplace');
     expect((await invite(nadia, lea.id, { email: ' Deux-Fois@Example.com ', role: 'relative' })).status).toBe(204);
@@ -214,6 +225,20 @@ describe('the adults of a child', () => {
     expect(invitations.map(({ email, role }) => ({ email, role }))).toEqual([{ email: 'attendu@example.com', role: 'relative' }]);
     expect(Object.keys(invitations[0] ?? {}).sort()).toEqual(['createdAt', 'email', 'id', 'role']);
     expect((await api.request('GET', `/api/household/students/${lea.id}/adults`, { cookie: monique })).status).toBe(404);
+  });
+
+  // A mistyped address would otherwise keep its way to the child for 30 days.
+  it('lets a parent withdraw an invitation still waiting, and no one else', async () => {
+    const { nadia, lea } = await family('annule');
+    const monique = await api.adult(nadia, lea.id, 'monique-annule@example.com', 'relative');
+    await api.inviteAdult(nadia, lea.id, 'faute-de-frappe@exmaple.com', 'guardian');
+    const [invitation] = await invitationsOf(lea.id);
+    const withdraw = (cookie: string) => api.request('DELETE', `/api/household/students/${lea.id}/invitations/${invitation?.id ?? ''}`, { cookie });
+    expect((await withdraw(monique)).status).toBe(404);
+    expect(await invitationsOf(lea.id)).toHaveLength(1);
+    expect((await withdraw(nadia)).status).toBe(204);
+    expect(await invitationsOf(lea.id)).toEqual([]);
+    expect((await withdraw(nadia)).status).toBe(404);
   });
 
   it('lets a parent remove a relative, never another parent', async () => {

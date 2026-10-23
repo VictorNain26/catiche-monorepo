@@ -18,6 +18,8 @@ import type { Mailer } from '../../platform/email/mailer';
 import { Problem } from '../../platform/http/problem';
 import type { HouseholdRepository } from './repository';
 
+const oneLine = (text: string) => text.replace(/\s+/g, ' ').trim();
+
 /** The role as an email names it, after « comme ». */
 const ROLE_WORDS: Record<AdultRole, string> = { guardian: 'parent', relative: 'proche' };
 
@@ -86,11 +88,9 @@ export function createHouseholdService({ repository, createActivationCode, share
     return toStudent(student);
   };
 
-  /** A student the adult is a parent of: a relative manages nothing, refused as an adult without a link. */
+  /** A relative manages nothing: refused as an adult without a link, by a clause of the query. */
   const managed = async (adultId: string, studentId: string) => {
-    const student = await found(adultId, studentId);
-    if (student.role !== 'guardian') throw new Problem('NOT_FOUND');
-    return student;
+    if (!(await repository.manages(adultId, studentId))) throw new Problem('NOT_FOUND');
   };
 
   const isStudent = (userId: string) => repository.isStudent(userId);
@@ -173,7 +173,10 @@ export function createHouseholdService({ repository, createActivationCode, share
       patch: { name?: string | undefined; level?: SchoolLevel | undefined; memoryProposed?: boolean | undefined },
     ) {
       // From 15 the child decides alone: the guardian neither proposes nor erases it.
-      if ((await managed(adultId, studentId)).memory.decidesAlone && patch.memoryProposed !== undefined) throw new Problem('FORBIDDEN');
+      if (patch.memoryProposed !== undefined) {
+        await managed(adultId, studentId);
+        if ((await found(adultId, studentId)).memory.decidesAlone) throw new Problem('FORBIDDEN');
+      }
       if (!(await repository.updateStudent(adultId, studentId, patch))) throw new Problem('NOT_FOUND');
       return found(adultId, studentId);
     },
@@ -205,7 +208,10 @@ export function createHouseholdService({ repository, createActivationCode, share
       if (!parent.declaredAt) throw new Problem('FORBIDDEN', 'la déclaration d’autorité parentale');
       if (followed) throw new Problem('INVALID_REQUEST', 'email: cette adresse suit déjà cet enfant');
       await repository.saveInvitation({ studentId, invitedBy: adultId, email, role, expiresAt: invitationExpiry() });
-      const { adultName, studentName } = parent;
+      // On one line each: the mailer makes a line « label : https://… » a link, which a name on
+      // several lines would forge (platform/email/mailer.ts).
+      const adultName = oneLine(parent.adultName);
+      const studentName = oneLine(parent.studentName);
       const letter = {
         subject: `${adultName} vous invite sur Catiche, pour ${studentName}`,
         intro: `${adultName} vous invite à suivre les devoirs du soir de ${studentName} sur Catiche.`,
@@ -240,6 +246,11 @@ export function createHouseholdService({ repository, createActivationCode, share
 
     async declineInvitation(email: string, invitationId: string) {
       if (!(await repository.declineInvitation(email, invitationId))) throw new Problem('NOT_FOUND');
+    },
+
+    /** A parent withdraws an invitation still waiting: a mistyped address keeps no way to the child. */
+    async withdrawInvitation(adultId: string, studentId: string, invitationId: string) {
+      if (!(await repository.withdrawInvitation(adultId, studentId, invitationId))) throw new Problem('NOT_FOUND');
     },
 
     /** For a parent: the other adults of the student, and the invitations still waiting. */

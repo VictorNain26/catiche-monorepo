@@ -90,7 +90,7 @@ export function householdAuth(db: Db) {
   return { deleteUser: accountDeletion(db), students, emailEntered: (adultId: string) => repository.countEmailEntry(adultId) };
 }
 
-/** A user's deletion, with the students no other adult follows, in one transaction. */
+/** A user's deletion, with the students they are the last parent of, in one transaction. */
 export function accountDeletion(db: Db) {
   const repository = createHouseholdRepository(db);
   return (userId: string) => repository.deleteAccount(userId);
