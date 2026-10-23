@@ -22,7 +22,7 @@ export const Route = createFileRoute('/foyer/compte')({
 
 function Account() {
   const { data: me } = useSuspenseQuery(meQuery);
-  if (me?.role !== 'guardian') return null;
+  if (me?.role !== 'adult') return null;
   return (
     <AdultPage title="Ce compte est le vôtre">
       <div className="flex flex-col gap-2 text-foreground">

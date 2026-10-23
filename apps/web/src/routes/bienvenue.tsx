@@ -6,13 +6,13 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ChildFields } from '../components/child-fields';
 import { Page } from '../components/page';
-import { isProblem } from '../lib/api';
 import { authClient, authData } from '../lib/auth';
 import { CHILD_AGES, GUARDIAN_HINT, GUARDIAN_LABEL, addStudent, householdMessage, studentsQuery } from '../lib/household';
 import {
   ADULT_LABEL,
   acceptInvitation,
   declareAdult,
+  invitationFailure,
   invitationPromise,
   invitedWelcomeSchema,
   meQuery,
@@ -33,7 +33,7 @@ export const Route = createFileRoute('/bienvenue')({
   beforeLoad: async ({ context }) => {
     const me = await context.queryClient.query(meQuery);
     if (!me) throw redirect({ to: '/connexion' });
-    if (me.role !== 'guardian' || me.name !== '') throw redirect({ to: '/' });
+    if (me.role !== 'adult' || me.name !== '') throw redirect({ to: '/' });
   },
   loader: async ({ context }) => {
     const [invitation] = pendingInvitations(await context.queryClient.query(meQuery));
@@ -90,16 +90,7 @@ function InvitedWelcome({ invitation }: { invitation: Invitation }) {
             error={errors.declaredGuardian?.message}
           />
         )}
-        {start.error && (
-          <Banner
-            tone="error"
-            title={
-              isProblem(start.error, 'NOT_FOUND')
-                ? `Cette invitation n’est plus valable. Demandez-en une nouvelle à ${invitation.invitedBy}.`
-                : householdMessage(start.error)
-            }
-          />
-        )}
+        {start.error && <Banner tone="error" title={invitationFailure(start.error, invitation)} />}
         <Button type="submit" disabled={start.isPending} className="sm:self-start">
           Continuer
         </Button>

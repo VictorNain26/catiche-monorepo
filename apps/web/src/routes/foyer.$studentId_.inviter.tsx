@@ -5,7 +5,7 @@ import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { AdultPage, BackLink } from '../components/page';
 import { isProblem } from '../lib/api';
-import { adultsQuery, householdMessage, inviteAdult, inviteSchema, roleChoices, studentsQuery } from '../lib/household';
+import { adultsQuery, householdMessage, inviteAdult, inviteSchema, roleChoices, studentsQuery, type InvitationInput } from '../lib/household';
 
 /**
  * A parent invites another adult for the child (A8): their address, and whether they are a parent
@@ -30,7 +30,7 @@ function InviteAdult() {
   const { errors } = form.formState;
 
   const invite = useMutation({
-    mutationFn: (json: Parameters<typeof inviteAdult>[1]) => inviteAdult(studentId, json),
+    mutationFn: (json: InvitationInput) => inviteAdult(studentId, json),
     onSuccess: async (_, { email }) => {
       await queryClient.invalidateQueries({ queryKey: adultsQuery(studentId).queryKey });
       toast(`L’invitation est envoyée à ${email}.`);

@@ -14,6 +14,8 @@ import { createHouseholdRepository } from './repository';
 import { householdRoutes, meRoutes, studentAuthGuard } from './routes';
 import { createHouseholdService, learnerMemory, type MemoryAnswer } from './service';
 
+export type { AdultRole } from './service';
+
 interface ModuleDeps {
   db: Db;
   auth: Auth;
@@ -39,9 +41,10 @@ export function householdModule({ db, auth, mailer, logger, background, publicUr
         throw error;
       }
     },
-    notify: (email) => {
+    send: mailer,
+    later: (task) => {
       background(
-        mailer(email).catch((error: unknown) => {
+        task().catch((error: unknown) => {
           logger.error({ err: error }, 'Household email not sent');
         }),
       );

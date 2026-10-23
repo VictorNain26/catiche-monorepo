@@ -10,13 +10,13 @@ import { generateId } from '@better-auth/core/utils/id';
 import type { SchoolLevel } from '../../domain/levels';
 import { memoryConsent, type MemoryAnswer } from '../../domain/memory-consent';
 
-export type { MemoryAnswer };
-import { INVITATION_DAYS, type InvitationLetter } from '../../platform/auth/invitation';
+export type { AdultRole, MemoryAnswer };
+import type { AdultRole } from '../../domain/adult-roles';
+import { invitationEmail, invitationExpiry, type InvitationLetter } from '../../platform/auth/invitation';
 import type { ActivationReason } from '../../platform/auth/student-sign-in';
-import type { Email } from '../../platform/email/mailer';
+import type { Mailer } from '../../platform/email/mailer';
 import { Problem } from '../../platform/http/problem';
 import type { HouseholdRepository } from './repository';
-import type { AdultRole } from '../../domain/adult-roles';
 
 /** The role as an email names it, after « comme ». */
 const ROLE_WORDS: Record<AdultRole, string> = { guardian: 'parent', relative: 'proche' };
@@ -37,8 +37,9 @@ interface Deps {
    * above its button; `false`, sending nothing, when the address has an account already.
    */
   inviteAddress: (email: string, letter: InvitationLetter) => Promise<boolean>;
-  /** Sends an email after the request has answered. */
-  notify: (email: Email) => void;
+  send: Mailer;
+  /** Runs a task after the request has answered, its failure logged. */
+  later: (task: () => Promise<void>) => void;
   /** The public address of Catiche, where an invitation waits for an adult who has an account. */
   publicUrl: string;
 }
@@ -78,16 +79,18 @@ const toStudent = ({ birthMonth, memoryProposedAt, memoryAnswer, ...student }: S
   };
 };
 
-export function createHouseholdService({ repository, createActivationCode, sharedDevice, inviteAddress, notify, publicUrl }: Deps) {
+export function createHouseholdService({ repository, createActivationCode, sharedDevice, inviteAddress, send, later, publicUrl }: Deps) {
   const found = async (adultId: string, studentId: string) => {
     const student = await repository.findStudent(adultId, studentId);
     if (!student) throw new Problem('NOT_FOUND');
     return toStudent(student);
   };
 
-  /** A relative manages nothing: refused as an adult without a link to the student. */
+  /** A student the adult is a parent of: a relative manages nothing, refused as an adult without a link. */
   const managed = async (adultId: string, studentId: string) => {
-    if (!(await repository.manages(adultId, studentId))) throw new Problem('NOT_FOUND');
+    const student = await found(adultId, studentId);
+    if (student.role !== 'guardian') throw new Problem('NOT_FOUND');
+    return student;
   };
 
   const isStudent = (userId: string) => repository.isStudent(userId);
@@ -118,7 +121,7 @@ export function createHouseholdService({ repository, createActivationCode, share
       return {
         id,
         name,
-        role: 'guardian' as const,
+        role: 'adult' as const,
         level: null,
         email,
         missing,
@@ -169,9 +172,8 @@ export function createHouseholdService({ repository, createActivationCode, share
       studentId: string,
       patch: { name?: string | undefined; level?: SchoolLevel | undefined; memoryProposed?: boolean | undefined },
     ) {
-      await managed(adultId, studentId);
       // From 15 the child decides alone: the guardian neither proposes nor erases it.
-      if (patch.memoryProposed !== undefined && (await found(adultId, studentId)).memory.decidesAlone) throw new Problem('FORBIDDEN');
+      if ((await managed(adultId, studentId)).memory.decidesAlone && patch.memoryProposed !== undefined) throw new Problem('FORBIDDEN');
       if (!(await repository.updateStudent(adultId, studentId, patch))) throw new Problem('NOT_FOUND');
       return found(adultId, studentId);
     },
@@ -198,35 +200,29 @@ export function createHouseholdService({ repository, createActivationCode, share
      * are told.
      */
     async inviteAdult(adultId: string, studentId: string, { email, role }: { email: string; role: AdultRole }) {
-      const parent = await repository.invitingParent(adultId, studentId);
+      const [parent, followed] = await Promise.all([repository.invitingParent(adultId, studentId), repository.followedBy(studentId, email)]);
       if (!parent) throw new Problem('NOT_FOUND');
       if (!parent.declaredAt) throw new Problem('FORBIDDEN', 'la déclaration d’autorité parentale');
-      if (email === parent.adultEmail || (await repository.followedBy(studentId, email))) {
-        throw new Problem('INVALID_REQUEST', 'email: cette adresse suit déjà cet enfant');
-      }
-      await repository.saveInvitation({
-        studentId,
-        invitedBy: adultId,
-        email,
-        role,
-        expiresAt: new Date(Date.now() + INVITATION_DAYS * 86_400_000),
-      });
+      if (followed) throw new Problem('INVALID_REQUEST', 'email: cette adresse suit déjà cet enfant');
+      await repository.saveInvitation({ studentId, invitedBy: adultId, email, role, expiresAt: invitationExpiry() });
       const { adultName, studentName } = parent;
-      const subject = `${adultName} vous invite sur Catiche, pour ${studentName}`;
-      const intro = `${adultName} vous invite à suivre les devoirs du soir de ${studentName} sur Catiche.`;
-      if (!(await inviteAddress(email, { subject, intro }))) {
-        notify({
-          to: email,
-          subject,
-          text: `Bonjour,\n\n${intro}\n\nL’invitation vous attend dans Catiche : ${publicUrl}/\n\nElle vaut ${String(INVITATION_DAYS)} jours.`,
-        });
-      }
+      const letter = {
+        subject: `${adultName} vous invite sur Catiche, pour ${studentName}`,
+        intro: `${adultName} vous invite à suivre les devoirs du soir de ${studentName} sur Catiche.`,
+      };
+      // After the answer, which then tells nothing of whether the address has an account.
+      later(async () => {
+        if (!(await inviteAddress(email, letter)))
+          await send(invitationEmail(email, letter, `L’invitation vous attend dans Catiche : ${publicUrl}/`));
+      });
       for (const to of parent.otherParents) {
-        notify({
-          to,
-          subject: `${adultName} a invité un adulte pour ${studentName}`,
-          text: `Bonjour,\n\n${adultName} a invité ${email} pour ${studentName}, comme ${ROLE_WORDS[role]}.\n\nVous verrez dans Catiche quand cette personne sera entrée.`,
-        });
+        later(() =>
+          send({
+            to,
+            subject: `${adultName} a invité un adulte pour ${studentName}`,
+            text: `Bonjour,\n\n${adultName} a invité ${email} pour ${studentName}, comme ${ROLE_WORDS[role]}.\n\nVous verrez dans Catiche quand cette personne sera entrée.`,
+          }),
+        );
       }
     },
 
@@ -236,10 +232,8 @@ export function createHouseholdService({ repository, createActivationCode, share
      */
     async acceptInvitation(adult: { id: string; email: string }, invitationId: string, declaredGuardian: boolean) {
       if ((await repository.missingDeclarations(adult.id)).adult) throw new Problem('FORBIDDEN', 'la déclaration de majorité');
-      const role = await repository.invitationRole(adult.email, invitationId);
-      if (!role) throw new Problem('NOT_FOUND');
-      if (role === 'guardian' && !declaredGuardian) throw new Problem('INVALID_REQUEST', 'declaredGuardian: la déclaration d’autorité parentale');
-      const accepted = await repository.acceptInvitation(adult.id, adult.email, invitationId);
+      const accepted = await repository.acceptInvitation(adult.id, adult.email, invitationId, declaredGuardian);
+      if (accepted === 'undeclared') throw new Problem('INVALID_REQUEST', 'declaredGuardian: la déclaration d’autorité parentale');
       if (!accepted) throw new Problem('NOT_FOUND');
       return { studentId: accepted.studentId };
     },

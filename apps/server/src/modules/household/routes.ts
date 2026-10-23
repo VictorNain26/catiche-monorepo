@@ -13,6 +13,7 @@ import { ADULT_ROLES } from '../../domain/adult-roles';
 import { schoolLevelSchema } from '../../domain/levels';
 import { isStudentBirthMonth, STUDENT_AGE_YEARS } from '../../domain/student-age';
 import type { Auth } from '../../platform/auth/auth';
+import { normalised } from '../../platform/auth/invitation';
 import { requireSession, type SessionEnv } from '../../platform/auth/session';
 import { ADULT_SIGN_INS, isStudentEmail } from '../../platform/auth/student-sign-in';
 import type { AppEnv } from '../../platform/http/env';
@@ -59,8 +60,7 @@ const activationRequest = z.object({ reason: z.enum(['device', 'forgotten']) });
 // An adult's address, in lowercase as better-auth stores it; never a student's, which receives nothing.
 const adultEmail = z
   .string()
-  .trim()
-  .toLowerCase()
+  .transform(normalised)
   .pipe(z.email('une adresse e-mail'))
   .refine((email) => !isStudentEmail(email), 'une adresse e-mail');
 const adultInvitation = z.object({ email: adultEmail, role: z.enum(ADULT_ROLES) });

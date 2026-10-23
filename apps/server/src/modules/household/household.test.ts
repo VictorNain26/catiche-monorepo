@@ -103,7 +103,8 @@ describe('/api/me', () => {
     const fresh = await api.guardian('nouveau@example.com');
     expect(await (await api.request('GET', '/api/me', { cookie: fresh })).json()).toMatchObject({
       name: 'Parent',
-      role: 'guardian',
+      // An adult, whatever their role for each child: parent or relative is the link's.
+      role: 'adult',
       level: null,
       missing: { adult: false, guardianOf: [] },
     });

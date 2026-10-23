@@ -6,9 +6,17 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AdultPage } from '../components/page';
 import { PasskeyOffer } from '../components/passkey-offer';
-import { isProblem } from '../lib/api';
-import { GUARDIAN_HINT, GUARDIAN_LABEL, LEVEL_LABELS, householdMessage, studentsQuery, type Student } from '../lib/household';
-import { acceptInvitation, declineInvitation, invitationLine, invitedWelcomeSchema, meQuery, pendingInvitations, type Invitation } from '../lib/me';
+import { GUARDIAN_HINT, GUARDIAN_LABEL, LEVEL_LABELS, studentsQuery, type Student } from '../lib/household';
+import {
+  acceptInvitation,
+  declineInvitation,
+  invitationFailure,
+  invitationLine,
+  invitedWelcomeSchema,
+  meQuery,
+  pendingInvitations,
+  type Invitation,
+} from '../lib/me';
 import { minutesText, summaryQuery } from '../lib/summary';
 
 /**
@@ -29,7 +37,7 @@ function Household() {
   const { data: me } = useSuspenseQuery(meQuery);
   const { data: students } = useSuspenseQuery(studentsQuery);
   // Read once: the card stays, to say it is done, or goes by its own « Plus tard ».
-  const [offered] = useState(me?.role === 'guardian' && me.passkeyOffer);
+  const [offered] = useState(me?.role === 'adult' && me.passkeyOffer);
   const invitations = pendingInvitations(me);
   // The last child gone while the page is open, from another device say: the adding, as on arrival.
   if (students.length === 0 && invitations.length === 0) return <Navigate to="/foyer/ajouter" />;
@@ -92,16 +100,7 @@ function InvitationCard({ invitation }: { invitation: Invitation }) {
           error={form.formState.errors.declaredGuardian?.message}
         />
       )}
-      {failure && (
-        <Banner
-          tone="error"
-          title={
-            isProblem(failure, 'NOT_FOUND')
-              ? `Cette invitation n’est plus valable. Demandez-en une nouvelle à ${invitation.invitedBy}.`
-              : householdMessage(failure)
-          }
-        />
-      )}
+      {failure && <Banner tone="error" title={invitationFailure(failure, invitation)} />}
       <div className="flex flex-wrap gap-3">
         <Button type="submit" disabled={accept.isPending || decline.isPending}>
           Accepter

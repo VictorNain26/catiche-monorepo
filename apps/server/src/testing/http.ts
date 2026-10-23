@@ -7,6 +7,7 @@
  */
 
 import { parseJsonEventStream, readUIMessageStream, uiMessageChunkSchema, type UIMessage, type UIMessageChunk } from 'ai';
+import type { AdultRole } from '../modules/household';
 import type { Auth } from '../platform/auth/auth';
 import { invite } from '../platform/auth/invitation';
 import type { Db } from '../platform/db/client';
@@ -31,9 +32,6 @@ export interface Student {
   level: string;
   birthMonth: string;
 }
-
-/** What an adult is to a student: a parent or guardian, who decides, or a relative, who follows. */
-type AdultRole = 'guardian' | 'relative';
 
 /** The code every student of the client chooses: six digits no rule refuses. */
 export const STUDENT_CODE = '482917';

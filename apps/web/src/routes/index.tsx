@@ -19,7 +19,7 @@ export const Route = createFileRoute('/')({
   beforeLoad: async ({ context }) => {
     const me = await context.queryClient.query(meQuery);
     if (!me) throw redirect({ to: '/profils' });
-    if (me.role === 'guardian') throw redirect({ to: '/foyer' });
+    if (me.role === 'adult') throw redirect({ to: '/foyer' });
   },
   loader: ({ context }) => Promise.all([context.queryClient.query(sessionsQuery), context.queryClient.query(ownDevicesQuery)]),
   component: StudentHome,

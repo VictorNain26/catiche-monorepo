@@ -19,7 +19,7 @@ import type { Config } from '../../config';
 import type { Db } from '../db/client';
 import type { Mailer } from '../email/mailer';
 import { CLIENT_ADDRESS_HEADER } from '../http/client-address';
-import { INVITATION_DAYS, invitationIdentifier, spendInvitationLinks, type InvitationLetter } from './invitation';
+import { INVITATION_DAYS, invitationEmail, invitationIdentifier, spendInvitationLinks, type InvitationLetter } from './invitation';
 import { account, passkey as passkeyTable, session, user, verification } from './schema';
 import { createStudentDevices } from './student-devices';
 import { ACTIVATION_PREFIX, EMAIL_SIGN_INS, isStudentEmail, studentSignIn, type StudentAccess } from './student-sign-in';
@@ -180,12 +180,13 @@ export function createAuth(
         // A parent's invitation of another adult says who invites, for which child (./invitation.ts).
         sendMagicLink: async ({ email, url, metadata }) => {
           const link = `${origin}/invitation#${new URL(url).searchParams.toString()}`;
-          const letter = invitationLetter(metadata);
-          await send({
-            to: email,
-            subject: letter.subject,
-            text: `Bonjour,\n\n${letter.intro}\n\nAccepter l’invitation : ${link}\n\nSur un autre appareil ? Ouvrez ${host} et donnez cette adresse.\n\nL’invitation vaut ${String(INVITATION_DAYS)} jours.`,
-          });
+          await send(
+            invitationEmail(
+              email,
+              invitationLetter(metadata),
+              `Accepter l’invitation : ${link}\n\nSur un autre appareil ? Ouvrez ${host} et donnez cette adresse.`,
+            ),
+          );
         },
       }),
       emailOTP({

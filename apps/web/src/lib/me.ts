@@ -6,7 +6,7 @@
 import { queryOptions } from '@tanstack/react-query';
 import type { InferResponseType } from 'hono/client';
 import { api, isProblem, parseResponse } from './api';
-import { ROLE_LABELS, firstName, newChildSchema, type AdultRole } from './household';
+import { ROLE_LABELS, firstName, householdMessage, newChildSchema, type AdultRole } from './household';
 import { ticked, z } from './zod';
 
 /** The adult's declaration of their age, the box's own words. */
@@ -25,12 +25,14 @@ export const welcomeSchema = (now = new Date()) => z.object({ you: z.object({ na
 export const invitedWelcomeSchema = (role: AdultRole) =>
   z.object({ name: adultName, adult: ticked, declaredGuardian: role === 'guardian' ? ticked : z.boolean() });
 
+type Me = InferResponseType<typeof api.me.$get, 200>;
+type AdultMe = Extract<Me, { role: 'adult' }>;
+
 /** An invitation waiting for the adult's address, as `/api/me` tells it. */
-export type Invitation = Extract<InferResponseType<typeof api.me.$get, 200>, { role: 'guardian' }>['invitations'][number];
+export type Invitation = AdultMe['invitations'][number];
 
 /** The invitations waiting for whoever is signed in: none for a student or a visitor. */
-export const pendingInvitations = (me: InferResponseType<typeof api.me.$get, 200> | null | undefined): Invitation[] =>
-  me?.role === 'guardian' ? me.invitations : [];
+export const pendingInvitations = (me: Me | null | undefined): Invitation[] => (me?.role === 'adult' ? me.invitations : []);
 
 type InvitationWords = Pick<Invitation, 'invitedBy' | 'studentName' | 'role'>;
 
@@ -48,6 +50,10 @@ export const invitationPromise = ({ invitedBy, studentName, role }: InvitationWo
 export const acceptInvitation = (id: string, declaredGuardian: boolean) =>
   parseResponse(api.me.invitations[':id'].accept.$post({ param: { id }, json: declaredGuardian ? { declaredGuardian: true } : {} }));
 
+/** A failed answer to an invitation, in words the adult reads: one gone, or expired, says whom to ask. */
+export const invitationFailure = (error: unknown, { invitedBy }: Pick<Invitation, 'invitedBy'>) =>
+  isProblem(error, 'NOT_FOUND') ? `Cette invitation n’est plus valable. Demandez-en une nouvelle à ${invitedBy}.` : householdMessage(error);
+
 export const declineInvitation = (id: string) => parseResponse(api.me.invitations[':id'].decline.$post({ param: { id } }));
 
 /** The adult's first name, changed in their account. */
@@ -63,7 +69,7 @@ export const declarationsSchema = z.object({ adult: ticked, guardianOf: z.record
 export const declareAdult = () => parseResponse(api.me.declarations.$post({ json: { adult: true } }));
 
 /** What an adult has yet to declare, as `/api/me` tells it. */
-type MissingDeclarations = Extract<InferResponseType<typeof api.me.$get, 200>, { role: 'guardian' }>['missing'];
+type MissingDeclarations = AdultMe['missing'];
 
 /** Whether the adult has a declaration to make before anything else. */
 export const hasMissingDeclarations = (missing: MissingDeclarations) => missing.adult || missing.guardianOf.length > 0;

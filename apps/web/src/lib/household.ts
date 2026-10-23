@@ -76,11 +76,11 @@ export const adultsQuery = (studentId: string) =>
     queryFn: () => parseResponse(students[':id'].adults.$get({ param: { id: studentId } })),
   });
 
-export type AdultRole = InferRequestType<(typeof students)[':id']['invitations']['$post']>['json']['role'];
+export type InvitationInput = InferRequestType<(typeof students)[':id']['invitations']['$post']>['json'];
+export type AdultRole = InvitationInput['role'];
 
 /** A parent invites an adult for the child; the adult receives an email, the other parents are told. */
-export const inviteAdult = (id: string, json: InferRequestType<(typeof students)[':id']['invitations']['$post']>['json']) =>
-  parseResponse(students[':id'].invitations.$post({ param: { id }, json }));
+export const inviteAdult = (id: string, json: InvitationInput) => parseResponse(students[':id'].invitations.$post({ param: { id }, json }));
 
 /** A parent removes a relative, or a relative themselves. */
 export const removeAdult = (id: string, adultId: string) => parseResponse(students[':id'].adults[':adultId'].$delete({ param: { id, adultId } }));

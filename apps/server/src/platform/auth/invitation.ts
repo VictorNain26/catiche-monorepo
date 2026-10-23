@@ -14,8 +14,11 @@ import { user, verification } from './schema';
 const INVITATION_PREFIX = 'sign-up-invitation:';
 export const INVITATION_DAYS = 30;
 
-// better-auth stores an address in lowercase (api/routes/sign-up.mjs): the invitation is keyed the same way.
-const normalised = (email: string) => email.trim().toLowerCase();
+/** When an invitation sent now ends. */
+export const invitationExpiry = () => new Date(Date.now() + INVITATION_DAYS * 86_400_000);
+
+// better-auth stores an address in lowercase (api/routes/sign-up.mjs): an invitation is keyed the same way.
+export const normalised = (email: string) => email.trim().toLowerCase();
 
 export const invitationIdentifier = (email: string) => `${INVITATION_PREFIX}${normalised(email)}`;
 
@@ -49,12 +52,22 @@ export interface InvitationLetter {
   intro: string;
 }
 
+/**
+ * An invitation's email: who invites and for which child, then `action`, the way to accept it,
+ * which is a button only for an address without an account.
+ */
+export const invitationEmail = (to: string, { subject, intro }: InvitationLetter, action: string) => ({
+  to,
+  subject,
+  text: `Bonjour,\n\n${intro}\n\n${action}\n\nL’invitation vaut ${String(INVITATION_DAYS)} jours.`,
+});
+
 export async function invite({ db, auth }: { db: Db; auth: Auth }, email: string, letter?: InvitationLetter) {
   const address = normalised(email);
   const [existing] = await db.select({ id: user.id }).from(user).where(eq(user.email, address));
   if (existing) throw new AccountExists(address);
   const identifier = invitationIdentifier(address);
-  const expiresAt = new Date(Date.now() + INVITATION_DAYS * 86_400_000);
+  const expiresAt = invitationExpiry();
   await db.transaction(async (tx) => {
     await tx.delete(verification).where(eq(verification.identifier, identifier));
     await tx.insert(verification).values({ id: crypto.randomUUID(), identifier, value: 'invited', expiresAt });

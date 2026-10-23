@@ -23,7 +23,7 @@ function Declarations() {
   const { data: me } = useSuspenseQuery(meQuery);
   const { data: students } = useSuspenseQuery(studentsQuery);
   // Read once: the boxes stay as they are while the declarations are sent.
-  const [missing] = useState(() => (me?.role === 'guardian' ? me.missing : { adult: false, guardianOf: [] }));
+  const [missing] = useState(() => (me?.role === 'adult' ? me.missing : { adult: false, guardianOf: [] }));
   const children = students.filter(({ id }) => missing.guardianOf.includes(id));
   const form = useForm({
     resolver: zodResolver(declarationsSchema),

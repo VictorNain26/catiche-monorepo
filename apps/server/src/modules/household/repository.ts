@@ -34,6 +34,17 @@ export interface NewInvitation {
 const otherAdult = alias(guardianship, 'other_adult');
 const inviter = alias(user, 'inviter');
 
+/** The link is a parent's, who manages the student; a relative's only reads them. */
+const asParent = (role: typeof guardianship.role | typeof otherAdult.role = guardianship.role) => eq(role, 'guardian');
+
+/** The invitations to this address still valid, or the one of them `invitationId` names. */
+const waiting = (email: string, invitationId?: string) =>
+  and(
+    eq(adultInvitation.email, email),
+    gt(adultInvitation.expiresAt, sql`now()`),
+    invitationId === undefined ? undefined : eq(adultInvitation.id, invitationId),
+  );
+
 export function createHouseholdRepository(db: Db) {
   /** The ids of the students `adultId` is linked to, as a parent or a relative: what they read. */
   const studentsOf = (adultId: string) => db.select({ id: guardianship.studentId }).from(guardianship).where(eq(guardianship.adultId, adultId));
@@ -43,7 +54,7 @@ export function createHouseholdRepository(db: Db) {
     db
       .select({ id: guardianship.studentId })
       .from(guardianship)
-      .where(and(eq(guardianship.adultId, adultId), eq(guardianship.role, 'guardian')));
+      .where(and(eq(guardianship.adultId, adultId), asParent()));
 
   /** The student's row, and the adult's link to them, which says the adult's role. */
   const linkOf = (adultId: string) => and(eq(guardianship.studentId, user.id), eq(guardianship.adultId, adultId));
@@ -123,7 +134,7 @@ export function createHouseholdRepository(db: Db) {
         db
           .select({ studentId: guardianship.studentId })
           .from(guardianship)
-          .where(and(eq(guardianship.adultId, adultId), eq(guardianship.role, 'guardian'), isNull(guardianship.declaredAt)))
+          .where(and(eq(guardianship.adultId, adultId), asParent(), isNull(guardianship.declaredAt)))
           .orderBy(guardianship.createdAt),
       ]);
       return { adult: !declared?.at, guardianOf: undeclared.map(({ studentId }) => studentId) };
@@ -174,7 +185,7 @@ export function createHouseholdRepository(db: Db) {
       const declared = await db
         .update(guardianship)
         .set({ declaredAt: sql`coalesce(${guardianship.declaredAt}, now())` })
-        .where(and(eq(guardianship.adultId, adultId), eq(guardianship.studentId, studentId), eq(guardianship.role, 'guardian')))
+        .where(and(eq(guardianship.adultId, adultId), eq(guardianship.studentId, studentId), asParent()))
         .returning({ studentId: guardianship.studentId });
       return declared.length > 0;
     },
@@ -188,11 +199,11 @@ export function createHouseholdRepository(db: Db) {
 
     /** Whether the adult is a parent of the student, the only one who manages them. */
     async manages(adultId: string, studentId: string) {
-      const [managed] = await db
-        .select({ id: user.id })
-        .from(user)
-        .where(and(eq(user.id, studentId), inArray(user.id, managedBy(adultId))));
-      return managed !== undefined;
+      const [link] = await db
+        .select({ adultId: guardianship.adultId })
+        .from(guardianship)
+        .where(and(eq(guardianship.adultId, adultId), eq(guardianship.studentId, studentId), asParent()));
+      return link !== undefined;
     },
 
     /** The student, their profile, and their link to the adult who adds them, declared now. */
@@ -307,7 +318,7 @@ export function createHouseholdRepository(db: Db) {
               tx
                 .select({ adultId: otherAdult.adultId })
                 .from(otherAdult)
-                .where(and(eq(otherAdult.studentId, user.id), ne(otherAdult.adultId, userId), eq(otherAdult.role, 'guardian'))),
+                .where(and(eq(otherAdult.studentId, user.id), ne(otherAdult.adultId, userId), asParent(otherAdult.role))),
             ),
           ),
         );
@@ -339,19 +350,20 @@ export function createHouseholdRepository(db: Db) {
      * their name and address, the student's name, and the other parents' addresses, who are told.
      */
     async invitingParent(adultId: string, studentId: string) {
-      const [link] = await db
-        .select({ declaredAt: guardianship.declaredAt, studentName: user.name, adultName: inviter.name, adultEmail: inviter.email })
-        .from(guardianship)
-        .innerJoin(user, eq(user.id, guardianship.studentId))
-        .innerJoin(inviter, eq(inviter.id, guardianship.adultId))
-        .where(and(eq(guardianship.adultId, adultId), eq(guardianship.studentId, studentId), eq(guardianship.role, 'guardian')));
-      if (!link) return undefined;
-      const others = await db
-        .select({ email: user.email })
-        .from(guardianship)
-        .innerJoin(user, eq(user.id, guardianship.adultId))
-        .where(and(eq(guardianship.studentId, studentId), eq(guardianship.role, 'guardian'), ne(guardianship.adultId, adultId)));
-      return { ...link, otherParents: others.map(({ email }) => email) };
+      const [[link], others] = await Promise.all([
+        db
+          .select({ declaredAt: guardianship.declaredAt, studentName: user.name, adultName: inviter.name })
+          .from(guardianship)
+          .innerJoin(user, eq(user.id, guardianship.studentId))
+          .innerJoin(inviter, eq(inviter.id, guardianship.adultId))
+          .where(and(eq(guardianship.adultId, adultId), eq(guardianship.studentId, studentId), asParent())),
+        db
+          .select({ email: user.email })
+          .from(guardianship)
+          .innerJoin(user, eq(user.id, guardianship.adultId))
+          .where(and(eq(guardianship.studentId, studentId), asParent(), ne(guardianship.adultId, adultId))),
+      ]);
+      return link && { ...link, otherParents: others.map(({ email }) => email) };
     },
 
     /** The invitation, which replaces the one the address had for the student. */
@@ -379,40 +391,34 @@ export function createHouseholdRepository(db: Db) {
         .from(adultInvitation)
         .innerJoin(user, eq(user.id, adultInvitation.studentId))
         .innerJoin(inviter, eq(inviter.id, adultInvitation.invitedBy))
-        .where(and(eq(adultInvitation.email, email), gt(adultInvitation.expiresAt, sql`now()`)))
+        .where(waiting(email))
         .orderBy(asc(adultInvitation.createdAt));
     },
 
     /**
      * The adult accepts an invitation to their address, still valid: their link to the student,
      * with its role, a parent's declared now; the invitation spent. Undefined when no such
-     * invitation. The invitation's row stays locked until the link exists: the student's deletion
-     * meanwhile waits, then takes the link with them.
+     * invitation; `'undeclared'`, nothing changed, for a parent's without the declaration. The
+     * invitation's row stays locked until the link exists: the student's deletion meanwhile
+     * waits, then takes the link with them.
      */
-    async acceptInvitation(adultId: string, email: string, invitationId: string) {
+    async acceptInvitation(adultId: string, email: string, invitationId: string, declaredGuardian: boolean) {
       return db.transaction(async (tx) => {
         const [invitation] = await tx
           .select({ studentId: adultInvitation.studentId, role: adultInvitation.role })
           .from(adultInvitation)
-          .where(and(eq(adultInvitation.id, invitationId), eq(adultInvitation.email, email), gt(adultInvitation.expiresAt, sql`now()`)))
+          .where(waiting(email, invitationId))
           .for('update');
         if (!invitation) return undefined;
+        const guardian = invitation.role === 'guardian';
+        if (guardian && !declaredGuardian) return 'undeclared' as const;
         await tx
           .insert(guardianship)
-          .values({ adultId, ...invitation, declaredAt: invitation.role === 'guardian' ? new Date() : null })
+          .values({ adultId, ...invitation, declaredAt: guardian ? new Date() : null })
           .onConflictDoNothing();
         await tx.delete(adultInvitation).where(eq(adultInvitation.id, invitationId));
         return invitation;
       });
-    },
-
-    /** The role an invitation to the address offers; undefined when there is none, or it expired. */
-    async invitationRole(email: string, invitationId: string) {
-      const [invitation] = await db
-        .select({ role: adultInvitation.role })
-        .from(adultInvitation)
-        .where(and(eq(adultInvitation.id, invitationId), eq(adultInvitation.email, email), gt(adultInvitation.expiresAt, sql`now()`)));
-      return invitation?.role;
     },
 
     /** The adult declines an invitation to their address; `false` when no such invitation. */
