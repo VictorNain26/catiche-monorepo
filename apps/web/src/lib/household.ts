@@ -71,7 +71,10 @@ export const GUARDIAN_LABEL = 'J’exerce l’autorité parentale sur cet enfant
 export const GUARDIAN_HINT =
   'Votre accord suffit pour qu’il utilise Catiche. Un autre parent pourra s’y opposer, depuis son compte ou en écrivant à contact@catiche.fr.';
 
-const name = z.string().trim().min(1, 'Son prénom.').max(50, '50 caractères au plus.');
+/** A first name as the server takes it, a child's or an adult's; `missing` says whose. */
+export const firstName = (missing: string) => z.string().trim().min(1, missing).max(50, '50 caractères au plus.');
+
+const name = firstName('Son prénom.');
 const level = z.custom<Level>(isLevel, 'Sa classe.');
 
 export const studentSchema = z.object({ name, level });

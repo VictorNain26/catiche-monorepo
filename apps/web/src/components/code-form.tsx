@@ -3,7 +3,7 @@ import { Banner, Button, Field, toast } from '@repo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { authClient, authMessage } from '../lib/auth';
+import { EMAIL_CODE, authClient, authMessage } from '../lib/auth';
 import { meQuery } from '../lib/me';
 import { z } from '../lib/zod';
 
@@ -11,10 +11,7 @@ import { z } from '../lib/zod';
 export const CODE_INPUT_CLASS = 'h-14 font-mono text-2xl tracking-widest md:text-2xl';
 
 const codeSchema = z.object({
-  otp: z
-    .string()
-    .trim()
-    .regex(/^\d{6}$/, 'Le code à 6 chiffres reçu par e-mail.'),
+  otp: z.string().trim().regex(EMAIL_CODE, 'Le code à 6 chiffres reçu par e-mail.'),
 });
 
 export const sendCode = (email: string) => authClient.emailOtp.sendVerificationOtp({ email, type: 'sign-in' });

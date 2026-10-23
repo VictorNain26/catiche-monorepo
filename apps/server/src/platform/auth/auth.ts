@@ -22,7 +22,7 @@ import { CLIENT_ADDRESS_HEADER } from '../http/client-address';
 import { INVITATION_DAYS, invitationIdentifier } from './invitation';
 import { account, passkey as passkeyTable, session, user, verification } from './schema';
 import { createStudentDevices } from './student-devices';
-import { ACTIVATION_PREFIX, isStudentEmail, studentSignIn, type StudentAccess } from './student-sign-in';
+import { ACTIVATION_PREFIX, EMAIL_SIGN_INS, isStudentEmail, studentSignIn, type StudentAccess } from './student-sign-in';
 
 interface AuthDeps {
   mailer: Mailer;
@@ -42,9 +42,6 @@ interface AuthDeps {
 
 /** The sign-in code's life, in the email and on the screen. */
 const CODE_MINUTES = 15;
-
-/** The routes by which an email lets an adult in: its code (or its button, which types it), and the invitation's button. */
-const EMAIL_ENTRIES = new Set(['/sign-in/email-otp', '/magic-link/verify']);
 
 export function createAuth(
   db: Db,
@@ -121,7 +118,7 @@ export function createAuth(
       // Each entry by an email, once its session is open; an entry refused opens none.
       after: createAuthMiddleware(async (ctx) => {
         const entered = ctx.context.newSession;
-        if (entered && EMAIL_ENTRIES.has(ctx.path)) await emailEntered(entered.user.id);
+        if (entered && EMAIL_SIGN_INS.includes(ctx.path)) await emailEntered(entered.user.id);
       }),
     },
     // A page of the web: better-auth's own error page has an inline style the CSP blocks.

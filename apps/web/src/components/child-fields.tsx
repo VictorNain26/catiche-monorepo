@@ -22,25 +22,26 @@ export function ChildFields({
   errors,
 }: {
   register: (field: ChildField) => UseFormRegisterReturn;
-  errors: Partial<Record<ChildField, string | undefined>>;
+  /** The form's errors for these fields, as react-hook-form gives them. */
+  errors: Partial<Record<ChildField, { message?: string | undefined }>> | undefined;
 }) {
   const [years] = useState(() => Object.fromEntries(birthYears().map((year) => [year, year])));
   return (
     <>
-      <Field label="Son prénom" autoComplete="off" {...register('name')} error={errors.name} />
-      <SelectField label="Sa classe" options={LEVEL_LABELS} {...register('level')} error={errors.level} />
+      <Field label="Son prénom" autoComplete="off" {...register('name')} error={errors?.name?.message} />
+      <SelectField label="Sa classe" options={LEVEL_LABELS} {...register('level')} error={errors?.level?.message} />
       <fieldset className="flex flex-col gap-2">
         <legend className="text-sm font-bold text-foreground">Son mois de naissance</legend>
         <div className="flex gap-3">
           <div className="flex-1">
-            <SelectField label="Mois" options={MONTHS} {...register('month')} error={errors.month} />
+            <SelectField label="Mois" options={MONTHS} {...register('month')} error={errors?.month?.message} />
           </div>
           <div className="flex-1">
-            <SelectField label="Année" options={years} {...register('year')} error={errors.year} />
+            <SelectField label="Année" options={years} {...register('year')} error={errors?.year?.message} />
           </div>
         </div>
       </fieldset>
-      <CheckboxField label={GUARDIAN_LABEL} hint={GUARDIAN_HINT} {...register('declaredGuardian')} error={errors.declaredGuardian} />
+      <CheckboxField label={GUARDIAN_LABEL} hint={GUARDIAN_HINT} {...register('declaredGuardian')} error={errors?.declaredGuardian?.message} />
     </>
   );
 }

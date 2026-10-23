@@ -25,7 +25,6 @@ function AddChild() {
   const { data: students } = useSuspenseQuery(studentsQuery);
   const [schema] = useState(() => newChildSchema());
   const form = useForm({ resolver: zodResolver(schema), defaultValues: { name: '', month: '', year: '', declaredGuardian: false } });
-  const { errors } = form.formState;
 
   const create = useMutation({
     mutationFn: addStudent,
@@ -42,16 +41,7 @@ function AddChild() {
     // Without a child yet, the home would send back here: no way back to it.
     <AdultPage title="Ajoutez un enfant" withBack={students.length > 0}>
       <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-4">
-        <ChildFields
-          register={(field) => form.register(field)}
-          errors={{
-            name: errors.name?.message,
-            level: errors.level?.message,
-            month: errors.month?.message,
-            year: errors.year?.message,
-            declaredGuardian: errors.declaredGuardian?.message,
-          }}
-        />
+        <ChildFields register={(field) => form.register(field)} errors={form.formState.errors} />
         {create.error && (
           <Banner tone="error" title={householdMessage(create.error, `Vérifiez le prénom et le mois de naissance : votre enfant a ${CHILD_AGES}.`)} />
         )}

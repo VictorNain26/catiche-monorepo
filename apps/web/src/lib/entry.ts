@@ -3,9 +3,10 @@
  * browser never sends to a server (apps/server/src/platform/auth/auth.ts). The page reads them here.
  */
 
+import { EMAIL_CODE } from './auth';
 import { z } from './zod';
 
-const entrySchema = z.object({ email: z.email(), code: z.string().regex(/^\d{6}$/) });
+const entrySchema = z.object({ email: z.email(), code: z.string().regex(EMAIL_CODE) });
 
 /** The address and the code a fragment carries; null when it is absent, cut or altered. */
 export function entryFromFragment(hash: string) {

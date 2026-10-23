@@ -14,13 +14,15 @@ const INVITATION_PREFIX = 'sign-up-invitation:';
 export const INVITATION_DAYS = 30;
 
 // better-auth stores an address in lowercase (api/routes/sign-up.mjs): the invitation is keyed the same way.
-export const invitationIdentifier = (email: string) => `${INVITATION_PREFIX}${email.trim().toLowerCase()}`;
+const normalised = (email: string) => email.trim().toLowerCase();
+
+export const invitationIdentifier = (email: string) => `${INVITATION_PREFIX}${normalised(email)}`;
 
 /** Where the invitation's link leads: a new account to its first screen; a spent or stale link to the page that says so. */
-export const INVITATION_LINK = { callbackURL: '/', newUserCallbackURL: '/bienvenue', errorCallbackURL: '/entrer' } as const;
+const INVITATION_LINK = { callbackURL: '/', newUserCallbackURL: '/bienvenue', errorCallbackURL: '/entrer' } as const;
 
 export async function invite({ db, auth }: { db: Db; auth: Auth }, email: string) {
-  const address = email.trim().toLowerCase();
+  const address = normalised(email);
   const identifier = invitationIdentifier(address);
   const expiresAt = new Date(Date.now() + INVITATION_DAYS * 86_400_000);
   await db.transaction(async (tx) => {

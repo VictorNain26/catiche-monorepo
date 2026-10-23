@@ -101,6 +101,11 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
 
 ## Technique reporté
 
+- Une clé d'accès ne se propose pas sur un appareil partagé (`GET /api/me`, `sharedDevice`), mais
+  la route d'enregistrement du plugin passkey ne le refuse pas : un appel direct en créerait une.
+  Un hook `before` sur `/passkey/generate-register-options`, lisant `isShortSession`
+  (`platform/auth/student-devices.ts`), avec son test, fermerait la règle au serveur.
+
 - L'e-mail de suppression invite à répondre (`platform/auth/auth.ts`), mais le mailer ne pose
   aucun `Reply-To` : la réponse irait à `MAIL_FROM`, que personne ne lit ; à faire pointer vers
   `contact@catiche.fr`, avec son test.

@@ -12,6 +12,7 @@ import { schoolLevelSchema } from '../../domain/levels';
 import { isStudentBirthMonth, STUDENT_AGE_YEARS } from '../../domain/student-age';
 import type { Auth } from '../../platform/auth/auth';
 import { requireSession, type SessionEnv } from '../../platform/auth/session';
+import { ADULT_SIGN_INS } from '../../platform/auth/student-sign-in';
 import type { AppEnv } from '../../platform/http/env';
 import { Problem } from '../../platform/http/problem';
 import { jsonBody } from '../../platform/http/validate';
@@ -28,10 +29,8 @@ const STUDENT_AUTH_PATHS = new Set([
   '/api/auth/get-session',
   '/api/auth/sign-out',
   '/api/auth/email-otp/send-verification-otp',
-  '/api/auth/sign-in/email-otp',
-  '/api/auth/magic-link/verify',
   '/api/auth/passkey/generate-authenticate-options',
-  '/api/auth/passkey/verify-authentication',
+  ...ADULT_SIGN_INS.map((path) => `/api/auth${path}`),
 ]);
 
 const name = z.string().trim().min(1).max(50);

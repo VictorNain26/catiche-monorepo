@@ -34,6 +34,11 @@ import type { Auth } from './auth';
 import { CODE_TRIES, DEVICE_TRIES, type StudentDevices } from './student-devices';
 
 export const ACTIVATION_PREFIX = 'student-activation:';
+
+/** The routes by which an email lets an adult in: its code (or its button, which types it), and the invitation's button. */
+export const EMAIL_SIGN_INS: readonly string[] = ['/sign-in/email-otp', '/magic-link/verify'];
+/** Every route that opens an adult's session: by an email, or by a passkey. */
+export const ADULT_SIGN_INS: readonly string[] = [...EMAIL_SIGN_INS, '/passkey/verify-authentication'];
 const ACTIVATION_MINUTES = 10;
 // Crockford's base32 (https://www.crockford.com/base32.html): no I, L, O or U to misread. Eight
 // characters, 40 bits, single use for ten minutes behind a rate limit: under the day the CNIL
@@ -279,7 +284,7 @@ export function studentSignIn({ devices, students }: { devices: StudentDevices; 
         {
           // A guardian entering on a recognised device: the session is the device's, short on a
           // shared one or on their child's, so that the child who takes it back never finds it open.
-          matcher: (ctx) => ctx.path === '/sign-in/email-otp' || ctx.path === '/magic-link/verify' || ctx.path === '/passkey/verify-authentication',
+          matcher: (ctx) => ctx.path !== undefined && ADULT_SIGN_INS.includes(ctx.path),
           handler: createAuthMiddleware(async (ctx) => {
             const created = ctx.context.newSession;
             const device = created ? await requestDevice(ctx) : undefined;

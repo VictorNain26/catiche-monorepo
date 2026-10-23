@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { z } from '../lib/zod';
 import { CodeForm, sendCode } from '../components/code-form';
 import { BackLink, Page } from '../components/page';
-import { authClient, authMessage, hasCode, isCancelled } from '../lib/auth';
+import { INVALID_EMAIL, authClient, authMessage, hasCode, isCancelled } from '../lib/auth';
 import { meQuery } from '../lib/me';
 import { announceProfileChange, profilesQuery, tabChannel } from '../lib/student';
 
@@ -27,20 +27,21 @@ export const Route = createFileRoute('/connexion')({
   component: SignIn,
 });
 
-const emailSchema = z.object({ email: z.email('Écrivez une adresse e-mail complète, par exemple nom@exemple.fr.') });
+const emailSchema = z.object({ email: z.email(INVALID_EMAIL) });
 
 function SignIn() {
   const navigate = useNavigate();
   const { email: given } = Route.useSearch();
-  const [email, setEmail] = useState<string | null>(null);
-  const [typed, setTyped] = useState(given ?? '');
+  // The address, kept when the adult goes back to change it.
+  const [email, setEmail] = useState(given ?? '');
+  const [sent, setSent] = useState(false);
   // The guardian in: another tab of the device, a child's, reloads on the guardian's space.
   const enter = useCallback(() => {
     announceProfileChange(tabChannel());
     return navigate({ to: '/' });
   }, [navigate]);
 
-  if (email) {
+  if (sent) {
     return (
       <Page title="Ouvrez l’e-mail de Catiche" announce>
         <CodeForm email={email} submitLabel="Entrer" onEntered={enter} />
@@ -48,7 +49,7 @@ function SignIn() {
           type="button"
           variant="link"
           onClick={() => {
-            setEmail(null);
+            setSent(false);
           }}
         >
           Changer d’adresse
@@ -58,10 +59,10 @@ function SignIn() {
   }
   return (
     <EmailStep
-      initial={typed}
-      onSent={(sent) => {
-        setTyped(sent);
-        setEmail(sent);
+      initial={email}
+      onSent={(address) => {
+        setEmail(address);
+        setSent(true);
       }}
       onEntered={enter}
     />

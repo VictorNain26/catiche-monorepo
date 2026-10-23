@@ -5,7 +5,7 @@
 
 import { createApp } from './app';
 import { loadConfig } from './config';
-import { accountDeletion, emailEntries, studentAccess } from './modules/household';
+import { householdAuth } from './modules/household';
 import { createAi } from './platform/ai/client';
 import { createModeration } from './platform/ai/moderation';
 import { createAuth } from './platform/auth/auth';
@@ -51,9 +51,7 @@ const auth = createAuth(database.db, config, {
   mailer,
   logger,
   background: tasks.run,
-  deleteUser: accountDeletion(database.db),
-  students: studentAccess(database.db),
-  emailEntered: emailEntries(database.db),
+  ...householdAuth(database.db),
 });
 const ai = createAi({ mistral: config.mistral, db: database.db, logger });
 const moderation = createModeration({ mistral: config.mistral, logger });

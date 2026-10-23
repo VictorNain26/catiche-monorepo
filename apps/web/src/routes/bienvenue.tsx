@@ -67,16 +67,7 @@ function Welcome() {
             <CheckboxField label={ADULT_LABEL} {...form.register('you.adult')} error={errors.you?.adult?.message} />
           </Section>
           <Section title="Votre enfant">
-            <ChildFields
-              register={(field) => form.register(`child.${field}`)}
-              errors={{
-                name: errors.child?.name?.message,
-                level: errors.child?.level?.message,
-                month: errors.child?.month?.message,
-                year: errors.child?.year?.message,
-                declaredGuardian: errors.child?.declaredGuardian?.message,
-              }}
-            />
+            <ChildFields register={(field) => form.register(`child.${field}`)} errors={errors.child} />
           </Section>
         </div>
         {start.error && (

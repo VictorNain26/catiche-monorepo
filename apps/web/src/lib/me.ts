@@ -6,20 +6,20 @@
 import { queryOptions } from '@tanstack/react-query';
 import type { InferResponseType } from 'hono/client';
 import { api, isProblem, parseResponse } from './api';
-import { newChildSchema } from './household';
+import { firstName, newChildSchema } from './household';
 import { ticked, z } from './zod';
 
 /** The adult's declaration of their age, the box's own words. */
 export const ADULT_LABEL = 'J’ai 18 ans ou plus.';
 
 /** The first name the adult's children see. */
-const firstName = z.string().trim().min(1, 'Votre prénom.').max(50, '50 caractères au plus.');
+const adultName = firstName('Votre prénom.');
 
 /** A new adult's first screen: their first name and their age declared, then their child, as the adding asks it. */
-export const welcomeSchema = (now = new Date()) => z.object({ you: z.object({ name: firstName, adult: ticked }), child: newChildSchema(now) });
+export const welcomeSchema = (now = new Date()) => z.object({ you: z.object({ name: adultName, adult: ticked }), child: newChildSchema(now) });
 
 /** The adult's first name, changed in their account. */
-export const nameSchema = z.object({ name: firstName });
+export const nameSchema = z.object({ name: adultName });
 
 /** « Plus tard » on the passkey's offer: the home shows it no more, « Votre compte » keeps the making of one. */
 export const closePasskeyOffer = () => parseResponse(api.me['passkey-offer'].$post());

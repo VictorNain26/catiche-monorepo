@@ -6,7 +6,7 @@
 
 import { z } from 'zod';
 import { loadConfig } from './config';
-import { accountDeletion, emailEntries, studentAccess } from './modules/household';
+import { householdAuth } from './modules/household';
 import { createAuth } from './platform/auth/auth';
 import { invite } from './platform/auth/invitation';
 import { createDb } from './platform/db/client';
@@ -29,9 +29,7 @@ const auth = createAuth(db, config, {
   mailer: config.mail ? scalewayMailer(config.mail) : logMailer(logger),
   logger,
   background: tasks.run,
-  deleteUser: accountDeletion(db),
-  students: studentAccess(db),
-  emailEntered: emailEntries(db),
+  ...householdAuth(db),
 });
 try {
   const { expiresAt } = await invite({ db, auth }, email.data);
