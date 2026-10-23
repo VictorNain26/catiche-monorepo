@@ -274,3 +274,33 @@ it('takes the invitation away with the child', async () => {
   expect(await invitationsOf(lea.id)).toEqual([]);
   expect(await db.select().from(user).where(eq(user.id, lea.id))).toEqual([]);
 });
+
+describe('at the same time', () => {
+  // Its own app: the races below spend more of a minute's budget than one app gives.
+  const race = testApp(db).api;
+  /** A parent and their child, and an adult invited for the child, in and 18 or over: the invitation waiting for them. */
+  const waiting = async (tag: string) => {
+    const parent = await race.guardian(`parent-${tag}@example.com`);
+    const child = await race.student(parent);
+    const email = `invite-${tag}@example.com`;
+    await race.inviteAdult(parent, child.id, email, 'relative');
+    const adult = await race.signIn(email);
+    await race.request('POST', '/api/me/declarations', { cookie: adult, body: { adult: true } });
+    const [invitation] = await db.select().from(adultInvitation).where(eq(adultInvitation.studentId, child.id));
+    return { parent, child, adult, invitationId: invitation?.id ?? '' };
+  };
+  const accept = async (adult: string, invitationId: string) =>
+    race.request('POST', `/api/me/invitations/${invitationId}/accept`, { cookie: adult, body: {} });
+  const deleteChild = async (parent: string, childId: string) => race.request('DELETE', `/api/household/students/${childId}`, { cookie: parent });
+
+  // Each locks the child, then the invitation: in another order, one would wait for the other's lock forever.
+  it('accepts an invitation while its child is deleted: one or the other, never a deadlock', async () => {
+    const families = await Promise.all([0, 1, 2, 3, 4, 5, 6, 7].map((pair) => waiting(`course-${String(pair)}`)));
+    const answers = await Promise.all(
+      families.flatMap(({ parent, child, adult, invitationId }) => [accept(adult, invitationId), deleteChild(parent, child.id)]),
+    );
+    expect(answers.map(({ status }) => status).filter((status) => ![200, 204, 404].includes(status))).toEqual([]);
+    const children = families.map(({ child }) => child.id);
+    for (const id of children) expect(await db.select().from(user).where(eq(user.id, id))).toEqual([]);
+  });
+});

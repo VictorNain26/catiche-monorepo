@@ -398,12 +398,19 @@ export function createHouseholdRepository(db: Db) {
     /**
      * The adult accepts an invitation to their address, still valid: their link to the student,
      * with its role, a parent's declared now; the invitation spent. Undefined when no such
-     * invitation; `'undeclared'`, nothing changed, for a parent's without the declaration. The
-     * invitation's row stays locked until the link exists: the student's deletion meanwhile
-     * waits, then takes the link with them.
+     * invitation; `'undeclared'`, nothing changed, for a parent's without the declaration.
+     * The student's row first, then the invitation's, in the order of the student's deletion,
+     * which locks the student, then their invitations by cascade: a deletion under way is waited
+     * for, and then leaves no invitation to accept; one that comes after waits for the link, and
+     * takes it with the student.
      */
     async acceptInvitation(adultId: string, email: string, invitationId: string, declaredGuardian: boolean) {
       return db.transaction(async (tx) => {
+        await tx
+          .select({ id: user.id })
+          .from(user)
+          .where(inArray(user.id, tx.select({ id: adultInvitation.studentId }).from(adultInvitation).where(eq(adultInvitation.id, invitationId))))
+          .for('update');
         const [invitation] = await tx
           .select({ studentId: adultInvitation.studentId, role: adultInvitation.role })
           .from(adultInvitation)
