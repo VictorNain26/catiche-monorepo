@@ -21,6 +21,10 @@ de 71 ans). Leurs constats retenus sont intégrés.
 - **2026-10-23, le fond** : la section « Questions tranchées », en fin de document.
 - **2026-10-23, la simplicité** : des user stories d'abord ; une navigation comprise par un enfant
   et par un adulte peu habitué aux écrans ; le moins d'écrans et de choix possible.
+- **2026-10-23, qui est connecté** (après l'essai de l'app : « on comprend pas si on est connecté
+  ou non, à qui », « on comprend pas les clés d'accès ») : le prénom de l'adulte en haut de
+  chacun de ses écrans, un retour nommé comme l'écran où il mène, « Votre compte » qui dit d'abord
+  à qui il est, et une clé d'accès expliquée par ce qu'elle évite : attendre un e-mail.
 - **Avant** : le point du soir (`produit.md`, 2026-10-21) ; la déclaration du majeur et du
   représentant légal, qui vaut consentement parental, avec une vérification proportionnée sans
   pièce d'identité (CNIL) (2026-10-21) ; l'espace de l'enfant ouvert par son
@@ -98,7 +102,8 @@ sont au § 8.
   le bouton de l'e-mail d'invitation, je remplis un écran pour moi et mon enfant, un écran pour
   son appareil, et j'arrive à l'accueil. Trois écrans, rien à retenir.
 - **P-2. Revenir sans effort.** Je veux rester connecté sur mon téléphone, et entrer par un lien
-  reçu par e-mail quand il le faut, sans course contre la montre.
+  reçu par e-mail quand il le faut, sans course contre la montre. *Réussie quand* : sur chaque
+  écran, je vois sous quel prénom je suis entré, et « Votre compte » me dit avec quelle adresse.
 - **P-3. Relier l'appareil de mon enfant**, ce soir ou à l'avance (pour l'ordinateur de sa
   grand-mère).
 - **P-4. Lire la soirée.** Je veux voir ce que mon enfant me montre et faire le geste demandé.
@@ -181,7 +186,12 @@ retirer l'autre.
 
 **Pas d'onglets.** Chaque rôle n'a qu'un écran où il revient : l'enfant, « Ce soir » ; l'adulte,
 l'accueil avec une carte par enfant. Tout le reste s'ouvre depuis là et se referme par un bouton
-« ← » qui nomme où il ramène. C'est un écart à `charte.md` (« des onglets en bas » au téléphone,
+« ← » qui nomme où il ramène, avec le mot du titre de cet écran : côté adulte, « ← Vos enfants »,
+puisque l'accueil s'intitule « Suivez les devoirs de vos enfants ».
+
+**Qui est connecté** : le haut de chaque écran de l'adulte porte son prénom, « Camille », un
+bouton qui ouvre « Votre compte », et « Quitter ». Côté enfant, le titre de « Ce soir » porte
+déjà son prénom (E4). Personne n'a à deviner sous quel compte il est entré. C'est un écart à `charte.md` (« des onglets en bas » au téléphone,
 « la navigation sur le côté » à l'ordinateur) : la PR de ce document met la charte à jour, les
 onglets ne servant que pour plusieurs destinations fréquentes.
 
@@ -217,7 +227,7 @@ Accueil : une carte par enfant
 ├─ « Gérer » (parent) ou « Ses devoirs et ses messages » (proche) → Gérer [prénom]
 ├─ une carte d'alerte quand il le faut (appareil bloqué, suppression demandée)
 ├─ « Ajouter un enfant »
-└─ en haut : « Mon compte », « Quitter »
+└─ en haut : « [Prénom] » → Votre compte ; « Quitter »
 ```
 
 ## 5. Les écrans
@@ -246,7 +256,8 @@ ce que la personne fait, pas le nom d'une fonction.
 pour inactivité ou une coupure d'internet la retrouvent là où elle était.
 
 **La confirmation récente**, pour les gestes sensibles de l'adulte (ajouter un appareil, un code
-de départ après un oubli, la suppression d'un compte ; A4, A7, A9) : une entrée de moins de
+de départ après un oubli, créer une clé d'accès, la suppression d'un compte ; A4, A5, A7, A9) :
+une entrée de moins de
 10 minutes suffit ; au-delà, l'écran le dit avant le geste (« Pour confirmer, nous allons vous
 envoyer un e-mail. »), puis y revient seul.
 
@@ -453,8 +464,17 @@ jamais pour un adulte invité ; et depuis « Gérer »).
 - Confirmation : la règle commune de « La confirmation récente » (plus haut).
 
 **A5. Accueil** (une carte par enfant, même avec un seul).
-- En haut : « Mon compte », « Quitter ».
-- Titre : « Suivez les devoirs de vos enfants » (avec un enfant : « Suivez les devoirs de Léa »).
+- En haut : « Camille » (vers A9), « Quitter ».
+- Titre : « Suivez les devoirs de vos enfants », avec un enfant comme avec plusieurs : les
+  autres écrans y ramènent par « ← Vos enfants ».
+- La clé d'accès, proposée une fois, en carte en tête, à la deuxième entrée par e-mail sur cet
+  appareil ; jamais pendant A3 ni A4. Titre : « Entrez sans attendre d'e-mail ». Texte : « Créez
+  une clé d'accès : la prochaine fois, vous entrerez avec votre empreinte, votre visage ou le
+  code de votre téléphone. Elle reste sur cet appareil. » Boutons : « Créer ma clé d'accès » ;
+  « Plus tard », qui la range dans A9 sans la reproposer. Après la fenêtre du téléphone : « C'est
+  fait. Sur cet appareil, vous entrez maintenant sans e-mail. » Le mot « clé d'accès » reste, car
+  la fenêtre du téléphone l'emploie ; une empreinte n'est jamais exigée, le code de l'appareil
+  suffit ([Google, « Communicating passkeys »](https://developers.google.com/identity/passkeys/ux/communicating-passkeys)).
 - Carte d'alerte, en tête, quand il le faut (parent) : « Léa a oublié son code. » avec « Donner un
   code de départ », qui l'affiche tout de suite ; « La tablette de Léa est bloquée après 3 codes
   faux. » avec « Débloquer » ; « Karim a demandé la suppression du compte de Léa. » avec « Voir ».
@@ -510,12 +530,18 @@ jamais pour un adulte invité ; et depuis « Gérer »).
   « Sur un autre appareil ? Ouvrez catiche.fr, donnez cette adresse et tapez ce code : [code]. » ;
   « L'invitation vaut 30 jours. » Le même e-mail sert à l'invitation de Victor, sans « Nadia ».
 
-**A9. Mon compte.**
+**A9. Votre compte** (par le prénom, en haut de chaque écran de l'adulte).
+- Titre : « Voici votre compte ». Retour : « ← Vos enfants ».
+- D'abord, à qui il est : « Ce compte est celui de Camille : camille@exemple.fr. » Puis, sur un
+  appareil personnel : « Cet appareil vous garde 90 jours : pas besoin d'e-mail pour revenir. » ;
+  sur un appareil partagé : « Cet appareil est partagé : votre espace se ferme après 10 minutes
+  sans rien faire. »
 - « Votre prénom ».
-- « Entrer plus vite » : proposé une fois, après la deuxième entrée par e-mail : « La prochaine
-  fois, entrez avec votre empreinte ou votre visage ? » ; « Oui » ; « Plus tard ». Ensuite,
-  ici : la liste, et « Supprimer » avec confirmation.
 - « Quitter Catiche ».
+- « Vos clés d'accès », avec la phrase d'A5 : « Une clé d'accès vous fait entrer avec votre
+  empreinte, votre visage ou le code de votre téléphone, sans attendre d'e-mail. » Chaque clé
+  porte son appareil et sa date (« Le téléphone, créée le 3 mars »), avec « Supprimer » et sa
+  confirmation ; puis « Créer une clé d'accès sur cet appareil ».
 - Séparé, en bas : « Supprimer mon compte », avec les conséquences nommées : « Votre compte sera
   effacé. Le compte de Léa le sera aussi : personne d'autre n'est son parent dans Catiche. C'est
   définitif. »
@@ -567,7 +593,10 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
 | Aujourd'hui | Dans l'application cible |
 |---|---|
 | Une colonne `max-w-md` presque partout, ni onglets ni navigation | Un écran où l'on revient, des pages qui s'ouvrent et se referment (§ 4) ; deux colonnes à l'ordinateur |
-| Mots techniques : session, verrouillage, bêta fermée, URL brute, clé d'accès | Mots des familles ; empreinte ou visage ; formule de statut ; un carré à viser |
+| Mots techniques : session, verrouillage, bêta fermée, URL brute | Mots des familles ; formule de statut ; un carré à viser |
+| La clé d'accès proposée avant l'ajout de l'enfant, expliquée par « le verrouillage », et « Entrer avec une clé d'accès » montré à qui n'en a pas | Proposée à la deuxième entrée, expliquée par ce qu'elle évite (A5) ; le téléphone la propose seul à l'entrée (A1) |
+| Rien ne dit sous quel compte l'adulte est entré ; « Mon compte » ne montre que les clés | Son prénom en haut de chaque écran ; « Votre compte » dit d'abord à qui il est (A9) |
+| « Retour au foyer », vers un écran qui ne s'appelle pas ainsi | « ← Vos enfants », le mot du titre de l'accueil |
 | Trois codes appelés « code » | Ton code, le code de départ, le code reçu par e-mail |
 | Le code e-mail de 5 minutes à recopier | Un lien dans l'e-mail, et le code, 15 minutes |
 | Deux façons de relier un appareil, sur deux écrans | Un seul écran, A4, avec deux choix |
