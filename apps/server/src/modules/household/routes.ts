@@ -1,5 +1,5 @@
 /**
- * /api/household: a signed-in guardian manages the students of their household. Every route
+ * /api/household: a signed-in adult manages the students they are linked to. Every route
  * needs a session, and refuses a student. Of better-auth's own routes, a signed-in student reaches
  * only those in STUDENT_AUTH_PATHS: the rest (update-user…) would let them change what their
  * guardian manages.
@@ -40,7 +40,12 @@ const birthMonth = z
   .regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'au format AAAA-MM')
   .refine((month) => isStudentBirthMonth(month, new Date()), `un âge de ${String(STUDENT_AGE_YEARS.min)} à ${String(STUDENT_AGE_YEARS.max)} ans`);
 
-const newStudent = z.object({ name, level: schoolLevelSchema, birthMonth, memoryProposed: z.boolean().optional() });
+// The adult's declarations, timestamped, on which the parental consent rests (CNIL): each one is a
+// box they tick, never a value the server assumes.
+const declaredGuardian = z.literal(true, 'la déclaration d’autorité parentale');
+const newStudent = z.object({ name, level: schoolLevelSchema, birthMonth, memoryProposed: z.boolean().optional(), declaredGuardian });
+const guardianDeclaration = z.object({ declaredGuardian });
+const adultDeclaration = z.object({ adult: z.literal(true, 'la déclaration de majorité') });
 const studentPatch = z
   .object({ name: name.optional(), level: schoolLevelSchema.optional(), memoryProposed: z.boolean().optional() })
   .refine((patch) => patch.name !== undefined || patch.level !== undefined || patch.memoryProposed !== undefined, 'au moins un champ');
@@ -68,13 +73,17 @@ export function studentAuthGuard({ auth, service }: { auth: Auth; service: House
 
 /**
  * /api/me: who is signed in, and as what; the web picks its home from it. A student's devices
- * too, and when a guardian last replaced their code.
+ * too, and when a guardian last replaced their code; an adult's declaration of being 18 or over.
  */
 export function meRoutes({ auth, service }: { auth: Auth; service: HouseholdService }) {
   return new Hono<SessionEnv>()
     .use(requireSession(auth))
     .get('/', async (c) => c.json(await service.me(c.var.userId, c.var.userName)))
-    .get('/devices', async (c) => c.json(await service.listOwnDevices(c.var.userId)));
+    .get('/devices', async (c) => c.json(await service.listOwnDevices(c.var.userId)))
+    .post('/declarations', jsonBody(adultDeclaration), async (c) => {
+      await service.declareAdult(c.var.userId);
+      return c.body(null, 204);
+    });
 }
 
 export function householdRoutes({ auth, service }: { auth: Auth; service: HouseholdService }) {
@@ -90,6 +99,10 @@ export function householdRoutes({ auth, service }: { auth: Auth; service: Househ
     .patch('/students/:id', jsonBody(studentPatch), async (c) =>
       c.json(await service.updateStudent(c.var.userId, c.req.param('id'), c.req.valid('json'))),
     )
+    .post('/students/:id/declaration', jsonBody(guardianDeclaration), async (c) => {
+      await service.declareGuardian(c.var.userId, c.req.param('id'));
+      return c.body(null, 204);
+    })
     .post('/students/:id/activation-code', jsonBody(activationRequest), async (c) =>
       c.json(await service.activationCode(c.var.userId, c.req.param('id'), c.req.valid('json').reason), 201),
     )

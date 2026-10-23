@@ -1,13 +1,14 @@
 /**
  * A guardian's account on a real database, through the HTTP API: in by a code sent to their
  * address, the first one creating the account on an invitation; refused alike for any address; and
- * the deletion, by a session opened minutes before, which takes a sole guardian's household and
- * students with it. A student's `.invalid` address is never sent to.
+ * the deletion, by a session opened minutes before, which takes with it the students no other adult
+ * follows. A student's `.invalid` address is never sent to.
  */
 
 import { describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
-import { household, householdMember } from '../../modules/household/schema';
+import { eq, inArray } from 'drizzle-orm';
+import { accountDeletion } from '../../modules/household';
+import { adultProfile, guardianship } from '../../modules/household/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { ORIGIN } from '../../testing/http';
@@ -155,30 +156,65 @@ describe('the error page', () => {
 });
 
 describe('account deletion', () => {
-  it("takes a sole guardian's household, students and their devices with it, from a session just opened", async () => {
+  it('takes the students it is the only adult of and their devices with it, from a session just opened', async () => {
     const email = 'depart@example.com';
     const parent = await api.guardian(email);
     const student = await api.student(parent);
     const device = await api.pair(parent, student.id);
     const parentId = (await api.sessionUser(parent))?.id ?? '';
-    const [member] = await db.select({ householdId: householdMember.householdId }).from(householdMember).where(eq(householdMember.userId, parentId));
 
     const notice = mail.next(email);
     expect((await api.request('POST', '/api/auth/delete-user', { cookie: parent, body: {} })).status).toBe(200);
     expect(await accounts(email)).toEqual([]);
     expect(await db.select().from(user).where(eq(user.id, student.id))).toEqual([]);
     expect(await db.select().from(session).where(eq(session.userId, student.id))).toEqual([]);
-    expect(
-      await db
-        .select()
-        .from(household)
-        .where(eq(household.id, member?.householdId ?? '')),
-    ).toEqual([]);
+    expect(await db.select().from(guardianship).where(eq(guardianship.adultId, parentId))).toEqual([]);
+    expect(await db.select().from(adultProfile).where(eq(adultProfile.userId, parentId))).toEqual([]);
     expect(await api.sessionUser(device)).toBeUndefined();
     expect(await api.sessionUser(parent)).toBeUndefined();
     const sent = await notice;
     expect(sent.subject).toBe('Votre compte Catiche est supprimé');
     expect(sent.text).toContain('Votre compte Catiche est supprimé');
+  });
+
+  it('keeps a student another adult follows, with their devices, and takes the one it alone follows', async () => {
+    const parent = await api.guardian('depart-a-deux@example.com');
+    const other = await api.guardian('reste@example.com');
+    const shared = await api.student(parent, { name: 'Léa' });
+    const alone = await api.student(parent, { name: 'Tom' });
+    const device = await api.pair(parent, shared.id);
+    const otherId = (await api.sessionUser(other))?.id ?? '';
+    await db.insert(guardianship).values({ adultId: otherId, studentId: shared.id, declaredAt: new Date() });
+
+    expect((await api.request('POST', '/api/auth/delete-user', { cookie: parent, body: {} })).status).toBe(200);
+    expect(await db.select({ id: user.id }).from(user).where(eq(user.id, shared.id))).toEqual([{ id: shared.id }]);
+    expect(await db.select().from(user).where(eq(user.id, alone.id))).toEqual([]);
+    expect(await db.select({ adultId: guardianship.adultId }).from(guardianship).where(eq(guardianship.studentId, shared.id))).toEqual([
+      { adultId: otherId },
+    ]);
+    expect((await api.sessionUser(device))?.id).toBe(shared.id);
+    const list = (await (await api.request('GET', '/api/household/students', { cookie: other })).json()) as { id: string }[];
+    expect(list.map(({ id }) => id)).toEqual([shared.id]);
+  });
+
+  it('takes a student whose two adults leave at the same time, never leaving them without an adult', async () => {
+    const deleteAccount = accountDeletion(db);
+    // Five pairs, set up at once: one pair alone could leave in turn by chance.
+    const pairs = await Promise.all(
+      [0, 1, 2, 3, 4].map(async (pair) => {
+        const [first, second] = await Promise.all([
+          api.guardian(`ensemble-${String(pair)}-a@example.com`),
+          api.guardian(`ensemble-${String(pair)}-b@example.com`),
+        ]);
+        const [student, firstUser, secondUser] = await Promise.all([api.student(first), api.sessionUser(first), api.sessionUser(second)]);
+        const adults = [firstUser?.id ?? '', secondUser?.id ?? ''];
+        await db.insert(guardianship).values({ adultId: adults[1] ?? '', studentId: student.id, declaredAt: new Date() });
+        return { studentId: student.id, adults };
+      }),
+    );
+    await Promise.all(pairs.flatMap(({ adults }) => adults.map((adultId) => deleteAccount(adultId))));
+    const students = pairs.map(({ studentId }) => studentId);
+    expect(await db.select({ id: user.id }).from(user).where(inArray(user.id, students))).toEqual([]);
   });
 
   it('refuses a session opened more than ten minutes ago, and keeps the account', async () => {

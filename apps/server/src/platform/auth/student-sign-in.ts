@@ -91,9 +91,9 @@ const activation = z.object({ userId: z.string(), reason: z.enum(['device', 'for
 const sharedDeadline = (openedAt: Date, now: Date) =>
   new Date(Math.min(openedAt.getTime() + SHARED_MINUTES * MINUTE, now.getTime() + IDLE_MINUTES * MINUTE));
 
-/** What the plugin asks of the household: whether a student is the guardian's, and their month of birth. */
+/** What the plugin asks of the household: whether an adult is linked to a student, and the student's month of birth. */
 export interface StudentAccess {
-  inHousehold: (guardianId: string, studentId: string) => Promise<boolean>;
+  follows: (adultId: string, studentId: string) => Promise<boolean>;
   birthMonth: (studentId: string) => Promise<string | null>;
 }
 
@@ -252,7 +252,7 @@ export function studentSignIn({ devices, students }: { devices: StudentDevices; 
       ),
 
       /**
-       * The guardian adds children of their household to this device, a family computer: shared
+       * The adult adds children they are linked to to this device, a family computer: shared
        * from now, their own session short on it, and a child without a code chooses one here.
        */
       addStudentProfiles: createAuthEndpoint(
@@ -261,8 +261,7 @@ export function studentSignIn({ devices, students }: { devices: StudentDevices; 
         async (ctx) => {
           const { session } = ctx.context.session;
           for (const studentId of ctx.body.studentIds) {
-            if (!(await students.inHousehold(session.userId, studentId)))
-              throw APIError.from('NOT_FOUND', { code: 'NOT_FOUND', message: 'Not found' });
+            if (!(await students.follows(session.userId, studentId))) throw APIError.from('NOT_FOUND', { code: 'NOT_FOUND', message: 'Not found' });
           }
           const device = await ensureDevice(ctx);
           const chooseTokens: Record<string, string> = {};

@@ -16,16 +16,18 @@ En place (`apps/server/src`) :
 - `platform/` : `http` (erreurs RFC 9457, en-têtes de sécurité, service du web), `db` (client,
   migrations sous verrou et vérifiées au démarrage), `auth` (better-auth et ses tables),
   `observability` (pino), `lifecycle` (santé et arrêt).
-- `modules/household` : le foyer, l'élève créé par son gardien sans aucun identifiant (ni e-mail,
-  ni mot de passe, ni nom de famille), ses appareils ; l'accès du gardien à l'élève comme clause
-  de la requête SQL, une matrice de tests d'accès croisés.
+- `modules/household` : le lien entre un adulte et un enfant, qui permet plusieurs adultes par
+  enfant ; l'élève créé par un adulte sans aucun identifiant (ni e-mail, ni mot de passe, ni nom de
+  famille), ses appareils ; les déclarations horodatées de l'adulte, majeur et représentant légal
+  de chaque enfant ; l'accès de l'adulte à l'élève comme clause de la requête SQL (`studentsOf`),
+  une matrice de tests d'accès croisés.
 - `platform/email` : l'envoi d'un e-mail, Scaleway TEM par son SDK en production, le journal en
   développement. Le gardien n'a pas de mot de passe : il entre par un code à 6 chiffres envoyé à son
   adresse (plugin `email-otp`), le premier créant son compte sur invitation, ou par une clé d'accès
   (`@better-auth/passkey`, liée à l'origine publique) qu'il crée depuis son foyer. Une clé se crée,
   et le compte se supprime (`POST /api/auth/delete-user`, que le web n'appelle pas encore : la
   suppression se fait sur demande), depuis une session ouverte il y a moins de 10 minutes ; la
-  suppression emporte son foyer s'il en est le seul gardien. L'élève n'a pas de clé : le garde du foyer lui
+  suppression emporte les enfants dont l'adulte est le seul lien. L'élève n'a pas de clé : le garde du foyer lui
   ferme les routes de better-auth, sauf les siennes et celles par où son parent entre sur son
   appareil. Une session vit 90 jours sans usage, sauf sur un appareil partagé. Les envois partent
   après la réponse (`platform/lifecycle/background.ts`), que l'arrêt attend.

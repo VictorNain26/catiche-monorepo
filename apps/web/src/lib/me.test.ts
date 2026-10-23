@@ -1,5 +1,33 @@
 import { describe, expect, it } from 'bun:test';
-import { isRecentReset } from './me';
+import { declarationsSchema, isRecentReset, welcomeSchema } from './me';
+
+describe('declarationsSchema', () => {
+  it('takes every box ticked', () => {
+    expect(declarationsSchema.parse({ adult: true, guardianOf: { lea: true, tom: true } })).toEqual({
+      adult: true,
+      guardianOf: { lea: true, tom: true },
+    });
+  });
+
+  it('says, under each box left unticked, what to do', () => {
+    const unticked = declarationsSchema.safeParse({ adult: false, guardianOf: { lea: true, tom: false } });
+    expect(unticked.error?.issues.map(({ path, message }) => [path.join('.'), message])).toEqual([
+      ['adult', 'Cochez cette case pour continuer.'],
+      ['guardianOf.tom', 'Cochez cette case pour continuer.'],
+    ]);
+  });
+});
+
+describe('welcomeSchema', () => {
+  it('asks a first name and the box of the age', () => {
+    expect(welcomeSchema.parse({ name: ' Nadia ', adult: true })).toEqual({ name: 'Nadia', adult: true });
+    const empty = welcomeSchema.safeParse({ name: ' ', adult: false });
+    expect(empty.error?.issues.map(({ path, message }) => [path[0], message])).toEqual([
+      ['name', 'Votre prénom.'],
+      ['adult', 'Cochez cette case pour continuer.'],
+    ]);
+  });
+});
 
 describe('isRecentReset', () => {
   const now = new Date('2026-10-20T12:00:00Z');

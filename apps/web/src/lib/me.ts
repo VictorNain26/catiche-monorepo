@@ -1,7 +1,30 @@
-/** Who is signed in, as `/api/me` tells it; null for a visitor without a session. And their devices. */
+/**
+ * Who is signed in, as `/api/me` tells it; null for a visitor without a session. Their devices, and
+ * an adult's declarations: being 18 or over, and holding parental authority over each child.
+ */
 
 import { queryOptions } from '@tanstack/react-query';
+import type { InferResponseType } from 'hono/client';
 import { api, isProblem, parseResponse } from './api';
+import { ticked, z } from './zod';
+
+/** The adult's declaration of their age, the box's own words. */
+export const ADULT_LABEL = 'J’ai 18 ans ou plus.';
+
+/** A new adult's first name, and their age declared. */
+export const welcomeSchema = z.object({ name: z.string().trim().min(1, 'Votre prénom.').max(50, '50 caractères au plus.'), adult: ticked });
+
+/** What an adult has yet to declare, every box ticked: their age, and each child's link by the child's id. */
+export const declarationsSchema = z.object({ adult: ticked, guardianOf: z.record(z.string(), ticked) });
+
+/** The adult declares being 18 or over. */
+export const declareAdult = () => parseResponse(api.me.declarations.$post({ json: { adult: true } }));
+
+/** What an adult has yet to declare, as `/api/me` tells it. */
+type MissingDeclarations = Extract<InferResponseType<typeof api.me.$get, 200>, { role: 'guardian' }>['missing'];
+
+/** Whether the adult has a declaration to make before anything else. */
+export const hasMissingDeclarations = (missing: MissingDeclarations) => missing.adult || missing.guardianOf.length > 0;
 
 export const meQuery = queryOptions({
   queryKey: ['me'],
