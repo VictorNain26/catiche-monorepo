@@ -236,17 +236,18 @@ Le code vit dans `apps/server/src/eval/` ; `bun run eval` rejoue le jeu sur le v
   le temps passé (de l'ouverture de la séance, d'un message à l'autre, une pause au-delà de
   10 minutes, rien après une détresse), les notions qui résistent (dernier exercice travaillé dans
   la semaine non résolu après une aide, ou résolu avec une aide allée jusqu'à « Étape
-  intermédiaire »). L'élève voit le même résumé (`GET /api/summary`), son parent par
-  `GET /api/summary/:studentId`. L'écran (`components/week-summary.tsx` du web) dit la même
+  intermédiaire »). L'élève voit le même résumé (`GET /api/summary`), chacun de ses adultes,
+  parent ou proche, par `GET /api/summary/:studentId`. L'écran (`components/week-summary.tsx` du web) dit la même
   semaine au parent et à l'élève, avec une question à poser à l'enfant tirée de ce qui résiste.
 - **L'enfant a son espace à lui, dès la 6e, ouvert par son propre code** (décisions de Victor,
   2026-10-20) : un code du parent met son profil sur un appareil, le sien ou l'ordinateur de la
   famille, puis l'enfant y choisit un code de 6 chiffres que le parent ne voit pas
   (`platform/auth/student-sign-in.ts`, et `docs/architecture.md`, « Serveur »). L'écran « Qui fait
   ses devoirs ? » liste les profils de l'appareil ; chaque frère ou sœur entre par son code, et
-  « Changer de profil » referme le sien. Le parent peut toujours donner un code « oublié » : l'enfant
-  le sait, la date du changement s'affiche chez lui (CNIL, recommandation 5). L'enfant voit les
-  appareils qui portent son profil ; le parent les débloque ou les déconnecte. La garde du foyer
+  « Changer de profil » referme le sien. Chacun de ses parents peut toujours donner un code
+  « oublié » : l'enfant le sait, la date du changement s'affiche chez lui (CNIL, recommandation 5).
+  L'enfant voit les appareils qui portent son profil ; ses parents les débloquent ou les
+  déconnectent, un proche jamais. La garde du foyer
   refuse à l'enfant les autres routes de better-auth (`STUDENT_AUTH_PATHS`,
   `modules/household/routes.ts`).
 - **La détresse n'alerte pas le parent d'office** : l'événement est enregistré

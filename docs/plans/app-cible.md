@@ -130,9 +130,9 @@ sont au § 8.
 
 ## 3. Le modèle de famille
 
-Ce sont des règles. Le lien entre un adulte et un enfant est en place
-(`apps/server/src/modules/household/schema.ts`) ; les rôles, l'invitation et l'historique viennent
-avec les écrans qui s'en servent.
+Ce sont des règles. Le lien entre un adulte et un enfant, son rôle et l'invitation d'un adulte
+sont en place (`apps/server/src/modules/household`, `docs/architecture.md`) ; l'historique vient
+avec « Gérer ».
 
 **Un enfant a un ou plusieurs adultes.** Le « foyer » disparaît des mots et des écrans : chaque
 adulte voit les enfants qui le concernent. Deux maisons, c'est un enfant avec deux parents. Un
@@ -158,11 +158,8 @@ adulte peut avoir plusieurs enfants, de familles différentes.
 | Voir ce qu'un autre adulte a changé | oui | non | ce qui le touche |
 | Lire les conversations avec Tom | jamais | jamais | oui |
 
-**Inviter un adulte.** Un parent donne l'adresse e-mail de l'adulte et dit s'il est parent ou
-tuteur, ou proche. L'adulte reçoit un e-mail avec un bouton pour entrer. L'invitation vaut 30
-jours, comme aujourd'hui (`platform/auth/invitation.ts`). Les autres parents en sont prévenus par
-e-mail ; la liste des adultes montre l'état de chaque invitation. L'enfant le voit à sa prochaine
-entrée.
+**Inviter un adulte** : construit (A8, `apps/server/src/modules/household/service.ts`), sauf
+ceci : l'enfant le voit à sa prochaine entrée.
 
 **L'historique.** Chaque geste d'un parent sur l'enfant s'inscrit dans l'historique, sur la page
 « Gérer » : qui, quoi, quand, sur 90 jours. Un geste qui compte est aussi envoyé par e-mail aux
@@ -418,11 +415,8 @@ bouton de l'e-mail mène à `/entrer`, « Entrez dans Catiche » avec le bouton 
 **A3. Vous et votre enfant** (la première fois ; un seul écran). Le parent invité par Victor :
 construit (`apps/web/src/routes/bienvenue.tsx`, l'invitation dans
 `apps/server/src/platform/auth/invitation.ts`), précédé de `/invitation`, « Bienvenue sur
-Catiche » avec le bouton « Accepter l'invitation » (`invitation.tsx`).
-- Adulte invité par un parent : titre « Bienvenue, Nadia vous invite pour Léa ». Texte, pour un
-  proche : « Léa pourra vous dire où en sont ses devoirs, et vous pourrez lui répondre. » ;
-  pour un parent : « Vous déciderez avec Nadia pour Léa. » Puis « Votre prénom », « J'ai 18 ans
-  ou plus » et, pour un parent, la case d'autorité parentale. Bouton : « Continuer ».
+Catiche » avec le bouton « Accepter l'invitation » (`invitation.tsx`). L'adulte invité par un
+parent : construit aussi (`bienvenue.tsx`, `InvitedWelcome`).
 
 **A4. Où [prénom] travaille le soir ?** (après A3 pour le parent qui vient d'ajouter l'enfant,
 jamais pour un adulte invité ; et depuis « Gérer »).
@@ -478,25 +472,17 @@ l'emploie ([Google, « Communicating passkeys »](https://developers.google.com/
   - « Léa a oublié son code » : « Son code actuel ne marchera plus, nulle part. Avec le code de
     départ que vous allez obtenir, Léa en choisira un nouveau, et verra la date du
     changement. » ; « Obtenir un code de départ » ;
-  - « Les adultes de Léa » : « Karim, parent, invité le 3 mars, pas encore entré » ; « Monique,
-    proche » ; « Inviter un adulte » (vers A8) ; « Retirer » sur un proche ;
+  - « Les adultes de Léa » : construit, sur la page de l'enfant (`foyer.$studentId.tsx`) ;
   - « Plus » (replié) : « Ce que Tom retient » (« Proposer à Léa » ou « Retirer » ; à partir de
     15 ans, « À partir de 15 ans, Léa décide seule. ») ; « Son prénom et sa classe » ;
     « Historique » ; « Supprimer son compte ».
-- Proche seulement : « Pour ajouter un appareil, demandez un code de départ à Nadia ou à Karim. » ;
-  « Me retirer des adultes de Léa ».
+- Proche seulement : « Pour ajouter un appareil, demandez un code de départ à Nadia ou à Karim. »
+  « Vous suivez les devoirs de Léa. » et « Me retirer des adultes de Léa » sont construits, sur la
+  page de l'enfant.
 
-**A8. Invitez un adulte pour [prénom].**
-- Titre : « Invitez un adulte pour Léa » ; champ « Son adresse e-mail ».
-- Choix : « Parent ou tuteur de Léa » ; « Un proche : beau-parent, grand-parent, assistante
-  familiale… »
-- Texte : « Il recevra un e-mail pour entrer. Léa et les autres parents en seront prévenus. »
-- Bouton principal : « Envoyer l'invitation ».
-- E-mail : objet « Nadia vous invite sur Catiche, pour Léa » ; « Bonjour, Nadia vous invite à
-  suivre les devoirs du soir de Léa sur Catiche. » ; puis le bouton et les phrases de l'e-mail
-  d'invitation de Victor, construit (`apps/server/src/platform/auth/auth.ts`). Pas de code dans
-  cet e-mail : un code de 30 jours serait un mot de passe ; sur un autre appareil, l'adresse
-  invitée suffit, par A1.
+**A8. Invitez un adulte pour [prénom]** : construit (`foyer.$studentId_.inviter.tsx`, ses e-mails
+dans `apps/server/src/modules/household/service.ts`), sauf « Léa en sera prévenue », qui attend les
+écrans de l'enfant.
 
 **A9. Votre compte** (par le prénom, en haut de chaque écran de l'adulte). Construit
 (`apps/web/src/routes/foyer.compte.tsx`), sauf :
@@ -588,7 +574,7 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
   Plusieurs PR, chacune revue en profondeur (découpage revu par Victor le 2026-10-23) :
   1. le modèle de famille (fait, #562) ;
   2. l'entrée de l'adulte et son en-tête : A1, A2, A3 pour le parent invité par Victor, A9 (fait) ;
-  3. inviter un adulte, le rôle de proche et ses droits (A8, la liste des adultes) ;
+  3. inviter un adulte, le rôle de proche et ses droits (A8, la liste des adultes) (fait) ;
   4. relier l'appareil de l'enfant, A4, avec le code de départ de 7 jours et le carré à viser ;
   5. l'accueil en cartes (A5 complet), « Gérer » (A7), l'historique, la suppression avec 7 jours
      d'annulation ;
