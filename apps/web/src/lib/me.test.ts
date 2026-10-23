@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { declarationsSchema, isRecentReset, welcomeSchema } from './me';
+import { declarationsSchema, invitationLine, invitationPromise, invitedWelcomeSchema, isRecentReset, welcomeSchema } from './me';
 
 describe('declarationsSchema', () => {
   it('takes every box ticked', () => {
@@ -37,6 +37,44 @@ describe('welcomeSchema', () => {
       ['child.name', 'Écrivez son prénom.'],
       ['child.declaredGuardian', 'Cochez cette case pour continuer.'],
     ]);
+  });
+});
+
+describe('invitedWelcomeSchema', () => {
+  it('asks a relative their first name and age, nothing of the child', () => {
+    expect(invitedWelcomeSchema('relative').parse({ name: ' Monique ', adult: true, declaredGuardian: false })).toEqual({
+      name: 'Monique',
+      adult: true,
+      declaredGuardian: false,
+    });
+  });
+
+  it('asks a parent the box of parental authority too', () => {
+    expect(invitedWelcomeSchema('guardian').parse({ name: 'Karim', adult: true, declaredGuardian: true })).toEqual({
+      name: 'Karim',
+      adult: true,
+      declaredGuardian: true,
+    });
+    const unticked = invitedWelcomeSchema('guardian').safeParse({ name: '', adult: false, declaredGuardian: false });
+    expect(unticked.error?.issues.map(({ path, message }) => [path.join('.'), message])).toEqual([
+      ['name', 'Écrivez votre prénom.'],
+      ['adult', 'Cochez cette case pour continuer.'],
+      ['declaredGuardian', 'Cochez cette case pour continuer.'],
+    ]);
+  });
+});
+
+describe('the words of an invitation', () => {
+  const invitation = { invitedBy: 'Nadia', studentName: 'Léa' };
+
+  it('says who invites, for which child, and as what', () => {
+    expect(invitationLine({ ...invitation, role: 'relative' })).toBe('Nadia vous invite pour Léa, comme proche.');
+    expect(invitationLine({ ...invitation, role: 'guardian' })).toBe('Nadia vous invite pour Léa, comme parent.');
+  });
+
+  it('says, on the first screen, what the role brings', () => {
+    expect(invitationPromise({ ...invitation, role: 'relative' })).toBe('Léa pourra vous dire où en sont ses devoirs, et vous pourrez lui répondre.');
+    expect(invitationPromise({ ...invitation, role: 'guardian' })).toBe('Vous déciderez avec Nadia pour Léa.');
   });
 });
 

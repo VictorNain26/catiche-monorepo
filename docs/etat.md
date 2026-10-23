@@ -106,6 +106,9 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
   Un hook `before` sur `/passkey/generate-register-options`, lisant `isShortSession`
   (`platform/auth/student-devices.ts`), avec son test, fermerait la règle au serveur.
 
+- Une invitation d'adulte expirée (`adult_invitation`) n'est plus lue, mais sa ligne reste, avec
+  l'adresse de quelqu'un qui n'est pas entré. La supprimer à l'expiration, par une tâche régulière
+  ou à la lecture, avec son test, avant le premier élève réel.
 - L'e-mail de suppression invite à répondre (`platform/auth/auth.ts`), mais le mailer ne pose
   aucun `Reply-To` : la réponse irait à `MAIL_FROM`, que personne ne lit ; à faire pointer vers
   `contact@catiche.fr`, avec son test.

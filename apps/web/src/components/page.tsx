@@ -18,12 +18,14 @@ function HeaderAnchor({ icon: Icon, className, children, ...anchor }: ComponentP
 }
 
 /** A link of the screen's header, with its words: an icon alone says nothing to a child. */
-export const HeaderLink = createLink(HeaderAnchor);
+const HeaderLink = createLink(HeaderAnchor);
 
-/** The way back to the screen above. */
-export function BackLink(props: Omit<ComponentProps<typeof HeaderLink>, 'icon'>) {
-  return <HeaderLink {...props} icon={ChevronLeftIcon} />;
+function BackAnchor(props: ComponentProps<'a'>) {
+  return <HeaderAnchor {...props} icon={ChevronLeftIcon} />;
 }
+
+/** The way back to the screen above; a link of the router's, its params typed by its route. */
+export const BackLink = createLink(BackAnchor);
 
 /**
  * The student's profile, on each of their screens: whose space is open shows, and a tap on it
@@ -37,14 +39,15 @@ export function ProfileAction() {
 
 /**
  * A screen of the adult's, its header the same everywhere: « ← Vos enfants », named by the home's
- * title, except on the home itself; who is signed in, which opens their account; and « Quitter ».
+ * title, except on the home itself, or the way back to a screen below it, named by it; who is
+ * signed in, which opens their account; and « Quitter ».
  */
-export function AdultPage({ withBack = true, ...page }: Omit<PageProps, 'back' | 'action'> & { withBack?: boolean }) {
+export function AdultPage({ withBack = true, back, ...page }: Omit<PageProps, 'action'> & { withBack?: boolean }) {
   const { data: me } = useSuspenseQuery(meQuery);
   return (
     <Page
       {...page}
-      back={withBack ? <BackLink to="/foyer">Vos enfants</BackLink> : undefined}
+      back={back ?? (withBack ? <BackLink to="/foyer">Vos enfants</BackLink> : undefined)}
       action={
         <div className="flex flex-wrap items-center justify-end gap-x-4">
           <HeaderLink to="/foyer/compte" icon={UserRoundIcon}>

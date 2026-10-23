@@ -11,7 +11,7 @@ import { account, device as deviceTable, deviceProfile, session, user } from '..
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { birthMonthAged, STUDENT_CODE, type Student } from '../../testing/http';
-import { adultProfile, guardianship, studentProfile } from './schema';
+import { adultInvitation, adultProfile, guardianship, studentProfile } from './schema';
 
 const { db } = await testDatabase();
 
@@ -36,6 +36,11 @@ const asStudentB = await matrix.pair(guardianB, studentOfB.id);
 const [deviceOfA] = (await matrix.devices(guardianA, studentOfA.id)).devices;
 // Without it the device route would read « /devices/ », refused all the same: the matrix would prove nothing.
 if (!deviceOfA) throw new Error('The student of A has no device');
+const relativeOfA = await matrix.adult(guardianA, studentOfA.id, 'proche@example.com', 'relative');
+const guardianAId = await idOf(guardianA);
+// From 15 the child decides alone on the memory: a relative's proposal is refused all the same as not found.
+const olderOfA = await matrix.student(guardianA, { name: 'Lou', birthMonth: birthMonthAged(15) });
+await db.insert(guardianship).values({ adultId: await idOf(relativeOfA), studentId: olderOfA.id, role: 'relative' });
 
 describe('access matrix', () => {
   const api = matrix;
@@ -48,30 +53,40 @@ describe('access matrix', () => {
       body: { name: 'X', level: 'sixieme', birthMonth: birthMonthAged(11), declaredGuardian: true },
     },
     { method: 'PATCH', path: target, body: { name: 'Changé' } },
+    { method: 'PATCH', path: target, body: { memoryProposed: true } },
+    { method: 'PATCH', path: `/api/household/students/${olderOfA.id}`, body: { memoryProposed: true } },
     { method: 'POST', path: `${target}/activation-code`, body: { reason: 'device' } },
     { method: 'POST', path: `${target}/activation-code`, body: { reason: 'forgotten' } },
     { method: 'POST', path: `${target}/declaration`, body: { declaredGuardian: true } },
     { method: 'GET', path: `${target}/devices` },
     { method: 'POST', path: `${target}/devices/${deviceOfA.id}/unblock` },
     { method: 'DELETE', path: `${target}/devices/${deviceOfA.id}` },
+    { method: 'POST', path: `${target}/invitations`, body: { email: 'invite@example.com', role: 'guardian' } },
+    { method: 'DELETE', path: `${target}/invitations/${crypto.randomUUID()}` },
+    { method: 'GET', path: `${target}/adults` },
+    { method: 'DELETE', path: `${target}/adults/${guardianAId}` },
     { method: 'DELETE', path: target },
   ];
+  // A relative follows the student, and manages nothing of them: refused as an adult without a link.
   const refused = [
     { actor: 'anonymous', cookie: undefined, status: 401, routes },
     { actor: 'the student', cookie: asStudentA, status: 403, routes },
     { actor: 'another student', cookie: asStudentB, status: 403, routes },
     { actor: 'an adult without a link to the student', cookie: guardianB, status: 404, routes: routes.slice(2) },
+    { actor: 'a relative of the student', cookie: relativeOfA, status: 404, routes: routes.slice(2) },
   ];
 
   for (const { actor, cookie, status, routes: denied } of refused) {
     for (const { method, path, body } of denied) {
-      it(`refuses ${method} ${path.replace(studentOfA.id, ':id').replace(deviceOfA.id, ':device')} to ${actor} with ${String(status)}, the student of A untouched`, async () => {
+      it(`refuses ${method} ${path.replace(studentOfA.id, ':id').replace(olderOfA.id, ':id-of-15').replace(deviceOfA.id, ':device')} ${JSON.stringify(body ?? {})} to ${actor} with ${String(status)}, the student of A untouched`, async () => {
         const res = await api.request(method, path, { cookie, body });
         expect(res.status).toBe(status);
         expect(res.headers.get('content-type')).toStartWith('application/problem+json');
         const [row] = await db.select({ name: user.name }).from(user).where(eq(user.id, studentOfA.id));
         expect(row?.name).toBe('Léa');
         expect((await api.sessionUser(asStudentA))?.id).toBe(studentOfA.id);
+        expect((await linksOf(studentOfA.id)).map(({ adultId }) => adultId)).toContain(guardianAId);
+        expect(await db.select().from(adultInvitation).where(eq(adultInvitation.studentId, studentOfA.id))).toEqual([]);
       });
     }
   }
@@ -79,7 +94,7 @@ describe('access matrix', () => {
   it('lists to each adult only the students they are linked to', async () => {
     const listA = (await (await api.request('GET', '/api/household/students', { cookie: guardianA })).json()) as Student[];
     const listB = (await (await api.request('GET', '/api/household/students', { cookie: guardianB })).json()) as Student[];
-    expect(listA.map((s) => s.id)).toEqual([studentOfA.id]);
+    expect(listA.map((s) => s.id)).toEqual([studentOfA.id, olderOfA.id]);
     expect(listB.map((s) => s.id)).toEqual([studentOfB.id]);
   });
 });
@@ -94,7 +109,8 @@ describe('/api/me', () => {
     const fresh = await api.guardian('nouveau@example.com');
     expect(await (await api.request('GET', '/api/me', { cookie: fresh })).json()).toMatchObject({
       name: 'Parent',
-      role: 'guardian',
+      // An adult, whatever their role for each child: parent or relative is the link's.
+      role: 'adult',
       level: null,
       missing: { adult: false, guardianOf: [] },
     });
@@ -182,6 +198,7 @@ describe('a guardian creates a student', () => {
     ['birthMonth', '2014-3'],
     ['name', '   '],
     ['name', 'a'.repeat(51)],
+    ['name', 'Léa\nAccepter : https://piege.example'],
   ] as const) {
     it(`refuses ${field} ${JSON.stringify(value).slice(0, 20)}`, async () => {
       const body = { name: 'Léa', level: 'cinquieme', birthMonth: birthMonthAged(12), declaredGuardian: true, [field]: value };

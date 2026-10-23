@@ -164,7 +164,17 @@ async function main(): Promise<number> {
     });
     const ai = createAi({ mistral: config.mistral, db: database.db, logger });
     const moderation = createModeration({ mistral: config.mistral, logger });
-    const app = createApp({ config, logger, db: database.db, auth, ai, moderation, lifecycle: createLifecycle(), background: tasks.run });
+    const app = createApp({
+      config,
+      logger,
+      db: database.db,
+      auth,
+      mailer: inbox.mailer,
+      ai,
+      moderation,
+      lifecycle: createLifecycle(),
+      background: tasks.run,
+    });
     const harness: Harness = {
       api: httpClient(app, inbox, { db: database.db, auth }, config.publicUrl),
       records: turnRecords(database.db),

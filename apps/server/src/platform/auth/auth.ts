@@ -16,10 +16,11 @@ import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { emailOTP, magicLink } from 'better-auth/plugins';
 import type { Logger } from 'pino';
 import type { Config } from '../../config';
+import { firstNameSchema } from '../../domain/first-name';
 import type { Db } from '../db/client';
 import type { Mailer } from '../email/mailer';
 import { CLIENT_ADDRESS_HEADER } from '../http/client-address';
-import { INVITATION_DAYS, invitationIdentifier, spendInvitationLinks } from './invitation';
+import { INVITATION_DAYS, invitationEmail, invitationIdentifier, spendInvitationLinks, type InvitationLetter } from './invitation';
 import { account, passkey as passkeyTable, session, user, verification } from './schema';
 import { createStudentDevices } from './student-devices';
 import { ACTIVATION_PREFIX, EMAIL_SIGN_INS, isStudentEmail, studentSignIn, type StudentAccess } from './student-sign-in';
@@ -42,6 +43,25 @@ interface AuthDeps {
 
 /** The sign-in code's life, in the email and on the screen. */
 const CODE_MINUTES = 15;
+
+/** An adult's first name, trimmed, as the rule of a child's takes it (domain/first-name.ts); refused otherwise. */
+const firstName = (name: string) => {
+  const parsed = firstNameSchema.safeParse(name);
+  if (!parsed.success) throw APIError.from('BAD_REQUEST', { code: 'INVALID_NAME', message: 'A first name holds on one line, 50 characters at most' });
+  return parsed.data;
+};
+
+/** Victor's invitation, in general words: no one invites for a named child. */
+const BETA_LETTER: InvitationLetter = {
+  subject: 'Votre invitation à Catiche',
+  intro: 'Voici votre invitation à suivre les devoirs du soir de votre enfant sur Catiche.',
+};
+
+/** The letter an invitation passed to its link, which only the server makes; Victor's otherwise. */
+const invitationLetter = (metadata: Record<string, unknown> | undefined): InvitationLetter =>
+  typeof metadata?.['subject'] === 'string' && typeof metadata['intro'] === 'string'
+    ? { subject: metadata['subject'], intro: metadata['intro'] }
+    : BETA_LETTER;
 
 export function createAuth(
   db: Db,
@@ -102,10 +122,12 @@ export function createAuth(
       user: {
         create: {
           // Every path that creates a guardian; a student is inserted by the household module.
-          before: async ({ email }, ctx) => {
-            if (!ctx || !(await invited(ctx, email))) {
+          before: async (created, ctx) => {
+            if (!ctx || !(await invited(ctx, created.email))) {
               throw APIError.from('FORBIDDEN', { code: 'INVITATION_REQUIRED', message: 'Sign-up is by invitation only' });
             }
+            // Nameless until the first screen asks it; named, as a child's first name is.
+            return created.name === '' ? undefined : { data: { ...created, name: firstName(created.name) } };
           },
           // Spent once the account exists, after the transaction commits (better-auth's db/with-hooks.mjs),
           // with every link the invitation sent: the account entered by a code, they open nothing more.
@@ -113,6 +135,10 @@ export function createAuth(
             await ctx?.context.internalAdapter.deleteVerificationByIdentifier(invitationIdentifier(email));
             await spendInvitationLinks(db, email);
           },
+        },
+        // `update-user`, the adult's own first name: the rule of a child's.
+        update: {
+          before: (changed) => Promise.resolve(changed.name === undefined ? undefined : { data: { ...changed, name: firstName(changed.name) } }),
         },
       },
     },
@@ -165,13 +191,16 @@ export function createAuth(
       magicLink({
         expiresIn: INVITATION_DAYS * 24 * 60 * 60,
         storeToken: 'hashed',
-        sendMagicLink: async ({ email, url }) => {
+        // A parent's invitation of another adult says who invites, for which child (./invitation.ts).
+        sendMagicLink: async ({ email, url, metadata }) => {
           const link = `${origin}/invitation#${new URL(url).searchParams.toString()}`;
-          await send({
-            to: email,
-            subject: 'Votre invitation à Catiche',
-            text: `Bonjour,\n\nVoici votre invitation à suivre les devoirs du soir de votre enfant sur Catiche.\n\nAccepter l’invitation : ${link}\n\nSur un autre appareil ? Ouvrez ${host} et donnez cette adresse.\n\nL’invitation vaut ${String(INVITATION_DAYS)} jours.`,
-          });
+          await send(
+            invitationEmail(
+              email,
+              invitationLetter(metadata),
+              `Accepter l’invitation : ${link}\n\nSur un autre appareil ? Ouvrez ${host} et donnez cette adresse.`,
+            ),
+          );
         },
       }),
       emailOTP({

@@ -31,7 +31,7 @@ function Enter() {
       if (error) {
         // The email touched again by the adult already in with its code: their home, not an error.
         const me = await queryClient.query({ ...meQuery, staleTime: 0 });
-        if (me?.role === 'guardian' && me.email === email) await navigate({ to: '/', replace: true });
+        if (me?.role === 'adult' && me.email === email) await navigate({ to: '/', replace: true });
         else setSpent(true);
         return;
       }

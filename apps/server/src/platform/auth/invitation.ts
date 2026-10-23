@@ -14,8 +14,11 @@ import { user, verification } from './schema';
 const INVITATION_PREFIX = 'sign-up-invitation:';
 export const INVITATION_DAYS = 30;
 
-// better-auth stores an address in lowercase (api/routes/sign-up.mjs): the invitation is keyed the same way.
-const normalised = (email: string) => email.trim().toLowerCase();
+/** When an invitation sent now ends. */
+export const invitationExpiry = () => new Date(Date.now() + INVITATION_DAYS * 86_400_000);
+
+// better-auth stores an address in lowercase (api/routes/sign-up.mjs): an invitation is keyed the same way.
+export const normalised = (email: string) => email.trim().toLowerCase();
 
 export const invitationIdentifier = (email: string) => `${INVITATION_PREFIX}${normalised(email)}`;
 
@@ -40,12 +43,40 @@ export class AccountExists extends Error {
   }
 }
 
-export async function invite({ db, auth }: { db: Db; auth: Auth }, email: string) {
+/**
+ * What the email says above its button, when someone invites: who, for which child. Victor's own
+ * invitation says it in general words (./auth.ts).
+ */
+export interface InvitationLetter {
+  subject: string;
+  intro: string;
+}
+
+/**
+ * An invitation's email: who invites and for which child, then `action`, the way to accept it,
+ * which is a button only for an address without an account.
+ */
+export const invitationEmail = (to: string, { subject, intro }: InvitationLetter, action: string) => ({
+  to,
+  subject,
+  text: `Bonjour,\n\n${intro}\n\n${action}\n\nL’invitation vaut ${String(INVITATION_DAYS)} jours.`,
+});
+
+/**
+ * The invitation of an address without an account taken back, with the links it sent: they let
+ * no one in any more. An address with an account has none left, spent when its account was made.
+ */
+export async function revokeInvitation(db: Db, email: string) {
+  await db.delete(verification).where(eq(verification.identifier, invitationIdentifier(email)));
+  await spendInvitationLinks(db, email);
+}
+
+export async function invite({ db, auth }: { db: Db; auth: Auth }, email: string, letter?: InvitationLetter) {
   const address = normalised(email);
   const [existing] = await db.select({ id: user.id }).from(user).where(eq(user.email, address));
   if (existing) throw new AccountExists(address);
   const identifier = invitationIdentifier(address);
-  const expiresAt = new Date(Date.now() + INVITATION_DAYS * 86_400_000);
+  const expiresAt = invitationExpiry();
   await db.transaction(async (tx) => {
     await tx.delete(verification).where(eq(verification.identifier, identifier));
     await tx.insert(verification).values({ id: crypto.randomUUID(), identifier, value: 'invited', expiresAt });
@@ -53,6 +84,9 @@ export async function invite({ db, auth }: { db: Db; auth: Auth }, email: string
   await spendInvitationLinks(db, address);
   // A call of the server's own: the route itself is disabled (better-auth enforces `disabledPaths`
   // on requests only, api/index.mjs), so no one else asks for a link.
-  await auth.api.signInMagicLink({ body: { email: address, ...INVITATION_LINK }, headers: new Headers() });
+  await auth.api.signInMagicLink({
+    body: { email: address, ...INVITATION_LINK, ...(letter === undefined ? {} : { metadata: { ...letter } }) },
+    headers: new Headers(),
+  });
   return { expiresAt };
 }

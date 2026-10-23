@@ -319,6 +319,15 @@ describe('a guardian adds their children to this computer', () => {
     expect((await computer.profiles()).profiles.map(({ id }) => id)).toEqual([lea.id]);
   });
 
+  // A parent links a device, with a code (app-cible.md, question 3): a relative does not.
+  it('refuses a relative of the child, as an adult without a link', async () => {
+    const { lea } = await family('parent-de-lea@example.com');
+    const computer = await guardianOn('grand-mere@example.com');
+    await db.insert(guardianship).values({ adultId: (await api.sessionUser(computer.cookie()))?.id ?? '', studentId: lea.id, role: 'relative' });
+    expect((await computer.addProfiles([lea.id])).status).toBe(404);
+    expect((await computer.profiles()).profiles).toEqual([]);
+  });
+
   it("refuses a child the adult is not linked to, and a student's session", async () => {
     const computer = await guardianOn('pas-le-mien@example.com');
     await api.student(computer.cookie());

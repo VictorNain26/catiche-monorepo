@@ -148,6 +148,13 @@
       "when": 1792781185723,
       "tag": "0020_adult_entry",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792791524061,
+      "tag": "0021_adult_invitation",
+      "breakpoints": true
     }
   ]
 }

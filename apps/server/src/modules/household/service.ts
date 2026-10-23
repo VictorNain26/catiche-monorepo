@@ -10,10 +10,23 @@ import { generateId } from '@better-auth/core/utils/id';
 import type { SchoolLevel } from '../../domain/levels';
 import { memoryConsent, type MemoryAnswer } from '../../domain/memory-consent';
 
-export type { MemoryAnswer };
+export type { AdultRole, MemoryAnswer };
+import type { AdultRole } from '../../domain/adult-roles';
+import { invitationEmail, invitationExpiry, type InvitationLetter } from '../../platform/auth/invitation';
 import type { ActivationReason } from '../../platform/auth/student-sign-in';
+import type { Mailer } from '../../platform/email/mailer';
 import { Problem } from '../../platform/http/problem';
 import type { HouseholdRepository } from './repository';
+
+/** The role as an email names it, after « comme ». */
+const ROLE_WORDS: Record<AdultRole, string> = { guardian: 'parent', relative: 'proche' };
+
+/**
+ * Catiche sends each invitation from its own domain: a parent's invitations waiting at once, and
+ * sent in a day, withdrawn ones included, enough for a family, never a flood.
+ */
+const WAITING_INVITATIONS_MAX = 10;
+export const INVITATIONS_PER_DAY = 20;
 
 export interface StudentInput {
   name: string;
@@ -26,6 +39,20 @@ interface Deps {
   createActivationCode: (userId: string, reason: ActivationReason) => Promise<{ code: string; expiresAt: Date }>;
   /** Whether the user's session on this device is a short one, the device being shared. */
   sharedDevice: (deviceId: string, userId: string) => Promise<boolean>;
+  /**
+   * The closed beta's invitation of an address without an account, its email saying `letter`
+   * above its button; `false`, sending nothing, when the address has an account already.
+   */
+  inviteAddress: (email: string, letter: InvitationLetter) => Promise<boolean>;
+  /** The closed beta's invitation of the address taken back, with its links. */
+  revokeAddress: (email: string) => Promise<void>;
+  /** One more invitation sent by the adult, `false` once INVITATIONS_PER_DAY are spent. */
+  spendInvitation: (adultId: string) => Promise<boolean>;
+  send: Mailer;
+  /** Runs a task after the request has answered, its failure logged. */
+  later: (task: () => Promise<void>) => void;
+  /** The public address of Catiche, where an invitation waits for an adult who has an account. */
+  publicUrl: string;
 }
 
 /** Who a session is: the device it was opened on, when the household knows it. */
@@ -63,11 +90,26 @@ const toStudent = ({ birthMonth, memoryProposedAt, memoryAnswer, ...student }: S
   };
 };
 
-export function createHouseholdService({ repository, createActivationCode, sharedDevice }: Deps) {
+export function createHouseholdService({
+  repository,
+  createActivationCode,
+  sharedDevice,
+  inviteAddress,
+  revokeAddress,
+  spendInvitation,
+  send,
+  later,
+  publicUrl,
+}: Deps) {
   const found = async (adultId: string, studentId: string) => {
     const student = await repository.findStudent(adultId, studentId);
     if (!student) throw new Problem('NOT_FOUND');
     return toStudent(student);
+  };
+
+  /** A relative manages nothing: refused as an adult without a link, by a clause of the query. */
+  const managed = async (adultId: string, studentId: string) => {
+    if (!(await repository.manages(adultId, studentId))) throw new Problem('NOT_FOUND');
   };
 
   const isStudent = (userId: string) => repository.isStudent(userId);
@@ -89,18 +131,21 @@ export function createHouseholdService({ repository, createActivationCode, share
     async me({ id, name, email, deviceId }: SignedIn) {
       const student = await repository.findProfile(id);
       if (student) return { id, name, role: 'student' as const, level: student.level };
-      const [missing, offer, shared] = await Promise.all([
+      const [missing, offer, shared, invitations] = await Promise.all([
         repository.missingDeclarations(id),
         repository.passkeyOffer(id),
         deviceId === null ? false : sharedDevice(deviceId, id),
+        repository.pendingInvitations(email),
       ]);
       return {
         id,
         name,
-        role: 'guardian' as const,
+        role: 'adult' as const,
         level: null,
         email,
         missing,
+        // The invitations waiting for the address the adult entered by: an email proved it.
+        invitations,
         // Whether the session closes after ten minutes without use: on a device a family shares.
         sharedDevice: shared,
         // Offered from the second entry by email, until a passkey exists or the offer is put
@@ -147,14 +192,17 @@ export function createHouseholdService({ repository, createActivationCode, share
       patch: { name?: string | undefined; level?: SchoolLevel | undefined; memoryProposed?: boolean | undefined },
     ) {
       // From 15 the child decides alone: the guardian neither proposes nor erases it.
-      if (patch.memoryProposed !== undefined && (await found(adultId, studentId)).memory.decidesAlone) throw new Problem('FORBIDDEN');
+      if (patch.memoryProposed !== undefined) {
+        await managed(adultId, studentId);
+        if ((await found(adultId, studentId)).memory.decidesAlone) throw new Problem('FORBIDDEN');
+      }
       if (!(await repository.updateStudent(adultId, studentId, patch))) throw new Problem('NOT_FOUND');
       return found(adultId, studentId);
     },
 
     /** A code for a new device of the student, or for the code they forgot, which then stops. */
     async activationCode(adultId: string, studentId: string, reason: ActivationReason) {
-      await found(adultId, studentId);
+      await managed(adultId, studentId);
       return createActivationCode(studentId, reason);
     },
 
@@ -163,8 +211,82 @@ export function createHouseholdService({ repository, createActivationCode, share
     },
 
     async listDevices(adultId: string, studentId: string) {
-      await found(adultId, studentId);
+      await managed(adultId, studentId);
       return repository.listDevices(adultId, studentId);
+    },
+
+    /**
+     * A parent who declared the link invites an adult for the student, as a parent or a relative.
+     * An address without an account receives the closed beta's invitation, whose button lets it
+     * in; one with an account, a link to Catiche, where the invitation waits. The other parents
+     * are told.
+     */
+    async inviteAdult(adultId: string, studentId: string, { email, role }: { email: string; role: AdultRole }) {
+      const [parent, followed] = await Promise.all([repository.invitingParent(adultId, studentId), repository.followedBy(studentId, email)]);
+      if (!parent) throw new Problem('NOT_FOUND');
+      if (!parent.declaredAt) throw new Problem('FORBIDDEN', 'la déclaration d’autorité parentale');
+      if (followed) throw new Problem('INVALID_REQUEST', 'email: cette adresse suit déjà cet enfant');
+      if ((await repository.waitingFrom(adultId, studentId, email)) >= WAITING_INVITATIONS_MAX || !(await spendInvitation(adultId))) {
+        throw new Problem('RATE_LIMITED');
+      }
+      await repository.saveInvitation({ studentId, invitedBy: adultId, email, role, expiresAt: invitationExpiry() });
+      // Each on one line, as every first name is (domain/first-name.ts): none adds a link to the email.
+      const { adultName, studentName } = parent;
+      const letter = {
+        subject: `${adultName} vous invite sur Catiche, pour ${studentName}`,
+        intro: `${adultName} vous invite à suivre les devoirs du soir de ${studentName} sur Catiche.`,
+      };
+      // After the answer, which then tells nothing of whether the address has an account.
+      later(async () => {
+        if (!(await inviteAddress(email, letter)))
+          await send(invitationEmail(email, letter, `L’invitation vous attend dans Catiche : ${publicUrl}/`));
+      });
+      for (const to of parent.otherParents) {
+        later(() =>
+          send({
+            to,
+            subject: `${adultName} a invité un adulte pour ${studentName}`,
+            text: `Bonjour,\n\n${adultName} a invité ${email} pour ${studentName}, comme ${ROLE_WORDS[role]}.\n\nVous verrez dans Catiche quand cette personne sera entrée.`,
+          }),
+        );
+      }
+    },
+
+    /**
+     * The adult accepts an invitation to their address: linked to the student with its role, once
+     * they declared being 18 or over, and, for a parent, holding parental authority.
+     */
+    async acceptInvitation(adult: { id: string; email: string }, invitationId: string, declaredGuardian: boolean) {
+      if ((await repository.missingDeclarations(adult.id)).adult) throw new Problem('FORBIDDEN', 'la déclaration de majorité');
+      const accepted = await repository.acceptInvitation(adult.id, adult.email, invitationId, declaredGuardian);
+      if (accepted === 'undeclared') throw new Problem('INVALID_REQUEST', 'declaredGuardian: la déclaration d’autorité parentale');
+      if (!accepted) throw new Problem('NOT_FOUND');
+      return { studentId: accepted.studentId };
+    },
+
+    async declineInvitation(email: string, invitationId: string) {
+      if (!(await repository.declineInvitation(email, invitationId))) throw new Problem('NOT_FOUND');
+    },
+
+    /**
+     * A parent withdraws an invitation still waiting: a mistyped address keeps no way to the
+     * child, nor, once no other child's invitation waits for it, into the closed beta.
+     */
+    async withdrawInvitation(adultId: string, studentId: string, invitationId: string) {
+      const withdrawn = await repository.withdrawInvitation(adultId, studentId, invitationId);
+      if (!withdrawn) throw new Problem('NOT_FOUND');
+      if (!withdrawn.stillInvited) await revokeAddress(withdrawn.email);
+    },
+
+    /** For a parent: the other adults of the student, and the invitations still waiting. */
+    async listAdults(adultId: string, studentId: string) {
+      await managed(adultId, studentId);
+      return repository.adultsOf(adultId, studentId);
+    },
+
+    /** A parent removes a relative, or a relative themselves; never a parent. */
+    async removeAdult(adultId: string, studentId: string, removedId: string) {
+      if (!(await repository.removeRelative(adultId, studentId, removedId))) throw new Problem('NOT_FOUND');
     },
 
     async unblockDevice(adultId: string, studentId: string, deviceId: string) {

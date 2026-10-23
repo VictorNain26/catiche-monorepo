@@ -17,10 +17,21 @@ En place (`apps/server/src`) :
   migrations sous verrou et vérifiées au démarrage), `auth` (better-auth et ses tables),
   `observability` (pino), `lifecycle` (santé et arrêt).
 - `modules/household` : le lien entre un adulte et un enfant, qui permet plusieurs adultes par
-  enfant ; l'élève créé par un adulte sans aucun identifiant (ni e-mail, ni mot de passe, ni nom de
-  famille), ses appareils ; les déclarations horodatées de l'adulte, majeur et représentant légal
-  de chaque enfant ; l'accès de l'adulte à l'élève comme clause de la requête SQL (`studentsOf`),
-  une matrice de tests d'accès croisés.
+  enfant, chacun parent ou proche (`guardianship.role`) ; l'élève créé par un adulte sans aucun
+  identifiant (ni e-mail, ni mot de passe, ni nom de famille), ses appareils ; les déclarations
+  horodatées de l'adulte, majeur et représentant légal de chaque enfant dont il est parent ;
+  l'accès de l'adulte à l'élève comme clause de la requête SQL, `studentsOf` pour lire (la fiche,
+  la semaine) et `managedBy` pour gérer (le reste, réservé au parent : un proche y reçoit 404),
+  une matrice de tests d'accès croisés. Un parent invite un autre adulte, parent ou proche, pour
+  un enfant (`adult_invitation`, `POST /api/household/students/:id/invitations`) : une adresse sans
+  compte reçoit l'invitation de bêta fermée, dont l'e-mail dit qui invite et pour quel enfant ;
+  une adresse avec un compte, un lien vers Catiche ; les autres parents sont prévenus. L'adulte
+  l'accepte depuis son premier écran ou son accueil (`GET /api/me`, `invitations`), son adresse
+  prouvée par l'e-mail d'entrée ; un parent annule une invitation en attente. Un prénom,
+  d'enfant ou d'adulte, tient sur une ligne (`domain/first-name.ts`, et un hook de better-auth
+  pour l'adulte) : le mailer fait un lien d'une ligne « libellé : https://… ».
+  Un parent retire un proche, un proche se retire lui-même, aucun
+  parent ne retire l'autre.
 - `platform/email` : l'envoi d'un e-mail, Scaleway TEM par son SDK en production, le journal en
   développement. Le gardien n'a pas de mot de passe : il entre par un e-mail envoyé à son adresse
   (plugin `email-otp`), dont le bouton mène à `/entrer` avec l'adresse et le code après le `#`, que
@@ -34,7 +45,8 @@ En place (`apps/server/src`) :
   partagé (`GET /api/me`, `passkeyOffer`). Une clé se crée,
   et le compte se supprime (`POST /api/auth/delete-user`, que le web n'appelle pas encore : la
   suppression se fait sur demande), depuis une session ouverte il y a moins de 10 minutes ; la
-  suppression emporte les enfants dont l'adulte est le seul lien. L'élève n'a pas de clé : le garde du foyer lui
+  suppression emporte les enfants dont l'adulte est le dernier parent, leurs proches n'en gardant
+  pas le lien. L'élève n'a pas de clé : le garde du foyer lui
   ferme les routes de better-auth, sauf les siennes et celles par où son parent entre sur son
   appareil. Une session vit 90 jours sans usage, sauf sur un appareil partagé. Les envois partent
   après la réponse (`platform/lifecycle/background.ts`), que l'arrêt attend.

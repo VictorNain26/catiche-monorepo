@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test';
 import { Hono } from 'hono';
 import { hc } from 'hono/client';
 import { parseResponse } from './api';
-import { MONTHS, birthYears, householdMessage, isLevel, memoryStatus, newChildSchema } from './household';
+import { MONTHS, birthYears, householdMessage, inviteSchema, isLevel, memoryStatus, newChildSchema, roleChoices } from './household';
 
 const problem = (code: string, status: 400 | 404 | 429 | 500) =>
   new Hono().get('/', (c) => c.json({ status, code }, status, { 'Content-Type': 'application/problem+json' }));
@@ -117,6 +117,30 @@ describe('birthYears', () => {
     expect(years[0]).toBe('2006');
     expect(years.at(-1)).toBe('2021');
     expect(years).toHaveLength(16);
+  });
+});
+
+describe('inviteSchema', () => {
+  it('gives the server a trimmed address and the role chosen', () => {
+    expect(inviteSchema.parse({ email: ' karim@example.com ', role: 'guardian' })).toEqual({ email: 'karim@example.com', role: 'guardian' });
+    expect(inviteSchema.parse({ email: 'monique@example.com', role: 'relative' })).toEqual({ email: 'monique@example.com', role: 'relative' });
+  });
+
+  it('says, under each field, what to do', () => {
+    const empty = inviteSchema.safeParse({ email: 'karim', role: '' });
+    expect(empty.error?.issues.map(({ path, message }) => [path[0], message])).toEqual([
+      ['email', 'Écrivez son adresse e-mail, par exemple nom@exemple.fr.'],
+      ['role', 'Choisissez : parent ou proche.'],
+    ]);
+  });
+});
+
+describe('roleChoices', () => {
+  it('names the two roles with the child’s name, as A8 does', () => {
+    expect(roleChoices('Léa')).toEqual([
+      ['guardian', 'Parent ou tuteur de Léa'],
+      ['relative', 'Un proche : beau-parent, grand-parent, assistante familiale…'],
+    ]);
   });
 });
 

@@ -69,6 +69,44 @@ export const unblockDevice = (id: string, deviceId: string) =>
 export const removeDevice = (id: string, deviceId: string) =>
   parseResponse(students[':id'].devices[':deviceId'].$delete({ param: { id, deviceId } }));
 
+/** For a parent: the other adults of the child, and the invitations still waiting. */
+export const adultsQuery = (studentId: string) =>
+  queryOptions({
+    queryKey: ['students', studentId, 'adults'],
+    queryFn: () => parseResponse(students[':id'].adults.$get({ param: { id: studentId } })),
+  });
+
+export type InvitationInput = InferRequestType<(typeof students)[':id']['invitations']['$post']>['json'];
+export type AdultRole = InvitationInput['role'];
+
+/** A parent invites an adult for the child; the adult receives an email, the other parents are told. */
+export const inviteAdult = (id: string, json: InvitationInput) => parseResponse(students[':id'].invitations.$post({ param: { id }, json }));
+
+/** A parent removes a relative, or a relative themselves. */
+export const removeAdult = (id: string, adultId: string) => parseResponse(students[':id'].adults[':adultId'].$delete({ param: { id, adultId } }));
+
+/** A parent withdraws an invitation still waiting. */
+export const withdrawInvitation = (id: string, invitationId: string) =>
+  parseResponse(students[':id'].invitations[':invitationId'].$delete({ param: { id, invitationId } }));
+
+/** The role as a list of adults says it. */
+export const ROLE_LABELS: Record<AdultRole, string> = { guardian: 'parent', relative: 'proche' };
+
+const isRole = (value: unknown): value is AdultRole => typeof value === 'string' && Object.hasOwn(ROLE_LABELS, value);
+
+/** The two roles a parent chooses from, named with the child's first name (A8). */
+export const roleChoices = (name: string) =>
+  [
+    ['guardian', `Parent ou tuteur de ${name}`],
+    ['relative', 'Un proche : beau-parent, grand-parent, assistante familiale…'],
+  ] as const satisfies readonly (readonly [AdultRole, string])[];
+
+/** The invitation of an adult, as the server takes it. */
+export const inviteSchema = z.object({
+  email: z.string().trim().pipe(z.email('Écrivez son adresse e-mail, par exemple nom@exemple.fr.')),
+  role: z.custom<AdultRole>(isRole, 'Choisissez : parent ou proche.'),
+});
+
 /** A failed household request, in words a parent reads; the server's own message never shows. */
 export function householdMessage(error: unknown, invalid = 'Vérifiez ce que vous avez saisi.'): string {
   if (isProblem(error, 'INVALID_REQUEST')) return invalid;

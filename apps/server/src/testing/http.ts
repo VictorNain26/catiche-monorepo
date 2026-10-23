@@ -7,6 +7,7 @@
  */
 
 import { parseJsonEventStream, readUIMessageStream, uiMessageChunkSchema, type UIMessage, type UIMessageChunk } from 'ai';
+import type { AdultRole } from '../modules/household';
 import type { Auth } from '../platform/auth/auth';
 import { invite } from '../platform/auth/invitation';
 import type { Db } from '../platform/db/client';
@@ -150,6 +151,37 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, { db
         'sign-in',
       );
       return cookieOf(res);
+    },
+    /** A guardian invites an adult for the student: the email the address receives. */
+    async inviteAdult(cookie: string, studentId: string, email: string, role: AdultRole) {
+      const received = mail.next(email);
+      await expectStatus(
+        request('POST', `/api/household/students/${studentId}/invitations`, { cookie, body: { email, role } }),
+        204,
+        'adult invitation',
+      );
+      return received;
+    },
+    /**
+     * An adult invited for the student, in by the code their address received, declared 18 or
+     * over, who accepted from their home, a parent with the box ticked: their session.
+     */
+    async adult(cookie: string, studentId: string, email: string, role: AdultRole) {
+      await api.inviteAdult(cookie, studentId, email, role);
+      const own = await api.signIn(email);
+      await expectStatus(request('POST', '/api/me/declarations', { cookie: own, body: { adult: true } }), 204, 'adult declaration');
+      const me = (await (await request('GET', '/api/me', { cookie: own })).json()) as { invitations: { id: string; studentId: string }[] };
+      const invitation = me.invitations.find((pending) => pending.studentId === studentId);
+      if (!invitation) throw new Error(`No invitation for ${email}`);
+      await expectStatus(
+        request('POST', `/api/me/invitations/${invitation.id}/accept`, {
+          cookie: own,
+          body: role === 'guardian' ? { declaredGuardian: true } : {},
+        }),
+        200,
+        'invitation accepted',
+      );
+      return own;
     },
     async student(cookie: string, overrides: Partial<Omit<Student, 'id'>> = {}) {
       const res = await expectStatus(

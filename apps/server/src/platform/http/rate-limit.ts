@@ -10,6 +10,20 @@ import { RateLimiterMemory, RateLimiterRes } from 'rate-limiter-flexible';
 import type { AppEnv } from './env';
 import { Problem } from './problem';
 
+/** A budget of `points` per `durationSeconds` for each key, in memory as the requests' own: `false` once the key spent it. */
+export function keyedBudget({ points, durationSeconds }: { points: number; durationSeconds: number }) {
+  const limiter = new RateLimiterMemory({ points, duration: durationSeconds });
+  return async (key: string) => {
+    try {
+      await limiter.consume(key);
+      return true;
+    } catch (rejection) {
+      if (!(rejection instanceof RateLimiterRes)) throw rejection;
+      return false;
+    }
+  };
+}
+
 export function rateLimit({ points, durationSeconds }: { points: number; durationSeconds: number }): MiddlewareHandler<AppEnv> {
   const limiter = new RateLimiterMemory({ points, duration: durationSeconds });
   return async (c, next) => {

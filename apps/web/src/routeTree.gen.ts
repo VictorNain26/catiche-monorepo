@@ -26,6 +26,7 @@ import { Route as FoyerDeclarationsRouteImport } from './routes/foyer.declaratio
 import { Route as ProfilsIndexRouteImport } from './routes/profils.index'
 import { Route as ProfilsStudentIdRouteImport } from './routes/profils.$studentId'
 import { Route as SeanceSessionIdRouteImport } from './routes/seance.$sessionId'
+import { Route as FoyerStudentIdInviterRouteImport } from './routes/foyer.$studentId_.inviter'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -112,6 +113,11 @@ const SeanceSessionIdRoute = SeanceSessionIdRouteImport.update({
   path: '/seance/$sessionId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FoyerStudentIdInviterRoute = FoyerStudentIdInviterRouteImport.update({
+  id: '/$studentId_/inviter',
+  path: '/$studentId/inviter',
+  getParentRoute: () => FoyerRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/seance/$sessionId': typeof SeanceSessionIdRoute
   '/foyer/': typeof FoyerIndexRoute
   '/profils/': typeof ProfilsIndexRoute
+  '/foyer/$studentId/inviter': typeof FoyerStudentIdInviterRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/seance/$sessionId': typeof SeanceSessionIdRoute
   '/foyer': typeof FoyerIndexRoute
   '/profils': typeof ProfilsIndexRoute
+  '/foyer/$studentId/inviter': typeof FoyerStudentIdInviterRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   '/seance/$sessionId': typeof SeanceSessionIdRoute
   '/foyer/': typeof FoyerIndexRoute
   '/profils/': typeof ProfilsIndexRoute
+  '/foyer/$studentId_/inviter': typeof FoyerStudentIdInviterRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -190,6 +199,7 @@ export interface FileRouteTypes {
     | '/seance/$sessionId'
     | '/foyer/'
     | '/profils/'
+    | '/foyer/$studentId/inviter'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -208,6 +218,7 @@ export interface FileRouteTypes {
     | '/seance/$sessionId'
     | '/foyer'
     | '/profils'
+    | '/foyer/$studentId/inviter'
   id:
     | '__root__'
     | '/'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/seance/$sessionId'
     | '/foyer/'
     | '/profils/'
+    | '/foyer/$studentId_/inviter'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -365,6 +377,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SeanceSessionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/foyer/$studentId_/inviter': {
+      id: '/foyer/$studentId_/inviter'
+      path: '/$studentId/inviter'
+      fullPath: '/foyer/$studentId/inviter'
+      preLoaderRoute: typeof FoyerStudentIdInviterRouteImport
+      parentRoute: typeof FoyerRoute
+    }
   }
 }
 
@@ -374,6 +393,7 @@ interface FoyerRouteChildren {
   FoyerCompteRoute: typeof FoyerCompteRoute
   FoyerDeclarationsRoute: typeof FoyerDeclarationsRoute
   FoyerIndexRoute: typeof FoyerIndexRoute
+  FoyerStudentIdInviterRoute: typeof FoyerStudentIdInviterRoute
 }
 
 const FoyerRouteChildren: FoyerRouteChildren = {
@@ -382,6 +402,7 @@ const FoyerRouteChildren: FoyerRouteChildren = {
   FoyerCompteRoute: FoyerCompteRoute,
   FoyerDeclarationsRoute: FoyerDeclarationsRoute,
   FoyerIndexRoute: FoyerIndexRoute,
+  FoyerStudentIdInviterRoute: FoyerStudentIdInviterRoute,
 }
 
 const FoyerRouteWithChildren = FoyerRoute._addFileChildren(FoyerRouteChildren)
