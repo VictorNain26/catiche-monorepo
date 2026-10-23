@@ -19,7 +19,6 @@ export interface StudentInput {
   name: string;
   level: SchoolLevel;
   birthMonth: string;
-  memoryProposed?: boolean | undefined;
 }
 
 interface Deps {
@@ -138,7 +137,6 @@ export function createHouseholdService({ repository, createActivationCode, share
         email: createPlaceholderEmail({ identifier: id, namespace: 'student' }),
         level: input.level,
         birthMonth: `${input.birthMonth}-01`,
-        memoryProposed: input.memoryProposed ?? false,
       });
       return found(adultId, id);
     },

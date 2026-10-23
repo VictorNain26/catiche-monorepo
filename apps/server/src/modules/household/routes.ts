@@ -43,7 +43,8 @@ const birthMonth = z
 // The adult's declarations, timestamped, on which the parental consent rests (CNIL): each one is a
 // box they tick, never a value the server assumes.
 const declaredGuardian = z.literal(true, 'la déclaration d’autorité parentale');
-const newStudent = z.object({ name, level: schoolLevelSchema, birthMonth, memoryProposed: z.boolean().optional(), declaredGuardian });
+// The memory is proposed from the child's page (the patch), never while adding them.
+const newStudent = z.object({ name, level: schoolLevelSchema, birthMonth, declaredGuardian });
 const guardianDeclaration = z.object({ declaredGuardian });
 const adultDeclaration = z.object({ adult: z.literal(true, 'la déclaration de majorité') });
 const studentPatch = z

@@ -19,7 +19,7 @@ import type { Config } from '../../config';
 import type { Db } from '../db/client';
 import type { Mailer } from '../email/mailer';
 import { CLIENT_ADDRESS_HEADER } from '../http/client-address';
-import { INVITATION_DAYS, invitationIdentifier } from './invitation';
+import { INVITATION_DAYS, invitationIdentifier, spendInvitationLinks } from './invitation';
 import { account, passkey as passkeyTable, session, user, verification } from './schema';
 import { createStudentDevices } from './student-devices';
 import { ACTIVATION_PREFIX, EMAIL_SIGN_INS, isStudentEmail, studentSignIn, type StudentAccess } from './student-sign-in';
@@ -107,18 +107,24 @@ export function createAuth(
               throw APIError.from('FORBIDDEN', { code: 'INVITATION_REQUIRED', message: 'Sign-up is by invitation only' });
             }
           },
-          // Spent once the account exists, after the transaction commits (better-auth's db/with-hooks.mjs).
+          // Spent once the account exists, after the transaction commits (better-auth's db/with-hooks.mjs),
+          // with every link the invitation sent: the account entered by a code, they open nothing more.
           after: async ({ email }, ctx) => {
             await ctx?.context.internalAdapter.deleteVerificationByIdentifier(invitationIdentifier(email));
+            await spendInvitationLinks(db, email);
           },
         },
       },
     },
     hooks: {
-      // Each entry by an email, once its session is open; an entry refused opens none.
+      // Each entry by an email, once its session is open; an entry refused opens none. The count
+      // only times the passkey's offer: its failure is reported, never the sign-in's.
       after: createAuthMiddleware(async (ctx) => {
         const entered = ctx.context.newSession;
-        if (entered && EMAIL_SIGN_INS.includes(ctx.path)) await emailEntered(entered.user.id);
+        if (!entered || !EMAIL_SIGN_INS.includes(ctx.path)) return;
+        await emailEntered(entered.user.id).catch((error: unknown) => {
+          logger.error({ err: error }, 'Email entry not counted');
+        });
       }),
     },
     // A page of the web: better-auth's own error page has an inline style the CSP blocks.

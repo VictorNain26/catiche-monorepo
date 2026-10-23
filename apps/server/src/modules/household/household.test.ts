@@ -138,6 +138,16 @@ describe('a guardian creates a student', () => {
     expect(await db.select().from(account).where(eq(account.userId, leo.id))).toEqual([]);
   });
 
+  // The memory is proposed from the child's page, once they exist: never while adding them.
+  it('never proposes the memory while adding the student', async () => {
+    const res = await api.request('POST', '/api/household/students', {
+      cookie: guardian,
+      body: { name: 'Sans mémoire', level: 'cinquieme', birthMonth: birthMonthAged(12), declaredGuardian: true, memoryProposed: true },
+    });
+    expect(res.status).toBe(201);
+    expect(((await res.json()) as { memory: { proposed: boolean } }).memory.proposed).toBe(false);
+  });
+
   it('links the student to the adult who added them, with their declaration', async () => {
     expect(await linksOf(leo.id)).toEqual([{ adultId: await idOf(guardian), declared: true }]);
   });

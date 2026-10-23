@@ -56,6 +56,12 @@ describe('the entries by email', () => {
     await api.request('POST', '/api/auth/sign-in/email-otp', { body: { email: 'compte@example.com', otp: '000000' } });
     expect(await entriesOf('compte@example.com')).toBe(2);
   });
+
+  it('let the adult in even when the count fails', async () => {
+    const failing = testApp(db, { auth: { emailEntered: () => Promise.reject(new Error('compte indisponible')) } }).api;
+    const cookie = await failing.guardian('sans-compte@example.com');
+    expect(await failing.sessionUser(cookie)).toBeDefined();
+  });
 });
 
 describe("the passkey's offer", () => {

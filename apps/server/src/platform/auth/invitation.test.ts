@@ -91,6 +91,21 @@ describe('the invitation', () => {
     expect(days).toBeLessThanOrEqual(30);
   });
 
+  it('spends the link sent before: inviting again leaves one link that works', async () => {
+    const first = linkIn(await invited('deux-liens@example.com'));
+    const second = linkIn(await invited('deux-liens@example.com'));
+    expect((await open(first)).headers.get('location')).toStartWith(`${ORIGIN}/entrer?error=`);
+    expect((await open(second)).headers.get('location')).toBe(`${ORIGIN}/bienvenue`);
+  });
+
+  it('spends the link once the account exists by a code: it is no sign-in for 30 days', async () => {
+    const link = linkIn(await invited('par-code@example.com'));
+    await api.signIn('par-code@example.com');
+    const res = await open(link);
+    expect(res.headers.get('location')).toStartWith(`${ORIGIN}/entrer?error=`);
+    expect(res.headers.getSetCookie().some((cookie) => cookie.startsWith('better-auth.session_token='))).toBe(false);
+  });
+
   it('has no public route: only the server makes a link', async () => {
     const res = await api.request('POST', '/api/auth/sign-in/magic-link', { body: { email: 'moi@example.com' } });
     expect(res.status).toBe(404);

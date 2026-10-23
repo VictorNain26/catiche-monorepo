@@ -5,7 +5,7 @@
  * whose button lets it in, by better-auth's magic link, which only the server makes (./auth.ts).
  */
 
-import { eq } from 'drizzle-orm';
+import { and, eq, like, sql } from 'drizzle-orm';
 import type { Db } from '../db/client';
 import type { Auth } from './auth';
 import { verification } from './schema';
@@ -21,6 +21,16 @@ export const invitationIdentifier = (email: string) => `${INVITATION_PREFIX}${no
 /** Where the invitation's link leads: a new account to its first screen; a spent or stale link to the page that says so. */
 const INVITATION_LINK = { callbackURL: '/', newUserCallbackURL: '/bienvenue', errorCallbackURL: '/entrer' } as const;
 
+/**
+ * The invitation's links still unused for the address: spent once a new one is sent or the account
+ * exists, so that no link stays a way in for 30 days. better-auth keys a link by its hashed token
+ * and keeps the address in its JSON value (plugins/magic-link).
+ */
+export const spendInvitationLinks = (db: Db, email: string) =>
+  db
+    .delete(verification)
+    .where(and(like(verification.identifier, 'magic-link:%'), sql`${verification.value}::jsonb ->> 'email' = ${normalised(email)}`));
+
 export async function invite({ db, auth }: { db: Db; auth: Auth }, email: string) {
   const address = normalised(email);
   const identifier = invitationIdentifier(address);
@@ -29,6 +39,7 @@ export async function invite({ db, auth }: { db: Db; auth: Auth }, email: string
     await tx.delete(verification).where(eq(verification.identifier, identifier));
     await tx.insert(verification).values({ id: crypto.randomUUID(), identifier, value: 'invited', expiresAt });
   });
+  await spendInvitationLinks(db, address);
   // A call of the server's own: the route itself is disabled (better-auth enforces `disabledPaths`
   // on requests only, api/index.mjs), so no one else asks for a link.
   await auth.api.signInMagicLink({ body: { email: address, ...INVITATION_LINK }, headers: new Headers() });

@@ -19,7 +19,12 @@ export const Route = createFileRoute('/entrer')({
     if (location.hash === '') return;
     const entry = entryFromFragment(location.hash);
     const { error } = entry ? await authClient.signIn.emailOtp({ email: entry.email, otp: entry.code }) : { error: true };
-    if (error) throw redirect({ to: '/entrer', search: entry ? { email: entry.email } : {}, replace: true });
+    if (error) {
+      // The email tapped again by the adult already in with its code: their home, not an error.
+      const me = await context.queryClient.query({ ...meQuery, staleTime: 0 });
+      if (entry && me?.role === 'guardian' && me.email === entry.email) throw redirect({ to: '/', replace: true });
+      throw redirect({ to: '/entrer', search: entry ? { email: entry.email } : {}, replace: true });
+    }
     // In: another tab of the device, a child's, reloads on the adult's space.
     announceProfileChange(tabChannel());
     await context.queryClient.invalidateQueries({ queryKey: meQuery.queryKey });

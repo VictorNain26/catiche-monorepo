@@ -19,7 +19,6 @@ export interface NewStudent {
   email: string;
   level: SchoolLevel;
   birthMonth: string;
-  memoryProposed: boolean;
 }
 
 const otherAdult = alias(guardianship, 'other_adult');
@@ -173,12 +172,7 @@ export function createHouseholdRepository(db: Db) {
         // Waits for the adult's deletion under way, as deleteAccount locks the same row: the link then finds no adult.
         await tx.select({ id: user.id }).from(user).where(eq(user.id, adultId)).for('update');
         await tx.insert(user).values({ id: student.id, name: student.name, email: student.email });
-        await tx.insert(studentProfile).values({
-          userId: student.id,
-          level: student.level,
-          birthMonth: student.birthMonth,
-          memoryProposedAt: student.memoryProposed ? new Date() : null,
-        });
+        await tx.insert(studentProfile).values({ userId: student.id, level: student.level, birthMonth: student.birthMonth });
         await tx.insert(guardianship).values({ adultId, studentId: student.id, declaredAt: new Date() });
       });
     },

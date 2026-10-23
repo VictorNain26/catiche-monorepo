@@ -15,8 +15,18 @@ import { httpClient, ORIGIN } from './http';
 import { memoryMailer } from './mailer';
 import { fakeMistral } from './mistral';
 
-/** `origin`: the public origin of the auth and the client; over https, better-auth prefixes its cookies `__Secure-`. */
-export function testApp(db: Db, { config = {}, origin = ORIGIN }: { config?: Partial<AppDeps['config']>; origin?: string } = {}) {
+/**
+ * `origin`: the public origin of the auth and the client; over https, better-auth prefixes its
+ * cookies `__Secure-`. `auth`: what better-auth asks of the household, replaced where a test says.
+ */
+export function testApp(
+  db: Db,
+  {
+    config = {},
+    origin = ORIGIN,
+    auth: household = {},
+  }: { config?: Partial<AppDeps['config']>; origin?: string; auth?: Partial<ReturnType<typeof householdAuth>> } = {},
+) {
   const silent = pino({ level: 'silent' });
   const mistral = fakeMistral();
   const mail = memoryMailer();
@@ -24,7 +34,7 @@ export function testApp(db: Db, { config = {}, origin = ORIGIN }: { config?: Par
   const auth = createAuth(
     db,
     { publicUrl: origin, authSecret: 'x'.repeat(32) },
-    { mailer: mail.mailer, logger: silent, background: tasks.run, ...householdAuth(db) },
+    { mailer: mail.mailer, logger: silent, background: tasks.run, ...householdAuth(db), ...household },
   );
   const app = createApp({
     config: { production: false, webDistDir: undefined, apiRateLimit: 1000, trustedProxyHops: 0, ...config },
