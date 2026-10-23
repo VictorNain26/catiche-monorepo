@@ -96,7 +96,9 @@ export function createHouseholdService({ repository, createActivationCode }: Dep
       return (await repository.listStudents(adultId)).map(toStudent);
     },
 
+    /** Only from an adult who has declared being 18 or over: with the box ticked here, the parental consent. */
     async createStudent(adultId: string, input: StudentInput) {
+      if ((await repository.missingDeclarations(adultId)).adult) throw new Problem('FORBIDDEN', 'la déclaration de majorité');
       const id = generateId();
       await repository.createStudent(adultId, {
         id,
