@@ -130,7 +130,7 @@ Ordre du prompt, du plus stable au plus variable (`assembleChatPrompt`,
 
 1. Système statique versionné : identité, pédagogie, sécurité, format. Aucune donnée d'élève.
    Sa voix suit `docs/charte.md`, « La voix de Tom » (2026-10-21). Écarts du prompt actuel
-   (`prompt.ts`), à corriger dans la PR qui suit celle de la landing :
+   (`prompt.ts`), à corriger dans la PR qui construit la soirée (`etat.md`, « Prochain chantier ») :
    - Tom ne dit qu'il est une IA que si l'élève le demande, alors que l'art. 50(1) de l'AI Act
      demande qu'il le dise dès la première interaction ;
    - le ton demande d'être « encourageant », alors que Tom constate sans féliciter ;

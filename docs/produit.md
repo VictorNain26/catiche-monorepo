@@ -116,9 +116,10 @@ devoirs à l'oral.
 - **À construire** : la soirée à l'oral, avec le micro à ouvrir (`etat.md`), les contrôles
   gardés d'un soir à l'autre, et le cartable du lendemain.
 
-**Ordre décidé par Victor** (2026-10-20, précisé le 2026-10-21) : d'abord la landing, jusqu'à
-ce que Victor la valide lui-même, car elle fixe la vision et les promesses que l'application
-devra tenir ; puis l'application. La soirée et le volet IA viennent ensuite.
+**Ordre décidé par Victor** (2026-10-20, revu le 2026-10-23) : d'abord la landing, qui fixe la
+vision et les promesses que l'application devra tenir (validée le 2026-10-22) ; puis
+l'application cible, conçue une seule fois sur le parcours final, soirée comprise, et construite
+par étapes (`etat.md`, « Prochain chantier »).
 
 **L'accès pendant la préparation** (Victor, 2026-10-21) : les comptes s'ouvrent sur invitation,
 demandée par e-mail ; aucune promotion tant que les bloquants de `etat.md` ne sont pas levés.
