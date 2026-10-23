@@ -34,7 +34,7 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
 
 - Aucune invitation pour un enfant réel tant que les bloquants (clause Mistral, base du staging
   joignable) ne sont pas levés : les invitations se donnent à la main.
-- L'application cible jusqu'au point du soir compris (« Prochain chantier »), dont la déclaration
+- L'application cible jusqu'à la soirée comprise (« Prochain chantier »), dont la déclaration
   horodatée de l'adulte et les comptes pour toutes les familles.
 - Bugsink auto-hébergé, avec sa base ; les erreurs des navigateurs par le serveur (`tunnel`), sans
   contenu d'élève.

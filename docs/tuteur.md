@@ -229,7 +229,7 @@ Le code vit dans `apps/server/src/eval/` ; `bun run eval` rejoue le jeu sur le v
   cible.
 - **La mémoire d'apprentissage (§5)** : avant 15 ans, proposée par le parent à l'ajout de
   l'enfant (dans l'application cible : depuis « Gérer »), acceptée par l'enfant à sa première
-  séance, coupée par l'un ou l'autre à tout moment ;
+  séance (dans l'application cible : sur son accueil ou dans « Ce que Tom retient »), coupée par l'un ou l'autre à tout moment ;
   à partir de 15 ans, l'élève décide seul. L'élève voit ce
   que Tom retient, notion par notion, le corrige ou l'efface ; le parent n'en voit que ce que
   dit le résumé.

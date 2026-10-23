@@ -22,7 +22,8 @@ de 71 ans). Leurs constats retenus sont intégrés.
 - **2026-10-23, la simplicité** : des user stories d'abord ; une navigation comprise par un enfant
   et par un adulte peu habitué aux écrans ; le moins d'écrans et de choix possible.
 - **Avant** : le point du soir (`produit.md`, 2026-10-21) ; la déclaration du majeur et du
-  représentant légal, sans pièce d'identité (2026-10-21) ; l'espace de l'enfant ouvert par son
+  représentant légal, qui vaut consentement parental, avec une vérification proportionnée sans
+  pièce d'identité (CNIL) (2026-10-21) ; l'espace de l'enfant ouvert par son
   propre code (`tuteur.md` § 8) ; les comptes sur invitation ; les deux voix (`charte.md`).
 
 ## 1. Les personnes et les cas
@@ -74,7 +75,7 @@ sont au § 8.
 - **E-5. Choisir l'ordre.** Je veux changer l'ordre de mes devoirs quand je veux, pas seulement
   quand Tom le propose.
 - **E-6. Avancer étape par étape.** Je veux savoir ce que je fais maintenant et dire quand c'est
-  fini. *Réussie quand* : le bouton dit ce qui est fini (« J'ai fini l'exercice 3 »).
+  fini. *Réussie quand* : le bouton dit ce qui est fini (« J'ai fini : exercice 3 »).
 - **E-7. Demander de l'aide.** Quand je bloque, je veux un bouton « Je bloque », pour que Tom
   m'aide sans me donner la réponse.
 - **E-8. Préparer demain.** Je veux savoir ce qui reste et ce qu'il faut dans mon cartable.
@@ -93,8 +94,9 @@ sont au § 8.
 ### Le parent ou tuteur
 
 - **P-1. Entrer la première fois.** En tant que parent invité, je veux ouvrir le compte de mon
-  enfant en quelques minutes. *Réussie quand* : un e-mail, un écran pour moi et mon enfant, un
-  écran pour son appareil, puis l'accueil.
+  enfant en quelques minutes, sans mot de passe ni code à recopier. *Réussie quand* : je touche
+  le bouton de l'e-mail d'invitation, je remplis un écran pour moi et mon enfant, un écran pour
+  son appareil, et j'arrive à l'accueil. Trois écrans, rien à retenir.
 - **P-2. Revenir sans effort.** Je veux rester connecté sur mon téléphone, et entrer par un lien
   reçu par e-mail quand il le faut, sans course contre la montre.
 - **P-3. Relier l'appareil de mon enfant**, ce soir ou à l'avance (pour l'ordinateur de sa
@@ -115,6 +117,8 @@ sont au § 8.
 ### Le proche
 
 - **R-1. Accepter l'invitation** et comprendre tout de suite pour quel enfant et pourquoi.
+  *Réussie quand* : un bouton dans l'e-mail, un écran qui dit « Nadia vous invite pour Léa », et
+  j'arrive à l'accueil.
 - **R-2. Lire la soirée et répondre**, comme P-4 et P-5.
 - **R-3. Savoir ce que je ne peux pas faire**, et à qui le demander (relier un appareil).
 - **R-4. Faire une pause** pendant les vacances, puis reprendre ; ou me retirer.
@@ -193,7 +197,7 @@ porte un enfant y reste connecté peu de temps (10 minutes sans rien faire, comm
 ```
 Ouvrir Catiche
 ├─ l'appareil connaît des prénoms → « Qui fait ses devoirs ? » → [Prénom] → Ton code → Ce soir
-├─ « Première fois ici ? » → Ton code de départ → Choisis ton code → Ce soir
+├─ « Première fois ici ? J'ai un code de départ » → Ton code de départ → Choisis ton code → Ce soir
 └─ « Je suis un adulte » → l'entrée de l'adulte
 Ce soir
 ├─ « Commencer mes devoirs » / « Reprendre mes devoirs » → La soirée (plein écran)
@@ -205,7 +209,9 @@ Ce soir
 **L'adulte :**
 ```
 Ouvrir Catiche
-└─ e-mail → code ou lien → (la première fois) Vous et votre enfant → Son appareil → Accueil
+├─ la première fois : bouton de l'e-mail d'invitation → Vous et votre enfant → Son appareil → Accueil
+├─ ensuite : déjà connecté → Accueil
+└─ sinon : Entrez dans Catiche → bouton de l'e-mail (ou son code) → Accueil
 Accueil : une carte par enfant
 ├─ « Lire son message » (quand l'enfant en a envoyé un) → Le message de [prénom]
 ├─ « Gérer » (parent) ou « Ses devoirs et ses messages » (proche) → Gérer [prénom]
@@ -224,7 +230,7 @@ Tom ne parle pas. Côté enfant, des tournures sans genre.
 **Les mots qui disent ce qui se passe** (Victor, 2026-10-23 : « soirée » n'est pas évocateur) :
 « la soirée » et « le point du soir » sont des mots de ce document, jamais de l'écran. L'écran dit
 « tes devoirs » ou « tes devoirs du soir » ; ce que l'enfant dit à un adulte est « un message »
-(« Dire à Karim où j'en suis », « Léa vous dit où en sont ses devoirs »). Un mot de l'écran dit
+(« Envoyer à Karim », « Léa vous dit où en sont ses devoirs »). Un mot de l'écran dit
 ce que la personne fait, pas le nom d'une fonction.
 
 **Les titres** ont un verbe, ou sont une question (`charte.md`).
@@ -238,6 +244,11 @@ ce que la personne fait, pas le nom d'une fonction.
 
 **Rien ne se perd** : la soirée est gardée à chaque geste. « Pause », « Quitter », une fermeture
 pour inactivité ou une coupure d'internet la retrouvent là où elle était.
+
+**La confirmation récente**, pour les gestes sensibles de l'adulte (ajouter un appareil, un code
+de départ après un oubli, la suppression d'un compte ; A4, A7, A9) : une entrée de moins de
+10 minutes suffit ; au-delà, l'écran le dit avant le geste (« Pour confirmer, nous allons vous
+envoyer un e-mail. »), puis y revient seul.
 
 **L'inactivité, sur un appareil partagé** : l'espace se ferme après 10 minutes sans rien faire, et
 au plus tard après 2 heures (`SHARED_MINUTES`, aujourd'hui). Pendant une étape de la soirée, le
@@ -253,8 +264,8 @@ là. » avec « Je suis encore là ». Sur un appareil personnel, rien ne se fer
 
 **C2. Qui fait ses devoirs ?** (l'entrée ; remplace `/profils` et l'écran sans profil).
 - Titre : « Qui fait ses devoirs ? »
-- Les prénoms des enfants de l'appareil, en grandes cartes alignées avec le titre (finition
-  d'`etat.md`). Sous un prénom bloqué : « Bloqué ici. Demande à Nadia ou à Karim. »
+- Les prénoms des enfants de l'appareil, en grandes cartes alignées avec le titre (aujourd'hui,
+  le titre est à gauche et les prénoms au centre). Sous un prénom bloqué : « Bloqué ici. Demande à Nadia ou à Karim. »
 - Deux grands boutons sous les prénoms (seuls, quand l'appareil n'en connaît pas) : « Première fois
   ici ? J'ai un code de départ » ; « Je suis un adulte ».
 
@@ -262,7 +273,7 @@ là. » avec « Je suis encore là ». Sur un appareil personnel, rien ne se fer
 
 **E1. Ton code de départ** (`/activer`).
 - Titre : « Entre ton code de départ »
-- Texte : « 8 lettres et chiffres, donnés par l'adulte qui t'a inscrit. »
+- Texte : « 8 lettres et chiffres, donnés par l'adulte qui a créé ton espace. »
 - Champ, qui accepte minuscules, espaces et collage, et affiche « ABCD EFGH ».
 - Bouton principal : « Continuer » ; second : « Viser le carré avec l'appareil photo ».
 - Erreur : « Ce code ne marche pas, ou il a expiré. Demande un nouveau code de départ. »
@@ -381,7 +392,7 @@ cherche :
   seulement ton prénom et ta classe. Nadia ou Karim peuvent te le proposer. »
 - Toujours, en bas : « Pour que tout parte, tes devoirs compris, demande à Nadia ou à Karim de
   supprimer ton compte. »
-- À partir de 15 ans : la proposition s'affiche une fois, et tu décides seul.
+- À partir de 15 ans : la proposition s'affiche une fois, et c'est toi qui décides.
 
 ### L'adulte
 
@@ -410,8 +421,12 @@ cherche :
   contact@catiche.fr. »
 - Ensuite, l'adulte reste connecté sur cet appareil (90 jours aujourd'hui, renouvelés à l'usage).
 
-**A3. Vous et votre enfant** (la première fois ; un seul écran).
-- Parent invité à la main : titre « Présentez-vous, puis votre enfant ». « Vous » : « Votre
+**A3. Vous et votre enfant** (la première fois ; un seul écran). On y arrive directement par le
+bouton de l'e-mail d'invitation, « Accepter l'invitation », qui fait entrer sans A1 ni A2 :
+l'e-mail prouve l'adresse. Ce bouton ne sert qu'une fois et vaut 30 jours, comme l'invitation.
+Toute invitation l'envoie, celle de Victor à la main comme celle d'un parent (aujourd'hui,
+`bun run invite` n'envoie aucun e-mail).
+- Parent invité par Victor : titre « Présentez-vous, puis votre enfant ». « Vous » : « Votre
   prénom » (« Votre enfant le verra. »), case « J'ai 18 ans ou plus. » « Votre enfant » : son
   prénom, sa classe, son mois et son année de naissance, et la case « J'exerce l'autorité
   parentale sur cet enfant, ou sa tutelle. », avec l'aide « Votre accord suffit pour qu'il
@@ -426,14 +441,13 @@ cherche :
 - Choix : « Sur cet ordinateur, à côté de moi » ; « Sur un autre appareil : le sien, ou celui
   d'un proche ».
 - Cet ordinateur : « [Prénom] choisit son code maintenant, sur cet écran. Vous ne le verrez
-  pas. » Puis E2 sur place. Pas proposé sur un ordinateur déjà ajouté (finition d'`etat.md`).
+  pas. » Puis E2 sur place. Pas proposé sur un ordinateur déjà ajouté (aujourd'hui, il l'est encore).
 - Autre appareil : le carré à viser et le code de départ (« ABCD EFGH »). « Sur l'autre appareil,
   visez ce carré avec l'appareil photo, ou ouvrez Catiche et touchez « J'ai un code de départ ».
   Il marche une seule fois, pendant 7 jours. » Boutons : « Partager le code » (le partage du
   téléphone : SMS, WhatsApp) ; « Obtenir un autre code ». Quand l'appareil est relié : « La tablette
   de [prénom] est ajoutée. »
-- Confirmation : une entrée de moins de 10 minutes suffit ; au-delà, l'écran le dit avant le
-  geste (« Pour confirmer, nous allons vous envoyer un e-mail. ») puis y revient seul.
+- Confirmation : la règle commune de « La confirmation récente » (plus haut).
 
 **A5. Accueil** (une carte par enfant, même avec un seul).
 - En haut : « Mon compte », « Quitter ».
@@ -550,10 +564,10 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
 |---|---|
 | Une colonne `max-w-md` presque partout, ni onglets ni navigation | Un écran où l'on revient, des pages qui s'ouvrent et se referment (§ 4) ; deux colonnes à l'ordinateur |
 | Mots techniques : session, verrouillage, bêta fermée, URL brute, clé d'accès | Mots des familles ; empreinte ou visage ; formule de statut ; un carré à viser |
-| Trois codes appelés « code » | Ton code, le code de départ, l'e-mail pour entrer |
+| Trois codes appelés « code » | Ton code, le code de départ, le code reçu par e-mail |
 | Le code e-mail de 5 minutes à recopier | Un lien dans l'e-mail, et le code, 15 minutes |
 | Deux façons de relier un appareil, sur deux écrans | Un seul écran, A4, avec deux choix |
-| Un code de 10 minutes pour un appareil | Jusqu'au lendemain, une seule fois, à partager ; 10 minutes pour un code oublié |
+| Un code de 10 minutes pour un appareil | 7 jours, une seule fois, à partager ; 10 minutes pour un code oublié |
 | « Ajouter cet ordinateur » proposé sur un ordinateur déjà ajouté | Caché (A4) |
 | Deux façons de proposer la mémoire | Un seul endroit, A7 ; l'enfant répond sur E4 ou E7 |
 | « Changer de profil » et « Se déconnecter » | « Quitter », qui rassure |
@@ -569,19 +583,19 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
 | « ton parent », au singulier | Les prénoms des adultes |
 | Un seul foyer, aucun second adulte | Plusieurs adultes, deux rôles, l'historique (§ 3) |
 | Pas de déclaration à l'entrée | A3, horodatée |
-| Pas de suppression du compte adulte : le serveur la porte (`POST /api/auth/delete-user`, session de moins de 10 minutes), elle se fait sur demande d'ici là, comme le disent les CGU | A9 |
-| Code oublié et suppression d'un enfant sans confirmation récente | Confirmation annoncée (A4) |
+| Pas de suppression du compte adulte : le serveur la porte (`POST /api/auth/delete-user`, session de moins de 10 minutes), elle se fait sur demande d'ici là, comme le disent les CGU et la politique de confidentialité | A9 |
+| Code oublié et suppression d'un enfant sans confirmation récente | La confirmation récente (§ 5) |
 | L'élève ne sait pas qu'un appareil s'ajoute | Carte « Depuis ta dernière visite », et E6 |
 | Formules de Tom avec des flèches de défilement sur Chrome de bureau : leur conteneur (`[&_.katex]:overflow-x-auto`, `components/tom-text.tsx`) déborde de 6 px en hauteur | Corrigé dans E5 (étape 3) |
 | Tom ne dit pas d'emblée qu'il est une IA ; « on avance ensemble » | Premier message d'E5 ; nouvelle réponse de repli (étape 3) |
-| Le micro fermé (`Permissions-Policy`) | Ouvert à `self`, transcription en français (étape 3) |
+| Le micro fermé (`Permissions-Policy`, `platform/http/security-headers.ts`) | Ouvert à `self`, transcription en français (étape 3) |
 | Les rôles `accent` et `secondary` du mode sombre pas revus dans l'app | Revus avec le socle (étape 2) |
-| La mémoire acceptée « à sa première séance », proposée à l'ajout (`tuteur.md` § 8) | Proposée depuis A7, acceptée sur E4 ou E7 ; `tuteur.md` à mettre à jour |
+| La mémoire acceptée « à sa première séance », proposée à l'ajout (`tuteur.md` § 8) | Proposée depuis A7, acceptée sur E4 ou E7 |
 | Les offres Gratuit et Complet | À revoir avec la soirée montrée (étape 4) |
 
 ## 8. Le découpage des étapes 2 à 5
 
-- **Étape 2, le socle** (stories E-1 à E-3, E-10 à E-12, P-1 à P-3, P-6 à P-12, R-1, R-3, R-4).
+- **Étape 2, le socle** (stories E-1 à E-3, E-10 à E-12, P-1 à P-3, P-7 à P-10, P-12, R-1, R-3).
   Plusieurs PR : d'abord le modèle de famille, ses droits et l'historique, avec leurs tests ; puis
   l'entrée de l'adulte (lien par e-mail, A1 à A4) et son accueil (A5, A7 à A9) ; puis l'enfant
   (C1, C2, E1 à E4, E6, E7 ; E4 dans son état « Avant », dont le bouton ouvre l'aide de Tom
@@ -589,11 +603,11 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
   rôles du mode sombre, la lecture aérée, l'inactivité, la politique de confidentialité pour
   l'opposition d'un autre parent, la charte mise à jour. Le résumé de la semaine reste, voix
   corrigée.
-- **Étape 3, la soirée** (E-4 à E-8) : E5 sauf « Dire », E4 complet, « Les soirs où [prénom] a
+- **Étape 3, la soirée** (E-4 à E-8, P-6) : E5 sauf « Dire », E4 complet, « Les soirs où [prénom] a
   travaillé » dans A7, le prompt de Tom (`tuteur.md` § 5), le micro et la transcription en
   français, les paliers des premiers soirs, les formules, la politique de confidentialité pour la
   voix.
-- **Étape 4, le point du soir** (E-9, P-4, P-5, R-2) : E5 « Dire », A6, les réponses sur E4,
+- **Étape 4, le point du soir** (E-9, P-4, P-5, P-11, R-2, R-4) : E5 « Dire », A6, les réponses sur E4,
   « Recevoir les messages » et l'e-mail qui prévient dans A7, la suppression du résumé de la
   semaine et de « Ce qui résiste », la politique de confidentialité pour ces messages, les offres.
 - **Étape 5, les contrôles** (E-13) : « Bientôt » sur E4.
