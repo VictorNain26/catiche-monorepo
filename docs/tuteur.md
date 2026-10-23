@@ -225,8 +225,8 @@ Le code vit dans `apps/server/src/eval/` ; `bun run eval` rejoue le jeu sur le v
 - **Les adultes de l'enfant** (Victor, 2026-10-23) : plusieurs, dans une ou deux maisons ; les
   parents ou tuteurs décident, les proches reçoivent le point du soir. Les droits de chacun et
   l'historique des changements : `docs/plans/app-cible.md`, « Le modèle de famille ».
-- **La mémoire d'apprentissage (§5)** : avant 15 ans, proposée par le parent à l'ajout de
-  l'enfant (dans l'application cible : depuis « Gérer »), acceptée par l'enfant à sa première
+- **La mémoire d'apprentissage (§5)** : avant 15 ans, proposée par le parent depuis la page
+  de l'enfant, jamais à son ajout (dans l'application cible : depuis « Gérer »), acceptée par l'enfant à sa première
   séance (dans l'application cible : sur son accueil ou dans « Ce que Tom retient »), coupée par l'un ou l'autre à tout moment ;
   à partir de 15 ans, l'élève décide seul. L'élève voit ce
   que Tom retient, notion par notion, le corrige ou l'efface ; le parent n'en voit que ce que

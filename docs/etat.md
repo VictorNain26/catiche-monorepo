@@ -117,6 +117,11 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
 - **Secret de l'auth** (`BETTER_AUTH_SECRET`) : le poivre des codes d'élève en dérive, et il
   signe le cookie d'appareil (`platform/auth/student-sign-in.ts`) ; le changer arrête tous les codes
   et fait oublier tous les appareils : chaque élève revient par un code « oublié » de son parent.
+- **Le bouton de l'invitation** est un lien `GET` à usage unique (`magic-link` de better-auth,
+  `platform/auth/invitation.ts`) : un filtre de messagerie qui ouvre les liens d'un e-mail pour
+  les inspecter le dépenserait avant l'invité, qui tomberait sur « Ce lien ne marche plus ». Le
+  compte, lui, est créé par ce passage : l'invité entre alors par A1 avec son adresse. Si une première invitation
+  réelle le rencontre, passer à une page qui demande un geste avant de dépenser le lien.
 - **Taux de Mistral** (`MISTRAL_USD_TO_EUR`) : le revérifier à chaque facture.
 - **Configuration des agents** : élagage mensuel, le prochain le 2026-11-02.
 - **TypeScript** figé à 6.0 tant que `typescript-eslint` exige `<6.1.0` ; `@types/node` 24 pour
