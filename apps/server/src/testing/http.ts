@@ -127,6 +127,11 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, { db
     request,
     /** The address invited, its email sent: when the invitation ends. */
     invite: (email: string) => invite({ db, auth }, email),
+    /**
+     * « Accepter l'invitation » touched on the web's page: the browser goes to better-auth's link,
+     * with what the email's link carries after its `#` (apps/web/src/routes/invitation.tsx).
+     */
+    acceptInvitation: (link: URL) => request('GET', `/api/auth/magic-link/verify?${link.hash.slice(1)}`),
     /** Invited, in by the code their address received, then declared 18 or over: the session it opens. */
     async guardian(email: string) {
       await api.invite(email);

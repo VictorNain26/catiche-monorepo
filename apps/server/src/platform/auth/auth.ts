@@ -159,15 +159,18 @@ export function createAuth(
         registration: { afterVerification: ({ ctx }) => ({ name: ctx.headers?.get('user-agent') ?? 'Clé d’accès' }) },
       }),
       // The invitation's button: a link of 30 days, single use, its token stored hashed. A new
-      // account goes to its first screen; a link spent or stale, to the page that says so.
+      // account goes to its first screen; a link spent or stale, to the page that says so. The
+      // email leads to the web's /invitation, better-auth's link after the `#`: a mail filter that
+      // opens every link spends nothing, only the page's own button goes on to better-auth's.
       magicLink({
         expiresIn: INVITATION_DAYS * 24 * 60 * 60,
         storeToken: 'hashed',
         sendMagicLink: async ({ email, url }) => {
+          const link = `${origin}/invitation#${new URL(url).searchParams.toString()}`;
           await send({
             to: email,
             subject: 'Votre invitation à Catiche',
-            text: `Bonjour,\n\nVoici votre invitation à suivre les devoirs du soir de votre enfant sur Catiche.\n\nAccepter l’invitation : ${url}\n\nSur un autre appareil ? Ouvrez ${host} et donnez cette adresse.\n\nL’invitation vaut ${String(INVITATION_DAYS)} jours.`,
+            text: `Bonjour,\n\nVoici votre invitation à suivre les devoirs du soir de votre enfant sur Catiche.\n\nAccepter l’invitation : ${link}\n\nSur un autre appareil ? Ouvrez ${host} et donnez cette adresse.\n\nL’invitation vaut ${String(INVITATION_DAYS)} jours.`,
           });
         },
       }),

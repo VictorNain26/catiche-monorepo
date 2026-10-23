@@ -1,14 +1,15 @@
 /**
  * Closed beta: a guardian's account is created for an invited address only. An invitation is a
  * verification value of better-auth, keyed by the address, spent once its account is created
- * (./auth.ts). Inviting an address again replaces its invitation. The address receives an email
- * whose button lets it in, by better-auth's magic link, which only the server makes (./auth.ts).
+ * (./auth.ts). Inviting an address again replaces its invitation; an address with an account is
+ * refused. The address receives an email whose button opens the web's /invitation, whose own
+ * button lets it in, by better-auth's magic link, which only the server makes (./auth.ts).
  */
 
 import { and, eq, like, sql } from 'drizzle-orm';
 import type { Db } from '../db/client';
 import type { Auth } from './auth';
-import { verification } from './schema';
+import { user, verification } from './schema';
 
 const INVITATION_PREFIX = 'sign-up-invitation:';
 export const INVITATION_DAYS = 30;
@@ -31,8 +32,18 @@ export const spendInvitationLinks = (db: Db, email: string) =>
     .delete(verification)
     .where(and(like(verification.identifier, 'magic-link:%'), sql`${verification.value}::jsonb ->> 'email' = ${normalised(email)}`));
 
+/** An address that already has an account enters by a sign-in email: a link of 30 days would be a way in that nothing spends. */
+export class AccountExists extends Error {
+  constructor(readonly email: string) {
+    super(`${email} has an account already`);
+    this.name = 'AccountExists';
+  }
+}
+
 export async function invite({ db, auth }: { db: Db; auth: Auth }, email: string) {
   const address = normalised(email);
+  const [existing] = await db.select({ id: user.id }).from(user).where(eq(user.email, address));
+  if (existing) throw new AccountExists(address);
   const identifier = invitationIdentifier(address);
   const expiresAt = new Date(Date.now() + INVITATION_DAYS * 86_400_000);
   await db.transaction(async (tx) => {

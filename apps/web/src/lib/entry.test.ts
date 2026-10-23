@@ -1,5 +1,19 @@
 import { describe, expect, it } from 'bun:test';
-import { entryFromFragment } from './entry';
+import { entryFromFragment, invitationFromFragment } from './entry';
+
+describe('invitationFromFragment', () => {
+  it('gives better-auth’s link what the invitation’s button carries, its token first', () => {
+    expect(invitationFromFragment('#token=abc&callbackURL=%2F&newUserCallbackURL=%2Fbienvenue&errorCallbackURL=%2Fentrer')).toBe(
+      'token=abc&callbackURL=%2F&newUserCallbackURL=%2Fbienvenue&errorCallbackURL=%2Fentrer',
+    );
+  });
+
+  it('gives nothing without a token', () => {
+    expect(invitationFromFragment('')).toBeNull();
+    expect(invitationFromFragment('#callbackURL=%2F')).toBeNull();
+    expect(invitationFromFragment('#token=')).toBeNull();
+  });
+});
 
 describe('entryFromFragment', () => {
   it('reads the address and the code the email’s button carries', () => {

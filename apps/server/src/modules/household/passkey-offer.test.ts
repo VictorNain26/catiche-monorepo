@@ -9,7 +9,6 @@ import { eq } from 'drizzle-orm';
 import { passkey, user } from '../../platform/auth/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
-import type { Email } from '../../platform/email/mailer';
 import { adultProfile } from './schema';
 
 const { db } = await testDatabase();
@@ -33,10 +32,9 @@ const entriesOf = async (email: string) =>
 
 /** The invitation's button, opened: the session it opens. */
 const acceptInvitation = async (email: string) => {
-  const received: Promise<Email> = mail.next(email);
+  const received = mail.next(email);
   await api.invite(email);
-  const url = new URL(/Accepter l’invitation : (\S+)/.exec((await received).text)?.[1] ?? '');
-  const res = await api.request('GET', `${url.pathname}${url.search}`);
+  const res = await api.acceptInvitation(mail.invitationIn(await received));
   return (
     res.headers
       .getSetCookie()

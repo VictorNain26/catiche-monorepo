@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { loadConfig } from './config';
 import { householdAuth } from './modules/household';
 import { createAuth } from './platform/auth/auth';
-import { invite } from './platform/auth/invitation';
+import { AccountExists, invite } from './platform/auth/invitation';
 import { createDb } from './platform/db/client';
 import { logMailer, scalewayMailer } from './platform/email/mailer';
 import { createBackgroundTasks } from './platform/lifecycle/background';
@@ -34,6 +34,10 @@ const auth = createAuth(db, config, {
 try {
   const { expiresAt } = await invite({ db, auth }, email.data);
   console.log(`Invitation de ${email.data} envoyée, valable jusqu'au ${expiresAt.toISOString()}`);
+} catch (error) {
+  if (!(error instanceof AccountExists)) throw error;
+  console.error(`${email.data} a déjà un compte : elle entre par un e-mail d'entrée.`);
+  process.exitCode = 1;
 } finally {
   await tasks.settled();
   await close();
