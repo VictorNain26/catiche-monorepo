@@ -8,6 +8,7 @@ import { z } from '../lib/zod';
 import { CodeForm, sendCode } from '../components/code-form';
 import { BackLink, Page } from '../components/page';
 import { INVALID_EMAIL, authClient, authMessage, hasCode, isCancelled } from '../lib/auth';
+import { handOff } from '../lib/hand-off';
 import { meQuery } from '../lib/me';
 import { announceProfileChange, profilesQuery, tabChannel } from '../lib/student';
 
@@ -16,10 +17,10 @@ import { announceProfileChange, profilesQuery, tabChannel } from '../lib/student
  * field, or their address, then the email it receives, whose button lets them in (/entrer) as its
  * code does here. The first entry creates the account, on an invitation (closed beta); /bienvenue
  * then asks its name. On a device that holds profiles, the adult's session is the device's: short
- * on a shared one, which a child's code then closes. `email`: the address, given back by a spent link.
+ * on a shared one, which a child's code then closes. What the screen before left (`handOff`): the
+ * address a spent link gives back, and that the adult just left Catiche, said once.
  */
 export const Route = createFileRoute('/connexion')({
-  validateSearch: z.object({ email: z.string().optional() }),
   // Read before the page shows: a device that holds profiles leads back to them. A failure still leaves the form.
   loader: async ({ context }) => {
     await context.queryClient.query(profilesQuery).catch(() => null);
@@ -31,9 +32,14 @@ const emailSchema = z.object({ email: z.email(INVALID_EMAIL) });
 
 function SignIn() {
   const navigate = useNavigate();
-  const { email: given } = Route.useSearch();
+  // Read as the page opens, cleared once it is shown: a reload, or a later visit, says nothing more.
+  const [given] = useState(() => ({ email: handOff().read('email'), signedOut: handOff().read('signedOut') !== null }));
+  useEffect(() => {
+    handOff().clear('email');
+    handOff().clear('signedOut');
+  }, []);
   // The address, kept when the adult goes back to change it.
-  const [email, setEmail] = useState(given ?? '');
+  const [email, setEmail] = useState(given.email ?? '');
   const [sent, setSent] = useState(false);
   // The guardian in: another tab of the device, a child's, reloads on the guardian's space.
   const enter = useCallback(() => {
@@ -60,6 +66,7 @@ function SignIn() {
   return (
     <EmailStep
       initial={email}
+      signedOut={given.signedOut}
       onSent={(address) => {
         setEmail(address);
         setSent(true);
@@ -69,7 +76,18 @@ function SignIn() {
   );
 }
 
-function EmailStep({ initial, onSent, onEntered }: { initial: string; onSent: (email: string) => void; onEntered: () => Promise<void> }) {
+function EmailStep({
+  initial,
+  signedOut,
+  onSent,
+  onEntered,
+}: {
+  initial: string;
+  /** The adult just left Catiche on this device. */
+  signedOut: boolean;
+  onSent: (email: string) => void;
+  onEntered: () => Promise<void>;
+}) {
   const queryClient = useQueryClient();
   // Read by the loader; when the list fails, the form still shows.
   const { data: device } = useQuery(profilesQuery);
@@ -100,6 +118,11 @@ function EmailStep({ initial, onSent, onEntered }: { initial: string; onSent: (e
   const profiles = device?.profiles.length ?? 0;
   return (
     <Page title="Entrez dans Catiche" back={profiles > 0 ? <BackLink to="/profils">Qui fait ses devoirs ?</BackLink> : undefined}>
+      {signedOut && (
+        <p role="status" className="font-bold text-foreground">
+          Catiche est fermé sur cet appareil. Pour revenir, donnez votre adresse e-mail.
+        </p>
+      )}
       <p className="text-foreground">
         Catiche aide votre enfant à organiser ses devoirs du soir, avec Tom, une intelligence artificielle. Vous ne lisez pas ses échanges avec Tom :
         votre enfant vous dit où en sont ses devoirs.

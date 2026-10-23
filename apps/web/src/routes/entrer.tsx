@@ -1,44 +1,77 @@
-import { Button } from '@repo/ui';
-import { Link, createFileRoute, redirect } from '@tanstack/react-router';
+import { Banner, Button } from '@repo/ui';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
 import { Page } from '../components/page';
-import { authClient } from '../lib/auth';
+import { FAILED, authClient } from '../lib/auth';
 import { entryFromFragment } from '../lib/entry';
+import { handOff } from '../lib/hand-off';
 import { meQuery } from '../lib/me';
 import { announceProfileChange, tabChannel } from '../lib/student';
-import { z } from '../lib/zod';
+import { useFragment } from '../lib/use-fragment';
 
 /**
  * Where the button of the sign-in email leads: the address and the code after the `#`, which no
- * server sees. The page enters with them, then leaves this address for the home, the fragment gone
- * from the address bar and the history. A link spent, stale or cut says so, and how to get another;
- * the invitation's link, refused, lands here too (`?error=`, apps/server/src/platform/auth/invitation.ts).
+ * server sees, wiped from the address bar as the page opens. Nothing happens until « Entrer » is
+ * touched: a mail filter that runs the page's script spends nothing. A link spent, stale or cut
+ * says so, and how to get another; the invitation's link, refused, lands here too (`?error=`).
  */
-export const Route = createFileRoute('/entrer')({
-  validateSearch: z.object({ email: z.string().optional() }),
-  beforeLoad: async ({ location, context }) => {
-    if (location.hash === '') return;
-    const entry = entryFromFragment(location.hash);
-    const { error } = entry ? await authClient.signIn.emailOtp({ email: entry.email, otp: entry.code }) : { error: true };
-    if (error) {
-      // The email tapped again by the adult already in with its code: their home, not an error.
-      const me = await context.queryClient.query({ ...meQuery, staleTime: 0 });
-      if (entry && me?.role === 'guardian' && me.email === entry.email) throw redirect({ to: '/', replace: true });
-      throw redirect({ to: '/entrer', search: entry ? { email: entry.email } : {}, replace: true });
-    }
-    // In: another tab of the device, a child's, reloads on the adult's space.
-    announceProfileChange(tabChannel());
-    await context.queryClient.invalidateQueries({ queryKey: meQuery.queryKey });
-    throw redirect({ to: '/', replace: true });
-  },
-  component: LinkSpent,
-});
+export const Route = createFileRoute('/entrer')({ component: Enter });
 
-function LinkSpent() {
-  const { email } = Route.useSearch();
+function Enter() {
+  const hash = useFragment();
+  const [entry] = useState(() => entryFromFragment(hash));
+  const [spent, setSpent] = useState(false);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const enter = useMutation({
+    mutationFn: async ({ email, code }: { email: string; code: string }) => {
+      const { error } = await authClient.signIn.emailOtp({ email, otp: code });
+      if (error) {
+        // The email touched again by the adult already in with its code: their home, not an error.
+        const me = await queryClient.query({ ...meQuery, staleTime: 0 });
+        if (me?.role === 'guardian' && me.email === email) await navigate({ to: '/', replace: true });
+        else setSpent(true);
+        return;
+      }
+      // In: another tab of the device, a child's, reloads on the adult's space.
+      announceProfileChange(tabChannel());
+      await queryClient.invalidateQueries({ queryKey: meQuery.queryKey });
+      await navigate({ to: '/', replace: true });
+    },
+  });
+
+  if (!entry || spent) return <LinkSpent email={entry?.email} />;
+  return (
+    <Page title="Entrez dans Catiche">
+      {enter.error && <Banner tone="error" title={FAILED} />}
+      <Button
+        disabled={enter.isPending}
+        onClick={() => {
+          enter.mutate(entry);
+        }}
+      >
+        Entrer
+      </Button>
+    </Page>
+  );
+}
+
+function LinkSpent({ email }: { email: string | undefined }) {
+  const navigate = useNavigate();
   return (
     <Page title="Ce lien ne marche plus">
       <p className="text-foreground">Il a déjà servi, ou il est trop ancien.</p>
-      <Button render={<Link to="/connexion" search={email === undefined ? {} : { email }} />}>Recevoir un nouvel e-mail</Button>
+      <Button
+        onClick={() => {
+          // The address goes along to the form, never in the address bar.
+          if (email !== undefined) handOff().leave('email', email);
+          void navigate({ to: '/connexion' });
+        }}
+      >
+        Recevoir un nouvel e-mail
+      </Button>
     </Page>
   );
 }
