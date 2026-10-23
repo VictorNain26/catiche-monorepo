@@ -13,7 +13,7 @@ import { ticked, z } from './zod';
 export const ADULT_LABEL = 'J’ai 18 ans ou plus.';
 
 /** The first name the adult's children see. */
-const adultName = firstName('Votre prénom.');
+const adultName = firstName('Écrivez votre prénom.');
 
 /** A new adult's first screen: their first name and their age declared, then their child, as the adding asks it. */
 export const welcomeSchema = (now = new Date()) => z.object({ you: z.object({ name: adultName, adult: ticked }), child: newChildSchema(now) });

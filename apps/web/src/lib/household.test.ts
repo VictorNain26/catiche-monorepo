@@ -72,10 +72,10 @@ describe('newChildSchema', () => {
   it('asks for each menu, and refuses an empty name or no level', () => {
     const empty = newChildSchema(now).safeParse({ name: ' ', level: '', month: '', year: '', declaredGuardian: true });
     expect(empty.error?.issues.map(({ path, message }) => [path[0], message])).toEqual([
-      ['name', 'Son prénom.'],
-      ['level', 'Sa classe.'],
-      ['month', 'Son mois.'],
-      ['year', 'Son année.'],
+      ['name', 'Écrivez son prénom.'],
+      ['level', 'Choisissez sa classe.'],
+      ['month', 'Choisissez son mois de naissance.'],
+      ['year', 'Choisissez son année de naissance.'],
     ]);
   });
 });

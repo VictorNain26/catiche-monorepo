@@ -32,9 +32,9 @@ describe('welcomeSchema', () => {
   it('says, under each field left empty or unticked, what to do', () => {
     const empty = welcomeSchema(now).safeParse({ you: { name: ' ', adult: false }, child: { ...child, name: '', declaredGuardian: false } });
     expect(empty.error?.issues.map(({ path, message }) => [path.join('.'), message])).toEqual([
-      ['you.name', 'Votre prénom.'],
+      ['you.name', 'Écrivez votre prénom.'],
       ['you.adult', 'Cochez cette case pour continuer.'],
-      ['child.name', 'Son prénom.'],
+      ['child.name', 'Écrivez son prénom.'],
       ['child.declaredGuardian', 'Cochez cette case pour continuer.'],
     ]);
   });
