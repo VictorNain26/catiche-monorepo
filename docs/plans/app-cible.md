@@ -187,13 +187,13 @@ retirer l'autre.
 **Pas d'onglets.** Chaque rôle n'a qu'un écran où il revient : l'enfant, « Ce soir » ; l'adulte,
 l'accueil avec une carte par enfant. Tout le reste s'ouvre depuis là et se referme par un bouton
 « ← » qui nomme où il ramène, avec le mot du titre de cet écran : côté adulte, « ← Vos enfants »,
-puisque l'accueil s'intitule « Suivez les devoirs de vos enfants ».
+puisque l'accueil s'intitule « Suivez les devoirs de vos enfants ». C'est un écart à `charte.md`
+(« des onglets en bas » au téléphone, « la navigation sur le côté » à l'ordinateur) : la PR de ce
+document met la charte à jour, les onglets ne servant que pour plusieurs destinations fréquentes.
 
-**Qui est connecté** : le haut de chaque écran de l'adulte porte son prénom, « Camille », un
-bouton qui ouvre « Votre compte », et « Quitter ». Côté enfant, le titre de « Ce soir » porte
-déjà son prénom (E4). Personne n'a à deviner sous quel compte il est entré. C'est un écart à `charte.md` (« des onglets en bas » au téléphone,
-« la navigation sur le côté » à l'ordinateur) : la PR de ce document met la charte à jour, les
-onglets ne servant que pour plusieurs destinations fréquentes.
+**Qui est connecté** : le haut de chaque écran de l'adulte porte un bouton à son nom, un
+pictogramme de personne et « Camille · Votre compte », puis « Quitter ». Côté enfant, le titre de
+« Ce soir » porte déjà son prénom (E4). Personne n'a à deviner sous quel compte il est entré.
 
 **Les tailles** : téléphone et tablette en portrait, une colonne ; tablette en paysage et
 ordinateur, la même page sur deux colonnes, sans barre de côté.
@@ -464,17 +464,17 @@ jamais pour un adulte invité ; et depuis « Gérer »).
 - Confirmation : la règle commune de « La confirmation récente » (plus haut).
 
 **A5. Accueil** (une carte par enfant, même avec un seul).
-- En haut : « Camille » (vers A9), « Quitter ».
+- En haut : « Camille · Votre compte » (vers A9), « Quitter ».
 - Titre : « Suivez les devoirs de vos enfants », avec un enfant comme avec plusieurs : les
   autres écrans y ramènent par « ← Vos enfants ».
 - La clé d'accès, proposée une fois, en carte en tête, à la deuxième entrée par e-mail sur cet
-  appareil ; jamais pendant A3 ni A4. Titre : « Entrez sans attendre d'e-mail ». Texte : « Créez
-  une clé d'accès : la prochaine fois, vous entrerez avec votre empreinte, votre visage ou le
-  code de votre téléphone. Elle reste sur cet appareil. » Boutons : « Créer ma clé d'accès » ;
+  appareil ; jamais pendant A3 ni A4, jamais sur un appareil partagé (§ 4). Titre : « Entrez sans
+  attendre d'e-mail ». Texte : « Créez une clé d'accès : la prochaine fois, vous entrerez avec
+  votre empreinte, votre visage ou le code qui déverrouille cet appareil. » Boutons : « Créer ma clé d'accès » ;
   « Plus tard », qui la range dans A9 sans la reproposer. Après la fenêtre du téléphone : « C'est
   fait. Sur cet appareil, vous entrez maintenant sans e-mail. » Le mot « clé d'accès » reste, car
   la fenêtre du téléphone l'emploie ; une empreinte n'est jamais exigée, le code de l'appareil
-  suffit ([Google, « Communicating passkeys »](https://developers.google.com/identity/passkeys/ux/communicating-passkeys)).
+  suffit, et aucune ne se crée sur un appareil partagé ([Google, « Communicating passkeys »](https://developers.google.com/identity/passkeys/ux/communicating-passkeys)).
 - Carte d'alerte, en tête, quand il le faut (parent) : « Léa a oublié son code. » avec « Donner un
   code de départ », qui l'affiche tout de suite ; « La tablette de Léa est bloquée après 3 codes
   faux. » avec « Débloquer » ; « Karim a demandé la suppression du compte de Léa. » avec « Voir ».
@@ -531,17 +531,19 @@ jamais pour un adulte invité ; et depuis « Gérer »).
   « L'invitation vaut 30 jours. » Le même e-mail sert à l'invitation de Victor, sans « Nadia ».
 
 **A9. Votre compte** (par le prénom, en haut de chaque écran de l'adulte).
-- Titre : « Voici votre compte ». Retour : « ← Vos enfants ».
+- Titre : « Ce compte est le vôtre ». Retour : « ← Vos enfants ».
 - D'abord, à qui il est : « Ce compte est celui de Camille : camille@exemple.fr. » Puis, sur un
-  appareil personnel : « Cet appareil vous garde 90 jours : pas besoin d'e-mail pour revenir. » ;
+  appareil personnel : « Sur cet appareil, Catiche se souvient de vous : revenez au moins une
+  fois tous les 90 jours, et vous n'aurez pas besoin d'e-mail. » ;
   sur un appareil partagé : « Cet appareil est partagé : votre espace se ferme après 10 minutes
   sans rien faire. »
 - « Votre prénom ».
 - « Quitter Catiche ».
 - « Vos clés d'accès », avec la phrase d'A5 : « Une clé d'accès vous fait entrer avec votre
-  empreinte, votre visage ou le code de votre téléphone, sans attendre d'e-mail. » Chaque clé
-  porte son appareil et sa date (« Le téléphone, créée le 3 mars »), avec « Supprimer » et sa
-  confirmation ; puis « Créer une clé d'accès sur cet appareil ».
+  empreinte, votre visage ou le code qui déverrouille l'appareil, sans attendre d'e-mail. »
+  Chaque clé porte son appareil, aussi précis que le navigateur le dit, et sa date (« Téléphone
+  Android, créée le 3 mars »), avec « Supprimer » et sa confirmation ; puis « Créer une clé
+  d'accès sur cet appareil », sauf sur un appareil partagé.
 - Séparé, en bas : « Supprimer mon compte », avec les conséquences nommées : « Votre compte sera
   effacé. Le compte de Léa le sera aussi : personne d'autre n'est son parent dans Catiche. C'est
   définitif. »
