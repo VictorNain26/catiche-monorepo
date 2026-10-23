@@ -1,23 +1,31 @@
 /**
  * The household on a real database, through the HTTP API as the web will call it: the access
- * matrix first (anonymous, two guardians, a student of each), then what a guardian does, the
- * devices of a student, and what a student may do with better-auth's own routes.
+ * matrix first (anonymous, two adults, a student of each), then what an adult does, the
+ * declarations, two adults linked to one student, the devices of a student, and what a student may
+ * do with better-auth's own routes.
  */
 
 import { describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
+import { invite } from '../../platform/auth/invitation';
 import { account, device as deviceTable, deviceProfile, session, user } from '../../platform/auth/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { birthMonthAged, STUDENT_CODE, type Student } from '../../testing/http';
-import { householdMember, studentProfile } from './schema';
+import { adultProfile, guardianship, studentProfile } from './schema';
 
 const { db } = await testDatabase();
 
 // One app per block: each has its own rate-limit budget, and every request here shares one address.
 const client = () => testApp(db).api;
 
-const householdOf = async (userId: string) => (await db.select().from(householdMember).where(eq(householdMember.userId, userId)))[0]?.householdId;
+/** The adults a student is linked to, and whether each declared it. */
+const linksOf = (studentId: string) =>
+  db
+    .select({ adultId: guardianship.adultId, declared: sql<boolean>`${guardianship.declaredAt} IS NOT NULL` })
+    .from(guardianship)
+    .where(eq(guardianship.studentId, studentId));
+const idOf = async (cookie: string) => (await matrix.sessionUser(cookie))?.id ?? '';
 
 const matrix = client();
 const guardianA = await matrix.guardian('a@example.com');
@@ -35,10 +43,15 @@ describe('access matrix', () => {
   const target = `/api/household/students/${studentOfA.id}`;
   const routes = [
     { method: 'GET', path: '/api/household/students' },
-    { method: 'POST', path: '/api/household/students', body: { name: 'X', level: 'sixieme', birthMonth: birthMonthAged(11) } },
+    {
+      method: 'POST',
+      path: '/api/household/students',
+      body: { name: 'X', level: 'sixieme', birthMonth: birthMonthAged(11), declaredGuardian: true },
+    },
     { method: 'PATCH', path: target, body: { name: 'Changé' } },
     { method: 'POST', path: `${target}/activation-code`, body: { reason: 'device' } },
     { method: 'POST', path: `${target}/activation-code`, body: { reason: 'forgotten' } },
+    { method: 'POST', path: `${target}/declaration`, body: { declaredGuardian: true } },
     { method: 'GET', path: `${target}/devices` },
     { method: 'POST', path: `${target}/devices/${deviceOfA.id}/unblock` },
     { method: 'DELETE', path: `${target}/devices/${deviceOfA.id}` },
@@ -47,8 +60,8 @@ describe('access matrix', () => {
   const refused = [
     { actor: 'anonymous', cookie: undefined, status: 401, routes },
     { actor: 'the student', cookie: asStudentA, status: 403, routes },
-    { actor: 'a student of another household', cookie: asStudentB, status: 403, routes },
-    { actor: 'the guardian of another household', cookie: guardianB, status: 404, routes: routes.slice(2) },
+    { actor: 'another student', cookie: asStudentB, status: 403, routes },
+    { actor: 'an adult without a link to the student', cookie: guardianB, status: 404, routes: routes.slice(2) },
   ];
 
   for (const { actor, cookie, status, routes: denied } of refused) {
@@ -64,7 +77,7 @@ describe('access matrix', () => {
     }
   }
 
-  it('lists to each guardian only the students of their household', async () => {
+  it('lists to each adult only the students they are linked to', async () => {
     const listA = (await (await api.request('GET', '/api/household/students', { cookie: guardianA })).json()) as Student[];
     const listB = (await (await api.request('GET', '/api/household/students', { cookie: guardianB })).json()) as Student[];
     expect(listA.map((s) => s.id)).toEqual([studentOfA.id]);
@@ -77,13 +90,14 @@ const creator = await creation.guardian('createur@example.com');
 const leo = await creation.student(creator, { name: 'Léo', level: 'sixieme', birthMonth: birthMonthAged(11) });
 
 describe('/api/me', () => {
-  it('tells who is signed in and as what, a guardian without a household yet included', async () => {
+  it('tells who is signed in and as what, an adult without a child yet included', async () => {
     const api = client();
     const fresh = await api.guardian('nouveau@example.com');
     expect(await (await api.request('GET', '/api/me', { cookie: fresh })).json()).toMatchObject({
       name: 'Parent',
       role: 'guardian',
       level: null,
+      missing: { adult: false, guardianOf: [] },
     });
     // In 5e as in 3e, the child's own space, which says nothing of a family device.
     expect(await (await api.request('GET', '/api/me', { cookie: asStudentA })).json()).toEqual({
@@ -125,19 +139,27 @@ describe('a guardian creates a student', () => {
     expect(await db.select().from(account).where(eq(account.userId, leo.id))).toEqual([]);
   });
 
-  it('puts every student in one household with their guardian', async () => {
-    const second = await api.student(guardian);
-    const home = await householdOf(second.id);
-    expect(home).toBeDefined();
-    expect(await householdOf(leo.id)).toBe(home);
-    expect(await householdOf((await api.sessionUser(guardian))?.id ?? '')).toBe(home);
+  it('links the student to the adult who added them, with their declaration', async () => {
+    expect(await linksOf(leo.id)).toEqual([{ adultId: await idOf(guardian), declared: true }]);
   });
 
-  it('creates one household when two first students arrive at once', async () => {
+  it('links each of two students added at once', async () => {
     const parent = await api.guardian('simultane@example.com');
     const [one, two] = await Promise.all([api.student(parent), api.student(parent)]);
-    expect(await householdOf(one.id)).toBe(await householdOf(two.id));
+    const adultId = await idOf(parent);
+    expect(await linksOf(one.id)).toEqual([{ adultId, declared: true }]);
+    expect(await linksOf(two.id)).toEqual([{ adultId, declared: true }]);
   });
+
+  for (const declaredGuardian of [undefined, false]) {
+    it(`refuses a student without the declaration of parental authority (${String(declaredGuardian)}), and creates nothing`, async () => {
+      const body = { name: 'Sans déclaration', level: 'cinquieme', birthMonth: birthMonthAged(12), declaredGuardian };
+      const res = await api.request('POST', '/api/household/students', { cookie: guardian, body });
+      expect(res.status).toBe(400);
+      expect(((await res.json()) as { detail: string }).detail).toStartWith('declaredGuardian:');
+      expect(await db.select().from(user).where(eq(user.name, 'Sans déclaration'))).toEqual([]);
+    });
+  }
 
   for (const [field, value] of [
     ['level', 'seconde'],
@@ -153,7 +175,7 @@ describe('a guardian creates a student', () => {
     ['name', 'a'.repeat(51)],
   ] as const) {
     it(`refuses ${field} ${JSON.stringify(value).slice(0, 20)}`, async () => {
-      const body = { name: 'Léa', level: 'cinquieme', birthMonth: birthMonthAged(12), [field]: value };
+      const body = { name: 'Léa', level: 'cinquieme', birthMonth: birthMonthAged(12), declaredGuardian: true, [field]: value };
       const res = await api.request('POST', '/api/household/students', { cookie: guardian, body });
       expect(res.status).toBe(400);
       expect(((await res.json()) as { detail: string }).detail).toStartWith(`${field}:`);
@@ -255,18 +277,114 @@ describe('a guardian manages a student', () => {
     expect(res.status).toBe(400);
   });
 
-  it('deletes the student, their devices, membership and profile; a second delete is not found', async () => {
+  it('deletes the student, their devices, links and profile; a second delete is not found', async () => {
     const student = await api.student(guardian);
     const device = await api.pair(guardian, student.id);
 
     const res = await api.request('DELETE', `/api/household/students/${student.id}`, { cookie: guardian });
     expect(res.status).toBe(204);
     expect(await api.sessionUser(device)).toBeUndefined();
-    expect(await householdOf(student.id)).toBeUndefined();
+    expect(await linksOf(student.id)).toEqual([]);
     expect(await db.select().from(studentProfile).where(eq(studentProfile.userId, student.id))).toEqual([]);
 
     const again = await api.request('DELETE', `/api/household/students/${student.id}`, { cookie: guardian });
     expect(again.status).toBe(404);
+  });
+});
+
+const declarations = client();
+const declarationsGuardian = await declarations.guardian('declarations@example.com');
+const declarationsStudent = await declarations.pair(declarationsGuardian, (await declarations.student(declarationsGuardian)).id);
+
+describe('the declarations', () => {
+  const api = declarations;
+  const missingOf = async (cookie: string) =>
+    ((await (await api.request('GET', '/api/me', { cookie })).json()) as { missing: { adult: boolean; guardianOf: string[] } }).missing;
+  const declaredAdultAt = async (cookie: string) =>
+    (
+      await db
+        .select()
+        .from(adultProfile)
+        .where(eq(adultProfile.userId, await idOf(cookie)))
+    )[0]?.declaredAdultAt;
+
+  it('ask a new adult to declare being 18 or over, and keep the first date', async () => {
+    await invite(db, 'majeur@example.com');
+    const cookie = await api.signIn('majeur@example.com');
+    expect(await missingOf(cookie)).toEqual({ adult: true, guardianOf: [] });
+
+    expect((await api.request('POST', '/api/me/declarations', { cookie, body: { adult: true } })).status).toBe(204);
+    expect(await missingOf(cookie)).toEqual({ adult: false, guardianOf: [] });
+    const first = await declaredAdultAt(cookie);
+    expect(first).toBeInstanceOf(Date);
+
+    expect((await api.request('POST', '/api/me/declarations', { cookie, body: { adult: true } })).status).toBe(204);
+    expect(await declaredAdultAt(cookie)).toEqual(first);
+  });
+
+  it('refuses a declaration that declares nothing, and a student', async () => {
+    await invite(db, 'mineur@example.com');
+    const cookie = await api.signIn('mineur@example.com');
+    for (const body of [{}, { adult: false }]) {
+      expect((await api.request('POST', '/api/me/declarations', { cookie, body })).status).toBe(400);
+    }
+    expect(await declaredAdultAt(cookie)).toBeUndefined();
+    expect((await api.request('POST', '/api/me/declarations', { cookie: declarationsStudent, body: { adult: true } })).status).toBe(403);
+    expect(await declaredAdultAt(declarationsStudent)).toBeUndefined();
+  });
+
+  it('list the links made before the declaration, until the adult confirms each', async () => {
+    const cookie = await api.guardian('ancien@example.com');
+    const lea = await api.student(cookie);
+    const tom = await api.student(cookie, { name: 'Tom' });
+    await db
+      .update(guardianship)
+      .set({ declaredAt: null })
+      .where(eq(guardianship.adultId, await idOf(cookie)));
+    expect((await missingOf(cookie)).guardianOf.toSorted()).toEqual([lea.id, tom.id].toSorted());
+
+    const path = `/api/household/students/${lea.id}/declaration`;
+    expect((await api.request('POST', path, { cookie, body: { declaredGuardian: false } })).status).toBe(400);
+    expect((await api.request('POST', path, { cookie, body: { declaredGuardian: true } })).status).toBe(204);
+    expect(await missingOf(cookie)).toEqual({ adult: false, guardianOf: [tom.id] });
+    expect(await linksOf(lea.id)).toEqual([{ adultId: await idOf(cookie), declared: true }]);
+  });
+
+  it("refuses to confirm another adult's link, which stays to confirm", async () => {
+    const cookie = await api.guardian('a-confirmer@example.com');
+    const lea = await api.student(cookie);
+    await db.update(guardianship).set({ declaredAt: null }).where(eq(guardianship.studentId, lea.id));
+    const res = await api.request('POST', `/api/household/students/${lea.id}/declaration`, {
+      cookie: declarationsGuardian,
+      body: { declaredGuardian: true },
+    });
+    expect(res.status).toBe(404);
+    expect(await linksOf(lea.id)).toEqual([{ adultId: await idOf(cookie), declared: false }]);
+  });
+});
+
+const sharing = client();
+
+describe('two adults linked to one student', () => {
+  const api = sharing;
+
+  it('both see and manage the student', async () => {
+    const mother = await api.guardian('mere@example.com');
+    const father = await api.guardian('pere@example.com');
+    const lea = await api.student(mother);
+    // Linked directly: the invitation of another adult comes with its own screen.
+    await db.insert(guardianship).values({ adultId: await idOf(father), studentId: lea.id, declaredAt: new Date() });
+
+    for (const [cookie, level] of [
+      [mother, 'quatrieme'],
+      [father, 'troisieme'],
+    ] as const) {
+      const list = (await (await api.request('GET', '/api/household/students', { cookie })).json()) as Student[];
+      expect(list.map(({ id }) => id)).toEqual([lea.id]);
+      const res = await api.request('PATCH', `/api/household/students/${lea.id}`, { cookie, body: { level } });
+      expect(await res.json()).toMatchObject({ id: lea.id, level });
+      expect((await api.devices(cookie, lea.id)).code).toEqual({ chosen: false, locked: false });
+    }
   });
 });
 

@@ -10,6 +10,7 @@ import { programmeFor } from '../../referential';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { birthMonthAged } from '../../testing/http';
+import { guardianship } from '../household/schema';
 import { createTutorRepository } from './repository';
 import { exercise, message, studySession, turnRecord } from './schema';
 import { record, sheet, turn } from './testing';
@@ -114,6 +115,14 @@ describe('the summary of the week', () => {
 
   it('gives their guardian the same summary', async () => {
     const res = await summaryOf(guardian, `/api/summary/${lea.id}`);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual(await (await summaryOf(asLea)).json());
+  });
+
+  it('gives a second adult linked to the student the same summary', async () => {
+    const father = await api.guardian('pere@example.com');
+    await db.insert(guardianship).values({ adultId: (await api.sessionUser(father))?.id ?? '', studentId: lea.id, declaredAt: new Date() });
+    const res = await summaryOf(father, `/api/summary/${lea.id}`);
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual(await (await summaryOf(asLea)).json());
   });

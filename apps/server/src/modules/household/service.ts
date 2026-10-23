@@ -1,5 +1,5 @@
 /**
- * What a guardian does with the students of their household. A student has no email (the
+ * What an adult does with the students they are linked to. A student has no email (the
  * non-routable address better-auth itself makes for an account without one, RFC 6761 `.invalid`)
  * and no password: a code the guardian asks for recognises a device of theirs, then the student
  * enters by a code of their own that the guardian never learns (`platform/auth/student-sign-in.ts`).
@@ -58,22 +58,38 @@ export function createHouseholdService({ repository, createActivationCode }: Dep
     return toStudent(student);
   };
 
-  const isStudent = async (userId: string) => (await repository.roleOf(userId)) === 'student';
+  const isStudent = (userId: string) => repository.isStudent(userId);
+
+  const assertNotStudent = async (userId: string) => {
+    if (await isStudent(userId)) throw new Problem('FORBIDDEN');
+  };
 
   return {
     isStudent,
 
-    /** A student reaches none of the guardian's routes. */
-    async assertNotStudent(userId: string) {
-      if (await isStudent(userId)) throw new Problem('FORBIDDEN');
-    },
+    /** A student reaches none of the adult's routes. */
+    assertNotStudent,
 
-    /** Who is signed in: a student, or else a guardian, whose household may not exist yet. */
+    /**
+     * Who is signed in: a student, or else an adult, who may have no student yet; and, for an adult,
+     * what they have yet to declare, which the web asks before anything else.
+     */
     async me(userId: string, name: string) {
       const student = await repository.findProfile(userId);
       return student
         ? { id: userId, name, role: 'student' as const, level: student.level }
-        : { id: userId, name, role: 'guardian' as const, level: null };
+        : { id: userId, name, role: 'guardian' as const, level: null, missing: await repository.missingDeclarations(userId) };
+    },
+
+    /** The adult declares being 18 or over. */
+    async declareAdult(userId: string) {
+      await assertNotStudent(userId);
+      await repository.declareAdult(userId);
+    },
+
+    /** The adult declares holding parental authority over a student they are linked to. */
+    async declareGuardian(adultId: string, studentId: string) {
+      if (!(await repository.declareGuardian(adultId, studentId))) throw new Problem('NOT_FOUND');
     },
 
     async listStudents(guardianId: string) {

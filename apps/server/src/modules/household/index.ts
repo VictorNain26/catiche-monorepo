@@ -34,8 +34,8 @@ export function studentDirectory(db: Db) {
     },
     answerMemory: (studentId: string, answer: MemoryAnswer, afterPosition: number) => repository.answerMemory(studentId, answer, afterPosition),
     resetMemory: (studentId: string, afterPosition: number) => repository.resetMemory(studentId, afterPosition),
-    /** Whether the student is in the household where `guardianId` is a guardian. */
-    inHousehold: async (guardianId: string, studentId: string) => (await repository.findStudent(guardianId, studentId)) !== undefined,
+    /** Whether the adult is linked to the student. */
+    follows: async (adultId: string, studentId: string) => (await repository.findStudent(adultId, studentId)) !== undefined,
   };
 }
 
@@ -45,12 +45,12 @@ export type StudentDirectory = ReturnType<typeof studentDirectory>;
 export function studentAccess(db: Db): StudentAccess {
   const repository = createHouseholdRepository(db);
   return {
-    inHousehold: studentDirectory(db).inHousehold,
+    follows: studentDirectory(db).follows,
     birthMonth: async (studentId) => (await repository.findProfile(studentId))?.birthMonth ?? null,
   };
 }
 
-/** A user's deletion, with a sole guardian's household and students, in one transaction. */
+/** A user's deletion, with the students no other adult follows, in one transaction. */
 export function accountDeletion(db: Db) {
   const repository = createHouseholdRepository(db);
   return (userId: string) => repository.deleteAccount(userId);

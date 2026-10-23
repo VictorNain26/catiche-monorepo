@@ -124,10 +124,12 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
 
   const api = {
     request,
-    /** Invited, then in by the code their address received: the session it opens. */
+    /** Invited, in by the code their address received, then declared 18 or over: the session it opens. */
     async guardian(email: string) {
       await invite(db, email);
-      return api.signIn(email);
+      const cookie = await api.signIn(email);
+      await expectStatus(request('POST', '/api/me/declarations', { cookie, body: { adult: true } }), 204, 'adult declaration');
+      return cookie;
     },
     /** In by the code the address receives, named on a first sign-in: the session cookie. */
     async signIn(email: string) {
@@ -145,7 +147,7 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, db: 
       const res = await expectStatus(
         request('POST', '/api/household/students', {
           cookie,
-          body: { name: 'Léa', level: 'cinquieme', birthMonth: birthMonthAged(12), ...overrides },
+          body: { name: 'Léa', level: 'cinquieme', birthMonth: birthMonthAged(12), declaredGuardian: true, ...overrides },
         }),
         201,
         'student',
