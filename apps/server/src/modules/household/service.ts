@@ -19,13 +19,25 @@ export interface StudentInput {
   name: string;
   level: SchoolLevel;
   birthMonth: string;
-  memoryProposed?: boolean | undefined;
 }
 
 interface Deps {
   repository: HouseholdRepository;
   createActivationCode: (userId: string, reason: ActivationReason) => Promise<{ code: string; expiresAt: Date }>;
+  /** Whether the user's session on this device is a short one, the device being shared. */
+  sharedDevice: (deviceId: string, userId: string) => Promise<boolean>;
 }
+
+/** Who a session is: the device it was opened on, when the household knows it. */
+interface SignedIn {
+  id: string;
+  name: string;
+  email: string;
+  deviceId: string | null;
+}
+
+/** The entries by email after which the passkey is offered: the first is the invitation's, or the first code. */
+const PASSKEY_OFFER_ENTRIES = 2;
 
 type StudentRow = NonNullable<Awaited<ReturnType<HouseholdRepository['findStudent']>>>;
 
@@ -51,7 +63,7 @@ const toStudent = ({ birthMonth, memoryProposedAt, memoryAnswer, ...student }: S
   };
 };
 
-export function createHouseholdService({ repository, createActivationCode }: Deps) {
+export function createHouseholdService({ repository, createActivationCode, sharedDevice }: Deps) {
   const found = async (adultId: string, studentId: string) => {
     const student = await repository.findStudent(adultId, studentId);
     if (!student) throw new Problem('NOT_FOUND');
@@ -74,12 +86,31 @@ export function createHouseholdService({ repository, createActivationCode }: Dep
      * Who is signed in: a student, or else an adult, who may have no student yet; and, for an adult,
      * what they have yet to declare, which the web asks before anything else.
      */
-    async me(userId: string, name: string) {
-      const student = await repository.findProfile(userId);
-      return student
-        ? { id: userId, name, role: 'student' as const, level: student.level }
-        : { id: userId, name, role: 'guardian' as const, level: null, missing: await repository.missingDeclarations(userId) };
+    async me({ id, name, email, deviceId }: SignedIn) {
+      const student = await repository.findProfile(id);
+      if (student) return { id, name, role: 'student' as const, level: student.level };
+      const [missing, offer, shared] = await Promise.all([
+        repository.missingDeclarations(id),
+        repository.passkeyOffer(id),
+        deviceId === null ? false : sharedDevice(deviceId, id),
+      ]);
+      return {
+        id,
+        name,
+        role: 'guardian' as const,
+        level: null,
+        email,
+        missing,
+        // Whether the session closes after ten minutes without use: on a device a family shares.
+        sharedDevice: shared,
+        // Offered from the second entry by email, until a passkey exists or the offer is put
+        // away; never on a shared device, whose lock a child may know.
+        passkeyOffer: offer.emailEntries >= PASSKEY_OFFER_ENTRIES && offer.passkeys === 0 && !offer.closed && !shared,
+      };
     },
+
+    /** The adult puts the passkey's offer away: « Votre compte » keeps the making of one. */
+    closePasskeyOffer: (userId: string) => repository.closePasskeyOffer(userId),
 
     /** The adult declares being 18 or over. */
     async declareAdult(userId: string) {
@@ -106,7 +137,6 @@ export function createHouseholdService({ repository, createActivationCode }: Dep
         email: createPlaceholderEmail({ identifier: id, namespace: 'student' }),
         level: input.level,
         birthMonth: `${input.birthMonth}-01`,
-        memoryProposed: input.memoryProposed ?? false,
       });
       return found(adultId, id);
     },

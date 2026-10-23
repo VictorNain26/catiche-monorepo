@@ -60,8 +60,13 @@ describe('scalewayMailer', () => {
     });
   });
 
-  it('escapes the text in its HTML part, one paragraph per line', () => {
-    expect(received[0]?.body.html).toBe('<p>Bonjour,</p><p>un lien : https://tom.example/x?a=1&amp;b=&lt;2&gt;</p>');
+  it('escapes the text in its HTML part, one paragraph per line, a line « Label : address » a link named by its label', () => {
+    expect(received[0]?.body.html).toBe('<p>Bonjour,</p><p><a href="https://tom.example/x?a=1&amp;b=&lt;2&gt;">un lien</a></p>');
+  });
+
+  it('leaves an address inside a sentence as text', async () => {
+    await send({ to: 'parent@example.com', subject: 'Sujet', text: 'Ouvrez https://tom.example et donnez cette adresse.' });
+    expect(received.at(-1)?.body.html).toBe('<p>Ouvrez https://tom.example et donnez cette adresse.</p>');
   });
 
   it('fails when the API refuses the email, so that the caller knows nothing was sent', async () => {

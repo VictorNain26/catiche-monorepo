@@ -4,13 +4,14 @@ import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tansta
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { ChildAccess, useActivation } from '../components/child-access';
-import { BackLink, Page } from '../components/page';
+import { AdultPage } from '../components/page';
 import { WeekSummary } from '../components/week-summary';
 import { isProblem } from '../lib/api';
 import { useConfirmation } from '../lib/confirmation';
 import { summaryQuery } from '../lib/summary';
 import {
   LEVEL_LABELS,
+  LEVEL_OPTIONS,
   deleteStudent,
   householdMessage,
   memoryStatus,
@@ -48,7 +49,7 @@ function StudentPage() {
   const first = activation.devices.length === 0;
 
   return (
-    <Page title={child.name} subtitle={LEVEL_LABELS[child.level]} back={<BackLink to="/foyer">Retour au foyer</BackLink>} wide>
+    <AdultPage title={child.name} subtitle={LEVEL_LABELS[child.level]} wide>
       {first && <ChildAccess child={child} activation={activation} />}
       <WeekSummary week={week.data} failed={week.isError} name={child.name} reader="guardian" />
       {!first && <ChildAccess child={child} activation={activation} />}
@@ -63,7 +64,7 @@ function StudentPage() {
           <DeleteStudent child={child} />
         </Fold>
       </div>
-    </Page>
+    </AdultPage>
   );
 }
 
@@ -151,7 +152,7 @@ function EditStudent({ child }: { child: Student }) {
       className="flex flex-col gap-4"
     >
       <Field label="Son prénom" autoComplete="off" {...form.register('name')} error={form.formState.errors.name?.message} />
-      <SelectField label="Sa classe" options={LEVEL_LABELS} {...form.register('level')} error={form.formState.errors.level?.message} />
+      <SelectField label="Sa classe" options={LEVEL_OPTIONS} {...form.register('level')} error={form.formState.errors.level?.message} />
       {update.error && <Banner tone="error" title={householdMessage(update.error)} />}
       <Button type="submit" variant="outline" disabled={update.isPending}>
         Enregistrer

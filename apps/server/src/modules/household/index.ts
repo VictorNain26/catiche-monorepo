@@ -4,6 +4,7 @@
  */
 
 import type { Auth } from '../../platform/auth/auth';
+import { createStudentDevices } from '../../platform/auth/student-devices';
 import { createActivationCode, type StudentAccess } from '../../platform/auth/student-sign-in';
 import type { Db } from '../../platform/db/client';
 import { createHouseholdRepository } from './repository';
@@ -11,9 +12,11 @@ import { householdRoutes, meRoutes, studentAuthGuard } from './routes';
 import { createHouseholdService, learnerMemory, type MemoryAnswer } from './service';
 
 export function householdModule({ db, auth }: { db: Db; auth: Auth }) {
+  const devices = createStudentDevices(db);
   const service = createHouseholdService({
     repository: createHouseholdRepository(db),
     createActivationCode: (userId, reason) => createActivationCode(auth, userId, reason),
+    sharedDevice: (deviceId, userId) => devices.isShortSession(deviceId, userId),
   });
   return { routes: householdRoutes({ auth, service }), me: meRoutes({ auth, service }), authGuard: studentAuthGuard({ auth, service }) };
 }
@@ -41,13 +44,17 @@ export function studentDirectory(db: Db) {
 
 export type StudentDirectory = ReturnType<typeof studentDirectory>;
 
-/** What the student sign-in asks of the household, which main.ts hands to better-auth. */
-export function studentAccess(db: Db): StudentAccess {
+/**
+ * What better-auth asks of the household, which each entry point hands to `createAuth`: a user's
+ * deletion, the student sign-in's answers, and the count of an adult's entries by email.
+ */
+export function householdAuth(db: Db) {
   const repository = createHouseholdRepository(db);
-  return {
+  const students: StudentAccess = {
     follows: studentDirectory(db).follows,
     birthMonth: async (studentId) => (await repository.findProfile(studentId))?.birthMonth ?? null,
   };
+  return { deleteUser: accountDeletion(db), students, emailEntered: (adultId: string) => repository.countEmailEntry(adultId) };
 }
 
 /** A user's deletion, with the students no other adult follows, in one transaction. */

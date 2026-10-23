@@ -1,10 +1,10 @@
 import { buttonVariants, cn } from '@repo/ui/classes';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createLink } from '@tanstack/react-router';
-import { ChevronLeftIcon, type LucideIcon } from 'lucide-react';
+import { ChevronLeftIcon, UserRoundIcon, type LucideIcon } from 'lucide-react';
 import { useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
 import { meQuery } from '../lib/me';
-import { ChangeProfile } from './sign-out';
+import { ChangeProfile, Quit } from './sign-out';
 
 function HeaderAnchor({ icon: Icon, className, children, ...anchor }: ComponentProps<'a'> & { icon: LucideIcon }) {
   return (
@@ -35,6 +35,28 @@ export function ProfileAction() {
   return <ChangeProfile name={me.name} />;
 }
 
+/**
+ * A screen of the adult's, its header the same everywhere: « ← Vos enfants », named by the home's
+ * title, except on the home itself; who is signed in, which opens their account; and « Quitter ».
+ */
+export function AdultPage({ withBack = true, ...page }: Omit<PageProps, 'back' | 'action'> & { withBack?: boolean }) {
+  const { data: me } = useSuspenseQuery(meQuery);
+  return (
+    <Page
+      {...page}
+      back={withBack ? <BackLink to="/foyer">Vos enfants</BackLink> : undefined}
+      action={
+        <div className="flex flex-wrap items-center justify-end gap-x-4">
+          <HeaderLink to="/foyer/compte" icon={UserRoundIcon}>
+            {me?.name} · Votre compte
+          </HeaderLink>
+          <Quit />
+        </div>
+      }
+    />
+  );
+}
+
 interface PageProps {
   title: string;
   /** A line that says more of the title, under it. */
@@ -62,7 +84,7 @@ export function Page({ title, subtitle, back, action, announce = false, wide = f
     <main className={cn('mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-4', wide && 'lg:max-w-5xl lg:px-8')}>
       <header className="flex flex-col gap-2 pt-4">
         {links ? (
-          <div className="flex min-h-11 items-center justify-between gap-3">
+          <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-3">
             {back ?? <span />}
             {action}
           </div>

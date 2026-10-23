@@ -20,6 +20,17 @@ export const LEVEL_LABELS: Record<Level, string> = {
   troisieme: 'Troisième',
 };
 
+/** The levels as a menu lists them, in school order. */
+export const LEVEL_OPTIONS = Object.entries(LEVEL_LABELS);
+
+/**
+ * The months as a menu lists them, from January: a list, since an object with « 10 » for a key
+ * would put October first (integer-like keys come first in JavaScript).
+ */
+export const MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'].map(
+  (label, index) => [String(index + 1).padStart(2, '0'), label] as const,
+);
+
 export const isLevel = (value: unknown): value is Level => typeof value === 'string' && Object.hasOwn(LEVEL_LABELS, value);
 
 export const studentsQuery = queryOptions({
@@ -71,8 +82,11 @@ export const GUARDIAN_LABEL = 'J’exerce l’autorité parentale sur cet enfant
 export const GUARDIAN_HINT =
   'Votre accord suffit pour qu’il utilise Catiche. Un autre parent pourra s’y opposer, depuis son compte ou en écrivant à contact@catiche.fr.';
 
-const name = z.string().trim().min(1, 'Son prénom.').max(50, '50 caractères au plus.');
-const level = z.custom<Level>(isLevel, 'Sa classe.');
+/** A first name as the server takes it, a child's or an adult's; `missing`: what to do when it is empty. */
+export const firstName = (missing: string) => z.string().trim().min(1, missing).max(50, '50 caractères au plus.');
+
+const name = firstName('Écrivez son prénom.');
+const level = z.custom<Level>(isLevel, 'Choisissez sa classe.');
 
 export const studentSchema = z.object({ name, level });
 
@@ -94,9 +108,8 @@ export const birthYears = (now = new Date()) =>
 export const newChildSchema = (now = new Date()) =>
   studentSchema
     .extend({
-      month: z.string().regex(/^(0[1-9]|1[0-2])$/, 'Son mois.'),
-      year: z.string().regex(/^\d{4}$/, 'Son année.'),
-      memoryProposed: z.boolean(),
+      month: z.string().regex(/^(0[1-9]|1[0-2])$/, 'Choisissez son mois de naissance.'),
+      year: z.string().regex(/^\d{4}$/, 'Choisissez son année de naissance.'),
       declaredGuardian: ticked,
     })
     .refine(({ month, year }) => isStudentBirthMonth(`${year}-${month}`, now), {

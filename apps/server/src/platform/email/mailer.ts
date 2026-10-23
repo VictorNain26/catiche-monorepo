@@ -25,6 +25,24 @@ export interface ScalewayMail {
   apiURL?: string | undefined;
 }
 
+/** A line that is a label, then an address: the HTML part shows the label, which opens the address. */
+const LINK_LINE = /^(.+) : (https?:\/\/\S+)$/;
+
+/**
+ * The SDK requires an HTML part: the same text, escaped, one paragraph per line, and a line
+ * « Entrer dans Catiche : https://… » a link named by its label. No template: the text says it all.
+ */
+function htmlOf(text: string) {
+  return text
+    .split('\n')
+    .map((line) => {
+      const link = LINK_LINE.exec(line);
+      const html = link ? `<a href="${Bun.escapeHTML(link[2] ?? '')}">${Bun.escapeHTML(link[1] ?? '')}</a>` : Bun.escapeHTML(line);
+      return `<p>${html}</p>`;
+    })
+    .join('');
+}
+
 // Past it, the email is abandoned and reported, instead of holding a background task.
 const SEND_TIMEOUT_MS = 10_000;
 
@@ -44,11 +62,7 @@ export function scalewayMailer({ accessKey, secretKey, projectId, from, apiURL }
         to: [{ email: to }],
         subject,
         text,
-        // The SDK requires an HTML part: the same text, escaped, one paragraph per line.
-        html: Bun.escapeHTML(text)
-          .split('\n')
-          .map((line) => `<p>${line}</p>`)
-          .join(''),
+        html: htmlOf(text),
       },
       { signal: AbortSignal.timeout(SEND_TIMEOUT_MS) },
     );

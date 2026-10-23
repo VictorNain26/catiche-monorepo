@@ -7,7 +7,6 @@
 
 import { describe, expect, it } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
-import { invite } from '../../platform/auth/invitation';
 import { account, device as deviceTable, deviceProfile, session, user } from '../../platform/auth/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
@@ -137,6 +136,16 @@ describe('a guardian creates a student', () => {
     const [row] = await db.select({ email: user.email }).from(user).where(eq(user.id, leo.id));
     expect(row?.email).toEndWith('.invalid');
     expect(await db.select().from(account).where(eq(account.userId, leo.id))).toEqual([]);
+  });
+
+  // The memory is proposed from the child's page, once they exist: never while adding them.
+  it('never proposes the memory while adding the student', async () => {
+    const res = await api.request('POST', '/api/household/students', {
+      cookie: guardian,
+      body: { name: 'Sans mémoire', level: 'cinquieme', birthMonth: birthMonthAged(12), declaredGuardian: true, memoryProposed: true },
+    });
+    expect(res.status).toBe(201);
+    expect(((await res.json()) as { memory: { proposed: boolean } }).memory.proposed).toBe(false);
   });
 
   it('links the student to the adult who added them, with their declaration', async () => {
@@ -306,10 +315,10 @@ describe('the declarations', () => {
         .select()
         .from(adultProfile)
         .where(eq(adultProfile.userId, await idOf(cookie)))
-    )[0]?.declaredAdultAt;
+    )[0]?.declaredAdultAt ?? null;
 
   it('ask a new adult to declare being 18 or over, and keep the first date', async () => {
-    await invite(db, 'majeur@example.com');
+    await api.invite('majeur@example.com');
     const cookie = await api.signIn('majeur@example.com');
     expect(await missingOf(cookie)).toEqual({ adult: true, guardianOf: [] });
 
@@ -323,7 +332,7 @@ describe('the declarations', () => {
   });
 
   it('refuses a student from an adult who has not declared being 18 or over, and creates nothing', async () => {
-    await invite(db, 'sans-majorite@example.com');
+    await api.invite('sans-majorite@example.com');
     const cookie = await api.signIn('sans-majorite@example.com');
     const body = { name: 'Sans majorité', level: 'cinquieme', birthMonth: birthMonthAged(12), declaredGuardian: true };
     expect((await api.request('POST', '/api/household/students', { cookie, body })).status).toBe(403);
@@ -331,14 +340,14 @@ describe('the declarations', () => {
   });
 
   it('refuses a declaration that declares nothing, and a student', async () => {
-    await invite(db, 'mineur@example.com');
+    await api.invite('mineur@example.com');
     const cookie = await api.signIn('mineur@example.com');
     for (const body of [{}, { adult: false }]) {
       expect((await api.request('POST', '/api/me/declarations', { cookie, body })).status).toBe(400);
     }
-    expect(await declaredAdultAt(cookie)).toBeUndefined();
+    expect(await declaredAdultAt(cookie)).toBeNull();
     expect((await api.request('POST', '/api/me/declarations', { cookie: declarationsStudent, body: { adult: true } })).status).toBe(403);
-    expect(await declaredAdultAt(declarationsStudent)).toBeUndefined();
+    expect(await declaredAdultAt(declarationsStudent)).toBeNull();
   });
 
   it('list the links made before the declaration, until the adult confirms each', async () => {

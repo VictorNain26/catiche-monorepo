@@ -101,6 +101,11 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
 
 ## Technique reporté
 
+- Une clé d'accès ne se propose pas sur un appareil partagé (`GET /api/me`, `sharedDevice`), mais
+  la route d'enregistrement du plugin passkey ne le refuse pas : un appel direct en créerait une.
+  Un hook `before` sur `/passkey/generate-register-options`, lisant `isShortSession`
+  (`platform/auth/student-devices.ts`), avec son test, fermerait la règle au serveur.
+
 - L'e-mail de suppression invite à répondre (`platform/auth/auth.ts`), mais le mailer ne pose
   aucun `Reply-To` : la réponse irait à `MAIL_FROM`, que personne ne lit ; à faire pointer vers
   `contact@catiche.fr`, avec son test.
@@ -117,6 +122,10 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
 - **Secret de l'auth** (`BETTER_AUTH_SECRET`) : le poivre des codes d'élève en dérive, et il
   signe le cookie d'appareil (`platform/auth/student-sign-in.ts`) ; le changer arrête tous les codes
   et fait oublier tous les appareils : chaque élève revient par un code « oublié » de son parent.
+- **Les liens des e-mails** : un filtre de messagerie qui ouvre chaque lien (Safe Links,
+  Defender) ne dépense rien depuis le 2026-10-23. Le bouton de l'invitation mène à `/invitation`
+  et celui de l'e-mail d'entrée à `/entrer`, qui n'agissent qu'au toucher de leur bouton. Si un
+  invité tombe malgré tout sur « Ce lien ne marche plus », regarder ce que son filtre exécute.
 - **Taux de Mistral** (`MISTRAL_USD_TO_EUR`) : le revérifier à chaque facture.
 - **Configuration des agents** : élagage mensuel, le prochain le 2026-11-02.
 - **TypeScript** figé à 6.0 tant que `typescript-eslint` exige `<6.1.0` ; `@types/node` 24 pour

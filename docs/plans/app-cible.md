@@ -193,9 +193,9 @@ puisque l'accueil s'intitule « Suivez les devoirs de vos enfants ». C'est un �
 (« des onglets en bas » au téléphone, « la navigation sur le côté » à l'ordinateur) : la PR de ce
 document met la charte à jour, les onglets ne servant que pour plusieurs destinations fréquentes.
 
-**Qui est connecté** : le haut de chaque écran de l'adulte porte un bouton à son nom, un
-pictogramme de personne et « Camille · Votre compte », puis « Quitter ». Côté enfant, le titre de
-« Ce soir » porte déjà son prénom (E4). Personne n'a à deviner sous quel compte il est entré.
+**Qui est connecté** : construit côté adulte (`AdultPage`, `apps/web/src/components/page.tsx`).
+Côté enfant, le titre de « Ce soir » porte déjà son prénom (E4). Personne n'a à deviner sous quel
+compte il est entré.
 
 **Les tailles** : téléphone et tablette en portrait, une colonne ; tablette en paysage et
 ordinateur, la même page sur deux colonnes, sans barre de côté.
@@ -410,42 +410,15 @@ cherche :
 
 ### L'adulte
 
-**A1. Entrez dans Catiche** (`/connexion`).
-- Titre : « Entrez dans Catiche »
-- Texte : « Catiche aide votre enfant à organiser ses devoirs du soir, avec Tom, une intelligence
-  artificielle. Vous ne lisez pas ses échanges avec Tom : votre enfant vous dit où en sont ses
-  devoirs. »
-- Champ « Votre adresse e-mail » ; bouton principal « Recevoir un e-mail pour entrer ». (Le
-  téléphone propose de lui-même la clé d'accès, s'il en a une.)
-- Lien : « Tu es élève ? C'est par ici ».
+**A1. Entrez dans Catiche** et **A2. Ouvrez l'e-mail de Catiche** : construits
+(`apps/web/src/routes/connexion.tsx`, l'e-mail dans `apps/server/src/platform/auth/auth.ts`) ; le
+bouton de l'e-mail mène à `/entrer`, « Entrez dans Catiche » avec le bouton « Entrer »
+(`entrer.tsx`).
 
-**A2. Ouvrez l'e-mail de Catiche.**
-- Titre : « Ouvrez l'e-mail de Catiche »
-- Texte : « Nous l'avons envoyé à [adresse]. Touchez le bouton de l'e-mail, ou tapez son code
-  ici. Il marche 15 minutes. »
-- Champ unique, chiffres ; bouton principal « Entrer » ; liens « Renvoyer l'e-mail », « Changer
-  d'adresse ».
-- E-mail : objet « Votre lien pour entrer dans Catiche » ; un bouton « Entrer dans Catiche » et le
-  code. « Si vous n'avez rien demandé, ignorez ce message : personne n'entre sans lui. »
-- Erreurs : celles de `lib/auth.ts`, sauf « Une adresse e-mail valide. », qui devient « Écrivez une
-  adresse e-mail complète, par exemple nom@exemple.fr. », et l'adresse sans compte ni
-  invitation, qui devient « En préparation : les comptes s'ouvrent sur invitation. Pour en
-  demander une, écrivez à contact@catiche.fr. » (la formule de statut de `charte.md`, dite
-  seulement à qui en a besoin).
-- Une adresse invitée qui n'a pas encore de compte passe ici aussi, puis va à A3.
-- Ensuite, l'adulte reste connecté sur cet appareil (90 jours aujourd'hui, renouvelés à l'usage).
-
-**A3. Vous et votre enfant** (la première fois ; un seul écran). On y arrive directement par le
-bouton de l'e-mail d'invitation, « Accepter l'invitation », qui fait entrer sans A1 ni A2 :
-l'e-mail prouve l'adresse. Ce bouton ne sert qu'une fois et vaut 30 jours, comme l'invitation.
-Toute invitation l'envoie, celle de Victor à la main comme celle d'un parent (aujourd'hui,
-`bun run invite` n'envoie aucun e-mail).
-- Parent invité par Victor : titre « Présentez-vous, puis votre enfant ». « Vous » : « Votre
-  prénom » (« Votre enfant le verra. »), case « J'ai 18 ans ou plus. » « Votre enfant » : son
-  prénom, sa classe, son mois et son année de naissance, et la case « J'exerce l'autorité
-  parentale sur cet enfant, ou sa tutelle. », avec l'aide « Votre accord suffit pour qu'il
-  utilise Catiche. Un autre parent pourra s'y opposer, depuis son compte ou en écrivant à
-  contact@catiche.fr. » Bouton principal : « Continuer ».
+**A3. Vous et votre enfant** (la première fois ; un seul écran). Le parent invité par Victor :
+construit (`apps/web/src/routes/bienvenue.tsx`, l'invitation dans
+`apps/server/src/platform/auth/invitation.ts`), précédé de `/invitation`, « Bienvenue sur
+Catiche » avec le bouton « Accepter l'invitation » (`invitation.tsx`).
 - Adulte invité par un parent : titre « Bienvenue, Nadia vous invite pour Léa ». Texte, pour un
   proche : « Léa pourra vous dire où en sont ses devoirs, et vous pourrez lui répondre. » ;
   pour un parent : « Vous déciderez avec Nadia pour Léa. » Puis « Votre prénom », « J'ai 18 ans
@@ -465,18 +438,10 @@ jamais pour un adulte invité ; et depuis « Gérer »).
   l'accueil ». Quand l'appareil est relié : « La tablette de [prénom] est ajoutée. »
 - Confirmation : la règle commune de « La confirmation récente » (plus haut).
 
-**A5. Accueil** (une carte par enfant, même avec un seul).
-- En haut : « Camille · Votre compte » (vers A9), « Quitter ».
-- Titre : « Suivez les devoirs de vos enfants », avec un enfant comme avec plusieurs : les
-  autres écrans y ramènent par « ← Vos enfants ».
-- La clé d'accès, proposée une fois, en carte en tête, à la deuxième entrée par e-mail sur cet
-  appareil ; jamais pendant A3 ni A4, jamais sur un appareil partagé (§ 4). Titre : « Entrez sans
-  attendre d'e-mail ». Texte : « Créez une clé d'accès : la prochaine fois, vous entrerez avec
-  votre empreinte, votre visage ou le code qui déverrouille cet appareil. » Boutons : « Créer ma clé d'accès » ;
-  « Plus tard », qui la range dans A9 sans la reproposer. Après la fenêtre du téléphone : « C'est
-  fait. Sur cet appareil, vous entrez maintenant sans e-mail. » Le mot « clé d'accès » reste, car
-  la fenêtre du téléphone l'emploie ; une empreinte n'est jamais exigée, le code de l'appareil
-  suffit, et aucune ne se crée sur un appareil partagé ([Google, « Communicating passkeys »](https://developers.google.com/identity/passkeys/ux/communicating-passkeys)).
+**A5. Accueil** (une carte par enfant, même avec un seul). L'en-tête, le titre et la carte de la
+clé d'accès sont construits (`apps/web/src/routes/foyer.index.tsx`,
+`components/passkey-offer.tsx`) ; le mot « clé d'accès » reste, car la fenêtre du téléphone
+l'emploie ([Google, « Communicating passkeys »](https://developers.google.com/identity/passkeys/ux/communicating-passkeys)).
 - Carte d'alerte, en tête, quand il le faut (parent) : « Léa a oublié son code. » avec « Donner un
   code de départ », qui l'affiche tout de suite ; « La tablette de Léa est bloquée après 3 codes
   faux. » avec « Débloquer » ; « Karim a demandé la suppression du compte de Léa. » avec « Voir ».
@@ -528,25 +493,16 @@ jamais pour un adulte invité ; et depuis « Gérer »).
 - Texte : « Il recevra un e-mail pour entrer. Léa et les autres parents en seront prévenus. »
 - Bouton principal : « Envoyer l'invitation ».
 - E-mail : objet « Nadia vous invite sur Catiche, pour Léa » ; « Bonjour, Nadia vous invite à
-  suivre les devoirs du soir de Léa sur Catiche. » ; bouton « Accepter l'invitation » ; puis
-  « Sur un autre appareil ? Ouvrez catiche.fr, donnez cette adresse et tapez ce code : [code]. » ;
-  « L'invitation vaut 30 jours. » Le même e-mail sert à l'invitation de Victor, sans « Nadia ».
+  suivre les devoirs du soir de Léa sur Catiche. » ; puis le bouton et les phrases de l'e-mail
+  d'invitation de Victor, construit (`apps/server/src/platform/auth/auth.ts`). Pas de code dans
+  cet e-mail : un code de 30 jours serait un mot de passe ; sur un autre appareil, l'adresse
+  invitée suffit, par A1.
 
-**A9. Votre compte** (par le prénom, en haut de chaque écran de l'adulte).
-- Titre : « Ce compte est le vôtre ». Retour : « ← Vos enfants ».
-- D'abord, à qui il est : « Ce compte est celui de Camille : camille@exemple.fr. » Puis, sur un
-  appareil personnel : « Sur cet appareil, Catiche se souvient de vous : revenez au moins une
-  fois tous les 90 jours, et vous n'aurez pas besoin d'e-mail. » ;
-  sur un appareil partagé : « Cet appareil est partagé : votre espace se ferme après 10 minutes
-  sans rien faire. »
-- « Votre prénom ».
-- « Quitter Catiche ».
-- « Vos clés d'accès », avec la phrase d'A5 : « Une clé d'accès vous fait entrer avec votre
-  empreinte, votre visage ou le code qui déverrouille l'appareil, sans attendre d'e-mail. »
-  Chaque clé porte son appareil, aussi précis que le navigateur le dit, et sa date (« Téléphone
-  Android, créée le 3 mars »), avec « Supprimer » et sa confirmation ; puis « Créer une clé
-  d'accès sur cet appareil », sauf sur un appareil partagé.
-- Séparé, en bas : « Supprimer mon compte », avec les conséquences nommées : « Votre compte sera
+**A9. Votre compte** (par le prénom, en haut de chaque écran de l'adulte). Construit
+(`apps/web/src/routes/foyer.compte.tsx`), sauf :
+- dans « Vos clés d'accès », chaque clé porte son appareil, aussi précis que le navigateur le dit
+  (« Téléphone Android, créée le 3 mars »), et « Supprimer » demande sa confirmation ;
+- séparé, en bas : « Supprimer mon compte », avec les conséquences nommées : « Votre compte sera
   effacé. Le compte de Léa le sera aussi : personne d'autre n'est son parent dans Catiche. C'est
   définitif. »
 
@@ -598,11 +554,7 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
 |---|---|
 | Une colonne `max-w-md` presque partout, ni onglets ni navigation | Un écran où l'on revient, des pages qui s'ouvrent et se referment (§ 4) ; deux colonnes à l'ordinateur |
 | Mots techniques : session, verrouillage, bêta fermée, URL brute | Mots des familles ; formule de statut ; un carré à viser |
-| La clé d'accès proposée avant l'ajout de l'enfant, expliquée par « le verrouillage », et « Entrer avec une clé d'accès » montré à qui n'en a pas | Proposée à la deuxième entrée, expliquée par ce qu'elle évite (A5) ; le téléphone la propose seul à l'entrée (A1) |
-| Rien ne dit sous quel compte l'adulte est entré ; « Mon compte » ne montre que les clés | Son prénom en haut de chaque écran ; « Votre compte » dit d'abord à qui il est (A9) |
-| « Retour au foyer », vers un écran qui ne s'appelle pas ainsi | « ← Vos enfants », le mot du titre de l'accueil |
 | Trois codes appelés « code » | Ton code, le code de départ, le code reçu par e-mail |
-| Le code e-mail de 5 minutes à recopier | Un lien dans l'e-mail, et le code, 15 minutes |
 | Deux façons de relier un appareil, sur deux écrans | Un seul écran, A4, avec deux choix |
 | Un code de 10 minutes pour un appareil | 7 jours, une seule fois, à partager ; 10 minutes pour un code oublié |
 | « Ajouter cet ordinateur » proposé sur un ordinateur déjà ajouté | Caché (A4) |
@@ -633,10 +585,17 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
 ## 8. Le découpage des étapes 2 à 5
 
 - **Étape 2, le socle** (stories E-1 à E-3, E-10 à E-12, P-1 à P-3, P-7 à P-10, P-12, R-1, R-3).
-  Plusieurs PR : d'abord le modèle de famille, ses droits et l'historique, avec leurs tests ; puis
-  l'entrée de l'adulte (lien par e-mail, A1 à A4) et son accueil (A5, A7 à A9) ; puis l'enfant
-  (C1, C2, E1 à E4, E6, E7 ; E4 dans son état « Avant », dont le bouton ouvre l'aide de Tom
-  actuelle, voix corrigée et message de quota compris). Avec : la navigation, Tom au trait, les
+  Plusieurs PR, chacune revue en profondeur (découpage revu par Victor le 2026-10-23) :
+  1. le modèle de famille (fait, #562) ;
+  2. l'entrée de l'adulte et son en-tête : A1, A2, A3 pour le parent invité par Victor, A9 (fait) ;
+  3. inviter un adulte, le rôle de proche et ses droits (A8, la liste des adultes) ;
+  4. relier l'appareil de l'enfant, A4, avec le code de départ de 7 jours et le carré à viser ;
+  5. l'accueil en cartes (A5 complet), « Gérer » (A7), l'historique, la suppression avec 7 jours
+     d'annulation ;
+  6. l'enfant (C1, C2, E1 à E4, E6, E7 ; E4 dans son état « Avant », dont le bouton ouvre l'aide
+     de Tom actuelle, voix corrigée et message de quota compris) et la navigation.
+
+  Avec : Tom au trait, les
   rôles du mode sombre, la lecture aérée, l'inactivité, la politique de confidentialité pour
   l'opposition d'un autre parent, la charte mise à jour. Le résumé de la semaine reste, voix
   corrigée.

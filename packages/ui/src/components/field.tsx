@@ -3,22 +3,29 @@ import { Checkbox } from './checkbox';
 import { Input } from './input';
 import { NativeSelect, NativeSelectOption } from './native-select';
 
-type FieldProps = React.ComponentProps<typeof Input> & { label: string; error?: string | undefined };
+type FieldProps = React.ComponentProps<typeof Input> & { label: string; hint?: string; error?: string | undefined };
 
-/** A labelled input, its error read out with it. */
-function Field({ label, error, ...input }: FieldProps) {
+/** A labelled input, what it is for under its label, its error read out with it. */
+function Field({ label, hint, error, ...input }: FieldProps) {
   const id = React.useId();
+  const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
+  const describedBy = [hint ? hintId : '', error ? errorId : ''].filter(Boolean).join(' ');
   return (
     <div className="flex flex-col gap-2">
       <label htmlFor={id} className="text-sm font-bold text-foreground">
         {label}
       </label>
+      {hint && (
+        <p id={hintId} className="text-sm text-muted-foreground">
+          {hint}
+        </p>
+      )}
       <Input
         id={id}
         variant={error ? 'error' : 'default'}
         aria-invalid={error ? true : undefined}
-        aria-describedby={error ? errorId : undefined}
+        aria-describedby={describedBy || undefined}
         {...input}
       />
       {error && (
@@ -30,7 +37,12 @@ function Field({ label, error, ...input }: FieldProps) {
   );
 }
 
-type SelectFieldProps = React.ComponentProps<'select'> & { label: string; options: Record<string, string>; error?: string | undefined };
+/** `options`: each value with its label, in the order the menu lists them. */
+type SelectFieldProps = React.ComponentProps<'select'> & {
+  label: string;
+  options: readonly (readonly [value: string, label: string])[];
+  error?: string | undefined;
+};
 
 /** A labelled native select, which a phone shows as its own picker. */
 function SelectField({ label, options, error, ...select }: SelectFieldProps) {
@@ -49,7 +61,7 @@ function SelectField({ label, options, error, ...select }: SelectFieldProps) {
         {...select}
       >
         <NativeSelectOption value="">Choisir</NativeSelectOption>
-        {Object.entries(options).map(([value, text]) => (
+        {options.map(([value, text]) => (
           <NativeSelectOption key={value} value={value}>
             {text}
           </NativeSelectOption>

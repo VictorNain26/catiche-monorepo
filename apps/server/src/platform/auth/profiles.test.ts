@@ -9,7 +9,6 @@ import { eq } from 'drizzle-orm';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { STUDENT_CODE } from '../../testing/http';
-import { invite } from './invitation';
 import { session } from './schema';
 
 const { db } = await testDatabase();
@@ -185,7 +184,7 @@ describe('signing out', () => {
 describe('a guardian on a device of their own', () => {
   it('keeps a long session', async () => {
     const phone = api.device();
-    await invite(db, 'mon-telephone@example.com');
+    await api.invite('mon-telephone@example.com');
     const res = await phone.signIn('mon-telephone@example.com');
     expect(sessionCookie(res)).toContain('Max-Age');
   });

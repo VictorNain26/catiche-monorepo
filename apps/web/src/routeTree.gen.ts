@@ -13,13 +13,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ActiverRouteImport } from './routes/activer'
 import { Route as BienvenueRouteImport } from './routes/bienvenue'
 import { Route as ConnexionRouteImport } from './routes/connexion'
+import { Route as EntrerRouteImport } from './routes/entrer'
 import { Route as ErreurConnexionRouteImport } from './routes/erreur-connexion'
 import { Route as FoyerRouteImport } from './routes/foyer'
+import { Route as InvitationRouteImport } from './routes/invitation'
 import { Route as MemoireRouteImport } from './routes/memoire'
 import { Route as FoyerIndexRouteImport } from './routes/foyer.index'
 import { Route as FoyerStudentIdRouteImport } from './routes/foyer.$studentId'
 import { Route as FoyerAjouterRouteImport } from './routes/foyer.ajouter'
-import { Route as FoyerCleRouteImport } from './routes/foyer.cle'
 import { Route as FoyerCompteRouteImport } from './routes/foyer.compte'
 import { Route as FoyerDeclarationsRouteImport } from './routes/foyer.declarations'
 import { Route as ProfilsIndexRouteImport } from './routes/profils.index'
@@ -46,6 +47,11 @@ const ConnexionRoute = ConnexionRouteImport.update({
   path: '/connexion',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EntrerRoute = EntrerRouteImport.update({
+  id: '/entrer',
+  path: '/entrer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ErreurConnexionRoute = ErreurConnexionRouteImport.update({
   id: '/erreur-connexion',
   path: '/erreur-connexion',
@@ -54,6 +60,11 @@ const ErreurConnexionRoute = ErreurConnexionRouteImport.update({
 const FoyerRoute = FoyerRouteImport.update({
   id: '/foyer',
   path: '/foyer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvitationRoute = InvitationRouteImport.update({
+  id: '/invitation',
+  path: '/invitation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MemoireRoute = MemoireRouteImport.update({
@@ -74,11 +85,6 @@ const FoyerStudentIdRoute = FoyerStudentIdRouteImport.update({
 const FoyerAjouterRoute = FoyerAjouterRouteImport.update({
   id: '/ajouter',
   path: '/ajouter',
-  getParentRoute: () => FoyerRoute,
-} as any)
-const FoyerCleRoute = FoyerCleRouteImport.update({
-  id: '/cle',
-  path: '/cle',
   getParentRoute: () => FoyerRoute,
 } as any)
 const FoyerCompteRoute = FoyerCompteRouteImport.update({
@@ -112,12 +118,13 @@ export interface FileRoutesByFullPath {
   '/activer': typeof ActiverRoute
   '/bienvenue': typeof BienvenueRoute
   '/connexion': typeof ConnexionRoute
+  '/entrer': typeof EntrerRoute
   '/erreur-connexion': typeof ErreurConnexionRoute
   '/foyer': typeof FoyerRouteWithChildren
+  '/invitation': typeof InvitationRoute
   '/memoire': typeof MemoireRoute
   '/foyer/$studentId': typeof FoyerStudentIdRoute
   '/foyer/ajouter': typeof FoyerAjouterRoute
-  '/foyer/cle': typeof FoyerCleRoute
   '/foyer/compte': typeof FoyerCompteRoute
   '/foyer/declarations': typeof FoyerDeclarationsRoute
   '/profils/$studentId': typeof ProfilsStudentIdRoute
@@ -130,11 +137,12 @@ export interface FileRoutesByTo {
   '/activer': typeof ActiverRoute
   '/bienvenue': typeof BienvenueRoute
   '/connexion': typeof ConnexionRoute
+  '/entrer': typeof EntrerRoute
   '/erreur-connexion': typeof ErreurConnexionRoute
+  '/invitation': typeof InvitationRoute
   '/memoire': typeof MemoireRoute
   '/foyer/$studentId': typeof FoyerStudentIdRoute
   '/foyer/ajouter': typeof FoyerAjouterRoute
-  '/foyer/cle': typeof FoyerCleRoute
   '/foyer/compte': typeof FoyerCompteRoute
   '/foyer/declarations': typeof FoyerDeclarationsRoute
   '/profils/$studentId': typeof ProfilsStudentIdRoute
@@ -148,12 +156,13 @@ export interface FileRoutesById {
   '/activer': typeof ActiverRoute
   '/bienvenue': typeof BienvenueRoute
   '/connexion': typeof ConnexionRoute
+  '/entrer': typeof EntrerRoute
   '/erreur-connexion': typeof ErreurConnexionRoute
   '/foyer': typeof FoyerRouteWithChildren
+  '/invitation': typeof InvitationRoute
   '/memoire': typeof MemoireRoute
   '/foyer/$studentId': typeof FoyerStudentIdRoute
   '/foyer/ajouter': typeof FoyerAjouterRoute
-  '/foyer/cle': typeof FoyerCleRoute
   '/foyer/compte': typeof FoyerCompteRoute
   '/foyer/declarations': typeof FoyerDeclarationsRoute
   '/profils/$studentId': typeof ProfilsStudentIdRoute
@@ -168,12 +177,13 @@ export interface FileRouteTypes {
     | '/activer'
     | '/bienvenue'
     | '/connexion'
+    | '/entrer'
     | '/erreur-connexion'
     | '/foyer'
+    | '/invitation'
     | '/memoire'
     | '/foyer/$studentId'
     | '/foyer/ajouter'
-    | '/foyer/cle'
     | '/foyer/compte'
     | '/foyer/declarations'
     | '/profils/$studentId'
@@ -186,11 +196,12 @@ export interface FileRouteTypes {
     | '/activer'
     | '/bienvenue'
     | '/connexion'
+    | '/entrer'
     | '/erreur-connexion'
+    | '/invitation'
     | '/memoire'
     | '/foyer/$studentId'
     | '/foyer/ajouter'
-    | '/foyer/cle'
     | '/foyer/compte'
     | '/foyer/declarations'
     | '/profils/$studentId'
@@ -203,12 +214,13 @@ export interface FileRouteTypes {
     | '/activer'
     | '/bienvenue'
     | '/connexion'
+    | '/entrer'
     | '/erreur-connexion'
     | '/foyer'
+    | '/invitation'
     | '/memoire'
     | '/foyer/$studentId'
     | '/foyer/ajouter'
-    | '/foyer/cle'
     | '/foyer/compte'
     | '/foyer/declarations'
     | '/profils/$studentId'
@@ -222,8 +234,10 @@ export interface RootRouteChildren {
   ActiverRoute: typeof ActiverRoute
   BienvenueRoute: typeof BienvenueRoute
   ConnexionRoute: typeof ConnexionRoute
+  EntrerRoute: typeof EntrerRoute
   ErreurConnexionRoute: typeof ErreurConnexionRoute
   FoyerRoute: typeof FoyerRouteWithChildren
+  InvitationRoute: typeof InvitationRoute
   MemoireRoute: typeof MemoireRoute
   ProfilsStudentIdRoute: typeof ProfilsStudentIdRoute
   SeanceSessionIdRoute: typeof SeanceSessionIdRoute
@@ -260,6 +274,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConnexionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/entrer': {
+      id: '/entrer'
+      path: '/entrer'
+      fullPath: '/entrer'
+      preLoaderRoute: typeof EntrerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/erreur-connexion': {
       id: '/erreur-connexion'
       path: '/erreur-connexion'
@@ -272,6 +293,13 @@ declare module '@tanstack/react-router' {
       path: '/foyer'
       fullPath: '/foyer'
       preLoaderRoute: typeof FoyerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invitation': {
+      id: '/invitation'
+      path: '/invitation'
+      fullPath: '/invitation'
+      preLoaderRoute: typeof InvitationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/memoire': {
@@ -300,13 +328,6 @@ declare module '@tanstack/react-router' {
       path: '/ajouter'
       fullPath: '/foyer/ajouter'
       preLoaderRoute: typeof FoyerAjouterRouteImport
-      parentRoute: typeof FoyerRoute
-    }
-    '/foyer/cle': {
-      id: '/foyer/cle'
-      path: '/cle'
-      fullPath: '/foyer/cle'
-      preLoaderRoute: typeof FoyerCleRouteImport
       parentRoute: typeof FoyerRoute
     }
     '/foyer/compte': {
@@ -350,7 +371,6 @@ declare module '@tanstack/react-router' {
 interface FoyerRouteChildren {
   FoyerStudentIdRoute: typeof FoyerStudentIdRoute
   FoyerAjouterRoute: typeof FoyerAjouterRoute
-  FoyerCleRoute: typeof FoyerCleRoute
   FoyerCompteRoute: typeof FoyerCompteRoute
   FoyerDeclarationsRoute: typeof FoyerDeclarationsRoute
   FoyerIndexRoute: typeof FoyerIndexRoute
@@ -359,7 +379,6 @@ interface FoyerRouteChildren {
 const FoyerRouteChildren: FoyerRouteChildren = {
   FoyerStudentIdRoute: FoyerStudentIdRoute,
   FoyerAjouterRoute: FoyerAjouterRoute,
-  FoyerCleRoute: FoyerCleRoute,
   FoyerCompteRoute: FoyerCompteRoute,
   FoyerDeclarationsRoute: FoyerDeclarationsRoute,
   FoyerIndexRoute: FoyerIndexRoute,
@@ -372,8 +391,10 @@ const rootRouteChildren: RootRouteChildren = {
   ActiverRoute: ActiverRoute,
   BienvenueRoute: BienvenueRoute,
   ConnexionRoute: ConnexionRoute,
+  EntrerRoute: EntrerRoute,
   ErreurConnexionRoute: ErreurConnexionRoute,
   FoyerRoute: FoyerRouteWithChildren,
+  InvitationRoute: InvitationRoute,
   MemoireRoute: MemoireRoute,
   ProfilsStudentIdRoute: ProfilsStudentIdRoute,
   SeanceSessionIdRoute: SeanceSessionIdRoute,

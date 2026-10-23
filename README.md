@@ -15,7 +15,10 @@ bun run dev    # postgres, migrations, puis server :3000 + landing :3001 + w
 ```
 
 Un compte parent se crée sur invitation, en bêta fermée comme en production :
-`cd apps/server && bun run invite <adresse>` (`bun dist/invite.js <adresse>` dans l'image).
+`cd apps/server && bun run invite <adresse>` (`bun dist/invite.js <adresse>` dans l'image) envoie
+à l'adresse l'e-mail d'invitation, dont le bouton fait entrer (une adresse qui a déjà un compte
+est refusée) ; en développement, l'e-mail et son
+lien s'écrivent dans le journal de la commande.
 
 Arrêt de l'infra : `bun run dev:down`. `bun run dev` attend que postgres soit prêt et que les
 migrations passent ; sinon rien ne démarre.
@@ -43,7 +46,7 @@ packages/
 | Backend | Bun 1.4, Hono 4, PostgreSQL 18, Drizzle ORM 0.45, pino |
 | Landing | Astro 7, statique et sans framework client, TailwindCSS 4, classes de `@repo/ui` ; animations en CSS (liées au défilement) et en Web Animations natives, sans bibliothèque (`apps/landing/src/scripts/evening.ts`) |
 | Web | Vite 8 sous Node (le bundler de Bun ne sert ni le plugin de TanStack Router ni la PWA), React 19, TanStack Router, TailwindCSS 4 |
-| Auth | Better Auth 1.7 : le gardien entre par un code envoyé à son adresse ou par une clé d'accès, sans mot de passe, sur invitation pendant la bêta fermée ; l'élève entre par son propre code, sur un appareil que le code du parent a reconnu |
+| Auth | Better Auth 1.7 : le gardien entre par un e-mail envoyé à son adresse (son bouton ou son code) ou par une clé d'accès, sans mot de passe, sur invitation pendant la bêta fermée ; l'élève entre par son propre code, sur un appareil que le code du parent a reconnu |
 | IA | Mistral Small 4, endpoint UE (`docs/tuteur.md`) |
 | Observabilité | Logs pino ; Bugsink, auto-hébergé, pour les erreurs avant la première famille (`docs/architecture.md`, « Observabilité »). Pas d'analytics installée |
 | Monorepo | Turborepo, workspaces Bun |

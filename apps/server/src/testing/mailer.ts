@@ -38,5 +38,12 @@ export function memoryMailer({ waitMs = 4_000 }: { waitMs?: number } = {}) {
     return code;
   };
 
-  return { mailer, sent, next, codeIn };
+  /** The link of the invitation's button, to the web's page that accepts it. */
+  const invitationIn = ({ subject, text }: Email) => {
+    const url = /Accepter l’invitation : (\S+)/.exec(text)?.[1];
+    if (!url) throw new Error(`No invitation link in "${subject}"`);
+    return new URL(url);
+  };
+
+  return { mailer, sent, next, codeIn, invitationIn };
 }

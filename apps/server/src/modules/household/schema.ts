@@ -6,7 +6,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { bigint, check, date, index, pgEnum, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
+import { bigint, check, date, index, integer, pgEnum, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
 import { SCHOOL_LEVELS } from '../../domain/levels';
 import { MEMORY_ANSWERS } from '../../domain/memory-consent';
 import { user } from '../../platform/auth/schema';
@@ -35,12 +35,18 @@ export const guardianship = pgTable(
   (table) => [primaryKey({ columns: [table.adultId, table.studentId] }), index('guardianship_student_id_idx').on(table.studentId)],
 );
 
-/** An adult's own declaration: when they declared being 18 or over. The parental consent rests on it (CNIL). */
+/**
+ * An adult's own profile: when they declared being 18 or over, on which the parental consent rests
+ * (CNIL), null until they do; how many times an email let them in, and when they put the passkey's
+ * offer away, which then shows no more.
+ */
 export const adultProfile = pgTable('adult_profile', {
   userId: text('user_id')
     .primaryKey()
     .references(() => user.id, { onDelete: 'cascade' }),
-  declaredAdultAt: timestamp('declared_adult_at', { withTimezone: true }).notNull(),
+  declaredAdultAt: timestamp('declared_adult_at', { withTimezone: true }),
+  emailEntries: integer('email_entries').notNull().default(0),
+  passkeyOfferClosedAt: timestamp('passkey_offer_closed_at', { withTimezone: true }),
 });
 
 export const studentProfile = pgTable(

@@ -11,7 +11,6 @@ import { guardianship } from '../../modules/household/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { STUDENT_CODE } from '../../testing/http';
-import { invite } from './invitation';
 import { deviceProfile, session, studentCode, verification } from './schema';
 import { ACTIVATION_PREFIX, normaliseActivationCode } from './student-sign-in';
 
@@ -277,7 +276,7 @@ describe('a forgotten code', () => {
 /** A guardian invited, in on a device of their own, then declared 18 or over: that device. */
 async function guardianOn(email: string) {
   const computer = api.device();
-  await invite(db, email);
+  await api.invite(email);
   expect((await computer.signIn(email)).status).toBe(200);
   expect((await api.request('POST', '/api/me/declarations', { cookie: computer.cookie(), body: { adult: true } })).status).toBe(204);
   return computer;

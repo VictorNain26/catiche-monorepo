@@ -12,6 +12,7 @@ import { schoolLevelSchema } from '../../domain/levels';
 import { isStudentBirthMonth, STUDENT_AGE_YEARS } from '../../domain/student-age';
 import type { Auth } from '../../platform/auth/auth';
 import { requireSession, type SessionEnv } from '../../platform/auth/session';
+import { ADULT_SIGN_INS } from '../../platform/auth/student-sign-in';
 import type { AppEnv } from '../../platform/http/env';
 import { Problem } from '../../platform/http/problem';
 import { jsonBody } from '../../platform/http/validate';
@@ -28,9 +29,8 @@ const STUDENT_AUTH_PATHS = new Set([
   '/api/auth/get-session',
   '/api/auth/sign-out',
   '/api/auth/email-otp/send-verification-otp',
-  '/api/auth/sign-in/email-otp',
   '/api/auth/passkey/generate-authenticate-options',
-  '/api/auth/passkey/verify-authentication',
+  ...ADULT_SIGN_INS.map((path) => `/api/auth${path}`),
 ]);
 
 const name = z.string().trim().min(1).max(50);
@@ -43,7 +43,8 @@ const birthMonth = z
 // The adult's declarations, timestamped, on which the parental consent rests (CNIL): each one is a
 // box they tick, never a value the server assumes.
 const declaredGuardian = z.literal(true, 'la déclaration d’autorité parentale');
-const newStudent = z.object({ name, level: schoolLevelSchema, birthMonth, memoryProposed: z.boolean().optional(), declaredGuardian });
+// The memory is proposed from the child's page (the patch), never while adding them.
+const newStudent = z.object({ name, level: schoolLevelSchema, birthMonth, declaredGuardian });
 const guardianDeclaration = z.object({ declaredGuardian });
 const adultDeclaration = z.object({ adult: z.literal(true, 'la déclaration de majorité') });
 const studentPatch = z
@@ -76,14 +77,22 @@ export function studentAuthGuard({ auth, service }: { auth: Auth; service: House
  * too, and when a guardian last replaced their code; an adult's declaration of being 18 or over.
  */
 export function meRoutes({ auth, service }: { auth: Auth; service: HouseholdService }) {
-  return new Hono<SessionEnv>()
-    .use(requireSession(auth))
-    .get('/', async (c) => c.json(await service.me(c.var.userId, c.var.userName)))
-    .get('/devices', async (c) => c.json(await service.listOwnDevices(c.var.userId)))
-    .post('/declarations', jsonBody(adultDeclaration), async (c) => {
-      await service.declareAdult(c.var.userId);
-      return c.body(null, 204);
-    });
+  return (
+    new Hono<SessionEnv>()
+      .use(requireSession(auth))
+      .get('/', async (c) => c.json(await service.me({ id: c.var.userId, name: c.var.userName, email: c.var.userEmail, deviceId: c.var.deviceId })))
+      .get('/devices', async (c) => c.json(await service.listOwnDevices(c.var.userId)))
+      .post('/declarations', jsonBody(adultDeclaration), async (c) => {
+        await service.declareAdult(c.var.userId);
+        return c.body(null, 204);
+      })
+      // « Plus tard » on the passkey's offer.
+      .post('/passkey-offer', async (c) => {
+        await service.assertNotStudent(c.var.userId);
+        await service.closePasskeyOffer(c.var.userId);
+        return c.body(null, 204);
+      })
+  );
 }
 
 export function householdRoutes({ auth, service }: { auth: Auth; service: HouseholdService }) {

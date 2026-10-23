@@ -2,26 +2,27 @@
  * better-auth, on the one public origin of the API and the web: the session cookie stays on that
  * host. No cookieCache: a cached session would outlive a deleted account for its whole maxAge. A
  * student enters by a code of their own, on a device a guardian's code recognised (./student-sign-in.ts). A
- * guardian has no password either: a code sent to their address lets them in, and the first one
- * creates their account, on an invitation (./invitation.ts), and a passkey then saves them the
- * code. Deleting the account, or adding a passkey, asks for a session opened a few minutes before.
+ * guardian has no password either: an email to their address lets them in, by its button or its
+ * code, and the first one creates their account, on an invitation (./invitation.ts), whose own
+ * email has a button; a passkey then saves them the email. Deleting the account, or adding a
+ * passkey, asks for a session opened a few minutes before.
  */
 
 import type { GenericEndpointContext } from '@better-auth/core';
 import { passkey } from '@better-auth/passkey';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { APIError } from 'better-auth/api';
-import { emailOTP } from 'better-auth/plugins';
+import { APIError, createAuthMiddleware } from 'better-auth/api';
+import { emailOTP, magicLink } from 'better-auth/plugins';
 import type { Logger } from 'pino';
 import type { Config } from '../../config';
 import type { Db } from '../db/client';
 import type { Mailer } from '../email/mailer';
 import { CLIENT_ADDRESS_HEADER } from '../http/client-address';
-import { invitationIdentifier } from './invitation';
+import { INVITATION_DAYS, invitationIdentifier, spendInvitationLinks } from './invitation';
 import { account, passkey as passkeyTable, session, user, verification } from './schema';
 import { createStudentDevices } from './student-devices';
-import { ACTIVATION_PREFIX, isStudentEmail, studentSignIn, type StudentAccess } from './student-sign-in';
+import { ACTIVATION_PREFIX, EMAIL_SIGN_INS, isStudentEmail, studentSignIn, type StudentAccess } from './student-sign-in';
 
 interface AuthDeps {
   mailer: Mailer;
@@ -35,15 +36,24 @@ interface AuthDeps {
   deleteUser: (userId: string) => Promise<void>;
   /** The household's answers to the student sign-in: whose a student is, and their month of birth. */
   students: StudentAccess;
+  /** An adult in by an email, its button or its code: counted, for the passkey's offer. */
+  emailEntered: (userId: string) => Promise<void>;
 }
 
-export function createAuth(db: Db, config: Pick<Config, 'publicUrl' | 'authSecret'>, { mailer, logger, background, deleteUser, students }: AuthDeps) {
+/** The sign-in code's life, in the email and on the screen. */
+const CODE_MINUTES = 15;
+
+export function createAuth(
+  db: Db,
+  config: Pick<Config, 'publicUrl' | 'authSecret'>,
+  { mailer, logger, background, deleteUser, students, emailEntered }: AuthDeps,
+) {
   // A student's address is never sent to, and answered as an unknown address would be, without telling.
   const send: Mailer = async (email) => {
     if (isStudentEmail(email.to)) return;
     await mailer(email);
   };
-  const { hostname: rpID, origin } = new URL(config.publicUrl);
+  const { hostname: rpID, origin, host } = new URL(config.publicUrl);
 
   // Closed beta: an address without an account needs a live invitation, whatever creates the user.
   const invited = async ({ context }: GenericEndpointContext, email: string) => {
@@ -97,12 +107,25 @@ export function createAuth(db: Db, config: Pick<Config, 'publicUrl' | 'authSecre
               throw APIError.from('FORBIDDEN', { code: 'INVITATION_REQUIRED', message: 'Sign-up is by invitation only' });
             }
           },
-          // Spent once the account exists, after the transaction commits (better-auth's db/with-hooks.mjs).
+          // Spent once the account exists, after the transaction commits (better-auth's db/with-hooks.mjs),
+          // with every link the invitation sent: the account entered by a code, they open nothing more.
           after: async ({ email }, ctx) => {
             await ctx?.context.internalAdapter.deleteVerificationByIdentifier(invitationIdentifier(email));
+            await spendInvitationLinks(db, email);
           },
         },
       },
+    },
+    hooks: {
+      // Each entry by an email, once its session is open; an entry refused opens none. The count
+      // only times the passkey's offer: its failure is reported, never the sign-in's.
+      after: createAuthMiddleware(async (ctx) => {
+        const entered = ctx.context.newSession;
+        if (!entered || !EMAIL_SIGN_INS.includes(ctx.path)) return;
+        await emailEntered(entered.user.id).catch((error: unknown) => {
+          logger.error({ err: error }, 'Email entry not counted');
+        });
+      }),
     },
     // A page of the web: better-auth's own error page has an inline style the CSP blocks.
     onAPIError: { errorURL: `${config.publicUrl}/erreur-connexion` },
@@ -112,8 +135,10 @@ export function createAuth(db: Db, config: Pick<Config, 'publicUrl' | 'authSecre
     advanced: { disableOriginCheck: false, backgroundTasks: { handler: background }, ipAddress: { ipAddressHeaders: [CLIENT_ADDRESS_HEADER] } },
     // An activation code is a credential: stored hashed, like a password, never in clear.
     verification: { storeIdentifier: { default: 'plain', overrides: { [ACTIVATION_PREFIX]: 'hashed' } } },
-    // The code's own routes for what Tom does not use: no password to reset, no other check.
+    // The code's own routes for what Tom does not use: no password to reset, no other check. And
+    // the magic link's own request: only the invitation makes one, by a call of the server's.
     disabledPaths: [
+      '/sign-in/magic-link',
       '/email-otp/check-verification-otp',
       '/email-otp/verify-email',
       '/email-otp/request-password-reset',
@@ -133,21 +158,40 @@ export function createAuth(db: Db, config: Pick<Config, 'publicUrl' | 'authSecre
         authenticatorSelection: { residentKey: 'required', userVerification: 'preferred' },
         registration: { afterVerification: ({ ctx }) => ({ name: ctx.headers?.get('user-agent') ?? 'Clé d’accès' }) },
       }),
+      // The invitation's button: a link of 30 days, single use, its token stored hashed. A new
+      // account goes to its first screen; a link spent or stale, to the page that says so. The
+      // email leads to the web's /invitation, better-auth's link after the `#`: a mail filter that
+      // opens every link spends nothing, only the page's own button goes on to better-auth's.
+      magicLink({
+        expiresIn: INVITATION_DAYS * 24 * 60 * 60,
+        storeToken: 'hashed',
+        sendMagicLink: async ({ email, url }) => {
+          const link = `${origin}/invitation#${new URL(url).searchParams.toString()}`;
+          await send({
+            to: email,
+            subject: 'Votre invitation à Catiche',
+            text: `Bonjour,\n\nVoici votre invitation à suivre les devoirs du soir de votre enfant sur Catiche.\n\nAccepter l’invitation : ${link}\n\nSur un autre appareil ? Ouvrez ${host} et donnez cette adresse.\n\nL’invitation vaut ${String(INVITATION_DAYS)} jours.`,
+          });
+        },
+      }),
       emailOTP({
         otpLength: 6,
-        expiresIn: 5 * 60,
+        expiresIn: CODE_MINUTES * 60,
         allowedAttempts: 3,
         storeOTP: 'hashed',
         // In the background (advanced.backgroundTasks): the answer is the same, and as fast, for any
         // address. One without an account or a live invitation is told of the closed beta instead.
+        // The button opens the web's /entrer with the address and the code after the `#`, which
+        // the browser never sends: the page types the code, then wipes it from the address bar.
         sendVerificationOTP: async ({ email, otp, type }, ctx) => {
           if (type !== 'sign-in' || !ctx) return;
           const known = (await ctx.context.internalAdapter.findUserByEmail(email)) !== null;
           if (known || (await invited(ctx, email))) {
+            const link = `${origin}/entrer#${new URLSearchParams({ email, code: otp }).toString()}`;
             await send({
               to: email,
-              subject: 'Votre code pour entrer dans Catiche',
-              text: `Bonjour,\n\nVotre code pour entrer dans Catiche : ${otp}\n\nIl est valable 5 minutes. Si vous n'avez rien demandé, ignorez ce message : personne n'entre sans ce code.`,
+              subject: 'Votre lien pour entrer dans Catiche',
+              text: `Bonjour,\n\nEntrer dans Catiche : ${link}\n\nOu tapez ce code : ${otp}\n\nIl marche ${String(CODE_MINUTES)} minutes. Si vous n’avez rien demandé, ignorez ce message : personne n’entre sans lui.`,
             });
             return;
           }
