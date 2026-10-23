@@ -11,6 +11,7 @@ import { createMiddleware } from 'hono/factory';
 import { validator } from 'hono/validator';
 import { z } from 'zod';
 import { ADULT_ROLES } from '../../domain/adult-roles';
+import { firstNameSchema } from '../../domain/first-name';
 import { schoolLevelSchema } from '../../domain/levels';
 import { isStudentBirthMonth, STUDENT_AGE_YEARS } from '../../domain/student-age';
 import type { Auth } from '../../platform/auth/auth';
@@ -37,7 +38,7 @@ const STUDENT_AUTH_PATHS = new Set([
   ...ADULT_SIGN_INS.map((path) => `/api/auth${path}`),
 ]);
 
-const name = z.string().trim().min(1).max(50);
+const name = firstNameSchema;
 
 const birthMonth = z
   .string()

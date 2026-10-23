@@ -198,6 +198,7 @@ describe('a guardian creates a student', () => {
     ['birthMonth', '2014-3'],
     ['name', '   '],
     ['name', 'a'.repeat(51)],
+    ['name', 'Léa\nAccepter : https://piege.example'],
   ] as const) {
     it(`refuses ${field} ${JSON.stringify(value).slice(0, 20)}`, async () => {
       const body = { name: 'Léa', level: 'cinquieme', birthMonth: birthMonthAged(12), declaredGuardian: true, [field]: value };

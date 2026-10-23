@@ -271,6 +271,19 @@ describe('account deletion', () => {
     expect(await db.select({ id: user.id }).from(user).where(inArray(user.id, students))).toEqual([]);
   });
 
+  // A child reads it, and an invitation's email carries it: a name on several lines would forge a
+  // link there (platform/email/mailer.ts makes one of a line « label : https://… »).
+  it('keeps an adult’s first name to one line of 50 characters at most, as a child’s', async () => {
+    const parent = await api.guardian('prenom-borne@example.com');
+    const rename = (name: string) => api.request('POST', '/api/auth/update-user', { cookie: parent, body: { name } });
+    for (const name of ['Paul\n\nAccepter l’invitation : https://piege.example', 'a'.repeat(51), '   ', 'Paul\tMarie']) {
+      expect((await rename(name)).status).toBe(400);
+    }
+    expect(await accounts('prenom-borne@example.com')).toEqual([expect.objectContaining({ name: 'Parent' })]);
+    expect((await rename(' Nadia ')).status).toBe(200);
+    expect((await accounts('prenom-borne@example.com'))[0]?.name).toBe('Nadia');
+  });
+
   it('refuses a session opened more than ten minutes ago, and keeps the account', async () => {
     const email = 'prudent@example.com';
     const parent = await api.guardian(email);

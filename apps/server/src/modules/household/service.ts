@@ -18,8 +18,6 @@ import type { Mailer } from '../../platform/email/mailer';
 import { Problem } from '../../platform/http/problem';
 import type { HouseholdRepository } from './repository';
 
-const oneLine = (text: string) => text.replace(/\s+/g, ' ').trim();
-
 /** The role as an email names it, after « comme ». */
 const ROLE_WORDS: Record<AdultRole, string> = { guardian: 'parent', relative: 'proche' };
 
@@ -219,10 +217,8 @@ export function createHouseholdService({
       if (!parent.declaredAt) throw new Problem('FORBIDDEN', 'la déclaration d’autorité parentale');
       if (followed) throw new Problem('INVALID_REQUEST', 'email: cette adresse suit déjà cet enfant');
       await repository.saveInvitation({ studentId, invitedBy: adultId, email, role, expiresAt: invitationExpiry() });
-      // On one line each: the mailer makes a line « label : https://… » a link, which a name on
-      // several lines would forge (platform/email/mailer.ts).
-      const adultName = oneLine(parent.adultName);
-      const studentName = oneLine(parent.studentName);
+      // Each on one line, as every first name is (domain/first-name.ts): none adds a link to the email.
+      const { adultName, studentName } = parent;
       const letter = {
         subject: `${adultName} vous invite sur Catiche, pour ${studentName}`,
         intro: `${adultName} vous invite à suivre les devoirs du soir de ${studentName} sur Catiche.`,

@@ -16,6 +16,7 @@ import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { emailOTP, magicLink } from 'better-auth/plugins';
 import type { Logger } from 'pino';
 import type { Config } from '../../config';
+import { firstNameSchema } from '../../domain/first-name';
 import type { Db } from '../db/client';
 import type { Mailer } from '../email/mailer';
 import { CLIENT_ADDRESS_HEADER } from '../http/client-address';
@@ -42,6 +43,13 @@ interface AuthDeps {
 
 /** The sign-in code's life, in the email and on the screen. */
 const CODE_MINUTES = 15;
+
+/** An adult's first name, trimmed, as the rule of a child's takes it (domain/first-name.ts); refused otherwise. */
+const firstName = (name: string) => {
+  const parsed = firstNameSchema.safeParse(name);
+  if (!parsed.success) throw APIError.from('BAD_REQUEST', { code: 'INVALID_NAME', message: 'A first name holds on one line, 50 characters at most' });
+  return parsed.data;
+};
 
 /** Victor's invitation, in general words: no one invites for a named child. */
 const BETA_LETTER: InvitationLetter = {
@@ -114,10 +122,12 @@ export function createAuth(
       user: {
         create: {
           // Every path that creates a guardian; a student is inserted by the household module.
-          before: async ({ email }, ctx) => {
-            if (!ctx || !(await invited(ctx, email))) {
+          before: async (created, ctx) => {
+            if (!ctx || !(await invited(ctx, created.email))) {
               throw APIError.from('FORBIDDEN', { code: 'INVITATION_REQUIRED', message: 'Sign-up is by invitation only' });
             }
+            // Nameless until the first screen asks it; named, as a child's first name is.
+            return created.name === '' ? undefined : { data: { ...created, name: firstName(created.name) } };
           },
           // Spent once the account exists, after the transaction commits (better-auth's db/with-hooks.mjs),
           // with every link the invitation sent: the account entered by a code, they open nothing more.
@@ -125,6 +135,10 @@ export function createAuth(
             await ctx?.context.internalAdapter.deleteVerificationByIdentifier(invitationIdentifier(email));
             await spendInvitationLinks(db, email);
           },
+        },
+        // `update-user`, the adult's own first name: the rule of a child's.
+        update: {
+          before: (changed) => Promise.resolve(changed.name === undefined ? undefined : { data: { ...changed, name: firstName(changed.name) } }),
         },
       },
     },
