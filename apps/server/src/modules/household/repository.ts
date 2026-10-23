@@ -233,6 +233,14 @@ export function createHouseholdRepository(db: Db) {
     async deleteAccount(userId: string) {
       await db.transaction(async (tx) => {
         await tx.select({ id: user.id }).from(user).where(eq(user.id, userId)).for('update');
+        // The students too, in one order: another adult of theirs leaving at the same time waits,
+        // then finds this adult gone and takes the student, never left without an adult.
+        await tx
+          .select({ id: user.id })
+          .from(user)
+          .where(inArray(user.id, studentsOf(userId)))
+          .orderBy(user.id)
+          .for('update');
         await tx.delete(user).where(
           and(
             inArray(user.id, studentsOf(userId)),

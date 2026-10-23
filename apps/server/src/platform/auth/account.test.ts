@@ -6,7 +6,8 @@
  */
 
 import { describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
+import { accountDeletion } from '../../modules/household';
 import { adultProfile, guardianship } from '../../modules/household/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
@@ -194,6 +195,23 @@ describe('account deletion', () => {
     expect((await api.sessionUser(device))?.id).toBe(shared.id);
     const list = (await (await api.request('GET', '/api/household/students', { cookie: other })).json()) as { id: string }[];
     expect(list.map(({ id }) => id)).toEqual([shared.id]);
+  });
+
+  it('takes a student whose two adults leave at the same time, never leaving them without an adult', async () => {
+    const deleteAccount = accountDeletion(db);
+    const students: string[] = [];
+    const adults: string[] = [];
+    for (let pair = 0; pair < 5; pair++) {
+      const first = await api.guardian(`ensemble-${String(pair)}-a@example.com`);
+      const second = await api.guardian(`ensemble-${String(pair)}-b@example.com`);
+      const student = await api.student(first);
+      const [firstId, secondId] = [(await api.sessionUser(first))?.id ?? '', (await api.sessionUser(second))?.id ?? ''];
+      await db.insert(guardianship).values({ adultId: secondId, studentId: student.id, declaredAt: new Date() });
+      students.push(student.id);
+      adults.push(firstId, secondId);
+    }
+    await Promise.all(adults.map((adultId) => deleteAccount(adultId)));
+    expect(await db.select({ id: user.id }).from(user).where(inArray(user.id, students))).toEqual([]);
   });
 
   it('refuses a session opened more than ten minutes ago, and keeps the account', async () => {

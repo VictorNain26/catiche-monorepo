@@ -4,6 +4,7 @@
  */
 
 import { queryOptions } from '@tanstack/react-query';
+import type { InferResponseType } from 'hono/client';
 import { api, isProblem, parseResponse } from './api';
 import { ticked, z } from './zod';
 
@@ -19,8 +20,11 @@ export const declarationsSchema = z.object({ adult: ticked, guardianOf: z.record
 /** The adult declares being 18 or over. */
 export const declareAdult = () => parseResponse(api.me.declarations.$post({ json: { adult: true } }));
 
+/** What an adult has yet to declare, as `/api/me` tells it. */
+type MissingDeclarations = Extract<InferResponseType<typeof api.me.$get, 200>, { role: 'guardian' }>['missing'];
+
 /** Whether the adult has a declaration to make before anything else. */
-export const hasMissingDeclarations = (missing: { adult: boolean; guardianOf: string[] }) => missing.adult || missing.guardianOf.length > 0;
+export const hasMissingDeclarations = (missing: MissingDeclarations) => missing.adult || missing.guardianOf.length > 0;
 
 export const meQuery = queryOptions({
   queryKey: ['me'],
