@@ -6,7 +6,17 @@ import { UserRoundIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm, useWatch, type FieldPath } from 'react-hook-form';
 import { BackLink, HeaderLink, Page } from '../components/page';
-import { CHILD_AGES, GUARDIAN_HINT, LEVEL_LABELS, addStudent, birthYears, householdMessage, newChildSchema, studentsQuery } from '../lib/household';
+import {
+  CHILD_AGES,
+  GUARDIAN_HINT,
+  GUARDIAN_LABEL,
+  LEVEL_LABELS,
+  addStudent,
+  birthYears,
+  householdMessage,
+  newChildSchema,
+  studentsQuery,
+} from '../lib/household';
 import type { z } from '../lib/zod';
 
 /**
@@ -121,7 +131,7 @@ function AddChild() {
               {...form.register('memoryProposed')}
             />
             <CheckboxField
-              label="J’exerce l’autorité parentale sur cet enfant, ou sa tutelle."
+              label={GUARDIAN_LABEL}
               hint={GUARDIAN_HINT}
               {...form.register('declaredGuardian')}
               error={form.formState.errors.declaredGuardian?.message}

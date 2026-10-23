@@ -52,8 +52,8 @@ const toStudent = ({ birthMonth, memoryProposedAt, memoryAnswer, ...student }: S
 };
 
 export function createHouseholdService({ repository, createActivationCode }: Deps) {
-  const found = async (guardianId: string, studentId: string) => {
-    const student = await repository.findStudent(guardianId, studentId);
+  const found = async (adultId: string, studentId: string) => {
+    const student = await repository.findStudent(adultId, studentId);
     if (!student) throw new Problem('NOT_FOUND');
     return toStudent(student);
   };
@@ -92,13 +92,13 @@ export function createHouseholdService({ repository, createActivationCode }: Dep
       if (!(await repository.declareGuardian(adultId, studentId))) throw new Problem('NOT_FOUND');
     },
 
-    async listStudents(guardianId: string) {
-      return (await repository.listStudents(guardianId)).map(toStudent);
+    async listStudents(adultId: string) {
+      return (await repository.listStudents(adultId)).map(toStudent);
     },
 
-    async createStudent(guardianId: string, input: StudentInput) {
+    async createStudent(adultId: string, input: StudentInput) {
       const id = generateId();
-      await repository.createStudent(guardianId, {
+      await repository.createStudent(adultId, {
         id,
         name: input.name,
         email: createPlaceholderEmail({ identifier: id, namespace: 'student' }),
@@ -106,23 +106,23 @@ export function createHouseholdService({ repository, createActivationCode }: Dep
         birthMonth: `${input.birthMonth}-01`,
         memoryProposed: input.memoryProposed ?? false,
       });
-      return found(guardianId, id);
+      return found(adultId, id);
     },
 
     async updateStudent(
-      guardianId: string,
+      adultId: string,
       studentId: string,
       patch: { name?: string | undefined; level?: SchoolLevel | undefined; memoryProposed?: boolean | undefined },
     ) {
       // From 15 the child decides alone: the guardian neither proposes nor erases it.
-      if (patch.memoryProposed !== undefined && (await found(guardianId, studentId)).memory.decidesAlone) throw new Problem('FORBIDDEN');
-      if (!(await repository.updateStudent(guardianId, studentId, patch))) throw new Problem('NOT_FOUND');
-      return found(guardianId, studentId);
+      if (patch.memoryProposed !== undefined && (await found(adultId, studentId)).memory.decidesAlone) throw new Problem('FORBIDDEN');
+      if (!(await repository.updateStudent(adultId, studentId, patch))) throw new Problem('NOT_FOUND');
+      return found(adultId, studentId);
     },
 
     /** A code for a new device of the student, or for the code they forgot, which then stops. */
-    async activationCode(guardianId: string, studentId: string, reason: ActivationReason) {
-      await found(guardianId, studentId);
+    async activationCode(adultId: string, studentId: string, reason: ActivationReason) {
+      await found(adultId, studentId);
       return createActivationCode(studentId, reason);
     },
 
@@ -130,21 +130,21 @@ export function createHouseholdService({ repository, createActivationCode }: Dep
       return repository.listOwnDevices(userId);
     },
 
-    async listDevices(guardianId: string, studentId: string) {
-      await found(guardianId, studentId);
-      return repository.listDevices(guardianId, studentId);
+    async listDevices(adultId: string, studentId: string) {
+      await found(adultId, studentId);
+      return repository.listDevices(adultId, studentId);
     },
 
-    async unblockDevice(guardianId: string, studentId: string, deviceId: string) {
-      if (!(await repository.unblockDevice(guardianId, studentId, deviceId))) throw new Problem('NOT_FOUND');
+    async unblockDevice(adultId: string, studentId: string, deviceId: string) {
+      if (!(await repository.unblockDevice(adultId, studentId, deviceId))) throw new Problem('NOT_FOUND');
     },
 
-    async removeDevice(guardianId: string, studentId: string, deviceId: string) {
-      if (!(await repository.removeDevice(guardianId, studentId, deviceId))) throw new Problem('NOT_FOUND');
+    async removeDevice(adultId: string, studentId: string, deviceId: string) {
+      if (!(await repository.removeDevice(adultId, studentId, deviceId))) throw new Problem('NOT_FOUND');
     },
 
-    async deleteStudent(guardianId: string, studentId: string) {
-      if (!(await repository.deleteStudent(guardianId, studentId))) throw new Problem('NOT_FOUND');
+    async deleteStudent(adultId: string, studentId: string) {
+      if (!(await repository.deleteStudent(adultId, studentId))) throw new Problem('NOT_FOUND');
     },
   };
 }

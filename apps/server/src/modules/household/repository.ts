@@ -57,8 +57,8 @@ export function createHouseholdRepository(db: Db) {
   };
 
   /** The profile, on a device, of a student the adult is linked to. */
-  const profileOf = (guardianId: string, studentId: string, deviceId: string) =>
-    and(eq(deviceProfile.deviceId, deviceId), eq(deviceProfile.studentId, studentId), inArray(deviceProfile.studentId, studentsOf(guardianId)));
+  const profileOf = (adultId: string, studentId: string, deviceId: string) =>
+    and(eq(deviceProfile.deviceId, deviceId), eq(deviceProfile.studentId, studentId), inArray(deviceProfile.studentId, studentsOf(adultId)));
 
   const studentColumns = {
     id: user.id,
@@ -88,12 +88,14 @@ export function createHouseholdRepository(db: Db) {
 
     /** What the adult has yet to declare: being 18 or over, and the links made before the declaration existed. */
     async missingDeclarations(adultId: string) {
-      const [declared] = await db.select({ at: adultProfile.declaredAdultAt }).from(adultProfile).where(eq(adultProfile.userId, adultId));
-      const undeclared = await db
-        .select({ studentId: guardianship.studentId })
-        .from(guardianship)
-        .where(and(eq(guardianship.adultId, adultId), isNull(guardianship.declaredAt)))
-        .orderBy(guardianship.createdAt);
+      const [[declared], undeclared] = await Promise.all([
+        db.select({ at: adultProfile.declaredAdultAt }).from(adultProfile).where(eq(adultProfile.userId, adultId)),
+        db
+          .select({ studentId: guardianship.studentId })
+          .from(guardianship)
+          .where(and(eq(guardianship.adultId, adultId), isNull(guardianship.declaredAt)))
+          .orderBy(guardianship.createdAt),
+      ]);
       return { adult: declared === undefined, guardianOf: undeclared.map(({ studentId }) => studentId) };
     },
 
@@ -112,21 +114,21 @@ export function createHouseholdRepository(db: Db) {
       return declared.length > 0;
     },
 
-    async listStudents(guardianId: string) {
+    async listStudents(adultId: string) {
       return db
         .select(studentColumns)
         .from(user)
         .innerJoin(studentProfile, eq(studentProfile.userId, user.id))
-        .where(inArray(user.id, studentsOf(guardianId)))
+        .where(inArray(user.id, studentsOf(adultId)))
         .orderBy(user.createdAt);
     },
 
-    async findStudent(guardianId: string, studentId: string) {
+    async findStudent(adultId: string, studentId: string) {
       const [student] = await db
         .select(studentColumns)
         .from(user)
         .innerJoin(studentProfile, eq(studentProfile.userId, user.id))
-        .where(and(eq(user.id, studentId), inArray(user.id, studentsOf(guardianId))));
+        .where(and(eq(user.id, studentId), inArray(user.id, studentsOf(adultId))));
       return student;
     },
 
@@ -148,7 +150,7 @@ export function createHouseholdRepository(db: Db) {
 
     /** `false` when the adult is not linked to the student. */
     async updateStudent(
-      guardianId: string,
+      adultId: string,
       studentId: string,
       patch: { name?: string | undefined; level?: SchoolLevel | undefined; memoryProposed?: boolean | undefined },
     ) {
@@ -156,7 +158,7 @@ export function createHouseholdRepository(db: Db) {
         const [found] = await tx
           .update(user)
           .set({ updatedAt: new Date(), ...(patch.name === undefined ? {} : { name: patch.name }) })
-          .where(and(eq(user.id, studentId), inArray(user.id, studentsOf(guardianId))))
+          .where(and(eq(user.id, studentId), inArray(user.id, studentsOf(adultId))))
           .returning({ id: user.id });
         if (!found) return false;
         const now = new Date();
@@ -179,8 +181,8 @@ export function createHouseholdRepository(db: Db) {
     },
 
     /** The student's devices and the state of their code, as their guardian reads them; never the code. */
-    async listDevices(guardianId: string, studentId: string) {
-      const list = await devices(and(eq(deviceProfile.studentId, studentId), inArray(deviceProfile.studentId, studentsOf(guardianId))));
+    async listDevices(adultId: string, studentId: string) {
+      const list = await devices(and(eq(deviceProfile.studentId, studentId), inArray(deviceProfile.studentId, studentsOf(adultId))));
       const { chosen, locked } = await codeOf(studentId);
       return { devices: list, code: { chosen, locked } };
     },
@@ -191,21 +193,21 @@ export function createHouseholdRepository(db: Db) {
     },
 
     /** The profile's tries on the device start again; `false` when no such profile of a student the adult is linked to. */
-    async unblockDevice(guardianId: string, studentId: string, deviceId: string) {
+    async unblockDevice(adultId: string, studentId: string, deviceId: string) {
       const unblocked = await db
         .update(deviceProfile)
         .set({ failures: 0 })
-        .where(profileOf(guardianId, studentId, deviceId))
+        .where(profileOf(adultId, studentId, deviceId))
         .returning({ deviceId: deviceProfile.deviceId });
       return unblocked.length > 0;
     },
 
     /** The device no longer holds the student: their profile there and its sessions go, the device too once empty. `false` when no such profile. */
-    async removeDevice(guardianId: string, studentId: string, deviceId: string) {
+    async removeDevice(adultId: string, studentId: string, deviceId: string) {
       return db.transaction(async (tx) => {
         const removed = await tx
           .delete(deviceProfile)
-          .where(profileOf(guardianId, studentId, deviceId))
+          .where(profileOf(adultId, studentId, deviceId))
           .returning({ deviceId: deviceProfile.deviceId });
         if (removed.length === 0) return false;
         await tx.delete(session).where(and(eq(session.userId, studentId), eq(session.deviceId, deviceId)));
@@ -247,10 +249,10 @@ export function createHouseholdRepository(db: Db) {
     },
 
     /** The student's sessions, links and profile go with the user row (ON DELETE CASCADE). */
-    async deleteStudent(guardianId: string, studentId: string) {
+    async deleteStudent(adultId: string, studentId: string) {
       const deleted = await db
         .delete(user)
-        .where(and(eq(user.id, studentId), inArray(user.id, studentsOf(guardianId))))
+        .where(and(eq(user.id, studentId), inArray(user.id, studentsOf(adultId))))
         .returning({ id: user.id });
       return deleted.length > 0;
     },

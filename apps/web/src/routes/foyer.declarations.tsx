@@ -6,8 +6,8 @@ import { UserRoundIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { HeaderLink, Page } from '../components/page';
-import { GUARDIAN_HINT, declareGuardian, householdMessage, studentsQuery } from '../lib/household';
-import { declarationsSchema, declareAdult, hasMissingDeclarations, meQuery } from '../lib/me';
+import { GUARDIAN_HINT, GUARDIAN_LABEL, declareGuardian, householdMessage, studentsQuery } from '../lib/household';
+import { ADULT_LABEL, declarationsSchema, declareAdult, hasMissingDeclarations, meQuery } from '../lib/me';
 
 /**
  * The declarations an adult has yet to make, asked before anything else: being 18 or over, and
@@ -33,8 +33,7 @@ function Declarations() {
 
   const confirm = useMutation({
     mutationFn: async () => {
-      if (missing.adult) await declareAdult();
-      for (const { id } of children) await declareGuardian(id);
+      await Promise.all([...(missing.adult ? [declareAdult()] : []), ...children.map(({ id }) => declareGuardian(id))]);
       await queryClient.invalidateQueries({ queryKey: meQuery.queryKey });
       await navigate({ to: '/foyer' });
     },
@@ -55,12 +54,12 @@ function Declarations() {
       }
     >
       <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-6">
-        {missing.adult && <CheckboxField label="J’ai 18 ans ou plus." {...form.register('adult')} error={form.formState.errors.adult?.message} />}
+        {missing.adult && <CheckboxField label={ADULT_LABEL} {...form.register('adult')} error={form.formState.errors.adult?.message} />}
         {children.map(({ id, name }) => (
           <fieldset key={id} className="flex flex-col gap-2">
             <legend className="text-sm font-bold text-foreground">{name}</legend>
             <CheckboxField
-              label="J’exerce l’autorité parentale sur cet enfant, ou sa tutelle."
+              label={GUARDIAN_LABEL}
               hint={GUARDIAN_HINT}
               {...form.register(`guardianOf.${id}`)}
               error={form.formState.errors.guardianOf?.[id]?.message}

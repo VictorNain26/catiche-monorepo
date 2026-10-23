@@ -8,4 +8,10 @@ import { z } from 'zod';
 
 z.config({ jitless: true });
 
+/** A box the adult ticks to declare; left unticked, it says what to do. */
+export const ticked = z
+  .boolean()
+  .refine(Boolean, 'Cochez cette case pour continuer.')
+  .transform(() => true as const);
+
 export { z };

@@ -5,13 +5,10 @@
 
 import { queryOptions } from '@tanstack/react-query';
 import { api, isProblem, parseResponse } from './api';
-import { z } from './zod';
+import { ticked, z } from './zod';
 
-/** A box the adult ticks to declare; left unticked, it says what to do. */
-export const ticked = z
-  .boolean()
-  .refine(Boolean, 'Cochez cette case pour continuer.')
-  .transform(() => true as const);
+/** The adult's declaration of their age, the box's own words. */
+export const ADULT_LABEL = 'J’ai 18 ans ou plus.';
 
 /** A new adult's first name, and their age declared. */
 export const welcomeSchema = z.object({ name: z.string().trim().min(1, 'Votre prénom.').max(50, '50 caractères au plus.'), adult: ticked });

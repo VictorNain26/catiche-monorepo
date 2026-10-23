@@ -3,10 +3,9 @@
 import { isStudentBirthMonth, STUDENT_AGE_YEARS } from '@repo/server/student-age';
 import { queryOptions } from '@tanstack/react-query';
 import type { InferRequestType, InferResponseType } from 'hono/client';
-import { z } from './zod';
+import { ticked, z } from './zod';
 import { api, isProblem, parseResponse } from './api';
 import { FAILED, TOO_MANY_TRIES } from './auth';
-import { ticked } from './me';
 
 const students = api.household.students;
 
@@ -67,7 +66,8 @@ export function householdMessage(error: unknown, invalid = 'Vérifiez ce que vou
   return FAILED;
 }
 
-/** What the declaration of parental authority means, under its box, wherever the adult ticks it. */
+/** The declaration of parental authority, the box's own words, and what it means under it, wherever the adult ticks it. */
+export const GUARDIAN_LABEL = 'J’exerce l’autorité parentale sur cet enfant, ou sa tutelle.';
 export const GUARDIAN_HINT =
   'Votre accord suffit pour qu’il utilise Catiche. Un autre parent pourra s’y opposer, depuis son compte ou en écrivant à contact@catiche.fr.';
 
