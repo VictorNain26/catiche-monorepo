@@ -7,8 +7,9 @@ import { CodeForm, sendCode } from './code-form';
 /**
  * The making of a passkey on this device. It is made within minutes of entering (the server's
  * freshAge); past them, a code confirms who is there first, then the button comes back.
+ * `secondary`: drawn as a second action, where the page's first purpose is something else.
  */
-export function PasskeyCreate({ label, onCreated }: { label: string; onCreated: () => Promise<unknown> }) {
+export function PasskeyCreate({ label, onCreated, secondary = false }: { label: string; onCreated: () => Promise<unknown>; secondary?: boolean }) {
   const [stale, setStale] = useState(false);
   const [codeSentTo, setCodeSentTo] = useState<string | null>(null);
 
@@ -68,6 +69,7 @@ export function PasskeyCreate({ label, onCreated }: { label: string; onCreated: 
         </>
       ) : (
         <Button
+          variant={secondary ? 'outline' : 'default'}
           disabled={add.isPending}
           onClick={() => {
             askCode.reset();

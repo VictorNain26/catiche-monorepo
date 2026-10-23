@@ -102,7 +102,8 @@ function Passkeys({ shared }: { shared: boolean }) {
         </List>
       )}
       {remove.error && <Banner tone="error" title={remove.error.message} />}
-      {!shared && <PasskeyCreate label="Créer une clé d’accès sur cet appareil" onCreated={refresh} />}
+      {/* A second action: the page says first whose account it is. */}
+      {!shared && <PasskeyCreate label="Créer une clé d’accès sur cet appareil" onCreated={refresh} secondary />}
     </Section>
   );
 }
