@@ -274,11 +274,12 @@ describe('a forgotten code', () => {
   });
 });
 
-/** A guardian invited, then in on a device of their own: that device. */
+/** A guardian invited, in on a device of their own, then declared 18 or over: that device. */
 async function guardianOn(email: string) {
   const computer = api.device();
   await invite(db, email);
   expect((await computer.signIn(email)).status).toBe(200);
+  expect((await api.request('POST', '/api/me/declarations', { cookie: computer.cookie(), body: { adult: true } })).status).toBe(204);
   return computer;
 }
 
