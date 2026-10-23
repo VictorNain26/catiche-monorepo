@@ -6,6 +6,7 @@ import type { InferRequestType, InferResponseType } from 'hono/client';
 import { z } from './zod';
 import { api, isProblem, parseResponse } from './api';
 import { FAILED, TOO_MANY_TRIES } from './auth';
+import { ticked } from './me';
 
 const students = api.household.students;
 
@@ -41,6 +42,9 @@ export const updateStudent = (id: string, json: InferRequestType<(typeof student
 
 export const deleteStudent = (id: string) => parseResponse(students[':id'].$delete({ param: { id } }));
 
+/** The adult confirms holding parental authority over a child linked to them before the declaration existed. */
+export const declareGuardian = (id: string) => parseResponse(students[':id'].declaration.$post({ param: { id }, json: { declaredGuardian: true } }));
+
 export type ActivationReason = InferRequestType<(typeof students)[':id']['activation-code']['$post']>['json']['reason'];
 
 /** A one-time code that puts the child's profile on a new device, or lets them choose a new code. */
@@ -62,6 +66,10 @@ export function householdMessage(error: unknown, invalid = 'Vérifiez ce que vou
   if (isProblem(error, 'RATE_LIMITED')) return TOO_MANY_TRIES;
   return FAILED;
 }
+
+/** What the declaration of parental authority means, under its box, wherever the adult ticks it. */
+export const GUARDIAN_HINT =
+  'Votre accord suffit pour qu’il utilise Catiche. Un autre parent pourra s’y opposer, depuis son compte ou en écrivant à contact@catiche.fr.';
 
 const name = z.string().trim().min(1, 'Son prénom.').max(50, '50 caractères au plus.');
 const level = z.custom<Level>(isLevel, 'Sa classe.');
@@ -89,6 +97,7 @@ export const newChildSchema = (now = new Date()) =>
       month: z.string().regex(/^(0[1-9]|1[0-2])$/, 'Son mois.'),
       year: z.string().regex(/^\d{4}$/, 'Son année.'),
       memoryProposed: z.boolean(),
+      declaredGuardian: ticked,
     })
     .refine(({ month, year }) => isStudentBirthMonth(`${year}-${month}`, now), {
       path: ['year'],

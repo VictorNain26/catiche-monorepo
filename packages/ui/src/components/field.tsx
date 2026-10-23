@@ -64,15 +64,17 @@ function SelectField({ label, options, error, ...select }: SelectFieldProps) {
   );
 }
 
-type CheckboxFieldProps = Omit<React.ComponentProps<'input'>, 'type'> & { label: string; hint?: string };
+type CheckboxFieldProps = Omit<React.ComponentProps<'input'>, 'type'> & { label: string; hint?: string; error?: string | undefined };
 
-/** A checkbox with its label beside it, and a line that says what it means. */
-function CheckboxField({ label, hint, ...checkbox }: CheckboxFieldProps) {
+/** A checkbox with its label beside it, a line that says what it means, and its error read out with it. */
+function CheckboxField({ label, hint, error, ...checkbox }: CheckboxFieldProps) {
   const id = React.useId();
   const hintId = `${id}-hint`;
+  const errorId = `${id}-error`;
+  const describedBy = [hint ? hintId : '', error ? errorId : ''].filter(Boolean).join(' ');
   return (
     <div className="flex items-start gap-3">
-      <Checkbox id={id} aria-describedby={hint ? hintId : undefined} {...checkbox} />
+      <Checkbox id={id} aria-invalid={error ? true : undefined} aria-describedby={describedBy || undefined} {...checkbox} />
       <div className="flex flex-col gap-1">
         <label htmlFor={id} className="text-sm font-bold text-foreground">
           {label}
@@ -80,6 +82,11 @@ function CheckboxField({ label, hint, ...checkbox }: CheckboxFieldProps) {
         {hint && (
           <p id={hintId} className="text-sm text-muted-foreground">
             {hint}
+          </p>
+        )}
+        {error && (
+          <p id={errorId} className="text-sm text-destructive">
+            {error}
           </p>
         )}
       </div>
