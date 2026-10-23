@@ -1,7 +1,7 @@
 # État
 
 Ce qui reste vrai quelle que soit la direction du produit : les bloquants, les gestes de Victor,
-le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-21 ; ce qui est fait en sort.
+le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui est fait en sort.
 
 ## Bloquants
 
@@ -34,13 +34,8 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-21 ; ce qui 
 
 - Aucune invitation pour un enfant réel tant que les bloquants (clause Mistral, base du staging
   joignable) ne sont pas levés : les invitations se donnent à la main.
-- À la création d'un compte adulte, une déclaration horodatée : majeur, et représentant légal des
-  enfants qu'il ajoute (un compte peut en porter plusieurs). Elle vaut consentement parental ; la
-  vérification reste proportionnée, sans pièce d'identité (CNIL) (Victor, 2026-10-21).
-- Le modèle et les mots « parent » et « enfant » de l'application, revus pour toutes les familles :
-  deux représentants légaux dans deux foyers, un beau-parent ou un grand-parent qui suit les
-  devoirs sans être représentant légal, une famille d'accueil, un tuteur. À la refonte de
-  l'application (Victor, 2026-10-21).
+- L'application cible jusqu'à la soirée comprise (« Prochain chantier »), dont la déclaration
+  horodatée de l'adulte et les comptes pour toutes les familles.
 - Bugsink auto-hébergé, avec sa base ; les erreurs des navigateurs par le serveur (`tunnel`), sans
   contenu d'élève.
 - La base du staging, joignable depuis internet : la placer dans un réseau privé Clever Cloud
@@ -51,8 +46,6 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-21 ; ce qui 
 - Après une détresse : la revue humaine qui relit `distress_event` (aucun code ne la lit
   aujourd'hui), son délai et sa trace ; ce que voit l'élève ensuite ; le canal du message au
   parent, avec une table d'envois idempotente.
-- Appareils de l'élève : le prévenir quand un nouvel appareil porte son profil ; aujourd'hui il le
-  voit seulement dans sa liste.
 - Appareils reconnus (`platform/auth/student-devices.ts`) :
   - la ligne d'un appareil (son navigateur) part quand le parent le déconnecte de son dernier
     profil, pas encore à la suppression d'un compte : une purge des appareils sans profil reste à
@@ -61,8 +54,6 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-21 ; ce qui 
     faut un nouveau code du parent ; le reposer à chaque entrée réussie ;
   - la limite de better-auth par adresse (5 par minute sur les routes de l'élève) vit en mémoire,
     par instance, et n'est exercée par aucun test : une seule instance, ou son stockage en base.
-- Sessions de parent : un code « oublié » et la suppression d'un enfant ne demandent pas de session
-  fraîche ; à exiger comme pour une clé d'accès, si un parent laisse sa session ouverte.
 - Le code de l'élève dans l'analyse d'impact : la CNIL réserve le code court au « dispositif
   matériel détenu en propre » (délibération 2022-100, § 46) ; l'ordinateur de la famille ne l'est
   pas, et s'appuie sur « tout autre mécanisme technique apportant un même niveau de sécurité »
@@ -86,47 +77,66 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-21 ; ce qui 
   applications et dépôt renommés, variables du staging, anciens domaines détachés. Reste, par
   Victor : supprimer l'image GHCR `tomai-server` (Settings du paquet sur GitHub) ; l'ancien
   domaine expire seul le 24 août 2027.
-- **L'ordre décidé par Victor (2026-10-20, précisé le 2026-10-21)**, un chantier après
-  l'autre :
-  1. **La landing, jusqu'à sa validation par Victor.** Restructurée autour de la soirée (#555),
-     puis réécrite pour tous les collégiens et toutes les familles (#559), elle attend la
-     validation de Victor.
-  2. **La voix de Tom et de l'app dans le code** (PR à part, juste après) :
-     - le prompt et la réponse de repli suivent `charte.md`, « La voix de Tom ». Les écarts sont
-       listés dans `tuteur.md` § 5 ;
-     - les messages de l'app vont à la bonne voix : pas de vouvoiement côté élève, pas de
-       « bêta fermée », pas de « Reviens demain ! ».
-  3. **La refonte de l'application**, pensée depuis l'enfant et les adultes réels. Il faut
-     d'abord un parcours et des textes validés, puis l'écran à l'ordinateur comme au téléphone.
-     Un inventaire des écrans actuels est fait : vocabulaire technique, colonne unique,
-     doublons, écarts à la charte. Les rôles `accent` et `secondary` du mode sombre ont monté
-     d'un pas pour la landing (#559) ; les écrans de l'app ne sont pas encore revus avec eux.
-  4. **La soirée de devoirs à l'oral et le point du soir** (`produit.md`), avec le volet IA.
-     La politique de confidentialité ne décrit encore ni la voix de l'élève ni les messages du
-     point du soir : à compléter dans la PR qui les construit.
-- **À vérifier, relevé par l'inventaire** : le résumé montre au parent « Ce qui résiste » même
-  quand l'enfant a refusé la mémoire, alors que `/memoire` dit le contraire
-  (`core/week-summary.ts`, `routes/memoire.tsx` du web).
-- Pour la soirée : le micro, que la `Permissions-Policy` du serveur
-  ferme (`platform/http/security-headers.ts`), s'ouvre à `self` ; la transcription impose le
-  français.
+- **La landing est validée par Victor le 2026-10-22**, vue en local (#555, #559).
+- **Tom en 3D**, en parallèle, dans le dépôt `tom-mascotte`, qui porte son plan : le
+  modèle, le pull, le cahier, les poses et des animations souples. Sa dernière PR, ici, intègre
+  les livrables à la landing et met à jour `charte.md`.
+- **L'application cible (ordre revu par Victor le 2026-10-23)**. La refonte des écrans, la voix
+  de l'app et la soirée forment un seul chantier : conçu une fois sur le parcours final, pour ne
+  pas refaire deux fois l'accueil de l'enfant, la séance et l'espace de l'adulte. Il se construit
+  dans cet ordre, une étape validée avant la suivante :
+  1. **Le parcours et les textes**, validés par Victor avant tout code : l'enfant, puis
+     l'adulte, soirée comprise, au téléphone et à l'ordinateur, dans les voix de `charte.md`.
+     Il part de l'inventaire des écrans actuels (vocabulaire technique, colonne unique,
+     doublons, écarts à la charte) et des familles réelles : deux représentants légaux dans
+     deux foyers, un beau-parent ou un grand-parent qui suit les devoirs sans être représentant
+     légal, une famille d'accueil, un tuteur (Victor, 2026-10-21).
+  2. **Le socle, sans IA**, qui remplace les écrans actuels au lieu de les retoucher. Ses
+     messages prennent la bonne voix : pas de vouvoiement côté élève, pas de « bêta fermée »,
+     pas de « Reviens demain ! ». Il comprend :
+     - l'entrée de l'adulte, avec une déclaration horodatée à la création du compte : majeur, et
+       représentant légal des enfants qu'il ajoute (un compte peut en porter plusieurs). Elle
+       vaut consentement parental ; la vérification reste proportionnée, sans pièce d'identité
+       (CNIL) (Victor, 2026-10-21) ;
+     - le modèle de comptes et les mots « parent » et « enfant », revus pour toutes ces familles ;
+     - l'entrée de l'enfant par son code, vue au téléphone, avec ses trois finitions : un code
+       trop facile refusé dès sa première saisie, « Ajouter cet ordinateur » caché sur un
+       ordinateur déjà ajouté, le titre et les prénoms de « Qui fait ses devoirs ? » alignés ;
+       l'élève prévenu quand un nouvel appareil porte son profil ;
+     - l'espace de l'adulte : la suppression de son compte, que le serveur porte
+       (`POST /api/auth/delete-user`, session de moins de 10 minutes) et qui se fait sur demande
+       d'ici là, comme le disent les CGU et la politique de confidentialité ; une session
+       fraîche pour un code « oublié » et la suppression d'un enfant, comme pour une clé
+       d'accès, si un parent laisse sa session ouverte ;
+     - la mise en page de la charte, avec les rôles `accent` et `secondary` du mode sombre
+       montés d'un pas pour la landing (#559), et Tom au trait.
+  3. **La soirée**, avec le volet IA (`produit.md`, « Ce que fait Catiche ») : l'élève dit ses
+     devoirs à l'oral, Tom propose un ordre, découpe en étapes, aide sur un exercice, puis
+     récapitule et prépare le cartable. Dans la même PR :
+     - le prompt et la réponse de repli suivent `charte.md`, « La voix de Tom », écarts listés
+       dans `tuteur.md` § 5, dont l'annonce d'une IA dès la première interaction (AI Act,
+       art. 50(1)) ;
+     - le micro, que la `Permissions-Policy` du serveur ferme
+       (`platform/http/security-headers.ts`), s'ouvre à `self` ; la transcription impose le
+       français ;
+     - la politique de confidentialité décrit la voix de l'élève ;
+     - les formules de Tom : sur Chrome de bureau, chaque formule montre des flèches de
+       défilement vertical, son conteneur (`[&_.katex]:overflow-x-auto`,
+       `components/tom-text.tsx`) débordant de 6 px en hauteur.
+  4. **Le point du soir**, qui remplace le résumé de la semaine. À corriger en passant : le
+     résumé montre au parent « Ce qui résiste » même quand l'enfant a refusé la mémoire, alors
+     que `/memoire` dit le contraire (`core/week-summary.ts`, `routes/memoire.tsx` du web). La
+     politique de confidentialité décrit ses messages. Les offres Gratuit et Complet se revoient
+     avec lui.
+  5. **Les contrôles gardés d'un soir à l'autre**, et leur révision ramenée les jours d'avant.
+
+  Les bloquants ne freinent pas la construction, seulement l'arrivée du premier élève réel.
 
 ## Technique reporté
 
-- La suppression du compte parent : le serveur la porte (`POST /api/auth/delete-user`, session de
-  moins de 10 minutes), mais le web n'a pas de bouton ; d'ici là, elle se fait sur demande, comme
-  le disent les CGU et la politique de confidentialité.
 - L'e-mail de suppression invite à répondre (`platform/auth/auth.ts`), mais le mailer ne pose
   aucun `Reply-To` : la réponse irait à `MAIL_FROM`, que personne ne lit ; à faire pointer vers
   `contact@catiche.fr`, avec son test.
-- Code de l'élève, vu dans Chrome le 2026-10-20 à l'ordinateur seulement (la fenêtre ne s'est
-  pas réduite à la largeur d'un téléphone) : à revoir au téléphone. Trois finitions :
-  - un code trop facile n'est refusé qu'après sa seconde saisie, au lieu de la première ;
-  - « Ajouter cet ordinateur » reste proposé sur un ordinateur déjà ajouté ;
-  - le titre de « Qui fait ses devoirs ? » est aligné à gauche, et les prénoms au centre.
-- Les formules de Tom : sur Chrome de bureau, chaque formule montre des flèches de défilement
-  vertical, son conteneur (`[&_.katex]:overflow-x-auto`, `components/tom-text.tsx`) débordant de
-  6 px en hauteur.
 - Mémoire : les 1 053 libellés du référentiel restent ceux du programme (« Il utilise… ») ; leur
   réécriture dans les mots de l'élève demande une relecture de Victor avant tout élève réel.
 - Harnais : la mesure de référence (11 fuites sur 106 conversations, commit `2f8aeed8`, avant le
