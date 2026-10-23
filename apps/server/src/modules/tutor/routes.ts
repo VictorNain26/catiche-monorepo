@@ -96,7 +96,7 @@ export function memoryRoutes({ auth, service }: { auth: Auth; service: TutorServ
 
 /**
  * /api/summary: the summary of the week (`docs/tuteur.md` § 8), the signed-in student's
- * own, or a student's for a guardian of their household; the same for both.
+ * own, or a student's for an adult linked to them; the same for both.
  */
 export function summaryRoutes({ auth, service }: { auth: Auth; service: TutorService }) {
   return new Hono<SessionEnv>()

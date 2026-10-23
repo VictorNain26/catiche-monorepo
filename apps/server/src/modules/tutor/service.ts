@@ -1,8 +1,8 @@
 /**
  * What a signed-in student does with their sessions, and the frame of a turn of the tutor: the
  * access, one turn at a time in a session, the day's quota; the turn itself is the pipeline's
- * (`turn-pipeline.ts`). Only a student reaches them, but the summary of the week, which a guardian
- * of their household reads too: never the conversations.
+ * (`turn-pipeline.ts`). Only a student reaches them, but the summary of the week, which an adult
+ * linked to them reads too: never the conversations.
  */
 
 import type { Logger } from 'pino';
@@ -101,9 +101,9 @@ export function createTutorService({ repository, students, ai, moderation, logge
       return summaryOf((await student(userId)).id);
     },
 
-    /** A student's summary of the week, for a guardian of their household; anyone else finds no such student. */
-    async summaryFor(guardianId: string, studentId: string) {
-      if (!(await students.inHousehold(guardianId, studentId))) throw new Problem('NOT_FOUND');
+    /** A student's summary of the week, for an adult linked to them; anyone else finds no such student. */
+    async summaryFor(adultId: string, studentId: string) {
+      if (!(await students.follows(adultId, studentId))) throw new Problem('NOT_FOUND');
       return summaryOf(studentId);
     },
 

@@ -125,7 +125,9 @@ sont au § 8.
 
 ## 3. Le modèle de famille
 
-Ce sont des règles ; le schéma de la base vient à l'étape 2.
+Ce sont des règles. Le lien entre un adulte et un enfant est en place
+(`apps/server/src/modules/household/schema.ts`) ; les rôles, l'invitation et l'historique viennent
+avec les écrans qui s'en servent.
 
 **Un enfant a un ou plusieurs adultes.** Le « foyer » disparaît des mots et des écrans : chaque
 adulte voit les enfants qui le concernent. Deux maisons, c'est un enfant avec deux parents. Un

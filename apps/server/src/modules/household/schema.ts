@@ -1,38 +1,47 @@
 /**
- * The household: a guardian and the students they created. A user belongs to one household at
- * most. A student's first name or pseudonym is `user.name`; the profile holds no family name, only
- * the level and the month of birth (GDPR art. 5.1.c, data minimisation).
+ * The adults and the students they follow. A user is a student when they have a student's profile;
+ * anyone else signed in is an adult. A student may have several adults, an adult several students.
+ * A student's first name or pseudonym is `user.name`; the profile holds no family name, only the
+ * level and the month of birth (GDPR art. 5.1.c, data minimisation).
  */
 
 import { sql } from 'drizzle-orm';
-import { bigint, check, date, index, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { bigint, check, date, index, pgEnum, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
 import { SCHOOL_LEVELS } from '../../domain/levels';
 import { MEMORY_ANSWERS } from '../../domain/memory-consent';
 import { user } from '../../platform/auth/schema';
 
-export const memberRole = pgEnum('household_member_role', ['guardian', 'student']);
 export const schoolLevel = pgEnum('school_level', SCHOOL_LEVELS);
 export const memoryAnswer = pgEnum('memory_answer', MEMORY_ANSWERS);
 
-export const household = pgTable('household', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-});
-
-export const householdMember = pgTable(
-  'household_member',
+/**
+ * An adult who follows a student: the one who added them, or, later, an adult they invited. The
+ * only way from an adult to a student (`studentsOf`). `declared_at` is when the adult declared
+ * holding parental authority or guardianship over the student; null for a link made before the
+ * declaration existed, which the adult confirms at their next visit.
+ */
+export const guardianship = pgTable(
+  'guardianship',
   {
-    userId: text('user_id')
-      .primaryKey()
-      .references(() => user.id, { onDelete: 'cascade' }),
-    householdId: uuid('household_id')
+    adultId: text('adult_id')
       .notNull()
-      .references(() => household.id, { onDelete: 'cascade' }),
-    role: memberRole('role').notNull(),
+      .references(() => user.id, { onDelete: 'cascade' }),
+    studentId: text('student_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    declaredAt: timestamp('declared_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index('household_member_household_id_idx').on(table.householdId)],
+  (table) => [primaryKey({ columns: [table.adultId, table.studentId] }), index('guardianship_student_id_idx').on(table.studentId)],
 );
+
+/** An adult's own declaration: when they declared being 18 or over. The parental consent rests on it (CNIL). */
+export const adultProfile = pgTable('adult_profile', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  declaredAdultAt: timestamp('declared_adult_at', { withTimezone: true }).notNull(),
+});
 
 export const studentProfile = pgTable(
   'student_profile',

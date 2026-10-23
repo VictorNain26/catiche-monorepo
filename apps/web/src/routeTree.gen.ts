@@ -21,6 +21,7 @@ import { Route as FoyerStudentIdRouteImport } from './routes/foyer.$studentId'
 import { Route as FoyerAjouterRouteImport } from './routes/foyer.ajouter'
 import { Route as FoyerCleRouteImport } from './routes/foyer.cle'
 import { Route as FoyerCompteRouteImport } from './routes/foyer.compte'
+import { Route as FoyerDeclarationsRouteImport } from './routes/foyer.declarations'
 import { Route as ProfilsIndexRouteImport } from './routes/profils.index'
 import { Route as ProfilsStudentIdRouteImport } from './routes/profils.$studentId'
 import { Route as SeanceSessionIdRouteImport } from './routes/seance.$sessionId'
@@ -85,6 +86,11 @@ const FoyerCompteRoute = FoyerCompteRouteImport.update({
   path: '/compte',
   getParentRoute: () => FoyerRoute,
 } as any)
+const FoyerDeclarationsRoute = FoyerDeclarationsRouteImport.update({
+  id: '/declarations',
+  path: '/declarations',
+  getParentRoute: () => FoyerRoute,
+} as any)
 const ProfilsIndexRoute = ProfilsIndexRouteImport.update({
   id: '/profils/',
   path: '/profils/',
@@ -113,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/foyer/ajouter': typeof FoyerAjouterRoute
   '/foyer/cle': typeof FoyerCleRoute
   '/foyer/compte': typeof FoyerCompteRoute
+  '/foyer/declarations': typeof FoyerDeclarationsRoute
   '/profils/$studentId': typeof ProfilsStudentIdRoute
   '/seance/$sessionId': typeof SeanceSessionIdRoute
   '/foyer/': typeof FoyerIndexRoute
@@ -129,6 +136,7 @@ export interface FileRoutesByTo {
   '/foyer/ajouter': typeof FoyerAjouterRoute
   '/foyer/cle': typeof FoyerCleRoute
   '/foyer/compte': typeof FoyerCompteRoute
+  '/foyer/declarations': typeof FoyerDeclarationsRoute
   '/profils/$studentId': typeof ProfilsStudentIdRoute
   '/seance/$sessionId': typeof SeanceSessionIdRoute
   '/foyer': typeof FoyerIndexRoute
@@ -147,6 +155,7 @@ export interface FileRoutesById {
   '/foyer/ajouter': typeof FoyerAjouterRoute
   '/foyer/cle': typeof FoyerCleRoute
   '/foyer/compte': typeof FoyerCompteRoute
+  '/foyer/declarations': typeof FoyerDeclarationsRoute
   '/profils/$studentId': typeof ProfilsStudentIdRoute
   '/seance/$sessionId': typeof SeanceSessionIdRoute
   '/foyer/': typeof FoyerIndexRoute
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
     | '/foyer/ajouter'
     | '/foyer/cle'
     | '/foyer/compte'
+    | '/foyer/declarations'
     | '/profils/$studentId'
     | '/seance/$sessionId'
     | '/foyer/'
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/foyer/ajouter'
     | '/foyer/cle'
     | '/foyer/compte'
+    | '/foyer/declarations'
     | '/profils/$studentId'
     | '/seance/$sessionId'
     | '/foyer'
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/foyer/ajouter'
     | '/foyer/cle'
     | '/foyer/compte'
+    | '/foyer/declarations'
     | '/profils/$studentId'
     | '/seance/$sessionId'
     | '/foyer/'
@@ -304,6 +316,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FoyerCompteRouteImport
       parentRoute: typeof FoyerRoute
     }
+    '/foyer/declarations': {
+      id: '/foyer/declarations'
+      path: '/declarations'
+      fullPath: '/foyer/declarations'
+      preLoaderRoute: typeof FoyerDeclarationsRouteImport
+      parentRoute: typeof FoyerRoute
+    }
     '/profils/': {
       id: '/profils/'
       path: '/profils'
@@ -333,6 +352,7 @@ interface FoyerRouteChildren {
   FoyerAjouterRoute: typeof FoyerAjouterRoute
   FoyerCleRoute: typeof FoyerCleRoute
   FoyerCompteRoute: typeof FoyerCompteRoute
+  FoyerDeclarationsRoute: typeof FoyerDeclarationsRoute
   FoyerIndexRoute: typeof FoyerIndexRoute
 }
 
@@ -341,6 +361,7 @@ const FoyerRouteChildren: FoyerRouteChildren = {
   FoyerAjouterRoute: FoyerAjouterRoute,
   FoyerCleRoute: FoyerCleRoute,
   FoyerCompteRoute: FoyerCompteRoute,
+  FoyerDeclarationsRoute: FoyerDeclarationsRoute,
   FoyerIndexRoute: FoyerIndexRoute,
 }
 

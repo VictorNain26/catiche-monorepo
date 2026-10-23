@@ -7,6 +7,7 @@
 import { describe, expect, it } from 'bun:test';
 import { verifyPassword } from 'better-auth/crypto';
 import { and, eq } from 'drizzle-orm';
+import { guardianship } from '../../modules/household/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { STUDENT_CODE } from '../../testing/http';
@@ -273,11 +274,12 @@ describe('a forgotten code', () => {
   });
 });
 
-/** A guardian invited, then in on a device of their own: that device. */
+/** A guardian invited, in on a device of their own, then declared 18 or over: that device. */
 async function guardianOn(email: string) {
   const computer = api.device();
   await invite(db, email);
   expect((await computer.signIn(email)).status).toBe(200);
+  expect((await api.request('POST', '/api/me/declarations', { cookie: computer.cookie(), body: { adult: true } })).status).toBe(204);
   return computer;
 }
 
@@ -308,7 +310,17 @@ describe('a guardian adds their children to this computer', () => {
     expect((await computer.addProfiles([lea.id])).status).toBe(403);
   });
 
-  it("refuses a child of another household, and a student's session", async () => {
+  it('lets a second adult linked to the child add them too', async () => {
+    const { lea } = await family('premier-adulte@example.com');
+    const computer = await guardianOn('second-adulte@example.com');
+    await db
+      .insert(guardianship)
+      .values({ adultId: (await api.sessionUser(computer.cookie()))?.id ?? '', studentId: lea.id, declaredAt: new Date() });
+    expect((await computer.addProfiles([lea.id])).status).toBe(200);
+    expect((await computer.profiles()).profiles.map(({ id }) => id)).toEqual([lea.id]);
+  });
+
+  it("refuses a child the adult is not linked to, and a student's session", async () => {
     const computer = await guardianOn('pas-le-mien@example.com');
     await api.student(computer.cookie());
     const { lea: stranger, tablet } = await withCode('le-sien@example.com');

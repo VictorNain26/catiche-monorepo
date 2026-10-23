@@ -1,11 +1,18 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { meQuery } from '../lib/me';
+import { hasMissingDeclarations, meQuery } from '../lib/me';
 
-/** The guardian's screens: anyone else goes home, a guardian not named yet gives their first name. */
+/**
+ * The guardian's screens: anyone else goes home, a guardian not named yet gives their first name,
+ * and one with a declaration still to make confirms it before anything else; their account stays
+ * open to them, to leave rather than declare.
+ */
+const BEFORE_DECLARATIONS = new Set(['/foyer/declarations', '/foyer/compte']);
+
 export const Route = createFileRoute('/foyer')({
-  beforeLoad: async ({ context }) => {
+  beforeLoad: async ({ context, location }) => {
     const me = await context.queryClient.query(meQuery);
     if (me?.role !== 'guardian') throw redirect({ to: '/' });
     if (me.name === '') throw redirect({ to: '/bienvenue' });
+    if (hasMissingDeclarations(me.missing) && !BEFORE_DECLARATIONS.has(location.pathname)) throw redirect({ to: '/foyer/declarations' });
   },
 });

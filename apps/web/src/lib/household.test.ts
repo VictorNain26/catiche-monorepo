@@ -41,10 +41,21 @@ describe('isLevel', () => {
 describe('newChildSchema', () => {
   // The server's rule (domain/student-age.ts): 5 to 20 years, in UTC. On 15 June 2026, from 2005-06 to 2021-05.
   const now = new Date('2026-06-15T12:00:00Z');
-  const child = (month: string, year: string) => ({ name: '  Léa ', level: 'sixieme', month, year, memoryProposed: true });
+  const child = (month: string, year: string) => ({ name: '  Léa ', level: 'sixieme', month, year, memoryProposed: true, declaredGuardian: true });
 
-  it('gives the server a trimmed first name, a level and the month the two menus make', () => {
-    expect(newChildSchema(now).parse(child('03', '2014'))).toEqual({ name: 'Léa', level: 'sixieme', birthMonth: '2014-03', memoryProposed: true });
+  it('gives the server a trimmed first name, a level, the month the two menus make and the declaration', () => {
+    expect(newChildSchema(now).parse(child('03', '2014'))).toEqual({
+      name: 'Léa',
+      level: 'sixieme',
+      birthMonth: '2014-03',
+      memoryProposed: true,
+      declaredGuardian: true,
+    });
+  });
+
+  it('refuses the box of parental authority unticked', () => {
+    const unticked = newChildSchema(now).safeParse({ ...child('03', '2014'), declaredGuardian: false });
+    expect(unticked.error?.issues).toEqual([expect.objectContaining({ path: ['declaredGuardian'], message: 'Cochez cette case pour continuer.' })]);
   });
 
   it('takes the ages the server takes, to the month, and no other', () => {
@@ -59,7 +70,7 @@ describe('newChildSchema', () => {
   });
 
   it('asks for each menu, and refuses an empty name or no level', () => {
-    const empty = newChildSchema(now).safeParse({ name: ' ', level: '', month: '', year: '', memoryProposed: false });
+    const empty = newChildSchema(now).safeParse({ name: ' ', level: '', month: '', year: '', memoryProposed: false, declaredGuardian: true });
     expect(empty.error?.issues.map(({ path, message }) => [path[0], message])).toEqual([
       ['name', 'Son prénom.'],
       ['level', 'Sa classe.'],

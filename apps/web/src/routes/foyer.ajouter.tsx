@@ -6,7 +6,17 @@ import { UserRoundIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm, useWatch, type FieldPath } from 'react-hook-form';
 import { BackLink, HeaderLink, Page } from '../components/page';
-import { CHILD_AGES, LEVEL_LABELS, addStudent, birthYears, householdMessage, newChildSchema, studentsQuery } from '../lib/household';
+import {
+  CHILD_AGES,
+  GUARDIAN_HINT,
+  GUARDIAN_LABEL,
+  LEVEL_LABELS,
+  addStudent,
+  birthYears,
+  householdMessage,
+  newChildSchema,
+  studentsQuery,
+} from '../lib/household';
 import type { z } from '../lib/zod';
 
 /**
@@ -21,7 +31,12 @@ export const Route = createFileRoute('/foyer/ajouter')({
 });
 
 /** What each step asks, in order: the step is done when they are valid. */
-const STEP_FIELDS: FieldPath<z.input<ReturnType<typeof newChildSchema>>>[][] = [['name'], ['level'], ['month', 'year'], ['memoryProposed']];
+const STEP_FIELDS: FieldPath<z.input<ReturnType<typeof newChildSchema>>>[][] = [
+  ['name'],
+  ['level'],
+  ['month', 'year'],
+  ['memoryProposed', 'declaredGuardian'],
+];
 const STEPS = STEP_FIELDS.length;
 const MONTHS: Record<string, string> = Object.fromEntries(
   ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'].map((label, index) => [
@@ -37,7 +52,10 @@ function AddChild() {
   const [step, setStep] = useState(1);
   const [schema] = useState(() => newChildSchema());
   const [years] = useState(() => Object.fromEntries(birthYears().map((year) => [year, year])));
-  const form = useForm({ resolver: zodResolver(schema), defaultValues: { name: '', month: '', year: '', memoryProposed: false } });
+  const form = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: { name: '', month: '', year: '', memoryProposed: false, declaredGuardian: false },
+  });
   const name = useWatch({ control: form.control, name: 'name' }).trim();
 
   const create = useMutation({
@@ -111,6 +129,12 @@ function AddChild() {
               label="Proposer que Tom retienne ce qui a résisté"
               hint={`Les notions de ses exercices et ce qui a été difficile, jamais ce qui est écrit dans les séances. ${name} accepte ou non, et peut tout effacer.`}
               {...form.register('memoryProposed')}
+            />
+            <CheckboxField
+              label={GUARDIAN_LABEL}
+              hint={GUARDIAN_HINT}
+              {...form.register('declaredGuardian')}
+              error={form.formState.errors.declaredGuardian?.message}
             />
             {create.error && (
               <Banner
