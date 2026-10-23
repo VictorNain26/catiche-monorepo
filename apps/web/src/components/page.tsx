@@ -18,7 +18,7 @@ function HeaderAnchor({ icon: Icon, className, children, ...anchor }: ComponentP
 }
 
 /** A link of the screen's header, with its words: an icon alone says nothing to a child. */
-export const HeaderLink = createLink(HeaderAnchor);
+const HeaderLink = createLink(HeaderAnchor);
 
 function BackAnchor(props: ComponentProps<'a'>) {
   return <HeaderAnchor {...props} icon={ChevronLeftIcon} />;
