@@ -38,6 +38,9 @@ const [deviceOfA] = (await matrix.devices(guardianA, studentOfA.id)).devices;
 if (!deviceOfA) throw new Error('The student of A has no device');
 const relativeOfA = await matrix.adult(guardianA, studentOfA.id, 'proche@example.com', 'relative');
 const guardianAId = await idOf(guardianA);
+// From 15 the child decides alone on the memory: a relative's proposal is refused all the same as not found.
+const olderOfA = await matrix.student(guardianA, { name: 'Lou', birthMonth: birthMonthAged(15) });
+await db.insert(guardianship).values({ adultId: await idOf(relativeOfA), studentId: olderOfA.id, role: 'relative' });
 
 describe('access matrix', () => {
   const api = matrix;
@@ -50,6 +53,8 @@ describe('access matrix', () => {
       body: { name: 'X', level: 'sixieme', birthMonth: birthMonthAged(11), declaredGuardian: true },
     },
     { method: 'PATCH', path: target, body: { name: 'Changé' } },
+    { method: 'PATCH', path: target, body: { memoryProposed: true } },
+    { method: 'PATCH', path: `/api/household/students/${olderOfA.id}`, body: { memoryProposed: true } },
     { method: 'POST', path: `${target}/activation-code`, body: { reason: 'device' } },
     { method: 'POST', path: `${target}/activation-code`, body: { reason: 'forgotten' } },
     { method: 'POST', path: `${target}/declaration`, body: { declaredGuardian: true } },
@@ -73,7 +78,7 @@ describe('access matrix', () => {
 
   for (const { actor, cookie, status, routes: denied } of refused) {
     for (const { method, path, body } of denied) {
-      it(`refuses ${method} ${path.replace(studentOfA.id, ':id').replace(deviceOfA.id, ':device')} to ${actor} with ${String(status)}, the student of A untouched`, async () => {
+      it(`refuses ${method} ${path.replace(studentOfA.id, ':id').replace(olderOfA.id, ':id-of-15').replace(deviceOfA.id, ':device')} ${JSON.stringify(body ?? {})} to ${actor} with ${String(status)}, the student of A untouched`, async () => {
         const res = await api.request(method, path, { cookie, body });
         expect(res.status).toBe(status);
         expect(res.headers.get('content-type')).toStartWith('application/problem+json');
@@ -89,7 +94,7 @@ describe('access matrix', () => {
   it('lists to each adult only the students they are linked to', async () => {
     const listA = (await (await api.request('GET', '/api/household/students', { cookie: guardianA })).json()) as Student[];
     const listB = (await (await api.request('GET', '/api/household/students', { cookie: guardianB })).json()) as Student[];
-    expect(listA.map((s) => s.id)).toEqual([studentOfA.id]);
+    expect(listA.map((s) => s.id)).toEqual([studentOfA.id, olderOfA.id]);
     expect(listB.map((s) => s.id)).toEqual([studentOfB.id]);
   });
 });
