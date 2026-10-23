@@ -199,18 +199,21 @@ describe('account deletion', () => {
 
   it('takes a student whose two adults leave at the same time, never leaving them without an adult', async () => {
     const deleteAccount = accountDeletion(db);
-    const students: string[] = [];
-    const adults: string[] = [];
-    for (let pair = 0; pair < 5; pair++) {
-      const first = await api.guardian(`ensemble-${String(pair)}-a@example.com`);
-      const second = await api.guardian(`ensemble-${String(pair)}-b@example.com`);
-      const student = await api.student(first);
-      const [firstId, secondId] = [(await api.sessionUser(first))?.id ?? '', (await api.sessionUser(second))?.id ?? ''];
-      await db.insert(guardianship).values({ adultId: secondId, studentId: student.id, declaredAt: new Date() });
-      students.push(student.id);
-      adults.push(firstId, secondId);
-    }
-    await Promise.all(adults.map((adultId) => deleteAccount(adultId)));
+    // Five pairs, set up at once: one pair alone could leave in turn by chance.
+    const pairs = await Promise.all(
+      [0, 1, 2, 3, 4].map(async (pair) => {
+        const [first, second] = await Promise.all([
+          api.guardian(`ensemble-${String(pair)}-a@example.com`),
+          api.guardian(`ensemble-${String(pair)}-b@example.com`),
+        ]);
+        const [student, firstUser, secondUser] = await Promise.all([api.student(first), api.sessionUser(first), api.sessionUser(second)]);
+        const adults = [firstUser?.id ?? '', secondUser?.id ?? ''];
+        await db.insert(guardianship).values({ adultId: adults[1] ?? '', studentId: student.id, declaredAt: new Date() });
+        return { studentId: student.id, adults };
+      }),
+    );
+    await Promise.all(pairs.flatMap(({ adults }) => adults.map((adultId) => deleteAccount(adultId))));
+    const students = pairs.map(({ studentId }) => studentId);
     expect(await db.select({ id: user.id }).from(user).where(inArray(user.id, students))).toEqual([]);
   });
 
