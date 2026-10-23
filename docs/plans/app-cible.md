@@ -411,12 +411,14 @@ cherche :
 ### L'adulte
 
 **A1. Entrez dans Catiche** et **A2. Ouvrez l'e-mail de Catiche** : construits
-(`apps/web/src/routes/connexion.tsx`, `entrer.tsx`, l'e-mail dans
-`apps/server/src/platform/auth/auth.ts`).
+(`apps/web/src/routes/connexion.tsx`, l'e-mail dans `apps/server/src/platform/auth/auth.ts`) ; le
+bouton de l'e-mail mène à `/entrer`, « Entrez dans Catiche » avec le bouton « Entrer »
+(`entrer.tsx`).
 
 **A3. Vous et votre enfant** (la première fois ; un seul écran). Le parent invité par Victor :
 construit (`apps/web/src/routes/bienvenue.tsx`, l'invitation dans
-`apps/server/src/platform/auth/invitation.ts`).
+`apps/server/src/platform/auth/invitation.ts`), précédé de `/invitation`, « Bienvenue sur
+Catiche » avec le bouton « Accepter l'invitation » (`invitation.tsx`).
 - Adulte invité par un parent : titre « Bienvenue, Nadia vous invite pour Léa ». Texte, pour un
   proche : « Léa pourra vous dire où en sont ses devoirs, et vous pourrez lui répondre. » ;
   pour un parent : « Vous déciderez avec Nadia pour Léa. » Puis « Votre prénom », « J'ai 18 ans

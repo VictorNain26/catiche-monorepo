@@ -24,11 +24,12 @@ En place (`apps/server/src`) :
 - `platform/email` : l'envoi d'un e-mail, Scaleway TEM par son SDK en production, le journal en
   développement. Le gardien n'a pas de mot de passe : il entre par un e-mail envoyé à son adresse
   (plugin `email-otp`), dont le bouton mène à `/entrer` avec l'adresse et le code après le `#`, que
-  le navigateur n'envoie à aucun serveur : la page tape le code, puis l'efface de la barre
-  d'adresse. Le premier crée son compte sur invitation (`platform/auth/invitation.ts`), qui envoie
-  elle-même un e-mail à un bouton : un lien du plugin `magic-link`, à usage unique, que seul le
-  serveur émet (sa route publique est dans `disabledPaths`, que better-auth n'applique qu'aux
-  requêtes). Il entre aussi par une clé d'accès (`@better-auth/passkey`, liée à l'origine
+  le navigateur n'envoie à aucun serveur : la page l'efface de la barre d'adresse et n'entre
+  qu'au toucher de « Entrer ». Le premier crée son compte sur invitation
+  (`platform/auth/invitation.ts`, refusée à une adresse qui a déjà un compte), qui envoie elle-même
+  un e-mail à un bouton : il mène à `/invitation`, le lien du plugin `magic-link` après le `#`, et
+  seul le bouton de cette page le suit. Ce lien sert une fois et seul le serveur l'émet (sa route
+  publique est dans `disabledPaths`, que better-auth n'applique qu'aux requêtes). Il entre aussi par une clé d'accès (`@better-auth/passkey`, liée à l'origine
   publique), que l'accueil propose à partir de sa deuxième entrée par e-mail, hors appareil
   partagé (`GET /api/me`, `passkeyOffer`). Une clé se crée,
   et le compte se supprime (`POST /api/auth/delete-user`, que le web n'appelle pas encore : la

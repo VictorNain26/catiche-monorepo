@@ -16,7 +16,8 @@ bun run dev    # postgres, migrations, puis server :3000 + landing :3001 + w
 
 Un compte parent se crée sur invitation, en bêta fermée comme en production :
 `cd apps/server && bun run invite <adresse>` (`bun dist/invite.js <adresse>` dans l'image) envoie
-à l'adresse l'e-mail d'invitation, dont le bouton fait entrer ; en développement, l'e-mail et son
+à l'adresse l'e-mail d'invitation, dont le bouton fait entrer (une adresse qui a déjà un compte
+est refusée) ; en développement, l'e-mail et son
 lien s'écrivent dans le journal de la commande.
 
 Arrêt de l'infra : `bun run dev:down`. `bun run dev` attend que postgres soit prêt et que les
