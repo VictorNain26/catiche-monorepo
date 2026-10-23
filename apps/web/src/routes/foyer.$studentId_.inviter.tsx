@@ -66,7 +66,9 @@ function InviteAdult() {
             title={
               isProblem(invite.error, 'INVALID_REQUEST')
                 ? `Cette adresse suit déjà ${child.name}, ou c’est la vôtre. Écrivez une autre adresse.`
-                : householdMessage(invite.error)
+                : isProblem(invite.error, 'RATE_LIMITED')
+                  ? 'Vous avez beaucoup d’invitations en attente ou envoyées aujourd’hui. Annulez-en une, ou réessayez demain.'
+                  : householdMessage(invite.error)
             }
           />
         )}

@@ -21,6 +21,13 @@ import type { HouseholdRepository } from './repository';
 /** The role as an email names it, after « comme ». */
 const ROLE_WORDS: Record<AdultRole, string> = { guardian: 'parent', relative: 'proche' };
 
+/**
+ * Catiche sends each invitation from its own domain: a parent's invitations waiting at once, and
+ * sent in a day, withdrawn ones included, enough for a family, never a flood.
+ */
+const WAITING_INVITATIONS_MAX = 10;
+export const INVITATIONS_PER_DAY = 20;
+
 export interface StudentInput {
   name: string;
   level: SchoolLevel;
@@ -39,6 +46,8 @@ interface Deps {
   inviteAddress: (email: string, letter: InvitationLetter) => Promise<boolean>;
   /** The closed beta's invitation of the address taken back, with its links. */
   revokeAddress: (email: string) => Promise<void>;
+  /** One more invitation sent by the adult, `false` once INVITATIONS_PER_DAY are spent. */
+  spendInvitation: (adultId: string) => Promise<boolean>;
   send: Mailer;
   /** Runs a task after the request has answered, its failure logged. */
   later: (task: () => Promise<void>) => void;
@@ -87,6 +96,7 @@ export function createHouseholdService({
   sharedDevice,
   inviteAddress,
   revokeAddress,
+  spendInvitation,
   send,
   later,
   publicUrl,
@@ -216,6 +226,9 @@ export function createHouseholdService({
       if (!parent) throw new Problem('NOT_FOUND');
       if (!parent.declaredAt) throw new Problem('FORBIDDEN', 'la déclaration d’autorité parentale');
       if (followed) throw new Problem('INVALID_REQUEST', 'email: cette adresse suit déjà cet enfant');
+      if ((await repository.waitingFrom(adultId, studentId, email)) >= WAITING_INVITATIONS_MAX || !(await spendInvitation(adultId))) {
+        throw new Problem('RATE_LIMITED');
+      }
       await repository.saveInvitation({ studentId, invitedBy: adultId, email, role, expiresAt: invitationExpiry() });
       // Each on one line, as every first name is (domain/first-name.ts): none adds a link to the email.
       const { adultName, studentName } = parent;

@@ -10,9 +10,10 @@ import { createStudentDevices } from '../../platform/auth/student-devices';
 import type { Mailer } from '../../platform/email/mailer';
 import { createActivationCode, type StudentAccess } from '../../platform/auth/student-sign-in';
 import type { Db } from '../../platform/db/client';
+import { keyedBudget } from '../../platform/http/rate-limit';
 import { createHouseholdRepository } from './repository';
 import { householdRoutes, meRoutes, studentAuthGuard } from './routes';
-import { createHouseholdService, learnerMemory, type MemoryAnswer } from './service';
+import { INVITATIONS_PER_DAY, createHouseholdService, learnerMemory, type MemoryAnswer } from './service';
 
 export type { AdultRole } from './service';
 
@@ -42,6 +43,8 @@ export function householdModule({ db, auth, mailer, logger, background, publicUr
       }
     },
     revokeAddress: (email) => revokeInvitation(db, email),
+    // In memory, as the API's own budget: right while the server runs as one instance.
+    spendInvitation: keyedBudget({ points: INVITATIONS_PER_DAY, durationSeconds: 24 * 60 * 60 }),
     send: mailer,
     later: (task) => {
       background(

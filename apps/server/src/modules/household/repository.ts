@@ -366,6 +366,17 @@ export function createHouseholdRepository(db: Db) {
       return link && { ...link, otherParents: others.map(({ email }) => email) };
     },
 
+    /** How many of the adult's invitations still wait, but the one to this address for this student, which a new one would replace. */
+    waitingFrom: (adultId: string, studentId: string, email: string) =>
+      db.$count(
+        adultInvitation,
+        and(
+          eq(adultInvitation.invitedBy, adultId),
+          gt(adultInvitation.expiresAt, sql`now()`),
+          or(ne(adultInvitation.studentId, studentId), ne(adultInvitation.email, email)),
+        ),
+      ),
+
     /** The invitation, which replaces the one the address had for the student. */
     async saveInvitation(invitation: NewInvitation) {
       const { invitedBy, role, expiresAt } = invitation;
@@ -396,13 +407,10 @@ export function createHouseholdRepository(db: Db) {
     },
 
     /**
-     * The adult accepts an invitation to their address, still valid: their link to the student,
-     * with its role, a parent's declared now; the invitation spent. Undefined when no such
-     * invitation; `'undeclared'`, nothing changed, for a parent's without the declaration.
-     * The student's row first, then the invitation's, in the order of the student's deletion,
-     * which locks the student, then their invitations by cascade: a deletion under way is waited
-     * for, and then leaves no invitation to accept; one that comes after waits for the link, and
-     * takes it with the student.
+     * The adult accepts an invitation to their address, still valid: their link, with its role,
+     * a parent's declared now; the invitation spent. Undefined when none; `'undeclared'` for a
+     * parent's without the declaration. Locks the student, then the invitation, as the student's
+     * deletion and its cascade do: neither waits for the other's lock forever.
      */
     async acceptInvitation(adultId: string, email: string, invitationId: string, declaredGuardian: boolean) {
       return db.transaction(async (tx) => {
@@ -437,10 +445,7 @@ export function createHouseholdRepository(db: Db) {
       return declined.length > 0;
     },
 
-    /**
-     * A parent of the student withdraws an invitation for them: its address, and whether another
-     * child's invitation still waits for it; undefined when no such invitation.
-     */
+    /** A parent withdraws an invitation: its address, and whether another one still waits for it; undefined when none. */
     async withdrawInvitation(adultId: string, studentId: string, invitationId: string) {
       const [withdrawn] = await db
         .delete(adultInvitation)

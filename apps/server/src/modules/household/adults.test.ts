@@ -292,6 +292,41 @@ it('takes the invitation away with the child', async () => {
   expect(await db.select().from(user).where(eq(user.id, lea.id))).toEqual([]);
 });
 
+// Catiche sends each invitation from its own domain: a parent sends a few, never a flood.
+describe('the invitations of a parent', () => {
+  const capped = testApp(db).api;
+  const inviteAs = (cookie: string, studentId: string, email: string) =>
+    capped.request('POST', `/api/household/students/${studentId}/invitations`, { cookie, body: { email, role: 'relative' } });
+  const withdrawAll = async (cookie: string, studentId: string) => {
+    for (const { id } of await invitationsOf(studentId)) {
+      expect((await capped.request('DELETE', `/api/household/students/${studentId}/invitations/${id}`, { cookie })).status).toBe(204);
+    }
+  };
+
+  it('wait 10 at most: one more once one is withdrawn', async () => {
+    const parent = await capped.guardian('plafond-attente@example.com');
+    const child = await capped.student(parent);
+    for (let n = 0; n < 10; n++) expect((await inviteAs(parent, child.id, `attente-${String(n)}@example.com`)).status).toBe(204);
+    expect((await inviteAs(parent, child.id, 'attente-de-trop@example.com')).status).toBe(429);
+    // Sent again to an address that waits already: it replaces, it adds none.
+    expect((await inviteAs(parent, child.id, 'attente-0@example.com')).status).toBe(204);
+    const [first] = await invitationsOf(child.id);
+    await capped.request('DELETE', `/api/household/students/${child.id}/invitations/${first?.id ?? ''}`, { cookie: parent });
+    expect((await inviteAs(parent, child.id, 'attente-de-trop@example.com')).status).toBe(204);
+  });
+
+  it('go out 20 at most in a day, withdrawn ones included', async () => {
+    const parent = await capped.guardian('plafond-jour@example.com');
+    const child = await capped.student(parent);
+    for (const round of [0, 1]) {
+      for (let n = 0; n < 10; n++) expect((await inviteAs(parent, child.id, `jour-${String(round)}-${String(n)}@example.com`)).status).toBe(204);
+      await withdrawAll(parent, child.id);
+    }
+    expect((await inviteAs(parent, child.id, 'jour-de-trop@example.com')).status).toBe(429);
+    expect(await invitationsOf(child.id)).toEqual([]);
+  });
+});
+
 describe('at the same time', () => {
   // Its own app: the races below spend more of a minute's budget than one app gives.
   const race = testApp(db).api;
