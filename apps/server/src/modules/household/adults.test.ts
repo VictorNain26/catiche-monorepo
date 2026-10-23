@@ -292,6 +292,8 @@ describe('at the same time', () => {
   const accept = async (adult: string, invitationId: string) =>
     race.request('POST', `/api/me/invitations/${invitationId}/accept`, { cookie: adult, body: {} });
   const deleteChild = async (parent: string, childId: string) => race.request('DELETE', `/api/household/students/${childId}`, { cookie: parent });
+  const withdraw = async (parent: string, childId: string, invitationId: string) =>
+    race.request('DELETE', `/api/household/students/${childId}/invitations/${invitationId}`, { cookie: parent });
 
   // Each locks the child, then the invitation: in another order, one would wait for the other's lock forever.
   it('accepts an invitation while its child is deleted: one or the other, never a deadlock', async () => {
@@ -302,5 +304,32 @@ describe('at the same time', () => {
     expect(answers.map(({ status }) => status).filter((status) => ![200, 204, 404].includes(status))).toEqual([]);
     const children = families.map(({ child }) => child.id);
     for (const id of children) expect(await db.select().from(user).where(eq(user.id, id))).toEqual([]);
+  });
+
+  it('refuses an invitation the parent withdrew', async () => {
+    const { parent, child, adult, invitationId } = await waiting('retiree');
+    expect((await withdraw(parent, child.id, invitationId)).status).toBe(204);
+    expect((await accept(adult, invitationId)).status).toBe(404);
+    expect(await linksOf(child.id)).toHaveLength(1);
+  });
+
+  it('makes one link of two acceptances at once', async () => {
+    const { child, adult, invitationId } = await waiting('deux-fois');
+    const statuses = (await Promise.all([accept(adult, invitationId), accept(adult, invitationId)])).map(({ status }) => status).sort();
+    expect(statuses).toEqual([200, 404]);
+    expect(await linksOf(child.id)).toHaveLength(2);
+    expect(await invitationsOf(child.id)).toEqual([]);
+  });
+
+  it('either links the adult or withdraws the invitation, when both come at once', async () => {
+    const { parent, child, adult, invitationId } = await waiting('accepte-ou-retire');
+    const [accepted, withdrawn] = await Promise.all([accept(adult, invitationId), withdraw(parent, child.id, invitationId)]);
+    // Accepted first, there is nothing left to withdraw; withdrawn first, nothing left to accept.
+    expect([
+      [200, 404],
+      [404, 204],
+    ]).toContainEqual([accepted.status, withdrawn.status]);
+    expect(await linksOf(child.id)).toHaveLength(accepted.status === 200 ? 2 : 1);
+    expect(await invitationsOf(child.id)).toEqual([]);
   });
 });
