@@ -293,11 +293,12 @@ là. » avec « Je suis encore là ». Sur un appareil personnel, rien ne se fer
 
 **E3. Tape ton code.**
 - Titre : « [Prénom], tape ton code »
-- Liens : « Ce n'est pas moi » ; « J'ai oublié mon code », qui ouvre : « Demande un code de départ à
-  Nadia ou à Karim. » et le bouton « J'ai un code de départ » (vers E1).
-- Erreurs : « Ce n'est pas ton code. Réessaie. » ; « Trop d'essais : ton espace est bloqué sur cet
-  appareil. Nadia ou Karim peuvent le débloquer. » ; « Trop d'essais : ton code ne marche plus.
-  Demande un code de départ à Nadia ou à Karim. »
+- Liens : « Ce n'est pas moi » ; « J'ai oublié mon code », qui prévient Nadia et Karim (une carte
+  sur leur accueil) et dit : « Nadia et Karim sont prévenus. Quand ils te donnent un code de
+  départ, touche ici. » avec le bouton « J'ai un code de départ » (vers E1).
+- Erreurs : « Ce n'est pas ton code. Réessaie. » ; après trop d'essais, un seul message, que
+  l'espace soit bloqué ici ou le code arrêté partout : « Ton code ne marche plus ici. Nadia et
+  Karim sont prévenus. » (l'accueil des parents dit lequel des deux, et quoi faire).
 - Une soirée en cours : « Tes devoirs t'attendent là où tu les as laissés. »
 
 **E4. Ce soir** (l'écran où l'enfant revient).
@@ -401,8 +402,6 @@ cherche :
 - Texte : « Catiche aide votre enfant à organiser ses devoirs du soir, avec Tom, une intelligence
   artificielle. Vous ne lisez pas ses échanges avec Tom : votre enfant vous dit où en sont ses
   devoirs. »
-- Bandeau, seulement si l'adulte n'arrive pas d'une invitation : « En préparation : les comptes
-  s'ouvrent sur invitation. »
 - Champ « Votre adresse e-mail » ; bouton principal « Recevoir un e-mail pour entrer ». (Le
   téléphone propose de lui-même la clé d'accès, s'il en a une.)
 - Lien : « Tu es élève ? C'est par ici ».
@@ -416,9 +415,11 @@ cherche :
 - E-mail : objet « Votre lien pour entrer dans Catiche » ; un bouton « Entrer dans Catiche » et le
   code. « Si vous n'avez rien demandé, ignorez ce message : personne n'entre sans lui. »
 - Erreurs : celles de `lib/auth.ts`, sauf « Une adresse e-mail valide. », qui devient « Écrivez une
-  adresse e-mail complète, par exemple nom@exemple.fr. », et l'adresse sans invitation, qui
-  devient « Cette adresse n'a pas d'invitation valable. Pour en demander une, écrivez à
-  contact@catiche.fr. »
+  adresse e-mail complète, par exemple nom@exemple.fr. », et l'adresse sans compte ni
+  invitation, qui devient « En préparation : les comptes s'ouvrent sur invitation. Pour en
+  demander une, écrivez à contact@catiche.fr. » (la formule de statut de `charte.md`, dite
+  seulement à qui en a besoin).
+- Une adresse invitée qui n'a pas encore de compte passe ici aussi, puis va à A3.
 - Ensuite, l'adulte reste connecté sur cet appareil (90 jours aujourd'hui, renouvelés à l'usage).
 
 **A3. Vous et votre enfant** (la première fois ; un seul écran). On y arrive directement par le
@@ -437,24 +438,26 @@ Toute invitation l'envoie, celle de Victor à la main comme celle d'un parent (a
   pour un parent : « Vous déciderez avec Nadia pour Léa. » Puis « Votre prénom », « J'ai 18 ans
   ou plus » et, pour un parent, la case d'autorité parentale. Bouton : « Continuer ».
 
-**A4. Où [prénom] travaille le soir ?** (après A3 pour un parent, et depuis « Gérer »).
-- Choix : « Sur cet ordinateur, à côté de moi » ; « Sur un autre appareil : le sien, ou celui
-  d'un proche ».
-- Cet ordinateur : « [Prénom] choisit son code maintenant, sur cet écran. Vous ne le verrez
-  pas. » Puis E2 sur place. Pas proposé sur un ordinateur déjà ajouté (aujourd'hui, il l'est encore).
+**A4. Où [prénom] travaille le soir ?** (après A3 pour le parent qui vient d'ajouter l'enfant,
+jamais pour un adulte invité ; et depuis « Gérer »).
+- Choix : « Sur cet appareil, à côté de moi » ; « Sur un autre appareil : le sien, ou celui d'un
+  proche ».
+- Cet appareil : « [Prénom] choisit son code maintenant, sur cet écran. Vous ne le verrez
+  pas. » Puis E2 sur place. Pas proposé sur un appareil déjà ajouté (aujourd'hui, il l'est encore).
 - Autre appareil : le carré à viser et le code de départ (« ABCD EFGH »). « Sur l'autre appareil,
-  visez ce carré avec l'appareil photo, ou ouvrez Catiche et touchez « J'ai un code de départ ».
-  Il marche une seule fois, pendant 7 jours. » Boutons : « Partager le code » (le partage du
-  téléphone : SMS, WhatsApp) ; « Obtenir un autre code ». Quand l'appareil est relié : « La tablette
-  de [prénom] est ajoutée. »
+  visez ce carré avec l'appareil photo : Catiche s'ouvre tout seul. Sinon, ouvrez catiche.fr,
+  touchez « J'ai un code de départ » et tapez ce code. Il marche une seule fois, pendant
+  7 jours. » Le carré porte un lien avec le code, qui mène droit à E2. Boutons : « Partager le
+  code » (le partage du téléphone : SMS, WhatsApp) ; « Obtenir un autre code » ; « Aller à
+  l'accueil ». Quand l'appareil est relié : « La tablette de [prénom] est ajoutée. »
 - Confirmation : la règle commune de « La confirmation récente » (plus haut).
 
 **A5. Accueil** (une carte par enfant, même avec un seul).
 - En haut : « Mon compte », « Quitter ».
 - Titre : « Suivez les devoirs de vos enfants » (avec un enfant : « Suivez les devoirs de Léa »).
-- Carte d'alerte, en tête, quand il le faut (parent) : « La tablette de Léa est bloquée après
-  3 codes faux. » avec « Débloquer » ; « Karim a demandé la suppression du compte de Léa. » avec
-  « Voir ».
+- Carte d'alerte, en tête, quand il le faut (parent) : « Léa a oublié son code. » avec « Donner un
+  code de départ », qui l'affiche tout de suite ; « La tablette de Léa est bloquée après 3 codes
+  faux. » avec « Débloquer » ; « Karim a demandé la suppression du compte de Léa. » avec « Voir ».
 - Une carte par enfant : prénom, classe, puis ce soir :
   - « Léa vous dit où en sont ses devoirs, et vous demande un mot à signer. » ; bouton principal
     « Lire son message » ;
@@ -503,8 +506,9 @@ Toute invitation l'envoie, celle de Victor à la main comme celle d'un parent (a
 - Texte : « Il recevra un e-mail pour entrer. Léa et les autres parents en seront prévenus. »
 - Bouton principal : « Envoyer l'invitation ».
 - E-mail : objet « Nadia vous invite sur Catiche, pour Léa » ; « Bonjour, Nadia vous invite à
-  suivre les devoirs du soir de Léa sur Catiche. » ; bouton « Accepter l'invitation » ;
-  « L'invitation vaut 30 jours. »
+  suivre les devoirs du soir de Léa sur Catiche. » ; bouton « Accepter l'invitation » ; puis
+  « Sur un autre appareil ? Ouvrez catiche.fr, donnez cette adresse et tapez ce code : [code]. » ;
+  « L'invitation vaut 30 jours. » Le même e-mail sert à l'invitation de Victor, sans « Nadia ».
 
 **A9. Mon compte.**
 - « Votre prénom ».
