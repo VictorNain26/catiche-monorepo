@@ -7,14 +7,14 @@
  */
 
 import { afterEach, describe, expect, it, setSystemTime } from 'bun:test';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { frenchDay } from '../../domain/student-deletion';
 import { user } from '../../platform/auth/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { ORIGIN, STUDENT_CODE } from '../../testing/http';
 import { householdSweep } from '.';
-import { studentProfile } from './schema';
+import { guardianship, studentProfile } from './schema';
 
 const { db } = await testDatabase();
 const { api, mail, tasks } = testApp(db);
@@ -204,6 +204,23 @@ describe('the deletion of a child with two parents', () => {
     expect(sent.map(({ to }) => to).toSorted()).toEqual([emails.karim, emails.nadia].toSorted());
     expect(sent[0]?.subject).toBe('Le compte de Léa est supprimé');
     expect(sent[0]?.text).toContain('Le compte de Léa est supprimé.');
+  });
+
+  it('once due, asks no declaration for the child, nor takes one', async () => {
+    const { nadia, karim, lea } = await family('declaration');
+    const karimId = (await api.sessionUser(karim))?.id ?? '';
+    // Karim's link, made before the declaration existed, waits for his.
+    await db
+      .update(guardianship)
+      .set({ declaredAt: null })
+      .where(and(eq(guardianship.adultId, karimId), eq(guardianship.studentId, lea.id)));
+    const asked = Date.now();
+    await ask(nadia, lea.id);
+    setSystemTime(new Date(asked + DAYS_7 + MINUTE));
+    const me = (await (await api.request('GET', '/api/me', { cookie: karim })).json()) as { missing: { guardianOf: string[] } };
+    expect(me.missing.guardianOf).not.toContain(lea.id);
+    const declared = await api.request('POST', `/api/household/students/${lea.id}/declaration`, { cookie: karim, body: { declaredGuardian: true } });
+    expect(declared.status).toBe(404);
   });
 
   it('stays asked once its author leaves Catiche, then says no one asked it', async () => {

@@ -129,7 +129,7 @@ export function createHouseholdRepository(db: Db) {
         db
           .select({ studentId: guardianship.studentId })
           .from(guardianship)
-          .where(and(eq(guardianship.adultId, adultId), asParent(), isNull(guardianship.declaredAt)))
+          .where(and(eq(guardianship.adultId, adultId), asParent(), isNull(guardianship.declaredAt), alive(guardianship.studentId)))
           .orderBy(guardianship.createdAt),
       ]);
       return { adult: !declared?.at, guardianOf: undeclared.map(({ studentId }) => studentId) };
@@ -180,7 +180,7 @@ export function createHouseholdRepository(db: Db) {
       const declared = await db
         .update(guardianship)
         .set({ declaredAt: sql`coalesce(${guardianship.declaredAt}, now())` })
-        .where(and(eq(guardianship.adultId, adultId), eq(guardianship.studentId, studentId), asParent()))
+        .where(and(eq(guardianship.adultId, adultId), eq(guardianship.studentId, studentId), asParent(), alive(guardianship.studentId)))
         .returning({ studentId: guardianship.studentId });
       return declared.length > 0;
     },
