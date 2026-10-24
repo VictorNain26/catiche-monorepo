@@ -418,6 +418,7 @@ parent : construit aussi (`bienvenue.tsx`, `InvitedWelcome`).
 (`apps/web/src/routes/foyer.$studentId_.appareil.tsx`, le code de départ dans
 `apps/server/src/platform/auth/student-sign-in.ts`), après A3, après l'ajout d'un enfant suivant
 et depuis la fiche de l'enfant. Reste l'entrée depuis « Gérer » (A7).
+Son texte donne l'adresse de l'app, et non catiche.fr, dont la landing ne mène pas à `/activer`.
 
 **A5. Accueil** (une carte par enfant, même avec un seul). L'en-tête, le titre et la carte de la
 clé d'accès sont construits (`apps/web/src/routes/foyer.index.tsx`,

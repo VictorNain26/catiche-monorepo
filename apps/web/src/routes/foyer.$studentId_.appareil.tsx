@@ -240,8 +240,8 @@ function StartingCode({ child, code }: { child: Student; code: string }) {
       <div className="flex flex-col gap-3">
         <p className="font-mono text-3xl tracking-widest text-foreground">{formatCode(code)}</p>
         <p className="text-foreground">
-          Sur l’autre appareil, visez ce carré avec l’appareil photo : Catiche s’ouvre tout seul. Sinon, ouvrez catiche.fr, touchez « J’ai un code de
-          départ » et tapez ce code. Il marche une seule fois, pendant 24 heures.
+          Sur l’autre appareil, visez ce carré avec l’appareil photo : Catiche s’ouvre tout seul. Sinon, ouvrez {window.location.host}, touchez « J’ai
+          un code de départ » et tapez ce code. Il marche une seule fois, pendant 24 heures.
         </p>
       </div>
     </Card>
