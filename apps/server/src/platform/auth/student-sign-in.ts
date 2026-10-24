@@ -22,7 +22,7 @@
  */
 
 import type { GenericEndpointContext } from '@better-auth/core';
-import { runWithTransaction } from '@better-auth/core/context';
+import { getCurrentAdapter, runWithTransaction } from '@better-auth/core/context';
 import { generateId } from '@better-auth/core/utils/id';
 import type { BetterAuthPlugin } from 'better-auth';
 import { APIError, createAuthEndpoint, createAuthMiddleware, freshSessionMiddleware } from 'better-auth/api';
@@ -67,7 +67,8 @@ const INVALID_CODE = { code: 'INVALID_CODE', message: 'Invalid code' };
 const BLOCKED = { code: 'PROFILE_BLOCKED', message: 'Blocked on this device until a guardian unblocks it' };
 const LOCKED = { code: 'PROFILE_LOCKED', message: 'Locked until a new code' };
 
-export type ActivationReason = 'device' | 'forgotten';
+const ACTIVATION_REASONS = ['device', 'forgotten'] as const;
+export type ActivationReason = (typeof ACTIVATION_REASONS)[number];
 
 /** Uppercase, without spaces or dashes, and Crockford's decoding of the letters read as digits. */
 export const normaliseActivationCode = (code: string) => code.toUpperCase().replace(/[\s-]/g, '').replace(/O/g, '0').replace(/[IL]/g, '1');
@@ -83,17 +84,19 @@ export const isStudentEmail = (email: string) => email.endsWith('.invalid');
 
 /**
  * A code that recognises the device that sends it for `userId`: a new device, within a day, so
- * that it can be prepared ahead; or a code forgotten, within ten minutes. It replaces the code of
- * the same reason given before for the student: one alive at a time bounds what can be guessed.
+ * that it can be prepared ahead; or a code forgotten, within ten minutes. It replaces the code given
+ * before for the student, whatever its reason: one alive at a time bounds what can be guessed, and a
+ * device code shared earlier cannot choose the code a forgotten one clears.
  */
 export async function createActivationCode(auth: Auth, userId: string, reason: ActivationReason) {
   const { adapter, internalAdapter } = await auth.$context;
   const code = generateActivationCode();
   const expiresAt = new Date(Date.now() + ACTIVATION_LIFETIMES[reason]);
   const value = JSON.stringify({ userId, reason });
+  // The identifier is hashed, the value is not: it names the student and the reason.
+  const replaced = ACTIVATION_REASONS.map((each) => JSON.stringify({ userId, reason: each }));
   await runWithTransaction(adapter, async () => {
-    // The identifier is hashed, the value is not: it names the student and the reason.
-    await adapter.deleteMany({ model: 'verification', where: [{ field: 'value', value }] });
+    await (await getCurrentAdapter(adapter)).deleteMany({ model: 'verification', where: [{ field: 'value', operator: 'in', value: replaced }] });
     await internalAdapter.createVerificationValue({ identifier: `${ACTIVATION_PREFIX}${code}`, value, expiresAt });
   });
   return { code, expiresAt };
@@ -102,7 +105,7 @@ export async function createActivationCode(auth: Auth, userId: string, reason: A
 /** The window's token as the profile keeps it: a SHA-256, the token itself being 190 random bits. */
 const hashToken = (token: string) => createHash('sha256').update(token).digest('base64url');
 
-const activation = z.object({ userId: z.string(), reason: z.enum(['device', 'forgotten']) });
+const activation = z.object({ userId: z.string(), reason: z.enum(ACTIVATION_REASONS) });
 
 /** When a session on a shared device closes: ten minutes from now, never past two hours from its opening. */
 const sharedDeadline = (openedAt: Date, now: Date) =>

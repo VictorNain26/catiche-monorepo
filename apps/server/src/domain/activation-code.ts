@@ -8,5 +8,7 @@
 export const ACTIVATION_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 export const ACTIVATION_CODE_LENGTH = 8;
 
+const ACTIVATION_PATTERN = new RegExp(`^[${ACTIVATION_ALPHABET}]{${String(ACTIVATION_CODE_LENGTH)}}$`);
+
 /** Whether `code` is one the server could have given: eight characters of the alphabet, uppercase. */
-export const isActivationCode = (code: string) => new RegExp(`^[${ACTIVATION_ALPHABET}]{${String(ACTIVATION_CODE_LENGTH)}}$`).test(code);
+export const isActivationCode = (code: string) => ACTIVATION_PATTERN.test(code);

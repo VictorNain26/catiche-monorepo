@@ -103,7 +103,7 @@ describe("a guardian's activation code", () => {
     expect(await servesAfter(await api.activationCode(guardian, lea.id, 'forgotten'), 11)).toBe(false);
   });
 
-  it('stops the code given before it for the same reason: one code alive at a time bounds the guessing', async () => {
+  it('stops the code given before it: one code alive at a time bounds the guessing', async () => {
     const guardian = await api.guardian('un-seul-code@example.com');
     const lea = await api.student(guardian);
     const firstDevice = await api.activationCode(guardian, lea.id);
@@ -117,15 +117,15 @@ describe("a guardian's activation code", () => {
     expect((await api.device().activate(secondForgotten)).status).toBe(200);
   });
 
-  it('leaves alive the code of the other reason: a forgotten code does not stop the device waiting, nor the reverse', async () => {
+  it('stops the code of the other reason too: a device code shared earlier cannot choose the code a forgotten code clears', async () => {
     const guardian = await api.guardian('deux-raisons@example.com');
     const lea = await api.student(guardian);
     const device = await api.activationCode(guardian, lea.id);
     const forgotten = await api.activationCode(guardian, lea.id, 'forgotten');
-    expect((await api.device().activate(device)).status).toBe(200);
+    expect(await problem(await api.device().activate(device))).toEqual({ status: 400, code: 'INVALID_ACTIVATION_CODE' });
 
     await api.activationCode(guardian, lea.id);
-    expect((await api.device().activate(forgotten)).status).toBe(200);
+    expect((await api.device().activate(forgotten)).status).toBe(400);
   });
 
   it('stops only the code of its own student', async () => {
