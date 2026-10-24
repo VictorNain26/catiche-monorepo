@@ -1,5 +1,5 @@
 {
-  "id": "2a198ea3-3ea8-4dfb-bd20-5c068ece7ed3",
+  "id": "2806c32e-3e3e-49c7-b212-94c7d56342e8",
   "prevId": "a5927bd9-07cf-4771-8851-6531a88725cd",
   "version": "7",
   "dialect": "postgresql",
@@ -991,10 +991,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "bigint",
           "primaryKey": true,
           "notNull": true,
-          "default": "gen_random_uuid()"
+          "identity": {
+            "type": "always",
+            "name": "child_event_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
         },
         "student_id": {
           "name": "student_id",

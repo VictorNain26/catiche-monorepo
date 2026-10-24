@@ -296,7 +296,7 @@ export function createHouseholdRepository(db: Db) {
             gt(childEvent.createdAt, sql`now() - make_interval(days => ${HISTORY_DAYS})`),
           ),
         )
-        .orderBy(desc(childEvent.createdAt)),
+        .orderBy(desc(childEvent.id)),
 
     /** The student's devices and the state of their code, as their guardian reads them; never the code. */
     async listDevices(adultId: string, studentId: string) {

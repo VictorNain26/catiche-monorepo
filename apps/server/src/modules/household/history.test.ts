@@ -16,7 +16,7 @@ const { db } = await testDatabase();
 const { api, mail, tasks } = testApp(db);
 
 interface Line {
-  id: string;
+  id: number;
   kind: string;
   detail: Record<string, unknown>;
   actor: string | null;
@@ -135,13 +135,13 @@ describe('the history of a child', () => {
 
   it('keeps the lines of an adult who left Catiche, without their name', async () => {
     const { nadia, karim, lea } = await family('parti');
-    await patch(karim, lea.id, { level: 'sixieme' });
+    expect((await patch(karim, lea.id, { level: 'sixieme' })).status).toBe(200);
     await db.delete(user).where(eq(user.id, await idOf(karim)));
-    const [last] = await history(nadia, lea.id);
-    expect(last).toMatchObject({ kind: 'level_changed', actor: null });
+    const lines = await history(nadia, lea.id);
+    expect(lines.filter(({ actor }) => actor === null).map(({ kind }) => kind)).toEqual(['level_changed', 'adult_joined']);
   });
 
-  it('gives the 90 last days, the newest first', async () => {
+  it('gives the 90 last days', async () => {
     const { nadia, lea } = await family('jours');
     const DAY = 24 * 60 * 60_000;
     await db.insert(childEvent).values([
@@ -151,10 +151,16 @@ describe('the history of a child', () => {
     const lines = await history(nadia, lea.id);
     expect(lines.map(({ kind }) => kind)).toContain('memory_proposed');
     expect(lines.map(({ kind }) => kind)).not.toContain('memory_withdrawn');
-    expect(lines.at(-1)?.kind).toBe('memory_proposed');
-    const times = lines.map(({ createdAt }) => Date.parse(createdAt));
-    expect(times).toEqual(times.toSorted((a, b) => b - a));
     expect(Object.keys(lines[0] ?? {}).sort()).toEqual(['actor', 'createdAt', 'detail', 'id', 'kind']);
+  });
+
+  // A clock can step back: this machine's database did, by 2 s, while these tests ran.
+  it('gives the lines in the order they were written, the newest first, whatever the clock said', async () => {
+    const { nadia, lea } = await family('horloge');
+    // Written before the clock stepped back: dated after the gesture that follows it.
+    await db.insert(childEvent).values({ studentId: lea.id, kind: 'memory_proposed', createdAt: new Date(Date.now() + 60 * 60_000) });
+    expect((await patch(nadia, lea.id, { level: 'sixieme' })).status).toBe(200);
+    expect((await history(nadia, lea.id)).slice(0, 2).map(({ kind }) => kind)).toEqual(['level_changed', 'memory_proposed']);
   });
 
   it('is read by a parent only: a relative and an adult without a link are not found, a student refused', async () => {

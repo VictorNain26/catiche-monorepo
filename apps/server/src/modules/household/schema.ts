@@ -84,12 +84,13 @@ export const adultProfile = pgTable('adult_profile', {
 /**
  * The history of a student: a gesture of an adult on them, written in the transaction of the
  * gesture itself. It goes with the student; an adult who leaves Catiche leaves their lines,
- * without their name. Read 90 days back (`HISTORY_DAYS`).
+ * without their name. Read 90 days back (`HISTORY_DAYS`), in the order of `id`, the order the
+ * lines were written: the clock can step back, a sequence cannot.
  */
 export const childEvent = pgTable(
   'child_event',
   {
-    id: uuid('id').primaryKey().defaultRandom(),
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
     studentId: text('student_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),

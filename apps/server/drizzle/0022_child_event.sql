@@ -1,6 +1,6 @@
 CREATE TYPE "public"."child_event_kind" AS ENUM('name_changed', 'level_changed', 'memory_proposed', 'memory_withdrawn', 'device_code', 'forgotten_code', 'device_unblocked', 'device_removed', 'adult_invited', 'invitation_withdrawn', 'adult_joined', 'adult_removed', 'adult_left');--> statement-breakpoint
 CREATE TABLE "child_event" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"id" bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "child_event_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1 CACHE 1),
 	"student_id" text NOT NULL,
 	"actor_id" text,
 	"kind" "child_event_kind" NOT NULL,
