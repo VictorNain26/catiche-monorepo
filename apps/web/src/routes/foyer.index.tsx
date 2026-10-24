@@ -133,7 +133,6 @@ function InvitationCard({ invitation }: { invitation: Invitation }) {
  * unblocked here. A status, which takes no focus.
  */
 function AlertCards({ child }: { child: Student }) {
-  const unblock = useUnblockDevice(child.id);
   const { blockedDevices, codeLocked } = child.alerts;
   if (codeLocked) {
     return (
@@ -143,25 +142,29 @@ function AlertCards({ child }: { child: Student }) {
       </Card>
     );
   }
-  return blockedDevices.map((device) => {
-    const kind = deviceKind(device.userAgent);
-    return (
-      <Card key={device.id} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="font-bold">
-          {capitalised(kind.the)} de {child.name} est {kind.blocked} après 3 codes faux.
-        </p>
-        {unblock.error && <Banner tone="error" title={householdMessage(unblock.error)} />}
-        <Button
-          disabled={unblock.isPending}
-          onClick={() => {
-            unblock.mutate(device.id);
-          }}
-        >
-          Débloquer
-        </Button>
-      </Card>
-    );
-  });
+  return blockedDevices.map((device) => <BlockedDevice key={device.id} child={child} device={device} />);
+}
+
+/** One blocked device, unblocked by its own request: another card's failure is not its own. */
+function BlockedDevice({ child, device }: { child: Student; device: Student['alerts']['blockedDevices'][number] }) {
+  const unblock = useUnblockDevice(child.id);
+  const kind = deviceKind(device.userAgent);
+  return (
+    <Card className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <p className="font-bold">
+        {capitalised(kind.the)} de {child.name} est {kind.blocked} après 3 codes faux.
+      </p>
+      {unblock.error && <Banner tone="error" title={householdMessage(unblock.error)} />}
+      <Button
+        disabled={unblock.isPending}
+        onClick={() => {
+          unblock.mutate(device.id);
+        }}
+      >
+        Débloquer
+      </Button>
+    </Card>
+  );
 }
 
 /**

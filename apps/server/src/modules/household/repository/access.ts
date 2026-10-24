@@ -21,6 +21,20 @@ export function accessOf(db: Db) {
   const studentsOf = (adultId: string) => db.select({ id: guardianship.studentId }).from(guardianship).where(eq(guardianship.adultId, adultId));
   return {
     studentsOf,
+    /**
+     * First in a gesture's transaction: the adult's row, then the student's, if the adult is
+     * linked to them, in the order the deletion of an account locks them (`deleteAccount`). The
+     * gesture's line in the history holds both as keys: taken later, behind another lock of the
+     * gesture's own (an invitation, a device), they would let two transactions wait for each other.
+     */
+    lockFor: async (tx: Pick<Db, 'select'>, adultId: string, studentId: string) => {
+      await tx.select({ id: user.id }).from(user).where(eq(user.id, adultId)).for('update');
+      await tx
+        .select({ id: user.id })
+        .from(user)
+        .where(and(eq(user.id, studentId), inArray(user.id, studentsOf(adultId))))
+        .for('update');
+    },
     /** The ids of the students `adultId` is a parent of: what they manage. */
     managedBy: (adultId: string) =>
       db

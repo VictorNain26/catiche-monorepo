@@ -37,7 +37,8 @@ describe('historyLine', () => {
     expect(line('adult_left', {}, 'Monique')).toBe('Monique a quitté les adultes de Léa');
   });
 
-  it('names an adult who has left Catiche as an adult', () => {
+  it('names an adult who has left Catiche, or not given a first name yet, as an adult', () => {
     expect(line('memory_withdrawn', {}, null)).toBe('Un adulte a retiré ce que Tom retient');
+    expect(line('memory_withdrawn', {}, '')).toBe('Un adulte a retiré ce que Tom retient');
   });
 });

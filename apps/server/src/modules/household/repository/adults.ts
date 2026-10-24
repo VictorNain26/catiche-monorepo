@@ -31,7 +31,7 @@ const waiting = (email: string, invitationId?: string) =>
   );
 
 export function adultsRepository(db: Db) {
-  const { managedBy: managed, otherParents } = accessOf(db);
+  const { managedBy: managed, otherParents, lockFor } = accessOf(db);
 
   return {
     /** Whether an adult with this address is linked to the student already. */
@@ -77,6 +77,7 @@ export function adultsRepository(db: Db) {
     async saveInvitation(invitation: NewInvitation) {
       const { studentId, invitedBy, email, role, expiresAt } = invitation;
       await db.transaction(async (tx) => {
+        await lockFor(tx, invitedBy, studentId);
         await tx
           .insert(adultInvitation)
           .values(invitation)
@@ -108,11 +109,12 @@ export function adultsRepository(db: Db) {
     /**
      * The adult accepts an invitation to their address, still valid: their link, with its role,
      * a parent's declared now; the invitation spent. Undefined when none; `'undeclared'` for a
-     * parent's without the declaration. Locks the student, then the invitation, as the student's
-     * deletion and its cascade do: neither waits for the other's lock forever.
+     * parent's without the declaration. Locks the adult, then the student, then the invitation, as
+     * an account's deletion, the student's and its cascade do: none waits for another's lock forever.
      */
     async acceptInvitation(adultId: string, email: string, invitationId: string, declaredGuardian: boolean) {
       return db.transaction(async (tx) => {
+        await tx.select({ id: user.id }).from(user).where(eq(user.id, adultId)).for('update');
         await tx
           .select({ id: user.id })
           .from(user)
@@ -149,6 +151,7 @@ export function adultsRepository(db: Db) {
     /** A parent withdraws an invitation: its address, and whether another one still waits for it; undefined when none. */
     async withdrawInvitation(adultId: string, studentId: string, invitationId: string) {
       return db.transaction(async (tx) => {
+        await lockFor(tx, adultId, studentId);
         const [withdrawn] = await tx
           .delete(adultInvitation)
           .where(
@@ -193,6 +196,7 @@ export function adultsRepository(db: Db) {
      */
     async removeRelative(adultId: string, studentId: string, relativeId: string) {
       return db.transaction(async (tx) => {
+        await lockFor(tx, adultId, studentId);
         const [relative] = await tx
           .select({ name: user.name })
           .from(guardianship)

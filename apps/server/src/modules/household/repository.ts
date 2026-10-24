@@ -30,7 +30,7 @@ const browserOf = async (tx: Pick<Db, 'select'>, deviceId: string) =>
   (await tx.select({ userAgent: device.userAgent }).from(device).where(eq(device.id, deviceId)))[0]?.userAgent ?? null;
 
 export function createHouseholdRepository(db: Db) {
-  const { studentsOf, managedBy, otherParents } = accessOf(db);
+  const { studentsOf, managedBy, otherParents, lockFor } = accessOf(db);
 
   /** The student's row, and the adult's link to them, which says the adult's role. */
   const linkOf = (adultId: string) => and(eq(guardianship.studentId, user.id), eq(guardianship.adultId, adultId));
@@ -235,6 +235,7 @@ export function createHouseholdRepository(db: Db) {
       patch: { name?: string | undefined; level?: SchoolLevel | undefined; memoryProposed?: boolean | undefined },
     ) {
       return db.transaction(async (tx) => {
+        await lockFor(tx, adultId, studentId);
         const [current] = await tx
           .select({ name: user.name, level: studentProfile.level, proposedAt: studentProfile.memoryProposedAt })
           .from(user)
@@ -276,6 +277,7 @@ export function createHouseholdRepository(db: Db) {
     /** A starting code the adult asks for the student, and its line in the history, in one transaction. */
     activationCode: (adultId: string, studentId: string, reason: ActivationReason) =>
       db.transaction(async (tx) => {
+        await lockFor(tx, adultId, studentId);
         const code = await createActivationCode(tx, studentId, reason);
         await record(tx, studentId, adultId, [{ kind: reason === 'device' ? 'device_code' : 'forgotten_code' }]);
         return code;
@@ -311,6 +313,7 @@ export function createHouseholdRepository(db: Db) {
     /** The profile's tries on the device start again; `false` when no such profile of a student the adult is a parent of. */
     async unblockDevice(adultId: string, studentId: string, deviceId: string) {
       return db.transaction(async (tx) => {
+        await lockFor(tx, adultId, studentId);
         const unblocked = await tx
           .update(deviceProfile)
           .set({ failures: 0 })
@@ -325,6 +328,7 @@ export function createHouseholdRepository(db: Db) {
     /** The device no longer holds the student: their profile there and its sessions go, the device too once empty. `false` when no such profile. */
     async removeDevice(adultId: string, studentId: string, deviceId: string) {
       return db.transaction(async (tx) => {
+        await lockFor(tx, adultId, studentId);
         const removed = await tx
           .delete(deviceProfile)
           .where(profileOf(adultId, studentId, deviceId))

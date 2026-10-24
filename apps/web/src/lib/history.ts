@@ -28,7 +28,8 @@ function deviceOf(userAgent: string | null | undefined): string {
  * anyone's gender (`docs/charte.md`, « Les mots »); an adult who left Catiche is « Un adulte ».
  */
 export function historyLine({ kind, detail, actor }: HistoryLine, child: string): string {
-  const who = actor ?? 'Un adulte';
+  // Null once the adult left Catiche; empty while they have not given their first name.
+  const who = actor === null || actor === '' ? 'Un adulte' : actor;
   const role = detail.role === undefined ? '' : `, comme ${ROLE_LABELS[detail.role]}`;
   const what: Record<HistoryLine['kind'], () => string> = {
     name_changed: () => `a changé le prénom en ${detail.name ?? ''}`,

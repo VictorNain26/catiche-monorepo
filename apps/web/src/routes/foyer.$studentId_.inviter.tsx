@@ -5,6 +5,7 @@ import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { AdultPage, BackLink } from '../components/page';
 import { isProblem } from '../lib/api';
+import { historyQuery } from '../lib/history';
 import { adultsQuery, householdMessage, inviteAdult, inviteSchema, roleChoices, studentsQuery, type InvitationInput } from '../lib/household';
 
 /**
@@ -32,7 +33,8 @@ function InviteAdult() {
   const invite = useMutation({
     mutationFn: (json: InvitationInput) => inviteAdult(studentId, json),
     onSuccess: async (_, { email }) => {
-      await queryClient.invalidateQueries({ queryKey: adultsQuery(studentId).queryKey });
+      // Its adults, and its history, which keeps the invitation.
+      await Promise.all([adultsQuery(studentId), historyQuery(studentId)].map(({ queryKey }) => queryClient.invalidateQueries({ queryKey })));
       toast(`L’invitation est envoyée à ${email}.`);
       await navigate({ to: '/foyer/$studentId', params: { studentId } });
     },

@@ -201,6 +201,7 @@ export function ForgottenCode({ child, activation }: { child: Student; activatio
         Son code actuel ne marchera plus, nulle part. Avec le code de départ que vous allez obtenir, {child.name} en choisira un nouveau, et verra la
         date du changement.
       </p>
+      <p className="text-muted-foreground">Ce code arrête aussi un code de départ donné avant, s’il n’a pas encore servi.</p>
       {code && (
         <Card className="flex flex-col items-center gap-2 text-center">
           <p>
