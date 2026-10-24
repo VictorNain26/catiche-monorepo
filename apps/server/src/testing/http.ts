@@ -152,6 +152,10 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, { db
       );
       return cookieOf(res);
     },
+    /** The adult gives their first name, as « Votre compte » does. */
+    named: async (cookie: string, name: string) => {
+      await expectStatus(request('POST', '/api/auth/update-user', { cookie, body: { name } }), 200, 'name');
+    },
     /** A guardian invites an adult for the student: the email the address receives. */
     async inviteAdult(cookie: string, studentId: string, email: string, role: AdultRole) {
       const received = mail.next(email);

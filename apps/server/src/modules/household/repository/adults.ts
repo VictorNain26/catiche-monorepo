@@ -10,7 +10,7 @@ import type { AdultRole } from '../../../domain/adult-roles';
 import { user } from '../../../platform/auth/schema';
 import type { Db } from '../../../platform/db/client';
 import { adultInvitation, guardianship } from '../schema';
-import { asParent, managedBy, record, studentsOf } from './access';
+import { accessOf, asParent, record } from './access';
 
 export interface NewInvitation {
   studentId: string;
@@ -31,35 +31,9 @@ const waiting = (email: string, invitationId?: string) =>
   );
 
 export function adultsRepository(db: Db) {
-  const managed = (adultId: string) => managedBy(db, adultId);
-
-  /** The addresses of the student's parents but `adultId`: never a relative's. */
-  const otherParents = (adultId: string, studentId: string) =>
-    db
-      .select({ email: user.email })
-      .from(guardianship)
-      .innerJoin(user, eq(user.id, guardianship.adultId))
-      .where(and(eq(guardianship.studentId, studentId), asParent(), ne(guardianship.adultId, adultId)));
+  const { managedBy: managed, otherParents } = accessOf(db);
 
   return {
-    /** For an adult linked to the student: the first names of the student's other parents, the earliest first. */
-    async parentsOf(adultId: string, studentId: string) {
-      const parents = await db
-        .select({ name: user.name })
-        .from(guardianship)
-        .innerJoin(user, eq(user.id, guardianship.adultId))
-        .where(
-          and(
-            eq(guardianship.studentId, studentId),
-            asParent(),
-            ne(guardianship.adultId, adultId),
-            inArray(guardianship.studentId, studentsOf(db, adultId)),
-          ),
-        )
-        .orderBy(asc(guardianship.createdAt));
-      return parents.map(({ name }) => name);
-    },
-
     /** Whether an adult with this address is linked to the student already. */
     async followedBy(studentId: string, email: string) {
       const [linked] = await db

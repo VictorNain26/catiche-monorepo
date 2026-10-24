@@ -10,7 +10,9 @@ import { WeekSummary } from '../components/week-summary';
 import { isProblem } from '../lib/api';
 import { useConfirmation } from '../lib/confirmation';
 import { formatDay } from '../lib/device';
+import { historyQuery } from '../lib/history';
 import { meQuery } from '../lib/me';
+import { capitalised } from '../lib/words';
 import { summaryQuery } from '../lib/summary';
 import {
   LEVEL_LABELS,
@@ -169,7 +171,8 @@ function ChildAdults({ child }: { child: Student }) {
   const queryClient = useQueryClient();
   const { data } = useSuspenseQuery(adultsQuery(child.id));
   // Its adults and its history.
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ['students', child.id] });
+  const refresh = () =>
+    Promise.all([adultsQuery(child.id), historyQuery(child.id)].map(({ queryKey }) => queryClient.invalidateQueries({ queryKey })));
   const removal = useConfirmation<string>();
   const remove = useMutation({
     mutationFn: (adultId: string) => removeAdult(child.id, adultId),
@@ -253,8 +256,6 @@ function ChildAdults({ child }: { child: Student }) {
     </Section>
   );
 }
-
-const capitalised = (word: string) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`;
 
 function Memory({ child }: { child: Student }) {
   const queryClient = useQueryClient();

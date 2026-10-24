@@ -3,7 +3,7 @@
 import { queryOptions } from '@tanstack/react-query';
 import type { InferResponseType } from 'hono/client';
 import { api, parseResponse } from './api';
-import { listWords } from './household';
+import { listWords } from './words';
 
 export type WeekSummary = InferResponseType<typeof api.summary.$get, 200>;
 type SubjectFamily = WeekSummary['subjects'][number]['subject'];

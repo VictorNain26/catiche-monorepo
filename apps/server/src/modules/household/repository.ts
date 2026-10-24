@@ -11,8 +11,9 @@ import type { SchoolLevel } from '../../domain/levels';
 import type { MemoryAnswer } from '../../domain/memory-consent';
 import { device, deviceProfile, passkey, session, studentCode, user } from '../../platform/auth/schema';
 import { CODE_TRIES, DEVICE_TRIES } from '../../platform/auth/student-devices';
+import { createActivationCode, type ActivationReason } from '../../platform/auth/student-sign-in';
 import type { Db } from '../../platform/db/client';
-import { asParent, managedBy as managedByIn, otherAdult, record, studentsOf as studentsOfIn, type Gesture } from './repository/access';
+import { accessOf, asParent, otherAdult, record, type Gesture } from './repository/access';
 import { adultsRepository } from './repository/adults';
 import { adultProfile, childEvent, guardianship, studentProfile } from './schema';
 
@@ -29,8 +30,7 @@ const browserOf = async (tx: Pick<Db, 'select'>, deviceId: string) =>
   (await tx.select({ userAgent: device.userAgent }).from(device).where(eq(device.id, deviceId)))[0]?.userAgent ?? null;
 
 export function createHouseholdRepository(db: Db) {
-  const studentsOf = (adultId: string) => studentsOfIn(db, adultId);
-  const managedBy = (adultId: string) => managedByIn(db, adultId);
+  const { studentsOf, managedBy, otherParents } = accessOf(db);
 
   /** The student's row, and the adult's link to them, which says the adult's role. */
   const linkOf = (adultId: string) => and(eq(guardianship.studentId, user.id), eq(guardianship.adultId, adultId));
@@ -168,7 +168,37 @@ export function createHouseholdRepository(db: Db) {
       return declared.length > 0;
     },
 
-    listStudents: (adultId: string) => linkedStudents(adultId),
+    /**
+     * The students the adult is linked to, in four queries whatever their number: each with the
+     * first names of their other parents, who decide with the adult, and what the home warns a
+     * parent of, the devices where too many tries blocked them and whether their code stopped
+     * everywhere; a relative, who manages neither, is warned of nothing.
+     */
+    async listStudents(adultId: string) {
+      const [students, parents, blocked, locked] = await Promise.all([
+        linkedStudents(adultId),
+        otherParents(adultId),
+        db
+          .select({ studentId: deviceProfile.studentId, id: device.id, userAgent: device.userAgent })
+          .from(deviceProfile)
+          .innerJoin(device, eq(device.id, deviceProfile.deviceId))
+          .where(and(inArray(deviceProfile.studentId, managedBy(adultId)), gte(deviceProfile.failures, DEVICE_TRIES)))
+          .orderBy(desc(deviceProfile.createdAt)),
+        db
+          .select({ studentId: studentCode.userId })
+          .from(studentCode)
+          .where(and(inArray(studentCode.userId, managedBy(adultId)), gte(studentCode.failures, CODE_TRIES))),
+      ]);
+      const of = <Row extends { studentId: string }>(rows: readonly Row[], id: string) => rows.filter(({ studentId }) => studentId === id);
+      return students.map((student) => ({
+        ...student,
+        parents: of(parents, student.id).map(({ name }) => name),
+        alerts: {
+          blockedDevices: of(blocked, student.id).map(({ id, userAgent }) => ({ id, userAgent })),
+          codeLocked: of(locked, student.id).length > 0,
+        },
+      }));
+    },
 
     async findStudent(adultId: string, studentId: string) {
       const [student] = await linkedStudents(adultId, eq(user.id, studentId));
@@ -213,13 +243,12 @@ export function createHouseholdRepository(db: Db) {
           .for('update');
         if (!current) return undefined;
         const proposed = current.proposedAt !== null;
-        const gestures: Gesture[] = [
-          ...(patch.name === undefined || patch.name === current.name ? [] : [{ kind: 'name_changed' as const, detail: { name: patch.name } }]),
-          ...(patch.level === undefined || patch.level === current.level ? [] : [{ kind: 'level_changed' as const, detail: { level: patch.level } }]),
-          ...(patch.memoryProposed === undefined || patch.memoryProposed === proposed
-            ? []
-            : [{ kind: patch.memoryProposed ? ('memory_proposed' as const) : ('memory_withdrawn' as const) }]),
-        ];
+        const gestures: Gesture[] = [];
+        if (patch.name !== undefined && patch.name !== current.name) gestures.push({ kind: 'name_changed', detail: { name: patch.name } });
+        if (patch.level !== undefined && patch.level !== current.level) gestures.push({ kind: 'level_changed', detail: { level: patch.level } });
+        if (patch.memoryProposed !== undefined && patch.memoryProposed !== proposed) {
+          gestures.push({ kind: patch.memoryProposed ? 'memory_proposed' : 'memory_withdrawn' });
+        }
         await tx
           .update(user)
           .set({ updatedAt: new Date(), ...(patch.name === undefined ? {} : { name: patch.name }) })
@@ -244,9 +273,13 @@ export function createHouseholdRepository(db: Db) {
       });
     },
 
-    /** Writes a starting code's line, in the transaction that makes the code (`createActivationCode`). */
-    recordCode: (adultId: string, studentId: string, kind: 'device_code' | 'forgotten_code') => (tx: Pick<Db, 'insert'>) =>
-      record(tx, studentId, adultId, [{ kind }]),
+    /** A starting code the adult asks for the student, and its line in the history, in one transaction. */
+    activationCode: (adultId: string, studentId: string, reason: ActivationReason) =>
+      db.transaction(async (tx) => {
+        const code = await createActivationCode(tx, studentId, reason);
+        await record(tx, studentId, adultId, [{ kind: reason === 'device' ? 'device_code' : 'forgotten_code' }]);
+        return code;
+      }),
 
     /** For a parent of the student: the gestures of the 90 last days, the newest first, with the first name of who made each. */
     history: (adultId: string, studentId: string) =>
@@ -268,20 +301,6 @@ export function createHouseholdRepository(db: Db) {
       const list = await devices(and(eq(deviceProfile.studentId, studentId), inArray(deviceProfile.studentId, managedBy(adultId))));
       const { chosen, locked } = await codeOf(studentId);
       return { devices: list, code: { chosen, locked } };
-    },
-
-    /**
-     * What the home warns a parent of: the devices where too many tries blocked the student, and
-     * whether their code stopped everywhere. Nothing for a relative, who manages neither.
-     */
-    async alertsOf(adultId: string, studentId: string) {
-      const managed = (column: typeof deviceProfile.studentId | typeof studentCode.userId) =>
-        and(eq(column, studentId), inArray(column, managedBy(adultId)));
-      const [blocked, locked] = await Promise.all([
-        devices(and(managed(deviceProfile.studentId), gte(deviceProfile.failures, DEVICE_TRIES))),
-        db.$count(studentCode, and(managed(studentCode.userId), gte(studentCode.failures, CODE_TRIES))),
-      ]);
-      return { blockedDevices: blocked.map(({ id, userAgent }) => ({ id, userAgent })), codeLocked: locked > 0 };
     },
 
     /** The signed-in student's own devices, and when a guardian last replaced their code. */

@@ -18,9 +18,7 @@ const { db } = await testDatabase();
 const { api, mail, tasks } = testApp(db);
 
 const idOf = async (cookie: string) => (await api.sessionUser(cookie))?.id ?? '';
-const named = async (cookie: string, name: string) => {
-  expect((await api.request('POST', '/api/auth/update-user', { cookie, body: { name } })).status).toBe(200);
-};
+const { named } = api;
 const linksOf = (studentId: string) =>
   db.select({ adultId: guardianship.adultId, role: guardianship.role }).from(guardianship).where(eq(guardianship.studentId, studentId));
 const invitationsOf = (studentId: string) => db.select().from(adultInvitation).where(eq(adultInvitation.studentId, studentId));

@@ -7,15 +7,18 @@ import { isProblem } from '../lib/api';
 import { useConfirmation } from '../lib/confirmation';
 import { RecentEntry } from './recent-entry';
 import { deviceKind, deviceName, formatDay, formatHour } from '../lib/device';
+import { historyQuery } from '../lib/history';
 import {
   activationCode,
   householdMessage,
   removeDevice,
   studentDevicesQuery,
+  studentsQuery,
   unblockDevice,
   type ActivationReason,
   type Student,
 } from '../lib/household';
+import { capitalised } from '../lib/words';
 
 const WATCH_MS = 10 * 60_000;
 
@@ -31,7 +34,7 @@ export function useActivation(studentId: string) {
   const activation = useMutation({
     mutationFn: (reason: ActivationReason) => activationCode(studentId, reason),
     // Its line in the child's history.
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['students', studentId, 'history'] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: historyQuery(studentId).queryKey }),
   });
   // Nothing else renders the page when a code expires.
   useEffect(() => {
@@ -76,22 +79,35 @@ export function useActivation(studentId: string) {
 
 type Activation = ReturnType<typeof useActivation>;
 
-const capitalised = (words: string) => `${words.charAt(0).toUpperCase()}${words.slice(1)}`;
+/** After a gesture on one of the child's devices: their devices, the home's alerts, their history. */
+function useDevicesChanged(studentId: string) {
+  const queryClient = useQueryClient();
+  return () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey, exact: true }),
+      queryClient.invalidateQueries({ queryKey: studentDevicesQuery(studentId).queryKey }),
+      queryClient.invalidateQueries({ queryKey: historyQuery(studentId).queryKey }),
+    ]);
+}
+
+/** « Débloquer », on « Gérer » as on the home's alert. */
+export function useUnblockDevice(studentId: string) {
+  const changed = useDevicesChanged(studentId);
+  return useMutation({ mutationFn: (deviceId: string) => unblockDevice(studentId, deviceId), onSettled: changed });
+}
 
 /**
  * « Ses appareils » (A7): the devices that hold the child's profile, each unblocked, with its
  * cause, or removed once confirmed; and a way to add one (A4).
  */
 export function ChildDevices({ child, activation }: { child: Student; activation: Activation }) {
-  const queryClient = useQueryClient();
-  // The devices, the home's alerts and the history: each reads what changed.
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ['students'] });
+  const changed = useDevicesChanged(child.id);
   const removal = useConfirmation<string>();
-  const unblock = useMutation({ mutationFn: (deviceId: string) => unblockDevice(child.id, deviceId), onSettled: refresh });
+  const unblock = useUnblockDevice(child.id);
   const remove = useMutation({
     mutationFn: (deviceId: string) => removeDevice(child.id, deviceId),
     onSuccess: removal.close,
-    onSettled: refresh,
+    onSettled: changed,
   });
   const failure = unblock.error ?? remove.error;
 

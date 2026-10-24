@@ -1,12 +1,14 @@
 import Bowser from 'bowser';
 
-/** A device as a person names it, from its browser's user agent: « iOS · Safari ». */
-export function deviceName(userAgent: string | null | undefined): string {
-  if (!userAgent) return 'Appareil inconnu';
+/** A device's system and browser, from its user agent: « iOS · Safari »; null when it cannot be read. */
+export function browserName(userAgent: string | null | undefined): string | null {
+  if (!userAgent) return null;
   const { os, browser } = Bowser.parse(userAgent);
-  const name = [os.name, browser.name].filter(Boolean).join(' · ');
-  return name || 'Appareil inconnu';
+  return [os.name, browser.name].filter(Boolean).join(' · ') || null;
 }
+
+/** A device as a person names it, from its browser's user agent: « iOS · Safari ». */
+export const deviceName = (userAgent: string | null | undefined) => browserName(userAgent) ?? 'Appareil inconnu';
 
 /** How a sentence names a device, by its kind: « la tablette », « cette tablette », « bloquée ». */
 interface DeviceKind {

@@ -6,8 +6,10 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AdultPage } from '../components/page';
 import { PasskeyOffer } from '../components/passkey-offer';
+import { useUnblockDevice } from '../components/child-access';
 import { deviceKind } from '../lib/device';
-import { GUARDIAN_HINT, GUARDIAN_LABEL, LEVEL_LABELS, householdMessage, studentsQuery, unblockDevice, type Student } from '../lib/household';
+import { GUARDIAN_HINT, GUARDIAN_LABEL, LEVEL_LABELS, householdMessage, studentsQuery, type Student } from '../lib/household';
+import { capitalised } from '../lib/words';
 import {
   acceptInvitation,
   declineInvitation,
@@ -131,11 +133,7 @@ function InvitationCard({ invitation }: { invitation: Invitation }) {
  * unblocked here. A status, which takes no focus.
  */
 function AlertCards({ child }: { child: Student }) {
-  const queryClient = useQueryClient();
-  const unblock = useMutation({
-    mutationFn: (deviceId: string) => unblockDevice(child.id, deviceId),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey }),
-  });
+  const unblock = useUnblockDevice(child.id);
   const { blockedDevices, codeLocked } = child.alerts;
   if (codeLocked) {
     return (
@@ -165,8 +163,6 @@ function AlertCards({ child }: { child: Student }) {
     );
   });
 }
-
-const capitalised = (words: string) => `${words.charAt(0).toUpperCase()}${words.slice(1)}`;
 
 /**
  * A child, their class, whether they worked tonight and the days of their week, without a time nor

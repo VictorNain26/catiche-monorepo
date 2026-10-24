@@ -24,9 +24,7 @@ const listedAs = async (cookie: string, studentId: string) => {
   return list.find(({ id }) => id === studentId);
 };
 const alertsOf = async (cookie: string, studentId: string) => (await listedAs(cookie, studentId))?.alerts;
-const named = async (cookie: string, name: string) => {
-  expect((await api.request('POST', '/api/auth/update-user', { cookie, body: { name } })).status).toBe(200);
-};
+const { named } = api;
 
 describe('the parents of a child', () => {
   it('are named to each adult, the earliest first, the adult themselves and the relatives left out', async () => {

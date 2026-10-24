@@ -3,7 +3,7 @@
 import { queryOptions } from '@tanstack/react-query';
 import type { InferResponseType } from 'hono/client';
 import { api, parseResponse } from './api';
-import { deviceKind, deviceName } from './device';
+import { browserName, deviceKind } from './device';
 import { LEVEL_LABELS, ROLE_LABELS } from './household';
 
 const history = api.household.students[':id'].history;
@@ -18,9 +18,9 @@ export const historyQuery = (studentId: string) =>
 
 /** The device a line names: its kind, and its browser when it can be read. */
 function deviceOf(userAgent: string | null | undefined): string {
-  const name = deviceName(userAgent);
+  const name = browserName(userAgent);
   const { the } = deviceKind(userAgent);
-  return name === 'Appareil inconnu' ? the : `${the} (${name})`;
+  return name === null ? the : `${the} (${name})`;
 }
 
 /**

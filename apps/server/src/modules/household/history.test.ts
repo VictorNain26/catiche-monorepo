@@ -24,9 +24,7 @@ interface Line {
 }
 
 const idOf = async (cookie: string) => (await api.sessionUser(cookie))?.id ?? '';
-const named = async (cookie: string, name: string) => {
-  expect((await api.request('POST', '/api/auth/update-user', { cookie, body: { name } })).status).toBe(200);
-};
+const { named } = api;
 const history = async (cookie: string, studentId: string) => {
   const res = await api.request('GET', `/api/household/students/${studentId}/history`, { cookie });
   expect(res.status).toBe(200);

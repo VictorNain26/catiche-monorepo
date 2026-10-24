@@ -33,13 +33,14 @@ En place (`apps/server/src`) :
   Un parent retire un proche, un proche se retire lui-même, aucun
   parent ne retire l'autre. Chaque geste d'un adulte sur l'enfant (la liste :
   `domain/child-events.ts`) s'inscrit dans l'historique (`child_event`), dans la transaction du
-  geste lui-même, le code de départ compris (`alsoIn` de `createActivationCode`) ; un parent le lit
+  geste lui-même, le code de départ compris (`createActivationCode` écrit dans la transaction
+  que le repository du foyer lui passe) ; un parent le lit
   sur la durée de `HISTORY_DAYS` (`GET /api/household/students/:id/history`), avec le prénom de l'auteur, que perd
   la ligne d'un adulte parti. La mémoire retirée et le code de départ après un oubli partent aussi
   par e-mail aux autres parents, jamais à un proche. La liste des enfants
   (`GET /api/household/students`) donne à chaque adulte les prénoms des autres parents et, à un
   parent, ce que son accueil signale : un appareil bloqué, le code arrêté partout. Les parties du
-  repository qui ne tiennent pas dans un fichier vivent dans `repository/`. Le résumé de la
+  repository qui ne tiennent pas dans un fichier vivent dans `repository/`, que lui seul importe. Le résumé de la
   semaine donne aussi les jours, à l'heure de Paris, où l'enfant a écrit à Tom (`days`,
   `tonight`), que chaque adulte lit sans durée ni matière.
 - `platform/email` : l'envoi d'un e-mail, Scaleway TEM par son SDK en production, le journal en

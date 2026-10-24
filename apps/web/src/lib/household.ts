@@ -6,6 +6,7 @@ import type { InferRequestType, InferResponseType } from 'hono/client';
 import { ticked, z } from './zod';
 import { api, isProblem, parseResponse } from './api';
 import { FAILED, TOO_MANY_TRIES } from './auth';
+import { listWords } from './words';
 
 const students = api.household.students;
 
@@ -155,10 +156,6 @@ export const newChildSchema = (now = new Date()) =>
       message: `Votre enfant a ${CHILD_AGES} : vérifiez son mois et son année.`,
     })
     .transform(({ month, year, ...child }) => ({ ...child, birthMonth: `${year}-${month}` }));
-
-/** « lundi, mardi et jeudi », « Nadia ou à Karim »: words in a sentence, `last` before the last one. */
-export const listWords = (words: readonly string[], last = ' et ') =>
-  words.length < 2 ? words.join('') : `${words.slice(0, -1).join(', ')}${last}${words.at(-1) ?? ''}`;
 
 /** The head of « Gérer » for a parent (A7): who decides for the child with them. */
 export const decidesWith = (name: string, parents: readonly string[]) =>
