@@ -66,7 +66,6 @@ function LinkDevice() {
             chosen={where === 'other'}
             onChoose={() => {
               setWhere('other');
-              if (!activation.code && !activation.asking) activation.ask('device');
             }}
           >
             Sur un autre appareil : le sien, ou celui d’un proche
@@ -196,6 +195,8 @@ function OtherDevice({ child, activation }: { child: Student; activation: Return
         activation.error && <Banner tone="error" title={householdMessage(activation.error)} />
       )}
       {share.error && <Banner tone="error" title="Le code ne s’est pas partagé. Recopiez-le, ou réessayez." />}
+      {/* Coming back here never stops a code already shared: only this button does, and says so. */}
+      <p className="text-muted-foreground">Un nouveau code arrête celui donné avant.</p>
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         {code && (
           <Button
@@ -208,13 +209,13 @@ function OtherDevice({ child, activation }: { child: Student; activation: Return
           </Button>
         )}
         <Button
-          variant="outline"
+          variant={code ? 'outline' : 'default'}
           disabled={activation.asking}
           onClick={() => {
             activation.ask('device');
           }}
         >
-          Obtenir un autre code
+          {code ? 'Obtenir un autre code' : 'Obtenir un code de départ'}
         </Button>
         {home}
       </div>

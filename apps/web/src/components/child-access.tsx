@@ -167,7 +167,7 @@ function ForgottenCode({ child, activation }: { child: Student; activation: Acti
             focusOnMount
             title={`Quand ${child.name} saisira ce code, son ancien code cessera de marcher et ses appareils seront déconnectés.`}
           >
-            {child.name} choisira un nouveau code, et verra la date du changement.
+            {child.name} choisira un nouveau code, et verra la date du changement. Ce code arrête aussi un code de départ en cours.
           </Banner>
           <Button
             variant="outline"
