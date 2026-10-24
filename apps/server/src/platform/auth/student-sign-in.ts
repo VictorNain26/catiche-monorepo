@@ -30,6 +30,7 @@ import { deleteSessionCookie, expireCookie, setSessionCookie } from 'better-auth
 import { createHash } from 'node:crypto';
 import { makeSignature } from 'better-auth/crypto';
 import { z } from 'zod';
+import { ACTIVATION_ALPHABET, ACTIVATION_CODE_LENGTH } from '../../domain/activation-code';
 import { studentCodeRefusal } from '../../domain/student-code';
 import type { Auth } from './auth';
 import { CODE_TRIES, DEVICE_TRIES, type StudentDevices } from './student-devices';
@@ -43,11 +44,9 @@ export const ADULT_SIGN_INS: readonly string[] = [...EMAIL_SIGN_INS, '/passkey/v
 const MINUTE = 60_000;
 /** The window to choose a code, once a guardian's code has served. */
 const WINDOW_MINUTES = 10;
-// Crockford's base32 (https://www.crockford.com/base32.html): no I, L, O or U to misread. Eight
-// characters, 40 bits, single use behind a rate limit, one alive at a time: within the day the
-// CNIL allows a temporary secret (deliberation 2022-100, § 35).
-const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
-const CODE_LENGTH = 8;
+// Eight characters of Crockford's base32 (`domain/activation-code.ts`), 40 bits, single use behind
+// a rate limit, one alive at a time: within the day the CNIL allows a temporary secret
+// (deliberation 2022-100, § 35).
 /** A code for a new device lasts a day; one for a code forgotten, ten minutes. */
 const ACTIVATION_LIFETIMES: Record<ActivationReason, number> = { device: 24 * 60 * MINUTE, forgotten: 10 * MINUTE };
 
@@ -75,8 +74,8 @@ export const normaliseActivationCode = (code: string) => code.toUpperCase().repl
 
 function generateActivationCode(): string {
   // 256 is a multiple of 32: every character is equally likely.
-  const bytes = crypto.getRandomValues(new Uint8Array(CODE_LENGTH));
-  return Array.from(bytes, (byte) => ALPHABET[byte % ALPHABET.length]).join('');
+  const bytes = crypto.getRandomValues(new Uint8Array(ACTIVATION_CODE_LENGTH));
+  return Array.from(bytes, (byte) => ACTIVATION_ALPHABET[byte % ACTIVATION_ALPHABET.length]).join('');
 }
 
 /** A student's address is the RFC 6761 `.invalid` one better-auth makes for an account without email. */

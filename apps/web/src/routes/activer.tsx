@@ -24,7 +24,7 @@ function Activate() {
   const queryClient = useQueryClient();
   const hash = useFragment();
   const [failure, setFailure] = useState<string | null>(null);
-  const [carried] = useState(() => activationFromFragment(hash));
+  const carried = activationFromFragment(hash);
   const form = useForm({ resolver: zodResolver(activationSchema), defaultValues: { code: carried === null ? '' : formatCode(carried) } });
 
   const submit = form.handleSubmit(async ({ code }) => {

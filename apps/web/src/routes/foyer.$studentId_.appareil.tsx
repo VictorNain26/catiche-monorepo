@@ -19,9 +19,10 @@ import { announceProfileChange, keepChooseTokens, profilesQuery, tabChannel } fr
  */
 export const Route = createFileRoute('/foyer/$studentId_/appareil')({
   loader: async ({ context, params }) => {
+    const profiles = context.queryClient.query(profilesQuery);
     const students = await context.queryClient.query(studentsQuery);
     if (students.find(({ id }) => id === params.studentId)?.role !== 'guardian') throw redirect({ to: '/foyer' });
-    await Promise.all([context.queryClient.query(studentDevicesQuery(params.studentId)), context.queryClient.query(profilesQuery)]);
+    await Promise.all([context.queryClient.query(studentDevicesQuery(params.studentId)), profiles]);
   },
   component: LinkDevice,
 });

@@ -5,6 +5,7 @@
  * « Continuer », so that nothing spends the code but them.
  */
 
+import { isActivationCode } from '@repo/server/activation-code';
 import { encode } from 'uqr';
 import { z } from './zod';
 
@@ -14,16 +15,13 @@ export const formatCode = (code: string) => `${code.slice(0, 4)} ${code.slice(4)
 /** The starting code as the child types it: the server reads it with or without its space or dash. */
 export const activationSchema = z.object({ code: z.string().trim().min(8, 'Les 8 caractères du code.').max(32, 'Le code a 8 caractères.') });
 
-// Crockford's base32, the server's alphabet (apps/server/src/platform/auth/student-sign-in.ts).
-const CODE = /^[0-9A-HJKMNP-TV-Z]{8}$/;
-
 /** The link the square carries, and the one « Partager le code » sends. */
 export const activationLink = (origin: string, code: string) => `${origin}/activer#${new URLSearchParams({ code }).toString()}`;
 
 /** The code a fragment carries; null when it is absent, cut or altered. */
 export function activationFromFragment(hash: string) {
   const code = new URLSearchParams(hash.replace(/^#/, '')).get('code');
-  return code !== null && CODE.test(code) ? code : null;
+  return code !== null && isActivationCode(code) ? code : null;
 }
 
 /** The QR code of `text`, a quiet zone of 4 modules around it (ISO/IEC 18004), as one SVG path of unit squares. */
