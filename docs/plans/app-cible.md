@@ -130,9 +130,9 @@ sont au § 8.
 
 ## 3. Le modèle de famille
 
-Ce sont des règles. Le lien entre un adulte et un enfant, son rôle et l'invitation d'un adulte
-sont en place (`apps/server/src/modules/household`, `docs/architecture.md`) ; l'historique vient
-avec « Gérer ».
+Ce sont des règles. Le lien entre un adulte et un enfant, son rôle, l'invitation d'un adulte et
+l'historique sont en place (`apps/server/src/modules/household`, `docs/architecture.md`) ; la
+suppression demandée, et son e-mail, viennent avec la PR 6 (§ 8).
 
 **Un enfant a un ou plusieurs adultes.** Le « foyer » disparaît des mots et des écrans : chaque
 adulte voit les enfants qui le concernent. Deux maisons, c'est un enfant avec deux parents. Un
@@ -420,9 +420,12 @@ parent : construit aussi (`bienvenue.tsx`, `InvitedWelcome`).
 et depuis la fiche de l'enfant. Reste l'entrée depuis « Gérer » (A7).
 Son texte donne l'adresse de l'app, et non catiche.fr, dont la landing ne mène pas à `/activer`.
 
-**A5. Accueil** (une carte par enfant, même avec un seul). L'en-tête, le titre et la carte de la
-clé d'accès sont construits (`apps/web/src/routes/foyer.index.tsx`,
-`components/passkey-offer.tsx`) ; le mot « clé d'accès » reste, car la fenêtre du téléphone
+**A5. Accueil** (une carte par enfant, même avec un seul). Construit
+(`apps/web/src/routes/foyer.index.tsx`, `components/passkey-offer.tsx`), sur deux colonnes à
+l'ordinateur, sauf : « Lire son message » (étape 4) ; la carte « Léa a oublié son code. », que
+l'enfant envoie lui-même (PR 7, avec E3), dont tient lieu aujourd'hui « Le code de Léa ne marche
+plus. », après 10 codes faux, avec « Donner un code de départ » qui mène à A7 ; la carte de la
+suppression demandée (PR 6). Le mot « clé d'accès » reste, car la fenêtre du téléphone
 l'emploie ([Google, « Communicating passkeys »](https://developers.google.com/identity/passkeys/ux/communicating-passkeys)).
 - Carte d'alerte, en tête, quand il le faut (parent) : « Léa a oublié son code. » avec « Donner un
   code de départ », qui l'affiche tout de suite ; « La tablette de Léa est bloquée après 3 codes
@@ -445,7 +448,13 @@ l'emploie ([Google, « Communicating passkeys »](https://developers.google.com/
 - Toujours : « Écrire un mot à Léa » (court, envoyé à l'enfant).
 - Rien d'autre : pas de note, pas de correction, pas de reste présenté comme un retard.
 
-**A7. Gérer [prénom]** (le proche y arrive par « Ses devoirs et ses messages »).
+**A7. Gérer [prénom]** (le proche y arrive par « Ses devoirs et ses messages »). Construit
+(`apps/web/src/routes/foyer.$studentId.tsx`, l'historique dans
+`apps/server/src/modules/household`), sur deux colonnes à l'ordinateur, sauf : « Les soirs où Léa
+a travaillé » (étape 3), qui laisse en attendant « Sa semaine », le résumé de la semaine ;
+« Recevoir les messages » (étape 4) ; la suppression avec 7 jours d'annulation (PR 6), immédiate
+jusque-là. À partir de 15 ans, l'écran dit « c'est Léa qui décide », tournure qui ne suppose pas
+le genre de l'enfant (§ 5, « Les voix »).
 - En tête : « Vous décidez pour Léa, avec Karim. » (parent) ; « Vous suivez les devoirs de Léa. »
   (proche).
 - « Les soirs où Léa a travaillé » : les sept derniers soirs, chez vous ou ailleurs, sans durée
@@ -460,13 +469,12 @@ l'emploie ([Google, « Communicating passkeys »](https://developers.google.com/
   - « Léa a oublié son code » : « Son code actuel ne marchera plus, nulle part. Avec le code de
     départ que vous allez obtenir, Léa en choisira un nouveau, et verra la date du
     changement. » ; « Obtenir un code de départ » ;
-  - « Les adultes de Léa » : construit, sur la page de l'enfant (`foyer.$studentId.tsx`) ;
+  - « Les adultes de Léa » ;
   - « Plus » (replié) : « Ce que Tom retient » (« Proposer à Léa » ou « Retirer » ; à partir de
     15 ans, « À partir de 15 ans, Léa décide seule. ») ; « Son prénom et sa classe » ;
     « Historique » ; « Supprimer son compte ».
-- Proche seulement : « Pour ajouter un appareil, demandez un code de départ à Nadia ou à Karim. »
-  « Vous suivez les devoirs de Léa. » et « Me retirer des adultes de Léa » sont construits, sur la
-  page de l'enfant.
+- Proche seulement : « Pour ajouter un appareil, demandez un code de départ à Nadia ou à Karim. » ;
+  « Me retirer des adultes de Léa ».
 
 **A8. Invitez un adulte pour [prénom]** : construit (`foyer.$studentId_.inviter.tsx`, ses e-mails
 dans `apps/server/src/modules/household/service.ts`), sauf « Léa en sera prévenue », qui attend les
@@ -562,10 +570,15 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
   3. inviter un adulte, le rôle de proche et ses droits (A8, la liste des adultes) (fait) ;
   4. relier l'appareil de l'enfant, A4, avec le code de départ de 24 heures et le carré à viser
      (fait) ;
-  5. l'accueil en cartes (A5 complet), « Gérer » (A7), l'historique, la suppression avec 7 jours
-     d'annulation ;
-  6. l'enfant (C1, C2, E1 à E4, E6, E7 ; E4 dans son état « Avant », dont le bouton ouvre l'aide
-     de Tom actuelle, voix corrigée et message de quota compris) et la navigation.
+  5. l'accueil en cartes (A5), « Gérer » (A7), l'historique sur 90 jours et ses e-mails aux
+     autres parents (fait) ;
+  6. la suppression du compte de l'enfant avec 7 jours d'annulation, celle du compte de l'adulte,
+     le nom des clés d'accès (A9), et la tâche de fond qu'elles demandent, qui purge aussi
+     l'historique de plus de 90 jours et les invitations expirées (découpage du 2026-10-24 : rien
+     ne tourne encore tout seul dans le serveur) ;
+  7. l'enfant (C1, C2, E1 à E4, E6, E7 ; E4 dans son état « Avant », dont le bouton ouvre l'aide
+     de Tom actuelle, voix corrigée et message de quota compris), la carte « Léa a oublié son
+     code » qu'il envoie (E3), et la navigation.
 
   Avec : Tom au trait, les
   rôles du mode sombre, la lecture aérée, l'inactivité, la politique de confidentialité pour
