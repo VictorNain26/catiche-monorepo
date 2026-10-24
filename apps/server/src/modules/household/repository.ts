@@ -354,11 +354,12 @@ export function createHouseholdRepository(db: Db) {
      * (their sessions, links, profiles and invitations by ON DELETE CASCADE), their relatives'
      * links too, since no one would manage them; a student another parent follows stays, with that
      * parent. Locks the user row, as createStudent does: a student created meanwhile waits, then
-     * finds no adult.
+     * finds no adult. `NO KEY UPDATE`, as a gesture's `lockFor`: a row that holds them as a key,
+     * written meanwhile with a lock of its own, does not wait for this one.
      */
     async deleteAccount(userId: string) {
       await db.transaction(async (tx) => {
-        await tx.select({ id: user.id }).from(user).where(eq(user.id, userId)).for('update');
+        await tx.select({ id: user.id }).from(user).where(eq(user.id, userId)).for('no key update');
         // The students too, in one order: another adult of theirs leaving at the same time waits,
         // then finds this adult gone and takes the student, never left without an adult.
         await tx
@@ -366,7 +367,7 @@ export function createHouseholdRepository(db: Db) {
           .from(user)
           .where(inArray(user.id, studentsOf(userId)))
           .orderBy(user.id)
-          .for('update');
+          .for('no key update');
         await tx.delete(user).where(
           and(
             inArray(user.id, managedBy(userId)),

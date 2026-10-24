@@ -5,8 +5,8 @@
  */
 
 import { describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
-import { user } from '../../platform/auth/schema';
+import { eq, sql } from 'drizzle-orm';
+import { deviceProfile, user } from '../../platform/auth/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { STUDENT_CODE } from '../../testing/http';
@@ -203,4 +203,50 @@ describe('the other parents', () => {
     const { nadia, lea } = await family('mail-propose');
     expect(await sentDuring(() => patch(nadia, lea.id, { memoryProposed: true }))).toEqual([]);
   });
+});
+
+describe('at the same time', () => {
+  /** Resolves once `count` statements of this database wait for a lock. */
+  const waitingForLocks = async (count: number) => {
+    for (;;) {
+      const [row] = await db.execute<{ waiting: number }>(
+        sql`select count(*)::int as waiting from pg_stat_activity where datname = current_database() and wait_event_type = 'Lock'`,
+      );
+      if ((row?.waiting ?? 0) >= count) return;
+      await Bun.sleep(20);
+    }
+  };
+
+  // The child's code holds the child as a key, and the parent's gesture locks the child first.
+  // The device's profile, held here, lines them up: the child's choice waits for it with the
+  // device locked, then the parent's gesture with the child locked; released, neither may wait
+  // for the other forever.
+  for (const gesture of ['unblock', 'remove'] as const) {
+    it(`lets a child choose their code while a parent ${gesture === 'unblock' ? 'unblocks' : 'removes'} the device: never a deadlock`, async () => {
+      const parent = await api.guardian(`parent-course-${gesture}@example.com`);
+      const child = await api.student(parent);
+      const device = api.device();
+      expect((await device.activate(await api.activationCode(parent, child.id))).status).toBe(200);
+      const [{ id: deviceId } = { id: '' }] = (await api.devices(parent, child.id)).devices;
+
+      const held = Promise.withResolvers<undefined>();
+      const released = Promise.withResolvers<undefined>();
+      const holding = db.transaction(async (tx) => {
+        await tx.select().from(deviceProfile).where(eq(deviceProfile.deviceId, deviceId)).for('update');
+        held.resolve(undefined);
+        await released.promise;
+      });
+      await held.promise;
+      const chosen = device.chooseCode(child.id, STUDENT_CODE, true);
+      await waitingForLocks(1);
+      const gestured =
+        gesture === 'unblock'
+          ? api.request('POST', `/api/household/students/${child.id}/devices/${deviceId}/unblock`, { cookie: parent })
+          : api.request('DELETE', `/api/household/students/${child.id}/devices/${deviceId}`, { cookie: parent });
+      await waitingForLocks(2);
+      released.resolve(undefined);
+      await holding;
+      expect([(await chosen).status, (await gestured).status]).toEqual([200, 204]);
+    });
+  }
 });

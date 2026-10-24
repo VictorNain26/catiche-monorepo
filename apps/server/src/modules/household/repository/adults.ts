@@ -111,15 +111,16 @@ export function adultsRepository(db: Db) {
      * a parent's declared now; the invitation spent. Undefined when none; `'undeclared'` for a
      * parent's without the declaration. Locks the adult, then the student, then the invitation, as
      * an account's deletion, the student's and its cascade do: none waits for another's lock forever.
+     * The two users `NO KEY UPDATE`, as a gesture's `lockFor`.
      */
     async acceptInvitation(adultId: string, email: string, invitationId: string, declaredGuardian: boolean) {
       return db.transaction(async (tx) => {
-        await tx.select({ id: user.id }).from(user).where(eq(user.id, adultId)).for('update');
+        await tx.select({ id: user.id }).from(user).where(eq(user.id, adultId)).for('no key update');
         await tx
           .select({ id: user.id })
           .from(user)
           .where(inArray(user.id, tx.select({ id: adultInvitation.studentId }).from(adultInvitation).where(eq(adultInvitation.id, invitationId))))
-          .for('update');
+          .for('no key update');
         const [invitation] = await tx
           .select({ studentId: adultInvitation.studentId, role: adultInvitation.role })
           .from(adultInvitation)

@@ -26,14 +26,16 @@ export function accessOf(db: Db) {
      * linked to them, in the order the deletion of an account locks them (`deleteAccount`). The
      * gesture's line in the history holds both as keys: taken later, behind another lock of the
      * gesture's own (an invitation, a device), they would let two transactions wait for each other.
+     * `NO KEY UPDATE`, which two gestures cannot hold at once, but which lets a row that only holds
+     * the student as a key be written meanwhile: the child's code, chosen with their device locked.
      */
     lockFor: async (tx: Pick<Db, 'select'>, adultId: string, studentId: string) => {
-      await tx.select({ id: user.id }).from(user).where(eq(user.id, adultId)).for('update');
+      await tx.select({ id: user.id }).from(user).where(eq(user.id, adultId)).for('no key update');
       await tx
         .select({ id: user.id })
         .from(user)
         .where(and(eq(user.id, studentId), inArray(user.id, studentsOf(adultId))))
-        .for('update');
+        .for('no key update');
     },
     /** The ids of the students `adultId` is a parent of: what they manage. */
     managedBy: (adultId: string) =>
