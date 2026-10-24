@@ -16,7 +16,7 @@ import { schoolLevelSchema } from '../../domain/levels';
 import { isStudentBirthMonth, STUDENT_AGE_YEARS } from '../../domain/student-age';
 import type { Auth } from '../../platform/auth/auth';
 import { normalised } from '../../platform/auth/invitation';
-import { requireSession, type SessionEnv } from '../../platform/auth/session';
+import { freshSession, requireSession, type SessionEnv } from '../../platform/auth/session';
 import { ADULT_SIGN_INS, isStudentEmail } from '../../platform/auth/student-sign-in';
 import type { AppEnv } from '../../platform/http/env';
 import { Problem } from '../../platform/http/problem';
@@ -144,7 +144,7 @@ export function householdRoutes({ auth, service }: { auth: Auth; service: Househ
       await service.declareGuardian(c.var.userId, c.req.param('id'));
       return c.body(null, 204);
     })
-    .post('/students/:id/activation-code', jsonBody(activationRequest), async (c) =>
+    .post('/students/:id/activation-code', freshSession, jsonBody(activationRequest), async (c) =>
       c.json(await service.activationCode(c.var.userId, c.req.param('id'), c.req.valid('json').reason), 201),
     )
     .get('/students/:id/devices', async (c) => c.json(await service.listDevices(c.var.userId, c.req.param('id'))))

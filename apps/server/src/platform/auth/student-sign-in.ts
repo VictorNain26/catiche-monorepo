@@ -4,7 +4,8 @@
  * the CNIL an unlocking code (deliberation 2022-100, § 45-47): six digits, a blocklist
  * (`domain/student-code.ts`), 3 tries on a device, 10 everywhere, then a guardian's code.
  *
- * - The guardian asks for an activation code (8 characters, 10 minutes, single use, hashed): the
+ * - The guardian asks for an activation code (8 characters, single use, hashed; 24 hours for a new
+ *   device, 10 minutes after a code forgotten): the
  *   device that sends it gets a signed cookie of its own, which holds nothing but its id, and the
  *   student's profile on it; no session.
  * - A student without a code chooses one there while the window is open; then their code opens
@@ -29,8 +30,12 @@ import { deleteSessionCookie, expireCookie, setSessionCookie } from 'better-auth
 import { createHash } from 'node:crypto';
 import { makeSignature } from 'better-auth/crypto';
 import { z } from 'zod';
+import { ACTIVATION_ALPHABET, ACTIVATION_CODE_LENGTH } from '../../domain/activation-code';
 import { studentCodeRefusal } from '../../domain/student-code';
-import type { Auth } from './auth';
+import { failureBudget, type FailureBudget } from '../http/rate-limit';
+import { eq, inArray } from 'drizzle-orm';
+import type { Db } from '../db/client';
+import { user, verification } from './schema';
 import { CODE_TRIES, DEVICE_TRIES, type StudentDevices } from './student-devices';
 
 export const ACTIVATION_PREFIX = 'student-activation:';
@@ -39,14 +44,25 @@ export const ACTIVATION_PREFIX = 'student-activation:';
 export const EMAIL_SIGN_INS: readonly string[] = ['/sign-in/email-otp', '/magic-link/verify'];
 /** Every route that opens an adult's session: by an email, or by a passkey. */
 export const ADULT_SIGN_INS: readonly string[] = [...EMAIL_SIGN_INS, '/passkey/verify-authentication'];
-const ACTIVATION_MINUTES = 10;
-// Crockford's base32 (https://www.crockford.com/base32.html): no I, L, O or U to misread. Eight
-// characters, 40 bits, single use for ten minutes behind a rate limit: under the day the CNIL
-// allows a temporary secret (deliberation 2022-100, § 35).
-const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
-const CODE_LENGTH = 8;
-
 const MINUTE = 60_000;
+/** The window to choose a code, once a guardian's code has served. */
+const WINDOW_MINUTES = 10;
+// Eight characters of Crockford's base32 (`domain/activation-code.ts`), 40 bits, single use behind
+// a rate limit, one alive at a time: within the day the CNIL allows a temporary secret
+// (deliberation 2022-100, § 35).
+/**
+ * The starting codes refused in an hour, every address together, past which none is tried. The
+ * rate limit by address does not bound a guesser with many addresses; this does: 300 an hour is
+ * 7 200 guesses over the 24 hours of a device code, against 2^40 ≈ 1.1 × 10^12 codes, a chance of
+ * 7 200 / 2^40 ≈ 6.5 × 10^-9 for one code alive, 6.5 × 10^-5 with 10 000 alive at once. In memory,
+ * by instance, as the other budgets.
+ */
+const ACTIVATION_FAILURES_PER_HOUR = 300;
+export const activationFailureBudget = () => failureBudget({ points: ACTIVATION_FAILURES_PER_HOUR, durationSeconds: 60 * 60 });
+
+/** A code for a new device lasts a day; one for a code forgotten, ten minutes. */
+const ACTIVATION_LIFETIMES: Record<ActivationReason, number> = { device: 24 * 60 * MINUTE, forgotten: 10 * MINUTE };
+
 /** A session on a shared device: closed ten minutes without use, two hours after it opened at most. */
 const IDLE_MINUTES = 10;
 const SHARED_MINUTES = 120;
@@ -64,33 +80,56 @@ const INVALID_CODE = { code: 'INVALID_CODE', message: 'Invalid code' };
 const BLOCKED = { code: 'PROFILE_BLOCKED', message: 'Blocked on this device until a guardian unblocks it' };
 const LOCKED = { code: 'PROFILE_LOCKED', message: 'Locked until a new code' };
 
-export type ActivationReason = 'device' | 'forgotten';
+const ACTIVATION_REASONS = ['device', 'forgotten'] as const;
+export type ActivationReason = (typeof ACTIVATION_REASONS)[number];
 
 /** Uppercase, without spaces or dashes, and Crockford's decoding of the letters read as digits. */
 export const normaliseActivationCode = (code: string) => code.toUpperCase().replace(/[\s-]/g, '').replace(/O/g, '0').replace(/[IL]/g, '1');
 
 function generateActivationCode(): string {
   // 256 is a multiple of 32: every character is equally likely.
-  const bytes = crypto.getRandomValues(new Uint8Array(CODE_LENGTH));
-  return Array.from(bytes, (byte) => ALPHABET[byte % ALPHABET.length]).join('');
+  const bytes = crypto.getRandomValues(new Uint8Array(ACTIVATION_CODE_LENGTH));
+  return Array.from(bytes, (byte) => ACTIVATION_ALPHABET[byte % ACTIVATION_ALPHABET.length]).join('');
 }
 
 /** A student's address is the RFC 6761 `.invalid` one better-auth makes for an account without email. */
 export const isStudentEmail = (email: string) => email.endsWith('.invalid');
 
-/** A code that recognises, within ten minutes, the device that sends it for `userId`: a new device, or a code forgotten. */
-export async function createActivationCode(auth: Auth, userId: string, reason: ActivationReason) {
+/**
+ * A code that recognises the device that sends it for `userId`: a new device, within a day, so
+ * that it can be prepared ahead; or a code forgotten, within ten minutes. It replaces the code given
+ * before for the student, whatever its reason: one alive at a time bounds what can be guessed, and a
+ * device code shared earlier cannot choose the code a forgotten one clears. The student's row,
+ * locked, puts two codes asked at the same moment one after the other.
+ */
+export async function createActivationCode(db: Db, userId: string, reason: ActivationReason) {
   const code = generateActivationCode();
-  const expiresAt = new Date(Date.now() + ACTIVATION_MINUTES * MINUTE);
-  const value = JSON.stringify({ userId, reason });
-  await (await auth.$context).internalAdapter.createVerificationValue({ identifier: `${ACTIVATION_PREFIX}${code}`, value, expiresAt });
+  const expiresAt = new Date(Date.now() + ACTIVATION_LIFETIMES[reason]);
+  // The identifier is hashed, the value is not: it names the student and the reason.
+  const replaced = ACTIVATION_REASONS.map((each) => JSON.stringify({ userId, reason: each }));
+  await db.transaction(async (tx) => {
+    await tx.select({ id: user.id }).from(user).where(eq(user.id, userId)).for('update');
+    await tx.delete(verification).where(inArray(verification.value, replaced));
+    await tx.insert(verification).values({
+      id: generateId(32),
+      identifier: hashActivationIdentifier(`${ACTIVATION_PREFIX}${code}`),
+      value: JSON.stringify({ userId, reason }),
+      expiresAt,
+    });
+  });
   return { code, expiresAt };
 }
+
+/**
+ * A starting code's identifier as it is stored, and as better-auth looks it up (`storeIdentifier`
+ * in auth.ts): a SHA-256, so that the table holds no code in clear.
+ */
+export const hashActivationIdentifier = (identifier: string) => createHash('sha256').update(identifier).digest('base64url');
 
 /** The window's token as the profile keeps it: a SHA-256, the token itself being 190 random bits. */
 const hashToken = (token: string) => createHash('sha256').update(token).digest('base64url');
 
-const activation = z.object({ userId: z.string(), reason: z.enum(['device', 'forgotten']) });
+const activation = z.object({ userId: z.string(), reason: z.enum(ACTIVATION_REASONS) });
 
 /** When a session on a shared device closes: ten minutes from now, never past two hours from its opening. */
 const sharedDeadline = (openedAt: Date, now: Date) =>
@@ -104,7 +143,16 @@ export interface StudentAccess {
 
 const studentCodeSchema = z.string().max(16);
 
-export function studentSignIn({ devices, students }: { devices: StudentDevices; students: StudentAccess }) {
+export function studentSignIn({
+  devices,
+  students,
+  failedActivations,
+}: {
+  devices: StudentDevices;
+  students: StudentAccess;
+  /** The starting codes refused, every address together (`activationFailureBudget`). */
+  failedActivations: FailureBudget;
+}) {
   const deviceCookie = (ctx: GenericEndpointContext) => ctx.context.createAuthCookie('device', { maxAge: DEVICE_COOKIE_SECONDS });
 
   /** The device the request's signed cookie names; none for a cookie forged, or for a device gone. */
@@ -137,7 +185,7 @@ export function studentSignIn({ devices, students }: { devices: StudentDevices; 
    */
   const openWindow = async (deviceId: string, studentId: string, options: { shared: boolean; keep?: string | undefined }) => {
     const chooseToken = generateId(32);
-    const windowUntil = new Date(Date.now() + ACTIVATION_MINUTES * MINUTE);
+    const windowUntil = new Date(Date.now() + WINDOW_MINUTES * MINUTE);
     await devices.addProfile(deviceId, studentId, { windowUntil, chooseTokenHash: hashToken(chooseToken), ...options });
     return chooseToken;
   };
@@ -172,6 +220,9 @@ export function studentSignIn({ devices, students }: { devices: StudentDevices; 
         { method: 'POST', body: z.object({ code: z.string().max(32) }) },
         async (ctx) => {
           const { internalAdapter } = ctx.context;
+          if (await failedActivations.spent()) {
+            throw APIError.from('TOO_MANY_REQUESTS', { code: 'TOO_MANY_ACTIVATIONS', message: 'Too many codes refused, try again later' });
+          }
           const spent = await runWithTransaction(ctx.context.adapter, async () => {
             // consumeVerificationValue deletes the code and returns nothing once it has expired.
             const verification = await internalAdapter.consumeVerificationValue(`${ACTIVATION_PREFIX}${normaliseActivationCode(ctx.body.code)}`);
@@ -179,6 +230,7 @@ export function studentSignIn({ devices, students }: { devices: StudentDevices; 
             return parsed.success ? parsed.data : null;
           });
           if (!spent || !(await internalAdapter.findUserById(spent.userId))) {
+            await failedActivations.fail();
             throw APIError.from('BAD_REQUEST', { code: 'INVALID_ACTIVATION_CODE', message: 'Invalid or expired code' });
           }
           if (spent.reason === 'forgotten') await devices.forget(spent.userId);

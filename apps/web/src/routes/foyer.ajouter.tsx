@@ -10,7 +10,7 @@ import { CHILD_AGES, addStudent, householdMessage, newChildSchema, studentsQuery
 
 /**
  * The adding of the next child, on one screen, as the adult's first screen asks the first
- * (`/bienvenue`); then the child's page, which says the next step. The memory of Tom is proposed
+ * (`/bienvenue`); then where the child works in the evening (A4). The memory of Tom is proposed
  * from there, never while adding.
  */
 export const Route = createFileRoute('/foyer/ajouter')({
@@ -30,7 +30,7 @@ function AddChild() {
     mutationFn: addStudent,
     onSuccess: async (created) => {
       queryClient.setQueryData(studentsQuery.queryKey, (list) => [...(list ?? []), created]);
-      await navigate({ to: '/foyer/$studentId', params: { studentId: created.id } });
+      await navigate({ to: '/foyer/$studentId/appareil', params: { studentId: created.id } });
     },
   });
   const submit = form.handleSubmit((child) => {

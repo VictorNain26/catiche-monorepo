@@ -175,6 +175,16 @@ for (const [mode, color] of modes) {
   }
 }
 
+// The square a parent shows, for another device's camera to aim at (A4): dark modules on a light ground in both modes,
+// as a camera reads a QR code (ISO/IEC 18004), at the contrast of text, which a dim screen still keeps above 3:1.
+for (const [mode, color] of modes) {
+  test(`${mode}: the square to aim at is dark on light, at 4.5:1`, () => {
+    assert.ok(luminance(color('square')) < luminance(color('square-background')), `${color('square')} on ${color('square-background')}`);
+    const ratio = contrast(color('square'), color('square-background'));
+    assert.ok(ratio >= 4.5, `${color('square')} on ${color('square-background')} = ${ratio.toFixed(2)}`);
+  });
+}
+
 // The highlighter is one gesture in both modes: a thick reed stroke under the baseline, which never touches the
 // letters; the words keep their own ink on the background, and the stroke stands out from it as a mark (3:1).
 test('the highlighter is the same stroke in both modes', () => {

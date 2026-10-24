@@ -58,8 +58,10 @@ En place (`apps/server/src`) :
 - `platform/auth/student-sign-in.ts` : l'entrée de l'élève par son propre code (décision de Victor,
   2026-10-20), sur le modèle du « secret d'activation » du NIST (SP 800-63B-4, § 3.2.10) et du
   « code de déverrouillage » de la CNIL (délibération 2022-100, § 45-47) :
-  - un code du gardien, à usage unique et haché, reconnaît l'appareil par un cookie signé qui ne
-    porte que son identifiant, sans ouvrir de session ;
+  - un code de départ du gardien, à usage unique et haché, un seul vivant par enfant (sa
+    durée : `createActivationCode`), reconnaît l'appareil par un cookie signé qui ne
+    porte que son identifiant, sans ouvrir de session ; le web le montre aussi en carré à viser,
+    un lien qui le porte après le `#` (`apps/web/src/lib/activation.ts`) ;
   - l'élève y choisit un code de 6 chiffres, refusé trop facile (`domain/student-code.ts`), que le
     gardien ne voit jamais ; ce code n'ouvre son profil que sur un appareil qui le porte ;
   - les essais se comptent avant d'être vérifiés (`platform/auth/student-devices.ts`) : 3 sur un

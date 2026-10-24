@@ -30,9 +30,9 @@ import {
 
 /**
  * One child of the adult's. For a parent: until a device holds their profile, the page opens on
- * the next step, a code for their own device, or this computer added; then their week; their
- * codes and devices side by side on a computer; their adults; their memory, their name and class
- * and their account folded, a tap away. For a relative: the week, and their way out.
+ * their devices, with the way to add one (A4); then their week; their devices; their adults; their
+ * memory, their name and class and their account folded, a tap away. For a relative: the week, and
+ * their way out.
  */
 export const Route = createFileRoute('/foyer/$studentId')({
   loader: async ({ context, params }) => {

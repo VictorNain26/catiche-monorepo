@@ -7,7 +7,7 @@
 import pino from 'pino';
 import { createApp, type AppDeps } from '../app';
 import { householdAuth } from '../modules/household';
-import { createAuth } from '../platform/auth/auth';
+import { createAuth, type AuthDeps } from '../platform/auth/auth';
 import type { Db } from '../platform/db/client';
 import { createBackgroundTasks } from '../platform/lifecycle/background';
 import { createLifecycle } from '../platform/lifecycle/shutdown';
@@ -25,7 +25,11 @@ export function testApp(
     config = {},
     origin = ORIGIN,
     auth: household = {},
-  }: { config?: Partial<AppDeps['config']>; origin?: string; auth?: Partial<ReturnType<typeof householdAuth>> } = {},
+  }: {
+    config?: Partial<AppDeps['config']>;
+    origin?: string;
+    auth?: Partial<ReturnType<typeof householdAuth> & Pick<AuthDeps, 'failedActivations'>>;
+  } = {},
 ) {
   const silent = pino({ level: 'silent' });
   const mistral = fakeMistral();

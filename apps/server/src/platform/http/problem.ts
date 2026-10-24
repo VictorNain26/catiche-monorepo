@@ -15,6 +15,7 @@ const PROBLEMS = {
   INVALID_REQUEST: { status: 400, title: 'Requête invalide' },
   UNAUTHENTICATED: { status: 401, title: 'Connexion requise' },
   FORBIDDEN: { status: 403, title: 'Accès refusé' },
+  SESSION_NOT_FRESH: { status: 403, title: 'Entrée récente requise' },
   NOT_FOUND: { status: 404, title: 'Ressource introuvable' },
   TURN_IN_PROGRESS: { status: 409, title: 'Un tour est déjà en cours dans cette séance' },
   PAYLOAD_TOO_LARGE: { status: 413, title: 'Envoi trop lourd' },

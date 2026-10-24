@@ -26,7 +26,7 @@ import type { z } from '../lib/zod';
  * A new adult's first screen, where the invitation's button leads: their first name and their age
  * declared, then their child, on one screen. Their account was created nameless, by the link or by
  * their first code; the household sends them here until they give their name, whatever they
- * reloaded. Then the child's page, which says how to reach their device. An adult a parent invited
+ * reloaded. Then where the child works in the evening (A4), to reach their device. An adult a parent invited
  * for a child, who has none yet, accepts that invitation here instead (`app-cible.md`, A3).
  */
 export const Route = createFileRoute('/bienvenue')({
@@ -118,7 +118,7 @@ function Welcome() {
       const created = await addStudent(child);
       queryClient.setQueryData(studentsQuery.queryKey, [created]);
       await queryClient.invalidateQueries({ queryKey: meQuery.queryKey });
-      await navigate({ to: '/foyer/$studentId', params: { studentId: created.id } });
+      await navigate({ to: '/foyer/$studentId/appareil', params: { studentId: created.id } });
     },
   });
   const submit = form.handleSubmit((values) => {

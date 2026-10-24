@@ -4,13 +4,14 @@
  * everywhere; a code forgotten; a guardian who adds their children to the family computer.
  */
 
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it, setSystemTime } from 'bun:test';
 import { verifyPassword } from 'better-auth/crypto';
 import { and, eq } from 'drizzle-orm';
 import { guardianship } from '../../modules/household/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { STUDENT_CODE } from '../../testing/http';
+import { failureBudget } from '../http/rate-limit';
 import { deviceProfile, session, studentCode, verification } from './schema';
 import { ACTIVATION_PREFIX, normaliseActivationCode } from './student-sign-in';
 
@@ -37,6 +38,19 @@ async function withCode(email: string) {
   const found = await family(email);
   expect((await found.tablet.chooseCode(found.lea.id, STUDENT_CODE, true)).status).toBe(200);
   return found;
+}
+
+/**
+ * Whether a guardian's code still serves, typed on a new device `minutes` after it was given.
+ * better-auth reads the clock itself: Bun's, set here, not a module replaced.
+ */
+async function servesAfter(code: string, minutes: number) {
+  try {
+    setSystemTime(new Date(Date.now() + minutes * 60_000));
+    return (await api.device().activate(code)).status === 200;
+  } finally {
+    setSystemTime();
+  }
 }
 
 /** `count` wrong codes on `device`, one after the other. */
@@ -74,6 +88,97 @@ describe("a guardian's activation code", () => {
     const late = await api.activationCode(guardian, lea.id);
     await db.update(verification).set({ expiresAt: new Date(Date.now() - 1000) });
     expect((await api.device().activate(late)).status).toBe(400);
+  });
+
+  it('links a device for 24 hours: still good at 23 h 59, refused at 24 h 01', async () => {
+    const guardian = await api.guardian('vingt-quatre-heures@example.com');
+    const lea = await api.student(guardian);
+    expect(await servesAfter(await api.activationCode(guardian, lea.id), 23 * 60 + 59)).toBe(true);
+    expect(await servesAfter(await api.activationCode(guardian, lea.id), 24 * 60 + 1)).toBe(false);
+  });
+
+  it('after a forgotten code, serves 10 minutes only: good at 9, refused at 11', async () => {
+    const guardian = await api.guardian('dix-minutes@example.com');
+    const lea = await api.student(guardian);
+    expect(await servesAfter(await api.activationCode(guardian, lea.id, 'forgotten'), 9)).toBe(true);
+    expect(await servesAfter(await api.activationCode(guardian, lea.id, 'forgotten'), 11)).toBe(false);
+  });
+
+  it('stops the code given before it: one code alive at a time bounds the guessing', async () => {
+    const guardian = await api.guardian('un-seul-code@example.com');
+    const lea = await api.student(guardian);
+    const firstDevice = await api.activationCode(guardian, lea.id);
+    const secondDevice = await api.activationCode(guardian, lea.id);
+    expect(await problem(await api.device().activate(firstDevice))).toEqual({ status: 400, code: 'INVALID_ACTIVATION_CODE' });
+    expect((await api.device().activate(secondDevice)).status).toBe(200);
+
+    const firstForgotten = await api.activationCode(guardian, lea.id, 'forgotten');
+    const secondForgotten = await api.activationCode(guardian, lea.id, 'forgotten');
+    expect((await api.device().activate(firstForgotten)).status).toBe(400);
+    expect((await api.device().activate(secondForgotten)).status).toBe(200);
+  });
+
+  it('stops the code of the other reason too: a device code shared earlier cannot choose the code a forgotten code clears', async () => {
+    const guardian = await api.guardian('deux-raisons@example.com');
+    const lea = await api.student(guardian);
+    const device = await api.activationCode(guardian, lea.id);
+    const forgotten = await api.activationCode(guardian, lea.id, 'forgotten');
+    expect(await problem(await api.device().activate(device))).toEqual({ status: 400, code: 'INVALID_ACTIVATION_CODE' });
+
+    await api.activationCode(guardian, lea.id);
+    expect((await api.device().activate(forgotten)).status).toBe(400);
+  });
+
+  it('is given, for either reason, only within minutes of the guardian’s entering', async () => {
+    const guardian = await api.guardian('code-frais@example.com');
+    const lea = await api.student(guardian);
+    const guardianId = (await api.sessionUser(guardian))?.id ?? '';
+    await db
+      .update(session)
+      .set({ createdAt: new Date(Date.now() - 11 * 60_000) })
+      .where(eq(session.userId, guardianId));
+    for (const reason of ['device', 'forgotten']) {
+      const res = await api.request('POST', `/api/household/students/${lea.id}/activation-code`, { cookie: guardian, body: { reason } });
+      expect({ reason, ...(await problem(res)) }).toEqual({ reason, status: 403, code: 'SESSION_NOT_FRESH' });
+    }
+  });
+
+  it('leaves one code alive after two asked at the same moment', async () => {
+    const guardian = await api.guardian('deux-a-la-fois@example.com');
+    const lea = await api.student(guardian);
+    for (let round = 0; round < 5; round++) {
+      const codes = await Promise.all([api.activationCode(guardian, lea.id), api.activationCode(guardian, lea.id, 'forgotten')]);
+      const alive = await db
+        .select()
+        .from(verification)
+        .where(eq(verification.value, JSON.stringify({ userId: lea.id, reason: 'device' })));
+      const forgotten = await db
+        .select()
+        .from(verification)
+        .where(eq(verification.value, JSON.stringify({ userId: lea.id, reason: 'forgotten' })));
+      expect({ round, alive: alive.length + forgotten.length, codes: codes.length }).toEqual({ round, alive: 1, codes: 2 });
+    }
+  });
+
+  it('stops only the code of its own student', async () => {
+    const guardian = await api.guardian('frere-et-soeur@example.com');
+    const lea = await api.student(guardian);
+    const tom = await api.student(guardian, { name: 'Tom', level: 'sixieme' });
+    const forLea = await api.activationCode(guardian, lea.id);
+    await api.activationCode(guardian, tom.id);
+    expect((await api.device().activate(forLea)).status).toBe(200);
+  });
+
+  it('is refused to every address once the failures of all of them spent their budget, a right one too, kept unspent', async () => {
+    const guardian = await api.guardian('budget-global@example.com');
+    const lea = await api.student(guardian);
+    const code = await api.activationCode(guardian, lea.id);
+    const tight = testApp(db, { auth: { failedActivations: failureBudget({ points: 2, durationSeconds: 3600 }) } }).api;
+    expect((await tight.device().activate('AAAAAAAA')).status).toBe(400);
+    expect((await tight.device().activate('BBBBBBBB')).status).toBe(400);
+    expect((await tight.device().activate(code)).status).toBe(429);
+    // Another instance, its budget whole: the code was never spent.
+    expect((await api.device().activate(code)).status).toBe(200);
   });
 
   it('recognises the device by a signed cookie of 400 days, and opens no session', async () => {

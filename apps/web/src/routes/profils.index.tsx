@@ -45,7 +45,7 @@ function Profiles() {
           {data.shared ? 'Sur cet appareil partagé, ton profil se ferme après 10 minutes sans rien faire.' : 'Touche ton prénom, puis tape ton code.'}
         </p>
         <Button render={<Link to="/activer" />} variant="link">
-          Nouvel appareil ou code oublié ? Entre le code de ton parent
+          Première fois ici ? J’ai un code de départ
         </Button>
         <Button render={<Link to="/connexion" />} variant="link">
           Vous êtes le parent ? Entrer dans votre espace

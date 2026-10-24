@@ -281,12 +281,8 @@ là. » avec « Je suis encore là ». Sur un appareil personnel, rien ne se fer
 
 ### L'enfant
 
-**E1. Ton code de départ** (`/activer`).
-- Titre : « Entre ton code de départ »
-- Texte : « 8 lettres et chiffres, donnés par l'adulte qui a créé ton espace. »
-- Champ, qui accepte minuscules, espaces et collage, et affiche « ABCD EFGH ».
-- Bouton principal : « Continuer » ; second : « Viser le carré avec l'appareil photo ».
-- Erreur : « Ce code ne marche pas, ou il a expiré. Demande un nouveau code de départ. »
+**E1. Ton code de départ** : construit (`apps/web/src/routes/activer.tsx`), le champ prérempli
+par le carré d'A4. Reste le second bouton : « Viser le carré avec l'appareil photo ».
 
 **E2. Choisis ton code.**
 - Titre : « Choisis ton code » ; sous-titre : « 6 chiffres que personne d'autre ne connaît. »
@@ -418,19 +414,11 @@ construit (`apps/web/src/routes/bienvenue.tsx`, l'invitation dans
 Catiche » avec le bouton « Accepter l'invitation » (`invitation.tsx`). L'adulte invité par un
 parent : construit aussi (`bienvenue.tsx`, `InvitedWelcome`).
 
-**A4. Où [prénom] travaille le soir ?** (après A3 pour le parent qui vient d'ajouter l'enfant,
-jamais pour un adulte invité ; et depuis « Gérer »).
-- Choix : « Sur cet appareil, à côté de moi » ; « Sur un autre appareil : le sien, ou celui d'un
-  proche ».
-- Cet appareil : « [Prénom] choisit son code maintenant, sur cet écran. Vous ne le verrez
-  pas. » Puis E2 sur place. Pas proposé sur un appareil déjà ajouté (aujourd'hui, il l'est encore).
-- Autre appareil : le carré à viser et le code de départ (« ABCD EFGH »). « Sur l'autre appareil,
-  visez ce carré avec l'appareil photo : Catiche s'ouvre tout seul. Sinon, ouvrez catiche.fr,
-  touchez « J'ai un code de départ » et tapez ce code. Il marche une seule fois, pendant
-  7 jours. » Le carré porte un lien avec le code, qui mène droit à E2. Boutons : « Partager le
-  code » (le partage du téléphone : SMS, WhatsApp) ; « Obtenir un autre code » ; « Aller à
-  l'accueil ». Quand l'appareil est relié : « La tablette de [prénom] est ajoutée. »
-- Confirmation : la règle commune de « La confirmation récente » (plus haut).
+**A4. Où [prénom] travaille le soir ?** : construit
+(`apps/web/src/routes/foyer.$studentId_.appareil.tsx`, le code de départ dans
+`apps/server/src/platform/auth/student-sign-in.ts`), après A3, après l'ajout d'un enfant suivant
+et depuis la fiche de l'enfant. Reste l'entrée depuis « Gérer » (A7).
+Son texte donne l'adresse de l'app, et non catiche.fr, dont la landing ne mène pas à `/activer`.
 
 **A5. Accueil** (une carte par enfant, même avec un seul). L'en-tête, le titre et la carte de la
 clé d'accès sont construits (`apps/web/src/routes/foyer.index.tsx`,
@@ -517,7 +505,7 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
   touche « Envoyer à Karim ». Karim lit A6 et touche « Je m'en occupe » sur le mot à signer ; Léa
   le voit sur E4. Nadia voit dans A7 que Léa a travaillé, sans le contenu.
 - **Inès et Monique, le mercredi.** Nadia a relié la tablette de Monique depuis chez elle (A4,
-  « Partager le code » par WhatsApp, valable 7 jours). Inès entre par C2. Monique a
+  « Partager le code » par WhatsApp, valable 24 heures). Inès entre par C2. Monique a
   reçu l'invitation (« Nadia vous invite sur Catiche, pour Léa »), est entrée par le bouton de
   l'e-mail ; elle reste connectée. Un e-mail la prévient ; elle lit le message, touche « Je m'en
   occupe » sur la fourniture, et écrit un mot. Pendant les vacances, elle coupe « Recevoir les
@@ -541,9 +529,6 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
 | Une colonne `max-w-md` presque partout, ni onglets ni navigation | Un écran où l'on revient, des pages qui s'ouvrent et se referment (§ 4) ; deux colonnes à l'ordinateur |
 | Mots techniques : session, verrouillage, bêta fermée, URL brute | Mots des familles ; formule de statut ; un carré à viser |
 | Trois codes appelés « code » | Ton code, le code de départ, le code reçu par e-mail |
-| Deux façons de relier un appareil, sur deux écrans | Un seul écran, A4, avec deux choix |
-| Un code de 10 minutes pour un appareil | 7 jours, une seule fois, à partager ; 10 minutes pour un code oublié |
-| « Ajouter cet ordinateur » proposé sur un ordinateur déjà ajouté | Caché (A4) |
 | Deux façons de proposer la mémoire | Un seul endroit, A7 ; l'enfant répond sur E4 ou E7 |
 | « Changer de profil » et « Se déconnecter » | « Quitter », qui rassure |
 | Le retour porte cinq noms | Un « ← » qui nomme où il ramène ; « ← Pause » dans la soirée |
@@ -575,7 +560,8 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
   1. le modèle de famille (fait, #562) ;
   2. l'entrée de l'adulte et son en-tête : A1, A2, A3 pour le parent invité par Victor, A9 (fait) ;
   3. inviter un adulte, le rôle de proche et ses droits (A8, la liste des adultes) (fait) ;
-  4. relier l'appareil de l'enfant, A4, avec le code de départ de 7 jours et le carré à viser ;
+  4. relier l'appareil de l'enfant, A4, avec le code de départ de 24 heures et le carré à viser
+     (fait) ;
   5. l'accueil en cartes (A5 complet), « Gérer » (A7), l'historique, la suppression avec 7 jours
      d'annulation ;
   6. l'enfant (C1, C2, E1 à E4, E6, E7 ; E4 dans son état « Avant », dont le bouton ouvre l'aide
@@ -613,9 +599,10 @@ dans le rôle d'un enfant ou d'un adulte peu habitué, fait les tâches sur l'é
 6. **Un e-mail prévient l'adulte d'un message** (« Léa vous dit où en sont ses devoirs »), un par
    soir au plus, qu'il peut couper ; à l'étape 4. Victor : « soirée » n'est pas évocateur, attention
    aux termes qui troublent ; d'où la règle « Les mots qui disent ce qui se passe » (§ 5).
-7. **Le code de départ vaut 7 jours** pour relier un appareil (10 minutes aujourd'hui), pour
-   préparer la tablette de la grand-mère avant le mercredi. Un code volé ajoute un appareil, mais
-   n'ouvre rien sans le code de l'enfant, et l'enfant en est prévenu. Le code après un oubli garde
-   10 minutes.
+7. **Le code de départ vaut 24 heures** pour relier un appareil (corrigé le 2026-10-24 ; 7 jours
+   d'abord), pour préparer la tablette de la grand-mère la veille. La CNIL n'admet un secret
+   temporaire que « sous la journée » (délibération 2022-100, § 35) ; et tant que l'enfant n'a pas
+   son code, un code de départ deviné ouvrirait son espace, puisque celui qui relie l'appareil
+   choisit le code. Le code après un oubli garde 10 minutes.
 8. **L'e-mail d'entrée de l'adulte porte un bouton et le code, valables 15 minutes** (un code de
    5 minutes aujourd'hui).

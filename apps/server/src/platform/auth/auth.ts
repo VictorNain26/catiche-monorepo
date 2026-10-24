@@ -20,12 +20,22 @@ import { firstNameSchema } from '../../domain/first-name';
 import type { Db } from '../db/client';
 import type { Mailer } from '../email/mailer';
 import { CLIENT_ADDRESS_HEADER } from '../http/client-address';
+import type { FailureBudget } from '../http/rate-limit';
 import { INVITATION_DAYS, invitationEmail, invitationIdentifier, spendInvitationLinks, type InvitationLetter } from './invitation';
 import { account, passkey as passkeyTable, session, user, verification } from './schema';
+import { FRESH_AGE_SECONDS } from './session';
 import { createStudentDevices } from './student-devices';
-import { ACTIVATION_PREFIX, EMAIL_SIGN_INS, isStudentEmail, studentSignIn, type StudentAccess } from './student-sign-in';
+import {
+  ACTIVATION_PREFIX,
+  EMAIL_SIGN_INS,
+  activationFailureBudget,
+  hashActivationIdentifier,
+  isStudentEmail,
+  studentSignIn,
+  type StudentAccess,
+} from './student-sign-in';
 
-interface AuthDeps {
+export interface AuthDeps {
   mailer: Mailer;
   logger: Logger;
   /** Runs a task after its request has answered: an email's timing tells nothing. */
@@ -39,6 +49,8 @@ interface AuthDeps {
   students: StudentAccess;
   /** An adult in by an email, its button or its code: counted, for the passkey's offer. */
   emailEntered: (userId: string) => Promise<void>;
+  /** The starting codes refused, every address together; `activationFailureBudget` unless a test passes its own. */
+  failedActivations?: FailureBudget;
 }
 
 /** The sign-in code's life, in the email and on the screen. */
@@ -66,7 +78,7 @@ const invitationLetter = (metadata: Record<string, unknown> | undefined): Invita
 export function createAuth(
   db: Db,
   config: Pick<Config, 'publicUrl' | 'authSecret'>,
-  { mailer, logger, background, deleteUser, students, emailEntered }: AuthDeps,
+  { mailer, logger, background, deleteUser, students, emailEntered, failedActivations = activationFailureBudget() }: AuthDeps,
 ) {
   // A student's address is never sent to, and answered as an unknown address would be, without telling.
   const send: Mailer = async (email) => {
@@ -117,7 +129,7 @@ export function createAuth(
     // A session lives ninety days without use, renewed as it is used: a summer without opening the
     // tablet leaves the child's device paired. Deleting the account, or adding a passkey, needs a
     // session at most ten minutes old.
-    session: { expiresIn: 90 * 24 * 60 * 60, freshAge: 10 * 60 },
+    session: { expiresIn: 90 * 24 * 60 * 60, freshAge: FRESH_AGE_SECONDS },
     databaseHooks: {
       user: {
         create: {
@@ -160,7 +172,12 @@ export function createAuth(
     // The client's address, as the server reads it behind the host's proxy (app.ts).
     advanced: { disableOriginCheck: false, backgroundTasks: { handler: background }, ipAddress: { ipAddressHeaders: [CLIENT_ADDRESS_HEADER] } },
     // An activation code is a credential: stored hashed, like a password, never in clear.
-    verification: { storeIdentifier: { default: 'plain', overrides: { [ACTIVATION_PREFIX]: 'hashed' } } },
+    verification: {
+      storeIdentifier: {
+        default: 'plain',
+        overrides: { [ACTIVATION_PREFIX]: { hash: (identifier) => Promise.resolve(hashActivationIdentifier(identifier)) } },
+      },
+    },
     // The code's own routes for what Tom does not use: no password to reset, no other check. And
     // the magic link's own request: only the invitation makes one, by a call of the server's.
     disabledPaths: [
@@ -172,7 +189,7 @@ export function createAuth(
       '/email-otp/reset-password',
     ],
     plugins: [
-      studentSignIn({ devices: createStudentDevices(db), students }),
+      studentSignIn({ devices: createStudentDevices(db), students, failedActivations }),
       // Bound to the public origin, never to the one a request claims; a discoverable credential,
       // which the browser offers in the address field. Its name in Tom is the browser that made it,
       // as a session's: a name the client sends would also replace, in the browser's own list, the
