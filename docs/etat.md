@@ -1,7 +1,7 @@
 # État
 
 Ce qui reste vrai quelle que soit la direction du produit : les bloquants, les gestes de Victor,
-le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui est fait en sort.
+le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-24 ; ce qui est fait en sort.
 
 ## Bloquants
 
@@ -66,9 +66,16 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
   aussi (sa durée : `createActivationCode`, `platform/auth/student-sign-in.ts`).
 - Les durées de conservation annoncées (`apps/landing/src/pages/confidentialite.astro`, § 7) :
   aucune purge ne tient encore celles du compte inactif ni des journaux. Celles des e-mails reçus
-  à `contact@` se tiennent à la main, dans la boîte Zimbra. L'historique d'un enfant ne se lit que
-  sur 90 jours (`HISTORY_DAYS`, `domain/child-events.ts`), mais ses lignes plus anciennes restent
-  jusqu'à la tâche de fond de la PR 6 (`docs/plans/app-cible.md` § 8), qui les purgera.
+  à `contact@` se tiennent à la main, dans la boîte Zimbra.
+- La politique de confidentialité (`apps/landing/src/pages/confidentialite.astro`, section `droits`) dit que
+  l'app ne propose pas la suppression du compte parent, faite « sur demande », et qu'un compte
+  enfant se supprime directement : depuis la PR 6 de l'étape 2, l'adulte supprime son compte
+  depuis « Votre compte », et la suppression d'un enfant suivi par deux parents attend 7 jours
+  qu'aucun ne l'annule. À reprendre avec la PR de la politique qui dit l'opposition d'un autre
+  parent (`docs/plans/app-cible.md` § 8).
+- La suppression du compte d'un enfant ne demande pas encore la confirmation récente
+  (`freshSession`, `platform/auth/session.ts`), que vise `docs/plans/app-cible.md` (§ 7) : la
+  route et l'écran « Gérer » l'attendent, avec leur test.
 - La landing, à la naissance de la production : ses liens « Se connecter » mènent au staging
   (`APP_URL`, `apps/landing/src/lib/brand.ts`) ; changer cette constante, et le bouton « Demander
   une invitation » (`molecules/request-invitation.astro`) avec les phrases « en préparation » si
@@ -113,9 +120,6 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
   Un hook `before` sur `/passkey/generate-register-options`, lisant `isShortSession`
   (`platform/auth/student-devices.ts`), avec son test, fermerait la règle au serveur.
 
-- Une invitation d'adulte expirée (`adult_invitation`) n'est plus lue, mais sa ligne reste, avec
-  l'adresse de quelqu'un qui n'est pas entré. La supprimer à l'expiration, par une tâche régulière
-  ou à la lecture, avec son test, avant le premier élève réel.
 - L'e-mail de suppression invite à répondre (`platform/auth/auth.ts`), mais le mailer ne pose
   aucun `Reply-To` : la réponse irait à `MAIL_FROM`, que personne ne lit ; à faire pointer vers
   `contact@catiche.fr`, avec son test.

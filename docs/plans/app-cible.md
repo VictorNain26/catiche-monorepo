@@ -130,9 +130,9 @@ sont au § 8.
 
 ## 3. Le modèle de famille
 
-Ce sont des règles. Le lien entre un adulte et un enfant, son rôle, l'invitation d'un adulte et
-l'historique sont en place (`apps/server/src/modules/household`, `docs/architecture.md`) ; la
-suppression demandée, et son e-mail, viennent avec la PR 6 (§ 8).
+Ce sont des règles. Le lien entre un adulte et un enfant, son rôle, l'invitation d'un adulte,
+l'historique et la suppression demandée sont en place (`apps/server/src/modules/household`,
+`docs/architecture.md`).
 
 **Un enfant a un ou plusieurs adultes.** Le « foyer » disparaît des mots et des écrans : chaque
 adulte voit les enfants qui le concernent. Deux maisons, c'est un enfant avec deux parents. Un
@@ -424,8 +424,7 @@ Son texte donne l'adresse de l'app, et non catiche.fr, dont la landing ne mène 
 (`apps/web/src/routes/foyer.index.tsx`, `components/passkey-offer.tsx`), sur deux colonnes à
 l'ordinateur, sauf : « Lire son message » (étape 4) ; la carte « Léa a oublié son code. », que
 l'enfant envoie lui-même (PR 7, avec E3), dont tient lieu aujourd'hui « Le code de Léa ne marche
-plus. », après 10 codes faux, avec « Donner un code de départ » qui mène à A7 ; la carte de la
-suppression demandée (PR 6). Le mot « clé d'accès » reste, car la fenêtre du téléphone
+plus. », après 10 codes faux, avec « Donner un code de départ » qui mène à A7. Le mot « clé d'accès » reste, car la fenêtre du téléphone
 l'emploie ([Google, « Communicating passkeys »](https://developers.google.com/identity/passkeys/ux/communicating-passkeys)).
 - Carte d'alerte, en tête, quand il le faut (parent) : « Léa a oublié son code. » avec « Donner un
   code de départ », qui l'affiche tout de suite ; « La tablette de Léa est bloquée après 3 codes
@@ -452,8 +451,7 @@ l'emploie ([Google, « Communicating passkeys »](https://developers.google.com/
 (`apps/web/src/routes/foyer.$studentId.tsx`, l'historique dans
 `apps/server/src/modules/household`), sur deux colonnes à l'ordinateur, sauf : « Les soirs où Léa
 a travaillé » (étape 3), qui laisse en attendant « Sa semaine », le résumé de la semaine ;
-« Recevoir les messages » (étape 4) ; la suppression avec 7 jours d'annulation (PR 6), immédiate
-jusque-là. À partir de 15 ans, l'écran dit « c'est Léa qui décide », tournure qui ne suppose pas
+« Recevoir les messages » (étape 4). À partir de 15 ans, l'écran dit « c'est Léa qui décide », tournure qui ne suppose pas
 le genre de l'enfant (§ 5, « Les voix »).
 - En tête : « Vous décidez pour Léa, avec Karim. » (parent) ; « Vous suivez les devoirs de Léa. »
   (proche).
@@ -480,13 +478,8 @@ le genre de l'enfant (§ 5, « Les voix »).
 dans `apps/server/src/modules/household/service.ts`), sauf « Léa en sera prévenue », qui attend les
 écrans de l'enfant.
 
-**A9. Votre compte** (par le prénom, en haut de chaque écran de l'adulte). Construit
-(`apps/web/src/routes/foyer.compte.tsx`), sauf :
-- dans « Vos clés d'accès », chaque clé porte son appareil, aussi précis que le navigateur le dit
-  (« Téléphone Android, créée le 3 mars »), et « Supprimer » demande sa confirmation ;
-- séparé, en bas : « Supprimer mon compte », avec les conséquences nommées : « Votre compte sera
-  effacé. Le compte de Léa le sera aussi : personne d'autre n'est son parent dans Catiche. C'est
-  définitif. »
+**A9. Votre compte** (par le prénom, en haut de chaque écran de l'adulte) : construit
+(`apps/web/src/routes/foyer.compte.tsx`), la suppression du compte comprise.
 
 ### L'accessibilité, pour tous les écrans
 
@@ -551,8 +544,7 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
 | « ton parent », au singulier | Les prénoms des adultes |
 | Un seul foyer, aucun second adulte | Plusieurs adultes, deux rôles, l'historique (§ 3) |
 | Pas de déclaration à l'entrée | A3, horodatée |
-| Pas de suppression du compte adulte : le serveur la porte (`POST /api/auth/delete-user`, session de moins de 10 minutes), elle se fait sur demande d'ici là, comme le disent les CGU et la politique de confidentialité | A9 |
-| Code oublié et suppression d'un enfant sans confirmation récente | La confirmation récente (§ 5) |
+| Suppression d'un enfant sans confirmation récente (le code oublié la demande, `freshSession`) | La confirmation récente (§ 5) |
 | L'élève ne sait pas qu'un appareil s'ajoute | Carte « Depuis ta dernière visite », et E6 |
 | Formules de Tom avec des flèches de défilement sur Chrome de bureau : leur conteneur (`[&_.katex]:overflow-x-auto`, `components/tom-text.tsx`) déborde de 6 px en hauteur | Corrigé dans E5 (étape 3) |
 | Tom ne dit pas d'emblée qu'il est une IA ; « on avance ensemble » | Premier message d'E5 ; nouvelle réponse de repli (étape 3) |
@@ -574,8 +566,7 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
      autres parents (fait) ;
   6. la suppression du compte de l'enfant avec 7 jours d'annulation, celle du compte de l'adulte,
      le nom des clés d'accès (A9), et la tâche de fond qu'elles demandent, qui purge aussi
-     l'historique de plus de 90 jours et les invitations expirées (découpage du 2026-10-24 : rien
-     ne tourne encore tout seul dans le serveur) ;
+     l'historique de plus de 90 jours et les invitations expirées (fait) ;
   7. l'enfant (C1, C2, E1 à E4, E6, E7 ; E4 dans son état « Avant », dont le bouton ouvre l'aide
      de Tom actuelle, voix corrigée et message de quota compris), la carte « Léa a oublié son
      code » qu'il envoie (E3), et la navigation.
