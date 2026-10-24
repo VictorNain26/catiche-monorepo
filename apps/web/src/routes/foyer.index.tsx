@@ -6,7 +6,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AdultPage } from '../components/page';
 import { PasskeyOffer } from '../components/passkey-offer';
-import { GUARDIAN_HINT, GUARDIAN_LABEL, LEVEL_LABELS, studentsQuery, type Student } from '../lib/household';
+import { deviceKind } from '../lib/device';
+import { GUARDIAN_HINT, GUARDIAN_LABEL, LEVEL_LABELS, householdMessage, studentsQuery, unblockDevice, type Student } from '../lib/household';
 import {
   acceptInvitation,
   declineInvitation,
@@ -17,11 +18,12 @@ import {
   pendingInvitations,
   type Invitation,
 } from '../lib/me';
-import { minutesText, summaryQuery } from '../lib/summary';
+import { eveningsLine, summaryQuery } from '../lib/summary';
 
 /**
- * The adult's home: the passkey's offer when it is due, a card per invitation waiting, then a card
- * per child with their week. Without a child nor an invitation, the adding of one.
+ * The adult's home (A5): a parent's alerts first, then the passkey's offer when it is due, a card
+ * per invitation waiting, and a card per child with their evenings, two by two on a computer.
+ * Without a child nor an invitation, the adding of one.
  */
 export const Route = createFileRoute('/foyer/')({
   loader: async ({ context }) => {
@@ -43,14 +45,17 @@ function Household() {
   if (students.length === 0 && invitations.length === 0) return <Navigate to="/foyer/ajouter" />;
 
   return (
-    <AdultPage title="Suivez les devoirs de vos enfants" withBack={false}>
+    <AdultPage title="Suivez les devoirs de vos enfants" withBack={false} wide>
+      {students.map((student) => (
+        <AlertCards key={student.id} child={student} />
+      ))}
       {offered && <PasskeyOffer />}
       {invitations.map((invitation) => (
         <InvitationCard key={invitation.id} invitation={invitation} />
       ))}
       {students.length > 0 && (
         <Section title="Vos enfants">
-          <ul className="flex flex-col gap-2">
+          <ul className="grid gap-4 lg:grid-cols-2">
             {students.map((student) => (
               <li key={student.id}>
                 <ChildCard child={student} />
@@ -59,7 +64,7 @@ function Household() {
           </ul>
         </Section>
       )}
-      <Button render={<Link to="/foyer/ajouter" />} variant="outline">
+      <Button render={<Link to="/foyer/ajouter" />} variant="outline" className="sm:self-start">
         Ajouter un enfant
       </Button>
     </AdultPage>
@@ -120,11 +125,58 @@ function InvitationCard({ invitation }: { invitation: Invitation }) {
   );
 }
 
-/** A child, their class, and their seven last days in a line, which holds its place while it loads. */
+/**
+ * What a parent has to act on for a child, at the top of the home (A5): their code stopped
+ * everywhere, which a starting code on « Gérer » replaces; else each device that blocked them,
+ * unblocked here. A status, which takes no focus.
+ */
+function AlertCards({ child }: { child: Student }) {
+  const queryClient = useQueryClient();
+  const unblock = useMutation({
+    mutationFn: (deviceId: string) => unblockDevice(child.id, deviceId),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey }),
+  });
+  const { blockedDevices, codeLocked } = child.alerts;
+  if (codeLocked) {
+    return (
+      <Card className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="font-bold">Le code de {child.name} ne marche plus.</p>
+        <Button render={<Link to="/foyer/$studentId" params={{ studentId: child.id }} />}>Donner un code de départ</Button>
+      </Card>
+    );
+  }
+  return blockedDevices.map((device) => {
+    const kind = deviceKind(device.userAgent);
+    return (
+      <Card key={device.id} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="font-bold">
+          {capitalised(kind.the)} de {child.name} est {kind.blocked} après 3 codes faux.
+        </p>
+        {unblock.error && <Banner tone="error" title={householdMessage(unblock.error)} />}
+        <Button
+          disabled={unblock.isPending}
+          onClick={() => {
+            unblock.mutate(device.id);
+          }}
+        >
+          Débloquer
+        </Button>
+      </Card>
+    );
+  });
+}
+
+const capitalised = (words: string) => `${words.charAt(0).toUpperCase()}${words.slice(1)}`;
+
+/**
+ * A child, their class, whether they worked tonight and the days of their week, without a time nor
+ * a subject; the line holds its place while it loads. « Gérer » for a parent, « Ses devoirs et ses
+ * messages » for a relative, both to A7.
+ */
 function ChildCard({ child }: { child: Student }) {
   const week = useQuery(summaryQuery(child.id));
   return (
-    <Card render={<Link to="/foyer/$studentId" params={{ studentId: child.id }} />} className="flex min-h-11 flex-col gap-1">
+    <Card className="flex h-full flex-col gap-2">
       <span className="flex items-center justify-between gap-3">
         <span className="font-bold">{child.name}</span>
         <span className="text-sm text-muted-foreground">{LEVEL_LABELS[child.level]}</span>
@@ -134,15 +186,21 @@ function ChildCard({ child }: { child: Student }) {
           <span className="sr-only">Chargement…</span>
           <Skeleton className="h-5 w-3/4" />
         </>
+      ) : week.data ? (
+        <>
+          {week.data.tonight && <p>{child.name} a travaillé ce soir.</p>}
+          <p className="text-muted-foreground">{eveningsLine(child.name, week.data.days)}</p>
+        </>
       ) : (
-        <span className="text-sm text-muted-foreground">
-          {week.data
-            ? week.data.sessions === 0
-              ? 'Pas de séance ces sept derniers jours'
-              : `Ces sept derniers jours : ${minutesText(week.data.minutes)}`
-            : 'Sa semaine n’a pas pu se charger'}
-        </span>
+        <p className="text-muted-foreground">Sa semaine n’a pas pu se charger. Réessayez dans un instant.</p>
       )}
+      <Button
+        render={<Link to="/foyer/$studentId" params={{ studentId: child.id }} />}
+        variant={child.role === 'guardian' ? 'default' : 'outline'}
+        className="mt-auto sm:self-start"
+      >
+        {child.role === 'guardian' ? 'Gérer' : 'Ses devoirs et ses messages'}
+      </Button>
     </Card>
   );
 }

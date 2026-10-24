@@ -6,7 +6,7 @@ import { formatCode } from '../lib/activation';
 import { isProblem } from '../lib/api';
 import { useConfirmation } from '../lib/confirmation';
 import { RecentEntry } from './recent-entry';
-import { deviceName, formatDay, formatHour } from '../lib/device';
+import { deviceKind, deviceName, formatDay, formatHour } from '../lib/device';
 import {
   activationCode,
   householdMessage,
@@ -24,10 +24,15 @@ const WATCH_MS = 10 * 60_000;
  * expires or a device holds one more profile of the child, the list of devices watched meanwhile.
  */
 export function useActivation(studentId: string) {
+  const queryClient = useQueryClient();
   // The devices that held the child's profile when the code was asked for: one more, and it is spent.
   const [before, setBefore] = useState<ReadonlySet<string> | null>(null);
   const [expired, setExpired] = useState<string | null>(null);
-  const activation = useMutation({ mutationFn: (reason: ActivationReason) => activationCode(studentId, reason) });
+  const activation = useMutation({
+    mutationFn: (reason: ActivationReason) => activationCode(studentId, reason),
+    // Its line in the child's history.
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['students', studentId, 'history'] }),
+  });
   // Nothing else renders the page when a code expires.
   useEffect(() => {
     if (!activation.data) return;
@@ -71,76 +76,115 @@ export function useActivation(studentId: string) {
 
 type Activation = ReturnType<typeof useActivation>;
 
+const capitalised = (words: string) => `${words.charAt(0).toUpperCase()}${words.slice(1)}`;
+
 /**
- * The devices that hold the child's profile, each one unblocked or disconnected; a way to add one
- * (A4); and a starting code for a code the child forgot.
+ * « Ses appareils » (A7): the devices that hold the child's profile, each unblocked, with its
+ * cause, or removed once confirmed; and a way to add one (A4).
  */
-export function ChildAccess({ child, activation }: { child: Student; activation: Activation }) {
+export function ChildDevices({ child, activation }: { child: Student; activation: Activation }) {
   const queryClient = useQueryClient();
-  const refresh = () => queryClient.invalidateQueries({ queryKey: studentDevicesQuery(child.id).queryKey });
+  // The devices, the home's alerts and the history: each reads what changed.
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ['students'] });
+  const removal = useConfirmation<string>();
   const unblock = useMutation({ mutationFn: (deviceId: string) => unblockDevice(child.id, deviceId), onSettled: refresh });
-  const remove = useMutation({ mutationFn: (deviceId: string) => removeDevice(child.id, deviceId), onSettled: refresh });
+  const remove = useMutation({
+    mutationFn: (deviceId: string) => removeDevice(child.id, deviceId),
+    onSuccess: removal.close,
+    onSettled: refresh,
+  });
   const failure = unblock.error ?? remove.error;
 
   return (
-    <Section title={`Appareils de ${child.name}`}>
+    <Section title="Ses appareils">
       {activation.devices.length === 0 ? (
         <p className="text-muted-foreground">Aucun appareil pour l’instant.</p>
       ) : (
         <List>
-          {activation.devices.map((device) => (
-            <ListItem
-              key={device.id}
-              title={deviceName(device.userAgent)}
-              meta={[device.blocked ? 'Bloqué : trop d’essais' : null, device.shared ? 'Partagé' : null, `Ajouté le ${formatDay(device.createdAt)}`]
-                .filter(Boolean)
-                .join(' · ')}
-            >
-              <span className="flex flex-col gap-2 sm:flex-row">
-                {device.blocked && (
-                  <Button
-                    disabled={unblock.isPending}
-                    onClick={() => {
-                      unblock.mutate(device.id);
-                    }}
-                  >
-                    Débloquer
-                  </Button>
-                )}
-                <Button
-                  variant="outline"
-                  disabled={remove.isPending}
-                  onClick={() => {
-                    remove.mutate(device.id);
-                  }}
-                >
-                  Déconnecter
-                </Button>
-              </span>
-            </ListItem>
-          ))}
+          {activation.devices.map((device) => {
+            const kind = deviceKind(device.userAgent);
+            return (
+              <ListItem
+                key={device.id}
+                title={deviceName(device.userAgent)}
+                meta={[
+                  device.blocked ? `${capitalised(kind.blocked)} après 3 codes faux` : null,
+                  device.shared ? 'Partagé' : null,
+                  `Ajouté le ${formatDay(device.createdAt)}`,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              >
+                <span className="flex flex-col gap-2 sm:flex-row">
+                  {device.blocked && (
+                    <Button
+                      disabled={unblock.isPending}
+                      onClick={() => {
+                        unblock.mutate(device.id);
+                      }}
+                    >
+                      Débloquer
+                    </Button>
+                  )}
+                  {removal.confirming !== device.id && (
+                    <Button
+                      ref={removal.opener(device.id)}
+                      variant="outline"
+                      onClick={() => {
+                        removal.open(device.id);
+                      }}
+                    >
+                      Retirer {kind.this}
+                    </Button>
+                  )}
+                </span>
+              </ListItem>
+            );
+          })}
         </List>
+      )}
+      {removal.confirming !== null && (
+        <>
+          <Banner tone="warning" focusOnMount title={`${child.name} devra entrer un nouveau code de départ sur cet appareil.`} />
+          <Button
+            disabled={remove.isPending}
+            onClick={() => {
+              if (removal.confirming !== null) remove.mutate(removal.confirming);
+            }}
+          >
+            Retirer
+          </Button>
+          <Button variant="outline" onClick={removal.cancel}>
+            Annuler
+          </Button>
+        </>
       )}
       {failure && <Banner tone="error" title={householdMessage(failure)} />}
       <Button render={<Link to="/foyer/$studentId/appareil" params={{ studentId: child.id }} />} variant="outline" className="sm:self-start">
         Ajouter un appareil
       </Button>
-      <ForgottenCode child={child} activation={activation} />
     </Section>
   );
 }
 
-/** A starting code for a code the child forgot: the old one stops when the child types it. */
-function ForgottenCode({ child, activation }: { child: Student; activation: Activation }) {
-  const forgetting = useConfirmation();
+/**
+ * « Léa a oublié son code » (A7): a starting code, once the child has a code; the old one stops
+ * when the child types it. Its text says what follows, before the button.
+ */
+export function ForgottenCode({ child, activation }: { child: Student; activation: Activation }) {
   const { code } = activation;
+  if (!activation.childCode.chosen) return null;
   return (
-    <>
+    <Section title={`${child.name} a oublié son code`}>
       {activation.childCode.locked && (
-        <Banner tone="warning" title={`Trop d’essais : le code de ${child.name} ne marche plus nulle part.`}>
-          Donnez-lui un code « oublié » : {child.name} en choisira un nouveau.
+        <Banner tone="warning" title={`Le code de ${child.name} ne marche plus.`}>
+          Trop de codes faux l’ont arrêté sur tous ses appareils.
         </Banner>
       )}
+      <p className="text-muted-foreground">
+        Son code actuel ne marchera plus, nulle part. Avec le code de départ que vous allez obtenir, {child.name} en choisira un nouveau, et verra la
+        date du changement.
+      </p>
       {code && (
         <Card className="flex flex-col items-center gap-2 text-center">
           <p>
@@ -160,43 +204,18 @@ function ForgottenCode({ child, activation }: { child: Student; activation: Acti
       ) : (
         activation.error && <Banner tone="error" title={householdMessage(activation.error)} />
       )}
-      {forgetting.confirming ? (
-        <>
-          <Banner
-            tone="warning"
-            focusOnMount
-            title={`Quand ${child.name} saisira ce code, son ancien code cessera de marcher et ses appareils seront déconnectés.`}
-          >
-            {child.name} choisira un nouveau code, et verra la date du changement. Ce code arrête aussi un code de départ en cours.
-          </Banner>
-          <Button
-            variant="outline"
-            disabled={activation.asking}
-            onClick={() => {
-              forgetting.close();
-              activation.ask('forgotten');
-            }}
-          >
-            Obtenir le code
-          </Button>
-          <Button variant="link" onClick={forgetting.cancel}>
-            Annuler
-          </Button>
-        </>
-      ) : (
-        activation.childCode.chosen && (
-          <Button
-            ref={forgetting.opener('confirm')}
-            variant="outline"
-            className="sm:self-start"
-            onClick={() => {
-              forgetting.open('confirm');
-            }}
-          >
-            {child.name} a oublié son code
-          </Button>
-        )
+      {!code && (
+        <Button
+          variant="outline"
+          className="sm:self-start"
+          disabled={activation.asking}
+          onClick={() => {
+            activation.ask('forgotten');
+          }}
+        >
+          Obtenir un code de départ
+        </Button>
       )}
-    </>
+    </Section>
   );
 }
