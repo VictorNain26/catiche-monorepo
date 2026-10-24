@@ -155,6 +155,13 @@
       "when": 1792791524061,
       "tag": "0021_adult_invitation",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1792844411300,
+      "tag": "0022_child_event",
+      "breakpoints": true
     }
   ]
 }

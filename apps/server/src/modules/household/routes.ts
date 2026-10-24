@@ -164,6 +164,7 @@ export function householdRoutes({ auth, service }: { auth: Auth; service: Househ
       await service.withdrawInvitation(c.var.userId, c.req.param('id'), c.req.valid('param').invitationId);
       return c.body(null, 204);
     })
+    .get('/students/:id/history', async (c) => c.json(await service.history(c.var.userId, c.req.param('id'))))
     .get('/students/:id/adults', async (c) => c.json(await service.listAdults(c.var.userId, c.req.param('id'))))
     .delete('/students/:id/adults/:adultId', async (c) => {
       await service.removeAdult(c.var.userId, c.req.param('id'), c.req.param('adultId'));

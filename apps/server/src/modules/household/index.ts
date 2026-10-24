@@ -31,7 +31,7 @@ export function householdModule({ db, auth, mailer, logger, background, publicUr
   const devices = createStudentDevices(db);
   const service = createHouseholdService({
     repository: createHouseholdRepository(db),
-    createActivationCode: (userId, reason) => createActivationCode(db, userId, reason),
+    createActivationCode: (userId, reason, alsoIn) => createActivationCode(db, userId, reason, alsoIn),
     sharedDevice: (deviceId, userId) => devices.isShortSession(deviceId, userId),
     inviteAddress: async (email, letter) => {
       try {

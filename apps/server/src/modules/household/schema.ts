@@ -6,8 +6,9 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { bigint, check, date, index, integer, pgEnum, pgTable, primaryKey, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
+import { bigint, check, date, index, integer, jsonb, pgEnum, pgTable, primaryKey, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
 import { ADULT_ROLES } from '../../domain/adult-roles';
+import { CHILD_EVENT_KINDS, type ChildEventDetail } from '../../domain/child-events';
 import { SCHOOL_LEVELS } from '../../domain/levels';
 import { MEMORY_ANSWERS } from '../../domain/memory-consent';
 import { user } from '../../platform/auth/schema';
@@ -16,6 +17,7 @@ export const schoolLevel = pgEnum('school_level', SCHOOL_LEVELS);
 export const memoryAnswer = pgEnum('memory_answer', MEMORY_ANSWERS);
 
 export const adultRole = pgEnum('adult_role', ADULT_ROLES);
+export const childEventKind = pgEnum('child_event_kind', CHILD_EVENT_KINDS);
 
 /**
  * An adult who follows a student: the one who added them, or an adult a parent invited. The only
@@ -78,6 +80,26 @@ export const adultProfile = pgTable('adult_profile', {
   emailEntries: integer('email_entries').notNull().default(0),
   passkeyOfferClosedAt: timestamp('passkey_offer_closed_at', { withTimezone: true }),
 });
+
+/**
+ * The history of a student: a gesture of an adult on them, written in the transaction of the
+ * gesture itself. It goes with the student; an adult who leaves Catiche leaves their lines,
+ * without their name. Read 90 days back (`HISTORY_DAYS`).
+ */
+export const childEvent = pgTable(
+  'child_event',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    studentId: text('student_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    actorId: text('actor_id').references(() => user.id, { onDelete: 'set null' }),
+    kind: childEventKind('kind').notNull(),
+    detail: jsonb('detail').$type<ChildEventDetail>().notNull().default({}),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('child_event_student_created_idx').on(table.studentId, table.createdAt)],
+);
 
 export const studentProfile = pgTable(
   'student_profile',

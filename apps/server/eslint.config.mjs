@@ -30,7 +30,8 @@ const files = [
   { pattern: 'src/modules/*/service.ts', category: 'service' },
   // The tutor's turn, which the service opens and runs: the repository, core/ and the platform, not the referential.
   { pattern: 'src/modules/*/turn-pipeline.ts', category: 'pipeline' },
-  { pattern: 'src/modules/*/repository.ts', category: 'repository' },
+  // A repository too long for one file keeps its parts in repository/, which it composes.
+  { pattern: ['src/modules/*/repository.ts', 'src/modules/*/repository/*.ts'], category: 'repository' },
   { pattern: 'src/modules/*/schema.ts', category: 'schema' },
   // A module's core/: its pure decisions and the model steps they call, which the service
   // composes. They may read the referential, the data of the programmes.
@@ -101,7 +102,7 @@ export default [
             allow(inModule(['pipeline']), sameModule(['repository', 'core']), inModule(['module-index']), element(['platform', 'domain'])),
             allow(inModule(['core']), sameModule(['core']), element(['platform', 'domain', 'referential'])),
             // The tables store the shapes core/ decides.
-            allow(inModule(['repository']), sameModule(['schema', 'core']), element(['platform', 'domain'])),
+            allow(inModule(['repository']), sameModule(['repository', 'schema', 'core']), element(['platform', 'domain'])),
             allow(inModule(['schema']), sameModule(['core']), element(['platform', 'domain'])),
             // The domain imports nothing: the platform may read its value lists (a reasoning effort).
             allow(element('platform'), element(['platform', 'domain']), file('config')),
