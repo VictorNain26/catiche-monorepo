@@ -52,7 +52,7 @@ function Profile() {
             : 'Trop d’essais : ton code ne marche plus. Ton parent te donne un code pour en choisir un nouveau.'}
       </Banner>
       <Button render={<Link to="/activer" />} variant="outline">
-        J’ai un code de mon parent
+        J’ai un code de départ
       </Button>
     </Page>
   );

@@ -15,6 +15,8 @@ import {
   type Student,
 } from '../lib/household';
 
+const WATCH_MS = 10 * 60_000;
+
 /**
  * A starting code of the parent's, for a new device or for a code the child forgot: shown until it
  * expires or a device holds one more profile of the child, the list of devices watched meanwhile.
@@ -40,10 +42,12 @@ export function useActivation(studentId: string) {
   }, [activation.data]);
   const spent = (list: readonly { id: string }[]) => before !== null && list.some(({ id }) => !before.has(id));
   const pending = (list: readonly { id: string }[]) => activation.data !== undefined && activation.data.code !== expired && !spent(list);
-  // While a code waits, the list shows the device the moment it holds the profile, and the code goes.
+  // While a code waits, the list shows the device the moment it holds the profile, and the code
+  // goes: every 5 seconds the first ten minutes, while the parent is likely at the other device;
+  // then each time the page comes back to the front, as a code for a device lasts a day.
   const { data } = useSuspenseQuery({
     ...studentDevicesQuery(studentId),
-    refetchInterval: (query) => (pending(query.state.data?.devices ?? []) ? 5000 : false),
+    refetchInterval: (query) => (pending(query.state.data?.devices ?? []) && Date.now() - activation.submittedAt < WATCH_MS ? 5000 : false),
   });
   return {
     devices: data.devices,
@@ -142,6 +146,7 @@ function ForgottenCode({ child, activation }: { child: Student; activation: Acti
           <p className="text-sm text-muted-foreground">Valable jusqu’à {formatHour(code.expiresAt)}, une seule fois.</p>
         </Card>
       )}
+      {activation.added && <Banner tone="success" title={`L’appareil de ${child.name} est ajouté.`} />}
       {activation.error && <Banner tone="error" title={householdMessage(activation.error)} />}
       {forgetting.confirming ? (
         <>
