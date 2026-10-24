@@ -22,7 +22,7 @@
  */
 
 import type { GenericEndpointContext } from '@better-auth/core';
-import { getCurrentAdapter, runWithTransaction } from '@better-auth/core/context';
+import { runWithTransaction } from '@better-auth/core/context';
 import { generateId } from '@better-auth/core/utils/id';
 import type { BetterAuthPlugin } from 'better-auth';
 import { APIError, createAuthEndpoint, createAuthMiddleware, freshSessionMiddleware } from 'better-auth/api';
@@ -33,7 +33,9 @@ import { z } from 'zod';
 import { ACTIVATION_ALPHABET, ACTIVATION_CODE_LENGTH } from '../../domain/activation-code';
 import { studentCodeRefusal } from '../../domain/student-code';
 import { failureBudget, type FailureBudget } from '../http/rate-limit';
-import type { Auth } from './auth';
+import { eq, inArray } from 'drizzle-orm';
+import type { Db } from '../db/client';
+import { user, verification } from './schema';
 import { CODE_TRIES, DEVICE_TRIES, type StudentDevices } from './student-devices';
 
 export const ACTIVATION_PREFIX = 'student-activation:';
@@ -97,21 +99,32 @@ export const isStudentEmail = (email: string) => email.endsWith('.invalid');
  * A code that recognises the device that sends it for `userId`: a new device, within a day, so
  * that it can be prepared ahead; or a code forgotten, within ten minutes. It replaces the code given
  * before for the student, whatever its reason: one alive at a time bounds what can be guessed, and a
- * device code shared earlier cannot choose the code a forgotten one clears.
+ * device code shared earlier cannot choose the code a forgotten one clears. The student's row,
+ * locked, puts two codes asked at the same moment one after the other.
  */
-export async function createActivationCode(auth: Auth, userId: string, reason: ActivationReason) {
-  const { adapter, internalAdapter } = await auth.$context;
+export async function createActivationCode(db: Db, userId: string, reason: ActivationReason) {
   const code = generateActivationCode();
   const expiresAt = new Date(Date.now() + ACTIVATION_LIFETIMES[reason]);
-  const value = JSON.stringify({ userId, reason });
   // The identifier is hashed, the value is not: it names the student and the reason.
   const replaced = ACTIVATION_REASONS.map((each) => JSON.stringify({ userId, reason: each }));
-  await runWithTransaction(adapter, async () => {
-    await (await getCurrentAdapter(adapter)).deleteMany({ model: 'verification', where: [{ field: 'value', operator: 'in', value: replaced }] });
-    await internalAdapter.createVerificationValue({ identifier: `${ACTIVATION_PREFIX}${code}`, value, expiresAt });
+  await db.transaction(async (tx) => {
+    await tx.select({ id: user.id }).from(user).where(eq(user.id, userId)).for('update');
+    await tx.delete(verification).where(inArray(verification.value, replaced));
+    await tx.insert(verification).values({
+      id: generateId(32),
+      identifier: hashActivationIdentifier(`${ACTIVATION_PREFIX}${code}`),
+      value: JSON.stringify({ userId, reason }),
+      expiresAt,
+    });
   });
   return { code, expiresAt };
 }
+
+/**
+ * A starting code's identifier as it is stored, and as better-auth looks it up (`storeIdentifier`
+ * in auth.ts): a SHA-256, so that the table holds no code in clear.
+ */
+export const hashActivationIdentifier = (identifier: string) => createHash('sha256').update(identifier).digest('base64url');
 
 /** The window's token as the profile keeps it: a SHA-256, the token itself being 190 random bits. */
 const hashToken = (token: string) => createHash('sha256').update(token).digest('base64url');

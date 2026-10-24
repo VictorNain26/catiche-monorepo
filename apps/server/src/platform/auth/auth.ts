@@ -24,7 +24,15 @@ import type { FailureBudget } from '../http/rate-limit';
 import { INVITATION_DAYS, invitationEmail, invitationIdentifier, spendInvitationLinks, type InvitationLetter } from './invitation';
 import { account, passkey as passkeyTable, session, user, verification } from './schema';
 import { createStudentDevices } from './student-devices';
-import { ACTIVATION_PREFIX, EMAIL_SIGN_INS, activationFailureBudget, isStudentEmail, studentSignIn, type StudentAccess } from './student-sign-in';
+import {
+  ACTIVATION_PREFIX,
+  EMAIL_SIGN_INS,
+  activationFailureBudget,
+  hashActivationIdentifier,
+  isStudentEmail,
+  studentSignIn,
+  type StudentAccess,
+} from './student-sign-in';
 
 export interface AuthDeps {
   mailer: Mailer;
@@ -163,7 +171,12 @@ export function createAuth(
     // The client's address, as the server reads it behind the host's proxy (app.ts).
     advanced: { disableOriginCheck: false, backgroundTasks: { handler: background }, ipAddress: { ipAddressHeaders: [CLIENT_ADDRESS_HEADER] } },
     // An activation code is a credential: stored hashed, like a password, never in clear.
-    verification: { storeIdentifier: { default: 'plain', overrides: { [ACTIVATION_PREFIX]: 'hashed' } } },
+    verification: {
+      storeIdentifier: {
+        default: 'plain',
+        overrides: { [ACTIVATION_PREFIX]: { hash: (identifier) => Promise.resolve(hashActivationIdentifier(identifier)) } },
+      },
+    },
     // The code's own routes for what Tom does not use: no password to reset, no other check. And
     // the magic link's own request: only the invitation makes one, by a call of the server's.
     disabledPaths: [

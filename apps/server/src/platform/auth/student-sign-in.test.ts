@@ -129,6 +129,23 @@ describe("a guardian's activation code", () => {
     expect((await api.device().activate(forgotten)).status).toBe(400);
   });
 
+  it('leaves one code alive after two asked at the same moment', async () => {
+    const guardian = await api.guardian('deux-a-la-fois@example.com');
+    const lea = await api.student(guardian);
+    for (let round = 0; round < 5; round++) {
+      const codes = await Promise.all([api.activationCode(guardian, lea.id), api.activationCode(guardian, lea.id, 'forgotten')]);
+      const alive = await db
+        .select()
+        .from(verification)
+        .where(eq(verification.value, JSON.stringify({ userId: lea.id, reason: 'device' })));
+      const forgotten = await db
+        .select()
+        .from(verification)
+        .where(eq(verification.value, JSON.stringify({ userId: lea.id, reason: 'forgotten' })));
+      expect({ round, alive: alive.length + forgotten.length, codes: codes.length }).toEqual({ round, alive: 1, codes: 2 });
+    }
+  });
+
   it('stops only the code of its own student', async () => {
     const guardian = await api.guardian('frere-et-soeur@example.com');
     const lea = await api.student(guardian);
