@@ -76,6 +76,11 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-24 ; ce qui 
 - La suppression du compte d'un enfant ne demande pas encore la confirmation récente
   (`freshSession`, `platform/auth/session.ts`), que vise `docs/plans/app-cible.md` (§ 7) : la
   route et l'écran « Gérer » l'attendent, avec leur test.
+- L'e-mail « Le compte de Léa est supprimé » de la tâche de fond (`householdSweep`) part une fois,
+  après la suppression : si le mailer échoue pendant le passage, il n'est jamais renvoyé.
+- La tâche de fond (`platform/lifecycle/sweep.ts`) garde une connexion en transaction pendant tout
+  le passage, envois d'e-mails compris : si Clever Cloud fixe `idle_in_transaction_session_timeout`,
+  le verrou peut se perdre en cours de passage, au pire avec des e-mails en double. À vérifier.
 - La landing, à la naissance de la production : ses liens « Se connecter » mènent au staging
   (`APP_URL`, `apps/landing/src/lib/brand.ts`) ; changer cette constante, et le bouton « Demander
   une invitation » (`molecules/request-invitation.astro`) avec les phrases « en préparation » si
