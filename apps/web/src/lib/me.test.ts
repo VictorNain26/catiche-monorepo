@@ -1,5 +1,25 @@
 import { describe, expect, it } from 'bun:test';
-import { declarationsSchema, invitationLine, invitationPromise, invitedWelcomeSchema, isRecentReset, welcomeSchema } from './me';
+import {
+  accountDeletionWarning,
+  declarationsSchema,
+  invitationLine,
+  invitationPromise,
+  invitedWelcomeSchema,
+  isRecentReset,
+  welcomeSchema,
+} from './me';
+
+describe('accountDeletionWarning', () => {
+  it('names each child the deletion takes, one sentence each', () => {
+    expect(accountDeletionWarning([])).toBe('Votre compte sera effacé. C’est définitif.');
+    expect(accountDeletionWarning(['Léa'])).toBe(
+      'Votre compte sera effacé. Le compte de Léa le sera aussi : personne d’autre n’est son parent dans Catiche. C’est définitif.',
+    );
+    expect(accountDeletionWarning(['Léa', 'Tom'])).toBe(
+      'Votre compte sera effacé. Le compte de Léa le sera aussi : personne d’autre n’est son parent dans Catiche. Le compte de Tom le sera aussi : personne d’autre n’est son parent dans Catiche. C’est définitif.',
+    );
+  });
+});
 
 describe('declarationsSchema', () => {
   it('takes every box ticked', () => {

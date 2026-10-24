@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { deviceKind, deviceName, formatDate, formatDay, formatHour } from './device';
+import { deviceKind, deviceName, formatDate, formatDay, formatHour, passkeyName } from './device';
 
 describe('deviceName', () => {
   it('names a phone by its system and browser', () => {
@@ -35,6 +35,22 @@ describe('deviceKind', () => {
   it('says « appareil » when it cannot tell', () => {
     expect(deviceKind('test-device')).toEqual({ the: 'l’appareil', this: 'cet appareil', blocked: 'bloqué' });
     expect(deviceKind(null)).toEqual({ the: 'l’appareil', this: 'cet appareil', blocked: 'bloqué' });
+  });
+});
+
+describe('passkeyName', () => {
+  const ANDROID = 'Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36';
+  const MAC = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15';
+  const created = new Date(2026, 2, 3, 9, 0);
+
+  it('names the key by its device and its system, then its day', () => {
+    expect(passkeyName(ANDROID, created)).toBe('Téléphone Android, créée le 3 mars');
+    expect(passkeyName(MAC, created)).toBe('Ordinateur macOS, créée le 3 mars');
+  });
+
+  it('says « Appareil » for a user agent it cannot read', () => {
+    expect(passkeyName('test-device', created)).toBe('Appareil, créée le 3 mars');
+    expect(passkeyName(null, created)).toBe('Appareil, créée le 3 mars');
   });
 });
 

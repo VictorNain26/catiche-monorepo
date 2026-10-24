@@ -7,6 +7,9 @@ import {
   askParents,
   birthYears,
   decidesWith,
+  deletionAsked,
+  deletionDay,
+  deletionWarning,
   householdMessage,
   inviteSchema,
   isLevel,
@@ -186,5 +189,22 @@ describe('askParents', () => {
   it('tells a relative which parents give a starting code', () => {
     expect(askParents(['Nadia'])).toBe('Pour ajouter un appareil, demandez un code de départ à Nadia.');
     expect(askParents(['Nadia', 'Karim'])).toBe('Pour ajouter un appareil, demandez un code de départ à Nadia ou à Karim.');
+  });
+});
+
+describe('the deletion of a child’s account', () => {
+  it('warns that the other parents may cancel it for 7 days', () => {
+    expect(deletionWarning(['Karim'])).toBe('Karim recevra un e-mail et pourra l’annuler pendant 7 jours.');
+    expect(deletionWarning(['Karim', 'Sam'])).toBe('Karim et Sam recevront un e-mail et pourront l’annuler pendant 7 jours.');
+  });
+
+  it('says who asked it, an adult who left Catiche as « Un adulte »', () => {
+    expect(deletionAsked('Léa', 'Nadia')).toBe('Nadia a demandé la suppression du compte de Léa.');
+    expect(deletionAsked('Léa', null)).toBe('Un adulte a demandé la suppression du compte de Léa.');
+  });
+
+  it('says the day it is done', () => {
+    // A local date: the same day whatever the time zone of the machine.
+    expect(deletionDay(new Date(2026, 9, 31, 9, 0).toISOString())).toBe('Elle se fera le 31 octobre.');
   });
 });
