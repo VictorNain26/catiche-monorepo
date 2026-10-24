@@ -3,7 +3,9 @@ import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-q
 import { Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { formatCode } from '../lib/activation';
+import { isProblem } from '../lib/api';
 import { useConfirmation } from '../lib/confirmation';
+import { RecentEntry } from './recent-entry';
 import { deviceName, formatDay, formatHour } from '../lib/device';
 import {
   activationCode,
@@ -61,6 +63,8 @@ export function useActivation(studentId: string) {
       activation.mutate(reason);
     },
     asking: activation.isPending,
+    /** The code refused for an entry too old: a recent one confirms it (`RecentEntry`), then it is asked again. */
+    stale: isProblem(activation.error, 'SESSION_NOT_FRESH'),
     error: activation.error,
   };
 }
@@ -147,7 +151,15 @@ function ForgottenCode({ child, activation }: { child: Student; activation: Acti
         </Card>
       )}
       {activation.added && <Banner tone="success" title={`L’appareil de ${child.name} est ajouté.`} />}
-      {activation.error && <Banner tone="error" title={householdMessage(activation.error)} />}
+      {activation.stale ? (
+        <RecentEntry
+          onConfirmed={() => {
+            activation.ask('forgotten');
+          }}
+        />
+      ) : (
+        activation.error && <Banner tone="error" title={householdMessage(activation.error)} />
+      )}
       {forgetting.confirming ? (
         <>
           <Banner

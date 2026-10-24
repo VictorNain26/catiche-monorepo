@@ -129,6 +129,20 @@ describe("a guardian's activation code", () => {
     expect((await api.device().activate(forgotten)).status).toBe(400);
   });
 
+  it('is given, for either reason, only within minutes of the guardian’s entering', async () => {
+    const guardian = await api.guardian('code-frais@example.com');
+    const lea = await api.student(guardian);
+    const guardianId = (await api.sessionUser(guardian))?.id ?? '';
+    await db
+      .update(session)
+      .set({ createdAt: new Date(Date.now() - 11 * 60_000) })
+      .where(eq(session.userId, guardianId));
+    for (const reason of ['device', 'forgotten']) {
+      const res = await api.request('POST', `/api/household/students/${lea.id}/activation-code`, { cookie: guardian, body: { reason } });
+      expect({ reason, ...(await problem(res)) }).toEqual({ reason, status: 403, code: 'SESSION_NOT_FRESH' });
+    }
+  });
+
   it('leaves one code alive after two asked at the same moment', async () => {
     const guardian = await api.guardian('deux-a-la-fois@example.com');
     const lea = await api.student(guardian);

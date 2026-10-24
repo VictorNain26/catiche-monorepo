@@ -4,8 +4,8 @@ import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-q
 import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useMemo, useState, type ReactNode } from 'react';
 import { useActivation } from '../components/child-access';
-import { CodeForm, sendCode } from '../components/code-form';
 import { AdultPage, BackLink } from '../components/page';
+import { RecentEntry } from '../components/recent-entry';
 import { activationLink, formatCode, squarePath } from '../lib/activation';
 import { AuthFailure, authClient, authData, hasCode } from '../lib/auth';
 import { householdMessage, studentDevicesQuery, studentsQuery, type Student } from '../lib/household';
@@ -102,7 +102,6 @@ function ThisDevice({ child }: { child: Student }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [stale, setStale] = useState(false);
-  const [codeSentTo, setCodeSentTo] = useState<string | null>(null);
   const add = useMutation({
     mutationFn: async () => {
       let added;
@@ -122,47 +121,17 @@ function ThisDevice({ child }: { child: Student }) {
       await navigate({ to: '/profils/$studentId', params: { studentId: child.id } });
     },
   });
-  const askCode = useMutation({
-    mutationFn: async () => {
-      const session = await authData(authClient.getSession());
-      if (!session) return;
-      await authData(sendCode(session.user.email));
-      setCodeSentTo(session.user.email);
-    },
-  });
-  const failure = add.error ?? askCode.error;
 
-  if (codeSentTo) {
-    return (
-      <CodeForm
-        email={codeSentTo}
-        submitLabel="Confirmer"
-        onEntered={() => {
-          setCodeSentTo(null);
-          setStale(false);
-        }}
-      />
-    );
-  }
   return (
     <div className="flex flex-col gap-4">
       <p className="text-foreground">{child.name} choisit son code maintenant, sur cet écran. Vous ne le verrez pas.</p>
-      {failure && <Banner tone="error" title={failure.message} />}
+      {add.error && <Banner tone="error" title={add.error.message} />}
       {stale ? (
-        <>
-          <Banner tone="info" title="Confirmez d’abord avec un code reçu par e-mail">
-            Par sécurité, un appareil s’ajoute dans les 10 minutes qui suivent votre entrée.
-          </Banner>
-          <Button
-            disabled={askCode.isPending}
-            className="sm:self-start"
-            onClick={() => {
-              askCode.mutate();
-            }}
-          >
-            Recevoir un code
-          </Button>
-        </>
+        <RecentEntry
+          onConfirmed={() => {
+            setStale(false);
+          }}
+        />
       ) : (
         <Button
           disabled={add.isPending}
@@ -217,7 +186,15 @@ function OtherDevice({ child, activation }: { child: Student; activation: Return
   return (
     <div className="flex flex-col gap-4">
       {code ? <StartingCode child={child} code={code.code} /> : activation.asking && <p className="text-muted-foreground">Chargement du code…</p>}
-      {activation.error && <Banner tone="error" title={householdMessage(activation.error)} />}
+      {activation.stale ? (
+        <RecentEntry
+          onConfirmed={() => {
+            activation.ask('device');
+          }}
+        />
+      ) : (
+        activation.error && <Banner tone="error" title={householdMessage(activation.error)} />
+      )}
       {share.error && <Banner tone="error" title="Le code ne s’est pas partagé. Recopiez-le, ou réessayez." />}
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         {code && (

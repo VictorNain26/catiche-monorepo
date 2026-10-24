@@ -23,6 +23,7 @@ import { CLIENT_ADDRESS_HEADER } from '../http/client-address';
 import type { FailureBudget } from '../http/rate-limit';
 import { INVITATION_DAYS, invitationEmail, invitationIdentifier, spendInvitationLinks, type InvitationLetter } from './invitation';
 import { account, passkey as passkeyTable, session, user, verification } from './schema';
+import { FRESH_AGE_SECONDS } from './session';
 import { createStudentDevices } from './student-devices';
 import {
   ACTIVATION_PREFIX,
@@ -128,7 +129,7 @@ export function createAuth(
     // A session lives ninety days without use, renewed as it is used: a summer without opening the
     // tablet leaves the child's device paired. Deleting the account, or adding a passkey, needs a
     // session at most ten minutes old.
-    session: { expiresIn: 90 * 24 * 60 * 60, freshAge: 10 * 60 },
+    session: { expiresIn: 90 * 24 * 60 * 60, freshAge: FRESH_AGE_SECONDS },
     databaseHooks: {
       user: {
         create: {

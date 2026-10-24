@@ -417,8 +417,7 @@ parent : construit aussi (`bienvenue.tsx`, `InvitedWelcome`).
 **A4. Où [prénom] travaille le soir ?** : construit
 (`apps/web/src/routes/foyer.$studentId_.appareil.tsx`, le code de départ dans
 `apps/server/src/platform/auth/student-sign-in.ts`), après A3, après l'ajout d'un enfant suivant
-et depuis la fiche de l'enfant. Restent : l'entrée depuis « Gérer » (A7) ; la confirmation
-récente avant un code pour un autre appareil, que seul « Sur cet appareil » demande aujourd'hui.
+et depuis la fiche de l'enfant. Reste l'entrée depuis « Gérer » (A7).
 
 **A5. Accueil** (une carte par enfant, même avec un seul). L'en-tête, le titre et la carte de la
 clé d'accès sont construits (`apps/web/src/routes/foyer.index.tsx`,
