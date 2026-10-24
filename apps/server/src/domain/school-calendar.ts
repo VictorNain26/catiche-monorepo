@@ -44,6 +44,12 @@ export function quotaDayStart(now: Date): Date {
   return parisTime(paris.year, paris.month, paris.hour < QUOTA_RESET_HOUR ? paris.day - 1 : paris.day, QUOTA_RESET_HOUR);
 }
 
+/** The day of a date in Paris, as YYYY-MM-DD: a message at 0:30 is of the day it begins. */
+export function parisDay(date: Date): string {
+  const { year, month, day } = parisParts(date);
+  return `${String(year)}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
+
 /** The school year a date belongs to, named after the September that opens it. */
 export function schoolYearOf(date: Date): number {
   // In Paris: on a server in UTC, the night of 1 September would still be August.

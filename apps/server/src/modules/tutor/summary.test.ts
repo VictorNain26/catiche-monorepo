@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'bun:test';
 import { and, eq, gt } from 'drizzle-orm';
-import { schoolYearOf } from '../../domain/school-calendar';
+import { parisDay, schoolYearOf } from '../../domain/school-calendar';
 import { programmeFor } from '../../referential';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
@@ -78,6 +78,7 @@ const summaryOf = (cookie: string, path = '/api/summary') => api.request('GET', 
 // Eight days ago: out of the week.
 await mathsSession(asLea, 8, [0, 5, 10]);
 // Yesterday: the first message sent four minutes after opening, two more, then a pause of twenty.
+const yesterday = [4, 6, 26].map((offset) => parisDay(ago(1, offset)));
 await mathsSession(asLea, 1, [4, 6, 26]);
 
 describe('the summary of the week', () => {
@@ -89,6 +90,9 @@ describe('the summary of the week', () => {
       sessions: 1,
       subjects: [{ subject: 'mathematiques', minutes: 5 }],
       resisting: [{ notionId: notion.id, label: notion.text, worked: 1, lastSolved: false, lastHelp: 'avec un rappel de la règle', watch: null }],
+      // The days in Paris the student wrote to Tom: yesterday's, and not the one eight days ago.
+      days: [...new Set(yesterday)],
+      tonight: false,
     });
   });
 
@@ -128,7 +132,7 @@ describe('the summary of the week', () => {
   });
 
   it('gives a student with no session this week an empty summary', async () => {
-    expect(await (await summaryOf(asNoe)).json()).toEqual({ minutes: 0, sessions: 0, subjects: [], resisting: [] });
+    expect(await (await summaryOf(asNoe)).json()).toEqual({ minutes: 0, sessions: 0, subjects: [], resisting: [], days: [], tonight: false });
   });
 
   it('refuses another guardian, a student asking for another, and a guardian asking as a student', async () => {
