@@ -72,7 +72,9 @@ export function weekSummary(messages: readonly WeekMessage[], exercises: readonl
  */
 function evenings(messages: readonly WeekMessage[], now: Date) {
   const today = parisDay(now);
-  const weekAgo = parisDay(weekStart(now));
-  const days = [...new Set(messages.map(({ at }) => parisDay(at)))].filter((day) => day > weekAgo && day <= today).sort();
+  // Six calendar days before today, not 144 hours: a change of clocks makes a day of 23 or 25.
+  const [year = 0, month = 1, day = 1] = today.split('-').map(Number);
+  const first = new Date(Date.UTC(year, month - 1, day - 6)).toISOString().slice(0, 10);
+  const days = [...new Set(messages.map(({ at }) => parisDay(at)))].filter((each) => each >= first && each <= today).sort();
   return { days, tonight: days.includes(today) };
 }

@@ -118,6 +118,16 @@ describe('weekSummary, the evenings', () => {
     });
   });
 
+  it('keeps seven calendar days across the change to summer time: one Monday, not two', () => {
+    // Monday 29 March 2027 at 0:30 in Paris, the clocks gone forward the night before; Monday 22 at 20:00.
+    expect(evenings('2027-03-28T22:30:00Z', '2027-03-22T19:00:00Z', '2027-03-28T22:10:00Z')).toEqual({ days: ['2027-03-29'], tonight: true });
+  });
+
+  it('keeps seven calendar days across the change to winter time: the Monday six days back stays', () => {
+    // Sunday 25 October 2026 at 23:30 in Paris, the clocks gone back that night; Monday 19 at 20:00.
+    expect(evenings('2026-10-25T22:30:00Z', '2026-10-19T18:00:00Z')).toEqual({ days: ['2026-10-19'], tonight: false });
+  });
+
   it('keeps seven days, today included: the same weekday a week ago is out', () => {
     // Thursday 8 January at 22:00 in Paris, within the seven days of hours before Thursday 15 at 21:00.
     expect(evenings('2026-01-15T20:00:00Z', '2026-01-08T21:00:00Z', '2026-01-09T08:00:00Z')).toEqual({ days: ['2026-01-09'], tonight: false });
