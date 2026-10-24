@@ -120,6 +120,10 @@ export const studentProfile = pgTable(
     memoryProposedAt: timestamp('memory_proposed_at', { withTimezone: true }),
     memoryAnswer: memoryAnswer('memory_answer'),
     memoryResetAfter: bigint('memory_reset_after', { mode: 'number' }),
+    // The deletion a parent asked while another parent follows the student, done 7 days later
+    // (domain/student-deletion.ts); who asked it, null once they left Catiche.
+    deletionRequestedAt: timestamp('deletion_requested_at', { withTimezone: true }),
+    deletionRequestedBy: text('deletion_requested_by').references(() => user.id, { onDelete: 'set null' }),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [check('student_profile_birth_month_first_day', sql`extract(day from ${table.birthMonth}) = 1`)],

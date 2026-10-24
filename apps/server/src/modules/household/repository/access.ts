@@ -3,12 +3,13 @@
  * they manage, a clause of the query itself (`../repository.ts`), and the history's writing.
  */
 
-import { and, asc, eq, inArray, ne } from 'drizzle-orm';
+import { and, asc, eq, inArray, lte, ne, notInArray, type Column } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { ChildEventDetail, ChildEventKind } from '../../../domain/child-events';
+import { deletionCutoff } from '../../../domain/student-deletion';
 import { user } from '../../../platform/auth/schema';
 import type { Db } from '../../../platform/db/client';
-import { childEvent, guardianship } from '../schema';
+import { childEvent, guardianship, studentProfile } from '../schema';
 
 export const otherAdult = alias(guardianship, 'other_adult');
 
@@ -17,9 +18,27 @@ export const asParent = (role: typeof guardianship.role | typeof otherAdult.role
 
 /** The two ways from an adult to students, on `db`: each part of the repository builds them once. */
 export function accessOf(db: Db) {
+  /**
+   * The student `column` names is not one whose deletion is due: past its day, a student is
+   * treated as deleted, whether or not the sweep has taken them yet (domain/student-deletion.ts).
+   * By the clock of the server, which a deletion asked is dated by.
+   */
+  const alive = (column: Column) =>
+    notInArray(
+      column,
+      db
+        .select({ id: studentProfile.userId })
+        .from(studentProfile)
+        .where(lte(studentProfile.deletionRequestedAt, deletionCutoff(new Date()))),
+    );
   /** The ids of the students `adultId` is linked to, as a parent or a relative: what they read. */
-  const studentsOf = (adultId: string) => db.select({ id: guardianship.studentId }).from(guardianship).where(eq(guardianship.adultId, adultId));
+  const studentsOf = (adultId: string) =>
+    db
+      .select({ id: guardianship.studentId })
+      .from(guardianship)
+      .where(and(eq(guardianship.adultId, adultId), alive(guardianship.studentId)));
   return {
+    alive,
     studentsOf,
     /**
      * First in a gesture's transaction: the adult's row, then the student's, if the adult is
@@ -42,7 +61,7 @@ export function accessOf(db: Db) {
       db
         .select({ id: guardianship.studentId })
         .from(guardianship)
-        .where(and(eq(guardianship.adultId, adultId), asParent())),
+        .where(and(eq(guardianship.adultId, adultId), asParent(), alive(guardianship.studentId))),
     /**
      * The other parents of the students `adultId` is linked to, or of the one `studentId` names,
      * the earliest first: who decides with the adult, and who is told. Never a relative.

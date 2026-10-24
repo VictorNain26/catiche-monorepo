@@ -9,6 +9,7 @@ import { createPlaceholderEmail } from '@better-auth/core/utils/email';
 import { generateId } from '@better-auth/core/utils/id';
 import type { SchoolLevel } from '../../domain/levels';
 import { memoryConsent, type MemoryAnswer } from '../../domain/memory-consent';
+import { deletionDue, frenchDay } from '../../domain/student-deletion';
 
 export type { AdultRole, MemoryAnswer };
 import type { AdultRole } from '../../domain/adult-roles';
@@ -79,13 +80,22 @@ export function learnerMemory(
   return { state, mayAnswer, resetAfter: profile.memoryResetAfter ?? 0 };
 }
 
-// The date column holds the first day of the month; the API speaks in YYYY-MM.
-const toStudent = <Row extends StudentRow>({ birthMonth, memoryProposedAt, memoryAnswer, ...student }: Row) => {
+// The date column holds the first day of the month; the API speaks in YYYY-MM. A deletion asked
+// says who asked it, null once they left Catiche, and the day it is done.
+const toStudent = <Row extends StudentRow>({
+  birthMonth,
+  memoryProposedAt,
+  memoryAnswer,
+  deletionRequestedAt,
+  deletionRequestedBy,
+  ...student
+}: Row) => {
   const { state, decidesAlone } = memoryConsent({ birthMonth, proposedAt: memoryProposedAt, answer: memoryAnswer }, new Date());
   return {
     ...student,
     birthMonth: birthMonth.slice(0, 7),
     memory: { proposed: memoryProposedAt !== null, state, decidesAlone },
+    deletion: deletionRequestedAt === null ? null : { by: deletionRequestedBy, dueAt: deletionDue(deletionRequestedAt) },
   };
 };
 
@@ -141,11 +151,14 @@ export function createHouseholdService({ repository, sharedDevice, inviteAddress
     async me({ id, name, email, deviceId }: SignedIn) {
       const student = await repository.findProfile(id);
       if (student) return { id, name, role: 'student' as const, level: student.level };
-      const [missing, offer, shared, invitations] = await Promise.all([
+      // A student whose deletion is due is signed in no more.
+      if (await isStudent(id)) throw new Problem('UNAUTHENTICATED');
+      const [missing, offer, shared, invitations, onlyParentOf] = await Promise.all([
         repository.missingDeclarations(id),
         repository.passkeyOffer(id),
         deviceId === null ? false : sharedDevice(deviceId, id),
         repository.pendingInvitations(email),
+        repository.onlyParentOf(id),
       ]);
       return {
         id,
@@ -161,6 +174,8 @@ export function createHouseholdService({ repository, sharedDevice, inviteAddress
         // Offered from the second entry by email, until a passkey exists or the offer is put
         // away; never on a shared device, whose lock a child may know.
         passkeyOffer: offer.emailEntries >= PASSKEY_OFFER_ENTRIES && offer.passkeys === 0 && !offer.closed && !shared,
+        // The children the deletion of the adult's account takes with it: « Votre compte » names them.
+        onlyParentOf,
       };
     },
 
@@ -325,8 +340,37 @@ export function createHouseholdService({ repository, sharedDevice, inviteAddress
       if (!(await repository.removeDevice(adultId, studentId, deviceId))) throw new Problem('NOT_FOUND');
     },
 
+    /**
+     * A parent deletes the student's account (`app-cible.md`, question tranchée 1): at once, null,
+     * when no other parent follows them; else the deletion is asked, and its day, which the other
+     * parents are told the first time it is.
+     */
     async deleteStudent(adultId: string, studentId: string) {
-      if (!(await repository.deleteStudent(adultId, studentId))) throw new Problem('NOT_FOUND');
+      const asked = await repository.askDeletion(adultId, studentId, new Date());
+      if (!asked) throw new Problem('NOT_FOUND');
+      if (asked.deleted) return null;
+      const dueAt = deletionDue(asked.requestedAt);
+      if (asked.first) {
+        later(async () => {
+          const link = await repository.parentLink(adultId, studentId);
+          if (!link) return;
+          const sentence = `${link.adultName} a demandé la suppression du compte de ${link.studentName}`;
+          await sendEach(link.otherParents, {
+            subject: sentence,
+            text: `Bonjour,\n\n${sentence}. Elle se fera le ${frenchDay(dueAt)}, sauf si vous l’annulez.\n\nGérer ${link.studentName}, dans Catiche : ${publicUrl}/foyer/${studentId}`,
+          });
+        });
+      }
+      return { dueAt };
+    },
+
+    /** A parent cancels the deletion asked, its author included; the other parents are told. */
+    async cancelDeletion(adultId: string, studentId: string) {
+      const cancelled = await repository.cancelDeletion(adultId, studentId);
+      if (!cancelled) throw new Problem('NOT_FOUND');
+      if (cancelled === 'cancelled') {
+        tellOtherParents(adultId, studentId, (adult, student) => `${adult} a annulé la suppression du compte de ${student}`);
+      }
     },
   };
 }

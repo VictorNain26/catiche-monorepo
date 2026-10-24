@@ -93,6 +93,36 @@ export function householdAuth(db: Db) {
   return { deleteUser: accountDeletion(db), students, emailEntered: (adultId: string) => repository.countEmailEntry(adultId) };
 }
 
+/**
+ * The household's steps of the background sweep (`platform/lifecycle/sweep.ts`), which main.ts
+ * hands to it: the deletions of students due, told to their parents; the history past its 90 days;
+ * the invitations of adults expired, with the closed beta's invitation of an address nothing
+ * waits for any more.
+ */
+export function householdSweep({ db, mailer }: { db: Db; mailer: Mailer }) {
+  const repository = createHouseholdRepository(db);
+  return {
+    deletions: async (now: Date) => {
+      const deleted = await repository.deleteDueStudents(now);
+      await Promise.all(
+        deleted.flatMap(({ name, parents }) =>
+          parents.map((to) =>
+            mailer({
+              to,
+              subject: `Le compte de ${name} est supprimé`,
+              text: `Bonjour,\n\nLe compte de ${name} est supprimé. Ses séances sont effacées et ses appareils déconnectés.`,
+            }),
+          ),
+        ),
+      );
+    },
+    history: (now: Date) => repository.purgeHistory(now),
+    invitations: async (now: Date) => {
+      for (const email of await repository.purgeInvitations(now)) await revokeInvitation(db, email);
+    },
+  };
+}
+
 /** A user's deletion, with the students they are the last parent of, in one transaction. */
 export function accountDeletion(db: Db) {
   const repository = createHouseholdRepository(db);

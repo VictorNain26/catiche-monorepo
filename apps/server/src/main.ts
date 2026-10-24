@@ -5,7 +5,7 @@
 
 import { createApp } from './app';
 import { loadConfig } from './config';
-import { householdAuth } from './modules/household';
+import { householdAuth, householdSweep } from './modules/household';
 import { createAi } from './platform/ai/client';
 import { createModeration } from './platform/ai/moderation';
 import { createAuth } from './platform/auth/auth';
@@ -14,6 +14,7 @@ import { logMailer, scalewayMailer } from './platform/email/mailer';
 import { pendingMigrations } from './platform/db/migrations';
 import { createBackgroundTasks } from './platform/lifecycle/background';
 import { createLifecycle, shutdown } from './platform/lifecycle/shutdown';
+import { createSweep } from './platform/lifecycle/sweep';
 import { createLogger } from './platform/observability/logger';
 
 // Readiness stays failed this long before the server closes: a few probe intervals of the host,
@@ -61,6 +62,10 @@ const app = createApp({ config, logger, db: database.db, auth, mailer, ai, moder
 const server = Bun.serve({ port: config.port, fetch: app.fetch, idleTimeout: 30 });
 logger.info({ url: server.url.href }, 'Server ready');
 
+// What runs on its own: the children's deletions due, the history and the invitations past their time.
+const sweep = createSweep({ db: database.db, logger, steps: householdSweep({ db: database.db, mailer }) });
+sweep.start();
+
 let stopping = false;
 for (const signal of ['SIGTERM', 'SIGINT'] as const) {
   process.on(signal, () => {
@@ -70,8 +75,9 @@ for (const signal of ['SIGTERM', 'SIGINT'] as const) {
     void shutdown({
       lifecycle,
       stopServer: () => server.stop(),
-      // The background tasks (emails, a session's title and summary), then the database they use.
-      close: [tasks.settled, database.close],
+      // The sweep's pass under way, the background tasks (emails, a session's title and summary),
+      // then the database they use.
+      close: [sweep.stop, tasks.settled, database.close],
       logger,
       drainMs: DRAIN_MS,
       deadlineMs: SHUTDOWN_DEADLINE_MS,

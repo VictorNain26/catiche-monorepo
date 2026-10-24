@@ -5,7 +5,7 @@
  * is not linked to, or only as a relative where a parent is needed, is simply not found.
  */
 
-import { and, desc, eq, gt, gte, inArray, isNull, ne, notExists, type SQL, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, gte, inArray, isNull, notExists, type SQL, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { HISTORY_DAYS } from '../../domain/child-events';
 import type { SchoolLevel } from '../../domain/levels';
@@ -14,8 +14,9 @@ import { device, deviceProfile, passkey, session, studentCode, user } from '../.
 import { CODE_TRIES, DEVICE_TRIES } from '../../platform/auth/student-devices';
 import { createActivationCode, type ActivationReason } from '../../platform/auth/student-sign-in';
 import type { Db } from '../../platform/db/client';
-import { accessOf, asParent, otherAdult, record, type Gesture } from './repository/access';
+import { accessOf, asParent, record, type Gesture } from './repository/access';
 import { adultsRepository } from './repository/adults';
+import { deletionsRepository } from './repository/deletions';
 import { adultProfile, childEvent, guardianship, studentProfile } from './schema';
 
 export interface NewStudent {
@@ -26,15 +27,17 @@ export interface NewStudent {
   birthMonth: string;
 }
 
-/** The browser a device named itself by, which the history names it by. */
 /** The adult a line of the history concerns, named when it is read. */
 const subject = alias(user, 'subject');
+/** The parent who asked the student's deletion. */
+const requester = alias(user, 'requester');
 
+/** The browser a device named itself by, which the history names it by. */
 const browserOf = async (tx: Pick<Db, 'select'>, deviceId: string) =>
   (await tx.select({ userAgent: device.userAgent }).from(device).where(eq(device.id, deviceId)))[0]?.userAgent ?? null;
 
 export function createHouseholdRepository(db: Db) {
-  const { studentsOf, managedBy, otherParents, lockFor } = accessOf(db);
+  const { alive, managedBy, otherParents, lockFor } = accessOf(db);
 
   /** The student's row, and the adult's link to them, which says the adult's role. */
   const linkOf = (adultId: string) => and(eq(guardianship.studentId, user.id), eq(guardianship.adultId, adultId));
@@ -80,18 +83,28 @@ export function createHouseholdRepository(db: Db) {
     memoryAnswer: studentProfile.memoryAnswer,
   };
 
-  /** The students the adult is linked to, matching `where`, with the adult's role for each. */
+  /**
+   * The students the adult is linked to, matching `where`, with the adult's role for each, and the
+   * deletion asked: when, and the first name of who asked it.
+   */
   const linkedStudents = (adultId: string, where?: SQL) =>
     db
-      .select({ ...studentColumns, role: guardianship.role })
+      .select({
+        ...studentColumns,
+        role: guardianship.role,
+        deletionRequestedAt: studentProfile.deletionRequestedAt,
+        deletionRequestedBy: requester.name,
+      })
       .from(user)
       .innerJoin(studentProfile, eq(studentProfile.userId, user.id))
       .innerJoin(guardianship, linkOf(adultId))
-      .where(where)
+      .leftJoin(requester, eq(requester.id, studentProfile.deletionRequestedBy))
+      .where(and(alive(user.id), where))
       .orderBy(user.createdAt);
 
   return {
     ...adultsRepository(db),
+    ...deletionsRepository(db),
 
     /** A user is a student when they have a student's profile. */
     async isStudent(userId: string) {
@@ -99,13 +112,13 @@ export function createHouseholdRepository(db: Db) {
       return profile !== undefined;
     },
 
-    /** A student's own profile; undefined for anyone who is not a student. */
+    /** A student's own profile; undefined for anyone who is not a student, and for a student whose deletion is due. */
     async findProfile(studentId: string) {
       const [student] = await db
         .select({ ...studentColumns, memoryResetAfter: studentProfile.memoryResetAfter })
         .from(user)
         .innerJoin(studentProfile, eq(studentProfile.userId, user.id))
-        .where(eq(user.id, studentId));
+        .where(and(eq(user.id, studentId), alive(user.id)));
       return student;
     },
 
@@ -214,7 +227,7 @@ export function createHouseholdRepository(db: Db) {
       const [link] = await db
         .select({ adultId: guardianship.adultId })
         .from(guardianship)
-        .where(and(eq(guardianship.adultId, adultId), eq(guardianship.studentId, studentId), asParent()));
+        .where(and(eq(guardianship.adultId, adultId), eq(guardianship.studentId, studentId), asParent(), alive(guardianship.studentId)));
       return link !== undefined;
     },
 
@@ -359,49 +372,6 @@ export function createHouseholdRepository(db: Db) {
           );
         return true;
       });
-    },
-
-    /**
-     * A user's deletion, in one transaction: the students they are the last parent of go with them
-     * (their sessions, links, profiles and invitations by ON DELETE CASCADE), their relatives'
-     * links too, since no one would manage them; a student another parent follows stays, with that
-     * parent. Locks the user row, as createStudent does: a student created meanwhile waits, then
-     * finds no adult. `NO KEY UPDATE`, as a gesture's `lockFor`: a row that holds them as a key,
-     * written meanwhile with a lock of its own, does not wait for this one.
-     */
-    async deleteAccount(userId: string) {
-      await db.transaction(async (tx) => {
-        await tx.select({ id: user.id }).from(user).where(eq(user.id, userId)).for('no key update');
-        // The students too, in one order: another adult of theirs leaving at the same time waits,
-        // then finds this adult gone and takes the student, never left without an adult.
-        await tx
-          .select({ id: user.id })
-          .from(user)
-          .where(inArray(user.id, studentsOf(userId)))
-          .orderBy(user.id)
-          .for('no key update');
-        await tx.delete(user).where(
-          and(
-            inArray(user.id, managedBy(userId)),
-            notExists(
-              tx
-                .select({ adultId: otherAdult.adultId })
-                .from(otherAdult)
-                .where(and(eq(otherAdult.studentId, user.id), ne(otherAdult.adultId, userId), asParent(otherAdult.role))),
-            ),
-          ),
-        );
-        await tx.delete(user).where(eq(user.id, userId));
-      });
-    },
-
-    /** The student's sessions, links, invitations and profile go with the user row (ON DELETE CASCADE). */
-    async deleteStudent(adultId: string, studentId: string) {
-      const deleted = await db
-        .delete(user)
-        .where(and(eq(user.id, studentId), inArray(user.id, managedBy(adultId))))
-        .returning({ id: user.id });
-      return deleted.length > 0;
     },
 
     /**

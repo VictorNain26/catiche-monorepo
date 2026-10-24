@@ -35,7 +35,7 @@ const waiting = (email: string, invitationId?: string) =>
   );
 
 export function adultsRepository(db: Db) {
-  const { managedBy: managed, otherParents, lockFor } = accessOf(db);
+  const { alive, managedBy: managed, otherParents, lockFor } = accessOf(db);
 
   return {
     /** Whether an adult with this address is linked to the student already. */
@@ -60,7 +60,7 @@ export function adultsRepository(db: Db) {
           .from(guardianship)
           .innerJoin(user, eq(user.id, guardianship.studentId))
           .innerJoin(inviter, eq(inviter.id, guardianship.adultId))
-          .where(and(eq(guardianship.adultId, adultId), eq(guardianship.studentId, studentId), asParent())),
+          .where(and(eq(guardianship.adultId, adultId), eq(guardianship.studentId, studentId), asParent(), alive(guardianship.studentId))),
         otherParents(adultId, studentId),
       ]);
       return link && { ...link, otherParents: others.map(({ email }) => email) };

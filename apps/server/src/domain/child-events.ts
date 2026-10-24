@@ -22,6 +22,9 @@ export const CHILD_EVENT_KINDS = [
   // A parent removes a relative; a relative leaves.
   'adult_removed',
   'adult_left',
+  // The deletion of the student's account, asked while another parent follows them, and cancelled.
+  'deletion_requested',
+  'deletion_cancelled',
 ] as const;
 
 export type ChildEventKind = (typeof CHILD_EVENT_KINDS)[number];
