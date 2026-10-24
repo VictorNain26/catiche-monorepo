@@ -4,7 +4,7 @@
  * everywhere; a code forgotten; a guardian who adds their children to the family computer.
  */
 
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it, setSystemTime } from 'bun:test';
 import { verifyPassword } from 'better-auth/crypto';
 import { and, eq } from 'drizzle-orm';
 import { guardianship } from '../../modules/household/schema';
@@ -37,6 +37,19 @@ async function withCode(email: string) {
   const found = await family(email);
   expect((await found.tablet.chooseCode(found.lea.id, STUDENT_CODE, true)).status).toBe(200);
   return found;
+}
+
+/**
+ * Whether a guardian's code still serves, typed on a new device `minutes` after it was given.
+ * better-auth reads the clock itself: Bun's, set here, not a module replaced.
+ */
+async function servesAfter(code: string, minutes: number) {
+  try {
+    setSystemTime(new Date(Date.now() + minutes * 60_000));
+    return (await api.device().activate(code)).status === 200;
+  } finally {
+    setSystemTime();
+  }
 }
 
 /** `count` wrong codes on `device`, one after the other. */
@@ -74,6 +87,54 @@ describe("a guardian's activation code", () => {
     const late = await api.activationCode(guardian, lea.id);
     await db.update(verification).set({ expiresAt: new Date(Date.now() - 1000) });
     expect((await api.device().activate(late)).status).toBe(400);
+  });
+
+  it('links a device for 24 hours: still good at 23 h 59, refused at 24 h 01', async () => {
+    const guardian = await api.guardian('vingt-quatre-heures@example.com');
+    const lea = await api.student(guardian);
+    expect(await servesAfter(await api.activationCode(guardian, lea.id), 23 * 60 + 59)).toBe(true);
+    expect(await servesAfter(await api.activationCode(guardian, lea.id), 24 * 60 + 1)).toBe(false);
+  });
+
+  it('after a forgotten code, serves 10 minutes only: good at 9, refused at 11', async () => {
+    const guardian = await api.guardian('dix-minutes@example.com');
+    const lea = await api.student(guardian);
+    expect(await servesAfter(await api.activationCode(guardian, lea.id, 'forgotten'), 9)).toBe(true);
+    expect(await servesAfter(await api.activationCode(guardian, lea.id, 'forgotten'), 11)).toBe(false);
+  });
+
+  it('stops the code given before it for the same reason: one code alive at a time bounds the guessing', async () => {
+    const guardian = await api.guardian('un-seul-code@example.com');
+    const lea = await api.student(guardian);
+    const firstDevice = await api.activationCode(guardian, lea.id);
+    const secondDevice = await api.activationCode(guardian, lea.id);
+    expect(await problem(await api.device().activate(firstDevice))).toEqual({ status: 400, code: 'INVALID_ACTIVATION_CODE' });
+    expect((await api.device().activate(secondDevice)).status).toBe(200);
+
+    const firstForgotten = await api.activationCode(guardian, lea.id, 'forgotten');
+    const secondForgotten = await api.activationCode(guardian, lea.id, 'forgotten');
+    expect((await api.device().activate(firstForgotten)).status).toBe(400);
+    expect((await api.device().activate(secondForgotten)).status).toBe(200);
+  });
+
+  it('leaves alive the code of the other reason: a forgotten code does not stop the device waiting, nor the reverse', async () => {
+    const guardian = await api.guardian('deux-raisons@example.com');
+    const lea = await api.student(guardian);
+    const device = await api.activationCode(guardian, lea.id);
+    const forgotten = await api.activationCode(guardian, lea.id, 'forgotten');
+    expect((await api.device().activate(device)).status).toBe(200);
+
+    await api.activationCode(guardian, lea.id);
+    expect((await api.device().activate(forgotten)).status).toBe(200);
+  });
+
+  it('stops only the code of its own student', async () => {
+    const guardian = await api.guardian('frere-et-soeur@example.com');
+    const lea = await api.student(guardian);
+    const tom = await api.student(guardian, { name: 'Tom', level: 'sixieme' });
+    const forLea = await api.activationCode(guardian, lea.id);
+    await api.activationCode(guardian, tom.id);
+    expect((await api.device().activate(forLea)).status).toBe(200);
   });
 
   it('recognises the device by a signed cookie of 400 days, and opens no session', async () => {

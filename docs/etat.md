@@ -58,7 +58,9 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
   matériel détenu en propre » (délibération 2022-100, § 46) ; l'ordinateur de la famille ne l'est
   pas, et s'appuie sur « tout autre mécanisme technique apportant un même niveau de sécurité »
   (appareil reconnu, 3 essais, session courte). C'est une interprétation à écrire, pas une
-  conformité littérale.
+  conformité littérale. Le code de départ d'un nouvel appareil vit une journée, la limite que la
+  CNIL admet pour un secret temporaire (§ 35), un seul à la fois par enfant : l'analyse le dit
+  aussi (sa durée : `createActivationCode`, `platform/auth/student-sign-in.ts`).
 - Les durées de conservation annoncées (`apps/landing/src/pages/confidentialite.astro`, § 7) :
   aucune purge ne tient encore celles du compte inactif ni des journaux. Celles des e-mails reçus
   à `contact@` se tiennent à la main, dans la boîte Zimbra.

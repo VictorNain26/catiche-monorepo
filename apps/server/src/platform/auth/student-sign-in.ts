@@ -4,7 +4,8 @@
  * the CNIL an unlocking code (deliberation 2022-100, § 45-47): six digits, a blocklist
  * (`domain/student-code.ts`), 3 tries on a device, 10 everywhere, then a guardian's code.
  *
- * - The guardian asks for an activation code (8 characters, 10 minutes, single use, hashed): the
+ * - The guardian asks for an activation code (8 characters, single use, hashed; 24 hours for a new
+ *   device, 10 minutes after a code forgotten): the
  *   device that sends it gets a signed cookie of its own, which holds nothing but its id, and the
  *   student's profile on it; no session.
  * - A student without a code chooses one there while the window is open; then their code opens
@@ -39,14 +40,17 @@ export const ACTIVATION_PREFIX = 'student-activation:';
 export const EMAIL_SIGN_INS: readonly string[] = ['/sign-in/email-otp', '/magic-link/verify'];
 /** Every route that opens an adult's session: by an email, or by a passkey. */
 export const ADULT_SIGN_INS: readonly string[] = [...EMAIL_SIGN_INS, '/passkey/verify-authentication'];
-const ACTIVATION_MINUTES = 10;
+const MINUTE = 60_000;
+/** The window to choose a code, once a guardian's code has served. */
+const WINDOW_MINUTES = 10;
 // Crockford's base32 (https://www.crockford.com/base32.html): no I, L, O or U to misread. Eight
-// characters, 40 bits, single use for ten minutes behind a rate limit: under the day the CNIL
-// allows a temporary secret (deliberation 2022-100, § 35).
+// characters, 40 bits, single use behind a rate limit, one alive at a time: within the day the
+// CNIL allows a temporary secret (deliberation 2022-100, § 35).
 const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 const CODE_LENGTH = 8;
+/** A code for a new device lasts a day; one for a code forgotten, ten minutes. */
+const ACTIVATION_LIFETIMES: Record<ActivationReason, number> = { device: 24 * 60 * MINUTE, forgotten: 10 * MINUTE };
 
-const MINUTE = 60_000;
 /** A session on a shared device: closed ten minutes without use, two hours after it opened at most. */
 const IDLE_MINUTES = 10;
 const SHARED_MINUTES = 120;
@@ -78,12 +82,21 @@ function generateActivationCode(): string {
 /** A student's address is the RFC 6761 `.invalid` one better-auth makes for an account without email. */
 export const isStudentEmail = (email: string) => email.endsWith('.invalid');
 
-/** A code that recognises, within ten minutes, the device that sends it for `userId`: a new device, or a code forgotten. */
+/**
+ * A code that recognises the device that sends it for `userId`: a new device, within a day, so
+ * that it can be prepared ahead; or a code forgotten, within ten minutes. It replaces the code of
+ * the same reason given before for the student: one alive at a time bounds what can be guessed.
+ */
 export async function createActivationCode(auth: Auth, userId: string, reason: ActivationReason) {
+  const { adapter, internalAdapter } = await auth.$context;
   const code = generateActivationCode();
-  const expiresAt = new Date(Date.now() + ACTIVATION_MINUTES * MINUTE);
+  const expiresAt = new Date(Date.now() + ACTIVATION_LIFETIMES[reason]);
   const value = JSON.stringify({ userId, reason });
-  await (await auth.$context).internalAdapter.createVerificationValue({ identifier: `${ACTIVATION_PREFIX}${code}`, value, expiresAt });
+  await runWithTransaction(adapter, async () => {
+    // The identifier is hashed, the value is not: it names the student and the reason.
+    await adapter.deleteMany({ model: 'verification', where: [{ field: 'value', value }] });
+    await internalAdapter.createVerificationValue({ identifier: `${ACTIVATION_PREFIX}${code}`, value, expiresAt });
+  });
   return { code, expiresAt };
 }
 
@@ -137,7 +150,7 @@ export function studentSignIn({ devices, students }: { devices: StudentDevices; 
    */
   const openWindow = async (deviceId: string, studentId: string, options: { shared: boolean; keep?: string | undefined }) => {
     const chooseToken = generateId(32);
-    const windowUntil = new Date(Date.now() + ACTIVATION_MINUTES * MINUTE);
+    const windowUntil = new Date(Date.now() + WINDOW_MINUTES * MINUTE);
     await devices.addProfile(deviceId, studentId, { windowUntil, chooseTokenHash: hashToken(chooseToken), ...options });
     return chooseToken;
   };
