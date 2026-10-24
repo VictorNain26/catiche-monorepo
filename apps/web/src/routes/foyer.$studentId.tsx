@@ -3,19 +3,24 @@ import { Banner, Button, Field, Fold, List, ListItem, Section, SelectField, toas
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
-import { ChildAccess, useActivation } from '../components/child-access';
+import { ChildDevices, ForgottenCode, useActivation } from '../components/child-access';
+import { ChildHistory } from '../components/child-history';
 import { AdultPage } from '../components/page';
 import { WeekSummary } from '../components/week-summary';
 import { isProblem } from '../lib/api';
 import { useConfirmation } from '../lib/confirmation';
 import { formatDay } from '../lib/device';
+import { historyQuery } from '../lib/history';
 import { meQuery } from '../lib/me';
+import { capitalised } from '../lib/words';
 import { summaryQuery } from '../lib/summary';
 import {
   LEVEL_LABELS,
   LEVEL_OPTIONS,
   ROLE_LABELS,
   adultsQuery,
+  askParents,
+  decidesWith,
   deleteStudent,
   householdMessage,
   memoryStatus,
@@ -29,10 +34,11 @@ import {
 } from '../lib/household';
 
 /**
- * One child of the adult's. For a parent: until a device holds their profile, the page opens on
- * their devices, with the way to add one (A4); then their week; their devices; their adults; their
- * memory, their name and class and their account folded, a tap away. For a relative: the week, and
- * their way out.
+ * « Gérer [prénom] » (A7). For a parent: who decides with them; until a device holds the child's
+ * profile, the page opens on their devices, with the way to add one (A4); then their week; their
+ * devices; their forgotten code; their adults; and, folded under « Plus », their memory, their name
+ * and class, the history and their account. Two columns on a computer. For a relative: the week,
+ * whom to ask for a device, and their way out.
  */
 export const Route = createFileRoute('/foyer/$studentId')({
   loader: async ({ context, params }) => {
@@ -60,9 +66,10 @@ function StudentPage() {
 function RelativeView({ child }: { child: Student }) {
   const week = useQuery(summaryQuery(child.id));
   return (
-    <AdultPage title={child.name} subtitle={LEVEL_LABELS[child.level]}>
+    <AdultPage title={`Gérer ${child.name}`} subtitle={LEVEL_LABELS[child.level]}>
       <p className="text-foreground">Vous suivez les devoirs de {child.name}.</p>
       <WeekSummary week={week.data} failed={week.isError} name={child.name} reader="guardian" />
+      {child.parents.length > 0 && <p className="text-muted-foreground">{askParents(child.parents)}</p>}
       <LeaveChild child={child} />
     </AdultPage>
   );
@@ -123,21 +130,34 @@ function ParentView({ child }: { child: Student }) {
   const first = activation.devices.length === 0;
 
   return (
-    <AdultPage title={child.name} subtitle={LEVEL_LABELS[child.level]} wide>
-      {first && <ChildAccess child={child} activation={activation} />}
-      <WeekSummary week={week.data} failed={week.isError} name={child.name} reader="guardian" />
-      {!first && <ChildAccess child={child} activation={activation} />}
-      <ChildAdults child={child} />
-      <div className="flex flex-col">
-        <Fold title="Ce que Tom retient">
-          <Memory child={child} />
-        </Fold>
-        <Fold title="Son prénom et sa classe">
-          <EditStudent child={child} />
-        </Fold>
-        <Fold title="Supprimer son compte">
-          <DeleteStudent child={child} />
-        </Fold>
+    <AdultPage title={`Gérer ${child.name}`} subtitle={LEVEL_LABELS[child.level]} wide>
+      <p className="text-foreground">{decidesWith(child.name, child.parents)}</p>
+      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-12">
+        <div className="flex flex-col gap-6">
+          {first && <ChildDevices child={child} activation={activation} />}
+          <WeekSummary week={week.data} failed={week.isError} name={child.name} reader="guardian" />
+          {!first && <ChildDevices child={child} activation={activation} />}
+          <ForgottenCode child={child} activation={activation} />
+        </div>
+        <div className="flex flex-col gap-6">
+          <ChildAdults child={child} />
+          <Fold title="Plus">
+            <div className="flex flex-col gap-6">
+              <Section title="Ce que Tom retient" level={3}>
+                <Memory child={child} />
+              </Section>
+              <Section title="Son prénom et sa classe" level={3}>
+                <EditStudent child={child} />
+              </Section>
+              <Section title="Historique" level={3}>
+                <ChildHistory child={child} />
+              </Section>
+              <Section title="Supprimer son compte" level={3}>
+                <DeleteStudent child={child} />
+              </Section>
+            </div>
+          </Fold>
+        </div>
       </div>
     </AdultPage>
   );
@@ -150,18 +170,21 @@ function ParentView({ child }: { child: Student }) {
 function ChildAdults({ child }: { child: Student }) {
   const queryClient = useQueryClient();
   const { data } = useSuspenseQuery(adultsQuery(child.id));
+  // Its adults and its history.
+  const refresh = () =>
+    Promise.all([adultsQuery(child.id), historyQuery(child.id)].map(({ queryKey }) => queryClient.invalidateQueries({ queryKey })));
   const removal = useConfirmation<string>();
   const remove = useMutation({
     mutationFn: (adultId: string) => removeAdult(child.id, adultId),
     onSuccess: () => {
       removal.close();
-      return queryClient.invalidateQueries({ queryKey: adultsQuery(child.id).queryKey });
+      return refresh();
     },
   });
   // A mistyped address keeps no way to the child: the invitation is withdrawn at once, and can be sent again.
   const withdraw = useMutation({
     mutationFn: (invitationId: string) => withdrawInvitation(child.id, invitationId),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: adultsQuery(child.id).queryKey }),
+    onSettled: refresh,
   });
   const nobody = data.adults.length === 0 && data.invitations.length === 0;
 
@@ -234,8 +257,6 @@ function ChildAdults({ child }: { child: Student }) {
   );
 }
 
-const capitalised = (word: string) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`;
-
 function Memory({ child }: { child: Student }) {
   const queryClient = useQueryClient();
   const withdrawal = useConfirmation();
@@ -288,7 +309,7 @@ function Memory({ child }: { child: Student }) {
               else propose.mutate(true);
             }}
           >
-            {child.memory.proposed ? 'Retirer la mémoire' : `Proposer la mémoire à ${child.name}`}
+            {child.memory.proposed ? 'Retirer' : `Proposer à ${child.name}`}
           </Button>
         ))}
     </>

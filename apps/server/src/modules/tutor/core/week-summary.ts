@@ -4,6 +4,7 @@
  * and the exercises' records, never by a model: no word of the student nor of Tom enters it.
  */
 
+import { parisDay } from '../../../domain/school-calendar';
 import type { SubjectFamily } from '../../../domain/subjects';
 import { notionMemories, notionView, type PastExercise } from './memory';
 
@@ -33,7 +34,7 @@ const roundedMinutes = (ms: number) => Math.round(ms / 60_000 / ROUND_MINUTES) *
  * reply is written: the session's opening times its first message, and the reading of the last
  * reply is not counted.
  */
-export function weekSummary(messages: readonly WeekMessage[], exercises: readonly PastExercise[], resets: ReadonlyMap<string, number>) {
+export function weekSummary(messages: readonly WeekMessage[], exercises: readonly PastExercise[], resets: ReadonlyMap<string, number>, now: Date) {
   const sessions = new Map<string, WeekMessage[]>();
   for (const message of messages) {
     const session = sessions.get(message.sessionId);
@@ -61,5 +62,19 @@ export function weekSummary(messages: readonly WeekMessage[], exercises: readonl
   const resisting = notionMemories(exercises, resets)
     .filter((notion) => (!notion.lastSolved && notion.lastHintLevel > 0) || notion.lastHintLevel >= RESISTS_FROM_HINT)
     .map(notionView);
-  return { minutes: roundedMinutes(total), sessions: sessions.size, subjects, resisting };
+  return { minutes: roundedMinutes(total), sessions: sessions.size, subjects, resisting, ...evenings(messages, now) };
+}
+
+/**
+ * The days, in Paris, the student wrote to Tom, the earliest first: the seven last, today
+ * included, so that no weekday comes twice; and whether today is one of them. Every adult of the
+ * student reads them, without a time nor a subject (`docs/plans/app-cible.md`, A5).
+ */
+function evenings(messages: readonly WeekMessage[], now: Date) {
+  const today = parisDay(now);
+  // Six calendar days before today, not 144 hours: a change of clocks makes a day of 23 or 25.
+  const [year = 0, month = 1, day = 1] = today.split('-').map(Number);
+  const first = new Date(Date.UTC(year, month - 1, day - 6)).toISOString().slice(0, 10);
+  const days = [...new Set(messages.map(({ at }) => parisDay(at)))].filter((each) => each >= first && each <= today).sort();
+  return { days, tonight: days.includes(today) };
 }

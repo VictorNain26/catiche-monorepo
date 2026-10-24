@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { minutesText, questionFor, subjectLabel } from './summary';
+import { eveningsLine, minutesText, questionFor, subjectLabel } from './summary';
 
 describe('minutesText', () => {
   it('says the time as a parent and a pupil read it, never zero minutes', () => {
@@ -7,6 +7,24 @@ describe('minutesText', () => {
     expect(minutesText(35)).toBe('environ 35 min');
     expect(minutesText(60)).toBe('environ 1 h');
     expect(minutesText(95)).toBe('environ 1 h 35');
+  });
+});
+
+describe('eveningsLine', () => {
+  // Monday 19, Tuesday 20 and Thursday 22 October 2026.
+  it('names the days the child worked, in their order, without a time', () => {
+    expect(eveningsLine('Léa', ['2026-10-19'])).toBe('Cette semaine, Léa a travaillé lundi.');
+    expect(eveningsLine('Léa', ['2026-10-19', '2026-10-20'])).toBe('Cette semaine, Léa a travaillé lundi et mardi.');
+    expect(eveningsLine('Léa', ['2026-10-19', '2026-10-20', '2026-10-22'])).toBe('Cette semaine, Léa a travaillé lundi, mardi et jeudi.');
+  });
+
+  it('says so when the child did not work these seven days', () => {
+    expect(eveningsLine('Léa', [])).toBe('Léa n’a pas travaillé ces sept derniers jours.');
+  });
+
+  it('reads a day as the server dated it in Paris, whatever the zone of the machine', () => {
+    // Sunday 25 October 2026, the night the clocks go back.
+    expect(eveningsLine('Léa', ['2026-10-25'])).toBe('Cette semaine, Léa a travaillé dimanche.');
   });
 });
 

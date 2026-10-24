@@ -6,6 +6,7 @@ import type { InferRequestType, InferResponseType } from 'hono/client';
 import { ticked, z } from './zod';
 import { api, isProblem, parseResponse } from './api';
 import { FAILED, TOO_MANY_TRIES } from './auth';
+import { listWords } from './words';
 
 const students = api.household.students;
 
@@ -155,6 +156,13 @@ export const newChildSchema = (now = new Date()) =>
       message: `Votre enfant a ${CHILD_AGES} : vérifiez son mois et son année.`,
     })
     .transform(({ month, year, ...child }) => ({ ...child, birthMonth: `${year}-${month}` }));
+
+/** The head of « Gérer » for a parent (A7): who decides for the child with them. */
+export const decidesWith = (name: string, parents: readonly string[]) =>
+  parents.length === 0 ? `Vous décidez pour ${name}.` : `Vous décidez pour ${name}, avec ${listWords(parents)}.`;
+
+/** For a relative, who adds no device (`app-cible.md`, question tranchée 3): the parents to ask. */
+export const askParents = (parents: readonly string[]) => `Pour ajouter un appareil, demandez un code de départ à ${listWords(parents, ' ou à ')}.`;
 
 /** What the guardian reads of the learner memory of their child. */
 export function memoryStatus({ name, memory }: Pick<Student, 'name' | 'memory'>): string {

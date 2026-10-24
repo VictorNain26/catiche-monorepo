@@ -8,7 +8,7 @@ import type { Auth } from '../../platform/auth/auth';
 import { AccountExists, invite, revokeInvitation } from '../../platform/auth/invitation';
 import { createStudentDevices } from '../../platform/auth/student-devices';
 import type { Mailer } from '../../platform/email/mailer';
-import { createActivationCode, type StudentAccess } from '../../platform/auth/student-sign-in';
+import type { StudentAccess } from '../../platform/auth/student-sign-in';
 import type { Db } from '../../platform/db/client';
 import { keyedBudget } from '../../platform/http/rate-limit';
 import { createHouseholdRepository } from './repository';
@@ -31,7 +31,6 @@ export function householdModule({ db, auth, mailer, logger, background, publicUr
   const devices = createStudentDevices(db);
   const service = createHouseholdService({
     repository: createHouseholdRepository(db),
-    createActivationCode: (userId, reason) => createActivationCode(db, userId, reason),
     sharedDevice: (deviceId, userId) => devices.isShortSession(deviceId, userId),
     inviteAddress: async (email, letter) => {
       try {

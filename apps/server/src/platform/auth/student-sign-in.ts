@@ -100,9 +100,10 @@ export const isStudentEmail = (email: string) => email.endsWith('.invalid');
  * that it can be prepared ahead; or a code forgotten, within ten minutes. It replaces the code given
  * before for the student, whatever its reason: one alive at a time bounds what can be guessed, and a
  * device code shared earlier cannot choose the code a forgotten one clears. The student's row,
- * locked, puts two codes asked at the same moment one after the other.
+ * locked, puts two codes asked at the same moment one after the other. `db` may be a transaction of
+ * the caller's, which keeps its own line of the code in it: the household's history.
  */
-export async function createActivationCode(db: Db, userId: string, reason: ActivationReason) {
+export async function createActivationCode(db: Pick<Db, 'transaction'>, userId: string, reason: ActivationReason) {
   const code = generateActivationCode();
   const expiresAt = new Date(Date.now() + ACTIVATION_LIFETIMES[reason]);
   // The identifier is hashed, the value is not: it names the student and the reason.

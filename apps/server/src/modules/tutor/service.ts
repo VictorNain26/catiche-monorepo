@@ -50,13 +50,14 @@ export function createTutorService({ repository, students, ai, moderation, logge
 
   /** The student's summary of the week: the same for them and for their guardian. */
   async function summaryOf(studentId: string) {
-    const since = weekStart(new Date());
+    const now = new Date();
+    const since = weekStart(now);
     const [messages, exercises, resets] = await Promise.all([
       repository.messagesSince(studentId, since),
       repository.pastExercises(studentId, { since, after: 0, by: 'turn' }, null, null),
       repository.notionResets(studentId),
     ]);
-    return weekSummary(messages, exercises, resets);
+    return weekSummary(messages, exercises, resets, now);
   }
 
   const turn = createTurnPipeline({

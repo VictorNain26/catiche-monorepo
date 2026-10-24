@@ -3,6 +3,7 @@
 import { queryOptions } from '@tanstack/react-query';
 import type { InferResponseType } from 'hono/client';
 import { api, parseResponse } from './api';
+import { listWords } from './words';
 
 export type WeekSummary = InferResponseType<typeof api.summary.$get, 200>;
 type SubjectFamily = WeekSummary['subjects'][number]['subject'];
@@ -27,6 +28,18 @@ export function minutesText(minutes: number): string {
   const rest = minutes % 60;
   if (hours === 0) return `environ ${String(rest)} min`;
   return rest === 0 ? `environ ${String(hours)} h` : `environ ${String(hours)} h ${String(rest)}`;
+}
+
+// The server dates a day in Paris (YYYY-MM-DD): read at noon UTC, it is the same day everywhere.
+const weekday = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', timeZone: 'UTC' });
+
+/**
+ * The evenings of the week in a line, for every adult of the child: the days, without a time nor a
+ * subject (`docs/plans/app-cible.md`, A5).
+ */
+export function eveningsLine(name: string, days: readonly string[]): string {
+  if (days.length === 0) return `${name} n’a pas travaillé ces sept derniers jours.`;
+  return `Cette semaine, ${name} a travaillé ${listWords(days.map((day) => weekday.format(new Date(`${day}T12:00:00Z`))))}.`;
 }
 
 const SUBJECTS: Record<SubjectFamily, string> = {

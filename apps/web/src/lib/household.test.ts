@@ -2,7 +2,18 @@ import { describe, expect, it } from 'bun:test';
 import { Hono } from 'hono';
 import { hc } from 'hono/client';
 import { parseResponse } from './api';
-import { MONTHS, birthYears, householdMessage, inviteSchema, isLevel, memoryStatus, newChildSchema, roleChoices } from './household';
+import {
+  MONTHS,
+  askParents,
+  birthYears,
+  decidesWith,
+  householdMessage,
+  inviteSchema,
+  isLevel,
+  memoryStatus,
+  newChildSchema,
+  roleChoices,
+} from './household';
 
 const problem = (code: string, status: 400 | 404 | 429 | 500) =>
   new Hono().get('/', (c) => c.json({ status, code }, status, { 'Content-Type': 'application/problem+json' }));
@@ -160,5 +171,20 @@ describe('memoryStatus', () => {
     );
     expect(status({ proposed: false, state: 'off', decidesAlone: true })).toBe('À partir de 15 ans, c’est Léa qui décide.');
     expect(status({ proposed: false, state: 'active', decidesAlone: true })).toStartWith('Léa l’a acceptée');
+  });
+});
+
+describe('decidesWith', () => {
+  it('says to a parent whom they decide with, or that they decide alone', () => {
+    expect(decidesWith('Léa', [])).toBe('Vous décidez pour Léa.');
+    expect(decidesWith('Léa', ['Karim'])).toBe('Vous décidez pour Léa, avec Karim.');
+    expect(decidesWith('Léa', ['Karim', 'Sam'])).toBe('Vous décidez pour Léa, avec Karim et Sam.');
+  });
+});
+
+describe('askParents', () => {
+  it('tells a relative which parents give a starting code', () => {
+    expect(askParents(['Nadia'])).toBe('Pour ajouter un appareil, demandez un code de départ à Nadia.');
+    expect(askParents(['Nadia', 'Karim'])).toBe('Pour ajouter un appareil, demandez un code de départ à Nadia ou à Karim.');
   });
 });

@@ -14,7 +14,7 @@ export type { AdultRole, MemoryAnswer };
 import type { AdultRole } from '../../domain/adult-roles';
 import { invitationEmail, invitationExpiry, type InvitationLetter } from '../../platform/auth/invitation';
 import type { ActivationReason } from '../../platform/auth/student-sign-in';
-import type { Mailer } from '../../platform/email/mailer';
+import type { Email, Mailer } from '../../platform/email/mailer';
 import { Problem } from '../../platform/http/problem';
 import type { HouseholdRepository } from './repository';
 
@@ -36,7 +36,6 @@ export interface StudentInput {
 
 interface Deps {
   repository: HouseholdRepository;
-  createActivationCode: (userId: string, reason: ActivationReason) => Promise<{ code: string; expiresAt: Date }>;
   /** Whether the user's session on this device is a short one, the device being shared. */
   sharedDevice: (deviceId: string, userId: string) => Promise<boolean>;
   /**
@@ -81,7 +80,7 @@ export function learnerMemory(
 }
 
 // The date column holds the first day of the month; the API speaks in YYYY-MM.
-const toStudent = ({ birthMonth, memoryProposedAt, memoryAnswer, ...student }: StudentRow) => {
+const toStudent = <Row extends StudentRow>({ birthMonth, memoryProposedAt, memoryAnswer, ...student }: Row) => {
   const { state, decidesAlone } = memoryConsent({ birthMonth, proposedAt: memoryProposedAt, answer: memoryAnswer }, new Date());
   return {
     ...student,
@@ -90,17 +89,7 @@ const toStudent = ({ birthMonth, memoryProposedAt, memoryAnswer, ...student }: S
   };
 };
 
-export function createHouseholdService({
-  repository,
-  createActivationCode,
-  sharedDevice,
-  inviteAddress,
-  revokeAddress,
-  spendInvitation,
-  send,
-  later,
-  publicUrl,
-}: Deps) {
+export function createHouseholdService({ repository, sharedDevice, inviteAddress, revokeAddress, spendInvitation, send, later, publicUrl }: Deps) {
   const found = async (adultId: string, studentId: string) => {
     const student = await repository.findStudent(adultId, studentId);
     if (!student) throw new Problem('NOT_FOUND');
@@ -110,6 +99,27 @@ export function createHouseholdService({
   /** A relative manages nothing: refused as an adult without a link, by a clause of the query. */
   const managed = async (adultId: string, studentId: string) => {
     if (!(await repository.manages(adultId, studentId))) throw new Problem('NOT_FOUND');
+  };
+
+  /**
+   * A gesture that counts, told to the student's other parents after the answer (`docs/plans/app-cible.md`
+   * § 3, « L'historique »): never to its author, nor to a relative.
+   */
+  const tellOtherParents = (adultId: string, studentId: string, said: (adultName: string, studentName: string) => string) => {
+    later(async () => {
+      const link = await repository.parentLink(adultId, studentId);
+      if (!link) return;
+      const sentence = said(link.adultName, link.studentName);
+      await sendEach(link.otherParents, {
+        subject: sentence,
+        text: `Bonjour,\n\n${sentence}.\n\nL’historique de ${link.studentName}, dans Catiche : ${publicUrl}/foyer/${studentId}`,
+      });
+    });
+  };
+
+  /** One email to each address. */
+  const sendEach = async (addresses: readonly string[], email: Omit<Email, 'to'>) => {
+    await Promise.all(addresses.map((to) => send({ ...email, to })));
   };
 
   const isStudent = (userId: string) => repository.isStudent(userId);
@@ -168,6 +178,10 @@ export function createHouseholdService({
       if (!(await repository.declareGuardian(adultId, studentId))) throw new Problem('NOT_FOUND');
     },
 
+    /**
+     * The adult's students, each with the first names of their other parents, who decide with the
+     * adult, and what the home warns a parent of: nothing for a relative.
+     */
     async listStudents(adultId: string) {
       return (await repository.listStudents(adultId)).map(toStudent);
     },
@@ -183,7 +197,10 @@ export function createHouseholdService({
         level: input.level,
         birthMonth: `${input.birthMonth}-01`,
       });
-      return found(adultId, id);
+      // Read back as the list gives it: the web puts it there.
+      const created = (await repository.listStudents(adultId)).find((student) => student.id === id);
+      if (!created) throw new Problem('NOT_FOUND');
+      return toStudent(created);
     },
 
     async updateStudent(
@@ -196,14 +213,28 @@ export function createHouseholdService({
         await managed(adultId, studentId);
         if ((await found(adultId, studentId)).memory.decidesAlone) throw new Problem('FORBIDDEN');
       }
-      if (!(await repository.updateStudent(adultId, studentId, patch))) throw new Problem('NOT_FOUND');
+      const gestures = await repository.updateStudent(adultId, studentId, patch);
+      if (!gestures) throw new Problem('NOT_FOUND');
+      if (gestures.includes('memory_withdrawn')) {
+        tellOtherParents(adultId, studentId, (adult, student) => `${adult} a retiré ce que Tom retient de ${student}`);
+      }
       return found(adultId, studentId);
     },
 
-    /** A code for a new device of the student, or for the code they forgot, which then stops. */
+    /** A code for a new device of the student, or for the code they forgot, which then stops; the other parents are told the latter. */
     async activationCode(adultId: string, studentId: string, reason: ActivationReason) {
       await managed(adultId, studentId);
-      return createActivationCode(studentId, reason);
+      const code = await repository.activationCode(adultId, studentId, reason);
+      if (reason === 'forgotten') {
+        tellOtherParents(adultId, studentId, (adult, student) => `${adult} a demandé un code de départ pour ${student}, qui a oublié son code`);
+      }
+      return code;
+    },
+
+    /** For a parent: what the adults did of the student, the 90 last days. */
+    async history(adultId: string, studentId: string) {
+      await managed(adultId, studentId);
+      return repository.history(adultId, studentId);
     },
 
     listOwnDevices(userId: string) {
@@ -222,7 +253,7 @@ export function createHouseholdService({
      * are told.
      */
     async inviteAdult(adultId: string, studentId: string, { email, role }: { email: string; role: AdultRole }) {
-      const [parent, followed] = await Promise.all([repository.invitingParent(adultId, studentId), repository.followedBy(studentId, email)]);
+      const [parent, followed] = await Promise.all([repository.parentLink(adultId, studentId), repository.followedBy(studentId, email)]);
       if (!parent) throw new Problem('NOT_FOUND');
       if (!parent.declaredAt) throw new Problem('FORBIDDEN', 'la déclaration d’autorité parentale');
       if (followed) throw new Problem('INVALID_REQUEST', 'email: cette adresse suit déjà cet enfant');
@@ -241,15 +272,12 @@ export function createHouseholdService({
         if (!(await inviteAddress(email, letter)))
           await send(invitationEmail(email, letter, `L’invitation vous attend dans Catiche : ${publicUrl}/`));
       });
-      for (const to of parent.otherParents) {
-        later(() =>
-          send({
-            to,
-            subject: `${adultName} a invité un adulte pour ${studentName}`,
-            text: `Bonjour,\n\n${adultName} a invité ${email} pour ${studentName}, comme ${ROLE_WORDS[role]}.\n\nVous verrez dans Catiche quand cette personne sera entrée.`,
-          }),
-        );
-      }
+      later(() =>
+        sendEach(parent.otherParents, {
+          subject: `${adultName} a invité un adulte pour ${studentName}`,
+          text: `Bonjour,\n\n${adultName} a invité ${email} pour ${studentName}, comme ${ROLE_WORDS[role]}.\n\nVous verrez dans Catiche quand cette personne sera entrée.`,
+        }),
+      );
     },
 
     /**
