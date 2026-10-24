@@ -8,7 +8,10 @@ import { LEVEL_LABELS, ROLE_LABELS } from './household';
 
 const history = api.household.students[':id'].history;
 
-export type HistoryLine = Pick<InferResponseType<typeof history.$get, 200>[number], 'kind' | 'detail' | 'actor'>;
+export type HistoryLine = Pick<InferResponseType<typeof history.$get, 200>[number], 'kind' | 'detail' | 'actor' | 'subject'>;
+
+/** A first name the history reads: null once the adult left Catiche, empty until they give one. */
+const named = (name: string | null) => (name === null || name === '' ? null : name);
 
 export const historyQuery = (studentId: string) =>
   queryOptions({
@@ -25,11 +28,12 @@ function deviceOf(userAgent: string | null | undefined): string {
 
 /**
  * A gesture of an adult on the child, as a parent reads it: who, then what. No word supposes
- * anyone's gender (`docs/charte.md`, « Les mots »); an adult who left Catiche is « Un adulte ».
+ * anyone's gender (`docs/charte.md`, « Les mots »); an adult who left Catiche is « Un adulte », and
+ * no line names an address.
  */
-export function historyLine({ kind, detail, actor }: HistoryLine, child: string): string {
-  // Null once the adult left Catiche; empty while they have not given their first name.
-  const who = actor === null || actor === '' ? 'Un adulte' : actor;
+export function historyLine({ kind, detail, actor, subject }: HistoryLine, child: string): string {
+  const who = named(actor) ?? 'Un adulte';
+  const whom = named(subject);
   const role = detail.role === undefined ? '' : `, comme ${ROLE_LABELS[detail.role]}`;
   const what: Record<HistoryLine['kind'], () => string> = {
     name_changed: () => `a changé le prénom en ${detail.name ?? ''}`,
@@ -40,10 +44,10 @@ export function historyLine({ kind, detail, actor }: HistoryLine, child: string)
     forgotten_code: () => 'a demandé un code de départ pour un code oublié',
     device_unblocked: () => `a débloqué ${deviceOf(detail.device)}`,
     device_removed: () => `a retiré ${deviceOf(detail.device)}`,
-    adult_invited: () => `a invité ${detail.email ?? ''}${role}`,
-    invitation_withdrawn: () => `a annulé l’invitation de ${detail.email ?? ''}`,
+    adult_invited: () => `a invité ${whom ?? 'un adulte'} pour ${child}${role}`,
+    invitation_withdrawn: () => `a annulé l’invitation ${whom === null ? 'd’un adulte' : `de ${whom}`}`,
     adult_joined: () => `a rejoint les adultes de ${child}${role}`,
-    adult_removed: () => `a retiré ${detail.name ?? ''} des adultes de ${child}`,
+    adult_removed: () => `a retiré ${whom ?? 'un proche'} des adultes de ${child}`,
     adult_left: () => `a quitté les adultes de ${child}`,
   };
   return `${who} ${what[kind]()}`;

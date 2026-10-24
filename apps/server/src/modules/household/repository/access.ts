@@ -67,6 +67,8 @@ export function accessOf(db: Db) {
 export interface Gesture {
   kind: ChildEventKind;
   detail?: ChildEventDetail;
+  /** The adult the gesture concerns, when they have an account. */
+  subjectId?: string | null;
 }
 
 /** The gestures of `actorId` on the student, in the history, by the transaction that makes them. */

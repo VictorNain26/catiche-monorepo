@@ -68,10 +68,7 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
   aucune purge ne tient encore celles du compte inactif ni des journaux. Celles des e-mails reçus
   à `contact@` se tiennent à la main, dans la boîte Zimbra. L'historique d'un enfant ne se lit que
   sur 90 jours (`HISTORY_DAYS`, `domain/child-events.ts`), mais ses lignes plus anciennes restent
-  jusqu'à la tâche de fond de la PR 6 (`docs/plans/app-cible.md` § 8), qui les purgera. Ces
-  lignes gardent l'adresse d'un adulte invité et le prénom d'un proche retiré (`detail`), même
-  après la suppression de son compte : la purge les emportera à 90 jours, la PR 6 dira si cela
-  suffit ou si la suppression d'un compte doit les effacer aussi.
+  jusqu'à la tâche de fond de la PR 6 (`docs/plans/app-cible.md` § 8), qui les purgera.
 - La landing, à la naissance de la production : ses liens « Se connecter » mènent au staging
   (`APP_URL`, `apps/landing/src/lib/brand.ts`) ; changer cette constante, et le bouton « Demander
   une invitation » (`molecules/request-invitation.astro`) avec les phrases « en préparation » si

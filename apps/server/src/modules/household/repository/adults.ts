@@ -22,6 +22,10 @@ export interface NewInvitation {
 
 const inviter = alias(user, 'inviter');
 
+/** The account of an address, which a line of the history names instead of the address; null when it has none. */
+const accountOf = async (tx: Pick<Db, 'select'>, email: string) =>
+  (await tx.select({ id: user.id }).from(user).where(eq(user.email, email)))[0]?.id ?? null;
+
 /** The invitations to this address still valid, or the one of them `invitationId` names. */
 const waiting = (email: string, invitationId?: string) =>
   and(
@@ -85,7 +89,7 @@ export function adultsRepository(db: Db) {
             target: [adultInvitation.studentId, adultInvitation.email],
             set: { invitedBy, role, expiresAt, createdAt: new Date() },
           });
-        await record(tx, studentId, invitedBy, [{ kind: 'adult_invited', detail: { email, role } }]);
+        await record(tx, studentId, invitedBy, [{ kind: 'adult_invited', detail: { role }, subjectId: await accountOf(tx, email) }]);
       });
     },
 
@@ -160,7 +164,7 @@ export function adultsRepository(db: Db) {
           )
           .returning({ email: adultInvitation.email });
         if (!withdrawn) return undefined;
-        await record(tx, studentId, adultId, [{ kind: 'invitation_withdrawn', detail: { email: withdrawn.email } }]);
+        await record(tx, studentId, adultId, [{ kind: 'invitation_withdrawn', subjectId: await accountOf(tx, withdrawn.email) }]);
         const [another] = await tx.select({ id: adultInvitation.id }).from(adultInvitation).where(waiting(withdrawn.email)).limit(1);
         return { email: withdrawn.email, stillInvited: another !== undefined };
       });
@@ -192,16 +196,14 @@ export function adultsRepository(db: Db) {
 
     /**
      * A relative's link to the student goes: by a parent of the student, or by the relative
-     * themselves. Never a parent's. `false` when no such link. The line names the relative a
+     * themselves. Never a parent's. `false` when no such link. The line concerns the relative a
      * parent removed; one who leaves is its author.
      */
     async removeRelative(adultId: string, studentId: string, relativeId: string) {
       return db.transaction(async (tx) => {
         await lockFor(tx, adultId, studentId);
-        const [relative] = await tx
-          .select({ name: user.name })
-          .from(guardianship)
-          .innerJoin(user, eq(user.id, guardianship.adultId))
+        const removed = await tx
+          .delete(guardianship)
           .where(
             and(
               eq(guardianship.studentId, studentId),
@@ -210,12 +212,9 @@ export function adultsRepository(db: Db) {
               or(eq(guardianship.adultId, adultId), inArray(guardianship.studentId, managed(adultId))),
             ),
           )
-          .for('update', { of: guardianship });
-        if (!relative) return false;
-        await tx.delete(guardianship).where(and(eq(guardianship.studentId, studentId), eq(guardianship.adultId, relativeId)));
-        await record(tx, studentId, adultId, [
-          relativeId === adultId ? { kind: 'adult_left' } : { kind: 'adult_removed', detail: { name: relative.name } },
-        ]);
+          .returning({ adultId: guardianship.adultId });
+        if (removed.length === 0) return false;
+        await record(tx, studentId, adultId, [relativeId === adultId ? { kind: 'adult_left' } : { kind: 'adult_removed', subjectId: relativeId }]);
         return true;
       });
     },

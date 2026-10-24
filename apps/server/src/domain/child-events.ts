@@ -26,15 +26,16 @@ export const CHILD_EVENT_KINDS = [
 
 export type ChildEventKind = (typeof CHILD_EVENT_KINDS)[number];
 
-/** What a line needs beyond its kind, a few words at most: never what the student wrote. */
+/**
+ * What a line needs beyond its kind, a few words at most: never what the student wrote, nor an
+ * adult's name or address, which the line reads by the adult it concerns (`subject_id`).
+ */
 export interface ChildEventDetail {
-  /** The new first name; the adult removed. */
+  /** The student's new first name: their lines go with them. */
   name?: string;
   level?: SchoolLevel;
   /** The device's browser, as it named itself. */
   device?: string | null;
-  /** The address invited, or whose invitation was withdrawn. */
-  email?: string;
   role?: AdultRole;
 }
 

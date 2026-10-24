@@ -20,6 +20,7 @@ interface Line {
   kind: string;
   detail: Record<string, unknown>;
   actor: string | null;
+  subject: string | null;
   createdAt: string;
 }
 
@@ -30,12 +31,12 @@ const history = async (cookie: string, studentId: string) => {
   expect(res.status).toBe(200);
   return (await res.json()) as Line[];
 };
-/** The lines written since `before` lines were, the oldest first, as kind, author and detail. */
+/** The lines written since `before` lines were, the oldest first, as kind, author, the adult they concern and detail. */
 const linesSince = async (cookie: string, studentId: string, before: number) =>
   (await history(cookie, studentId))
     .toReversed()
     .slice(before)
-    .map(({ kind, actor, detail }) => ({ kind, actor, detail }));
+    .map(({ kind, actor, subject, detail }) => ({ kind, actor, subject, detail }));
 const patch = (cookie: string, studentId: string, body: unknown) => api.request('PATCH', `/api/household/students/${studentId}`, { cookie, body });
 
 /** Nadia and Karim, Léa's parents, and Monique, a relative of hers, each named. */
@@ -54,12 +55,25 @@ const family = async (tag: string) => {
 describe('the history of a child', () => {
   it('keeps the adults coming in, each invitation by its author and each entry by the adult', async () => {
     const { nadia, lea } = await family('entrees');
+    // Invited before they had an account: the invitation names no one, never the address.
     expect(await linesSince(nadia, lea.id, 0)).toEqual([
-      { kind: 'adult_invited', actor: 'Nadia', detail: { email: 'karim-entrees@example.com', role: 'guardian' } },
+      { kind: 'adult_invited', actor: 'Nadia', subject: null, detail: { role: 'guardian' } },
       // Named after: the line says who they are now.
-      { kind: 'adult_joined', actor: 'Karim', detail: { role: 'guardian' } },
-      { kind: 'adult_invited', actor: 'Nadia', detail: { email: 'monique-entrees@example.com', role: 'relative' } },
-      { kind: 'adult_joined', actor: 'Monique', detail: { role: 'relative' } },
+      { kind: 'adult_joined', actor: 'Karim', subject: null, detail: { role: 'guardian' } },
+      { kind: 'adult_invited', actor: 'Nadia', subject: null, detail: { role: 'relative' } },
+      { kind: 'adult_joined', actor: 'Monique', subject: null, detail: { role: 'relative' } },
+    ]);
+  });
+
+  it('names an adult invited who has an account by their first name, read when the history is', async () => {
+    const { nadia, lea } = await family('compte');
+    const sam = await api.guardian('sam-compte@example.com');
+    await named(sam, 'Sam');
+    const before = (await history(nadia, lea.id)).length;
+    await api.inviteAdult(nadia, lea.id, 'sam-compte@example.com', 'relative');
+    await named(sam, 'Samuel');
+    expect(await linesSince(nadia, lea.id, before)).toEqual([
+      { kind: 'adult_invited', actor: 'Nadia', subject: 'Samuel', detail: { role: 'relative' } },
     ]);
   });
 
@@ -70,8 +84,9 @@ describe('the history of a child', () => {
     expect((await patch(nadia, lea.id, { name: 'Léna', level: 'cinquieme' })).status).toBe(200);
     expect((await patch(karim, lea.id, { name: 'Léna', level: 'quatrieme' })).status).toBe(200);
     expect(await linesSince(nadia, lea.id, before)).toEqual([
-      { kind: 'name_changed', actor: 'Nadia', detail: { name: 'Léna' } },
-      { kind: 'level_changed', actor: 'Karim', detail: { level: 'quatrieme' } },
+      // The child's own first name, whose lines go with the child.
+      { kind: 'name_changed', actor: 'Nadia', subject: null, detail: { name: 'Léna' } },
+      { kind: 'level_changed', actor: 'Karim', subject: null, detail: { level: 'quatrieme' } },
     ]);
   });
 
@@ -87,8 +102,8 @@ describe('the history of a child', () => {
       expect((await patch(cookie, lea.id, { memoryProposed })).status).toBe(200);
     }
     expect(await linesSince(nadia, lea.id, before)).toEqual([
-      { kind: 'memory_proposed', actor: 'Nadia', detail: {} },
-      { kind: 'memory_withdrawn', actor: 'Karim', detail: {} },
+      { kind: 'memory_proposed', actor: 'Nadia', subject: null, detail: {} },
+      { kind: 'memory_withdrawn', actor: 'Karim', subject: null, detail: {} },
     ]);
   });
 
@@ -104,10 +119,10 @@ describe('the history of a child', () => {
     await api.activationCode(karim, lea.id, 'forgotten');
     expect((await api.request('DELETE', `/api/household/students/${lea.id}/devices/${deviceId}`, { cookie: nadia })).status).toBe(204);
     expect(await linesSince(nadia, lea.id, before)).toEqual([
-      { kind: 'device_code', actor: 'Nadia', detail: {} },
-      { kind: 'device_unblocked', actor: 'Karim', detail: { device: 'test-device' } },
-      { kind: 'forgotten_code', actor: 'Karim', detail: {} },
-      { kind: 'device_removed', actor: 'Nadia', detail: { device: 'test-device' } },
+      { kind: 'device_code', actor: 'Nadia', subject: null, detail: {} },
+      { kind: 'device_unblocked', actor: 'Karim', subject: null, detail: { device: 'test-device' } },
+      { kind: 'forgotten_code', actor: 'Karim', subject: null, detail: {} },
+      { kind: 'device_removed', actor: 'Nadia', subject: null, detail: { device: 'test-device' } },
     ]);
   });
 
@@ -126,10 +141,32 @@ describe('the history of a child', () => {
     expect((await api.request('DELETE', `/api/household/students/${lea.id}/adults/${await idOf(paul)}`, { cookie: nadia })).status).toBe(204);
     expect((await api.request('DELETE', `/api/household/students/${lea.id}/adults/${await idOf(monique)}`, { cookie: monique })).status).toBe(204);
     expect(await linesSince(nadia, lea.id, before)).toEqual([
-      { kind: 'adult_invited', actor: 'Nadia', detail: { email: 'faute@exmaple.com', role: 'relative' } },
-      { kind: 'invitation_withdrawn', actor: 'Nadia', detail: { email: 'faute@exmaple.com' } },
-      { kind: 'adult_removed', actor: 'Nadia', detail: { name: 'Paul' } },
-      { kind: 'adult_left', actor: 'Monique', detail: {} },
+      { kind: 'adult_invited', actor: 'Nadia', subject: null, detail: { role: 'relative' } },
+      { kind: 'invitation_withdrawn', actor: 'Nadia', subject: null, detail: {} },
+      { kind: 'adult_removed', actor: 'Nadia', subject: 'Paul', detail: {} },
+      { kind: 'adult_left', actor: 'Monique', subject: null, detail: {} },
+    ]);
+  });
+
+  it('keeps neither the first name nor the address of an adult whose account is deleted', async () => {
+    const { nadia, lea } = await family('efface');
+    const paul = await api.adult(nadia, lea.id, 'paul-efface@example.com', 'relative');
+    await named(paul, 'Paul');
+    await api.inviteAdult(nadia, lea.id, 'jamais-efface@example.com', 'relative');
+    const [pending] = (
+      (await (await api.request('GET', `/api/household/students/${lea.id}/adults`, { cookie: nadia })).json()) as { invitations: { id: string }[] }
+    ).invitations;
+    expect((await api.request('DELETE', `/api/household/students/${lea.id}/invitations/${pending?.id ?? ''}`, { cookie: nadia })).status).toBe(204);
+    expect((await api.request('DELETE', `/api/household/students/${lea.id}/adults/${await idOf(paul)}`, { cookie: nadia })).status).toBe(204);
+    expect((await api.request('POST', '/api/auth/delete-user', { cookie: paul, body: {} })).status).toBe(200);
+    const written = JSON.stringify(await db.select().from(childEvent).where(eq(childEvent.studentId, lea.id)));
+    const read = JSON.stringify(await history(nadia, lea.id));
+    for (const trace of ['Paul', 'paul-efface', 'jamais-efface']) {
+      expect(written).not.toContain(trace);
+      expect(read).not.toContain(trace);
+    }
+    expect((await linesSince(nadia, lea.id, 0)).filter(({ kind }) => kind === 'adult_removed')).toEqual([
+      { kind: 'adult_removed', actor: 'Nadia', subject: null, detail: {} },
     ]);
   });
 
@@ -151,7 +188,7 @@ describe('the history of a child', () => {
     const lines = await history(nadia, lea.id);
     expect(lines.map(({ kind }) => kind)).toContain('memory_proposed');
     expect(lines.map(({ kind }) => kind)).not.toContain('memory_withdrawn');
-    expect(Object.keys(lines[0] ?? {}).sort()).toEqual(['actor', 'createdAt', 'detail', 'id', 'kind']);
+    expect(Object.keys(lines[0] ?? {}).sort()).toEqual(['actor', 'createdAt', 'detail', 'id', 'kind', 'subject']);
   });
 
   // A clock can step back: this machine's database did, by 2 s, while these tests ran.

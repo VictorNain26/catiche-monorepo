@@ -1,5 +1,5 @@
 {
-  "id": "2806c32e-3e3e-49c7-b212-94c7d56342e8",
+  "id": "65ddb5af-dd45-4564-8900-1809191fc5b4",
   "prevId": "a5927bd9-07cf-4771-8851-6531a88725cd",
   "version": "7",
   "dialect": "postgresql",
@@ -1018,6 +1018,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "subject_id": {
+          "name": "subject_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "kind": {
           "name": "kind",
           "type": "child_event_kind",
@@ -1083,6 +1089,19 @@
           "tableTo": "user",
           "columnsFrom": [
             "actor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "child_event_subject_id_user_id_fk": {
+          "name": "child_event_subject_id_user_id_fk",
+          "tableFrom": "child_event",
+          "tableTo": "user",
+          "columnsFrom": [
+            "subject_id"
           ],
           "columnsTo": [
             "id"

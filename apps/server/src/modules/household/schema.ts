@@ -84,7 +84,8 @@ export const adultProfile = pgTable('adult_profile', {
 /**
  * The history of a student: a gesture of an adult on them, written in the transaction of the
  * gesture itself. It goes with the student; an adult who leaves Catiche leaves their lines,
- * without their name. Read 90 days back (`HISTORY_DAYS`), in the order of `id`, the order the
+ * without their name: a line holds no adult's name nor address, only the ids of who made the
+ * gesture and of whom it concerns, whose first names are read with it. Read 90 days back (`HISTORY_DAYS`), in the order of `id`, the order the
  * lines were written: the clock can step back, a sequence cannot.
  */
 export const childEvent = pgTable(
@@ -95,6 +96,8 @@ export const childEvent = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
     actorId: text('actor_id').references(() => user.id, { onDelete: 'set null' }),
+    // The adult the gesture concerns, invited or removed: their first name is read with the line.
+    subjectId: text('subject_id').references(() => user.id, { onDelete: 'set null' }),
     kind: childEventKind('kind').notNull(),
     detail: jsonb('detail').$type<ChildEventDetail>().notNull().default({}),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

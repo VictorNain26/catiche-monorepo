@@ -4,8 +4,8 @@ import { historyLine, type HistoryLine } from './history';
 const IPHONE =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
 
-const line = (kind: HistoryLine['kind'], detail: HistoryLine['detail'] = {}, actor: string | null = 'Nadia') =>
-  historyLine({ kind, detail, actor }, 'Léa');
+const line = (kind: HistoryLine['kind'], detail: HistoryLine['detail'] = {}, actor: string | null = 'Nadia', subject: string | null = null) =>
+  historyLine({ kind, detail, actor, subject }, 'Léa');
 
 describe('historyLine', () => {
   it('says who changed the child’s first name or class, and to what', () => {
@@ -30,11 +30,17 @@ describe('historyLine', () => {
   });
 
   it('says the adults invited, come in, removed or gone, without supposing anyone’s gender', () => {
-    expect(line('adult_invited', { email: 'paul@example.com', role: 'relative' })).toBe('Nadia a invité paul@example.com, comme proche');
-    expect(line('invitation_withdrawn', { email: 'paul@example.com' })).toBe('Nadia a annulé l’invitation de paul@example.com');
+    expect(line('adult_invited', { role: 'relative' }, 'Nadia', 'Paul')).toBe('Nadia a invité Paul pour Léa, comme proche');
+    expect(line('invitation_withdrawn', {}, 'Nadia', 'Paul')).toBe('Nadia a annulé l’invitation de Paul');
     expect(line('adult_joined', { role: 'guardian' }, 'Karim')).toBe('Karim a rejoint les adultes de Léa, comme parent');
-    expect(line('adult_removed', { name: 'Monique' })).toBe('Nadia a retiré Monique des adultes de Léa');
+    expect(line('adult_removed', {}, 'Nadia', 'Monique')).toBe('Nadia a retiré Monique des adultes de Léa');
     expect(line('adult_left', {}, 'Monique')).toBe('Monique a quitté les adultes de Léa');
+  });
+
+  it('names no address: an adult invited without an account, or gone since, is « un adulte »', () => {
+    expect(line('adult_invited', { role: 'relative' })).toBe('Nadia a invité un adulte pour Léa, comme proche');
+    expect(line('invitation_withdrawn')).toBe('Nadia a annulé l’invitation d’un adulte');
+    expect(line('adult_removed')).toBe('Nadia a retiré un proche des adultes de Léa');
   });
 
   it('names an adult who has left Catiche, or not given a first name yet, as an adult', () => {

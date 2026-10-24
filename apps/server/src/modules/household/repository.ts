@@ -6,6 +6,7 @@
  */
 
 import { and, desc, eq, gt, gte, inArray, isNull, ne, notExists, type SQL, sql } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import { HISTORY_DAYS } from '../../domain/child-events';
 import type { SchoolLevel } from '../../domain/levels';
 import type { MemoryAnswer } from '../../domain/memory-consent';
@@ -26,6 +27,9 @@ export interface NewStudent {
 }
 
 /** The browser a device named itself by, which the history names it by. */
+/** The adult a line of the history concerns, named when it is read. */
+const subject = alias(user, 'subject');
+
 const browserOf = async (tx: Pick<Db, 'select'>, deviceId: string) =>
   (await tx.select({ userAgent: device.userAgent }).from(device).where(eq(device.id, deviceId)))[0]?.userAgent ?? null;
 
@@ -286,9 +290,17 @@ export function createHouseholdRepository(db: Db) {
     /** For a parent of the student: the gestures of the 90 last days, the newest first, with the first name of who made each. */
     history: (adultId: string, studentId: string) =>
       db
-        .select({ id: childEvent.id, kind: childEvent.kind, detail: childEvent.detail, actor: user.name, createdAt: childEvent.createdAt })
+        .select({
+          id: childEvent.id,
+          kind: childEvent.kind,
+          detail: childEvent.detail,
+          actor: user.name,
+          subject: subject.name,
+          createdAt: childEvent.createdAt,
+        })
         .from(childEvent)
         .leftJoin(user, eq(user.id, childEvent.actorId))
+        .leftJoin(subject, eq(subject.id, childEvent.subjectId))
         .where(
           and(
             eq(childEvent.studentId, studentId),
