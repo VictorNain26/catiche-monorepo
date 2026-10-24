@@ -91,6 +91,10 @@
   /* Le panneau de marque, à l'entrée de l'app : l'eau profonde. */
   --color-panel: var(--water-11);
   --color-panel-foreground: var(--mist-1);
+  /* Le carré à viser avec l'appareil photo (A4) : foncé sur clair dans les deux modes, comme un
+   * appareil photo lit un code QR. */
+  --color-square: var(--mist-12);
+  --color-square-background: #ffffff;
   /* Les graphiques, dans cet ordre, chaque série à 3:1 du fond et de la carte, deux voisines
    * séparées par leur clarté (pas 11, 9, 10, 12), jamais le pelage contre l'eau. */
   --color-chart-1: var(--water-11);
@@ -183,5 +187,8 @@
     /* L'eau profonde reste distincte du plan clair en sombre aussi (test : panel et tint). */
     --color-panel: var(--water-7);
     --color-panel-foreground: var(--mist-12);
+    /* Le carré reste foncé sur clair : les pas s'inversent en sombre. */
+    --color-square: var(--mist-1);
+    --color-square-background: var(--mist-12);
   }
 }

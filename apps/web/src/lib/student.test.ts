@@ -39,6 +39,12 @@ describe('studentCodeMessage', () => {
     expect(locked).toContain('nouveau code');
   });
 
+  it('names a starting code refused by its name, and says what to ask for', () => {
+    expect(studentCodeMessage({ code: 'INVALID_ACTIVATION_CODE', status: 400 })).toBe(
+      'Ce code ne marche pas, ou il a expiré. Demande un nouveau code de départ.',
+    );
+  });
+
   it('says why a chosen code is refused', () => {
     expect(studentCodeMessage({ code: 'CODE_TOO_EASY', status: 400 })).toContain('trop facile');
     expect(studentCodeMessage({ code: 'CODE_IS_BIRTH_DATE', status: 400 })).toContain('naissance');

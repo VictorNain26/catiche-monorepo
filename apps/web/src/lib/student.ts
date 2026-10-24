@@ -49,7 +49,7 @@ const MESSAGES: Partial<Record<string, string>> = {
   CODE_IS_BIRTH_DATE: 'C’est ta date de naissance : quelqu’un pourrait la deviner. Choisis un autre code.',
   CODE_FORMAT: 'Ton code a 6 chiffres.',
   CODE_NOT_EXPECTED: 'Le temps pour choisir ton code est passé. Demande à ton parent un nouveau code.',
-  INVALID_ACTIVATION_CODE: 'Ce code n’est pas valable ou a expiré. Demande un nouveau code à ton parent.',
+  INVALID_ACTIVATION_CODE: 'Ce code ne marche pas, ou il a expiré. Demande un nouveau code de départ.',
 };
 
 export function studentCodeMessage(error: { code?: string | undefined; status: number }): string {
