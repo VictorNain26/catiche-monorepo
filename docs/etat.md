@@ -147,3 +147,15 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
 - **`@hono/bun`** : adoption faible ; la revérifier avant Hono v5.
 - **Catalogs Bun** : les remettre quand renovatebot/renovate#42909 est fusionnée.
 - **Bun.SQL** : écarté pour ses bugs de corruption ouverts ; réévaluer quand ils sont fermés.
+- **Deux tests qui comparent des dates d'écriture**, vus en échec une fois chacun dans un
+  pre-push du 2026-10-24, sous forte charge, et pas reproduits ensuite (0 sur 80 et 0 sur 40,
+  lancés seuls) :
+  - `the adults of a child > lists, to a parent, the other adults and the invitations still
+    waiting; to no one else` (`modules/household/adults.test.ts`) : Karim, entré avant Monique,
+    venait après elle ; la liste suit `guardianship.created_at` ;
+  - `a turn > prepares the sheet of a new exercise, holds back a reply that gives its answer,
+    then follows the proposal` (`modules/tutor/turn.test.ts`) : la dernière ligne de `records`,
+    triée par `turn_record.created_at`, était celle du premier tour.
+  Le même jour, l'horloge de la base locale a reculé de 2,15 s en 20 s, mesuré par
+  `clock_timestamp()` : c'est la cause supposée. S'ils échouent encore, trier par une clé qui ne
+  dépend pas de l'horloge, comme l'historique de l'enfant (`child_event.id`).
