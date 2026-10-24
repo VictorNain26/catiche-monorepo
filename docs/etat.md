@@ -53,7 +53,10 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-23 ; ce qui 
   - le cookie d'appareil n'est posé qu'à l'activation : passé 400 jours, le navigateur l'oublie et il
     faut un nouveau code du parent ; le reposer à chaque entrée réussie ;
   - la limite de better-auth par adresse (5 par minute sur les routes de l'élève) vit en mémoire,
-    par instance, et n'est exercée par aucun test : une seule instance, ou son stockage en base.
+    par instance, et n'est exercée par aucun test : une seule instance, ou son stockage en base ;
+  - le budget des codes de départ refusés, toutes adresses confondues
+    (`activationFailureBudget`, `platform/auth/student-sign-in.ts`), vit aussi en mémoire, par
+    instance : même remède.
 - Le code de l'élève dans l'analyse d'impact : la CNIL réserve le code court au « dispositif
   matériel détenu en propre » (délibération 2022-100, § 46) ; l'ordinateur de la famille ne l'est
   pas, et s'appuie sur « tout autre mécanisme technique apportant un même niveau de sécurité »

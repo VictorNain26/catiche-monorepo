@@ -11,6 +11,7 @@ import { guardianship } from '../../modules/household/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
 import { STUDENT_CODE } from '../../testing/http';
+import { failureBudget } from '../http/rate-limit';
 import { deviceProfile, session, studentCode, verification } from './schema';
 import { ACTIVATION_PREFIX, normaliseActivationCode } from './student-sign-in';
 
@@ -135,6 +136,18 @@ describe("a guardian's activation code", () => {
     const forLea = await api.activationCode(guardian, lea.id);
     await api.activationCode(guardian, tom.id);
     expect((await api.device().activate(forLea)).status).toBe(200);
+  });
+
+  it('is refused to every address once the failures of all of them spent their budget, a right one too, kept unspent', async () => {
+    const guardian = await api.guardian('budget-global@example.com');
+    const lea = await api.student(guardian);
+    const code = await api.activationCode(guardian, lea.id);
+    const tight = testApp(db, { auth: { failedActivations: failureBudget({ points: 2, durationSeconds: 3600 }) } }).api;
+    expect((await tight.device().activate('AAAAAAAA')).status).toBe(400);
+    expect((await tight.device().activate('BBBBBBBB')).status).toBe(400);
+    expect((await tight.device().activate(code)).status).toBe(429);
+    // Another instance, its budget whole: the code was never spent.
+    expect((await api.device().activate(code)).status).toBe(200);
   });
 
   it('recognises the device by a signed cookie of 400 days, and opens no session', async () => {

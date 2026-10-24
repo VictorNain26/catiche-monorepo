@@ -32,6 +32,7 @@ import { makeSignature } from 'better-auth/crypto';
 import { z } from 'zod';
 import { ACTIVATION_ALPHABET, ACTIVATION_CODE_LENGTH } from '../../domain/activation-code';
 import { studentCodeRefusal } from '../../domain/student-code';
+import { failureBudget, type FailureBudget } from '../http/rate-limit';
 import type { Auth } from './auth';
 import { CODE_TRIES, DEVICE_TRIES, type StudentDevices } from './student-devices';
 
@@ -47,6 +48,16 @@ const WINDOW_MINUTES = 10;
 // Eight characters of Crockford's base32 (`domain/activation-code.ts`), 40 bits, single use behind
 // a rate limit, one alive at a time: within the day the CNIL allows a temporary secret
 // (deliberation 2022-100, § 35).
+/**
+ * The starting codes refused in an hour, every address together, past which none is tried. The
+ * rate limit by address does not bound a guesser with many addresses; this does: 300 an hour is
+ * 7 200 guesses over the 24 hours of a device code, against 2^40 ≈ 1.1 × 10^12 codes, a chance of
+ * 7 200 / 2^40 ≈ 6.5 × 10^-9 for one code alive, 6.5 × 10^-5 with 10 000 alive at once. In memory,
+ * by instance, as the other budgets.
+ */
+const ACTIVATION_FAILURES_PER_HOUR = 300;
+export const activationFailureBudget = () => failureBudget({ points: ACTIVATION_FAILURES_PER_HOUR, durationSeconds: 60 * 60 });
+
 /** A code for a new device lasts a day; one for a code forgotten, ten minutes. */
 const ACTIVATION_LIFETIMES: Record<ActivationReason, number> = { device: 24 * 60 * MINUTE, forgotten: 10 * MINUTE };
 
@@ -119,7 +130,16 @@ export interface StudentAccess {
 
 const studentCodeSchema = z.string().max(16);
 
-export function studentSignIn({ devices, students }: { devices: StudentDevices; students: StudentAccess }) {
+export function studentSignIn({
+  devices,
+  students,
+  failedActivations,
+}: {
+  devices: StudentDevices;
+  students: StudentAccess;
+  /** The starting codes refused, every address together (`activationFailureBudget`). */
+  failedActivations: FailureBudget;
+}) {
   const deviceCookie = (ctx: GenericEndpointContext) => ctx.context.createAuthCookie('device', { maxAge: DEVICE_COOKIE_SECONDS });
 
   /** The device the request's signed cookie names; none for a cookie forged, or for a device gone. */
@@ -187,6 +207,9 @@ export function studentSignIn({ devices, students }: { devices: StudentDevices; 
         { method: 'POST', body: z.object({ code: z.string().max(32) }) },
         async (ctx) => {
           const { internalAdapter } = ctx.context;
+          if (await failedActivations.spent()) {
+            throw APIError.from('TOO_MANY_REQUESTS', { code: 'TOO_MANY_ACTIVATIONS', message: 'Too many codes refused, try again later' });
+          }
           const spent = await runWithTransaction(ctx.context.adapter, async () => {
             // consumeVerificationValue deletes the code and returns nothing once it has expired.
             const verification = await internalAdapter.consumeVerificationValue(`${ACTIVATION_PREFIX}${normaliseActivationCode(ctx.body.code)}`);
@@ -194,6 +217,7 @@ export function studentSignIn({ devices, students }: { devices: StudentDevices; 
             return parsed.success ? parsed.data : null;
           });
           if (!spent || !(await internalAdapter.findUserById(spent.userId))) {
+            await failedActivations.fail();
             throw APIError.from('BAD_REQUEST', { code: 'INVALID_ACTIVATION_CODE', message: 'Invalid or expired code' });
           }
           if (spent.reason === 'forgotten') await devices.forget(spent.userId);

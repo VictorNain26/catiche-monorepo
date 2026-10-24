@@ -5,7 +5,7 @@ import pino from 'pino';
 import type { AppEnv } from './env';
 import { clientAddress } from './client-address';
 import { notFound, problemHandler } from './problem';
-import { rateLimit } from './rate-limit';
+import { failureBudget, rateLimit } from './rate-limit';
 
 function app(points: number, trustedProxyHops = 0) {
   return new Hono<AppEnv>()
@@ -16,6 +16,23 @@ function app(points: number, trustedProxyHops = 0) {
     .onError(problemHandler(pino({ level: 'silent' })))
     .notFound(notFound);
 }
+
+describe('a budget of failures', () => {
+  it('is spent once its failures are counted, and not before', async () => {
+    const budget = failureBudget({ points: 2, durationSeconds: 60 });
+    expect(await budget.spent()).toBe(false);
+    await budget.fail();
+    expect(await budget.spent()).toBe(false);
+    await budget.fail();
+    expect(await budget.spent()).toBe(true);
+  });
+
+  it('counts nothing by being asked: only failures spend it', async () => {
+    const budget = failureBudget({ points: 1, durationSeconds: 60 });
+    for (let ask = 0; ask < 5; ask++) await budget.spent();
+    expect(await budget.spent()).toBe(false);
+  });
+});
 
 describe('rate limit', () => {
   it('lets a client through within its budget', async () => {

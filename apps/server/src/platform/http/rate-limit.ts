@@ -24,6 +24,23 @@ export function keyedBudget({ points, durationSeconds }: { points: number; durat
   };
 }
 
+/**
+ * A budget of `points` failures per `durationSeconds`, all clients together, in memory: `spent`
+ * asks without counting, so that the try it gates is refused before it is made; `fail` counts one.
+ */
+export function failureBudget({ points, durationSeconds }: { points: number; durationSeconds: number }) {
+  const limiter = new RateLimiterMemory({ points, duration: durationSeconds });
+  const KEY = 'all';
+  return {
+    spent: async () => ((await limiter.get(KEY))?.consumedPoints ?? 0) >= points,
+    fail: async () => {
+      await limiter.penalty(KEY);
+    },
+  };
+}
+
+export type FailureBudget = ReturnType<typeof failureBudget>;
+
 export function rateLimit({ points, durationSeconds }: { points: number; durationSeconds: number }): MiddlewareHandler<AppEnv> {
   const limiter = new RateLimiterMemory({ points, duration: durationSeconds });
   return async (c, next) => {
