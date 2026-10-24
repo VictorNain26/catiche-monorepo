@@ -6,11 +6,10 @@
 
 import { and, asc, eq, gt, inArray, lt, lte, ne, notExists } from 'drizzle-orm';
 import { HISTORY_DAYS } from '../../../domain/child-events';
-import { deletionCutoff } from '../../../domain/student-deletion';
 import { user } from '../../../platform/auth/schema';
 import type { Db } from '../../../platform/db/client';
 import { adultInvitation, childEvent, guardianship, studentProfile } from '../schema';
-import { accessOf, asParent, otherAdult, record } from './access';
+import { accessOf, asParent, deletionIsDue, otherAdult, record } from './access';
 
 const DAY_MS = 24 * 60 * 60_000;
 
@@ -28,6 +27,20 @@ export function deletionsRepository(db: Db) {
           .where(and(eq(otherAdult.studentId, user.id), ne(otherAdult.adultId, adultId), asParent(otherAdult.role))),
       ),
     );
+
+  /**
+   * First in a deletion's transaction, as in a gesture's: the adult and the student locked, then
+   * when the student's deletion was asked, null if it was not. Undefined when the adult is not a
+   * parent of the student, or the deletion is due already.
+   */
+  const askedOf = async (tx: Pick<Db, 'select'>, adultId: string, studentId: string) => {
+    await lockFor(tx, adultId, studentId);
+    const [student] = await tx
+      .select({ requestedAt: studentProfile.deletionRequestedAt })
+      .from(studentProfile)
+      .where(and(eq(studentProfile.userId, studentId), inArray(studentProfile.userId, managedBy(adultId))));
+    return student;
+  };
 
   return {
     /** The students the adult is the only parent of, the earliest first, which `deleteAccount` takes. */
@@ -66,21 +79,13 @@ export function deletionsRepository(db: Db) {
      */
     askDeletion: (adultId: string, studentId: string, now: Date) =>
       db.transaction(async (tx) => {
-        await lockFor(tx, adultId, studentId);
-        const [student] = await tx
-          .select({ requestedAt: studentProfile.deletionRequestedAt })
-          .from(studentProfile)
-          .where(and(eq(studentProfile.userId, studentId), inArray(studentProfile.userId, managedBy(adultId))));
+        const student = await askedOf(tx, adultId, studentId);
         if (!student) return undefined;
-        const [other] = await tx
-          .select({ adultId: guardianship.adultId })
-          .from(guardianship)
-          .where(and(eq(guardianship.studentId, studentId), ne(guardianship.adultId, adultId), asParent()))
-          .limit(1);
-        if (!other) {
-          await tx.delete(user).where(eq(user.id, studentId));
-          return { deleted: true } as const;
-        }
+        const deleted = await tx
+          .delete(user)
+          .where(and(eq(user.id, studentId), onlyParentOf(tx, adultId)))
+          .returning({ id: user.id });
+        if (deleted.length > 0) return { deleted: true } as const;
         if (student.requestedAt) return { deleted: false, requestedAt: student.requestedAt, first: false } as const;
         await tx
           .update(studentProfile)
@@ -97,11 +102,7 @@ export function deletionsRepository(db: Db) {
      */
     cancelDeletion: (adultId: string, studentId: string) =>
       db.transaction(async (tx) => {
-        await lockFor(tx, adultId, studentId);
-        const [student] = await tx
-          .select({ requestedAt: studentProfile.deletionRequestedAt })
-          .from(studentProfile)
-          .where(and(eq(studentProfile.userId, studentId), inArray(studentProfile.userId, managedBy(adultId))));
+        const student = await askedOf(tx, adultId, studentId);
         if (!student) return undefined;
         if (!student.requestedAt) return 'none' as const;
         await tx
@@ -118,11 +119,7 @@ export function deletionsRepository(db: Db) {
      * a parent may have cancelled meanwhile. The first name of each, and their parents' addresses.
      */
     async deleteDueStudents(now: Date) {
-      const due = await db
-        .select({ id: studentProfile.userId })
-        .from(studentProfile)
-        .where(lte(studentProfile.deletionRequestedAt, deletionCutoff(now)))
-        .orderBy(studentProfile.userId);
+      const due = await db.select({ id: studentProfile.userId }).from(studentProfile).where(deletionIsDue(now)).orderBy(studentProfile.userId);
       const deleted: { name: string; parents: string[] }[] = [];
       for (const { id } of due) {
         const gone = await db.transaction(async (tx) => {
@@ -130,7 +127,7 @@ export function deletionsRepository(db: Db) {
           const [still] = await tx
             .select({ id: studentProfile.userId })
             .from(studentProfile)
-            .where(and(eq(studentProfile.userId, id), lte(studentProfile.deletionRequestedAt, deletionCutoff(now))));
+            .where(and(eq(studentProfile.userId, id), deletionIsDue(now)));
           if (!student || !still) return undefined;
           const parents = await tx
             .select({ email: user.email })

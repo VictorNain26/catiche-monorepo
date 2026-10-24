@@ -66,6 +66,11 @@ interface SignedIn {
 /** The entries by email after which the passkey is offered: the first is the invitation's, or the first code. */
 const PASSKEY_OFFER_ENTRIES = 2;
 
+/** One email to each address. */
+export async function sendEach(send: Mailer, addresses: readonly string[], email: Omit<Email, 'to'>) {
+  await Promise.all(addresses.map((to) => send({ ...email, to })));
+}
+
 type StudentRow = NonNullable<Awaited<ReturnType<HouseholdRepository['findStudent']>>>;
 
 /** The student's learner memory as the tutor reads it; the child answers once the parent proposed it, or alone from 15. */
@@ -113,23 +118,24 @@ export function createHouseholdService({ repository, sharedDevice, inviteAddress
 
   /**
    * A gesture that counts, told to the student's other parents after the answer (`docs/plans/app-cible.md`
-   * § 3, « L'historique »): never to its author, nor to a relative.
+   * § 3, « L'historique »): never to its author, nor to a relative. `then`: what the email says after
+   * the sentence, the history's link unless it says otherwise.
    */
-  const tellOtherParents = (adultId: string, studentId: string, said: (adultName: string, studentName: string) => string) => {
+  const tellOtherParents = (
+    adultId: string,
+    studentId: string,
+    said: (adultName: string, studentName: string) => string,
+    then = (studentName: string, link: string) => `.\n\nL’historique de ${studentName}, dans Catiche : ${link}`,
+  ) => {
     later(async () => {
       const link = await repository.parentLink(adultId, studentId);
       if (!link) return;
       const sentence = said(link.adultName, link.studentName);
-      await sendEach(link.otherParents, {
+      await sendEach(send, link.otherParents, {
         subject: sentence,
-        text: `Bonjour,\n\n${sentence}.\n\nL’historique de ${link.studentName}, dans Catiche : ${publicUrl}/foyer/${studentId}`,
+        text: `Bonjour,\n\n${sentence}${then(link.studentName, `${publicUrl}/foyer/${studentId}`)}`,
       });
     });
-  };
-
-  /** One email to each address. */
-  const sendEach = async (addresses: readonly string[], email: Omit<Email, 'to'>) => {
-    await Promise.all(addresses.map((to) => send({ ...email, to })));
   };
 
   const isStudent = (userId: string) => repository.isStudent(userId);
@@ -149,10 +155,10 @@ export function createHouseholdService({ repository, sharedDevice, inviteAddress
      * what they have yet to declare, which the web asks before anything else.
      */
     async me({ id, name, email, deviceId }: SignedIn) {
-      const student = await repository.findProfile(id);
+      const [student, studentGone] = await Promise.all([repository.findProfile(id), isStudent(id)]);
       if (student) return { id, name, role: 'student' as const, level: student.level };
       // A student whose deletion is due is signed in no more.
-      if (await isStudent(id)) throw new Problem('UNAUTHENTICATED');
+      if (studentGone) throw new Problem('UNAUTHENTICATED');
       const [missing, offer, shared, invitations, onlyParentOf] = await Promise.all([
         repository.missingDeclarations(id),
         repository.passkeyOffer(id),
@@ -288,7 +294,7 @@ export function createHouseholdService({ repository, sharedDevice, inviteAddress
           await send(invitationEmail(email, letter, `L’invitation vous attend dans Catiche : ${publicUrl}/`));
       });
       later(() =>
-        sendEach(parent.otherParents, {
+        sendEach(send, parent.otherParents, {
           subject: `${adultName} a invité un adulte pour ${studentName}`,
           text: `Bonjour,\n\n${adultName} a invité ${email} pour ${studentName}, comme ${ROLE_WORDS[role]}.\n\nVous verrez dans Catiche quand cette personne sera entrée.`,
         }),
@@ -351,15 +357,12 @@ export function createHouseholdService({ repository, sharedDevice, inviteAddress
       if (asked.deleted) return null;
       const dueAt = deletionDue(asked.requestedAt);
       if (asked.first) {
-        later(async () => {
-          const link = await repository.parentLink(adultId, studentId);
-          if (!link) return;
-          const sentence = `${link.adultName} a demandé la suppression du compte de ${link.studentName}`;
-          await sendEach(link.otherParents, {
-            subject: sentence,
-            text: `Bonjour,\n\n${sentence}. Elle se fera le ${frenchDay(dueAt)}, sauf si vous l’annulez.\n\nGérer ${link.studentName}, dans Catiche : ${publicUrl}/foyer/${studentId}`,
-          });
-        });
+        tellOtherParents(
+          adultId,
+          studentId,
+          (adult, student) => `${adult} a demandé la suppression du compte de ${student}`,
+          (student, link) => `. Elle se fera le ${frenchDay(dueAt)}, sauf si vous l’annulez.\n\nGérer ${student}, dans Catiche : ${link}`,
+        );
       }
       return { dueAt };
     },

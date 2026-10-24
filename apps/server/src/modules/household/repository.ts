@@ -37,7 +37,7 @@ const browserOf = async (tx: Pick<Db, 'select'>, deviceId: string) =>
   (await tx.select({ userAgent: device.userAgent }).from(device).where(eq(device.id, deviceId)))[0]?.userAgent ?? null;
 
 export function createHouseholdRepository(db: Db) {
-  const { alive, managedBy, otherParents, lockFor } = accessOf(db);
+  const { alive, studentsOf, managedBy, otherParents, lockFor } = accessOf(db);
 
   /** The student's row, and the adult's link to them, which says the adult's role. */
   const linkOf = (adultId: string) => and(eq(guardianship.studentId, user.id), eq(guardianship.adultId, adultId));
@@ -99,7 +99,7 @@ export function createHouseholdRepository(db: Db) {
       .innerJoin(studentProfile, eq(studentProfile.userId, user.id))
       .innerJoin(guardianship, linkOf(adultId))
       .leftJoin(requester, eq(requester.id, studentProfile.deletionRequestedBy))
-      .where(and(alive(user.id), where))
+      .where(and(inArray(user.id, studentsOf(adultId)), where))
       .orderBy(user.createdAt);
 
   return {
@@ -227,7 +227,7 @@ export function createHouseholdRepository(db: Db) {
       const [link] = await db
         .select({ adultId: guardianship.adultId })
         .from(guardianship)
-        .where(and(eq(guardianship.adultId, adultId), eq(guardianship.studentId, studentId), asParent(), alive(guardianship.studentId)));
+        .where(and(eq(guardianship.adultId, adultId), eq(guardianship.studentId, studentId), inArray(guardianship.studentId, managedBy(adultId))));
       return link !== undefined;
     },
 

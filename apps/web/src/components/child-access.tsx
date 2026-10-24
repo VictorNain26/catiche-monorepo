@@ -214,6 +214,7 @@ export function ForgottenCode({ child, activation }: { child: Student; activatio
       {activation.added && <Banner tone="success" title={`L’appareil de ${child.name} est ajouté.`} />}
       {activation.stale ? (
         <RecentEntry
+          why="Par sécurité, un code de départ se donne dans les 10 minutes qui suivent votre entrée."
           onConfirmed={() => {
             activation.ask('forgotten');
           }}

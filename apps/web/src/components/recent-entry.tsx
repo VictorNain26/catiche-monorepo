@@ -9,13 +9,7 @@ import { CodeForm, sendCode } from './code-form';
  * server refused it as SESSION_NOT_FRESH: a code received by email confirms who is there, then
  * `onConfirmed` goes back to the gesture. `why`: what the gesture asks the recent entry for.
  */
-export function RecentEntry({
-  onConfirmed,
-  why = 'Par sécurité, un appareil s’ajoute dans les 10 minutes qui suivent votre entrée.',
-}: {
-  onConfirmed: () => void;
-  why?: string;
-}) {
+export function RecentEntry({ onConfirmed, why }: { onConfirmed: () => void; why: string }) {
   const [codeSentTo, setCodeSentTo] = useState<string | null>(null);
   const askCode = useMutation({
     mutationFn: async () => {

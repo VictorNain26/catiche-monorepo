@@ -16,21 +16,17 @@ export const otherAdult = alias(guardianship, 'other_adult');
 /** The link is a parent's, who manages the student; a relative's only reads them. */
 export const asParent = (role: typeof guardianship.role | typeof otherAdult.role = guardianship.role) => eq(role, 'guardian');
 
+/** The student's deletion, asked, is due at `now` (domain/student-deletion.ts): by the clock of the server, which dates a deletion asked. */
+export const deletionIsDue = (now: Date) => lte(studentProfile.deletionRequestedAt, deletionCutoff(now));
+
 /** The two ways from an adult to students, on `db`: each part of the repository builds them once. */
 export function accessOf(db: Db) {
   /**
    * The student `column` names is not one whose deletion is due: past its day, a student is
-   * treated as deleted, whether or not the sweep has taken them yet (domain/student-deletion.ts).
-   * By the clock of the server, which a deletion asked is dated by.
+   * treated as deleted, whether or not the sweep has taken them yet.
    */
   const alive = (column: Column) =>
-    notInArray(
-      column,
-      db
-        .select({ id: studentProfile.userId })
-        .from(studentProfile)
-        .where(lte(studentProfile.deletionRequestedAt, deletionCutoff(new Date()))),
-    );
+    notInArray(column, db.select({ id: studentProfile.userId }).from(studentProfile).where(deletionIsDue(new Date())));
   /** The ids of the students `adultId` is linked to, as a parent or a relative: what they read. */
   const studentsOf = (adultId: string) =>
     db

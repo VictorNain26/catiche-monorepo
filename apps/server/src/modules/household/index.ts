@@ -13,7 +13,7 @@ import type { Db } from '../../platform/db/client';
 import { keyedBudget } from '../../platform/http/rate-limit';
 import { createHouseholdRepository } from './repository';
 import { householdRoutes, meRoutes, studentAuthGuard } from './routes';
-import { INVITATIONS_PER_DAY, createHouseholdService, learnerMemory, type MemoryAnswer } from './service';
+import { INVITATIONS_PER_DAY, createHouseholdService, learnerMemory, sendEach, type MemoryAnswer } from './service';
 
 export type { AdultRole } from './service';
 
@@ -105,14 +105,11 @@ export function householdSweep({ db, mailer }: { db: Db; mailer: Mailer }) {
     deletions: async (now: Date) => {
       const deleted = await repository.deleteDueStudents(now);
       await Promise.all(
-        deleted.flatMap(({ name, parents }) =>
-          parents.map((to) =>
-            mailer({
-              to,
-              subject: `Le compte de ${name} est supprimé`,
-              text: `Bonjour,\n\nLe compte de ${name} est supprimé. Ses séances sont effacées et ses appareils déconnectés.`,
-            }),
-          ),
+        deleted.map(({ name, parents }) =>
+          sendEach(mailer, parents, {
+            subject: `Le compte de ${name} est supprimé`,
+            text: `Bonjour,\n\nLe compte de ${name} est supprimé. Ses séances sont effacées et ses appareils déconnectés.`,
+          }),
         ),
       );
     },

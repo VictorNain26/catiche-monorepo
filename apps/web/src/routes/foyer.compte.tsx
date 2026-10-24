@@ -2,7 +2,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Banner, Button, Field, List, ListItem, Section, toast } from '@repo/ui';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AdultPage } from '../components/page';
 import { PasskeyCreate } from '../components/passkey-create';
@@ -55,15 +54,16 @@ function Account() {
 function DeleteAccount({ childNames }: { childNames: readonly string[] }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const deletion = useConfirmation();
-  const [stale, setStale] = useState(false);
+  // The consequences confirmed first, then, past 10 minutes, the recent entry.
+  const deletion = useConfirmation<'confirm' | 'recent'>();
   const remove = useMutation({
     mutationFn: async () => {
       try {
         await authData(authClient.deleteUser());
       } catch (error) {
+        // better-auth's own refusal of a session too old for this route (`delete-user`).
         if (error instanceof AuthFailure && hasCode(error, 'SESSION_EXPIRED')) {
-          setStale(true);
+          deletion.open('recent');
           return;
         }
         throw error;
@@ -76,15 +76,14 @@ function DeleteAccount({ childNames }: { childNames: readonly string[] }) {
 
   return (
     <Section title="Supprimer mon compte">
-      {stale ? (
+      {deletion.confirming === 'recent' ? (
         <RecentEntry
           why="Par sécurité, un compte se supprime dans les 10 minutes qui suivent votre entrée."
           onConfirmed={() => {
-            setStale(false);
             remove.mutate();
           }}
         />
-      ) : deletion.confirming ? (
+      ) : deletion.confirming === 'confirm' ? (
         <>
           <Banner tone="warning" focusOnMount title={accountDeletionWarning(childNames)} />
           {remove.error && <Banner tone="error" title={remove.error.message} />}
