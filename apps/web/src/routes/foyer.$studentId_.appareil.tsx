@@ -84,7 +84,8 @@ function Choice({ chosen, onChoose, children }: { chosen: boolean; onChoose: () 
       render={<button type="button" aria-pressed={chosen} onClick={onChoose} />}
       className={cn(
         'flex min-h-16 items-center text-left text-lg font-bold transition-colors duration-fast ease-standard hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none',
-        chosen && 'bg-accent text-accent-foreground',
+        // The card chosen, told by its frame in the brand's water, which the contrast test holds on the accent.
+        chosen && 'border-primary bg-accent text-accent-foreground ring-1 ring-primary',
       )}
     >
       {children}
@@ -227,7 +228,8 @@ function StartingCode({ child, code }: { child: Student; code: string }) {
   const link = activationLink(window.location.origin, code);
   const { size, d } = useMemo(() => squarePath(link), [link]);
   return (
-    <Card className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-start sm:text-left">
+    // The words under the square, at every width: beside it, a column too narrow would cut the code in two.
+    <Card className="flex flex-col items-center gap-4 text-center">
       <svg
         viewBox={`0 0 ${String(size)} ${String(size)}`}
         role="img"
@@ -238,7 +240,7 @@ function StartingCode({ child, code }: { child: Student; code: string }) {
         <path d={d} />
       </svg>
       <div className="flex flex-col gap-3">
-        <p className="font-mono text-3xl tracking-widest text-foreground">{formatCode(code)}</p>
+        <p className="font-mono text-3xl tracking-widest whitespace-nowrap text-foreground">{formatCode(code)}</p>
         <p className="text-foreground">
           Sur l’autre appareil, visez ce carré avec l’appareil photo : Catiche s’ouvre tout seul. Sinon, ouvrez {window.location.host}, touchez « J’ai
           un code de départ » et tapez ce code. Il marche une seule fois, pendant 24 heures.
