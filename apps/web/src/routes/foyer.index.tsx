@@ -8,7 +8,7 @@ import { AdultPage } from '../components/page';
 import { PasskeyOffer } from '../components/passkey-offer';
 import { useUnblockDevice } from '../components/child-access';
 import { deviceKind } from '../lib/device';
-import { GUARDIAN_HINT, GUARDIAN_LABEL, LEVEL_LABELS, householdMessage, studentsQuery, type Student } from '../lib/household';
+import { GUARDIAN_HINT, GUARDIAN_LABEL, LEVEL_LABELS, deletionAsked, householdMessage, studentsQuery, type Student } from '../lib/household';
 import { capitalised } from '../lib/words';
 import {
   acceptInvitation,
@@ -128,21 +128,32 @@ function InvitationCard({ invitation }: { invitation: Invitation }) {
 }
 
 /**
- * What a parent has to act on for a child, at the top of the home (A5): their code stopped
- * everywhere, which a starting code on « Gérer » replaces; else each device that blocked them,
- * unblocked here. A status, which takes no focus.
+ * What a parent has to act on for a child, at the top of the home (A5): the deletion of their
+ * account asked, its author included, seen on « Gérer »; their code stopped everywhere, which a
+ * starting code on « Gérer » replaces; else each device that blocked them, unblocked here. A
+ * status, which takes no focus.
  */
 function AlertCards({ child }: { child: Student }) {
+  if (child.role !== 'guardian') return null;
   const { blockedDevices, codeLocked } = child.alerts;
-  if (codeLocked) {
-    return (
-      <Card className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="font-bold">Le code de {child.name} ne marche plus.</p>
-        <Button render={<Link to="/foyer/$studentId" params={{ studentId: child.id }} />}>Donner un code de départ</Button>
-      </Card>
-    );
-  }
-  return blockedDevices.map((device) => <BlockedDevice key={device.id} child={child} device={device} />);
+  return (
+    <>
+      {child.deletion && (
+        <Card className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="font-bold">{deletionAsked(child.name, child.deletion.by)}</p>
+          <Button render={<Link to="/foyer/$studentId" params={{ studentId: child.id }} />}>Voir</Button>
+        </Card>
+      )}
+      {codeLocked ? (
+        <Card className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="font-bold">Le code de {child.name} ne marche plus.</p>
+          <Button render={<Link to="/foyer/$studentId" params={{ studentId: child.id }} />}>Donner un code de départ</Button>
+        </Card>
+      ) : (
+        blockedDevices.map((device) => <BlockedDevice key={device.id} child={child} device={device} />)
+      )}
+    </>
+  );
 }
 
 /** One blocked device, unblocked by its own request: another card's failure is not its own. */

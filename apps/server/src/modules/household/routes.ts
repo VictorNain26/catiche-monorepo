@@ -171,7 +171,12 @@ export function householdRoutes({ auth, service }: { auth: Auth; service: Househ
       return c.body(null, 204);
     })
     .delete('/students/:id', async (c) => {
-      await service.deleteStudent(c.var.userId, c.req.param('id'));
+      // Deleted at once, or asked for 7 days when another parent follows the child.
+      const asked = await service.deleteStudent(c.var.userId, c.req.param('id'));
+      return asked ? c.json(asked, 202) : c.body(null, 204);
+    })
+    .post('/students/:id/deletion/cancel', async (c) => {
+      await service.cancelDeletion(c.var.userId, c.req.param('id'));
       return c.body(null, 204);
     });
 }

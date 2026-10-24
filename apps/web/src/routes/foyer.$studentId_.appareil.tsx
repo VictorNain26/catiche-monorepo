@@ -11,6 +11,9 @@ import { AuthFailure, authClient, authData, hasCode } from '../lib/auth';
 import { householdMessage, studentDevicesQuery, studentsQuery, type Student } from '../lib/household';
 import { announceProfileChange, keepChooseTokens, profilesQuery, tabChannel } from '../lib/student';
 
+/** What the recent entry is asked for, on both ways of adding a device. */
+const DEVICE_WHY = 'Par sécurité, un appareil s’ajoute dans les 10 minutes qui suivent votre entrée.';
+
 /**
  * A4, where the child works in the evening: on this device, next to the parent, where the child
  * chooses their code at once; or on another, theirs or a relative's, by the square to aim at or the
@@ -128,6 +131,7 @@ function ThisDevice({ child }: { child: Student }) {
       {add.error && <Banner tone="error" title={add.error.message} />}
       {stale ? (
         <RecentEntry
+          why={DEVICE_WHY}
           onConfirmed={() => {
             setStale(false);
           }}
@@ -188,6 +192,7 @@ function OtherDevice({ child, activation }: { child: Student; activation: Return
       {code ? <StartingCode child={child} code={code.code} /> : activation.asking && <p className="text-muted-foreground">Chargement du code…</p>}
       {activation.stale ? (
         <RecentEntry
+          why={DEVICE_WHY}
           onConfirmed={() => {
             activation.ask('device');
           }}

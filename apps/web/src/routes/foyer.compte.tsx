@@ -1,19 +1,22 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Banner, Button, Field, List, ListItem, Section, toast } from '@repo/ui';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { AdultPage } from '../components/page';
 import { PasskeyCreate } from '../components/passkey-create';
+import { RecentEntry } from '../components/recent-entry';
 import { SignOut } from '../components/sign-out';
-import { authClient, authData } from '../lib/auth';
-import { deviceName, formatDay } from '../lib/device';
-import { meQuery, nameSchema } from '../lib/me';
+import { AuthFailure, authClient, authData, hasCode } from '../lib/auth';
+import { useConfirmation } from '../lib/confirmation';
+import { passkeyName } from '../lib/device';
+import { accountDeletionWarning, meQuery, nameSchema } from '../lib/me';
 import { passkeysQuery } from '../lib/passkey';
 
 /**
  * The adult's account, opened from their name at the top of each of their screens: whose it is
- * first, and what this device remembers; their first name; the way out; their passkeys.
+ * first, and what this device remembers; their first name; the way out; their passkeys; apart, at
+ * the bottom, the deletion of their account.
  */
 export const Route = createFileRoute('/foyer/compte')({
   loader: ({ context }) => context.queryClient.query(passkeysQuery),
@@ -38,7 +41,77 @@ function Account() {
       <FirstName name={me.name} />
       <SignOut label="Quitter Catiche" />
       <Passkeys shared={me.sharedDevice} />
+      <DeleteAccount childNames={me.onlyParentOf.map(({ name }) => name)} />
     </AdultPage>
+  );
+}
+
+/**
+ * The adult deletes their account, apart at the bottom, its consequences named first: the children
+ * they are the only parent of go with it. A session opened more than 10 minutes ago asks a code
+ * received by email (`RecentEntry`), then the deletion goes on; done, the way in (A1).
+ */
+function DeleteAccount({ childNames }: { childNames: readonly string[] }) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  // The consequences confirmed first, then, past 10 minutes, the recent entry.
+  const deletion = useConfirmation<'confirm' | 'recent'>();
+  const remove = useMutation({
+    mutationFn: async () => {
+      try {
+        await authData(authClient.deleteUser());
+      } catch (error) {
+        // better-auth's own refusal of a session too old for this route (`delete-user`).
+        if (error instanceof AuthFailure && hasCode(error, 'SESSION_EXPIRED')) {
+          deletion.open('recent');
+          return;
+        }
+        throw error;
+      }
+      queryClient.clear();
+      toast('Votre compte est supprimé.');
+      await navigate({ to: '/connexion' });
+    },
+  });
+
+  return (
+    <Section title="Supprimer mon compte">
+      {deletion.confirming === 'recent' ? (
+        <RecentEntry
+          why="Par sécurité, un compte se supprime dans les 10 minutes qui suivent votre entrée."
+          onConfirmed={() => {
+            remove.mutate();
+          }}
+        />
+      ) : deletion.confirming === 'confirm' ? (
+        <>
+          <Banner tone="warning" focusOnMount title={accountDeletionWarning(childNames)} />
+          {remove.error && <Banner tone="error" title={remove.error.message} />}
+          <Button
+            disabled={remove.isPending}
+            onClick={() => {
+              remove.mutate();
+            }}
+          >
+            Supprimer définitivement
+          </Button>
+          <Button variant="outline" onClick={deletion.cancel}>
+            Annuler
+          </Button>
+        </>
+      ) : (
+        <Button
+          ref={deletion.opener('confirm')}
+          variant="outline"
+          className="sm:self-start"
+          onClick={() => {
+            deletion.open('confirm');
+          }}
+        >
+          Supprimer mon compte
+        </Button>
+      )}
+    </Section>
   );
 }
 
@@ -68,16 +141,24 @@ function FirstName({ name }: { name: string }) {
   );
 }
 
-/** A passkey opens Catiche without waiting for an email; none is made on a shared device, whose lock a child may know. */
+/**
+ * A passkey opens Catiche without waiting for an email; none is made on a shared device, whose lock
+ * a child may know. Each says its device and its day; « Supprimer » asks a confirmation.
+ */
 function Passkeys({ shared }: { shared: boolean }) {
   const queryClient = useQueryClient();
   const { data: passkeys } = useSuspenseQuery(passkeysQuery);
   const refresh = () => Promise.all([passkeysQuery, meQuery].map(({ queryKey }) => queryClient.invalidateQueries({ queryKey })));
+  const removal = useConfirmation<string>();
 
   const remove = useMutation({
     mutationFn: (id: string) => authData(authClient.passkey.deletePasskey({ id })),
+    onSuccess: () => {
+      removal.close();
+    },
     onSettled: refresh,
   });
+  const confirming = passkeys.find(({ id }) => id === removal.confirming);
 
   return (
     <Section
@@ -87,19 +168,41 @@ function Passkeys({ shared }: { shared: boolean }) {
       {passkeys.length > 0 && (
         <List>
           {passkeys.map((passkey) => (
-            <ListItem key={passkey.id} title={deviceName(passkey.name)} meta={`Créée le ${formatDay(passkey.createdAt)}`}>
-              <Button
-                variant="outline"
-                disabled={remove.isPending}
-                onClick={() => {
-                  remove.mutate(passkey.id);
-                }}
-              >
-                Supprimer
-              </Button>
+            <ListItem key={passkey.id} title={passkeyName(passkey.name, passkey.createdAt)}>
+              {removal.confirming !== passkey.id && (
+                <Button
+                  ref={removal.opener(passkey.id)}
+                  variant="outline"
+                  onClick={() => {
+                    removal.open(passkey.id);
+                  }}
+                >
+                  Supprimer
+                </Button>
+              )}
             </ListItem>
           ))}
         </List>
+      )}
+      {confirming && (
+        <>
+          <Banner
+            tone="warning"
+            focusOnMount
+            title={`La clé « ${passkeyName(confirming.name, confirming.createdAt)} » ne vous fera plus entrer. Vous entrerez avec un code reçu par e-mail.`}
+          />
+          <Button
+            disabled={remove.isPending}
+            onClick={() => {
+              remove.mutate(confirming.id);
+            }}
+          >
+            Supprimer la clé
+          </Button>
+          <Button variant="outline" onClick={removal.cancel}>
+            Annuler
+          </Button>
+        </>
       )}
       {remove.error && <Banner tone="error" title={remove.error.message} />}
       {/* A second action: the page says first whose account it is. */}

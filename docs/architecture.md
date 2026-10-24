@@ -15,7 +15,11 @@ En place (`apps/server/src`) :
   l'environnement ; `app.ts`, `createApp(deps)`.
 - `platform/` : `http` (erreurs RFC 9457, en-têtes de sécurité, service du web), `db` (client,
   migrations sous verrou et vérifiées au démarrage), `auth` (better-auth et ses tables),
-  `observability` (pino), `lifecycle` (santé et arrêt).
+  `observability` (pino), `lifecycle` (santé, arrêt, et la tâche de fond). La tâche de fond
+  (`platform/lifecycle/sweep.ts`) tourne dans le processus, une fois au démarrage puis toutes les
+  heures, et appelle les étapes que `main.ts` lui passe (`householdSweep`, `modules/household`) ;
+  un verrou consultatif de Postgres, tenu par sa transaction, n'en laisse passer qu'une instance
+  à la fois, et l'arrêt attend le passage en cours.
 - `modules/household` : le lien entre un adulte et un enfant, qui permet plusieurs adultes par
   enfant, chacun parent ou proche (`guardianship.role`) ; l'élève créé par un adulte sans aucun
   identifiant (ni e-mail, ni mot de passe, ni nom de famille), ses appareils ; les déclarations
@@ -39,7 +43,15 @@ En place (`apps/server/src`) :
   la ligne d'un adulte parti. La mémoire retirée et le code de départ après un oubli partent aussi
   par e-mail aux autres parents, jamais à un proche. La liste des enfants
   (`GET /api/household/students`) donne à chaque adulte les prénoms des autres parents et, à un
-  parent, ce que son accueil signale : un appareil bloqué, le code arrêté partout. Les parties du
+  parent, ce que son accueil signale : un appareil bloqué, le code arrêté partout, la suppression
+  demandée. Un parent supprime le compte de l'enfant (`DELETE /api/household/students/:id`) tout
+  de suite quand aucun autre parent ne le suit ; sinon la suppression est demandée, les autres
+  parents prévenus, et tout parent l'annule pendant `DELETION_DAYS`
+  (`domain/student-deletion.ts`) ; passé ce délai, l'enfant est traité comme supprimé par chaque
+  lecture (`alive`, `repository/access.ts`), puis la tâche de fond le supprime et prévient ses
+  parents. Elle purge aussi l'historique au-delà de `HISTORY_DAYS` et les invitations expirées,
+  avec l'invitation de bêta, passée elle aussi, d'une adresse que plus rien n'attend ; un élève
+  dont la suppression est échue n'entre plus par son code (`StudentAccess.active`). Les parties du
   repository qui ne tiennent pas dans un fichier vivent dans `repository/`, que lui seul importe. Le résumé de la
   semaine donne aussi les jours, à l'heure de Paris, où l'enfant a écrit à Tom (`days`,
   `tonight`), que chaque adulte lit sans durée ni matière.
@@ -54,10 +66,10 @@ En place (`apps/server/src`) :
   publique est dans `disabledPaths`, que better-auth n'applique qu'aux requêtes). Il entre aussi par une clé d'accès (`@better-auth/passkey`, liée à l'origine
   publique), que l'accueil propose à partir de sa deuxième entrée par e-mail, hors appareil
   partagé (`GET /api/me`, `passkeyOffer`). Une clé se crée,
-  et le compte se supprime (`POST /api/auth/delete-user`, que le web n'appelle pas encore : la
-  suppression se fait sur demande), depuis une session ouverte il y a moins de 10 minutes ; la
-  suppression emporte les enfants dont l'adulte est le dernier parent, leurs proches n'en gardant
-  pas le lien. L'élève n'a pas de clé : le garde du foyer lui
+  et le compte se supprime (`POST /api/auth/delete-user`, depuis « Votre compte »), depuis une
+  session ouverte il y a moins de 10 minutes ; la suppression emporte les enfants dont l'adulte
+  est le dernier parent (`GET /api/me`, `onlyParentOf`, que l'écran nomme avant), leurs proches
+  n'en gardant pas le lien. L'élève n'a pas de clé : le garde du foyer lui
   ferme les routes de better-auth, sauf les siennes et celles par où son parent entre sur son
   appareil. Une session vit 90 jours sans usage, sauf sur un appareil partagé. Les envois partent
   après la réponse (`platform/lifecycle/background.ts`), que l'arrêt attend.

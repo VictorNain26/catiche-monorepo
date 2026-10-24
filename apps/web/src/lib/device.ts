@@ -24,10 +24,24 @@ const KINDS: Record<'mobile' | 'tablet' | 'desktop' | 'unknown', DeviceKind> = {
   unknown: { the: 'l’appareil', this: 'cet appareil', blocked: 'bloqué' },
 };
 
-/** A device's kind, from its user agent; « appareil » when it cannot tell (`app-cible.md` § 5, « Les noms »). */
-export function deviceKind(userAgent: string | null | undefined): DeviceKind {
+/** The kind of device a user agent says, `unknown` when it cannot tell. */
+function kindOf(userAgent: string | null | undefined): keyof typeof KINDS {
   const type = userAgent ? Bowser.parse(userAgent).platform.type : undefined;
-  return type === 'mobile' || type === 'tablet' || type === 'desktop' ? KINDS[type] : KINDS.unknown;
+  return type === 'mobile' || type === 'tablet' || type === 'desktop' ? type : 'unknown';
+}
+
+/** A device's kind, from its user agent; « appareil » when it cannot tell (`app-cible.md` § 5, « Les noms »). */
+export const deviceKind = (userAgent: string | null | undefined): DeviceKind => KINDS[kindOf(userAgent)];
+
+const KIND_NAMES: Record<keyof typeof KINDS, string> = { mobile: 'Téléphone', tablet: 'Tablette', desktop: 'Ordinateur', unknown: 'Appareil' };
+
+/**
+ * A passkey as « Vos clés d'accès » lists it (A9), by the user agent that made it: « Téléphone
+ * Android, créée le 3 mars », as precise as the browser says.
+ */
+export function passkeyName(userAgent: string | null | undefined, createdAt: string | Date) {
+  const system = userAgent ? Bowser.parse(userAgent).os.name : undefined;
+  return `${[KIND_NAMES[kindOf(userAgent)], system].filter(Boolean).join(' ')}, créée le ${formatDate(createdAt)}`;
 }
 
 const day = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short' });

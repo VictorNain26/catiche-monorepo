@@ -10,7 +10,7 @@ import type { AdultRole } from '../../../domain/adult-roles';
 import { user } from '../../../platform/auth/schema';
 import type { Db } from '../../../platform/db/client';
 import { adultInvitation, guardianship } from '../schema';
-import { accessOf, asParent, record } from './access';
+import { accessOf, record } from './access';
 
 export interface NewInvitation {
   studentId: string;
@@ -60,7 +60,7 @@ export function adultsRepository(db: Db) {
           .from(guardianship)
           .innerJoin(user, eq(user.id, guardianship.studentId))
           .innerJoin(inviter, eq(inviter.id, guardianship.adultId))
-          .where(and(eq(guardianship.adultId, adultId), eq(guardianship.studentId, studentId), asParent())),
+          .where(and(eq(guardianship.adultId, adultId), eq(guardianship.studentId, studentId), inArray(guardianship.studentId, managed(adultId)))),
         otherParents(adultId, studentId),
       ]);
       return link && { ...link, otherParents: others.map(({ email }) => email) };

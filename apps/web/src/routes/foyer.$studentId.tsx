@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tansta
 import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { ChildDevices, ForgottenCode, useActivation } from '../components/child-access';
+import { DeleteStudent, DeletionAsked } from '../components/child-deletion';
 import { ChildHistory } from '../components/child-history';
 import { AdultPage } from '../components/page';
 import { WeekSummary } from '../components/week-summary';
@@ -21,7 +22,6 @@ import {
   adultsQuery,
   askParents,
   decidesWith,
-  deleteStudent,
   householdMessage,
   memoryStatus,
   removeAdult,
@@ -37,7 +37,7 @@ import {
  * « Gérer [prénom] » (A7). For a parent: who decides with them; until a device holds the child's
  * profile, the page opens on their devices, with the way to add one (A4); then their week; their
  * devices; their forgotten code; their adults; and, folded under « Plus », their memory, their name
- * and class, the history and their account. Two columns on a computer. For a relative: the week,
+ * and class, the history and their account, whose deletion asked shows at the top. Two columns on a computer. For a relative: the week,
  * whom to ask for a device, and their way out.
  */
 export const Route = createFileRoute('/foyer/$studentId')({
@@ -132,6 +132,7 @@ function ParentView({ child }: { child: Student }) {
   return (
     <AdultPage title={`Gérer ${child.name}`} subtitle={LEVEL_LABELS[child.level]} wide>
       <p className="text-foreground">{decidesWith(child.name, child.parents)}</p>
+      {child.deletion && <DeletionAsked child={child} deletion={child.deletion} />}
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-12">
         <div className="flex flex-col gap-6">
           {first && <ChildDevices child={child} activation={activation} />}
@@ -152,9 +153,12 @@ function ParentView({ child }: { child: Student }) {
               <Section title="Historique" level={3}>
                 <ChildHistory child={child} />
               </Section>
-              <Section title="Supprimer son compte" level={3}>
-                <DeleteStudent child={child} />
-              </Section>
+              {/* Asked already: the notice at the top of the page says it, and cancels it. */}
+              {!child.deletion && (
+                <Section title="Supprimer son compte" level={3}>
+                  <DeleteStudent child={child} />
+                </Section>
+              )}
             </div>
           </Fold>
         </div>
@@ -347,46 +351,5 @@ function EditStudent({ child }: { child: Student }) {
         Enregistrer
       </Button>
     </form>
-  );
-}
-
-function DeleteStudent({ child }: { child: Student }) {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const deletion = useConfirmation();
-  const remove = useMutation({
-    mutationFn: () => deleteStudent(child.id),
-    onSuccess: async () => {
-      await navigate({ to: '/foyer' });
-      await queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey });
-    },
-  });
-
-  return deletion.confirming ? (
-    <>
-      <Banner tone="warning" focusOnMount title="Ses séances seront effacées et ses appareils déconnectés. C’est définitif." />
-      {remove.error && <Banner tone="error" title={householdMessage(remove.error)} />}
-      <Button
-        disabled={remove.isPending}
-        onClick={() => {
-          remove.mutate();
-        }}
-      >
-        Supprimer définitivement
-      </Button>
-      <Button variant="outline" onClick={deletion.cancel}>
-        Annuler
-      </Button>
-    </>
-  ) : (
-    <Button
-      ref={deletion.opener('confirm')}
-      variant="outline"
-      onClick={() => {
-        deletion.open('confirm');
-      }}
-    >
-      Supprimer le compte de {child.name}
-    </Button>
   );
 }

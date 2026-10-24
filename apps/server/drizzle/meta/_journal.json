@@ -162,6 +162,13 @@
       "when": 1792853749822,
       "tag": "0022_child_event",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792858782179,
+      "tag": "0023_student_deletion",
+      "breakpoints": true
     }
   ]
 }

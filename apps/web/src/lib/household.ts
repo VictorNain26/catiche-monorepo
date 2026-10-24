@@ -6,6 +6,7 @@ import type { InferRequestType, InferResponseType } from 'hono/client';
 import { ticked, z } from './zod';
 import { api, isProblem, parseResponse } from './api';
 import { FAILED, TOO_MANY_TRIES } from './auth';
+import { formatDate } from './device';
 import { listWords } from './words';
 
 const students = api.household.students;
@@ -51,7 +52,28 @@ export const addStudent = (json: InferRequestType<typeof students.$post>['json']
 export const updateStudent = (id: string, json: InferRequestType<(typeof students)[':id']['$patch']>['json']) =>
   parseResponse(students[':id'].$patch({ param: { id }, json }));
 
-export const deleteStudent = (id: string) => parseResponse(students[':id'].$delete({ param: { id } }));
+/** Whether the deletion is asked, another parent following the child (202), rather than done at once (204). */
+export async function deleteStudent(id: string) {
+  const response = students[':id'].$delete({ param: { id } });
+  await parseResponse(response);
+  return (await response).status === 202;
+}
+
+/** A parent cancels the deletion asked, its author included. */
+export const cancelDeletion = (id: string) => parseResponse(students[':id'].deletion.cancel.$post({ param: { id } }));
+
+/** What « Supprimer son compte » warns of when other parents follow the child (`app-cible.md`, question tranchée 1). */
+export const deletionWarning = (parents: readonly string[]) =>
+  parents.length > 1
+    ? `${listWords(parents)} recevront un e-mail et pourront l’annuler pendant 7 jours.`
+    : `${listWords(parents)} recevra un e-mail et pourra l’annuler pendant 7 jours.`;
+
+/** Who asked the deletion of the child's account; an adult who left Catiche is « Un adulte ». */
+export const deletionAsked = (name: string, by: string | null) =>
+  `${by === null || by === '' ? 'Un adulte' : by} a demandé la suppression du compte de ${name}.`;
+
+/** The day the deletion asked is done. */
+export const deletionDay = (dueAt: string) => `Elle se fera le ${formatDate(dueAt)}.`;
 
 /** The adult confirms holding parental authority over a child linked to them before the declaration existed. */
 export const declareGuardian = (id: string) => parseResponse(students[':id'].declaration.$post({ param: { id }, json: { declaredGuardian: true } }));

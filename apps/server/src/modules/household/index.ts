@@ -13,7 +13,7 @@ import type { Db } from '../../platform/db/client';
 import { keyedBudget } from '../../platform/http/rate-limit';
 import { createHouseholdRepository } from './repository';
 import { householdRoutes, meRoutes, studentAuthGuard } from './routes';
-import { INVITATIONS_PER_DAY, createHouseholdService, learnerMemory, type MemoryAnswer } from './service';
+import { INVITATIONS_PER_DAY, createHouseholdService, learnerMemory, sendEach, type MemoryAnswer } from './service';
 
 export type { AdultRole } from './service';
 
@@ -89,8 +89,34 @@ export function householdAuth(db: Db) {
   const students: StudentAccess = {
     manages: (adultId, studentId) => repository.manages(adultId, studentId),
     birthMonth: async (studentId) => (await repository.findProfile(studentId))?.birthMonth ?? null,
+    active: async (studentId) => (await repository.findProfile(studentId)) !== undefined,
   };
   return { deleteUser: accountDeletion(db), students, emailEntered: (adultId: string) => repository.countEmailEntry(adultId) };
+}
+
+/**
+ * The household's steps of the background sweep (`platform/lifecycle/sweep.ts`), which main.ts
+ * hands to it: the deletions of students due, told to their parents; the history past its 90 days;
+ * the invitations of adults expired, with the closed beta's invitation of an address nothing
+ * waits for any more, once past its own day.
+ */
+export function householdSweep({ db, mailer }: { db: Db; mailer: Mailer }) {
+  const repository = createHouseholdRepository(db);
+  return {
+    deletions: async (now: Date) => {
+      const deleted = await repository.deleteDueStudents(now);
+      await Promise.all(
+        deleted.map(({ name, parents }) =>
+          sendEach(mailer, parents, {
+            subject: `Le compte de ${name} est supprimé`,
+            text: `Bonjour,\n\nLe compte de ${name} est supprimé. Ses séances sont effacées et ses appareils déconnectés.`,
+          }),
+        ),
+      );
+    },
+    history: (now: Date) => repository.purgeHistory(now),
+    invitations: (now: Date) => repository.purgeInvitations(now),
+  };
 }
 
 /** A user's deletion, with the students they are the last parent of, in one transaction. */

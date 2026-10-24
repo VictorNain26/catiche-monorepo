@@ -9,6 +9,7 @@ import { createPlaceholderEmail } from '@better-auth/core/utils/email';
 import { generateId } from '@better-auth/core/utils/id';
 import type { SchoolLevel } from '../../domain/levels';
 import { memoryConsent, type MemoryAnswer } from '../../domain/memory-consent';
+import { deletionDue, frenchDay } from '../../domain/student-deletion';
 
 export type { AdultRole, MemoryAnswer };
 import type { AdultRole } from '../../domain/adult-roles';
@@ -65,6 +66,11 @@ interface SignedIn {
 /** The entries by email after which the passkey is offered: the first is the invitation's, or the first code. */
 const PASSKEY_OFFER_ENTRIES = 2;
 
+/** One email to each address. */
+export async function sendEach(send: Mailer, addresses: readonly string[], email: Omit<Email, 'to'>) {
+  await Promise.all(addresses.map((to) => send({ ...email, to })));
+}
+
 type StudentRow = NonNullable<Awaited<ReturnType<HouseholdRepository['findStudent']>>>;
 
 /** The student's learner memory as the tutor reads it; the child answers once the parent proposed it, or alone from 15. */
@@ -79,13 +85,22 @@ export function learnerMemory(
   return { state, mayAnswer, resetAfter: profile.memoryResetAfter ?? 0 };
 }
 
-// The date column holds the first day of the month; the API speaks in YYYY-MM.
-const toStudent = <Row extends StudentRow>({ birthMonth, memoryProposedAt, memoryAnswer, ...student }: Row) => {
+// The date column holds the first day of the month; the API speaks in YYYY-MM. A deletion asked
+// says who asked it, null once they left Catiche, and the day it is done.
+const toStudent = <Row extends StudentRow>({
+  birthMonth,
+  memoryProposedAt,
+  memoryAnswer,
+  deletionRequestedAt,
+  deletionRequestedBy,
+  ...student
+}: Row) => {
   const { state, decidesAlone } = memoryConsent({ birthMonth, proposedAt: memoryProposedAt, answer: memoryAnswer }, new Date());
   return {
     ...student,
     birthMonth: birthMonth.slice(0, 7),
     memory: { proposed: memoryProposedAt !== null, state, decidesAlone },
+    deletion: deletionRequestedAt === null ? null : { by: deletionRequestedBy, dueAt: deletionDue(deletionRequestedAt) },
   };
 };
 
@@ -103,23 +118,24 @@ export function createHouseholdService({ repository, sharedDevice, inviteAddress
 
   /**
    * A gesture that counts, told to the student's other parents after the answer (`docs/plans/app-cible.md`
-   * § 3, « L'historique »): never to its author, nor to a relative.
+   * § 3, « L'historique »): never to its author, nor to a relative. `then`: what the email says after
+   * the sentence, the history's link unless it says otherwise.
    */
-  const tellOtherParents = (adultId: string, studentId: string, said: (adultName: string, studentName: string) => string) => {
+  const tellOtherParents = (
+    adultId: string,
+    studentId: string,
+    said: (adultName: string, studentName: string) => string,
+    then = (studentName: string, link: string) => `.\n\nL’historique de ${studentName}, dans Catiche : ${link}`,
+  ) => {
     later(async () => {
       const link = await repository.parentLink(adultId, studentId);
       if (!link) return;
       const sentence = said(link.adultName, link.studentName);
-      await sendEach(link.otherParents, {
+      await sendEach(send, link.otherParents, {
         subject: sentence,
-        text: `Bonjour,\n\n${sentence}.\n\nL’historique de ${link.studentName}, dans Catiche : ${publicUrl}/foyer/${studentId}`,
+        text: `Bonjour,\n\n${sentence}${then(link.studentName, `${publicUrl}/foyer/${studentId}`)}`,
       });
     });
-  };
-
-  /** One email to each address. */
-  const sendEach = async (addresses: readonly string[], email: Omit<Email, 'to'>) => {
-    await Promise.all(addresses.map((to) => send({ ...email, to })));
   };
 
   const isStudent = (userId: string) => repository.isStudent(userId);
@@ -139,13 +155,16 @@ export function createHouseholdService({ repository, sharedDevice, inviteAddress
      * what they have yet to declare, which the web asks before anything else.
      */
     async me({ id, name, email, deviceId }: SignedIn) {
-      const student = await repository.findProfile(id);
+      const [student, studentGone] = await Promise.all([repository.findProfile(id), isStudent(id)]);
       if (student) return { id, name, role: 'student' as const, level: student.level };
-      const [missing, offer, shared, invitations] = await Promise.all([
+      // A student whose deletion is due is signed in no more.
+      if (studentGone) throw new Problem('UNAUTHENTICATED');
+      const [missing, offer, shared, invitations, onlyParentOf] = await Promise.all([
         repository.missingDeclarations(id),
         repository.passkeyOffer(id),
         deviceId === null ? false : sharedDevice(deviceId, id),
         repository.pendingInvitations(email),
+        repository.onlyParentOf(id),
       ]);
       return {
         id,
@@ -161,6 +180,8 @@ export function createHouseholdService({ repository, sharedDevice, inviteAddress
         // Offered from the second entry by email, until a passkey exists or the offer is put
         // away; never on a shared device, whose lock a child may know.
         passkeyOffer: offer.emailEntries >= PASSKEY_OFFER_ENTRIES && offer.passkeys === 0 && !offer.closed && !shared,
+        // The children the deletion of the adult's account takes with it: « Votre compte » names them.
+        onlyParentOf,
       };
     },
 
@@ -273,7 +294,7 @@ export function createHouseholdService({ repository, sharedDevice, inviteAddress
           await send(invitationEmail(email, letter, `L’invitation vous attend dans Catiche : ${publicUrl}/`));
       });
       later(() =>
-        sendEach(parent.otherParents, {
+        sendEach(send, parent.otherParents, {
           subject: `${adultName} a invité un adulte pour ${studentName}`,
           text: `Bonjour,\n\n${adultName} a invité ${email} pour ${studentName}, comme ${ROLE_WORDS[role]}.\n\nVous verrez dans Catiche quand cette personne sera entrée.`,
         }),
@@ -325,8 +346,34 @@ export function createHouseholdService({ repository, sharedDevice, inviteAddress
       if (!(await repository.removeDevice(adultId, studentId, deviceId))) throw new Problem('NOT_FOUND');
     },
 
+    /**
+     * A parent deletes the student's account (`app-cible.md`, question tranchée 1): at once, null,
+     * when no other parent follows them; else the deletion is asked, and its day, which the other
+     * parents are told the first time it is.
+     */
     async deleteStudent(adultId: string, studentId: string) {
-      if (!(await repository.deleteStudent(adultId, studentId))) throw new Problem('NOT_FOUND');
+      const asked = await repository.askDeletion(adultId, studentId, new Date());
+      if (!asked) throw new Problem('NOT_FOUND');
+      if (asked.deleted) return null;
+      const dueAt = deletionDue(asked.requestedAt);
+      if (asked.first) {
+        tellOtherParents(
+          adultId,
+          studentId,
+          (adult, student) => `${adult} a demandé la suppression du compte de ${student}`,
+          (student, link) => `. Elle se fera le ${frenchDay(dueAt)}, sauf si vous l’annulez.\n\nGérer ${student}, dans Catiche : ${link}`,
+        );
+      }
+      return { dueAt };
+    },
+
+    /** A parent cancels the deletion asked, its author included; the other parents are told. */
+    async cancelDeletion(adultId: string, studentId: string) {
+      const cancelled = await repository.cancelDeletion(adultId, studentId);
+      if (!cancelled) throw new Problem('NOT_FOUND');
+      if (cancelled === 'cancelled') {
+        tellOtherParents(adultId, studentId, (adult, student) => `${adult} a annulé la suppression du compte de ${student}`);
+      }
     },
   };
 }

@@ -49,6 +49,8 @@ export function historyLine({ kind, detail, actor, subject }: HistoryLine, child
     adult_joined: () => `a rejoint les adultes de ${child}${role}`,
     adult_removed: () => `a retiré ${whom ?? 'un proche'} des adultes de ${child}`,
     adult_left: () => `a quitté les adultes de ${child}`,
+    deletion_requested: () => `a demandé la suppression du compte de ${child}`,
+    deletion_cancelled: () => `a annulé la suppression du compte de ${child}`,
   };
   return `${who} ${what[kind]()}`;
 }

@@ -47,4 +47,9 @@ describe('historyLine', () => {
     expect(line('memory_withdrawn', {}, null)).toBe('Un adulte a retiré ce que Tom retient');
     expect(line('memory_withdrawn', {}, '')).toBe('Un adulte a retiré ce que Tom retient');
   });
+
+  it('says the deletion of the child’s account asked and cancelled', () => {
+    expect(line('deletion_requested')).toBe('Nadia a demandé la suppression du compte de Léa');
+    expect(line('deletion_cancelled', {}, 'Karim')).toBe('Karim a annulé la suppression du compte de Léa');
+  });
 });

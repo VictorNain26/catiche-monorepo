@@ -59,6 +59,14 @@ export const declineInvitation = (id: string) => parseResponse(api.me.invitation
 /** The adult's first name, changed in their account. */
 export const nameSchema = z.object({ name: adultName });
 
+/** What « Supprimer mon compte » says of its consequences (A9): one sentence for each child it takes. */
+export const accountDeletionWarning = (children: readonly string[]) =>
+  [
+    'Votre compte sera effacé.',
+    ...children.map((name) => `Le compte de ${name} le sera aussi : personne d’autre n’est son parent dans Catiche.`),
+    'C’est définitif.',
+  ].join(' ');
+
 /** « Plus tard » on the passkey's offer: the home shows it no more, « Votre compte » keeps the making of one. */
 export const closePasskeyOffer = () => parseResponse(api.me['passkey-offer'].$post());
 
