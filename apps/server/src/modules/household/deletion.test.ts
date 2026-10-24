@@ -12,7 +12,7 @@ import { frenchDay } from '../../domain/student-deletion';
 import { user } from '../../platform/auth/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
-import { ORIGIN } from '../../testing/http';
+import { ORIGIN, STUDENT_CODE } from '../../testing/http';
 import { householdSweep } from '.';
 import { studentProfile } from './schema';
 
@@ -172,7 +172,11 @@ describe('the deletion of a child with two parents', () => {
 
   it('is done 7 days later: refused by the routes once due, then deleted by the sweep, which tells the parents', async () => {
     const { nadia, karim, lea, emails } = await family('echeance');
-    const child = await api.pair(nadia, lea.id);
+    // Léa's own device, kept to come back by her code.
+    const device = api.device();
+    expect((await device.activate(await api.activationCode(nadia, lea.id))).status).toBe(200);
+    expect((await device.chooseCode(lea.id, STUDENT_CODE, true)).status).toBe(200);
+    const child = device.cookie();
     const asked = Date.now();
     await ask(nadia, lea.id);
     await tasks.settled();
@@ -188,6 +192,9 @@ describe('the deletion of a child with two parents', () => {
     expect((await api.request('GET', `/api/summary/${lea.id}`, { cookie: karim })).status).toBe(404);
     expect((await cancel(karim, lea.id)).status).toBe(404);
     expect((await api.request('GET', '/api/me', { cookie: child })).status).toBe(401);
+    // Her device no longer offers her, nor lets her in by her code.
+    expect((await device.profiles()).profiles.map(({ id }) => id)).not.toContain(lea.id);
+    expect((await device.enter(lea.id, STUDENT_CODE)).status).toBe(401);
     expect((await api.request('POST', '/api/sessions', { cookie: child, body: {} })).status).toBe(403);
     expect(await exists(lea.id)).toBe(true);
 

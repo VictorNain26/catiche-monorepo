@@ -136,10 +136,15 @@ const activation = z.object({ userId: z.string(), reason: z.enum(ACTIVATION_REAS
 const sharedDeadline = (openedAt: Date, now: Date) =>
   new Date(Math.min(openedAt.getTime() + SHARED_MINUTES * MINUTE, now.getTime() + IDLE_MINUTES * MINUTE));
 
-/** What the plugin asks of the household: whether an adult is a parent of a student, who alone adds their devices, and the student's month of birth. */
+/**
+ * What the plugin asks of the household: whether an adult is a parent of a student, who alone adds
+ * their devices, the student's month of birth, and whether the student may still enter, which a
+ * deletion fallen due ends before the sweep takes them.
+ */
 export interface StudentAccess {
   manages: (adultId: string, studentId: string) => Promise<boolean>;
   birthMonth: (studentId: string) => Promise<string | null>;
+  active: (studentId: string) => Promise<boolean>;
 }
 
 const studentCodeSchema = z.string().max(16);
@@ -199,7 +204,7 @@ export function studentSignIn({
     const { internalAdapter } = ctx.context;
     const carried = await ctx.getSignedCookie(ctx.context.authCookies.sessionToken.name, ctx.context.secret);
     const user = await internalAdapter.findUserById(studentId);
-    if (!user) throw APIError.from('UNAUTHORIZED', INVALID_CODE);
+    if (!user || !(await students.active(studentId))) throw APIError.from('UNAUTHORIZED', INVALID_CODE);
     const now = new Date();
     const created = shared
       ? await internalAdapter.createSession(studentId, true, { deviceId, expiresAt: sharedDeadline(now, now) }, true)
@@ -251,7 +256,9 @@ export function studentSignIn({
       listStudentProfiles: createAuthEndpoint('/student/profiles', { method: 'GET' }, async (ctx) => {
         const device = await requestDevice(ctx);
         if (!device) return ctx.json({ shared: false, profiles: [] });
-        return ctx.json({ shared: device.shared, profiles: await devices.listProfiles(device.id) });
+        const profiles = await devices.listProfiles(device.id);
+        const active = await Promise.all(profiles.map(({ id }) => students.active(id)));
+        return ctx.json({ shared: device.shared, profiles: profiles.filter((_, index) => active[index]) });
       }),
 
       /**

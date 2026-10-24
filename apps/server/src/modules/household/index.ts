@@ -89,6 +89,7 @@ export function householdAuth(db: Db) {
   const students: StudentAccess = {
     manages: (adultId, studentId) => repository.manages(adultId, studentId),
     birthMonth: async (studentId) => (await repository.findProfile(studentId))?.birthMonth ?? null,
+    active: async (studentId) => (await repository.findProfile(studentId)) !== undefined,
   };
   return { deleteUser: accountDeletion(db), students, emailEntered: (adultId: string) => repository.countEmailEntry(adultId) };
 }
@@ -97,7 +98,7 @@ export function householdAuth(db: Db) {
  * The household's steps of the background sweep (`platform/lifecycle/sweep.ts`), which main.ts
  * hands to it: the deletions of students due, told to their parents; the history past its 90 days;
  * the invitations of adults expired, with the closed beta's invitation of an address nothing
- * waits for any more.
+ * waits for any more, once past its own day.
  */
 export function householdSweep({ db, mailer }: { db: Db; mailer: Mailer }) {
   const repository = createHouseholdRepository(db);
@@ -114,9 +115,7 @@ export function householdSweep({ db, mailer }: { db: Db; mailer: Mailer }) {
       );
     },
     history: (now: Date) => repository.purgeHistory(now),
-    invitations: async (now: Date) => {
-      for (const email of await repository.purgeInvitations(now)) await revokeInvitation(db, email);
-    },
+    invitations: (now: Date) => repository.purgeInvitations(now),
   };
 }
 

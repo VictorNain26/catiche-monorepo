@@ -59,12 +59,21 @@ describe('the purge of the invitations', () => {
     await api.inviteAdult(nadia, lea.id, 'vivante@example.com', 'relative');
     await api.inviteAdult(nadia, lea.id, 'attendue@example.com', 'relative');
     await api.inviteAdult(nadia, tom.id, 'attendue@example.com', 'relative');
+    await api.inviteAdult(nadia, lea.id, 'victor@example.com', 'relative');
     await tasks.settled();
-    // Léa's invitations of the first and the third address expired; Tom's of the third still waits.
+    // Léa's invitations of the first, third and fourth addresses expired, with the beta invitation
+    // they made at the same time; Tom's of the third still waits. Victor invited the fourth again,
+    // from the command line: its new beta invitation is live.
+    const expired = ['expiree@example.com', 'attendue@example.com', 'victor@example.com'];
     await db
       .update(adultInvitation)
       .set({ expiresAt: new Date(Date.now() - DAY) })
-      .where(and(eq(adultInvitation.studentId, lea.id), inArray(adultInvitation.email, ['expiree@example.com', 'attendue@example.com'])));
+      .where(and(eq(adultInvitation.studentId, lea.id), inArray(adultInvitation.email, expired)));
+    await db
+      .update(verification)
+      .set({ expiresAt: new Date(Date.now() - DAY) })
+      .where(inArray(verification.identifier, expired.map(invitationIdentifier)));
+    await api.invite('victor@example.com');
 
     await sweep.invitations(new Date());
 
@@ -74,5 +83,7 @@ describe('the purge of the invitations', () => {
     expect(await betaInvited('vivante@example.com')).toBe(true);
     expect(await invitedFor('attendue@example.com')).toEqual([tom.id]);
     expect(await betaInvited('attendue@example.com')).toBe(true);
+    expect(await invitedFor('victor@example.com')).toEqual([]);
+    expect(await betaInvited('victor@example.com')).toBe(true);
   });
 });

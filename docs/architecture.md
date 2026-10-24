@@ -50,7 +50,8 @@ En place (`apps/server/src`) :
   (`domain/student-deletion.ts`) ; passé ce délai, l'enfant est traité comme supprimé par chaque
   lecture (`alive`, `repository/access.ts`), puis la tâche de fond le supprime et prévient ses
   parents. Elle purge aussi l'historique au-delà de `HISTORY_DAYS` et les invitations expirées,
-  avec l'invitation de bêta d'une adresse que plus rien n'attend. Les parties du
+  avec l'invitation de bêta, passée elle aussi, d'une adresse que plus rien n'attend ; un élève
+  dont la suppression est échue n'entre plus par son code (`StudentAccess.active`). Les parties du
   repository qui ne tiennent pas dans un fichier vivent dans `repository/`, que lui seul importe. Le résumé de la
   semaine donne aussi les jours, à l'heure de Paris, où l'enfant a écrit à Tom (`days`,
   `tonight`), que chaque adulte lit sans durée ni matière.

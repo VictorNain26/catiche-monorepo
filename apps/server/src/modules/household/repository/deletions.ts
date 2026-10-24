@@ -6,6 +6,7 @@
 
 import { and, asc, eq, gt, inArray, lt, lte, ne, notExists } from 'drizzle-orm';
 import { HISTORY_DAYS } from '../../../domain/child-events';
+import { revokeExpiredInvitation } from '../../../platform/auth/invitation';
 import { user } from '../../../platform/auth/schema';
 import type { Db } from '../../../platform/db/client';
 import { adultInvitation, childEvent, guardianship, studentProfile } from '../schema';
@@ -149,18 +150,21 @@ export function deletionsRepository(db: Db) {
 
     /**
      * The invitations of adults expired at `now`, which hold an address of someone who never came
-     * in; the addresses no other invitation waits for any more, whose beta invitation goes too.
+     * in; and, in the same transaction, the beta invitation of an address no other invitation waits
+     * for any more, once its own day has passed too.
      */
     purgeInvitations: (now: Date) =>
       db.transaction(async (tx) => {
         const expired = await tx.delete(adultInvitation).where(lte(adultInvitation.expiresAt, now)).returning({ email: adultInvitation.email });
         const emails = [...new Set(expired.map(({ email }) => email))];
-        if (emails.length === 0) return [];
+        if (emails.length === 0) return;
         const waiting = await tx
           .selectDistinct({ email: adultInvitation.email })
           .from(adultInvitation)
           .where(and(inArray(adultInvitation.email, emails), gt(adultInvitation.expiresAt, now)));
-        return emails.filter((email) => !waiting.some((row) => row.email === email));
+        for (const email of emails.filter((address) => !waiting.some((row) => row.email === address))) {
+          await revokeExpiredInvitation(tx, email, now);
+        }
       }),
   };
 }

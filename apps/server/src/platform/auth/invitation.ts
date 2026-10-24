@@ -6,7 +6,7 @@
  * button lets it in, by better-auth's magic link, which only the server makes (./auth.ts).
  */
 
-import { and, eq, like, sql } from 'drizzle-orm';
+import { and, eq, gt, like, sql } from 'drizzle-orm';
 import type { Db } from '../db/client';
 import type { Auth } from './auth';
 import { user, verification } from './schema';
@@ -30,7 +30,7 @@ const INVITATION_LINK = { callbackURL: '/', newUserCallbackURL: '/bienvenue', er
  * exists, so that no link stays a way in for 30 days. better-auth keys a link by its hashed token
  * and keeps the address in its JSON value (plugins/magic-link).
  */
-export const spendInvitationLinks = (db: Db, email: string) =>
+export const spendInvitationLinks = (db: Pick<Db, 'delete'>, email: string) =>
   db
     .delete(verification)
     .where(and(like(verification.identifier, 'magic-link:%'), sql`${verification.value}::jsonb ->> 'email' = ${normalised(email)}`));
@@ -66,9 +66,21 @@ export const invitationEmail = (to: string, { subject, intro }: InvitationLetter
  * The invitation of an address without an account taken back, with the links it sent: they let
  * no one in any more. An address with an account has none left, spent when its account was made.
  */
-export async function revokeInvitation(db: Db, email: string) {
+export async function revokeInvitation(db: Pick<Db, 'delete'>, email: string) {
   await db.delete(verification).where(eq(verification.identifier, invitationIdentifier(email)));
   await spendInvitationLinks(db, email);
+}
+
+/**
+ * The invitation of an address taken back once its day has passed at `now`, with its links, by the
+ * transaction of the caller; a live one stays, as the one Victor sends again from the command line.
+ */
+export async function revokeExpiredInvitation(db: Pick<Db, 'select' | 'delete'>, email: string, now: Date) {
+  const [live] = await db
+    .select({ id: verification.id })
+    .from(verification)
+    .where(and(eq(verification.identifier, invitationIdentifier(email)), gt(verification.expiresAt, now)));
+  if (!live) await revokeInvitation(db, email);
 }
 
 export async function invite({ db, auth }: { db: Db; auth: Auth }, email: string, letter?: InvitationLetter) {
