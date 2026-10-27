@@ -42,7 +42,7 @@ function ListItem({ title, meta, render, className, children }: ListItemProps) {
         <>
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="font-bold">{title}</span>
-            {meta !== undefined && <span className="text-smtext-muted-foreground group-hover:text-accent-muted-foreground">{meta}</span>}
+            {meta !== undefined && <span className="text-sm text-muted-foreground group-hover:text-accent-muted-foreground">{meta}</span>}
           </span>
           {children}
           {link && <ChevronRightIcon aria-hidden="true" nonScalingStroke className="size-6 shrink-0 text-muted-foreground" />}
