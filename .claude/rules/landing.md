@@ -1,5 +1,4 @@
 ---
-description: Landing Astro — chargé uniquement sur apps/landing
 paths:
   - "apps/landing/**"
 ---

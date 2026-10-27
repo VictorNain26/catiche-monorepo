@@ -1,5 +1,4 @@
 ---
-description: Design system — chargé uniquement sur les fichiers d'interface
 paths:
   - "apps/landing/**/*.{ts,astro,css}"
   - "apps/web/**/*.{ts,tsx,css}"

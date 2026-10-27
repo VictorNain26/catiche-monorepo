@@ -1,5 +1,4 @@
 ---
-description: Migrations Drizzle — chargé uniquement sur le schéma DB et les migrations
 paths:
   - "apps/server/src/platform/*/schema.ts"
   - "apps/server/src/modules/*/schema.ts"

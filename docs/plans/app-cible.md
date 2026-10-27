@@ -570,7 +570,6 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
   7. l'enfant (C1, C2, E1 à E4, E6, E7 ; E4 dans son état « Avant », dont le bouton ouvre l'aide
      de Tom actuelle, voix corrigée et message de quota compris), la carte « Léa a oublié son
      code » qu'il envoie (E3), et la navigation.
-
   Avec : Tom au trait, les
   rôles du mode sombre, la lecture aérée, l'inactivité, la politique de confidentialité pour
   l'opposition d'un autre parent, la charte mise à jour. Le résumé de la semaine reste, voix

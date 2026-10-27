@@ -1,5 +1,4 @@
 ---
-description: Serveur Bun + Hono — chargé uniquement sur apps/server
 paths:
   - "apps/server/**"
 ---

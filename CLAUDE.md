@@ -44,3 +44,5 @@ change (Postgres de `docker compose` requis). Formatage : `bun run format`.
 
 - lefthook : format, lint et typecheck avant un commit ; tests et build avant un push.
 - CI (`.github/workflows/ci.yml`) : ses jobs réunis par `ci-ok`, le seul check à exiger.
+- GitHub : la règle « Protect main » du dépôt (Settings › Rules) tient `main` hors d'atteinte
+  d'un push direct.

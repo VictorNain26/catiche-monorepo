@@ -1,5 +1,4 @@
 ---
-description: Runners et emplacement des tests du monorepo — chargé en ouvrant un test
 paths:
   - "**/*.test.ts"
   - "**/*.test.mjs"
