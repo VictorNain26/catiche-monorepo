@@ -334,7 +334,10 @@ export function studentSignIn({
        */
       forgotStudentCode: createAuthEndpoint('/student/forgot', { method: 'POST', body: z.object({ studentId: z.string().max(64) }) }, async (ctx) => {
         const device = await requestDevice(ctx);
-        if (!device || !(await devices.forgot(device.id, ctx.body.studentId))) throw APIError.from('NOT_FOUND', NOT_FOUND);
+        const { studentId } = ctx.body;
+        if (!device || !(await students.active(studentId)) || !(await devices.forgot(device.id, studentId))) {
+          throw APIError.from('NOT_FOUND', NOT_FOUND);
+        }
         return ctx.json({ success: true });
       }),
 

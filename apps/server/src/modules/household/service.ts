@@ -273,9 +273,9 @@ export function createHouseholdService({ repository, sharedDevice, inviteAddress
       return news;
     },
 
-    /** The student's « Vu »: what changed until now is said no more. */
-    async newsSeen(userId: string) {
-      if (!(await repository.newsSeen(userId))) throw new Problem('FORBIDDEN');
+    /** The student's « Vu »: what changed until the news were read is said no more. */
+    async newsSeen(userId: string, readAt: Date) {
+      if (!(await repository.newsSeen(userId, readAt))) throw new Problem('FORBIDDEN');
     },
 
     async listDevices(adultId: string, studentId: string) {

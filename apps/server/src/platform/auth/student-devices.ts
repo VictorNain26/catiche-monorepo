@@ -196,7 +196,8 @@ export function createStudentDevices(db: Db) {
         if (!opened) return false;
         await tx
           .insert(studentCode)
-          .values({ userId: studentId, hash, setAt: now, firstSetAt: now })
+          // The first code's moment by the database's clock, which dates the devices it is compared to.
+          .values({ userId: studentId, hash, setAt: now, firstSetAt: sql`now()` })
           .onConflictDoUpdate({
             target: studentCode.userId,
             set: { hash, setAt: now, firstSetAt: sql`coalesce(${studentCode.firstSetAt}, excluded.first_set_at)`, failures: 0 },

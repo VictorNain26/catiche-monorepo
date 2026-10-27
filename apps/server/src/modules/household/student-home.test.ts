@@ -13,17 +13,25 @@ const { db } = await testDatabase();
 const { api } = testApp(db);
 
 interface News {
+  readAt: string;
   codeChangedAt: string | null;
   devices: { userAgent: string | null; createdAt: string }[];
 }
 
-const newsOf = async (cookie: string) => {
+const read = async (cookie: string) => {
   const res = await api.request('GET', '/api/me/news', { cookie });
   expect(res.status).toBe(200);
   return (await res.json()) as News;
 };
-const seen = async (cookie: string) => {
-  expect((await api.request('POST', '/api/me/news/seen', { cookie })).status).toBe(204);
+/** The news, without the moment they were read. */
+const newsOf = async (cookie: string) => {
+  const { codeChangedAt, devices } = await read(cookie);
+  return { codeChangedAt, devices: devices.map(({ userAgent, createdAt }) => ({ userAgent, createdAt })) };
+};
+/** « Vu », on the news as they read now. */
+const seen = async (cookie: string, readAt?: string) => {
+  const body = { readAt: readAt ?? (await read(cookie)).readAt };
+  expect((await api.request('POST', '/api/me/news/seen', { cookie, body })).status).toBe(204);
 };
 
 describe('the parents of a student', () => {
@@ -68,6 +76,16 @@ describe('the news of a student', () => {
     expect(await newsOf(tablet)).toEqual({ codeChangedAt: null, devices: [] });
   });
 
+  it('keep, after « Vu », a device added since they were read', async () => {
+    const nadia = await api.guardian('nouvelles-entre-deux@example.com');
+    const lea = await api.student(nadia);
+    const tablet = await api.pair(nadia, lea.id);
+    const { readAt } = await read(tablet);
+    await api.pair(nadia, lea.id);
+    await seen(tablet, readAt);
+    expect((await newsOf(tablet)).devices).toHaveLength(1);
+  });
+
   it('say when a code was chosen after a forgotten one, and nothing once seen', async () => {
     const nadia = await api.guardian('nouvelles-code@example.com');
     const lea = await api.student(nadia);
@@ -85,6 +103,6 @@ describe('the news of a student', () => {
   it('are the student’s alone', async () => {
     const nadia = await api.guardian('nouvelles-adulte@example.com');
     expect((await api.request('GET', '/api/me/news', { cookie: nadia })).status).toBe(403);
-    expect((await api.request('POST', '/api/me/news/seen', { cookie: nadia })).status).toBe(403);
+    expect((await api.request('POST', '/api/me/news/seen', { cookie: nadia, body: { readAt: new Date().toISOString() } })).status).toBe(403);
   });
 });

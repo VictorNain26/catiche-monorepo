@@ -53,6 +53,8 @@ const declaredGuardian = z.literal(true, 'la déclaration d’autorité parental
 const newStudent = z.object({ name, level: schoolLevelSchema, birthMonth, declaredGuardian });
 const guardianDeclaration = z.object({ declaredGuardian });
 const adultDeclaration = z.object({ adult: z.literal(true, 'la déclaration de majorité') });
+// The moment the news were read (`GET /api/me/news`), which « Vu » says no more than.
+const newsSeen = z.object({ readAt: z.iso.datetime({ offset: true }) });
 const studentPatch = z
   .object({ name: name.optional(), level: schoolLevelSchema.optional(), memoryProposed: z.boolean().optional() })
   .refine((patch) => patch.name !== undefined || patch.level !== undefined || patch.memoryProposed !== undefined, 'au moins un champ');
@@ -107,8 +109,8 @@ export function meRoutes({ auth, service }: { auth: Auth; service: HouseholdServ
       .get('/devices', async (c) => c.json(await service.listOwnDevices(c.var.userId)))
       // « Depuis ta dernière visite », and its « Vu ».
       .get('/news', async (c) => c.json(await service.news(c.var.userId, c.var.deviceId)))
-      .post('/news/seen', async (c) => {
-        await service.newsSeen(c.var.userId);
+      .post('/news/seen', jsonBody(newsSeen), async (c) => {
+        await service.newsSeen(c.var.userId, new Date(c.req.valid('json').readAt));
         return c.body(null, 204);
       })
       .post('/declarations', jsonBody(adultDeclaration), async (c) => {

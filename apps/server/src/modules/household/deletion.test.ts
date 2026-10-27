@@ -196,6 +196,9 @@ describe('the deletion of a child with two parents', () => {
     expect((await device.profiles()).profiles.map(({ id }) => id)).not.toContain(lea.id);
     expect((await device.enter(lea.id, STUDENT_CODE)).status).toBe(401);
     expect((await api.request('POST', '/api/sessions', { cookie: child, body: {} })).status).toBe(403);
+    expect((await api.request('GET', '/api/me/news', { cookie: child })).status).toBe(403);
+    expect((await api.request('POST', '/api/me/news/seen', { cookie: child, body: { readAt: new Date().toISOString() } })).status).toBe(403);
+    expect((await device.forgot(lea.id)).status).toBe(404);
     expect(await exists(lea.id)).toBe(true);
 
     // The deletions the file's earlier tests asked are due too: this family's emails only.

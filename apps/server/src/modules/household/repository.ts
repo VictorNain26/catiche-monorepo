@@ -352,15 +352,21 @@ export function createHouseholdRepository(db: Db) {
     /**
      * What changed for the student since they last said « Vu », or since their first code when
      * later: a code chosen since, after a guardian's « forgotten » one, and the devices their profile
-     * was added to, the newest first, but `deviceId`, the one they read it on. Undefined for anyone
-     * who is not a student.
+     * was added to, the newest first, but `deviceId`, the one they read it on; and `readAt`, by the
+     * database's clock, which dates the devices, for « Vu » to say no more than was read. Undefined
+     * for anyone who is not a student, or whose deletion is due.
      */
     async news(studentId: string, deviceId: string | null) {
       const [seen] = await db
-        .select({ at: studentProfile.newsSeenAt, firstSetAt: studentCode.firstSetAt, setAt: studentCode.setAt })
+        .select({
+          at: studentProfile.newsSeenAt,
+          readAt: sql<Date>`now()`.mapWith(studentProfile.newsSeenAt),
+          firstSetAt: studentCode.firstSetAt,
+          setAt: studentCode.setAt,
+        })
         .from(studentProfile)
         .leftJoin(studentCode, eq(studentCode.userId, studentProfile.userId))
-        .where(eq(studentProfile.userId, studentId));
+        .where(and(eq(studentProfile.userId, studentId), alive(studentProfile.userId)));
       if (!seen) return undefined;
       const since = seen.firstSetAt && seen.firstSetAt > seen.at ? seen.firstSetAt : seen.at;
       const added = await devices(
@@ -370,15 +376,18 @@ export function createHouseholdRepository(db: Db) {
           deviceId === null ? undefined : ne(deviceProfile.deviceId, deviceId),
         ),
       );
-      return { codeChangedAt: seen.setAt && seen.setAt > since ? seen.setAt : null, devices: added };
+      return { readAt: seen.readAt, codeChangedAt: seen.setAt && seen.setAt > since ? seen.setAt : null, devices: added };
     },
 
-    /** The student's « Vu »; `false` for anyone who is not a student. */
-    async newsSeen(studentId: string) {
+    /**
+     * The student's « Vu » on the news read at `readAt`: what came after stays news. Never back,
+     * never past now. `false` for anyone who is not a student, or whose deletion is due.
+     */
+    async newsSeen(studentId: string, readAt: Date) {
       const seen = await db
         .update(studentProfile)
-        .set({ newsSeenAt: sql`now()` })
-        .where(eq(studentProfile.userId, studentId))
+        .set({ newsSeenAt: sql`greatest(${studentProfile.newsSeenAt}, least(${readAt.toISOString()}::timestamptz, now()))` })
+        .where(and(eq(studentProfile.userId, studentId), alive(studentProfile.userId)))
         .returning({ userId: studentProfile.userId });
       return seen.length > 0;
     },
