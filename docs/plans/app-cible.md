@@ -419,6 +419,47 @@ cherche :
 
 ### L'adulte
 
+**La cible visuelle** des écrans de l'adulte et de la connexion (A1 à A5, A7 à A9, `/entrer`,
+`/invitation`, `/erreur-connexion`) : [la toile « Catiche — écrans des adultes »](https://claude.ai/artifact/TtuGmiNYP6YmVNb19sLj9D),
+dans sa version `1793113472-7d0a`, validée par Victor le 2026-10-27 après deux tests de tâches
+(une mère qui découvre Catiche, une grand-mère proche). Les écrans sont construits ; leurs
+retouches, comparées à la toile, forment une PR de l'étape 2 après la PR 7 (§ 8). Ce qu'elles
+changent, et dont les textes font foi ici :
+
+- **Connexion** : à l'ordinateur, le panneau de marque de l'entrée de l'enfant ; `/erreur-connexion`
+  titré « La connexion n'a pas abouti », « Recommencez : un nouveau code vous sera envoyé. » et
+  le bouton principal « Revenir à la connexion ».
+- **`/invitation`** : « Nadia vous invite à suivre les devoirs de Léa. Touchez le bouton : les
+  fois suivantes, vous entrerez avec votre adresse e-mail. » La page doit connaître les deux
+  prénoms avant l'acceptation, ce que le serveur ne lui donne pas encore.
+- **A3, l'adulte invité** : pour un proche, « Vous verrez les soirs où Léa travaille. Vous ne
+  changerez rien à son compte : Nadia et Karim décident pour elle. » ; sous « J'ai 18 ans ou
+  plus. », « Seul un adulte peut suivre les devoirs d'un enfant. ».
+- **A4** : « Sur l'autre appareil, prenez ce carré en photo : Catiche s'ouvre tout seul. »,
+  comme E1 ; le texte dit le bouton de l'enfant, « J'ai un code de départ ». L'adresse de l'app
+  reste à fixer avec la production.
+- **A5** : un seul bouton principal, celui de la carte d'alerte ; sur chaque enfant, « Gérer
+  Léa » en bouton secondaire ; la clé d'accès proposée sans bouton principal. Pour un proche, le
+  titre « Suivez les devoirs de Léa » quand il ne suit qu'un enfant, et « Suivre ses devoirs »
+  jusqu'à l'étape 4, qui apporte les messages.
+- **A7** : le code oublié en tête, en carte d'alerte, avec le bouton principal ; le code obtenu
+  dit le geste de l'enfant (« Sur son appareil, Léa touche « J'ai oublié mon code », puis « J'ai
+  un code de départ », et tape ce code. Il marche une seule fois, pendant 24 heures. ») ; chaque
+  appareil dit ce qu'il est (« Tablette · iPadOS · Safari ») ; la suppression demandée dit ce
+  qu'elle efface et qui peut l'annuler (« Le compte de Léa sera supprimé dans 7 jours : ses
+  devoirs effacés, ses appareils déconnectés. » ; « Karim recevra un e-mail. D'ici là, Karim ou
+  vous pouvez annuler. ») ; « Ce que Tom retient », non proposé : « Tom ne retient rien d'un
+  soir à l'autre. Vous pouvez le proposer à Léa : elle décidera. ».
+- **A7, le proche** : titré « Voyez la semaine de Léa », retour « ← Accueil » ; « Léa veut
+  travailler sur votre tablette ou votre ordinateur ? Demandez un code de départ à Nadia ou à
+  Karim : Léa le tapera sur l'écran. » ; sous « Me retirer des adultes de Léa », « Vous ne verrez
+  plus les devoirs de Léa. Nadia ou Karim pourront vous inviter de nouveau. ».
+- **A8** : sous le choix, ce que fait chacun (« Un parent ou tuteur décide pour Léa, comme vous :
+  ses appareils, ses adultes, son compte. » ; « Un proche suit les devoirs de Léa. Il ne change
+  rien à son compte. ») ; « Karim et Léa en seront prévenus. ».
+- **A9** : sans le bouton « Quitter Catiche », que double « Quitter » de l'en-tête ; deux colonnes
+  à l'ordinateur.
+
 **A1. Entrez dans Catiche** et **A2. Ouvrez l'e-mail de Catiche** : construits
 (`apps/web/src/routes/connexion.tsx`, l'e-mail dans `apps/server/src/platform/auth/auth.ts`) ; le
 bouton de l'e-mail mène à `/entrer`, « Entrez dans Catiche » avec le bouton « Entrer »
@@ -585,7 +626,9 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
      l'historique de plus de 90 jours et les invitations expirées (fait) ;
   7. l'enfant (C1, C2, E1 à E4, E6, E7 ; E4 dans son état « Avant », dont le bouton ouvre l'aide
      de Tom actuelle, voix corrigée et message de quota compris), la carte « Léa a oublié son
-     code » qu'il envoie (E3), et la navigation.
+     code » qu'il envoie (E3), et la navigation ;
+  8. les retouches des écrans de l'adulte et de la connexion, comparées à leur toile (§ 5,
+     « L'adulte »).
   Avec : Tom au trait, les
   rôles du mode sombre, la lecture aérée, l'inactivité, la politique de confidentialité pour
   l'opposition d'un autre parent, la charte mise à jour. Le résumé de la semaine reste, voix
