@@ -102,6 +102,8 @@ const TEXT = [
 const MARKS = [
   ['input', 'background'],
   ['input', 'card'],
+  // Among others, the border of an outline button under the pointer, which hovers onto the secondary: on the accent,
+  // it would fall to 2.99:1 in light mode.
   ['input', 'secondary'],
   ['ring', 'background'],
   ['ring', 'card'],

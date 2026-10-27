@@ -12,8 +12,8 @@ export const buttonVariants = cva(
         tonal: 'bg-tonal text-tonal-foreground hover:bg-tonal-hover active:scale-[0.98] disabled:bg-disabled',
         // An outline, kept for what belongs with a field (a key of the code pad, the photo beside the
         // message) and for the gesture that opens a grave one (delete, remove); its border is a
-        // field's, at 3:1.
-        outline: 'border border-input bg-transparent hover:bg-accent hover:text-accent-foreground active:scale-[0.98]',
+        // field's, at 3:1, which it keeps under the pointer on the secondary (on the accent, it would fall under).
+        outline: 'border border-input bg-transparent hover:bg-secondary hover:text-secondary-foreground active:scale-[0.98]',
         // A gesture that takes something away for good, drawn as an outline in the destructive's red;
         // disabled, it is an outline like the others.
         'outline-destructive':
