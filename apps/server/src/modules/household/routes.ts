@@ -98,8 +98,8 @@ export function studentAuthGuard({ auth, service }: { auth: Auth; service: House
 
 /**
  * /api/me: who is signed in, and as what; the web picks its home from it. A student's devices
- * too, when a guardian last replaced their code, and what changed since their last visit; an
- * adult's declaration of being 18 or over.
+ * too, and what changed since their last visit, a code a guardian replaced included; an adult's
+ * declaration of being 18 or over.
  */
 export function meRoutes({ auth, service }: { auth: Auth; service: HouseholdService }) {
   return (

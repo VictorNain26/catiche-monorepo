@@ -61,13 +61,13 @@ export function createHouseholdRepository(db: Db) {
       .where(where)
       .orderBy(desc(deviceProfile.createdAt));
 
-  /** Whether the student has chosen a code, whether too many tries locked it, and when a guardian last replaced it. */
+  /** Whether the student has chosen a code, and whether too many tries locked it. */
   const codeOf = async (studentId: string) => {
     const [code] = await db
-      .select({ hash: studentCode.hash, failures: studentCode.failures, resetAt: studentCode.resetAt })
+      .select({ hash: studentCode.hash, failures: studentCode.failures })
       .from(studentCode)
       .where(eq(studentCode.userId, studentId));
-    return { chosen: Boolean(code?.hash), locked: (code?.failures ?? 0) >= CODE_TRIES, resetAt: code?.resetAt ?? null };
+    return { chosen: Boolean(code?.hash), locked: (code?.failures ?? 0) >= CODE_TRIES };
   };
 
   /** The profile, on a device, of a student the adult is a parent of. */
@@ -339,9 +339,9 @@ export function createHouseholdRepository(db: Db) {
       return { devices: list, code: { chosen, locked } };
     },
 
-    /** The signed-in student's own devices, and when a guardian last replaced their code. */
+    /** The signed-in student's own devices; a code changed is told by `news`. */
     async listOwnDevices(userId: string) {
-      return { devices: await devices(eq(deviceProfile.studentId, userId)), codeResetAt: (await codeOf(userId)).resetAt };
+      return { devices: await devices(eq(deviceProfile.studentId, userId)) };
     },
 
     /** The first names of the student's parents, the earliest first: whom the child asks. Never a relative. */
