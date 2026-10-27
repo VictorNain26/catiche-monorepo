@@ -102,17 +102,13 @@ describe('the words of an invitation', () => {
 describe('the words of « Règle ton espace » (E6)', () => {
   it('says who sees what, with two parents', () => {
     expect(whoSeesWhat(['Nadia', 'Karim'])).toBe(
-      'Nadia et Karim voient les soirs où tu as travaillé, et les messages que tu leur envoies. Ils ne lisent jamais tes conversations avec Tom.',
+      'Nadia et Karim voient le résumé de ta semaine, le même que toi. Ils ne lisent jamais tes conversations avec Tom.',
     );
   });
 
   it('says it of a single parent, in the singular', () => {
-    expect(whoSeesWhat(['Nadia'])).toBe(
-      'Nadia voit les soirs où tu as travaillé, et les messages que tu lui envoies. Nadia ne lit jamais tes conversations avec Tom.',
-    );
-    expect(whoSeesWhat([])).toBe(
-      'Tes parents voient les soirs où tu as travaillé, et les messages que tu leur envoies. Ils ne lisent jamais tes conversations avec Tom.',
-    );
+    expect(whoSeesWhat(['Nadia'])).toBe('Nadia voit le résumé de ta semaine, le même que toi. Nadia ne lit jamais tes conversations avec Tom.');
+    expect(whoSeesWhat([])).toBe('Tes parents voient le résumé de ta semaine, le même que toi. Ils ne lisent jamais tes conversations avec Tom.');
   });
 
   it('says whom to tell of a device not recognised', () => {

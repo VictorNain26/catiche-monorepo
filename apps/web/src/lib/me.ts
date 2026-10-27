@@ -105,12 +105,15 @@ export const ownDevicesQuery = queryOptions({
 /** The first names of the signed-in student's parents, the earliest first; none for anyone else. */
 export const parentsOfMe = (me: Me | null | undefined): readonly string[] => (me?.role === 'student' ? me.parents : []);
 
-/** « Qui voit quoi » (E6): what the parents see of the student, and what never. */
+/**
+ * « Qui voit quoi » (E6): what the parents see of the student today, the week's summary, and what
+ * never. Step 4 replaces the summary by the evenings worked and the messages (`app-cible.md` § 5).
+ */
 export function whoSeesWhat(parents: readonly string[]) {
   const { both, many } = parentWords(parents);
   return many
-    ? `${capitalised(both)} voient les soirs où tu as travaillé, et les messages que tu leur envoies. Ils ne lisent jamais tes conversations avec Tom.`
-    : `${both} voit les soirs où tu as travaillé, et les messages que tu lui envoies. ${both} ne lit jamais tes conversations avec Tom.`;
+    ? `${capitalised(both)} voient le résumé de ta semaine, le même que toi. Ils ne lisent jamais tes conversations avec Tom.`
+    : `${both} voit le résumé de ta semaine, le même que toi. ${both} ne lit jamais tes conversations avec Tom.`;
 }
 
 /** Under « Tes appareils » (E6): whom to tell of a device the student does not recognise. */

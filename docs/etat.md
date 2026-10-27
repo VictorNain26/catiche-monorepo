@@ -134,10 +134,9 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
   de quota (« Ton plan et ton cartable restent là. », `apps/web/src/lib/chat.ts`), le délai de
   30 minutes pendant une étape. L'avertissement d'inactivité vibre, sans son
   (`apps/web/src/components/idle-sign-out.tsx`).
-- « Qui voit quoi » (E6) dit que les parents voient les soirs travaillés et les messages ; tant
-  que l'étape 4 n'a pas remplacé le résumé de la semaine, ils lisent aussi ce résumé (matières,
-  temps, ce qui résiste), qu'« Ce soir » rappelle sous le résumé de l'enfant. À trancher par
-  Victor : la phrase d'E6 jusqu'à l'étape 4.
+- « Qui voit quoi » (E6) dit ce que les parents voient aujourd'hui, le résumé de la semaine
+  (`whoSeesWhat`, `apps/web/src/lib/me.ts`) ; l'étape 4, qui remplace ce résumé, y met la phrase
+  d'`app-cible.md` § 5, les soirs travaillés et les messages.
 - `student_code.reset_at` n'a plus de lecteur depuis que `codeResetAt` a quitté `GET /api/me/devices`
   (le changement de code se dit par `GET /api/me/news`, sur `set_at`) : la colonne se retire par
   une migration, ou sert à l'historique.

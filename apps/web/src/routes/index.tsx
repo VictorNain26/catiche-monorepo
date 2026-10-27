@@ -48,9 +48,10 @@ function StudentHome() {
         {memory?.state === 'asked' && (
           <Card
             render={<Link to="/memoire" />}
-            className="flex min-h-14 items-center font-bold text-primary underline underline-offset-4 transition-colors duration-fast ease-standard hover:bg-accent lg:col-span-5 lg:col-start-8 lg:p-5"
+            className="flex min-h-14 flex-col justify-center gap-1 transition-colors duration-fast ease-standard hover:bg-accent lg:col-span-5 lg:col-start-8 lg:p-5"
           >
-            Tom peut se souvenir de ce qui était difficile
+            <span className="font-bold text-primary underline underline-offset-4">Tom peut se souvenir de ce qui était difficile</span>
+            <span className="text-sm text-muted-foreground">Si tu es d’accord, Tom retient les leçons où tu as bloqué.</span>
           </Card>
         )}
       </div>
