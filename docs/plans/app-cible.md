@@ -68,7 +68,7 @@ sont au § 8.
 
 - **E-1. Entrer la première fois.** En tant qu'élève, je veux entrer sur ma tablette avec le code
   que ma mère m'a donné, pour avoir mon espace à moi. *Réussie quand* : il suffit d'un code de
-  départ (ou du carré à viser) puis de choisir mon code, en 3 écrans au plus.
+  départ (ou du carré à prendre en photo) puis de choisir mon code, en 3 écrans au plus.
 - **E-2. Revenir.** Je veux toucher mon prénom et taper mon code, sans rien d'autre à chercher.
 - **E-3. Code oublié.** Je veux pouvoir repartir quand j'ai oublié mon code. *Réussie quand* :
   l'écran de mon code me dit à qui demander un code de départ, et m'ouvre la case pour le taper
@@ -233,8 +233,8 @@ Accueil : une carte par enfant
 
 **La cible visuelle** des écrans de l'enfant (C1, C2, E1 à E4, E6, E7) : [la toile « Catiche —
 écrans de l'enfant »](https://claude.ai/artifact/Xcu1PanDBVqHFXpcJNaGqF), dans sa version
-`1793111529-9d17`, validée par Victor le 2026-10-27, textes tranchés compris. La PR 7 compare sa mise en page à cette
-version ; les textes font foi ici, dans chaque écran. Tom au trait n'y est encore qu'un cadre.
+`1793111686-ad9f`, validée par Victor le 2026-10-27, textes tranchés compris. La PR 7 compare
+sa mise en page à cette version ; les textes font foi ici, dans chaque écran. Tom au trait n'y est encore qu'un cadre.
 Le test de tâches de la toile (une élève de 5ᵉ, 2026-10-27) a fait réécrire neuf textes d'E1 à
 E7, tranchés le même jour sur délégation de Victor (« les meilleurs choix pour le wording
 d'après notre ton ») ; ils sont écrits dans les écrans ci-dessous.
@@ -255,7 +255,7 @@ ce que la personne fait, pas le nom d'une fonction.
 **Les noms**, partout les mêmes :
 - **« ton code »** : les 6 chiffres que l'enfant choisit ;
 - **« le code de départ »** : 8 lettres et chiffres qu'un parent obtient pour relier un appareil
-  ou après un code oublié, montré aussi comme « un carré à viser avec l'appareil photo » ;
+  ou après un code oublié, montré aussi comme « un carré à prendre en photo » ;
 - **« le code reçu par e-mail »** : celui de l'adulte, avec le lien qui fait entrer sans le taper ;
 - **« appareil »** quand on ne sait pas si c'est un téléphone, une tablette ou un ordinateur.
 
@@ -291,7 +291,7 @@ là. » avec « Je suis encore là ». Sur un appareil personnel, rien ne se fer
 
 **E1. Ton code de départ** : construit (`apps/web/src/routes/activer.tsx`), le champ prérempli
 par le carré d'A4. Reste le second bouton, qui ouvre l'appareil photo et nomme où est le
-carré : « Prendre en photo le carré sur l'écran de Nadia ou Karim ».
+carré : « Prendre en photo le carré du code de départ ».
 
 **E2. Choisis ton code.**
 - Titre : « Choisis ton code » ; sous-titre : « 6 chiffres que personne d'autre ne connaît. »
@@ -324,7 +324,7 @@ carré : « Prendre en photo le carré sur l'écran de Nadia ou Karim ».
 - Titre : « [Prénom], voici tes devoirs du soir »
 - **Une seule carte « Depuis ta dernière visite »**, quand il y a du nouveau, avec « Vu » :
   « Karim peut maintenant recevoir tes messages. » ; « Ton code a été changé le [date]. » ; « Ton
-  espace s'ouvre aussi sur une tablette depuis le [date]. Si c'est toi, touche « Vu ». Sinon,
+  espace s'ouvre aussi sur une tablette depuis le [date]. Si ce n'est pas toi,
   dis-le à Nadia ou à Karim. »
 - **Avant** : « Dis à Tom ce que tu as ce soir. Il t'aide à choisir par où commencer. » ; bouton
   principal « Commencer mes devoirs » ; le dessin de Tom au trait, sans bulle. Dessous,
@@ -400,8 +400,9 @@ cherche :
 
 **E7. Ce que Tom retient.**
 - Proposition : « Tom peut se souvenir de ce qui était difficile » ; « Si tu es d'accord, Tom
-  retient d'un soir à l'autre les leçons où tu as bloqué, et combien de fois tu les as
-  travaillées. Il ne garde aucun de tes messages. Tu peux tout voir et tout effacer. » ;
+  retient d'un soir à l'autre les leçons où tu as bloqué : combien de fois tu les as
+  travaillées, si tu les as réussies, et le genre d'erreur qui revient. Il ne garde aucun de
+  tes messages. Tu peux tout voir et tout effacer. » ;
   « D'accord », « Non merci ».
 - Active : « Tom se souvient des leçons de tes exercices depuis la rentrée. Nadia et Karim voient
   seulement que c'est activé. » Par leçon : « Travaillée 3 fois. La dernière fois : pas encore
@@ -543,7 +544,7 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
 | Aujourd'hui | Dans l'application cible |
 |---|---|
 | Une colonne `max-w-md` presque partout, ni onglets ni navigation | Un écran où l'on revient, des pages qui s'ouvrent et se referment (§ 4) ; deux colonnes à l'ordinateur |
-| Mots techniques : session, verrouillage, bêta fermée, URL brute | Mots des familles ; formule de statut ; un carré à viser |
+| Mots techniques : session, verrouillage, bêta fermée, URL brute | Mots des familles ; formule de statut ; un carré à prendre en photo |
 | Trois codes appelés « code » | Ton code, le code de départ, le code reçu par e-mail |
 | Deux façons de proposer la mémoire | Un seul endroit, A7 ; l'enfant répond sur E4 ou E7 |
 | « Changer de profil » et « Se déconnecter » | « Quitter », qui rassure |
@@ -575,7 +576,7 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
   1. le modèle de famille (fait, #562) ;
   2. l'entrée de l'adulte et son en-tête : A1, A2, A3 pour le parent invité par Victor, A9 (fait) ;
   3. inviter un adulte, le rôle de proche et ses droits (A8, la liste des adultes) (fait) ;
-  4. relier l'appareil de l'enfant, A4, avec le code de départ de 24 heures et le carré à viser
+  4. relier l'appareil de l'enfant, A4, avec le code de départ de 24 heures et le carré à prendre en photo
      (fait) ;
   5. l'accueil en cartes (A5), « Gérer » (A7), l'historique sur 90 jours et ses e-mails aux
      autres parents (fait) ;
