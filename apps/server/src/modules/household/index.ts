@@ -91,6 +91,7 @@ export function householdAuth(db: Db) {
     birthMonth: async (studentId) => (await repository.findProfile(studentId))?.birthMonth ?? null,
     active: async (studentId) => (await repository.findProfile(studentId)) !== undefined,
     parents: (studentId) => repository.parentsOf(studentId),
+    codeChosen: (studentId) => repository.firstCodeChosen(studentId),
   };
   return { deleteUser: accountDeletion(db), students, emailEntered: (adultId: string) => repository.countEmailEntry(adultId) };
 }

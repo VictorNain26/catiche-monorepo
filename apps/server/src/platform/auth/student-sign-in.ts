@@ -147,6 +147,7 @@ export interface StudentAccess {
   birthMonth: (studentId: string) => Promise<string | null>;
   active: (studentId: string) => Promise<boolean>;
   parents: (studentId: string) => Promise<string[]>;
+  codeChosen: (studentId: string) => Promise<void>;
 }
 
 const studentCodeSchema = z.string().max(16);
@@ -290,6 +291,7 @@ export function studentSignIn({
           if (refusal) throw APIError.from(REFUSALS[refusal].status, REFUSALS[refusal]);
           const hash = await ctx.context.password.hash(await peppered(ctx, code));
           if (!(await devices.chooseCode(device.id, studentId, hash, { chooseTokenHash, shared: !ownDevice }))) throw notExpected;
+          await students.codeChosen(studentId);
           return openSession(ctx, studentId, device.id, device.shared || !ownDevice);
         },
       ),

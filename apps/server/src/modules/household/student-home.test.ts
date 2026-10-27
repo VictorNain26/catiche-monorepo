@@ -47,6 +47,14 @@ describe('the news of a student', () => {
     expect(await newsOf(tablet)).toEqual({ codeChangedAt: null, devices: [] });
   });
 
+  it('never name the device the first code was chosen on, to the devices added after it', async () => {
+    const nadia = await api.guardian('nouvelles-premier@example.com');
+    const lea = await api.student(nadia);
+    await api.pair(nadia, lea.id);
+    const phone = await api.pair(nadia, lea.id);
+    expect((await newsOf(phone)).devices).toEqual([]);
+  });
+
   it('name a device added since, never the one they are read on, and nothing once seen', async () => {
     const nadia = await api.guardian('nouvelles-appareil@example.com');
     const lea = await api.student(nadia);

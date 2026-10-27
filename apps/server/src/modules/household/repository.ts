@@ -380,6 +380,27 @@ export function createHouseholdRepository(db: Db) {
       return { codeChangedAt: codeChanged ? seen.setAt : null, devices: added };
     },
 
+    /**
+     * The student's first code is chosen: the devices linked until then are not news. A code chosen
+     * after a guardian's « forgotten » one leaves `news_seen_at` alone, for the home to say it.
+     */
+    async firstCodeChosen(studentId: string) {
+      await db
+        .update(studentProfile)
+        .set({ newsSeenAt: sql`now()` })
+        .where(
+          and(
+            eq(studentProfile.userId, studentId),
+            notExists(
+              db
+                .select()
+                .from(studentCode)
+                .where(and(eq(studentCode.userId, studentId), isNotNull(studentCode.resetAt))),
+            ),
+          ),
+        );
+    },
+
     /** The student's « Vu »; `false` for anyone who is not a student. */
     async newsSeen(studentId: string) {
       const seen = await db
