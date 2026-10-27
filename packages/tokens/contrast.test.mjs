@@ -95,9 +95,6 @@ const TEXT = [
   // The filled secondary button, at rest and under the pointer.
   ['tonal-foreground', 'tonal'],
   ['tonal-foreground', 'tonal-hover'],
-  // The child's stage, under the sheet: its title and its line.
-  ['stage-foreground', 'stage'],
-  ['stage-muted-foreground', 'stage'],
 ];
 
 // A control's border, the focus ring and each chart series: 3:1

@@ -32,10 +32,10 @@
   /* L'interligne d'un titre de section du site, sur deux lignes ou plus. */
   --leading-title: 1.1;
 
-  /* Le texte secondaire des composants (la ligne sous un titre de liste, le libellé et l'aide d'un
-   * champ, le texte d'un bandeau) : 15 px, deux pas sous le corps, jamais les 14 px de text-sm. */
-  --text-meta: 0.9375rem;
-  --text-meta--line-height: 1.45;
+  /* Le texte secondaire (la ligne sous un titre de liste, le libellé et l'aide d'un champ, le texte
+   * d'un bandeau) : text-sm, redéfini à 15 px, deux pas sous le corps, au lieu des 14 px de Tailwind. */
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.45;
 
   /* Deux rayons, les cartes et les bulles puis les boutons et les champs. Deux ombres : celle d'un
    * bouton plein, et celle d'une feuille (une carte, une liste) posée sur le fond, qui la détache
@@ -72,10 +72,6 @@
   --color-tonal: var(--water-3);
   --color-tonal-foreground: var(--water-11);
   --color-tonal-hover: var(--water-4);
-  /* La scène de l'enfant, sous sa feuille : l'eau très claire, l'encre et sa ligne secondaire. */
-  --color-stage: var(--water-2);
-  --color-stage-foreground: var(--mist-12);
-  --color-stage-muted-foreground: var(--mist-11);
   --color-destructive: var(--red-10);
   --color-destructive-foreground: var(--mist-1);
   --color-success: var(--green-10);
@@ -212,7 +208,6 @@
     --color-input: var(--mist-10);
     --color-tonal: var(--water-5);
     --color-tonal-hover: var(--water-6);
-    --color-stage: var(--water-3);
     /* En sombre, un pas plus vif du jonc, qui se détache du fond sombre. */
     --color-highlight: var(--reed-10);
     --color-panel-highlight: var(--reed-11);

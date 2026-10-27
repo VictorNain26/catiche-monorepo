@@ -54,8 +54,6 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
   concurrencer l'action principale. Le contour (`outline`) est réservé à ce qui va avec un champ
   (une touche du pavé de code, la photo à côté du message) et au geste grave, celui qui ouvre une
   suppression ou un retrait ; le geste définitif a son contour rouge (`outline-destructive`).
-- La scène de l'enfant (`stage`) est un plan d'eau très claire, avec son encre et sa ligne
-  secondaire ; la feuille, une carte, s'y pose.
 - Le sombre suit le réglage de l'appareil ; il ne se présente jamais comme bon pour le sommeil.
 - Les états (`success`, `destructive`, `warning`, `disabled`) gardent leur sens dans les deux
   modes. Un bouton ne se désactive pas pour un formulaire incomplet : l'envoi dit ce qui manque ;
@@ -73,9 +71,9 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
   « spéciale dyslexie » : l'espacement aide, pas la fonte.
 - Une échelle fixe, du corps au titre ; le corps à 17 px au moins au téléphone ; jamais sous 12 px ;
   jamais de graisse fine ; 45 à 75 caractères par ligne.
-- Le texte secondaire des composants (la ligne sous un titre de liste, le libellé et l'aide d'un
-  champ, le texte d'un bandeau) à 15 px (`text-meta`) ; un bouton et une saisie gardent la taille
-  du corps.
+- Le texte secondaire (la ligne sous un titre de liste, le libellé et l'aide d'un champ, le texte
+  d'un bandeau) est `text-sm`, redéfini à 15 px ; un bouton et une saisie gardent la taille du
+  corps.
 - Le titre d'un écran garde la graisse que `base.css` pose aux titres, sans la surcharger.
 - Les chiffres qu'on compare en chiffres tabulaires ; les fractions des maths en `frac`.
 - Le gras pour faire ressortir, jamais l'italique ; le texte de Tom à 18 px au moins, interligne 1,5.

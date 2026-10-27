@@ -35,7 +35,7 @@ function Toasts() {
       className="flex flex-col gap-1 rounded-2xl border border-border bg-popover p-4 text-popover-foreground shadow-control transition-opacity duration-base ease-standard data-ending-style:opacity-0 data-starting-style:opacity-0 motion-reduce:transition-none"
     >
       <Toast.Title className="font-bold" />
-      <Toast.Description className="text-meta text-muted-foreground" />
+      <Toast.Description className="text-sm text-muted-foreground" />
     </Toast.Root>
   ));
 }
