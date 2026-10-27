@@ -211,7 +211,7 @@ Ouvrir Catiche
 Ce soir
 ├─ « Commencer mes devoirs » / « Reprendre mes devoirs » → La soirée (plein écran)
 │    └─ « ← Pause » → Ce soir
-├─ en haut : « Mes réglages » → Mes réglages → Ce que Tom retient
+├─ en haut : « Régler mon espace » → Règle ton espace → Ce que Tom retient
 └─ en haut : « Quitter »
 ```
 
@@ -233,24 +233,15 @@ Accueil : une carte par enfant
 
 **La cible visuelle** des écrans de l'enfant (C1, C2, E1 à E4, E6, E7) : [la toile « Catiche —
 écrans de l'enfant »](https://claude.ai/artifact/Xcu1PanDBVqHFXpcJNaGqF), dans sa version
-`1793108282-91f4`, validée par Victor le 2026-10-27. La PR 7 compare sa mise en page à cette
-version ; les textes font foi ici, dans ce paragraphe puis dans chaque écran. Tom au trait n'y
-est encore qu'un cadre. Le test de tâches de la toile (une élève de 5ᵉ, 2026-10-27) pose des
-questions à Victor, à trancher avant la PR 7 ; tant qu'elles ne le sont pas, les textes des
-écrans ci-dessous restent ceux à construire :
-- « Tout effacer » et « Arrêter » (E7) commencent par la même phrase, « Tom oublie tout » ;
-- « Il ne garde rien de ce que tu écris » (E7) semble contredire les leçons retenues ;
-- E2 se valide par un bouton, E3 au sixième chiffre : un seul geste pour les deux ;
-- E3, après « J'ai oublié mon code », garde son titre « tape ton code » ;
-- « Ton plan reste là » (E4, « Quitter ») n'est pas compris : l'enfant dit « mes devoirs » ;
-- « Un nouvel appareil ouvre ton espace » (E4) inquiète sans dire quoi faire ;
-- « Viser le carré » (E1) ne dit pas de quel carré il s'agit ;
-- « Mes réglages » mène à un écran titré « Règle ton espace » ;
-- le texte de « Bientôt » (E4) n'est pas écrit.
+`1793111529-9d17`, validée par Victor le 2026-10-27, textes tranchés compris. La PR 7 compare sa mise en page à cette
+version ; les textes font foi ici, dans chaque écran. Tom au trait n'y est encore qu'un cadre.
+Le test de tâches de la toile (une élève de 5ᵉ, 2026-10-27) a fait réécrire neuf textes d'E1 à
+E7, tranchés le même jour sur délégation de Victor (« les meilleurs choix pour le wording
+d'après notre ton ») ; ils sont écrits dans les écrans ci-dessous.
 
 **Les voix** : Catiche vouvoie l'adulte et tutoie l'enfant dans les boutons, les erreurs et les
 réglages ; Tom tutoie dans ses bulles, et seulement là. Les boutons de l'enfant parlent à la
-première personne (« Commencer mes devoirs », « Mes réglages »). Hors de la soirée, le dessin de
+première personne (« Commencer mes devoirs », « Régler mon espace »). Hors de la soirée, le dessin de
 Tom ne parle pas. Côté enfant, des tournures sans genre.
 
 **Les mots qui disent ce qui se passe** (Victor, 2026-10-23 : « soirée » n'est pas évocateur) :
@@ -280,7 +271,7 @@ envoyer un e-mail. »), puis y revient seul.
 **L'inactivité, sur un appareil partagé** : l'espace se ferme après 10 minutes sans rien faire, et
 au plus tard après 2 heures (`SHARED_MINUTES`, aujourd'hui). Pendant une étape de la soirée, le
 délai passe à 30 minutes : l'élève travaille sur papier. Une minute avant, un avertissement qui
-vibre ou sonne quand l'appareil le permet : « Ton espace va se fermer. Ton plan reste
+vibre ou sonne quand l'appareil le permet : « Ton espace va se fermer. Tes devoirs restent
 là. » avec « Je suis encore là ». Sur un appareil personnel, rien ne se ferme.
 
 ### Les écrans communs
@@ -299,7 +290,8 @@ là. » avec « Je suis encore là ». Sur un appareil personnel, rien ne se fer
 ### L'enfant
 
 **E1. Ton code de départ** : construit (`apps/web/src/routes/activer.tsx`), le champ prérempli
-par le carré d'A4. Reste le second bouton : « Viser le carré avec l'appareil photo ».
+par le carré d'A4. Reste le second bouton, qui ouvre l'appareil photo et nomme où est le
+carré : « Prendre en photo le carré sur l'écran de Nadia ou Karim ».
 
 **E2. Choisis ton code.**
 - Titre : « Choisis ton code » ; sous-titre : « 6 chiffres que personne d'autre ne connaît. »
@@ -308,7 +300,8 @@ par le carré d'A4. Reste le second bouton : « Viser le carré avec l'appareil 
 - Puis, sauf sur l'ordinateur ajouté par un parent, une question à laquelle il faut répondre :
   « Quelqu'un d'autre se sert de cet appareil ? » ; « Oui, on le partage » (Catiche se fermera
   quand tu ne t'en sers plus) ; « Non, il est à moi ».
-- Bouton qui valide chaque saisie : « Valider ».
+- Chaque saisie se valide seule au sixième chiffre, comme sur E3 : un seul geste pour taper un
+  code, partout.
 - Erreurs (le code trop facile, dès la première saisie) : « Ce code est trop facile à deviner.
   Évite les suites et les chiffres répétés. » ; « C'est ta date de naissance. Choisis un autre
   code. » ; « Les deux codes sont différents. Recommence. » ; « Le temps est passé. Demande un
@@ -316,29 +309,32 @@ par le carré d'A4. Reste le second bouton : « Viser le carré avec l'appareil 
 
 **E3. Tape ton code.**
 - Titre : « [Prénom], tape ton code »
+- Le code se valide seul au sixième chiffre.
 - Liens : « Ce n'est pas moi » ; « J'ai oublié mon code », qui prévient Nadia et Karim (une carte
-  sur leur accueil) et dit : « Nadia et Karim sont prévenus. Quand ils te donnent un code de
-  départ, touche ici. » avec le bouton « J'ai un code de départ » (vers E1).
+  sur leur accueil). L'écran change alors de titre, « Nadia et Karim sont prévenus », et dit :
+  « Ils le voient en ouvrant Catiche. Quand ils te donnent un code de départ, touche le
+  bouton. » avec le bouton « J'ai un code de départ » (vers E1).
 - Erreurs : « Ce n'est pas ton code. Réessaie. » ; après trop d'essais, un seul message, que
   l'espace soit bloqué ici ou le code arrêté partout : « Ton code ne marche plus ici. Nadia et
   Karim sont prévenus. » (l'accueil des parents dit lequel des deux, et quoi faire).
 - Une soirée en cours : « Tes devoirs t'attendent là où tu les as laissés. »
 
 **E4. Ce soir** (l'écran où l'enfant revient).
-- En haut : « Mes réglages », « Quitter ».
+- En haut : « Régler mon espace », « Quitter ».
 - Titre : « [Prénom], voici tes devoirs du soir »
 - **Une seule carte « Depuis ta dernière visite »**, quand il y a du nouveau, avec « Vu » :
-  « Karim peut maintenant recevoir tes messages. » ; « Ton code a été changé le [date]. » ; « Un
-  nouvel appareil ouvre ton espace : tablette, le [date]. »
+  « Karim peut maintenant recevoir tes messages. » ; « Ton code a été changé le [date]. » ; « Ton
+  espace s'ouvre aussi sur une tablette depuis le [date]. Si c'est toi, touche « Vu ». Sinon,
+  dis-le à Nadia ou à Karim. »
 - **Avant** : « Dis à Tom ce que tu as ce soir. Il t'aide à choisir par où commencer. » ; bouton
   principal « Commencer mes devoirs » ; le dessin de Tom au trait, sans bulle. Dessous,
-  « Bientôt » : les contrôles annoncés (étape 5).
+  « Bientôt » : « Tes contrôles s'afficheront ici les jours d'avant. » (étape 5).
 - **Pendant** : l'étape en cours, bouton principal « Reprendre mes devoirs ».
 - **Après** : ce qui est fait, ce qui reste et pour quand, le cartable ; « Message envoyé à
   Karim » ; sa réponse (« Karim s'occupe du mot à signer. ») et son mot.
 - La mémoire de Tom proposée : une carte, une fois (E7).
-- « Quitter » demande : « Quitter Catiche ? Ton plan reste là. Personne d'autre ne peut l'ouvrir
-  sans ton code. » ; « Quitter » ; « Rester ».
+- « Quitter » demande : « Quitter Catiche ? Tes devoirs restent là. Personne d'autre ne peut
+  les ouvrir sans ton code. » ; « Quitter » ; « Rester ».
 
 **E5. La soirée** (plein écran).
 - En haut : « ← Pause » et une bande de progression nommée, la phase en cours marquée :
@@ -393,7 +389,7 @@ Les attentes : « Tom lit ta photo, quelques secondes… », « Tom écrit… »
 La réponse de repli de Tom : « Je reprends autrement : où en es-tu dans l'exercice ? » La réponse
 de détresse garde ses mots (`charte.md`).
 
-**E6. Mes réglages.** Le titre : « Règle ton espace ». Trois blocs, dans l'ordre où on les
+**E6. Régler mon espace.** Le titre : « Règle ton espace ». Trois blocs, dans l'ordre où on les
 cherche :
 - **« Qui voit quoi »** : « Nadia et Karim voient les soirs où tu as travaillé, et les messages
   que tu leur envoies. Ils ne lisent jamais tes conversations avec Tom. »
@@ -403,15 +399,17 @@ cherche :
 - L'historique de ce qui le touche, caché tant qu'il est vide.
 
 **E7. Ce que Tom retient.**
-- Proposition : « Tom peut se souvenir de ce qui était difficile » ; « D'un soir à l'autre,
-  Tom garderait les leçons où tu as bloqué. Il ne garde rien de ce que tu écris. Tu peux tout voir
-  et tout effacer. » ; « D'accord », « Non merci ».
+- Proposition : « Tom peut se souvenir de ce qui était difficile » ; « Si tu es d'accord, Tom
+  retient d'un soir à l'autre les leçons où tu as bloqué, et combien de fois tu les as
+  travaillées. Il ne garde aucun de tes messages. Tu peux tout voir et tout effacer. » ;
+  « D'accord », « Non merci ».
 - Active : « Tom se souvient des leçons de tes exercices depuis la rentrée. Nadia et Karim voient
   seulement que c'est activé. » Par leçon : « Travaillée 3 fois. La dernière fois : pas encore
   réussie. » ; « J'ai compris ». En bas, deux boutons, chacun avec sa phrase :
-  - « Tout effacer » : « Tom oublie tout ce qu'il retient, et recommence à retenir la prochaine
-    fois. »
-  - « Arrêter » : « Tom oublie tout, et ne retiendra plus rien. »
+  - « Effacer et recommencer » : « Tom efface ce qu'il a retenu. Il retiendra de nouveau les
+    leçons où tu bloques. »
+  - « Ne plus rien retenir » : « Tom efface ce qu'il a retenu, et ne retient plus rien d'un soir
+    à l'autre. »
 - Non active, avant 15 ans : « Tom ne se souvient de rien d'un soir à l'autre. Il connaît
   seulement ton prénom et ta classe. Nadia ou Karim peuvent te le proposer. »
 - Toujours, en bas : « Pour que tout parte, tes devoirs compris, demande à Nadia ou à Karim de
