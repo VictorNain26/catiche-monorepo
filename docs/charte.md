@@ -44,8 +44,18 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
   contrastes cibles sur le fond, interpolés en OKLCH, par Leonardo (`packages/tokens/scales.mjs`) ;
   le sombre a son échelle à lui, pas une inversion. Les rôles pointent vers les pas, ceux des
   surfaces compris (`card`, `secondary` pour la bulle de l'élève, `muted` et `muted-foreground`
-  pour le texte secondaire). En sombre, l'eau profonde est un peu moins claire que le `#79cbc9`
-  de l'essai : chaque pas garde le même contraste dans les deux modes.
+  pour le texte secondaire) ; seul un rôle fixe déclaré porte une valeur à lui : le noir du voile,
+  et le blanc (`white`), le papier de la carte en clair. En sombre, l'eau profonde est un peu
+  moins claire que le `#79cbc9` de l'essai : chaque pas garde le même contraste dans les deux
+  modes.
+- La bordure (`border`) est au pas 6, le premier des bordures : une carte et une liste se voient
+  sur le fond. Une bordure qui porte un sens, celle d'un champ, est `input`, à 3:1.
+- Le bouton secondaire est plein, dans l'eau claire (`tonal`) : il se lit comme un bouton sans
+  concurrencer l'action principale. Le contour (`outline`) est réservé à ce qui va avec un champ
+  (une touche du pavé de code, la photo à côté du message) et au geste grave, celui qui ouvre une
+  suppression ou un retrait ; le geste définitif a son contour rouge (`outline-destructive`).
+- La scène de l'enfant (`stage`) est un plan d'eau très claire, avec son encre et sa ligne
+  secondaire ; la feuille, une carte, s'y pose.
 - Le sombre suit le réglage de l'appareil ; il ne se présente jamais comme bon pour le sommeil.
 - Les états (`success`, `destructive`, `warning`, `disabled`) gardent leur sens dans les deux
   modes. Un bouton ne se désactive pas pour un formulaire incomplet : l'envoi dit ce qui manque ;
@@ -63,14 +73,19 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
   « spéciale dyslexie » : l'espacement aide, pas la fonte.
 - Une échelle fixe, du corps au titre ; le corps à 17 px au moins au téléphone ; jamais sous 12 px ;
   jamais de graisse fine ; 45 à 75 caractères par ligne.
+- Le texte secondaire des composants (la ligne sous un titre de liste, le libellé et l'aide d'un
+  champ, le texte d'un bandeau) à 15 px (`text-meta`) ; un bouton et une saisie gardent la taille
+  du corps.
+- Le titre d'un écran garde la graisse que `base.css` pose aux titres, sans la surcharger.
 - Les chiffres qu'on compare en chiffres tabulaires ; les fractions des maths en `frac`.
 - Le gras pour faire ressortir, jamais l'italique ; le texte de Tom à 18 px au moins, interligne 1,5.
   Dans les écrans réduits qui illustrent la landing, 16 px est admis.
 
 ## Formes et composition
 
-- Deux rayons : les cartes et les bulles, puis les boutons et les champs ; une ombre légère pour
-  ce qui se pose sur le fond, rien de plus.
+- Deux rayons : les cartes et les bulles, puis les boutons et les champs. Deux ombres légères :
+  celle du bouton plein, et l'ombre de feuille (`shadow-sheet`) d'une carte ou d'une liste posée
+  sur le fond ; en sombre, la carte se détache par son pas, sans ombre.
 - Une liste pour des éléments semblables, une carte pour un bloc à part qui mène à un détail ; un
   seul bouton principal par écran.
 - Un écran où l'on revient, et des pages qui s'ouvrent depuis lui et se referment par un « ← »
