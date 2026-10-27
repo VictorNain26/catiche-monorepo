@@ -1,6 +1,6 @@
 import { AlertDialog, AlertDialogClose, Button } from '@repo/ui';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { meQuery } from '../lib/me';
 import { profilesQuery } from '../lib/student';
 import { useSignOut } from './sign-out';
@@ -23,6 +23,8 @@ export function IdleSignOut() {
   const { data: device } = useQuery(profilesQuery);
   const { mutate: signOut } = useSignOut();
   const [warned, setWarned] = useState(false);
+  // The ten minutes from now, as an activity gives them; the warning closed gives them too.
+  const restartRef = useRef<(() => void) | null>(null);
   const watched = Boolean(me) && device?.shared === true;
 
   useEffect(() => {
@@ -50,12 +52,14 @@ export function IdleSignOut() {
       }
       arm();
     };
+    restartRef.current = active;
     arm();
     for (const event of ACTIVITY) window.addEventListener(event, active, { passive: true });
     return () => {
       clearTimeout(warning);
       clearTimeout(closing);
       for (const event of ACTIVITY) window.removeEventListener(event, active);
+      restartRef.current = null;
     };
   }, [watched, signOut]);
 
@@ -63,12 +67,12 @@ export function IdleSignOut() {
     <AlertDialog
       open={watched && warned}
       onOpenChange={(open) => {
-        if (!open) setWarned(false);
+        if (!open) restartRef.current?.();
       }}
       title="Ton espace va se fermer."
       description="Tes devoirs restent là."
     >
-      {/* It closes the dialog; its touch, an activity, starts the ten minutes again. */}
+      {/* It closes the dialog, as Escape does: the ten minutes start again. */}
       <AlertDialogClose render={<Button size="lg" />}>Je suis encore là</AlertDialogClose>
     </AlertDialog>
   );
