@@ -32,7 +32,7 @@
     "build:types": "bun --bun tsc -p tsconfig.types.json"
   },
   "dependencies": {
-    "@ai-sdk/mistral": "^4.0.65",
+    "@ai-sdk/mistral": "^4.0.71",
     "@better-auth/core": "^1.7.12",
     "@better-auth/passkey": "^1.7.12",
     "@hono/bun": "^1.0.1",
@@ -41,7 +41,7 @@
     "@scaleway/sdk-client": "^2.12.1",
     "@scaleway/sdk-tem": "^2.15.0",
     "@simplewebauthn/server": "^13.3.3",
-    "ai": "7.0.142",
+    "ai": "7.0.152",
     "better-auth": "^1.7.12",
     "drizzle-orm": "^0.45.4",
     "hono": "^4.13.13",
