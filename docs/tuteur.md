@@ -244,7 +244,7 @@ Le code vit dans `apps/server/src/eval/` ; `bun run eval` rejoue le jeu sur le v
   famille, puis l'enfant y choisit un code de 6 chiffres que le parent ne voit pas
   (`platform/auth/student-sign-in.ts`, et `docs/architecture.md`, « Serveur »). L'écran « Qui fait
   ses devoirs ? » liste les profils de l'appareil ; chaque frère ou sœur entre par son code, et
-  « Changer de profil » referme le sien. Chacun de ses parents peut toujours donner un code
+  « Quitter » referme le sien. Chacun de ses parents peut toujours donner un code
   « oublié » : l'enfant le sait, la date du changement s'affiche chez lui (CNIL, recommandation 5).
   L'enfant voit les appareils qui portent son profil ; ses parents les débloquent ou les
   déconnectent, un proche jamais. La garde du foyer

@@ -129,6 +129,19 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
   (Victor, 2026-10-27) : il demanderait un décodeur QR en wasm et une CSP élargie, alors que
   l'appareil photo du téléphone ouvre déjà le carré, un lien (`apps/web/src/lib/activation.ts`).
 
+- Les écrans de l'enfant (PR 7b) laissent à l'étape 3 ce qui dépend de la soirée : le titre
+  « Séance avec Tom » et le mot « séance » du résumé de la semaine côté enfant, la fin du message
+  de quota (« Ton plan et ton cartable restent là. », `apps/web/src/lib/chat.ts`), le délai de
+  30 minutes pendant une étape. L'avertissement d'inactivité vibre, sans son
+  (`apps/web/src/components/idle-sign-out.tsx`).
+- « Qui voit quoi » (E6) dit que les parents voient les soirs travaillés et les messages ; tant
+  que l'étape 4 n'a pas remplacé le résumé de la semaine, ils lisent aussi ce résumé (matières,
+  temps, ce qui résiste), qu'« Ce soir » rappelle sous le résumé de l'enfant. À trancher par
+  Victor : la phrase d'E6 jusqu'à l'étape 4.
+- `student_code.reset_at` n'a plus de lecteur depuis que `codeResetAt` a quitté `GET /api/me/devices`
+  (le changement de code se dit par `GET /api/me/news`, sur `set_at`) : la colonne se retire par
+  une migration, ou sert à l'historique.
+
 - `/invitation` doit nommer l'adulte qui invite et l'enfant avant l'acceptation
   (`app-cible.md` § 5, A3) : la route d'invitation du serveur ne les donne pas encore à la page.
   À faire avec la PR 8 de l'étape 2, sans exposer plus que ces deux prénoms à qui tient le lien.
