@@ -245,7 +245,8 @@ Le code vit dans `apps/server/src/eval/` ; `bun run eval` rejoue le jeu sur le v
   (`platform/auth/student-sign-in.ts`, et `docs/architecture.md`, « Serveur »). L'écran « Qui fait
   ses devoirs ? » liste les profils de l'appareil ; chaque frère ou sœur entre par son code, et
   « Quitter » referme le sien. Chacun de ses parents peut toujours donner un code
-  « oublié » : l'enfant le sait, la date du changement s'affiche chez lui (CNIL, recommandation 5).
+  « oublié » : l'enfant le sait, la date du changement lui est dite une fois, dans « Depuis ta
+  dernière visite », jusqu'à son « Vu » (`apps/web/src/lib/news.ts` ; CNIL, recommandation 5).
   L'enfant voit les appareils qui portent son profil ; ses parents les débloquent ou les
   déconnectent, un proche jamais. La garde du foyer
   refuse à l'enfant les autres routes de better-auth (`STUDENT_AUTH_PATHS`,
