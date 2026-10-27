@@ -15,6 +15,10 @@
   --font-sans: var(--font-brand-text, ui-sans-serif), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-brand-heading, ui-sans-serif), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-brand-mono, ui-monospace), ui-monospace, monospace;
+  /* inline aussi : sans lui, Tailwind écrirait la valeur claire en dur dans .shadow-sheet, et le
+   * sombre ne pourrait pas l'effacer ; l'utilitaire lit la variable de :root, que le sombre
+   * redéfinit. */
+  --shadow-sheet: var(--sheet-shadow);
 }
 
 @theme {
@@ -44,7 +48,6 @@
   --radius-control: 12px;
   --shadow-control: 0 1px 2px rgb(19 37 43 / 0.18);
   --shadow-control-hover: 0 2px 6px rgb(19 37 43 / 0.2);
-  --shadow-sheet: 0 1px 2px rgb(19 37 43 / 0.06), 0 4px 12px rgb(19 37 43 / 0.05);
 
   --color-background: var(--mist-1);
   --color-foreground: var(--mist-12);
@@ -170,6 +173,11 @@
   }
 }
 
+/* L'ombre de feuille (shadow-sheet, plus haut), que le sombre efface. */
+:root {
+  --sheet-shadow: 0 1px 2px rgb(19 37 43 / 0.06), 0 4px 12px rgb(19 37 43 / 0.05);
+}
+
 /* Au téléphone (sous `sm`), le mouvement de moitié moins ample. */
 @media (width < 40rem) {
   :root {
@@ -193,7 +201,9 @@
     /* La carte deux pas au-dessus du fond : sans ombre en sombre, c'est son pas qui la détache. */
     --color-card: var(--mist-3);
     --color-popover: var(--mist-3);
-    --shadow-sheet: none;
+    /* Une ombre vide, pas none : Tailwind compose l'ombre avec l'anneau de focus dans une même
+     * liste de box-shadow, où none l'invaliderait tout entière, anneau compris. */
+    --sheet-shadow: 0 0 #0000;
     /* La bulle de l'élève et le survol, un pas au-dessus de la carte : sans cela, ils s'y
      * confondent. */
     --color-secondary: var(--mist-4);
