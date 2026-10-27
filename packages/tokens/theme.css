@@ -216,6 +216,8 @@
     --color-destructive: var(--red-11);
     --color-annotation: var(--fur-11);
     --color-input: var(--mist-10);
+    /* Un contrôle désactivé, un pas au-dessus de la carte : à son pas, il s'y confondrait. */
+    --color-disabled: var(--mist-4);
     --color-tonal: var(--water-5);
     --color-tonal-hover: var(--water-6);
     /* En sombre, un pas plus vif du jonc, qui se détache du fond sombre. */

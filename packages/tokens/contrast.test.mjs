@@ -173,6 +173,14 @@ for (const [mode, color] of modes) {
   });
 }
 
+// A disabled control (a filled button, a field) keeps its shape on a card in each mode: its ground is not the card's.
+for (const [mode, color] of modes) {
+  test(`${mode}: disabled stands apart from the card`, () => {
+    const ratio = contrast(color('disabled'), color('card'));
+    assert.ok(ratio > 1, `disabled ${color('disabled')} on card ${color('card')} = ${ratio.toFixed(2)}`);
+  });
+}
+
 // The site's planes alternate: the deep plane and the light one, one after the other on the page, differ in lightness
 // as two chart series do, in each mode.
 for (const [mode, color] of modes) {
