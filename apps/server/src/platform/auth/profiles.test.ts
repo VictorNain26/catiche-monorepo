@@ -1,7 +1,8 @@
 /**
- * The profiles a device holds, through the HTTP API on a real database: a session that a summer
- * without use leaves alive on the student's own device; a short one on a shared device, the
- * guardian's too, so that a brother or sister who comes next finds it closed.
+ * The profiles a device holds, through the HTTP API on a real database: the parents each names,
+ * whom the child asks; a session that a summer without use leaves alive on the student's own
+ * device; a short one on a shared device, the guardian's too, so that a brother or sister who
+ * comes next finds it closed.
  */
 
 import { describe, expect, it } from 'bun:test';
@@ -33,6 +34,19 @@ async function family(email: string) {
   };
   return { guardian, lea, tom, recognise };
 }
+
+describe('a profile on a device', () => {
+  it('names its parents, the earliest first, never a relative', async () => {
+    const { guardian, lea, recognise } = await family('parents-du-profil@example.com');
+    await api.named(guardian, 'Nadia');
+    const karim = await api.adult(guardian, lea.id, 'karim-profil@example.com', 'guardian');
+    await api.named(karim, 'Karim');
+    await api.adult(guardian, lea.id, 'monique-profil@example.com', 'relative');
+    const tablet = api.device();
+    await recognise(tablet, lea.id);
+    expect((await tablet.profiles()).profiles.map(({ parents }) => parents)).toEqual([['Nadia', 'Karim']]);
+  });
+});
 
 describe("the student's own device", () => {
   it('keeps them in ninety days without use', async () => {

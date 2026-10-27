@@ -47,7 +47,7 @@ interface Device {
 
 interface Profiles {
   shared: boolean;
-  profiles: { id: string; name: string; state: string }[];
+  profiles: { id: string; name: string; state: string; parents: string[] }[];
 }
 
 /**
@@ -284,6 +284,8 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, { db
           send('POST', '/api/auth/student/choose-code', { studentId, code, ownDevice, chooseToken }),
         /** The student in by their own code. */
         enter: (studentId: string, code: string) => send('POST', '/api/auth/student/sign-in', { studentId, code }),
+        /** « J'ai oublié mon code », touched under the student's first name. */
+        forgot: (studentId: string) => send('POST', '/api/auth/student/forgot', { studentId }),
         /** The guardian adds their children to this device, a family computer. */
         async addProfiles(studentIds: string[]) {
           const res = await send('POST', '/api/auth/student/add-profiles', { studentIds });

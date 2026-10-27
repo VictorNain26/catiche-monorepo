@@ -196,7 +196,7 @@ describe("a guardian's activation code", () => {
 
   it('lists the student on the device, and nothing on a device whose cookie is forged', async () => {
     const { lea, tablet } = await family('liste@example.com');
-    expect(await tablet.profiles()).toEqual({ shared: false, profiles: [{ id: lea.id, name: 'Léa', state: 'choose' }] });
+    expect(await tablet.profiles()).toEqual({ shared: false, profiles: [{ id: lea.id, name: 'Léa', state: 'choose', parents: ['Parent'] }] });
 
     const [name = '', value = ''] = tablet.cookie().split('=');
     const forged = `${name}=${value.slice(0, -4)}AAAA`;

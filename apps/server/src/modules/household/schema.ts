@@ -124,6 +124,9 @@ export const studentProfile = pgTable(
     // (domain/student-deletion.ts); who asked it, null once they left Catiche.
     deletionRequestedAt: timestamp('deletion_requested_at', { withTimezone: true }),
     deletionRequestedBy: text('deletion_requested_by').references(() => user.id, { onDelete: 'set null' }),
+    // When the student last said « Vu » to what changed since their last visit; a row that existed
+    // before it takes the migration's moment.
+    newsSeenAt: timestamp('news_seen_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [check('student_profile_birth_month_first_day', sql`extract(day from ${table.birthMonth}) = 1`)],

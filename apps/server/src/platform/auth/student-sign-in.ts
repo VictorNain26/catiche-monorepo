@@ -138,13 +138,15 @@ const sharedDeadline = (openedAt: Date, now: Date) =>
 
 /**
  * What the plugin asks of the household: whether an adult is a parent of a student, who alone adds
- * their devices, the student's month of birth, and whether the student may still enter, which a
- * deletion fallen due ends before the sweep takes them.
+ * their devices, the student's month of birth, whether the student may still enter, which a
+ * deletion fallen due ends before the sweep takes them, and the first names of their parents, the
+ * earliest first, whom a profile names to ask (never a relative).
  */
 export interface StudentAccess {
   manages: (adultId: string, studentId: string) => Promise<boolean>;
   birthMonth: (studentId: string) => Promise<string | null>;
   active: (studentId: string) => Promise<boolean>;
+  parents: (studentId: string) => Promise<string[]>;
 }
 
 const studentCodeSchema = z.string().max(16);
@@ -252,13 +254,19 @@ export function studentSignIn({
         },
       ),
 
-      /** The profiles of this device, each with what its student meets; nothing without a device. */
+      /**
+       * The profiles of this device, each with what its student meets and the parents to ask;
+       * nothing without a device. The parents go only to a device that holds the profile.
+       */
       listStudentProfiles: createAuthEndpoint('/student/profiles', { method: 'GET' }, async (ctx) => {
         const device = await requestDevice(ctx);
         if (!device) return ctx.json({ shared: false, profiles: [] });
-        const profiles = await devices.listProfiles(device.id);
-        const active = await Promise.all(profiles.map(({ id }) => students.active(id)));
-        return ctx.json({ shared: device.shared, profiles: profiles.filter((_, index) => active[index]) });
+        const listed = await Promise.all(
+          (await devices.listProfiles(device.id)).map(async (profile) =>
+            (await students.active(profile.id)) ? { ...profile, parents: await students.parents(profile.id) } : undefined,
+          ),
+        );
+        return ctx.json({ shared: device.shared, profiles: listed.filter((profile) => profile !== undefined) });
       }),
 
       /**
@@ -315,6 +323,18 @@ export function studentSignIn({
           return openSession(ctx, studentId, device.id, device.shared);
         },
       ),
+
+      /**
+       * « J'ai oublié mon code », on a device that holds the profile: the student's parents are
+       * told, once, until one of them gives a « forgotten » code or the student finds theirs again.
+       */
+      forgotStudentCode: createAuthEndpoint('/student/forgot', { method: 'POST', body: z.object({ studentId: z.string().max(64) }) }, async (ctx) => {
+        const device = await requestDevice(ctx);
+        if (!device || !(await devices.forgot(device.id, ctx.body.studentId))) {
+          throw APIError.from('NOT_FOUND', { code: 'NOT_FOUND', message: 'Not found' });
+        }
+        return ctx.json({ success: true });
+      }),
 
       /**
        * A parent adds their children to this device, a family computer (never a relative): shared
@@ -384,7 +404,8 @@ export function studentSignIn({
     // trusted hops are set (docs/architecture.md, « Hébergement », TRUSTED_PROXY_HOPS).
     rateLimit: [
       {
-        pathMatcher: (path: string) => ['/student/activate', '/student/choose-code', '/student/sign-in', '/student/add-profiles'].includes(path),
+        pathMatcher: (path: string) =>
+          ['/student/activate', '/student/choose-code', '/student/sign-in', '/student/forgot', '/student/add-profiles'].includes(path),
         window: 60,
         max: 5,
       },

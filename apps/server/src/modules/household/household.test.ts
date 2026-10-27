@@ -120,6 +120,7 @@ describe('/api/me', () => {
       name: 'Léa',
       role: 'student',
       level: 'cinquieme',
+      parents: ['Parent'],
     });
     expect((await api.request('GET', '/api/me')).status).toBe(401);
   });

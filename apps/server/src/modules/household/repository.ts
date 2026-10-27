@@ -5,7 +5,7 @@
  * is not linked to, or only as a relative where a parent is needed, is simply not found.
  */
 
-import { and, desc, eq, gt, gte, inArray, isNull, notExists, type SQL, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, gte, inArray, isNotNull, isNull, ne, notExists, type SQL, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { HISTORY_DAYS } from '../../domain/child-events';
 import type { SchoolLevel } from '../../domain/levels';
@@ -188,11 +188,12 @@ export function createHouseholdRepository(db: Db) {
     /**
      * The students the adult is linked to, in four queries whatever their number: each with the
      * first names of their other parents, who decide with the adult, and what the home warns a
-     * parent of, the devices where too many tries blocked them and whether their code stopped
-     * everywhere; a relative, who manages neither, is warned of nothing.
+     * parent of, the devices where too many tries blocked them, whether their code stopped
+     * everywhere and whether they said they forgot it; a relative, who manages neither, is warned
+     * of nothing.
      */
     async listStudents(adultId: string) {
-      const [students, parents, blocked, locked] = await Promise.all([
+      const [students, parents, blocked, codes] = await Promise.all([
         linkedStudents(adultId),
         otherParents(adultId),
         db
@@ -202,9 +203,13 @@ export function createHouseholdRepository(db: Db) {
           .where(and(inArray(deviceProfile.studentId, managedBy(adultId)), gte(deviceProfile.failures, DEVICE_TRIES)))
           .orderBy(desc(deviceProfile.createdAt)),
         db
-          .select({ studentId: studentCode.userId })
+          .select({
+            studentId: studentCode.userId,
+            locked: gte(studentCode.failures, CODE_TRIES).mapWith(Boolean),
+            forgotten: isNotNull(studentCode.forgottenAt).mapWith(Boolean),
+          })
           .from(studentCode)
-          .where(and(inArray(studentCode.userId, managedBy(adultId)), gte(studentCode.failures, CODE_TRIES))),
+          .where(inArray(studentCode.userId, managedBy(adultId))),
       ]);
       const of = <Row extends { studentId: string }>(rows: readonly Row[], id: string) => rows.filter(({ studentId }) => studentId === id);
       return students.map((student) => ({
@@ -212,7 +217,8 @@ export function createHouseholdRepository(db: Db) {
         parents: of(parents, student.id).map(({ name }) => name),
         alerts: {
           blockedDevices: of(blocked, student.id).map(({ id, userAgent }) => ({ id, userAgent })),
-          codeLocked: of(locked, student.id).length > 0,
+          codeLocked: of(codes, student.id).some(({ locked }) => locked),
+          codeForgotten: of(codes, student.id).some(({ forgotten }) => forgotten),
         },
       }));
     },
@@ -333,6 +339,55 @@ export function createHouseholdRepository(db: Db) {
     /** The signed-in student's own devices, and when a guardian last replaced their code. */
     async listOwnDevices(userId: string) {
       return { devices: await devices(eq(deviceProfile.studentId, userId)), codeResetAt: (await codeOf(userId)).resetAt };
+    },
+
+    /** The first names of the student's parents, the earliest first: whom the child asks. Never a relative. */
+    async parentsOf(studentId: string) {
+      const parents = await db
+        .select({ name: user.name })
+        .from(guardianship)
+        .innerJoin(user, eq(user.id, guardianship.adultId))
+        .where(and(eq(guardianship.studentId, studentId), asParent()))
+        .orderBy(asc(guardianship.createdAt));
+      return parents.map(({ name }) => name);
+    },
+
+    /**
+     * What changed for the student since `news_seen_at`: when they chose a code after a guardian's
+     * « forgotten » one, and the devices their profile was added to, the newest first, but
+     * `deviceId`, the one they read it on. Undefined for anyone who is not a student.
+     */
+    async news(studentId: string, deviceId: string | null) {
+      const [seen] = await db
+        .select({ at: studentProfile.newsSeenAt, setAt: studentCode.setAt, resetAt: studentCode.resetAt })
+        .from(studentProfile)
+        .leftJoin(studentCode, eq(studentCode.userId, studentProfile.userId))
+        .where(eq(studentProfile.userId, studentId));
+      if (!seen) return undefined;
+      const added = await db
+        .select({ userAgent: device.userAgent, createdAt: deviceProfile.createdAt })
+        .from(deviceProfile)
+        .innerJoin(device, eq(device.id, deviceProfile.deviceId))
+        .where(
+          and(
+            eq(deviceProfile.studentId, studentId),
+            gt(deviceProfile.createdAt, seen.at),
+            deviceId === null ? undefined : ne(deviceProfile.deviceId, deviceId),
+          ),
+        )
+        .orderBy(desc(deviceProfile.createdAt));
+      const codeChanged = seen.resetAt !== null && seen.setAt !== null && seen.setAt > seen.at;
+      return { codeChangedAt: codeChanged ? seen.setAt : null, devices: added };
+    },
+
+    /** The student's « Vu »; `false` for anyone who is not a student. */
+    async newsSeen(studentId: string) {
+      const seen = await db
+        .update(studentProfile)
+        .set({ newsSeenAt: sql`now()` })
+        .where(eq(studentProfile.userId, studentId))
+        .returning({ userId: studentProfile.userId });
+      return seen.length > 0;
     },
 
     /** The profile's tries on the device start again; `false` when no such profile of a student the adult is a parent of. */
