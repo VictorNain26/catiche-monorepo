@@ -21,8 +21,9 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
   (moyen de paiement, vérification d'identité, double authentification).
 - **Scaleway** : lire et valider les nouvelles « Specific Conditions Services » que la console
   demande (vu le 2026-10-20).
-- **GitHub** : supprimer l'image GHCR `tomai-server` (Settings du paquet), restée de l'ancien
-  nom.
+- **GitHub** : supprimer l'image GHCR `tomai-server` (Settings du paquet), restée du changement
+  de nom (#552) : la CI publie `catiche-server` ; signaler au support que 77 alertes Dependabot
+  sont restées sur des `uv.lock` supprimés en `8f5011f` (fermées à la main le 2026-10-27).
 - **CNIL** : écrire sur l'hébergement de données de santé ; garder une copie du DPA de Clever
   Cloud pour l'AIPD.
 - **Landing** : le texte de « Qui fait Catiche », court et sans photo, si la section doit
