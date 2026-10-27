@@ -21,8 +21,8 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
   (moyen de paiement, vérification d'identité, double authentification).
 - **Scaleway** : lire et valider les nouvelles « Specific Conditions Services » que la console
   demande (vu le 2026-10-20).
-- **Dependabot** : classer `inaccurate` les alertes rattachées à `apps/ai-service/uv.lock` et
-  `apps/curriculum/uv.lock`, supprimés en `8f5011f`, et signaler le bug au support GitHub.
+- **GitHub** : supprimer l'image GHCR `tomai-server` (Settings du paquet), restée de l'ancien
+  nom.
 - **CNIL** : écrire sur l'hébergement de données de santé ; garder une copie du DPA de Clever
   Cloud pour l'AIPD.
 - **Landing** : le texte de « Qui fait Catiche », court et sans photo, si la section doit
@@ -92,11 +92,6 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
 
 ## Prochain chantier
 
-- **Le passage à `catiche.fr`** est fait le 2026-10-20 (#552) : DNS, envoi Scaleway vérifié,
-  applications et dépôt renommés, variables du staging, anciens domaines détachés. Reste, par
-  Victor : supprimer l'image GHCR `tomai-server` (Settings du paquet sur GitHub) ; l'ancien
-  domaine expire seul le 24 août 2027.
-- **La landing est validée par Victor le 2026-10-22**, vue en local (#555, #559).
 - **Tom en 3D**, en parallèle, dans le dépôt `tom-mascotte`, qui porte son plan : le
   modèle, le pull, le cahier, les poses et des animations souples. Sa dernière PR, ici, intègre
   les livrables à la landing et met à jour `charte.md`.
