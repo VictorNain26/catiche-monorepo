@@ -74,6 +74,10 @@ const TEXT = [
   ['muted-foreground', 'card'],
   // The secondary, raised a step above the card in dark mode, takes the accent's secondary words, as the accent does.
   ['accent-muted-foreground', 'secondary'],
+  // The secondary words and the written states on the secondary, raised above the card in dark mode.
+  ['muted-foreground', 'secondary'],
+  ['success', 'secondary'],
+  ['destructive', 'secondary'],
   ['primary', 'background'],
   ['primary', 'card'],
   ['primary', 'secondary'],
@@ -109,6 +113,9 @@ const MARKS = [
   ['ring', 'card'],
   // The border of a destructive outline button, under the pointer.
   ['destructive', 'accent'],
+  // The chevron of a hovered line of a list, which keeps the muted-foreground on the accent: a mark, not words, which
+  // take the accent-muted-foreground there (in TEXT).
+  ['muted-foreground', 'accent'],
   // The dot of the site's status pill, a mark on the secondary.
   ['annotation', 'secondary'],
   // The evening's timeline, which fills in the brand's water on a rail of the border's colour.
