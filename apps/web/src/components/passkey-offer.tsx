@@ -44,7 +44,7 @@ export function PasskeyOffer() {
           }}
         />
         <Button
-          variant="outline"
+          variant="tonal"
           disabled={later.isPending}
           onClick={() => {
             later.mutate();

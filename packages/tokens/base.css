@@ -22,6 +22,8 @@
 }
 
 @layer base {
+  /* A border with no meaning of its own takes the border role, which a card and a list show on the
+   * background; a field's border is the input role (docs/charte.md, "Couleurs"). */
   * {
     @apply border-border;
   }

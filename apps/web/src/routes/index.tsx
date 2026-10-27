@@ -96,7 +96,7 @@ function News({ parents }: { parents: readonly string[] }) {
       </ul>
       {seen.error && <MessageBanner message={STUDENT_FAILED} />}
       <Button
-        variant="outline"
+        variant="tonal"
         className="self-start"
         disabled={seen.isPending}
         onClick={() => {

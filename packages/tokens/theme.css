@@ -15,6 +15,10 @@
   --font-sans: var(--font-brand-text, ui-sans-serif), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-brand-heading, ui-sans-serif), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-brand-mono, ui-monospace), ui-monospace, monospace;
+  /* inline aussi : sans lui, Tailwind écrirait la valeur claire en dur dans .shadow-sheet, et le
+   * sombre ne pourrait pas l'effacer ; l'utilitaire lit la variable de :root, que le sombre
+   * redéfinit. */
+  --shadow-sheet: var(--sheet-shadow);
 }
 
 @theme {
@@ -32,8 +36,14 @@
   /* L'interligne d'un titre de section du site, sur deux lignes ou plus. */
   --leading-title: 1.1;
 
-  /* Deux rayons, les cartes et les bulles puis les boutons et les champs ; une ombre légère pour
-   * ce qui se pose sur le fond. */
+  /* Le texte secondaire (la ligne sous un titre de liste, le libellé et l'aide d'un champ, le texte
+   * d'un bandeau) : text-sm, redéfini à 15 px, deux pas sous le corps, au lieu des 14 px de Tailwind. */
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.45;
+
+  /* Deux rayons, les cartes et les bulles puis les boutons et les champs. Deux ombres : celle d'un
+   * bouton plein, et celle d'une feuille (une carte, une liste) posée sur le fond, qui la détache
+   * sans bordure plus sombre ; en sombre, la feuille se détache par son pas, sans ombre. */
   --radius-2xl: 20px;
   --radius-control: 12px;
   --shadow-control: 0 1px 2px rgb(19 37 43 / 0.18);
@@ -52,11 +62,19 @@
   --color-accent-foreground: var(--mist-12);
   /* Le texte secondaire sur le survol : muted-foreground y tomberait à 4,3:1. */
   --color-accent-muted-foreground: var(--mist-11);
-  /* Une carte se détache en blanc sur la brume ; en sombre, un pas plus clair que le fond. */
-  --color-card: #ffffff;
+  /* Le papier : un blanc fixe, hors des échelles, que la carte prend en clair. */
+  --color-white: #ffffff;
+  /* Une carte se détache en blanc sur la brume, avec l'ombre de feuille ; en sombre, deux pas plus
+   * clairs que le fond. */
+  --color-card: var(--color-white);
   --color-card-foreground: var(--mist-12);
-  --color-popover: #ffffff;
+  --color-popover: var(--color-white);
   --color-popover-foreground: var(--mist-12);
+  /* Le bouton secondaire plein, dans l'eau claire, puis sous le pointeur. Le contour est réservé
+   * aux champs et au geste grave. */
+  --color-tonal: var(--water-3);
+  --color-tonal-foreground: var(--water-11);
+  --color-tonal-hover: var(--water-4);
   --color-destructive: var(--red-10);
   --color-destructive-foreground: var(--mist-1);
   --color-success: var(--green-10);
@@ -81,7 +99,9 @@
   --highlight-gap: 0.05em;
   /* Le pelage, une note, un accent rare. */
   --color-annotation: var(--fur-10);
-  --color-border: var(--mist-4);
+  /* La bordure au pas 6, le premier des bordures (charte, « Couleurs ») : elle se voit sur le fond
+   * comme sur la carte, sans porter de sens. Une bordure qui en porte un, celle d'un champ, est input. */
+  --color-border: var(--mist-6);
   --color-input: var(--mist-9);
   --color-ring: var(--water-11);
   --color-overlay: #000000;
@@ -94,7 +114,7 @@
   /* Le carré à viser avec l'appareil photo (A4) : foncé sur clair dans les deux modes, comme un
    * appareil photo lit un code QR. */
   --color-square: var(--mist-12);
-  --color-square-background: #ffffff;
+  --color-square-background: var(--color-white);
   /* Les graphiques, dans cet ordre, chaque série à 3:1 du fond et de la carte, deux voisines
    * séparées par leur clarté (pas 11, 9, 10, 12), jamais le pelage contre l'eau. */
   --color-chart-1: var(--water-11);
@@ -153,6 +173,11 @@
   }
 }
 
+/* L'ombre de feuille (shadow-sheet, plus haut), que le sombre efface. */
+:root {
+  --sheet-shadow: 0 1px 2px rgb(19 37 43 / 0.06), 0 4px 12px rgb(19 37 43 / 0.05);
+}
+
 /* Au téléphone (sous `sm`), le mouvement de moitié moins ample. */
 @media (width < 40rem) {
   :root {
@@ -173,12 +198,28 @@
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --color-card: var(--mist-2);
-    --color-popover: var(--mist-2);
-    /* La bulle de l'élève et le survol, un pas au-dessus de la carte, qui est elle-même un pas
-     * au-dessus du fond : sans cela, ils s'y confondent. */
-    --color-secondary: var(--mist-3);
-    --color-accent: var(--mist-4);
+    /* La carte deux pas au-dessus du fond : sans ombre en sombre, c'est son pas qui la détache. */
+    --color-card: var(--mist-3);
+    --color-popover: var(--mist-3);
+    /* Une ombre vide, pas none : Tailwind compose l'ombre avec l'anneau de focus dans une même
+     * liste de box-shadow, où none l'invaliderait tout entière, anneau compris. */
+    --sheet-shadow: 0 0 #0000;
+    /* La bulle de l'élève et le survol, un pas au-dessus de la carte : sans cela, ils s'y
+     * confondent. */
+    --color-secondary: var(--mist-4);
+    --color-accent: var(--mist-5);
+    /* Sur cette carte plus claire, le texte au pas 10 tomberait sous 4,5:1 : le texte secondaire,
+     * les états écrits et la note passent au pas 11, et la bordure d'un champ au pas 10, pour
+     * garder 3:1 sur la bulle de l'élève. */
+    --color-muted-foreground: var(--mist-11);
+    --color-success: var(--green-11);
+    --color-destructive: var(--red-11);
+    --color-annotation: var(--fur-11);
+    --color-input: var(--mist-10);
+    /* Un contrôle désactivé, un pas au-dessus de la carte : à son pas, il s'y confondrait. */
+    --color-disabled: var(--mist-4);
+    --color-tonal: var(--water-5);
+    --color-tonal-hover: var(--water-6);
     /* En sombre, un pas plus vif du jonc, qui se détache du fond sombre. */
     --color-highlight: var(--reed-10);
     --color-panel-highlight: var(--reed-11);

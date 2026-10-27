@@ -36,10 +36,10 @@ function Profiles() {
       }
       after={
         <div className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:gap-6">
-          <Button render={<Link to="/activer" />} variant="outline" size="lg" className={WAY_IN}>
+          <Button render={<Link to="/activer" />} variant="tonal" size="lg" className={WAY_IN}>
             Première fois ici ? J’ai un code de départ
           </Button>
-          <Button render={<Link to="/connexion" />} variant="outline" size="lg" className={WAY_IN}>
+          <Button render={<Link to="/connexion" />} variant="tonal" size="lg" className={WAY_IN}>
             Je suis un adulte
           </Button>
         </div>

@@ -7,7 +7,10 @@ import { cn } from '../lib/utils';
 function List({ className, ...props }: React.ComponentProps<'ul'>) {
   return (
     <ul
-      className={cn('flex flex-col divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card text-card-foreground', className)}
+      className={cn(
+        'flex flex-col divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sheet',
+        className,
+      )}
       {...props}
     />
   );

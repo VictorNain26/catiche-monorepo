@@ -73,7 +73,7 @@ function Memory() {
           </Button>
           <Button
             size="lg"
-            variant="outline"
+            variant="tonal"
             disabled={busy}
             onClick={() => {
               answer.mutate('declined', {
@@ -123,7 +123,7 @@ function Memory() {
                     <p className="text-sm text-muted-foreground">{notionSummary(notion)}</p>
                   </div>
                   <Button
-                    variant="outline"
+                    variant="tonal"
                     className="shrink-0 self-start sm:self-center"
                     disabled={busy}
                     onClick={() => {

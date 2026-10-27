@@ -92,7 +92,7 @@ export function DeleteStudent({ child }: { child: Student }) {
       >
         {alone ? 'Supprimer définitivement' : 'Demander la suppression'}
       </Button>
-      <Button variant="outline" onClick={deletion.cancel}>
+      <Button variant="tonal" onClick={deletion.cancel}>
         Annuler
       </Button>
     </>
