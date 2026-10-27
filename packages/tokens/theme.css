@@ -99,6 +99,14 @@
   --highlight-gap: 0.05em;
   /* Le pelage, une note, un accent rare. */
   --color-annotation: var(--fur-10);
+  /* La pastille de l'initiale d'un prénom (C2), dans le pelage clair. */
+  --color-chip: var(--fur-3);
+  --color-chip-foreground: var(--fur-11);
+  /* La scène de l'enfant, l'eau claire où se tiennent son titre, Tom et l'action principale ; la
+   * feuille (la carte, shadow-sheet) la chevauche. */
+  --color-stage: var(--water-2);
+  --color-stage-foreground: var(--mist-12);
+  --color-stage-muted-foreground: var(--mist-11);
   /* La bordure au pas 6, le premier des bordures (charte, « Couleurs ») : elle se voit sur le fond
    * comme sur la carte, sans porter de sens. Une bordure qui en porte un, celle d'un champ, est input. */
   --color-border: var(--mist-6);
@@ -225,6 +233,8 @@
     --color-panel-highlight: var(--reed-11);
     --color-halo: var(--water-6);
     --color-tint: var(--water-3);
+    /* La scène, un pas au-dessus du fond : au pas 2, elle s'y confondrait. */
+    --color-stage: var(--water-3);
     /* L'eau profonde reste distincte du plan clair en sombre aussi (test : panel et tint). */
     --color-panel: var(--water-7);
     --color-panel-foreground: var(--mist-12);

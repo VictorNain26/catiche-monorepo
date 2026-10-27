@@ -99,6 +99,12 @@ const TEXT = [
   // The filled secondary button, at rest and under the pointer.
   ['tonal-foreground', 'tonal'],
   ['tonal-foreground', 'tonal-hover'],
+  // The student's stage: the title and Tom's sentence, their second line, and the links of its header.
+  ['stage-foreground', 'stage'],
+  ['stage-muted-foreground', 'stage'],
+  ['primary', 'stage'],
+  // The chip of a first name's initial, on « Qui fait ses devoirs ? ».
+  ['chip-foreground', 'chip'],
 ];
 
 // A control's border, the focus ring and each chart series: 3:1
@@ -111,6 +117,7 @@ const MARKS = [
   ['input', 'secondary'],
   ['ring', 'background'],
   ['ring', 'card'],
+  ['ring', 'stage'],
   // The border of a destructive outline button, under the pointer.
   ['destructive', 'accent'],
   // The chevron of a hovered line of a list, which keeps the muted-foreground on the accent: a mark, not words, which
@@ -232,7 +239,7 @@ test('the highlighter is the same stroke in both modes', () => {
 // light plane, and on a card, where the evening's screens strike the step done and the adult's phone ticks « Je m'en
 // occupe ». On the deep plane, the same reed in a lighter step (`panel-highlight`, in MARKS).
 for (const [mode, color] of modes) {
-  for (const ground of ['background', 'halo', 'tint', 'card']) {
+  for (const ground of ['background', 'halo', 'tint', 'card', 'stage']) {
     test(`${mode}: highlight on ${ground} meets WCAG 1.4.11 (3:1)`, () => {
       const ratio = contrast(color('highlight'), color(ground));
       assert.ok(ratio >= 3, `${color('highlight')} on ${color(ground)} = ${ratio.toFixed(2)}`);
