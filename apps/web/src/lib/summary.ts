@@ -3,8 +3,7 @@
 import { queryOptions } from '@tanstack/react-query';
 import type { InferResponseType } from 'hono/client';
 import { api, parseResponse } from './api';
-import { parentWords } from './student';
-import { capitalised, listWords } from './words';
+import { listWords, parentWords } from './words';
 
 export type WeekSummary = InferResponseType<typeof api.summary.$get, 200>;
 type SubjectFamily = WeekSummary['subjects'][number]['subject'];
@@ -59,16 +58,14 @@ export const subjectLabel = (subject: SubjectFamily) => SUBJECTS[subject];
  * nothing to know of the subject. Said to the parent,
  * or to the child, their parents named, never the adult's sentence to a pupil.
  */
-export function questionFor(reader: 'guardian' | 'student', name: string, notion: string, parents: readonly string[] = []): string {
+export function questionFor(reader: 'guardian' | 'student', name: string, notion: string, parents: readonly string[]): string {
   if (reader === 'guardian') return `Demandez à ${name} de vous montrer un exercice sur « ${notion} », et où ça coince.`;
-  const { both, many } = parentWords(parents);
-  return capitalised(
-    `${both} ${many ? 'peuvent te demander de leur' : 'peut te demander de lui'} montrer un exercice sur « ${notion} », et où ça coince.`,
-  );
+  const { Both, agree } = parentWords(parents);
+  return `${Both} ${agree('peut te demander de lui', 'peuvent te demander de leur')} montrer un exercice sur « ${notion} », et où ça coince.`;
 }
 
 /** Under the child's own summary: who reads it too. */
 export function sameSummary(parents: readonly string[]) {
-  const { both, many } = parentWords(parents);
-  return capitalised(`${both} ${many ? 'voient' : 'voit'} ce même résumé.`);
+  const { Both, agree } = parentWords(parents);
+  return `${Both} ${agree('voit', 'voient')} ce même résumé.`;
 }

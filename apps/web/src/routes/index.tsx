@@ -1,6 +1,8 @@
-import { Banner, Button, Card } from '@repo/ui';
+import { Button, Card, Section } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
+import { CardAction } from '../components/card-action';
+import { MessageBanner } from '../components/message-banner';
 import { StudentPage } from '../components/page';
 import { TomHead } from '../components/tom';
 import { WeekSummary } from '../components/week-summary';
@@ -22,14 +24,20 @@ export const Route = createFileRoute('/')({
     if (!me) throw redirect({ to: '/profils' });
     if (me.role === 'adult') throw redirect({ to: '/foyer' });
   },
-  loader: ({ context }) => context.queryClient.query(sessionsQuery),
+  loader: ({ context }) => {
+    // Started, not awaited: the memory, the news and the week are each optional, a failure of one leaves the rest.
+    const { queryClient } = context;
+    void queryClient.query(memoryQuery).catch(() => undefined);
+    void queryClient.query(newsQuery).catch(() => undefined);
+    void queryClient.query(ownSummaryQuery).catch(() => undefined);
+    return queryClient.query(sessionsQuery);
+  },
   component: StudentHome,
 });
 
 function StudentHome() {
   const { data: me } = useSuspenseQuery(meQuery);
   const parents = parentsOfMe(me);
-  // Not awaited: the memory, the news and the week are each optional, a failure of one leaves the rest.
   const { data: memory } = useQuery(memoryQuery);
   const week = useQuery(ownSummaryQuery);
 
@@ -46,21 +54,15 @@ function StudentHome() {
         <News parents={parents} />
         <Start />
         {memory?.state === 'asked' && (
-          <Card
-            render={<Link to="/memoire" />}
-            className="flex min-h-14 flex-col justify-center gap-1 transition-colors duration-fast ease-standard hover:bg-accent lg:col-span-5 lg:col-start-8 lg:p-5"
-          >
+          <CardAction render={<Link to="/memoire" />} className="flex min-h-14 flex-col justify-center gap-1 lg:col-span-5 lg:col-start-8 lg:p-5">
             <span className="font-bold text-primary underline underline-offset-4">Tom peut se souvenir de ce qui était difficile</span>
             <span className="text-sm text-muted-foreground">Si tu es d’accord, Tom retient les leçons où tu as bloqué.</span>
-          </Card>
+          </CardAction>
         )}
       </div>
-      <section aria-labelledby="soon-title" className="flex flex-col gap-2">
-        <h2 id="soon-title" className="text-lg text-foreground">
-          Bientôt
-        </h2>
+      <Section title="Bientôt" className="gap-2" titleClassName="text-lg">
         <p className="rounded-2xl border border-border p-4 text-sm text-muted-foreground">Tes contrôles s’afficheront ici les jours d’avant.</p>
-      </section>
+      </Section>
       {me && <WeekSummary week={week.data} failed={week.isError} name={me.name} reader="student" parents={parents} />}
     </StudentPage>
   );
@@ -75,7 +77,10 @@ function News({ parents }: { parents: readonly string[] }) {
   const { data: news } = useQuery(newsQuery);
   const seen = useMutation({
     mutationFn: markNewsSeen,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: newsQuery.queryKey }),
+    // What was read is said no more: the card goes, without asking the server again.
+    onSuccess: () => {
+      queryClient.setQueryData(newsQuery.queryKey, (read) => read && { ...read, codeChangedAt: null, devices: [] });
+    },
   });
   const lines = news ? newsLines(news, parents) : [];
   if (!news || lines.length === 0) return null;
@@ -89,11 +94,7 @@ function News({ parents }: { parents: readonly string[] }) {
           <li key={line}>{line}</li>
         ))}
       </ul>
-      {seen.error && (
-        <Banner tone="error" title={STUDENT_FAILED.title}>
-          {STUDENT_FAILED.detail}
-        </Banner>
-      )}
+      {seen.error && <MessageBanner message={STUDENT_FAILED} />}
       <Button
         variant="outline"
         className="self-start"
@@ -147,11 +148,7 @@ function Start() {
             Commencer mes devoirs
           </Button>
         )}
-        {start.error && (
-          <Banner tone="error" title={STUDENT_FAILED.title}>
-            {STUDENT_FAILED.detail}
-          </Banner>
-        )}
+        {start.error && <MessageBanner message={STUDENT_FAILED} />}
       </div>
     </section>
   );

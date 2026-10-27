@@ -11,6 +11,7 @@ import {
   deletionAsked,
   deletionDay,
   deletionWarning,
+  hasCodeAlert,
   householdMessage,
   inviteSchema,
   isLevel,
@@ -39,6 +40,18 @@ describe('codeAlert', () => {
   it('says a code stopped by too many tries, and nothing for a code that works', () => {
     expect(codeAlert('Léa', { codeForgotten: false, codeLocked: true })).toBe('Le code de Léa ne marche plus.');
     expect(codeAlert('Léa', { codeForgotten: false, codeLocked: false })).toBeNull();
+  });
+});
+
+describe('hasCodeAlert', () => {
+  it('holds for a code forgotten or stopped by too many tries, as the home’s card shows it', () => {
+    expect(hasCodeAlert({ codeForgotten: true, codeLocked: false })).toBe(true);
+    expect(hasCodeAlert({ codeForgotten: false, codeLocked: true })).toBe(true);
+    expect(hasCodeAlert({ codeForgotten: true, codeLocked: true })).toBe(true);
+  });
+
+  it('does not hold for a code that works', () => {
+    expect(hasCodeAlert({ codeForgotten: false, codeLocked: false })).toBe(false);
   });
 });
 

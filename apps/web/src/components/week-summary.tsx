@@ -2,6 +2,7 @@ import { Banner, List, ListItem, Section, Skeleton } from '@repo/ui';
 import { lastTime } from '../lib/memory';
 import { STUDENT_FAILED } from '../lib/student';
 import { minutesText, questionFor, sameSummary, subjectLabel, type WeekSummary as Week } from '../lib/summary';
+import { MessageBanner } from './message-banner';
 
 // The guardian's summary names no parent.
 const NO_PARENTS: readonly string[] = [];
@@ -35,9 +36,7 @@ export function WeekSummary({
         reader === 'guardian' ? (
           <Banner tone="error" title="Le résumé de la semaine n’a pas pu se charger. Réessayez dans un instant." />
         ) : (
-          <Banner tone="error" title={STUDENT_FAILED.title}>
-            {STUDENT_FAILED.detail}
-          </Banner>
+          <MessageBanner message={STUDENT_FAILED} />
         )
       ) : (
         <>

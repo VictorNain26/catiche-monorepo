@@ -1,9 +1,11 @@
-import { Banner, Button, Card } from '@repo/ui';
+import { Button } from '@repo/ui';
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, Navigate, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { EyeOffIcon } from 'lucide-react';
 import { useState } from 'react';
+import { CardAction } from '../components/card-action';
 import { CodePad } from '../components/code-pad';
+import { MessageBanner } from '../components/message-banner';
 import { EntryPage } from '../components/page';
 import { authClient } from '../lib/auth';
 import {
@@ -17,6 +19,7 @@ import {
   pressKey,
   profilesQuery,
   STUDENT_FAILED,
+  stoppedMessage,
   studentCodeMessage,
   tabChannel,
   type CodeMessage,
@@ -60,14 +63,6 @@ function useEntered() {
     announceProfileChange(tabChannel());
     await navigate({ to: '/', reloadDocument: true });
   };
-}
-
-function Failure({ message }: { message: CodeMessage }) {
-  return (
-    <Banner tone="error" title={message.title}>
-      {message.detail}
-    </Banner>
-  );
 }
 
 const NOT_ME = (
@@ -123,7 +118,7 @@ function EnterCode({ studentId, name, parents, stopped }: { studentId: string; n
     );
   }
 
-  const shown = failure ?? (stopped ? studentCodeMessage({ code: 'PROFILE_BLOCKED', status: 403 }, parents) : null);
+  const shown = failure ?? (stopped ? stoppedMessage(parents) : null);
   return (
     <EntryPage
       title={`${name}, tape ton code`}
@@ -148,14 +143,13 @@ function EnterCode({ studentId, name, parents, stopped }: { studentId: string; n
         </div>
       }
     >
-      {shown && <Failure message={shown} />}
+      {shown && <MessageBanner message={shown} />}
     </EntryPage>
   );
 }
 
 // An answer to « Quelqu'un d'autre se sert de cet appareil ? »: a card the whole of which is the button.
-const CHOICE =
-  'group flex min-h-24 flex-col justify-center gap-1 text-left shadow-control transition-colors duration-fast ease-standard hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:bg-disabled disabled:text-disabled-foreground';
+const CHOICE = 'flex min-h-24 flex-col justify-center gap-1 text-left shadow-control';
 
 type Step = { kind: 'first' } | { kind: 'again'; first: string } | { kind: 'device'; code: string };
 
@@ -204,16 +198,16 @@ function ChooseCode({ studentId, parents, shared, token }: { studentId: string; 
     return (
       <EntryPage title="Quelqu’un d’autre se sert de cet appareil ?" announce>
         <div className="flex flex-col gap-3">
-          <Card render={<button type="button" disabled={sending} onClick={() => void send(step.code, false)} />} className={CHOICE}>
+          <CardAction render={<button type="button" disabled={sending} onClick={() => void send(step.code, false)} />} className={CHOICE}>
             <span className="text-xl font-bold">Oui, on le partage</span>
             <span className="text-sm text-muted-foreground group-hover:text-accent-muted-foreground group-disabled:text-disabled-foreground">
               Catiche se fermera quand tu ne t’en sers plus.
             </span>
-          </Card>
-          <Card render={<button type="button" disabled={sending} onClick={() => void send(step.code, true)} />} className={CHOICE}>
+          </CardAction>
+          <CardAction render={<button type="button" disabled={sending} onClick={() => void send(step.code, true)} />} className={CHOICE}>
             <span className="text-xl font-bold">Non, il est à moi</span>
-          </Card>
-          {failure && <Failure message={failure} />}
+          </CardAction>
+          {failure && <MessageBanner message={failure} />}
         </div>
       </EntryPage>
     );
@@ -238,7 +232,7 @@ function ChooseCode({ studentId, parents, shared, token }: { studentId: string; 
       }
     >
       {failure ? (
-        <Failure message={failure} />
+        <MessageBanner message={failure} />
       ) : (
         <p className="flex gap-3 rounded-2xl bg-muted p-4 text-sm">
           <EyeOffIcon aria-hidden="true" nonScalingStroke className="size-6 shrink-0" />

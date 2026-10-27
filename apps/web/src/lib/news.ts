@@ -4,12 +4,13 @@ import { queryOptions } from '@tanstack/react-query';
 import type { InferResponseType } from 'hono/client';
 import { api, parseResponse } from './api';
 import { deviceKind, formatDate } from './device';
-import { parentWords } from './student';
+import { parentWords } from './words';
 
 type News = InferResponseType<typeof api.me.news.$get, 200>;
 
 export const newsQuery = queryOptions({
-  queryKey: ['me', 'news'],
+  // Outside `['me']`: a change of the student's own data does not read the news again.
+  queryKey: ['news'],
   queryFn: () => parseResponse(api.me.news.$get()),
 });
 

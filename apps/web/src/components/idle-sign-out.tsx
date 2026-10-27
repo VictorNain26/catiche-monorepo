@@ -1,4 +1,4 @@
-import { AlertDialog, Button } from '@repo/ui';
+import { AlertDialog, AlertDialogClose, Button } from '@repo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { meQuery } from '../lib/me';
@@ -27,20 +27,30 @@ export function IdleSignOut() {
 
   useEffect(() => {
     if (!watched) return;
+    let shown = false;
+    let warning: ReturnType<typeof setTimeout> | undefined;
+    let closing: ReturnType<typeof setTimeout> | undefined;
     const warn = () => {
+      shown = true;
       setWarned(true);
       // Safari has no vibration.
       if ('vibrate' in navigator) navigator.vibrate(VIBRATION_MS);
     };
-    let warning = setTimeout(warn, IDLE_MS - WARNING_MS);
-    let closing = setTimeout(signOut, IDLE_MS);
-    const active = () => {
+    /** The warning a minute before, then the closing: from now. */
+    const arm = () => {
       clearTimeout(warning);
       clearTimeout(closing);
-      setWarned(false);
       warning = setTimeout(warn, IDLE_MS - WARNING_MS);
       closing = setTimeout(signOut, IDLE_MS);
     };
+    const active = () => {
+      if (shown) {
+        shown = false;
+        setWarned(false);
+      }
+      arm();
+    };
+    arm();
     for (const event of ACTIVITY) window.addEventListener(event, active, { passive: true });
     return () => {
       clearTimeout(warning);
@@ -58,8 +68,8 @@ export function IdleSignOut() {
       title="Ton espace va se fermer."
       description="Tes devoirs restent là."
     >
-      {/* Its touch is an activity: the ten minutes start again. */}
-      <Button size="lg">Je suis encore là</Button>
+      {/* It closes the dialog; its touch, an activity, starts the ten minutes again. */}
+      <AlertDialogClose render={<Button size="lg" />}>Je suis encore là</AlertDialogClose>
     </AlertDialog>
   );
 }

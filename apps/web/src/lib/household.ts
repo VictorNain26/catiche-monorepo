@@ -188,6 +188,9 @@ export function codeAlert(name: string, { codeForgotten, codeLocked }: Pick<Stud
   return codeLocked ? `Le code de ${name} ne marche plus.` : null;
 }
 
+/** Whether the home shows the card on the child's code (`codeAlert`), read from the flags alone. */
+export const hasCodeAlert = ({ codeForgotten, codeLocked }: Pick<Student['alerts'], 'codeForgotten' | 'codeLocked'>) => codeForgotten || codeLocked;
+
 /** The head of « Gérer » for a parent (A7): who decides for the child with them. */
 export const decidesWith = (name: string, parents: readonly string[]) =>
   parents.length === 0 ? `Vous décidez pour ${name}.` : `Vous décidez pour ${name}, avec ${listWords(parents)}.`;

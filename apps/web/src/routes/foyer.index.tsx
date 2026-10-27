@@ -14,6 +14,7 @@ import {
   LEVEL_LABELS,
   codeAlert,
   deletionAsked,
+  hasCodeAlert,
   householdMessage,
   studentDevicesQuery,
   studentsQuery,
@@ -46,7 +47,7 @@ export const Route = createFileRoute('/foyer/')({
     // A code to give from the home: the child's devices, which tell when the code is spent.
     await Promise.all(
       students
-        .filter((child) => child.role === 'guardian' && codeAlert(child.name, child.alerts) !== null)
+        .filter((child) => child.role === 'guardian' && hasCodeAlert(child.alerts))
         .map(({ id }) => context.queryClient.query(studentDevicesQuery(id))),
     );
   },

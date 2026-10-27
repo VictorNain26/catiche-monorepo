@@ -7,8 +7,7 @@ import { queryOptions } from '@tanstack/react-query';
 import type { InferResponseType } from 'hono/client';
 import { api, isProblem, parseResponse } from './api';
 import { ROLE_LABELS, firstName, householdMessage, newChildSchema, type AdultRole } from './household';
-import { parentWords } from './student';
-import { capitalised } from './words';
+import { parentWords } from './words';
 import { ticked, z } from './zod';
 
 /** The adult's declaration of their age, the box's own words. */
@@ -110,10 +109,8 @@ export const parentsOfMe = (me: Me | null | undefined): readonly string[] => (me
  * never. Step 4 replaces the summary by the evenings worked and the messages (`app-cible.md` § 5).
  */
 export function whoSeesWhat(parents: readonly string[]) {
-  const { both, many } = parentWords(parents);
-  return many
-    ? `${capitalised(both)} voient le résumé de ta semaine, le même que toi. Ils ne lisent jamais tes conversations avec Tom.`
-    : `${both} voit le résumé de ta semaine, le même que toi. ${both} ne lit jamais tes conversations avec Tom.`;
+  const { Both, They, agree } = parentWords(parents);
+  return `${Both} ${agree('voit', 'voient')} le résumé de ta semaine, le même que toi. ${They} ne ${agree('lit', 'lisent')} jamais tes conversations avec Tom.`;
 }
 
 /** Under « Tes appareils » (E6): whom to tell of a device the student does not recognise. */

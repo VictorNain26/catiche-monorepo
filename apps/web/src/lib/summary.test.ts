@@ -38,7 +38,7 @@ describe('subjectLabel', () => {
 
 describe('questionFor', () => {
   it('asks the parent to have the child show where a notion that resists gets stuck, without knowing the answer', () => {
-    expect(questionFor('guardian', 'Lou', 'Résoudre une équation du premier degré')).toBe(
+    expect(questionFor('guardian', 'Lou', 'Résoudre une équation du premier degré', [])).toBe(
       'Demandez à Lou de vous montrer un exercice sur « Résoudre une équation du premier degré », et où ça coince.',
     );
   });

@@ -155,8 +155,8 @@ function Memory() {
           <div className="flex flex-col gap-2">
             <Button
               size="lg"
-              variant="outline"
-              className="border-destructive text-destructive lg:self-start"
+              variant="outline-destructive"
+              className="lg:self-start"
               disabled={busy}
               onClick={() => {
                 answer.mutate('declined');

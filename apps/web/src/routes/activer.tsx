@@ -1,9 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Banner, Button, Field } from '@repo/ui';
+import { Button, Field } from '@repo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { MessageBanner } from '../components/message-banner';
 import { BackLink, EntryPage } from '../components/page';
 import { CODE_INPUT_CLASS } from '../components/code-form';
 import { activationFromFragment, activationSchema, formatCode } from '../lib/activation';
@@ -32,7 +33,7 @@ function Activate() {
     const { data, error } = await authClient.student.activate({ code });
     if (error) {
       // A starting code refused names no parent: nobody is told.
-      setFailure(studentCodeMessage(error, []));
+      setFailure(studentCodeMessage(error));
       return;
     }
     keepChooseTokens({ [data.studentId]: data.chooseToken });
@@ -54,11 +55,7 @@ function Activate() {
           {...form.register('code')}
           error={form.formState.errors.code?.message}
         />
-        {failure && (
-          <Banner tone="error" title={failure.title}>
-            {failure.detail}
-          </Banner>
-        )}
+        {failure && <MessageBanner message={failure} />}
         <Button type="submit" size="lg" className="lg:self-start" disabled={form.formState.isSubmitting}>
           Continuer
         </Button>

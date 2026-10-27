@@ -7,6 +7,7 @@ import type { ComponentProps } from 'react';
 import { authClient, authData } from '../lib/auth';
 import { handOff } from '../lib/hand-off';
 import { announceProfileChange, STUDENT_FAILED, tabChannel } from '../lib/student';
+import { MessageBanner } from './message-banner';
 
 /**
  * Signs out of this device, then loads the app afresh, in this tab and the others: nothing of the
@@ -65,13 +66,7 @@ export function StudentQuit() {
       trigger={<HeaderButton icon={LogOutIcon}>Quitter</HeaderButton>}
       title="Quitter Catiche ?"
       description="Tes devoirs restent là. Personne d’autre ne peut les ouvrir sans ton code."
-      error={
-        signOut.error && (
-          <Banner tone="error" title={STUDENT_FAILED.title}>
-            {STUDENT_FAILED.detail}
-          </Banner>
-        )
-      }
+      error={signOut.error && <MessageBanner message={STUDENT_FAILED} />}
     >
       <Button
         size="lg"

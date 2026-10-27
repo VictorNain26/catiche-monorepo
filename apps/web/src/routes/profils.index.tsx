@@ -1,6 +1,7 @@
-import { Button, Card } from '@repo/ui';
+import { Button } from '@repo/ui';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect } from '@tanstack/react-router';
+import { CardAction } from '../components/card-action';
 import { EntryPage } from '../components/page';
 import { meQuery } from '../lib/me';
 import { profileNote, profilesQuery } from '../lib/student';
@@ -50,13 +51,13 @@ function Profiles() {
             const note = profileNote(profile.state, profile.parents);
             return (
               <li key={profile.id}>
-                <Card
+                <CardAction
                   render={<Link to="/profils/$studentId" params={{ studentId: profile.id }} />}
-                  className="group flex h-full min-h-32 flex-col justify-center gap-1 shadow-control transition-colors duration-fast ease-standard hover:bg-accent hover:text-accent-foreground lg:min-h-44 lg:p-6"
+                  className="flex h-full min-h-32 flex-col justify-center gap-1 shadow-control lg:min-h-44 lg:p-6"
                 >
                   <span className="text-2xl font-bold break-words lg:text-3xl">{profile.name}</span>
                   {note && <span className="text-sm text-muted-foreground group-hover:text-accent-muted-foreground">{note}</span>}
-                </Card>
+                </CardAction>
               </li>
             );
           })}

@@ -8,7 +8,6 @@ import {
   forgottenTitle,
   keepChooseTokens,
   listenForProfileChange,
-  parentWords,
   pressKey,
   profileNote,
   STUDENT_FAILED,
@@ -36,20 +35,6 @@ describe('pressKey', () => {
 
 const TWO = ['Nadia', 'Karim'];
 const ONE = ['Nadia'];
-
-describe('parentWords', () => {
-  it('names two parents together, either one, and to either one', () => {
-    expect(parentWords(TWO)).toEqual({ both: 'Nadia et Karim', either: 'Nadia ou Karim', toEither: 'à Nadia ou à Karim', many: true });
-  });
-
-  it('names a single parent alone, the verb in the singular', () => {
-    expect(parentWords(ONE)).toEqual({ both: 'Nadia', either: 'Nadia', toEither: 'à Nadia', many: false });
-  });
-
-  it('says « tes parents » without a first name', () => {
-    expect(parentWords([])).toEqual({ both: 'tes parents', either: 'tes parents', toEither: 'à tes parents', many: true });
-  });
-});
 
 describe('studentCodeMessage', () => {
   it('says a wrong code, and asks to try again', () => {

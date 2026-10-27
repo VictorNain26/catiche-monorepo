@@ -83,7 +83,7 @@ export function EntryPage({
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md lg:grid lg:max-w-none lg:grid-cols-12 lg:gap-16 lg:p-8">
       <aside className="hidden flex-col justify-between rounded-2xl bg-panel p-10 text-panel-foreground lg:col-span-5 lg:flex">
-        <p className="font-heading text-2xl font-extrabold">Catiche</p>
+        <Brand className="text-2xl text-panel-foreground" />
         <TomHead className="size-56 self-center" />
         <span />
       </aside>

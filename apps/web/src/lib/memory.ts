@@ -3,8 +3,7 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { InferRequestType, InferResponseType } from 'hono/client';
 import { api, isProblem, parseResponse } from './api';
-import { parentWords } from './student';
-import { capitalised } from './words';
+import { parentWords } from './words';
 
 type Memory = InferResponseType<typeof api.memory.$get, 200>;
 type Notion = Memory['notions'][number];
@@ -35,14 +34,14 @@ export const notionSummary = ({ worked, lastSolved }: Pick<Notion, 'worked' | 'l
 
 /** Once active (E7): what Tom keeps, and that the parents see only that it is. */
 export function memoryActive(parents: readonly string[]) {
-  const { both, many } = parentWords(parents);
-  return `Tom se souvient des leçons de tes exercices depuis la rentrée. ${capitalised(both)} ${many ? 'voient' : 'voit'} seulement que c’est activé.`;
+  const { Both, agree } = parentWords(parents);
+  return `Tom se souvient des leçons de tes exercices depuis la rentrée. ${Both} ${agree('voit', 'voient')} seulement que c’est activé.`;
 }
 
 /** Not active, the student unable to answer (E7): what Tom knows, and who may propose it. */
 export function memoryOff(parents: readonly string[]) {
-  const { either, many } = parentWords(parents);
-  return `Tom ne se souvient de rien d’un soir à l’autre. Il connaît seulement ton prénom et ta classe. ${capitalised(either)} ${many ? 'peuvent' : 'peut'} te le proposer.`;
+  const { Either, agree } = parentWords(parents);
+  return `Tom ne se souvient de rien d’un soir à l’autre. Il connaît seulement ton prénom et ta classe. ${Either} ${agree('peut', 'peuvent')} te le proposer.`;
 }
 
 /** At the foot of E7, always: whom to ask for everything to go. */
