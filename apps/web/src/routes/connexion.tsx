@@ -16,12 +16,14 @@ import { announceProfileChange, profilesQuery, tabChannel } from '../lib/student
  * The adult's way in, without a password: a passkey, which the browser offers in the address
  * field, or their address, then the email it receives, whose button lets them in (/entrer) as its
  * code does here. The first entry creates the account, on an invitation (closed beta); /bienvenue
- * then asks its name. Its way back is « Qui fait ses devoirs ? ». On a device that holds profiles, the adult's session is the device's: short
- * on a shared one, which a child's code then closes. What the screen before left (`handOff`): the
- * address a spent link gives back, and that the adult just left Catiche, said once.
+ * then asks its name. Its way back is « Qui fait ses devoirs ? ». On a device that holds profiles,
+ * the adult's session is the device's: short on a shared one, which a child's code then closes.
+ * What the screen before left (`handOff`): the address a spent link gives back, and that the adult
+ * just left Catiche, said once.
  */
 export const Route = createFileRoute('/connexion')({
-  // Read before the page shows: a device without a profile sends a student straight to the starting code. A failure still leaves the form.
+  // Read before the page shows: on a device without a profile, a student goes straight to the
+  // starting code. A failure still leaves the form.
   loader: async ({ context }) => {
     await context.queryClient.query(profilesQuery).catch(() => null);
   },
