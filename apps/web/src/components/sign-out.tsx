@@ -11,8 +11,8 @@ import { MessageBanner } from './message-banner';
 
 /**
  * Signs out of this device, then loads the app afresh, in this tab and the others: nothing of the
- * profile stays in memory. The device keeps its profiles, and the home leads to « Qui fait ses
- * devoirs ? » where it holds some. An adult's sign-in then says, once, that Catiche is closed here.
+ * profile stays in memory. The device keeps its profiles. A student goes back to « Qui fait ses
+ * devoirs ? » by the home; an adult to their sign-in, which says, once, that Catiche is closed here.
  */
 export function useSignOut({ adult = false }: { adult?: boolean } = {}) {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ export function useSignOut({ adult = false }: { adult?: boolean } = {}) {
       await authData(authClient.signOut());
       if (adult) handOff().leave('signedOut', 'yes');
       announceProfileChange(tabChannel());
-      await navigate({ to: '/', reloadDocument: true });
+      await navigate({ to: adult ? '/connexion' : '/', reloadDocument: true });
     },
   });
 }
