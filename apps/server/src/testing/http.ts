@@ -67,6 +67,9 @@ async function expectStatus(response: Response | Promise<Response>, status: numb
   return res;
 }
 
+/** A refusal of better-auth as a test reads it: its status and its code. */
+export const problem = async (res: Response) => ({ status: res.status, code: ((await res.json()) as { code?: string }).code });
+
 /**
  * A turn's UI message stream as the web reads it: the chunks in their order, parsed by the AI SDK,
  * and the reply the student reads, built by its `readUIMessageStream`; with the stream's error, if

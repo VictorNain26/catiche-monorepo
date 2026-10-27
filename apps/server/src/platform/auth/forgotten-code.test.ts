@@ -8,7 +8,7 @@ import { describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
-import { STUDENT_CODE } from '../../testing/http';
+import { problem, STUDENT_CODE } from '../../testing/http';
 import { studentCode } from './schema';
 
 const { db } = await testDatabase();
@@ -16,7 +16,6 @@ const { api } = testApp(db);
 
 const forgottenAt = async (userId: string) =>
   (await db.select({ at: studentCode.forgottenAt }).from(studentCode).where(eq(studentCode.userId, userId)))[0]?.at ?? null;
-const problem = async (res: Response) => ({ status: res.status, code: ((await res.json()) as { code?: string }).code });
 
 /** A guardian with Léa, and a new device of hers, recognised by her guardian's code; her code chosen there if `code`. */
 async function family(email: string, { code }: { code: boolean }) {

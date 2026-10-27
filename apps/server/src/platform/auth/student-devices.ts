@@ -196,8 +196,11 @@ export function createStudentDevices(db: Db) {
         if (!opened) return false;
         await tx
           .insert(studentCode)
-          .values({ userId: studentId, hash, setAt: now })
-          .onConflictDoUpdate({ target: studentCode.userId, set: { hash, setAt: now, failures: 0 } });
+          .values({ userId: studentId, hash, setAt: now, firstSetAt: now })
+          .onConflictDoUpdate({
+            target: studentCode.userId,
+            set: { hash, setAt: now, firstSetAt: sql`coalesce(${studentCode.firstSetAt}, excluded.first_set_at)`, failures: 0 },
+          });
         if (shared && !held.shared) {
           await tx.update(device).set({ shared: true }).where(eq(device.id, deviceId));
           await closeSessionsOf(tx, deviceId, undefined);

@@ -79,6 +79,7 @@ const REFUSALS = {
 const INVALID_CODE = { code: 'INVALID_CODE', message: 'Invalid code' };
 const BLOCKED = { code: 'PROFILE_BLOCKED', message: 'Blocked on this device until a guardian unblocks it' };
 const LOCKED = { code: 'PROFILE_LOCKED', message: 'Locked until a new code' };
+const NOT_FOUND = { code: 'NOT_FOUND', message: 'Not found' };
 
 const ACTIVATION_REASONS = ['device', 'forgotten'] as const;
 export type ActivationReason = (typeof ACTIVATION_REASONS)[number];
@@ -147,7 +148,6 @@ export interface StudentAccess {
   birthMonth: (studentId: string) => Promise<string | null>;
   active: (studentId: string) => Promise<boolean>;
   parents: (studentId: string) => Promise<string[]>;
-  codeChosen: (studentId: string) => Promise<void>;
 }
 
 const studentCodeSchema = z.string().max(16);
@@ -262,12 +262,15 @@ export function studentSignIn({
       listStudentProfiles: createAuthEndpoint('/student/profiles', { method: 'GET' }, async (ctx) => {
         const device = await requestDevice(ctx);
         if (!device) return ctx.json({ shared: false, profiles: [] });
-        const listed = await Promise.all(
-          (await devices.listProfiles(device.id)).map(async (profile) =>
-            (await students.active(profile.id)) ? { ...profile, parents: await students.parents(profile.id) } : undefined,
-          ),
-        );
-        return ctx.json({ shared: device.shared, profiles: listed.filter((profile) => profile !== undefined) });
+        const profiles = await devices.listProfiles(device.id);
+        const [active, parents] = await Promise.all([
+          Promise.all(profiles.map(({ id }) => students.active(id))),
+          Promise.all(profiles.map(({ id }) => students.parents(id))),
+        ]);
+        return ctx.json({
+          shared: device.shared,
+          profiles: profiles.map((profile, index) => ({ ...profile, parents: parents[index] ?? [] })).filter((_, index) => active[index]),
+        });
       }),
 
       /**
@@ -291,7 +294,6 @@ export function studentSignIn({
           if (refusal) throw APIError.from(REFUSALS[refusal].status, REFUSALS[refusal]);
           const hash = await ctx.context.password.hash(await peppered(ctx, code));
           if (!(await devices.chooseCode(device.id, studentId, hash, { chooseTokenHash, shared: !ownDevice }))) throw notExpected;
-          await students.codeChosen(studentId);
           return openSession(ctx, studentId, device.id, device.shared || !ownDevice);
         },
       ),
@@ -332,9 +334,7 @@ export function studentSignIn({
        */
       forgotStudentCode: createAuthEndpoint('/student/forgot', { method: 'POST', body: z.object({ studentId: z.string().max(64) }) }, async (ctx) => {
         const device = await requestDevice(ctx);
-        if (!device || !(await devices.forgot(device.id, ctx.body.studentId))) {
-          throw APIError.from('NOT_FOUND', { code: 'NOT_FOUND', message: 'Not found' });
-        }
+        if (!device || !(await devices.forgot(device.id, ctx.body.studentId))) throw APIError.from('NOT_FOUND', NOT_FOUND);
         return ctx.json({ success: true });
       }),
 
@@ -348,7 +348,7 @@ export function studentSignIn({
         async (ctx) => {
           const { session } = ctx.context.session;
           for (const studentId of ctx.body.studentIds) {
-            if (!(await students.manages(session.userId, studentId))) throw APIError.from('NOT_FOUND', { code: 'NOT_FOUND', message: 'Not found' });
+            if (!(await students.manages(session.userId, studentId))) throw APIError.from('NOT_FOUND', NOT_FOUND);
           }
           const device = await ensureDevice(ctx);
           const chooseTokens: Record<string, string> = {};
