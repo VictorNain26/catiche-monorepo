@@ -92,6 +92,12 @@ const TEXT = [
   ['foreground', 'tint'],
   ['primary', 'tint'],
   ['panel-foreground', 'panel'],
+  // The filled secondary button, at rest and under the pointer.
+  ['tonal-foreground', 'tonal'],
+  ['tonal-foreground', 'tonal-hover'],
+  // The child's stage, under the sheet: its title and its line.
+  ['stage-foreground', 'stage'],
+  ['stage-muted-foreground', 'stage'],
 ];
 
 // A control's border, the focus ring and each chart series: 3:1
@@ -116,8 +122,8 @@ const MARKS = [
   ]),
 ];
 
-// A color the same in both modes on purpose: an overlay is black.
-const FIXED = ['overlay'];
+// A color written as a value, not a step, on purpose: an overlay is black, and white is the light card's paper.
+const FIXED = ['overlay', 'white'];
 
 test('every role follows the dark mode: it points at a scale step, is redefined in the dark block, or is fixed', () => {
   const roles = Object.keys(theme.light).filter((name) => name.startsWith('color-'));
@@ -127,6 +133,20 @@ test('every role follows the dark mode: it points at a scale step, is redefined 
   });
   assert.deepEqual(left, []);
 });
+
+// In each mode, a role points at a scale step or at a fixed role; only a fixed role holds a value of its own
+// (docs/charte.md, "Couleurs").
+for (const [mode, vars] of [
+  ['light', theme.light],
+  ['dark', theme.dark],
+]) {
+  test(`${mode}: only a fixed role holds a color value of its own`, () => {
+    const literal = Object.keys(vars).filter(
+      (name) => name.startsWith('color-') && !FIXED.includes(name.slice('color-'.length)) && !/^var\(--[a-z0-9-]+\)$/.test(vars[name]),
+    );
+    assert.deepEqual(literal, []);
+  });
+}
 
 // Next to each other in a stacked bar, two series must differ in lightness, not only in hue: a
 // reader who confuses the hues, or a grayscale print, tells them apart by it. 1.4:1 is ours, no
