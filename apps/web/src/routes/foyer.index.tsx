@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Banner, Button, Card, CheckboxField, Section, Skeleton } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
-import { Link, Navigate, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
+import { CatchBoundary, Link, Navigate, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
+import { Suspense, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AdultPage } from '../components/page';
 import { PasskeyOffer } from '../components/passkey-offer';
@@ -44,11 +44,12 @@ export const Route = createFileRoute('/foyer/')({
     if (students.length === 0 && pendingInvitations(me).length === 0) throw redirect({ to: '/foyer/ajouter' });
     // Started, not awaited: each card's line arrives with the page, or says it failed.
     for (const { id } of students) void context.queryClient.query(summaryQuery(id)).catch(() => undefined);
-    // A code to give from the home: the child's devices, which tell when the code is spent.
+    // A code to give from the home: the child's devices, which tell when the code is spent. A
+    // failure is the alert card's alone (`CodeAlert`).
     await Promise.all(
       students
         .filter((child) => child.role === 'guardian' && hasCodeAlert(child.alerts))
-        .map(({ id }) => context.queryClient.query(studentDevicesQuery(id))),
+        .map(({ id }) => context.queryClient.query(studentDevicesQuery(id)).catch(() => undefined)),
     );
   },
   component: Household,
@@ -170,15 +171,33 @@ function AlertCards({ child }: { child: Student }) {
   );
 }
 
-/** The child's code forgotten or stopped: the starting code given from the card, by the gesture of « Gérer » (A7). */
+/**
+ * The child's code forgotten or stopped: the starting code given from the card, by the gesture of
+ * « Gérer » (A7). The gesture waits for the child's devices, and fails, in the card alone.
+ */
 function CodeAlert({ child, alert }: { child: Student; alert: string }) {
-  const activation = useActivation(child.id);
   return (
     <Card className="flex flex-col gap-3">
       <p className="font-bold">{alert}</p>
-      <ForgottenCodeGesture child={child} activation={activation} label="Donner un code de départ" primary />
+      <CatchBoundary getResetKey={() => child.id} errorComponent={() => <Banner tone="error" title={householdMessage(null)} />}>
+        <Suspense
+          fallback={
+            <>
+              <span className="sr-only">Chargement…</span>
+              <Skeleton className="h-11 w-56" />
+            </>
+          }
+        >
+          <CodeGesture child={child} />
+        </Suspense>
+      </CatchBoundary>
     </Card>
   );
+}
+
+function CodeGesture({ child }: { child: Student }) {
+  const activation = useActivation(child.id);
+  return <ForgottenCodeGesture child={child} activation={activation} label="Donner un code de départ" primary />;
 }
 
 /** One blocked device, unblocked by its own request: another card's failure is not its own. */
