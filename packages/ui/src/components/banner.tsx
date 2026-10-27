@@ -51,7 +51,7 @@ function Banner({ tone, title, children, className, focusOnMount = false }: Bann
         <p id={titleId} className="font-bold">
           {title}
         </p>
-        {children !== undefined && <div className="text-sm">{children}</div>}
+        {children !== undefined && <div className="text-meta">{children}</div>}
       </div>
     </>
   );

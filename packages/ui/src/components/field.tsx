@@ -13,11 +13,11 @@ function Field({ label, hint, error, ...input }: FieldProps) {
   const describedBy = [hint ? hintId : '', error ? errorId : ''].filter(Boolean).join(' ');
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-sm font-bold text-foreground">
+      <label htmlFor={id} className="text-meta font-bold text-foreground">
         {label}
       </label>
       {hint && (
-        <p id={hintId} className="text-sm text-muted-foreground">
+        <p id={hintId} className="text-meta text-muted-foreground">
           {hint}
         </p>
       )}
@@ -29,7 +29,7 @@ function Field({ label, hint, error, ...input }: FieldProps) {
         {...input}
       />
       {error && (
-        <p id={errorId} className="text-sm text-destructive">
+        <p id={errorId} className="text-meta text-destructive">
           {error}
         </p>
       )}
@@ -50,7 +50,7 @@ function SelectField({ label, options, error, ...select }: SelectFieldProps) {
   const errorId = `${id}-error`;
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-sm font-bold text-foreground">
+      <label htmlFor={id} className="text-meta font-bold text-foreground">
         {label}
       </label>
       <NativeSelect
@@ -68,7 +68,7 @@ function SelectField({ label, options, error, ...select }: SelectFieldProps) {
         ))}
       </NativeSelect>
       {error && (
-        <p id={errorId} className="text-sm text-destructive">
+        <p id={errorId} className="text-meta text-destructive">
           {error}
         </p>
       )}
@@ -89,17 +89,17 @@ function CheckboxField({ label, hint, error, ...checkbox }: CheckboxFieldProps) 
   const describedBy = [hint ? hintId : '', error ? errorId : ''].filter(Boolean).join(' ');
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="flex min-h-11 cursor-pointer items-center gap-3 text-sm font-bold text-foreground">
+      <label htmlFor={id} className="flex min-h-11 cursor-pointer items-center gap-3 text-meta font-bold text-foreground">
         <Checkbox id={id} aria-invalid={error ? true : undefined} aria-describedby={describedBy || undefined} {...checkbox} />
         {label}
       </label>
       {hint && (
-        <p id={hintId} className="pl-9 text-sm text-muted-foreground">
+        <p id={hintId} className="pl-9 text-meta text-muted-foreground">
           {hint}
         </p>
       )}
       {error && (
-        <p id={errorId} className="pl-9 text-sm text-destructive">
+        <p id={errorId} className="pl-9 text-meta text-destructive">
           {error}
         </p>
       )}

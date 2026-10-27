@@ -7,7 +7,10 @@ import { cn } from '../lib/utils';
 function List({ className, ...props }: React.ComponentProps<'ul'>) {
   return (
     <ul
-      className={cn('flex flex-col divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card text-card-foreground', className)}
+      className={cn(
+        'flex flex-col divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sheet',
+        className,
+      )}
       {...props}
     />
   );
@@ -17,13 +20,15 @@ interface ListItemProps {
   title: React.ReactNode;
   /** What tells this item from the others: a date, a subject. */
   meta?: React.ReactNode;
+  /** What heads the line, before its words: a chip with an initial, an icon. */
+  leading?: React.ReactNode;
   /** The link the whole line is, an empty anchor or the router's: the line leads to the detail. */
   render?: React.ReactElement;
   className?: string;
   children?: React.ReactNode;
 }
 
-function ListItem({ title, meta, render, className, children }: ListItemProps) {
+function ListItem({ title, meta, leading, render, className, children }: ListItemProps) {
   const link = render !== undefined;
   const row = useRender({
     defaultTagName: 'div',
@@ -37,9 +42,10 @@ function ListItem({ title, meta, render, className, children }: ListItemProps) {
       ),
       children: (
         <>
+          {leading}
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="font-bold">{title}</span>
-            {meta !== undefined && <span className="text-sm text-muted-foreground group-hover:text-accent-muted-foreground">{meta}</span>}
+            {meta !== undefined && <span className="text-meta text-muted-foreground group-hover:text-accent-muted-foreground">{meta}</span>}
           </span>
           {children}
           {link && <ChevronRightIcon aria-hidden="true" nonScalingStroke className="size-6 shrink-0 text-muted-foreground" />}
