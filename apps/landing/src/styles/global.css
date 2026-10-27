@@ -59,26 +59,6 @@
   }
 }
 
-/* The reed laid just under the baseline, raised from the bottom of the line box so that it grazes the letters without
- * touching them, where a link's underline would not sit: the same stroke in both modes (docs/charte.md, "Couleurs":
- * the reed highlights); `lay-highlight` lays it from the left, where a component lets it. It stays behind the ink and
- * breaks under the descenders (g, j, q), as `text-decoration-skip-ink` would: a thin halo of the surface around the
- * letters, the section's plane (`--plane`) or the page's background, is painted over it. A text decoration would skip
- * the ink too, but it cannot be laid from the left. */
-@utility highlighter {
-  --highlight-halo: var(--plane, var(--color-background));
-  color: inherit;
-  background: linear-gradient(var(--color-highlight), var(--color-highlight)) no-repeat 0 calc(100% - var(--highlight-offset)) / 100%
-    var(--highlight-height);
-  box-decoration-break: clone;
-  text-shadow:
-    var(--highlight-gap) 0 var(--highlight-halo),
-    calc(var(--highlight-gap) * -1) 0 var(--highlight-halo),
-    0 var(--highlight-gap) var(--highlight-halo),
-    var(--highlight-gap) var(--highlight-gap) var(--highlight-halo),
-    calc(var(--highlight-gap) * -1) var(--highlight-gap) var(--highlight-halo);
-}
-
 /* Depth behind Tom and the evening at the top of the page: a soft halo of water, fading out from its middle. */
 @utility halo {
   background: radial-gradient(closest-side, var(--color-halo), transparent);
