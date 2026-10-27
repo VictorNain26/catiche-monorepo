@@ -570,14 +570,6 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
   7. l'enfant (C1, C2, E1 à E4, E6, E7 ; E4 dans son état « Avant », dont le bouton ouvre l'aide
      de Tom actuelle, voix corrigée et message de quota compris), la carte « Léa a oublié son
      code » qu'il envoie (E3), et la navigation.
-
-  **Le design d'abord (Victor, 2026-10-25)** : avant la PR 7, de vraies maquettes avec la charte,
-  au téléphone et à l'ordinateur, des écrans de l'enfant (C1, C2, E1 à E4, E6, E7) et des écrans
-  adultes déjà construits (A1 à A5, A7 à A9). Victor les valide ; la PR 7 et les retouches de
-  l'existant se comparent ensuite aux maquettes. Les PR 2 à 6 ont été construites sur les textes
-  seuls, sans cible visuelle, alors qu'une interface se construit contre une cible et s'y compare
-  ([Claude Code, best practices](https://code.claude.com/docs/en/best-practices)).
-
   Avec : Tom au trait, les
   rôles du mode sombre, la lecture aérée, l'inactivité, la politique de confidentialité pour
   l'opposition d'un autre parent, la charte mise à jour. Le résumé de la semaine reste, voix

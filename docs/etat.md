@@ -109,9 +109,14 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
      écran avec ses textes, le tableau avant / après et le découpage en PR. Ce document porte
      le détail des étapes 2 à 5 ; chaque étape en retire ce qu'elle construit.
   2. **Le socle, sans IA** : le modèle de famille et ses droits, l'entrée de l'adulte et de
-     l'enfant, l'accueil, « Gérer », la navigation, Tom au trait. Le côté adulte est construit
-     (#562 à #568). Reste l'enfant et la navigation, après les maquettes que Victor valide
-     d'abord (`docs/plans/app-cible.md` § 8, « Le design d'abord »).
+     l'enfant, l'accueil, « Gérer », la navigation, Tom au trait. Ce qui en est fait :
+     `docs/plans/app-cible.md` § 8. **Le design d'abord (Victor, 2026-10-25)** : avant la PR 7,
+     de vraies maquettes avec la charte, au téléphone et à l'ordinateur, des écrans de l'enfant
+     (C1, C2, E1 à E4, E6, E7) et des écrans adultes déjà construits (A1 à A5, A7 à A9). Victor
+     les valide ; la PR 7 et les retouches de l'existant se comparent ensuite aux maquettes. Les
+     PR 2 à 6 ont été construites sur les textes seuls, alors qu'une interface se construit
+     contre une cible visuelle et s'y compare
+     ([best practices de Claude Code](https://code.claude.com/docs/en/best-practices)).
   3. **La soirée**, avec le volet IA et le prompt de Tom.
   4. **Le point du soir**, qui remplace le résumé de la semaine.
   5. **Les contrôles gardés d'un soir à l'autre.**
