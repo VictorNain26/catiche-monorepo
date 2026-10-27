@@ -11,7 +11,7 @@
     "test": "bun test src"
   },
   "dependencies": {
-    "@ai-sdk/react": "4.0.146",
+    "@ai-sdk/react": "4.0.156",
     "@better-auth/passkey": "^1.7.12",
     "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
@@ -21,7 +21,7 @@
     "@repo/ui": "workspace:*",
     "@tanstack/react-query": "^5.104.5",
     "@tanstack/react-router": "^1.170.41",
-    "ai": "7.0.142",
+    "ai": "7.0.152",
     "better-auth": "^1.7.12",
     "bowser": "2.14.1",
     "hono": "^4.13.13",
