@@ -183,6 +183,13 @@
       "when": 1793120026321,
       "tag": "0025_student_first_code",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793129219809,
+      "tag": "0026_drop_reset_at",
+      "breakpoints": true
     }
   ]
 }

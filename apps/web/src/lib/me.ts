@@ -7,6 +7,7 @@ import { queryOptions } from '@tanstack/react-query';
 import type { InferResponseType } from 'hono/client';
 import { api, isProblem, parseResponse } from './api';
 import { ROLE_LABELS, firstName, householdMessage, newChildSchema, type AdultRole } from './household';
+import { parentWords } from './words';
 import { ticked, z } from './zod';
 
 /** The adult's declaration of their age, the box's own words. */
@@ -94,14 +95,23 @@ export const meQuery = queryOptions({
   },
 });
 
-/** The devices that hold the signed-in student's profile, the newest first, and when a parent last replaced their code. */
+/** The devices that hold the signed-in student's profile, the newest first. */
 export const ownDevicesQuery = queryOptions({
   queryKey: ['me', 'devices'],
   queryFn: () => parseResponse(api.me.devices.$get()),
 });
 
-const RESET_NOTICE_DAYS = 14;
+/** The first names of the signed-in student's parents, the earliest first; none for anyone else. */
+export const parentsOfMe = (me: Me | null | undefined): readonly string[] => (me?.role === 'student' ? me.parents : []);
 
-/** Whether a parent replaced the student's code within two weeks: their home tells them. */
-export const isRecentReset = (resetAt: string | null, now = new Date()) =>
-  resetAt !== null && now.getTime() - Date.parse(resetAt) <= RESET_NOTICE_DAYS * 24 * 60 * 60_000;
+/**
+ * « Qui voit quoi » (E6): what the parents see of the student today, the week's summary, and what
+ * never. Step 4 replaces the summary by the evenings worked and the messages (`app-cible.md` § 5).
+ */
+export function whoSeesWhat(parents: readonly string[]) {
+  const { Both, They, agree } = parentWords(parents);
+  return `${Both} ${agree('voit', 'voient')} le résumé de ta semaine, le même que toi. ${They} ne ${agree('lit', 'lisent')} jamais tes conversations avec Tom.`;
+}
+
+/** Under « Tes appareils » (E6): whom to tell of a device the student does not recognise. */
+export const unknownDevice = (parents: readonly string[]) => `Tu ne reconnais pas l’un d’eux ? Dis-le ${parentWords(parents).toEither}.`;

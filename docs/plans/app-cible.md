@@ -626,7 +626,7 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
        carte chez le parent, « Depuis ta dernière visite » (fait) ;
      - 7b, les écrans : C1, C2, E1 à E4, E6, E7 (E4 dans son état « Avant », dont le bouton ouvre
        l'aide de Tom actuelle, voix corrigée et message de quota compris), la carte « Léa a oublié
-       son code » (A5) et la navigation.
+       son code » (A5) et la navigation (fait).
 
      Reportés : le bouton photo d'E1 (`etat.md`, « Technique reporté ») ; l'historique d'E6, dont
      la carte « Depuis ta dernière visite » d'E4 dit déjà ce qui change ;

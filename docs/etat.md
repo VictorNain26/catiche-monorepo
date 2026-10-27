@@ -129,6 +129,15 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
   (Victor, 2026-10-27) : il demanderait un décodeur QR en wasm et une CSP élargie, alors que
   l'appareil photo du téléphone ouvre déjà le carré, un lien (`apps/web/src/lib/activation.ts`).
 
+- Les écrans de l'enfant (PR 7b) laissent à l'étape 3 ce qui dépend de la soirée : le titre
+  « Séance avec Tom » et le mot « séance » du résumé de la semaine côté enfant, la fin du message
+  de quota (« Ton plan et ton cartable restent là. », `apps/web/src/lib/chat.ts`), le délai de
+  30 minutes pendant une étape. L'avertissement d'inactivité vibre, sans son
+  (`apps/web/src/components/idle-sign-out.tsx`).
+- « Qui voit quoi » (E6) dit ce que les parents voient aujourd'hui, le résumé de la semaine
+  (`whoSeesWhat`, `apps/web/src/lib/me.ts`) ; l'étape 4, qui remplace ce résumé, y met la phrase
+  d'`app-cible.md` § 5, les soirs travaillés et les messages.
+
 - `/invitation` doit nommer l'adulte qui invite et l'enfant avant l'acceptation
   (`app-cible.md` § 5, A3) : la route d'invitation du serveur ne les donne pas encore à la page.
   À faire avec la PR 8 de l'étape 2, sans exposer plus que ces deux prénoms à qui tient le lien.
@@ -181,3 +190,7 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
   Le même jour, l'horloge de la base locale a reculé de 2,15 s en 20 s, mesuré par
   `clock_timestamp()` : c'est la cause supposée. S'ils échouent encore, trier par une clé qui ne
   dépend pas de l'horloge, comme l'historique de l'enfant (`child_event.id`).
+- **`the deletion of a child with two parents > is asked: noted, told to the other parent with
+  its day, and the child stays`** (`modules/household/deletion.test.ts`) : vu en échec une fois le
+  2026-10-27, lancé avec tout `household` et `platform/auth` ; repassé seul, puis deux fois avec
+  eux. Cause non trouvée ; s'il échoue encore, garder sa sortie.

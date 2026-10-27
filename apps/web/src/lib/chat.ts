@@ -16,6 +16,11 @@ export const sessionsQuery = queryOptions({
   queryFn: () => parseResponse(sessions.$get()),
 });
 
+/** The session the student opened today, on this device's calendar: « Reprendre mes devoirs » reopens it. */
+export function tonightSession<Session extends { createdAt: string }>(sessions: readonly Session[], now = new Date()): Session | undefined {
+  return sessions.find(({ createdAt }) => new Date(createdAt).toDateString() === now.toDateString());
+}
+
 /** A new session, or the latest one still empty. */
 export const startSession = () => parseResponse(sessions.$post());
 
@@ -61,12 +66,15 @@ export const waitingText = (step: TurnStep | null): string => WAITING[step ?? 'r
 export const mathDelimited = (text: string): string =>
   text.replace(/\\\[([\s\S]+?)\\\]/g, (_, tex: string) => `$$${tex}$$`).replace(/\\\(([\s\S]+?)\\\)/g, (_, tex: string) => `$${tex}$`);
 
-/** A failed turn, in words a student reads; the server's own message never shows. */
+/**
+ * A failed turn, in words a student reads (`app-cible.md`, E5); the server's own message never
+ * shows. The quota's « Ton plan et ton cartable restent là. » waits for the plan and the bag (step 3).
+ */
 export function chatMessage(error: Error): string {
-  if (isProblem(error, 'QUOTA_EXCEEDED')) return 'Le temps avec Tom est fini pour aujourd’hui. Reviens demain !';
-  if (isProblem(error, 'TURN_IN_PROGRESS')) return 'Tom répond encore à ton message précédent : attends sa réponse.';
-  if (isProblem(error, 'RATE_LIMITED')) return 'Trop de messages d’un coup. Attends une minute avant de réécrire.';
-  if (isProblem(error, 'INVALID_REQUEST')) return 'Ton message est vide ou trop long.';
+  if (isProblem(error, 'QUOTA_EXCEEDED')) return 'Tom a assez répondu pour aujourd’hui. Il répondra de nouveau demain.';
+  if (isProblem(error, 'TURN_IN_PROGRESS')) return 'Tom répond encore. Attends sa réponse.';
+  if (isProblem(error, 'RATE_LIMITED')) return 'Trop de messages d’un coup. Attends une minute.';
+  if (isProblem(error, 'INVALID_REQUEST')) return 'Ton message est vide ou trop long. Écris ta question en quelques phrases.';
   if (isProblem(error, 'PAYLOAD_TOO_LARGE')) return 'La photo est trop lourde. Reprends-la, ou recopie l’énoncé.';
   return 'Tom n’a pas pu répondre. Réessaie dans un instant.';
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "student_code" DROP COLUMN "reset_at";

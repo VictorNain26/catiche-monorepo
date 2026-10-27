@@ -1,19 +1,22 @@
-import { Banner, Button, Fold, List, ListItem, Section, toast } from '@repo/ui';
-import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { Button, Card, Section } from '@repo/ui';
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { MemoryAnswer } from '../components/memory-answer';
-import { Page, ProfileAction } from '../components/page';
+import { CardAction } from '../components/card-action';
+import { MessageBanner } from '../components/message-banner';
+import { StudentPage } from '../components/page';
 import { TomHead } from '../components/tom';
 import { WeekSummary } from '../components/week-summary';
-import { sessionsQuery, startSession } from '../lib/chat';
-import { deviceName, formatDay } from '../lib/device';
-import { isRecentReset, meQuery, ownDevicesQuery } from '../lib/me';
-import { memoryQuery, useMemoryAnswer, type MemoryChoice } from '../lib/memory';
+import { sessionsQuery, startSession, tonightSession } from '../lib/chat';
+import { meQuery, parentsOfMe } from '../lib/me';
+import { memoryQuery } from '../lib/memory';
+import { markNewsSeen, newsLines, newsQuery } from '../lib/news';
+import { STUDENT_FAILED } from '../lib/student';
 import { ownSummaryQuery } from '../lib/summary';
 
 /**
- * The home: « Qui fait ses devoirs ? » for a visitor, the household for a guardian, their space for
- * a student: their sessions with Tom, and every device that holds their profile.
+ * The home: « Qui fait ses devoirs ? » for a visitor, the household for an adult, and for a student
+ * E4, « Ce soir », the screen they come back to: what changed since their last visit, Tom's help to
+ * start or take up their homework, the memory Tom offers, and their week.
  */
 export const Route = createFileRoute('/')({
   beforeLoad: async ({ context }) => {
@@ -21,117 +24,132 @@ export const Route = createFileRoute('/')({
     if (!me) throw redirect({ to: '/profils' });
     if (me.role === 'adult') throw redirect({ to: '/foyer' });
   },
-  loader: ({ context }) => Promise.all([context.queryClient.query(sessionsQuery), context.queryClient.query(ownDevicesQuery)]),
+  loader: ({ context }) => {
+    // Started, not awaited: the memory, the news and the week are each optional, a failure of one leaves the rest.
+    const { queryClient } = context;
+    void queryClient.query(memoryQuery).catch(() => undefined);
+    void queryClient.query(newsQuery).catch(() => undefined);
+    void queryClient.query(ownSummaryQuery).catch(() => undefined);
+    return queryClient.query(sessionsQuery);
+  },
   component: StudentHome,
 });
 
-// The student's answer, said back to them once taken.
-const ANSWERED: Record<MemoryChoice, string> = {
-  accepted: 'C’est noté : Tom retiendra ce qui a résisté. Tu peux tout voir et tout effacer dans « Ce que Tom retient ».',
-  declined: 'C’est noté : Tom ne retiendra rien d’une séance à l’autre.',
-};
-
 function StudentHome() {
   const { data: me } = useSuspenseQuery(meQuery);
-  // Not awaited: the memory is optional, a failure of it leaves the sessions open.
+  const parents = parentsOfMe(me);
   const { data: memory } = useQuery(memoryQuery);
-  const answer = useMemoryAnswer();
-  // Not awaited either: the week failing leaves the sessions, and says so.
   const week = useQuery(ownSummaryQuery);
 
   return (
-    <Page title={`Bonjour ${me?.name ?? ''}`} action={<ProfileAction />}>
-      <CodeChanged />
-      {memory?.state === 'asked' && (
-        <MemoryAnswer
-          answer={answer}
-          onAnswered={(choice) => {
-            toast(ANSWERED[choice]);
-          }}
-        />
-      )}
-      <Sessions />
-      {me && <WeekSummary week={week.data} failed={week.isError} name={me.name} reader="student" />}
-      <Button render={<Link to="/memoire" />} variant="link">
-        Ce que Tom retient
-      </Button>
-      <Devices />
-    </Page>
+    <StudentPage
+      title={
+        <>
+          {me?.name}, voici tes <span className="highlighter">devoirs</span> du soir
+        </>
+      }
+      wide
+    >
+      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-12 lg:gap-10">
+        <News parents={parents} />
+        <Start />
+        {memory?.state === 'asked' && (
+          <CardAction render={<Link to="/memoire" />} className="flex min-h-14 flex-col justify-center gap-1 lg:col-span-5 lg:col-start-8 lg:p-5">
+            <span className="font-bold text-primary underline underline-offset-4">Tom peut se souvenir de ce qui était difficile</span>
+            <span className="text-sm text-muted-foreground">Si tu es d’accord, Tom retient les leçons où tu as bloqué.</span>
+          </CardAction>
+        )}
+      </div>
+      <Section title="Bientôt" className="gap-2" titleClassName="text-lg">
+        <p className="rounded-2xl border border-border p-4 text-sm text-muted-foreground">Tes contrôles s’afficheront ici les jours d’avant.</p>
+      </Section>
+      {me && <WeekSummary week={week.data} failed={week.isError} name={me.name} reader="student" parents={parents} />}
+    </StudentPage>
   );
 }
 
-function Sessions() {
+/**
+ * « Depuis ta dernière visite », when something changed: a status, which takes no focus. « Vu » says
+ * no more than what was read; its failure leaves the card, which says so.
+ */
+function News({ parents }: { parents: readonly string[] }) {
+  const queryClient = useQueryClient();
+  const { data: news } = useQuery(newsQuery);
+  const seen = useMutation({
+    mutationFn: markNewsSeen,
+    // What was read is said no more: the card goes, without asking the server again.
+    onSuccess: () => {
+      queryClient.setQueryData(newsQuery.queryKey, (read) => read && { ...read, codeChangedAt: null, devices: [] });
+    },
+  });
+  const lines = news ? newsLines(news, parents) : [];
+  if (!news || lines.length === 0) return null;
+  return (
+    <Card render={<section aria-labelledby="news-title" />} className="flex flex-col gap-3 lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:p-5">
+      <h2 id="news-title" className="text-lg text-card-foreground">
+        Depuis ta dernière visite
+      </h2>
+      <ul className="flex flex-col gap-2 text-sm">
+        {lines.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
+      {seen.error && <MessageBanner message={STUDENT_FAILED} />}
+      <Button
+        variant="outline"
+        className="self-start"
+        disabled={seen.isPending}
+        onClick={() => {
+          seen.mutate(news.readAt);
+        }}
+      >
+        Vu
+      </Button>
+    </Card>
+  );
+}
+
+/**
+ * « Avant »: Tom, without a bubble, and the way into his help; a session opened today is taken up
+ * again rather than a new one started.
+ */
+function Start() {
   const navigate = useNavigate();
   const { data: sessions } = useSuspenseQuery(sessionsQuery);
+  const tonight = tonightSession(sessions);
   const start = useMutation({
     mutationFn: startSession,
     onSuccess: ({ id }) => navigate({ to: '/seance/$sessionId', params: { sessionId: id } }),
   });
 
   return (
-    <Section title="Tes séances avec Tom">
-      <p className="flex items-center gap-3 text-muted-foreground">
-        <TomHead className="size-10 shrink-0" />
-        Un exercice qui résiste ? Ouvre une séance, on le reprend pas à pas.
-      </p>
-      <Button
-        disabled={start.isPending}
-        onClick={() => {
-          start.mutate();
-        }}
-      >
-        Nouvelle séance
-      </Button>
-      {start.error && <Banner tone="error" title="La séance n’a pas pu s’ouvrir. Réessaie dans un instant." />}
-      {sessions.length > 0 && (
-        <List>
-          {sessions.map((session) => (
-            <ListItem
-              key={session.id}
-              render={<Link to="/seance/$sessionId" params={{ sessionId: session.id }} />}
-              title={session.title ?? 'Séance sans titre'}
-              meta={formatDay(session.createdAt)}
-            />
-          ))}
-        </List>
-      )}
-    </Section>
-  );
-}
-
-/**
- * A code a parent replaced, told to the student for two weeks on their home, and for good in their
- * devices: the parent can enter their space that way, and the student knows when (CNIL, recommendation 5).
- */
-function CodeChanged() {
-  const { data } = useSuspenseQuery(ownDevicesQuery);
-  if (!isRecentReset(data.codeResetAt)) return null;
-  return (
-    <Banner tone="info" title={`Ton code a été changé le ${formatDay(data.codeResetAt ?? '')}, avec un code de ton parent.`}>
-      Si ce n’est pas toi qui l’as changé, parles-en à ton parent.
-    </Banner>
-  );
-}
-
-function Devices() {
-  const { data } = useSuspenseQuery(ownDevicesQuery);
-
-  return (
-    <Fold title="Tes appareils">
-      <List>
-        {data.devices.map((device) => (
-          <ListItem
-            key={device.id}
-            title={deviceName(device.userAgent)}
-            meta={`${device.shared ? 'Partagé · ajouté' : 'Ajouté'} le ${formatDay(device.createdAt)}`}
-          />
-        ))}
-      </List>
-      {data.codeResetAt && <p className="text-sm text-muted-foreground">Ton code a été changé le {formatDay(data.codeResetAt)}.</p>}
-      <p className="text-sm text-muted-foreground">Un appareil que tu ne reconnais pas ? Dis-le à ton parent, qui peut le déconnecter.</p>
-      <p className="text-sm text-muted-foreground">
-        Sur un appareil partagé, ton profil se ferme après 10 minutes sans rien faire : personne d’autre n’y entre après toi.
-      </p>
-    </Fold>
+    <section
+      aria-labelledby="start-title"
+      className="flex flex-col items-center gap-5 pt-2 text-center lg:col-span-7 lg:row-span-2 lg:row-start-1 lg:flex-row lg:items-center lg:gap-8 lg:self-start lg:rounded-2xl lg:border lg:border-border lg:bg-card lg:p-8 lg:text-left lg:text-card-foreground"
+    >
+      <TomHead className="size-40 shrink-0 lg:size-48" />
+      <div className="flex w-full flex-col gap-5 lg:gap-6">
+        <p id="start-title" className="text-lg lg:text-xl">
+          Dis à Tom ce que tu as ce soir. Il t’aide à choisir par où commencer.
+        </p>
+        {tonight ? (
+          <Button render={<Link to="/seance/$sessionId" params={{ sessionId: tonight.id }} />} size="lg" className="w-full lg:w-auto lg:self-start">
+            Reprendre mes devoirs
+          </Button>
+        ) : (
+          <Button
+            size="lg"
+            className="w-full lg:w-auto lg:self-start"
+            disabled={start.isPending}
+            onClick={() => {
+              start.mutate();
+            }}
+          >
+            Commencer mes devoirs
+          </Button>
+        )}
+        {start.error && <MessageBanner message={STUDENT_FAILED} />}
+      </div>
+    </section>
   );
 }

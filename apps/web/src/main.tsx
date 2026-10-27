@@ -14,7 +14,7 @@ import '@fontsource/atkinson-hyperlegible-mono/700.css';
 import './styles.css';
 
 // A session gone while a screen is open (ten minutes unused on a shared device, revoked
-// elsewhere): back to the profiles of the device, or the sign-in, then nothing cached, so that no
+// elsewhere): back to « Qui fait ses devoirs ? », then nothing cached, so that no
 // query of the screen left asks again.
 const sessionLost = () => {
   void router.navigate({ to: '/profils' }).then(() => {

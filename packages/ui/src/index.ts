@@ -1,3 +1,5 @@
+export { AlertDialog, AlertDialogClose } from './components/alert-dialog';
+
 export { Banner } from './components/banner';
 
 export { Button } from './components/button';

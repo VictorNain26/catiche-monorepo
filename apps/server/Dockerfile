@@ -23,7 +23,7 @@ RUN --mount=type=cache,target=/root/.bun/install/cache \
 COPY tsconfig.base.json ./
 COPY packages/tokens/ ./packages/tokens/
 COPY packages/ui/ ./packages/ui/
-COPY apps/server/src/domain/student-age.ts apps/server/src/domain/activation-code.ts ./apps/server/src/domain/
+COPY apps/server/src/domain/student-age.ts apps/server/src/domain/activation-code.ts apps/server/src/domain/student-code.ts ./apps/server/src/domain/
 COPY apps/web/ ./apps/web/
 WORKDIR /app/apps/web
 RUN bun run build && test -f dist/index.html -a -f dist/sw.js

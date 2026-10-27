@@ -230,15 +230,15 @@ export function createStudentDevices(db: Db) {
 
     /**
      * A guardian's « forgotten » code, spent: the old code stops, every session of the student
-     * closes, the windows other devices had open close, the tries start again, and the student is
-     * told when it happened; their parents, told the code was forgotten, are told no more.
+     * closes, the windows other devices had open close, and the tries start again; their parents,
+     * told the code was forgotten, are told no more.
      */
-    async forget(studentId: string, now = new Date()) {
+    async forget(studentId: string) {
       await db.transaction(async (tx) => {
         await tx
           .insert(studentCode)
-          .values({ userId: studentId, hash: null, resetAt: now })
-          .onConflictDoUpdate({ target: studentCode.userId, set: { hash: null, failures: 0, resetAt: now, forgottenAt: null } });
+          .values({ userId: studentId, hash: null })
+          .onConflictDoUpdate({ target: studentCode.userId, set: { hash: null, failures: 0, forgottenAt: null } });
         await tx
           .update(deviceProfile)
           .set({ failures: 0, codeWindowUntil: null, chooseTokenHash: null })

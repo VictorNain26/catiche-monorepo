@@ -10,6 +10,10 @@
       "types": "./src/domain/activation-code.ts",
       "import": "./src/domain/activation-code.ts"
     },
+    "./student-code": {
+      "types": "./src/domain/student-code.ts",
+      "import": "./src/domain/student-code.ts"
+    },
     "./student-age": {
       "types": "./src/domain/student-age.ts",
       "import": "./src/domain/student-age.ts"

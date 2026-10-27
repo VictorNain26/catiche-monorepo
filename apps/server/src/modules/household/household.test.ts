@@ -274,7 +274,10 @@ describe("a student's devices", () => {
       .where(eq(deviceProfile.studentId, student.id));
     const res = await api.request('GET', '/api/me/devices', { cookie: device });
     expect(res.status).toBe(200);
-    const { devices } = (await res.json()) as { devices: { userAgent: string }[] };
+    const body = (await res.json()) as { devices: { userAgent: string }[] };
+    // Their devices only: a code changed is told by « Depuis ta dernière visite » (`/api/me/news`).
+    expect(Object.keys(body)).toEqual(['devices']);
+    const { devices } = body;
     expect(devices).toHaveLength(1);
     expect(devices[0]).toMatchObject({ userAgent: 'test-device' });
     expect(Object.keys(devices[0] ?? {}).sort()).toEqual(DEVICE_FIELDS);

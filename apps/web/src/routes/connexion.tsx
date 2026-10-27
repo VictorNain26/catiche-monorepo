@@ -16,12 +16,14 @@ import { announceProfileChange, profilesQuery, tabChannel } from '../lib/student
  * The adult's way in, without a password: a passkey, which the browser offers in the address
  * field, or their address, then the email it receives, whose button lets them in (/entrer) as its
  * code does here. The first entry creates the account, on an invitation (closed beta); /bienvenue
- * then asks its name. On a device that holds profiles, the adult's session is the device's: short
- * on a shared one, which a child's code then closes. What the screen before left (`handOff`): the
- * address a spent link gives back, and that the adult just left Catiche, said once.
+ * then asks its name. Its way back is « Qui fait ses devoirs ? ». On a device that holds profiles,
+ * the adult's session is the device's: short on a shared one, which a child's code then closes.
+ * What the screen before left (`handOff`): the address a spent link gives back, and that the adult
+ * just left Catiche, said once.
  */
 export const Route = createFileRoute('/connexion')({
-  // Read before the page shows: a device that holds profiles leads back to them. A failure still leaves the form.
+  // Read before the page shows: on a device without a profile, a student goes straight to the
+  // starting code. A failure still leaves the form.
   loader: async ({ context }) => {
     await context.queryClient.query(profilesQuery).catch(() => null);
   },
@@ -117,7 +119,7 @@ function EmailStep({
 
   const profiles = device?.profiles.length ?? 0;
   return (
-    <Page title="Entrez dans Catiche" back={profiles > 0 ? <BackLink to="/profils">Qui fait ses devoirs ?</BackLink> : undefined}>
+    <Page title="Entrez dans Catiche" back={<BackLink to="/profils">Qui fait ses devoirs ?</BackLink>}>
       {signedOut && (
         <p role="status" className="font-bold text-foreground">
           Catiche est fermé sur cet appareil. Pour revenir, donnez votre adresse e-mail.

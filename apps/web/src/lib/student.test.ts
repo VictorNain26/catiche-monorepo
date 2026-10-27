@@ -2,10 +2,15 @@ import { describe, expect, it } from 'bun:test';
 import {
   announceProfileChange,
   chooseTokenFor,
+  codeSecret,
+  firstCodeRefusal,
+  forgottenText,
+  forgottenTitle,
   keepChooseTokens,
   listenForProfileChange,
   pressKey,
   profileNote,
+  STUDENT_FAILED,
   studentCodeMessage,
 } from './student';
 
@@ -28,38 +33,93 @@ describe('pressKey', () => {
   });
 });
 
+const TWO = ['Nadia', 'Karim'];
+const ONE = ['Nadia'];
+
 describe('studentCodeMessage', () => {
-  it('tells a wrong code apart from a profile blocked here, and from one locked everywhere', () => {
-    const wrong = studentCodeMessage({ code: 'INVALID_CODE', status: 401 });
-    const blocked = studentCodeMessage({ code: 'PROFILE_BLOCKED', status: 403 });
-    const locked = studentCodeMessage({ code: 'PROFILE_LOCKED', status: 403 });
-    expect(new Set([wrong, blocked, locked]).size).toBe(3);
-    expect(wrong).toContain('Réessaie');
-    expect(blocked).toContain('demande à ton parent');
-    expect(locked).toContain('nouveau code');
+  it('says a wrong code, and asks to try again', () => {
+    expect(studentCodeMessage({ code: 'INVALID_CODE', status: 401 }, TWO)).toEqual({ title: 'Ce n’est pas ton code. Réessaie.' });
+  });
+
+  it('says one thing of a profile blocked here and of a code stopped everywhere, naming who is told', () => {
+    const blocked = studentCodeMessage({ code: 'PROFILE_BLOCKED', status: 403 }, TWO);
+    expect(blocked).toEqual({ title: 'Ton code ne marche plus ici.', detail: 'Nadia et Karim sont prévenus.' });
+    expect(studentCodeMessage({ code: 'PROFILE_LOCKED', status: 403 }, TWO)).toEqual(blocked);
+    expect(studentCodeMessage({ code: 'PROFILE_LOCKED', status: 403 }, ONE)).toEqual({
+      title: 'Ton code ne marche plus ici.',
+      detail: 'Nadia est au courant.',
+    });
+  });
+
+  it('says why a chosen code is refused, and what to do', () => {
+    expect(studentCodeMessage({ code: 'CODE_TOO_EASY', status: 400 }, TWO)).toEqual({
+      title: 'Ce code est trop facile à deviner.',
+      detail: 'Évite les suites et les chiffres répétés.',
+    });
+    expect(studentCodeMessage({ code: 'CODE_IS_BIRTH_DATE', status: 400 }, TWO)).toEqual({
+      title: 'C’est ta date de naissance.',
+      detail: 'Choisis un autre code.',
+    });
+    expect(studentCodeMessage({ code: 'CODE_NOT_EXPECTED', status: 403 }, TWO)).toEqual({
+      title: 'Le temps est passé.',
+      detail: 'Demande un nouveau code de départ.',
+    });
   });
 
   it('names a starting code refused by its name, and says what to ask for', () => {
-    expect(studentCodeMessage({ code: 'INVALID_ACTIVATION_CODE', status: 400 })).toBe(
-      'Ce code ne marche pas, ou il a expiré. Demande un nouveau code de départ.',
-    );
-  });
-
-  it('says why a chosen code is refused', () => {
-    expect(studentCodeMessage({ code: 'CODE_TOO_EASY', status: 400 })).toContain('trop facile');
-    expect(studentCodeMessage({ code: 'CODE_IS_BIRTH_DATE', status: 400 })).toContain('naissance');
+    expect(studentCodeMessage({ code: 'INVALID_ACTIVATION_CODE', status: 400 }, TWO)).toEqual({
+      title: 'Ce code ne marche pas, ou il a expiré.',
+      detail: 'Demande un nouveau code de départ.',
+    });
   });
 
   it('asks to wait on a rate limit, and falls back without the server’s words', () => {
-    expect(studentCodeMessage({ code: 'INVALID_CODE', status: 429 })).toStartWith('Trop d’essais.');
-    expect(studentCodeMessage({ code: 'SOMETHING_NEW', status: 400 })).toBe('Une erreur est survenue. Réessaie dans un instant.');
-    expect(studentCodeMessage({ status: 500 })).toBe('Une erreur est survenue. Réessaie dans un instant.');
+    expect(studentCodeMessage({ code: 'INVALID_CODE', status: 429 }, TWO)).toEqual({
+      title: 'Trop d’essais. Attends une minute avant de réessayer.',
+    });
+    expect(studentCodeMessage({ code: 'SOMETHING_NEW', status: 400 }, TWO)).toEqual(STUDENT_FAILED);
+    expect(studentCodeMessage({ status: 500 }, TWO)).toEqual(STUDENT_FAILED);
+  });
+
+  it('says a failure without a pronoun, the way the general error does', () => {
+    expect(STUDENT_FAILED).toEqual({ title: 'Ça n’a pas marché.', detail: 'Internet a peut-être coupé.' });
   });
 
   it('speaks to the student, never as to a parent', () => {
-    for (const code of ['INVALID_CODE', 'PROFILE_BLOCKED', 'PROFILE_LOCKED', 'CODE_TOO_EASY', 'INVALID_ACTIVATION_CODE']) {
-      expect(studentCodeMessage({ code, status: 400 })).not.toMatch(/\bvous\b|\bvotre\b|enfant/i);
+    for (const code of ['INVALID_CODE', 'PROFILE_BLOCKED', 'PROFILE_LOCKED', 'CODE_TOO_EASY', 'INVALID_ACTIVATION_CODE', 'CODE_NOT_EXPECTED']) {
+      const { title, detail = '' } = studentCodeMessage({ code, status: 400 }, TWO);
+      expect(`${title} ${detail}`).not.toMatch(/\bvous\b|\bvotre\b|enfant|ton parent/i);
     }
+  });
+});
+
+describe('firstCodeRefusal', () => {
+  it('refuses a code too easy to guess at its first typing, by the server’s own rule', () => {
+    expect(firstCodeRefusal('123456')).toEqual(studentCodeMessage({ code: 'CODE_TOO_EASY', status: 400 }, []));
+    expect(firstCodeRefusal('111111')).toEqual(studentCodeMessage({ code: 'CODE_TOO_EASY', status: 400 }, []));
+    expect(firstCodeRefusal('147258')).not.toBeNull();
+  });
+
+  it('takes any other code, the birth date left to the server, which knows it', () => {
+    expect(firstCodeRefusal('920374')).toBeNull();
+    expect(firstCodeRefusal('201403')).toBeNull();
+  });
+});
+
+describe('the words of the codes', () => {
+  it('says that the parents see neither the code nor the conversations (E2)', () => {
+    expect(codeSecret(TWO)).toBe('Nadia et Karim ne voient ni ton code, ni tes conversations avec Tom.');
+    expect(codeSecret(ONE)).toBe('Nadia ne voit ni ton code, ni tes conversations avec Tom.');
+    expect(codeSecret([])).toBe('Tes parents ne voient ni ton code, ni tes conversations avec Tom.');
+  });
+
+  it('says who is told of a forgotten code, and what to do then (E3)', () => {
+    expect(forgottenTitle(TWO)).toBe('Nadia et Karim sont prévenus');
+    expect(forgottenText(TWO)).toBe('Ils le voient en ouvrant Catiche. Quand ils te donnent un code de départ, touche le bouton.');
+    expect(forgottenTitle(ONE)).toBe('Nadia est au courant');
+    expect(forgottenText(ONE)).toBe('Nadia le voit en ouvrant Catiche. Quand Nadia te donne un code de départ, touche le bouton.');
+    expect(forgottenTitle([])).toBe('Tes parents sont prévenus');
+    expect(forgottenText([])).toBe('Ils le voient en ouvrant Catiche. Quand ils te donnent un code de départ, touche le bouton.');
   });
 });
 
@@ -72,12 +132,17 @@ describe('the token of a window to choose a code', () => {
 });
 
 describe('profileNote', () => {
-  it('says what waits behind a name on the list, and nothing for a profile ready', () => {
-    expect(profileNote('ready')).toBeNull();
-    expect(profileNote('choose')).toBe('Choisis ton code');
-    expect(profileNote('waiting')).toContain('parent');
-    expect(profileNote('blocked')).toContain('Bloqué');
-    expect(profileNote('locked')).toContain('nouveau code');
+  it('says, under a name blocked here or stopped everywhere, whom to ask', () => {
+    expect(profileNote('blocked', TWO)).toBe('Bloqué ici. Demande à Nadia ou à Karim.');
+    expect(profileNote('locked', TWO)).toBe('Bloqué ici. Demande à Nadia ou à Karim.');
+    expect(profileNote('blocked', ONE)).toBe('Bloqué ici. Demande à Nadia.');
+    expect(profileNote('blocked', [])).toBe('Bloqué ici. Demande à tes parents.');
+  });
+
+  it('says a code to choose, and nothing for a profile ready or waiting for a starting code', () => {
+    expect(profileNote('choose', TWO)).toBe('Choisis ton code');
+    expect(profileNote('ready', TWO)).toBeNull();
+    expect(profileNote('waiting', TWO)).toBeNull();
   });
 });
 

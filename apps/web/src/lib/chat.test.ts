@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import { APICallError } from 'ai';
-import { chatMessage, isTurnStep, mathDelimited, textOf, toUIMessage, waitingText } from './chat';
+import { chatMessage, isTurnStep, mathDelimited, textOf, toUIMessage, tonightSession, waitingText } from './chat';
 
 const refused = (status: number, responseBody?: string) =>
   new APICallError({
@@ -12,12 +12,18 @@ const refused = (status: number, responseBody?: string) =>
   });
 
 describe('chatMessage', () => {
-  it('says each refusal of the server in French', () => {
-    expect(chatMessage(refused(429, JSON.stringify({ code: 'QUOTA_EXCEEDED' })))).toStartWith('Le temps avec Tom est fini');
-    expect(chatMessage(refused(409, JSON.stringify({ code: 'TURN_IN_PROGRESS' })))).toStartWith('Tom répond encore');
-    expect(chatMessage(refused(429, JSON.stringify({ code: 'RATE_LIMITED' })))).toStartWith('Trop de messages');
-    expect(chatMessage(refused(400, JSON.stringify({ code: 'INVALID_REQUEST' })))).toBe('Ton message est vide ou trop long.');
-    expect(chatMessage(refused(413, JSON.stringify({ code: 'PAYLOAD_TOO_LARGE' })))).toStartWith('La photo est trop lourde');
+  it('says each refusal of the server in the words of the evening (E5)', () => {
+    expect(chatMessage(refused(429, JSON.stringify({ code: 'QUOTA_EXCEEDED' })))).toBe(
+      'Tom a assez répondu pour aujourd’hui. Il répondra de nouveau demain.',
+    );
+    expect(chatMessage(refused(409, JSON.stringify({ code: 'TURN_IN_PROGRESS' })))).toBe('Tom répond encore. Attends sa réponse.');
+    expect(chatMessage(refused(429, JSON.stringify({ code: 'RATE_LIMITED' })))).toBe('Trop de messages d’un coup. Attends une minute.');
+    expect(chatMessage(refused(400, JSON.stringify({ code: 'INVALID_REQUEST' })))).toBe(
+      'Ton message est vide ou trop long. Écris ta question en quelques phrases.',
+    );
+    expect(chatMessage(refused(413, JSON.stringify({ code: 'PAYLOAD_TOO_LARGE' })))).toBe(
+      'La photo est trop lourde. Reprends-la, ou recopie l’énoncé.',
+    );
   });
 
   it('falls back for an unknown code, a body that is not a problem, or a failure of the stream', () => {
@@ -27,6 +33,24 @@ describe('chatMessage', () => {
     expect(chatMessage(refused(500))).toBe(fallback);
     expect(chatMessage(new Error('Tom n’a pas pu répondre. Réessaie dans un instant.'))).toBe(fallback);
     expect(chatMessage(new Error('an internal message'))).toBe(fallback);
+  });
+});
+
+describe('tonightSession', () => {
+  const at = (date: number, hour: number) => new Date(2026, 9, date, hour, 0).toISOString();
+  const now = new Date(2026, 9, 27, 21, 0);
+
+  it('finds the student’s session of the day, to take it up again', () => {
+    const sessions = [
+      { id: 'tonight', createdAt: at(27, 18) },
+      { id: 'yesterday', createdAt: at(26, 18) },
+    ];
+    expect(tonightSession(sessions, now)?.id).toBe('tonight');
+  });
+
+  it('finds none from another day, nor without a session: the home starts one', () => {
+    expect(tonightSession([{ id: 'yesterday', createdAt: at(26, 23) }], now)).toBeUndefined();
+    expect(tonightSession<{ id: string; createdAt: string }>([], now)).toBeUndefined();
   });
 });
 

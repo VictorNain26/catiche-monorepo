@@ -3,6 +3,7 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { InferRequestType, InferResponseType } from 'hono/client';
 import { api, isProblem, parseResponse } from './api';
+import { parentWords } from './words';
 
 type Memory = InferResponseType<typeof api.memory.$get, 200>;
 type Notion = Memory['notions'][number];
@@ -27,12 +28,31 @@ export function lastTime({ lastSolved, lastHelp, watch }: Pick<Notion, 'lastSolv
   ].join(' ');
 }
 
-/** « Travaillée 2 fois. » and the last time. */
-export const notionSummary = (notion: Notion): string => `Travaillée ${String(notion.worked)} fois. ${lastTime(notion)}`;
+/** A lesson as the student reads it (E7): « Travaillée 3 fois. La dernière fois : pas encore réussie. » */
+export const notionSummary = ({ worked, lastSolved }: Pick<Notion, 'worked' | 'lastSolved'>): string =>
+  `Travaillée ${String(worked)} fois. La dernière fois : ${lastSolved ? 'réussie' : 'pas encore réussie'}.`;
 
-/** A failed memory request, in words a student reads. */
+/** Once active (E7): what Tom keeps, and that the parents see only that it is. */
+export function memoryActive(parents: readonly string[]) {
+  const { Both, agree } = parentWords(parents);
+  return `Tom se souvient des leçons de tes exercices depuis la rentrée. ${Both} ${agree('voit', 'voient')} seulement que c’est activé.`;
+}
+
+/** Not active, the student unable to answer (E7): what Tom knows, and who may propose it. */
+export function memoryOff(parents: readonly string[]) {
+  const { Either, agree } = parentWords(parents);
+  return `Tom ne se souvient de rien d’un soir à l’autre. Il connaît seulement ton prénom et ta classe. ${Either} ${agree('peut', 'peuvent')} te le proposer.`;
+}
+
+/** At the foot of E7, always: whom to ask for everything to go. */
+export const accountDeletion = (parents: readonly string[]) =>
+  `Pour que tout parte, tes devoirs compris, demande ${parentWords(parents).toEither} de supprimer ton compte.`;
+
+/**
+ * A failed memory request, in words a student reads. A proposal withdrawn meanwhile (FORBIDDEN) is
+ * any failure: the screen reads the memory again, and says who may propose it.
+ */
 export function memoryMessage(error: unknown): string {
-  if (isProblem(error, 'FORBIDDEN')) return 'Ton parent ne te la propose pas, ou plus : demande-lui.';
   if (isProblem(error, 'RATE_LIMITED')) return 'Trop d’essais. Attends une minute.';
   return 'Ça n’a pas marché. Réessaie dans un instant.';
 }

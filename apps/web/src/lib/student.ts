@@ -7,7 +7,9 @@
 
 import { queryOptions } from '@tanstack/react-query';
 import type { ProfileState } from '@repo/server/contract';
+import { studentCodeRefusal } from '@repo/server/student-code';
 import { authClient, authData } from './auth';
+import { parentWords } from './words';
 
 export type { ProfileState };
 
@@ -38,35 +40,80 @@ export function pressKey(code: string, key: string): string {
   return code;
 }
 
-const FAILED = 'Une erreur est survenue. Réessaie dans un instant.';
-
-/** What the student reads of a refusal of their code, or of their parent's; the server's own message never shows. */
-const MESSAGES: Partial<Record<string, string>> = {
-  INVALID_CODE: 'Ce n’est pas ton code. Réessaie.',
-  PROFILE_BLOCKED: 'Trop d’essais : ton profil est bloqué sur cet appareil. Pour le débloquer, demande à ton parent.',
-  PROFILE_LOCKED: 'Trop d’essais : ton code ne marche plus. Demande à ton parent un nouveau code.',
-  CODE_TOO_EASY: 'Ce code est trop facile à deviner : pas de suite, pas de chiffre répété.',
-  CODE_IS_BIRTH_DATE: 'C’est ta date de naissance : quelqu’un pourrait la deviner. Choisis un autre code.',
-  CODE_FORMAT: 'Ton code a 6 chiffres.',
-  CODE_NOT_EXPECTED: 'Le temps pour choisir ton code est passé. Demande à ton parent un nouveau code.',
-  INVALID_ACTIVATION_CODE: 'Ce code ne marche pas, ou il a expiré. Demande un nouveau code de départ.',
-};
-
-export function studentCodeMessage(error: { code?: string | undefined; status: number }): string {
-  if (error.status === 429) return 'Trop d’essais. Attends une minute avant de réessayer.';
-  return (error.code === undefined ? undefined : MESSAGES[error.code]) ?? FAILED;
+/** What the student reads of a refusal: what happened, then what to do. */
+export interface CodeMessage {
+  title: string;
+  detail?: string;
 }
 
-const NOTES: Record<ProfileState, string | null> = {
-  ready: null,
-  choose: 'Choisis ton code',
-  waiting: 'Demande un code à ton parent',
-  blocked: 'Bloqué : demande à ton parent',
-  locked: 'Demande un nouveau code à ton parent',
+/** A request of the student's that failed, said without a pronoun, as the general error says it (C1). */
+export const STUDENT_FAILED: CodeMessage = { title: 'Ça n’a pas marché.', detail: 'Internet a peut-être coupé.' };
+
+/** Who is told of a code that no longer works, or forgotten (E3): « Nadia et Karim sont prévenus ». */
+export function forgottenTitle(parents: readonly string[]) {
+  const { Both, agree } = parentWords(parents);
+  // A single parent's gender is unknown: « au courant » agrees with none.
+  return `${Both} ${agree('est au courant', 'sont prévenus')}`;
+}
+
+/** What follows a forgotten code (E3), before « J'ai un code de départ ». */
+export function forgottenText(parents: readonly string[]) {
+  const { They, they, agree } = parentWords(parents);
+  return `${They} le ${agree('voit', 'voient')} en ouvrant Catiche. Quand ${they} te ${agree('donne', 'donnent')} un code de départ, touche le bouton.`;
+}
+
+/** A code too easy to guess, refused by the server or as it is first typed (E2). */
+const CODE_TOO_EASY: CodeMessage = { title: 'Ce code est trop facile à deviner.', detail: 'Évite les suites et les chiffres répétés.' };
+
+/**
+ * A profile blocked on this device and a code stopped everywhere say one thing: the parents' home
+ * says which, and what to do.
+ */
+export const stoppedMessage = (parents: readonly string[]): CodeMessage => ({
+  title: 'Ton code ne marche plus ici.',
+  detail: `${forgottenTitle(parents)}.`,
+});
+
+/** What the student reads of a refusal of their code, or of a starting code (`app-cible.md`, E2, E3); the server's own message never shows. */
+const MESSAGES: Partial<Record<string, CodeMessage>> = {
+  INVALID_CODE: { title: 'Ce n’est pas ton code. Réessaie.' },
+  CODE_TOO_EASY,
+  CODE_IS_BIRTH_DATE: { title: 'C’est ta date de naissance.', detail: 'Choisis un autre code.' },
+  CODE_FORMAT: { title: 'Ton code a 6 chiffres.' },
+  CODE_NOT_EXPECTED: { title: 'Le temps est passé.', detail: 'Demande un nouveau code de départ.' },
+  INVALID_ACTIVATION_CODE: { title: 'Ce code ne marche pas, ou il a expiré.', detail: 'Demande un nouveau code de départ.' },
 };
 
-/** What waits behind a name on « Qui fait ses devoirs ? ». */
-export const profileNote = (state: ProfileState) => NOTES[state];
+/**
+ * A refusal, in the student's words; the parents, named only by a profile blocked or stopped
+ * (`stoppedMessage`), are « tes parents » when none is given, as for a starting code.
+ */
+export function studentCodeMessage(error: { code?: string | undefined; status: number }, parents: readonly string[] = []): CodeMessage {
+  if (error.status === 429) return { title: 'Trop d’essais. Attends une minute avant de réessayer.' };
+  if (error.code === 'PROFILE_BLOCKED' || error.code === 'PROFILE_LOCKED') return stoppedMessage(parents);
+  return (error.code === undefined ? undefined : MESSAGES[error.code]) ?? STUDENT_FAILED;
+}
+
+/**
+ * A first code refused as it is typed, by the server's own rule, before it is typed again; the
+ * birth date, which the device does not know, is the server's to refuse.
+ */
+export const firstCodeRefusal = (code: string): CodeMessage | null => (studentCodeRefusal(code, '') === 'easy' ? CODE_TOO_EASY : null);
+
+/** Beside the code to choose (E2): what the parents never see. */
+export function codeSecret(parents: readonly string[]) {
+  const { Both, agree } = parentWords(parents);
+  return `${Both} ne ${agree('voit', 'voient')} ni ton code, ni tes conversations avec Tom.`;
+}
+
+/**
+ * What waits behind a name on « Qui fait ses devoirs ? » (C2): a profile blocked here or stopped
+ * everywhere says whom to ask; one waiting for a starting code, nothing, its name leads to it.
+ */
+export function profileNote(state: ProfileState, parents: readonly string[]): string | null {
+  if (state === 'blocked' || state === 'locked') return `Bloqué ici. Demande ${parentWords(parents).toEither}.`;
+  return state === 'choose' ? 'Choisis ton code' : null;
+}
 
 /** The channel the tabs of this browser share. */
 export interface ProfileChannel {

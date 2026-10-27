@@ -344,7 +344,8 @@ describe('the tries of a code', () => {
 });
 
 describe('a forgotten code', () => {
-  it('stops the old code, closes every session, and lets the student choose a new one, told of the change', async () => {
+  // The student is told of the change by « Depuis ta dernière visite » (`modules/household/student-home.test.ts`).
+  it('stops the old code, closes every session, and lets the student choose a new one', async () => {
     const { guardian, lea, tablet } = await withCode('oublie@example.com');
     const phone = api.device();
     await phone.activate(await api.activationCode(guardian, lea.id, 'forgotten'));
@@ -353,9 +354,6 @@ describe('a forgotten code', () => {
     expect((await phone.profiles()).profiles[0]?.state).toBe('choose');
 
     expect((await phone.chooseCode(lea.id, '920374', true)).status).toBe(200);
-    const res = await api.request('GET', '/api/me/devices', { cookie: phone.cookie() });
-    const { codeResetAt } = (await res.json()) as { codeResetAt: string | null };
-    expect(Date.parse(codeResetAt ?? '')).toBeGreaterThan(Date.now() - 60_000);
     // The new code opens the other device; the old one no longer.
     expect((await tablet.enter(lea.id, '920374')).status).toBe(200);
   });
@@ -368,12 +366,6 @@ describe('a forgotten code', () => {
     await fresh.activate(await api.activationCode(guardian, lea.id, 'forgotten'));
     expect(await problem(await phone.chooseCode(lea.id, '920374', true))).toEqual({ status: 403, code: 'CODE_NOT_EXPECTED' });
     expect((await fresh.chooseCode(lea.id, '920374', true)).status).toBe(200);
-  });
-
-  it('tells a student whose code never changed nothing', async () => {
-    const { tablet } = await withCode('jamais-change@example.com');
-    const res = await api.request('GET', '/api/me/devices', { cookie: tablet.cookie() });
-    expect(((await res.json()) as { codeResetAt: string | null }).codeResetAt).toBeNull();
   });
 });
 

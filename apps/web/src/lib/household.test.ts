@@ -6,10 +6,12 @@ import {
   MONTHS,
   askParents,
   birthYears,
+  codeAlert,
   decidesWith,
   deletionAsked,
   deletionDay,
   deletionWarning,
+  hasCodeAlert,
   householdMessage,
   inviteSchema,
   isLevel,
@@ -28,6 +30,30 @@ const failure = async (code: string, status: 400 | 404 | 429 | 500) => {
     (error: unknown) => error,
   );
 };
+
+describe('codeAlert', () => {
+  it('says first a code the child said forgotten, whether or not too many tries stopped it', () => {
+    expect(codeAlert('Léa', { codeForgotten: true, codeLocked: false })).toBe('Léa a oublié son code.');
+    expect(codeAlert('Léa', { codeForgotten: true, codeLocked: true })).toBe('Léa a oublié son code.');
+  });
+
+  it('says a code stopped by too many tries, and nothing for a code that works', () => {
+    expect(codeAlert('Léa', { codeForgotten: false, codeLocked: true })).toBe('Le code de Léa ne marche plus.');
+    expect(codeAlert('Léa', { codeForgotten: false, codeLocked: false })).toBeNull();
+  });
+});
+
+describe('hasCodeAlert', () => {
+  it('holds for a code forgotten or stopped by too many tries, as the home’s card shows it', () => {
+    expect(hasCodeAlert({ codeForgotten: true, codeLocked: false })).toBe(true);
+    expect(hasCodeAlert({ codeForgotten: false, codeLocked: true })).toBe(true);
+    expect(hasCodeAlert({ codeForgotten: true, codeLocked: true })).toBe(true);
+  });
+
+  it('does not hold for a code that works', () => {
+    expect(hasCodeAlert({ codeForgotten: false, codeLocked: false })).toBe(false);
+  });
+});
 
 describe('householdMessage', () => {
   it('says what to fix for each problem, in French', async () => {

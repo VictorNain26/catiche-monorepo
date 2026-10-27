@@ -102,6 +102,8 @@ const MARKS = [
   ['input', 'secondary'],
   ['ring', 'background'],
   ['ring', 'card'],
+  // The border of a destructive outline button, under the pointer.
+  ['destructive', 'accent'],
   // The dot of the site's status pill, a mark on the secondary.
   ['annotation', 'secondary'],
   // The evening's timeline, which fills in the brand's water on a rail of the border's colour.

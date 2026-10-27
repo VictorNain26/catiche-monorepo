@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { eveningsLine, minutesText, questionFor, subjectLabel } from './summary';
+import { eveningsLine, minutesText, questionFor, sameSummary, subjectLabel } from './summary';
 
 describe('minutesText', () => {
   it('says the time as a parent and a pupil read it, never zero minutes', () => {
@@ -38,14 +38,25 @@ describe('subjectLabel', () => {
 
 describe('questionFor', () => {
   it('asks the parent to have the child show where a notion that resists gets stuck, without knowing the answer', () => {
-    expect(questionFor('guardian', 'Lou', 'Résoudre une équation du premier degré')).toBe(
+    expect(questionFor('guardian', 'Lou', 'Résoudre une équation du premier degré', [])).toBe(
       'Demandez à Lou de vous montrer un exercice sur « Résoudre une équation du premier degré », et où ça coince.',
     );
   });
 
-  it('tells the child the same question in their own words', () => {
-    expect(questionFor('student', 'Lou', 'Résoudre une équation du premier degré')).toBe(
-      'Ton parent peut te demander de lui montrer un exercice sur « Résoudre une équation du premier degré », et où ça coince.',
+  it('tells the child the same question in their own words, their parents named', () => {
+    expect(questionFor('student', 'Lou', 'Résoudre une équation du premier degré', ['Nadia', 'Karim'])).toBe(
+      'Nadia et Karim peuvent te demander de leur montrer un exercice sur « Résoudre une équation du premier degré », et où ça coince.',
     );
+    expect(questionFor('student', 'Lou', 'Résoudre une équation du premier degré', ['Nadia'])).toBe(
+      'Nadia peut te demander de lui montrer un exercice sur « Résoudre une équation du premier degré », et où ça coince.',
+    );
+  });
+});
+
+describe('sameSummary', () => {
+  it('tells the child who reads the same summary', () => {
+    expect(sameSummary(['Nadia', 'Karim'])).toBe('Nadia et Karim voient ce même résumé.');
+    expect(sameSummary(['Nadia'])).toBe('Nadia voit ce même résumé.');
+    expect(sameSummary([])).toBe('Tes parents voient ce même résumé.');
   });
 });
