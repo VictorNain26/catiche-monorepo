@@ -31,6 +31,7 @@ const STUDENT_AUTH_PATHS = new Set([
   '/api/auth/student/profiles',
   '/api/auth/student/choose-code',
   '/api/auth/student/sign-in',
+  '/api/auth/student/forgot',
   '/api/auth/get-session',
   '/api/auth/sign-out',
   '/api/auth/email-otp/send-verification-otp',
@@ -52,6 +53,8 @@ const declaredGuardian = z.literal(true, 'la déclaration d’autorité parental
 const newStudent = z.object({ name, level: schoolLevelSchema, birthMonth, declaredGuardian });
 const guardianDeclaration = z.object({ declaredGuardian });
 const adultDeclaration = z.object({ adult: z.literal(true, 'la déclaration de majorité') });
+// The moment the news were read (`GET /api/me/news`), which « Vu » says no more than.
+const newsSeen = z.object({ readAt: z.iso.datetime({ offset: true }) });
 const studentPatch = z
   .object({ name: name.optional(), level: schoolLevelSchema.optional(), memoryProposed: z.boolean().optional() })
   .refine((patch) => patch.name !== undefined || patch.level !== undefined || patch.memoryProposed !== undefined, 'au moins un champ');
@@ -95,7 +98,8 @@ export function studentAuthGuard({ auth, service }: { auth: Auth; service: House
 
 /**
  * /api/me: who is signed in, and as what; the web picks its home from it. A student's devices
- * too, and when a guardian last replaced their code; an adult's declaration of being 18 or over.
+ * too, when a guardian last replaced their code, and what changed since their last visit; an
+ * adult's declaration of being 18 or over.
  */
 export function meRoutes({ auth, service }: { auth: Auth; service: HouseholdService }) {
   return (
@@ -103,6 +107,12 @@ export function meRoutes({ auth, service }: { auth: Auth; service: HouseholdServ
       .use(requireSession(auth))
       .get('/', async (c) => c.json(await service.me({ id: c.var.userId, name: c.var.userName, email: c.var.userEmail, deviceId: c.var.deviceId })))
       .get('/devices', async (c) => c.json(await service.listOwnDevices(c.var.userId)))
+      // « Depuis ta dernière visite », and its « Vu ».
+      .get('/news', async (c) => c.json(await service.news(c.var.userId, c.var.deviceId)))
+      .post('/news/seen', jsonBody(newsSeen), async (c) => {
+        await service.newsSeen(c.var.userId, new Date(c.req.valid('json').readAt));
+        return c.body(null, 204);
+      })
       .post('/declarations', jsonBody(adultDeclaration), async (c) => {
         await service.declareAdult(c.var.userId);
         return c.body(null, 204);

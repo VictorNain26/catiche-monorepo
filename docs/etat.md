@@ -125,6 +125,10 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
 
 ## Technique reporté
 
+- Le bouton « Prendre en photo le carré du code de départ » d'E1 (`app-cible.md` § 5) est reporté
+  (Victor, 2026-10-27) : il demanderait un décodeur QR en wasm et une CSP élargie, alors que
+  l'appareil photo du téléphone ouvre déjà le carré, un lien (`apps/web/src/lib/activation.ts`).
+
 - `/invitation` doit nommer l'adulte qui invite et l'enfant avant l'acceptation
   (`app-cible.md` § 5, A3) : la route d'invitation du serveur ne les donne pas encore à la page.
   À faire avec la PR 8 de l'étape 2, sans exposer plus que ces deux prénoms à qui tient le lien.

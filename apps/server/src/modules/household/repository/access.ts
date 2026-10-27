@@ -3,7 +3,7 @@
  * they manage, a clause of the query itself (`../repository.ts`), and the history's writing.
  */
 
-import { and, asc, eq, inArray, lte, ne, notInArray, type Column } from 'drizzle-orm';
+import { and, asc, eq, inArray, lte, ne, notInArray, type Column, type SQL } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { ChildEventDetail, ChildEventKind } from '../../../domain/child-events';
 import { deletionCutoff } from '../../../domain/student-deletion';
@@ -33,6 +33,14 @@ export function accessOf(db: Db) {
       .select({ id: guardianship.studentId })
       .from(guardianship)
       .where(and(eq(guardianship.adultId, adultId), alive(guardianship.studentId)));
+  /** The parents of the students `where` keeps, the earliest first. Never a relative. */
+  const parents = (where: SQL | undefined) =>
+    db
+      .select({ studentId: guardianship.studentId, name: user.name, email: user.email })
+      .from(guardianship)
+      .innerJoin(user, eq(user.id, guardianship.adultId))
+      .where(and(where, asParent()))
+      .orderBy(asc(guardianship.createdAt));
   return {
     alive,
     studentsOf,
@@ -63,19 +71,15 @@ export function accessOf(db: Db) {
      * the earliest first: who decides with the adult, and who is told. Never a relative.
      */
     otherParents: (adultId: string, studentId?: string) =>
-      db
-        .select({ studentId: guardianship.studentId, name: user.name, email: user.email })
-        .from(guardianship)
-        .innerJoin(user, eq(user.id, guardianship.adultId))
-        .where(
-          and(
-            studentId === undefined ? undefined : eq(guardianship.studentId, studentId),
-            inArray(guardianship.studentId, studentsOf(adultId)),
-            asParent(),
-            ne(guardianship.adultId, adultId),
-          ),
-        )
-        .orderBy(asc(guardianship.createdAt)),
+      parents(
+        and(
+          studentId === undefined ? undefined : eq(guardianship.studentId, studentId),
+          inArray(guardianship.studentId, studentsOf(adultId)),
+          ne(guardianship.adultId, adultId),
+        ),
+      ),
+    /** The parents of the student, the earliest first: whom the child asks. */
+    parentsOf: (studentId: string) => parents(eq(guardianship.studentId, studentId)),
   };
 }
 

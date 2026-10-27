@@ -1,0 +1,1 @@
+ALTER TABLE "student_code" ADD COLUMN "first_set_at" timestamp with time zone;

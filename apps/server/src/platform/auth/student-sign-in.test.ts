@@ -10,7 +10,7 @@ import { and, eq } from 'drizzle-orm';
 import { guardianship } from '../../modules/household/schema';
 import { testApp } from '../../testing/app';
 import { testDatabase } from '../../testing/database';
-import { STUDENT_CODE } from '../../testing/http';
+import { problem, STUDENT_CODE } from '../../testing/http';
 import { failureBudget } from '../http/rate-limit';
 import { deviceProfile, session, studentCode, verification } from './schema';
 import { ACTIVATION_PREFIX, normaliseActivationCode } from './student-sign-in';
@@ -22,7 +22,6 @@ type Device = ReturnType<typeof api.device>;
 
 const sessionsOf = (userId: string) => db.select().from(session).where(eq(session.userId, userId));
 const codeOf = async (userId: string) => (await db.select().from(studentCode).where(eq(studentCode.userId, userId)))[0];
-const problem = async (res: Response) => ({ status: res.status, code: ((await res.json()) as { code?: string }).code });
 
 /** A guardian with Léa, and a new device of hers, recognised by her guardian's code. */
 async function family(email: string) {
@@ -196,7 +195,7 @@ describe("a guardian's activation code", () => {
 
   it('lists the student on the device, and nothing on a device whose cookie is forged', async () => {
     const { lea, tablet } = await family('liste@example.com');
-    expect(await tablet.profiles()).toEqual({ shared: false, profiles: [{ id: lea.id, name: 'Léa', state: 'choose' }] });
+    expect(await tablet.profiles()).toEqual({ shared: false, profiles: [{ id: lea.id, name: 'Léa', state: 'choose', parents: ['Parent'] }] });
 
     const [name = '', value = ''] = tablet.cookie().split('=');
     const forged = `${name}=${value.slice(0, -4)}AAAA`;

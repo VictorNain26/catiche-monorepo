@@ -5,7 +5,7 @@
  * allows. Rows are locked in one order: the code, then the device, then the profile.
  */
 
-import { and, asc, eq, gt, lt, ne, sql } from 'drizzle-orm';
+import { and, asc, eq, gt, isNotNull, lt, ne, sql } from 'drizzle-orm';
 import type { Db } from '../db/client';
 import { device, deviceProfile, session, studentCode, user } from './schema';
 
@@ -147,10 +147,10 @@ export function createStudentDevices(db: Db) {
       });
     },
 
-    /** The right code: its tries start again, here and everywhere. */
+    /** The right code: its tries start again, here and everywhere, and a code said forgotten is found again. */
     async succeeded(deviceId: string, studentId: string) {
       await db.transaction(async (tx) => {
-        await tx.update(studentCode).set({ failures: 0 }).where(eq(studentCode.userId, studentId));
+        await tx.update(studentCode).set({ failures: 0, forgottenAt: null }).where(eq(studentCode.userId, studentId));
         await tx
           .update(deviceProfile)
           .set({ failures: 0 })
@@ -196,8 +196,12 @@ export function createStudentDevices(db: Db) {
         if (!opened) return false;
         await tx
           .insert(studentCode)
-          .values({ userId: studentId, hash, setAt: now })
-          .onConflictDoUpdate({ target: studentCode.userId, set: { hash, setAt: now, failures: 0 } });
+          // The first code's moment by the database's clock, which dates the devices it is compared to.
+          .values({ userId: studentId, hash, setAt: now, firstSetAt: sql`now()` })
+          .onConflictDoUpdate({
+            target: studentCode.userId,
+            set: { hash, setAt: now, firstSetAt: sql`coalesce(${studentCode.firstSetAt}, excluded.first_set_at)`, failures: 0 },
+          });
         if (shared && !held.shared) {
           await tx.update(device).set({ shared: true }).where(eq(device.id, deviceId));
           await closeSessionsOf(tx, deviceId, undefined);
@@ -207,16 +211,34 @@ export function createStudentDevices(db: Db) {
     },
 
     /**
+     * « J'ai oublié mon code », on a device that holds the profile: the first moment it was said
+     * stays until the code is found again or replaced. Nothing for a student without a code, who has
+     * none to forget. False when the device does not hold the profile.
+     */
+    async forgot(deviceId: string, studentId: string) {
+      const [held] = await db
+        .select({ studentId: deviceProfile.studentId })
+        .from(deviceProfile)
+        .where(and(eq(deviceProfile.deviceId, deviceId), eq(deviceProfile.studentId, studentId)));
+      if (!held) return false;
+      await db
+        .update(studentCode)
+        .set({ forgottenAt: sql`coalesce(${studentCode.forgottenAt}, now())` })
+        .where(and(eq(studentCode.userId, studentId), isNotNull(studentCode.hash)));
+      return true;
+    },
+
+    /**
      * A guardian's « forgotten » code, spent: the old code stops, every session of the student
      * closes, the windows other devices had open close, the tries start again, and the student is
-     * told when it happened.
+     * told when it happened; their parents, told the code was forgotten, are told no more.
      */
     async forget(studentId: string, now = new Date()) {
       await db.transaction(async (tx) => {
         await tx
           .insert(studentCode)
           .values({ userId: studentId, hash: null, resetAt: now })
-          .onConflictDoUpdate({ target: studentCode.userId, set: { hash: null, failures: 0, resetAt: now } });
+          .onConflictDoUpdate({ target: studentCode.userId, set: { hash: null, failures: 0, resetAt: now, forgottenAt: null } });
         await tx
           .update(deviceProfile)
           .set({ failures: 0, codeWindowUntil: null, chooseTokenHash: null })

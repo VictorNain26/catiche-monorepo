@@ -5,7 +5,7 @@
  * is not linked to, or only as a relative where a parent is needed, is simply not found.
  */
 
-import { and, desc, eq, gt, gte, inArray, isNull, notExists, type SQL, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, gte, inArray, isNotNull, isNull, ne, notExists, type SQL, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { HISTORY_DAYS } from '../../domain/child-events';
 import type { SchoolLevel } from '../../domain/levels';
@@ -37,7 +37,7 @@ const browserOf = async (tx: Pick<Db, 'select'>, deviceId: string) =>
   (await tx.select({ userAgent: device.userAgent }).from(device).where(eq(device.id, deviceId)))[0]?.userAgent ?? null;
 
 export function createHouseholdRepository(db: Db) {
-  const { alive, studentsOf, managedBy, otherParents, lockFor } = accessOf(db);
+  const { alive, studentsOf, managedBy, otherParents, parentsOf, lockFor } = accessOf(db);
 
   /** The student's row, and the adult's link to them, which says the adult's role. */
   const linkOf = (adultId: string) => and(eq(guardianship.studentId, user.id), eq(guardianship.adultId, adultId));
@@ -188,11 +188,12 @@ export function createHouseholdRepository(db: Db) {
     /**
      * The students the adult is linked to, in four queries whatever their number: each with the
      * first names of their other parents, who decide with the adult, and what the home warns a
-     * parent of, the devices where too many tries blocked them and whether their code stopped
-     * everywhere; a relative, who manages neither, is warned of nothing.
+     * parent of, the devices where too many tries blocked them, whether their code stopped
+     * everywhere and whether they said they forgot it; a relative, who manages neither, is warned
+     * of nothing.
      */
     async listStudents(adultId: string) {
-      const [students, parents, blocked, locked] = await Promise.all([
+      const [students, parents, blocked, codes] = await Promise.all([
         linkedStudents(adultId),
         otherParents(adultId),
         db
@@ -202,19 +203,27 @@ export function createHouseholdRepository(db: Db) {
           .where(and(inArray(deviceProfile.studentId, managedBy(adultId)), gte(deviceProfile.failures, DEVICE_TRIES)))
           .orderBy(desc(deviceProfile.createdAt)),
         db
-          .select({ studentId: studentCode.userId })
+          .select({
+            studentId: studentCode.userId,
+            locked: gte(studentCode.failures, CODE_TRIES).mapWith(Boolean),
+            forgotten: isNotNull(studentCode.forgottenAt).mapWith(Boolean),
+          })
           .from(studentCode)
-          .where(and(inArray(studentCode.userId, managedBy(adultId)), gte(studentCode.failures, CODE_TRIES))),
+          .where(inArray(studentCode.userId, managedBy(adultId))),
       ]);
       const of = <Row extends { studentId: string }>(rows: readonly Row[], id: string) => rows.filter(({ studentId }) => studentId === id);
-      return students.map((student) => ({
-        ...student,
-        parents: of(parents, student.id).map(({ name }) => name),
-        alerts: {
-          blockedDevices: of(blocked, student.id).map(({ id, userAgent }) => ({ id, userAgent })),
-          codeLocked: of(locked, student.id).length > 0,
-        },
-      }));
+      return students.map((student) => {
+        const code = codes.find(({ studentId }) => studentId === student.id);
+        return {
+          ...student,
+          parents: of(parents, student.id).map(({ name }) => name),
+          alerts: {
+            blockedDevices: of(blocked, student.id).map(({ id, userAgent }) => ({ id, userAgent })),
+            codeLocked: code?.locked ?? false,
+            codeForgotten: code?.forgotten ?? false,
+          },
+        };
+      });
     },
 
     async findStudent(adultId: string, studentId: string) {
@@ -333,6 +342,54 @@ export function createHouseholdRepository(db: Db) {
     /** The signed-in student's own devices, and when a guardian last replaced their code. */
     async listOwnDevices(userId: string) {
       return { devices: await devices(eq(deviceProfile.studentId, userId)), codeResetAt: (await codeOf(userId)).resetAt };
+    },
+
+    /** The first names of the student's parents, the earliest first: whom the child asks. Never a relative. */
+    async parentsOf(studentId: string) {
+      return (await parentsOf(studentId)).map(({ name }) => name);
+    },
+
+    /**
+     * What changed for the student since they last said « Vu », or since their first code when
+     * later: a code chosen since, after a guardian's « forgotten » one, and the devices their profile
+     * was added to, the newest first, but `deviceId`, the one they read it on; and `readAt`, by the
+     * database's clock, which dates the devices, for « Vu » to say no more than was read. Undefined
+     * for anyone who is not a student, or whose deletion is due.
+     */
+    async news(studentId: string, deviceId: string | null) {
+      const [seen] = await db
+        .select({
+          at: studentProfile.newsSeenAt,
+          readAt: sql<Date>`now()`.mapWith(studentProfile.newsSeenAt),
+          firstSetAt: studentCode.firstSetAt,
+          setAt: studentCode.setAt,
+        })
+        .from(studentProfile)
+        .leftJoin(studentCode, eq(studentCode.userId, studentProfile.userId))
+        .where(and(eq(studentProfile.userId, studentId), alive(studentProfile.userId)));
+      if (!seen) return undefined;
+      const since = seen.firstSetAt && seen.firstSetAt > seen.at ? seen.firstSetAt : seen.at;
+      const added = await devices(
+        and(
+          eq(deviceProfile.studentId, studentId),
+          gt(deviceProfile.createdAt, since),
+          deviceId === null ? undefined : ne(deviceProfile.deviceId, deviceId),
+        ),
+      );
+      return { readAt: seen.readAt, codeChangedAt: seen.setAt && seen.setAt > since ? seen.setAt : null, devices: added };
+    },
+
+    /**
+     * The student's « Vu » on the news read at `readAt`: what came after stays news. Never back,
+     * never past now. `false` for anyone who is not a student, or whose deletion is due.
+     */
+    async newsSeen(studentId: string, readAt: Date) {
+      const seen = await db
+        .update(studentProfile)
+        .set({ newsSeenAt: sql`greatest(${studentProfile.newsSeenAt}, least(${readAt.toISOString()}::timestamptz, now()))` })
+        .where(and(eq(studentProfile.userId, studentId), alive(studentProfile.userId)))
+        .returning({ userId: studentProfile.userId });
+      return seen.length > 0;
     },
 
     /** The profile's tries on the device start again; `false` when no such profile of a student the adult is a parent of. */

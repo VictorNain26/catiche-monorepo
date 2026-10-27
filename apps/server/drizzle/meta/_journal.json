@@ -169,6 +169,20 @@
       "when": 1792858782179,
       "tag": "0023_student_deletion",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1793118668297,
+      "tag": "0024_student_news",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1793120026321,
+      "tag": "0025_student_first_code",
+      "breakpoints": true
     }
   ]
 }

@@ -89,7 +89,9 @@ En place (`apps/server/src`) :
     gardien ne voit jamais ; ce code n'ouvre son profil que sur un appareil qui le porte ;
   - les essais se comptent avant d'être vérifiés (`platform/auth/student-devices.ts`) : 3 sur un
     appareil, puis le gardien débloque ; 10 partout, puis il faut un code « oublié » du gardien, qui
-    arrête l'ancien code, ferme les sessions de l'élève, et que l'élève voit daté ;
+    arrête l'ancien code, ferme les sessions de l'élève, et que l'élève voit daté ; l'élève qui
+    dit l'avoir oublié, depuis un appareil qui porte son profil, le fait savoir à ses parents
+    jusqu'à ce code ou à sa prochaine entrée (`forgot` dans `student-devices.ts`) ;
   - le hachage est celui des mots de passe de better-auth, sur un HMAC du code par une clé dérivée
     du secret de l'auth : une copie de la base seule ne livre pas le million de codes ;
   - un appareil partagé (l'élève le dit, ou il porte un deuxième profil) garde une session dix

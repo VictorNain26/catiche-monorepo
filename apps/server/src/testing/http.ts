@@ -47,7 +47,7 @@ interface Device {
 
 interface Profiles {
   shared: boolean;
-  profiles: { id: string; name: string; state: string }[];
+  profiles: { id: string; name: string; state: string; parents: string[] }[];
 }
 
 /**
@@ -66,6 +66,9 @@ async function expectStatus(response: Response | Promise<Response>, status: numb
   if (res.status !== status) throw new Error(`${step}: HTTP ${String(res.status)} ${await res.text()}`);
   return res;
 }
+
+/** A refusal of better-auth as a test reads it: its status and its code. */
+export const problem = async (res: Response) => ({ status: res.status, code: ((await res.json()) as { code?: string }).code });
 
 /**
  * A turn's UI message stream as the web reads it: the chunks in their order, parsed by the AI SDK,
@@ -284,6 +287,8 @@ export function httpClient(app: App, mail: ReturnType<typeof memoryMailer>, { db
           send('POST', '/api/auth/student/choose-code', { studentId, code, ownDevice, chooseToken }),
         /** The student in by their own code. */
         enter: (studentId: string, code: string) => send('POST', '/api/auth/student/sign-in', { studentId, code }),
+        /** « J'ai oublié mon code », touched under the student's first name. */
+        forgot: (studentId: string) => send('POST', '/api/auth/student/forgot', { studentId }),
         /** The guardian adds their children to this device, a family computer. */
         async addProfiles(studentIds: string[]) {
           const res = await send('POST', '/api/auth/student/add-profiles', { studentIds });

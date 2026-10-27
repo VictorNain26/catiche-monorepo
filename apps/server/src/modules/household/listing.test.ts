@@ -1,7 +1,8 @@
 /**
  * What the list of an adult's students says of each, on a real database, through the HTTP API:
  * who else decides for the child, and what the home warns a parent of, a device that blocked the
- * child after 3 wrong codes, a code stopped everywhere after 10; never a relative.
+ * child after 3 wrong codes, a code stopped everywhere after 10, a code the child says forgotten;
+ * never a relative.
  */
 
 import { describe, expect, it } from 'bun:test';
@@ -17,7 +18,7 @@ const { api } = testApp(db);
 interface Listed {
   id: string;
   parents: string[];
-  alerts: { blockedDevices: { id: string; userAgent: string | null }[]; codeLocked: boolean };
+  alerts: { blockedDevices: { id: string; userAgent: string | null }[]; codeLocked: boolean; codeForgotten: boolean };
 }
 const listedAs = async (cookie: string, studentId: string) => {
   const list = (await (await api.request('GET', '/api/household/students', { cookie })).json()) as Listed[];
@@ -48,14 +49,14 @@ describe('the alerts of the home', () => {
     const device = api.device();
     await device.activate(await api.activationCode(nadia, lea.id));
     await device.chooseCode(lea.id, STUDENT_CODE, true);
-    expect(await alertsOf(nadia, lea.id)).toEqual({ blockedDevices: [], codeLocked: false });
+    expect(await alertsOf(nadia, lea.id)).toEqual({ blockedDevices: [], codeLocked: false, codeForgotten: false });
     for (let n = 0; n < 3; n++) await device.enter(lea.id, '000000');
     const alerts = await alertsOf(nadia, lea.id);
     expect(alerts?.blockedDevices.map(({ userAgent }) => userAgent)).toEqual(['test-device']);
     expect(alerts?.codeLocked).toBe(false);
     const deviceId = alerts?.blockedDevices[0]?.id ?? '';
     expect((await api.request('POST', `/api/household/students/${lea.id}/devices/${deviceId}/unblock`, { cookie: nadia })).status).toBe(204);
-    expect(await alertsOf(nadia, lea.id)).toEqual({ blockedDevices: [], codeLocked: false });
+    expect(await alertsOf(nadia, lea.id)).toEqual({ blockedDevices: [], codeLocked: false, codeForgotten: false });
   });
 
   it('says a code stopped everywhere after 10 wrong codes, to a parent and not to a relative', async () => {
@@ -64,7 +65,19 @@ describe('the alerts of the home', () => {
     await api.pair(nadia, lea.id);
     const monique = await api.adult(nadia, lea.id, 'monique-arrete@example.com', 'relative');
     await db.update(studentCode).set({ failures: 10 }).where(eq(studentCode.userId, lea.id));
-    expect(await alertsOf(nadia, lea.id)).toEqual({ blockedDevices: [], codeLocked: true });
-    expect(await alertsOf(monique, lea.id)).toEqual({ blockedDevices: [], codeLocked: false });
+    expect(await alertsOf(nadia, lea.id)).toEqual({ blockedDevices: [], codeLocked: true, codeForgotten: false });
+    expect(await alertsOf(monique, lea.id)).toEqual({ blockedDevices: [], codeLocked: false, codeForgotten: false });
+  });
+
+  it('says the child forgot their code, to a parent and not to a relative', async () => {
+    const nadia = await api.guardian('nadia-oubli@example.com');
+    const lea = await api.student(nadia);
+    const device = api.device();
+    await device.activate(await api.activationCode(nadia, lea.id));
+    await device.chooseCode(lea.id, STUDENT_CODE, true);
+    const monique = await api.adult(nadia, lea.id, 'monique-oubli@example.com', 'relative');
+    expect((await device.forgot(lea.id)).status).toBe(200);
+    expect(await alertsOf(nadia, lea.id)).toEqual({ blockedDevices: [], codeLocked: false, codeForgotten: true });
+    expect(await alertsOf(monique, lea.id)).toEqual({ blockedDevices: [], codeLocked: false, codeForgotten: false });
   });
 });

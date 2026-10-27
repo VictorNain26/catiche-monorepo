@@ -621,9 +621,15 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
   6. la suppression du compte de l'enfant avec 7 jours d'annulation, celle du compte de l'adulte,
      le nom des clés d'accès (A9), et la tâche de fond qu'elles demandent, qui purge aussi
      l'historique de plus de 90 jours et les invitations expirées (fait) ;
-  7. l'enfant (C1, C2, E1 à E4, E6, E7 ; E4 dans son état « Avant », dont le bouton ouvre l'aide
-     de Tom actuelle, voix corrigée et message de quota compris), la carte « Léa a oublié son
-     code » qu'il envoie (E3), et la navigation ;
+  7. l'enfant, en deux PR (Victor, 2026-10-27) :
+     - 7a, le serveur : les prénoms des parents pour l'enfant, « J'ai oublié mon code » et sa
+       carte chez le parent, « Depuis ta dernière visite » (fait) ;
+     - 7b, les écrans : C1, C2, E1 à E4, E6, E7 (E4 dans son état « Avant », dont le bouton ouvre
+       l'aide de Tom actuelle, voix corrigée et message de quota compris), la carte « Léa a oublié
+       son code » (A5) et la navigation.
+
+     Reportés : le bouton photo d'E1 (`etat.md`, « Technique reporté ») ; l'historique d'E6, dont
+     la carte « Depuis ta dernière visite » d'E4 dit déjà ce qui change ;
   8. les retouches des écrans de l'adulte et de la connexion, comparées à leur toile (§ 5,
      « L'adulte »).
   Avec : Tom au trait, les

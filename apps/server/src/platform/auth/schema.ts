@@ -79,8 +79,13 @@ export const studentCode = pgTable('student_code', {
   hash: text('hash'),
   failures: integer('failures').notNull().default(0),
   setAt: timestamp('set_at', { withTimezone: true }),
+  // When the student chose their first code: the devices linked until then are not news to them.
+  firstSetAt: timestamp('first_set_at', { withTimezone: true }),
   // When a guardian's « forgotten » code replaced it: the student is told.
   resetAt: timestamp('reset_at', { withTimezone: true }),
+  // When the student said « J'ai oublié mon code », until a parent's « forgotten » code is spent or
+  // the student enters: their parents are told.
+  forgottenAt: timestamp('forgotten_at', { withTimezone: true }),
 });
 
 export const account = pgTable(

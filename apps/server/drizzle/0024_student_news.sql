@@ -1,0 +1,2 @@
+ALTER TABLE "student_code" ADD COLUMN "forgotten_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "student_profile" ADD COLUMN "news_seen_at" timestamp with time zone DEFAULT now() NOT NULL;

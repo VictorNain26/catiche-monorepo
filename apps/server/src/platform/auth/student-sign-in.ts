@@ -79,6 +79,7 @@ const REFUSALS = {
 const INVALID_CODE = { code: 'INVALID_CODE', message: 'Invalid code' };
 const BLOCKED = { code: 'PROFILE_BLOCKED', message: 'Blocked on this device until a guardian unblocks it' };
 const LOCKED = { code: 'PROFILE_LOCKED', message: 'Locked until a new code' };
+const NOT_FOUND = { code: 'NOT_FOUND', message: 'Not found' };
 
 const ACTIVATION_REASONS = ['device', 'forgotten'] as const;
 export type ActivationReason = (typeof ACTIVATION_REASONS)[number];
@@ -138,13 +139,15 @@ const sharedDeadline = (openedAt: Date, now: Date) =>
 
 /**
  * What the plugin asks of the household: whether an adult is a parent of a student, who alone adds
- * their devices, the student's month of birth, and whether the student may still enter, which a
- * deletion fallen due ends before the sweep takes them.
+ * their devices, the student's month of birth, whether the student may still enter, which a
+ * deletion fallen due ends before the sweep takes them, and the first names of their parents, the
+ * earliest first, whom a profile names to ask (never a relative).
  */
 export interface StudentAccess {
   manages: (adultId: string, studentId: string) => Promise<boolean>;
   birthMonth: (studentId: string) => Promise<string | null>;
   active: (studentId: string) => Promise<boolean>;
+  parents: (studentId: string) => Promise<string[]>;
 }
 
 const studentCodeSchema = z.string().max(16);
@@ -252,13 +255,22 @@ export function studentSignIn({
         },
       ),
 
-      /** The profiles of this device, each with what its student meets; nothing without a device. */
+      /**
+       * The profiles of this device, each with what its student meets and the parents to ask;
+       * nothing without a device. The parents go only to a device that holds the profile.
+       */
       listStudentProfiles: createAuthEndpoint('/student/profiles', { method: 'GET' }, async (ctx) => {
         const device = await requestDevice(ctx);
         if (!device) return ctx.json({ shared: false, profiles: [] });
         const profiles = await devices.listProfiles(device.id);
-        const active = await Promise.all(profiles.map(({ id }) => students.active(id)));
-        return ctx.json({ shared: device.shared, profiles: profiles.filter((_, index) => active[index]) });
+        const [active, parents] = await Promise.all([
+          Promise.all(profiles.map(({ id }) => students.active(id))),
+          Promise.all(profiles.map(({ id }) => students.parents(id))),
+        ]);
+        return ctx.json({
+          shared: device.shared,
+          profiles: profiles.map((profile, index) => ({ ...profile, parents: parents[index] ?? [] })).filter((_, index) => active[index]),
+        });
       }),
 
       /**
@@ -317,6 +329,19 @@ export function studentSignIn({
       ),
 
       /**
+       * « J'ai oublié mon code », on a device that holds the profile: the student's parents are
+       * told, once, until one of them gives a « forgotten » code or the student finds theirs again.
+       */
+      forgotStudentCode: createAuthEndpoint('/student/forgot', { method: 'POST', body: z.object({ studentId: z.string().max(64) }) }, async (ctx) => {
+        const device = await requestDevice(ctx);
+        const { studentId } = ctx.body;
+        if (!device || !(await students.active(studentId)) || !(await devices.forgot(device.id, studentId))) {
+          throw APIError.from('NOT_FOUND', NOT_FOUND);
+        }
+        return ctx.json({ success: true });
+      }),
+
+      /**
        * A parent adds their children to this device, a family computer (never a relative): shared
        * from now, their own session short on it, and a child without a code chooses one here.
        */
@@ -326,7 +351,7 @@ export function studentSignIn({
         async (ctx) => {
           const { session } = ctx.context.session;
           for (const studentId of ctx.body.studentIds) {
-            if (!(await students.manages(session.userId, studentId))) throw APIError.from('NOT_FOUND', { code: 'NOT_FOUND', message: 'Not found' });
+            if (!(await students.manages(session.userId, studentId))) throw APIError.from('NOT_FOUND', NOT_FOUND);
           }
           const device = await ensureDevice(ctx);
           const chooseTokens: Record<string, string> = {};
@@ -384,7 +409,8 @@ export function studentSignIn({
     // trusted hops are set (docs/architecture.md, « Hébergement », TRUSTED_PROXY_HOPS).
     rateLimit: [
       {
-        pathMatcher: (path: string) => ['/student/activate', '/student/choose-code', '/student/sign-in', '/student/add-profiles'].includes(path),
+        pathMatcher: (path: string) =>
+          ['/student/activate', '/student/choose-code', '/student/sign-in', '/student/forgot', '/student/add-profiles'].includes(path),
         window: 60,
         max: 5,
       },

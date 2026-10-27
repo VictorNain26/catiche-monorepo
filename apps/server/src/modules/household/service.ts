@@ -151,12 +151,13 @@ export function createHouseholdService({ repository, sharedDevice, inviteAddress
     assertNotStudent,
 
     /**
-     * Who is signed in: a student, or else an adult, who may have no student yet; and, for an adult,
-     * what they have yet to declare, which the web asks before anything else.
+     * Who is signed in: a student, with the first names of their parents, whom their pages name;
+     * or else an adult, who may have no student yet, and what they have yet to declare, which the
+     * web asks before anything else.
      */
     async me({ id, name, email, deviceId }: SignedIn) {
       const [student, studentGone] = await Promise.all([repository.findProfile(id), isStudent(id)]);
-      if (student) return { id, name, role: 'student' as const, level: student.level };
+      if (student) return { id, name, role: 'student' as const, level: student.level, parents: await repository.parentsOf(id) };
       // A student whose deletion is due is signed in no more.
       if (studentGone) throw new Problem('UNAUTHENTICATED');
       const [missing, offer, shared, invitations, onlyParentOf] = await Promise.all([
@@ -260,6 +261,21 @@ export function createHouseholdService({ repository, sharedDevice, inviteAddress
 
     listOwnDevices(userId: string) {
       return repository.listOwnDevices(userId);
+    },
+
+    /**
+     * What changed for the student since their last « Vu »: a code chosen after a forgotten one,
+     * the devices that took their profile, never the one of the request. A student's alone.
+     */
+    async news(userId: string, deviceId: string | null) {
+      const news = await repository.news(userId, deviceId);
+      if (!news) throw new Problem('FORBIDDEN');
+      return news;
+    },
+
+    /** The student's « Vu »: what changed until the news were read is said no more. */
+    async newsSeen(userId: string, readAt: Date) {
+      if (!(await repository.newsSeen(userId, readAt))) throw new Problem('FORBIDDEN');
     },
 
     async listDevices(adultId: string, studentId: string) {
