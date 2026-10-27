@@ -113,8 +113,8 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
      PR 2 à 6 ont été construites sur les textes seuls, alors qu'une interface se construit
      contre une cible visuelle et s'y compare
      ([best practices de Claude Code](https://code.claude.com/docs/en/best-practices)).
-     Les maquettes et les textes de l'enfant, cible de la PR 7 : `app-cible.md` § 5, « La cible
-     visuelle ». Les écrans adultes attendent encore les leurs.
+     Les maquettes de l'enfant, cible de la PR 7, et celles de l'adulte, cible des retouches qui
+     la suivent : `app-cible.md` § 5, « La cible visuelle », côté enfant et côté adulte.
   3. **La soirée**, avec le volet IA et le prompt de Tom.
   4. **Le point du soir**, qui remplace le résumé de la semaine.
   5. **Les contrôles gardés d'un soir à l'autre.**
@@ -124,6 +124,10 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
   ou un tuteur l'ouvre (Victor, 2026-10-23). À revoir si une famille d'accueil le demande.
 
 ## Technique reporté
+
+- `/invitation` doit nommer l'adulte qui invite et l'enfant avant l'acceptation
+  (`app-cible.md` § 5, A3) : la route d'invitation du serveur ne les donne pas encore à la page.
+  À faire avec la PR 8 de l'étape 2, sans exposer plus que ces deux prénoms à qui tient le lien.
 
 - Une clé d'accès ne se propose pas sur un appareil partagé (`GET /api/me`, `sharedDevice`), mais
   la route d'enregistrement du plugin passkey ne le refuse pas : un appel direct en créerait une.

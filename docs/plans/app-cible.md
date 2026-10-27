@@ -419,22 +419,42 @@ cherche :
 
 ### L'adulte
 
+**La cible visuelle** des écrans de l'adulte et de la connexion (A1 à A5, A7 à A9, `/entrer`,
+`/invitation`, `/erreur-connexion`) : [la toile « Catiche — écrans des adultes »](https://claude.ai/artifact/TtuGmiNYP6YmVNb19sLj9D),
+dans sa version `1793113472-7d0a`, validée par Victor le 2026-10-27 après deux tests de tâches
+(une mère qui découvre Catiche, une grand-mère proche). Les écrans sont construits ; leurs
+retouches, comparées à la toile, forment la PR 8 de l'étape 2 (§ 8) ; les textes font foi dans
+chaque écran ci-dessous.
+
 **A1. Entrez dans Catiche** et **A2. Ouvrez l'e-mail de Catiche** : construits
 (`apps/web/src/routes/connexion.tsx`, l'e-mail dans `apps/server/src/platform/auth/auth.ts`) ; le
 bouton de l'e-mail mène à `/entrer`, « Entrez dans Catiche » avec le bouton « Entrer »
-(`entrer.tsx`).
+(`entrer.tsx`). À l'ordinateur, le panneau de marque de l'entrée de l'enfant (C2). L'échec d'une
+connexion (`/erreur-connexion`) : « La connexion n'a pas abouti » ; « Recommencez : un nouveau
+code vous sera envoyé. » ; bouton principal « Revenir à la connexion ».
 
 **A3. Vous et votre enfant** (la première fois ; un seul écran). Le parent invité par Victor :
 construit (`apps/web/src/routes/bienvenue.tsx`, l'invitation dans
 `apps/server/src/platform/auth/invitation.ts`), précédé de `/invitation`, « Bienvenue sur
 Catiche » avec le bouton « Accepter l'invitation » (`invitation.tsx`). L'adulte invité par un
 parent : construit aussi (`bienvenue.tsx`, `InvitedWelcome`).
+- `/invitation` : pour l'adulte invité par un parent, « Nadia vous invite à suivre les devoirs de
+  Léa. Touchez le bouton : les fois suivantes, vous entrerez avec votre adresse e-mail. » ; la
+  page doit connaître ces deux prénoms avant l'acceptation, ce que le serveur ne lui donne pas
+  encore. Pour le parent invité par Victor, « Votre invitation vous attend. » puis la même
+  seconde phrase.
+- L'adulte invité comme proche : « Vous verrez les soirs où Léa travaille. Vous ne changerez
+  rien à son compte : Nadia et Karim décident pour elle. »
+- Sous « J'ai 18 ans ou plus. » : « Seul un adulte peut suivre les devoirs d'un enfant. »
 
 **A4. Où [prénom] travaille le soir ?** : construit
 (`apps/web/src/routes/foyer.$studentId_.appareil.tsx`, le code de départ dans
 `apps/server/src/platform/auth/student-sign-in.ts`), après A3, après l'ajout d'un enfant suivant
 et depuis la fiche de l'enfant. Reste l'entrée depuis « Gérer » (A7).
 Son texte donne l'adresse de l'app, et non catiche.fr, dont la landing ne mène pas à `/activer`.
+Il dit le geste comme E1 : « Sur l'autre appareil, prenez ce carré en photo : Catiche s'ouvre
+tout seul. Sinon, ouvrez [adresse de l'app], touchez « J'ai un code de départ » et tapez ce
+code. Il marche une seule fois, pendant 24 heures. »
 
 **A5. Accueil** (une carte par enfant, même avec un seul). Construit
 (`apps/web/src/routes/foyer.index.tsx`, `components/passkey-offer.tsx`), sur deux colonnes à
@@ -451,8 +471,12 @@ l'emploie ([Google, « Communicating passkeys »](https://developers.google.com/
   - ou « Léa a travaillé ce soir. » ;
   - puis la semaine en une ligne : « Cette semaine, Léa a travaillé lundi, mardi et jeudi. » (chez
     vous ou ailleurs, sans durée ni matière) ;
-  - puis « Gérer » (parent) ou « Ses devoirs et ses messages » (proche).
+  - puis « Gérer Léa » (parent) ou « Suivre ses devoirs » (proche ; « Ses devoirs et ses
+    messages » à l'étape 4, quand les messages existent), en bouton secondaire.
 - « Ajouter un enfant » (parent).
+- Un seul bouton principal sur l'écran : celui de la carte d'alerte quand il y en a une, sinon
+  « Lire son message » ; la clé d'accès se propose avec un bouton secondaire.
+- Pour un proche qui ne suit qu'un enfant, le titre le nomme : « Suivez les devoirs de Léa ».
 
 **A6. Le message de [prénom]** (le point du soir, reçu).
 - Titre : « Léa vous dit où en sont ses devoirs »
@@ -463,39 +487,53 @@ l'emploie ([Google, « Communicating passkeys »](https://developers.google.com/
 - Toujours : « Écrire un mot à Léa » (court, envoyé à l'enfant).
 - Rien d'autre : pas de note, pas de correction, pas de reste présenté comme un retard.
 
-**A7. Gérer [prénom]** (le proche y arrive par « Ses devoirs et ses messages »). Construit
+**A7. Gérer [prénom]** (le proche y arrive par « Suivre ses devoirs », et l'écran s'intitule pour
+lui « Voyez la semaine de [prénom] », avec le retour « ← Accueil »). Construit
 (`apps/web/src/routes/foyer.$studentId.tsx`, l'historique dans
 `apps/server/src/modules/household`), sur deux colonnes à l'ordinateur, sauf : « Les soirs où Léa
 a travaillé » (étape 3), qui laisse en attendant « Sa semaine », le résumé de la semaine ;
 « Recevoir les messages » (étape 4). À partir de 15 ans, l'écran dit « c'est Léa qui décide », tournure qui ne suppose pas
 le genre de l'enfant (§ 5, « Les voix »).
-- En tête : « Vous décidez pour Léa, avec Karim. » (parent) ; « Vous suivez les devoirs de Léa. »
-  (proche).
+- En tête : « Vous décidez pour Léa, avec Karim. » (parent) ; « Nadia et Karim décident pour
+  Léa. » (proche).
 - « Les soirs où Léa a travaillé » : les sept derniers soirs, chez vous ou ailleurs, sans durée
   ni matière.
 - « Recevoir les messages de Léa » : un interrupteur, avec « Un e-mail vous prévient quand Léa
   vous écrit. » (coupable à part). Coupé : « Vous ne recevez plus les messages de Léa. Vous pouvez
   reprendre quand vous voulez. »
 - Parent seulement :
-  - « Ses appareils » : « Ajouter un appareil » (vers A4) ; par appareil, « Débloquer » avec la
-    cause, ou « Retirer ce téléphone » (« Léa devra entrer un nouveau code de départ sur cet
-    appareil. ») ;
-  - « Léa a oublié son code » : « Son code actuel ne marchera plus, nulle part. Avec le code de
-    départ que vous allez obtenir, Léa en choisira un nouveau, et verra la date du
-    changement. » ; « Obtenir un code de départ » ;
+  - « Léa a oublié son code », en tête, en carte d'alerte quand l'enfant l'a dit : « Son code
+    actuel ne marchera plus, nulle part. Avec le code de départ que vous allez obtenir, Léa en
+    choisira un nouveau, et verra la date du changement. » ; bouton principal « Obtenir un code
+    de départ ». Le code obtenu dit le geste de l'enfant : « Sur son appareil, Léa touche
+    « J'ai oublié mon code », puis « J'ai un code de départ », et tape ce code. Il marche une
+    seule fois, pendant 24 heures. » ;
+  - « Ses appareils » : chacun dit ce qu'il est (« Tablette · iPadOS · Safari ») ; « Ajouter un
+    appareil » (vers A4) ; par appareil, « Débloquer » avec la cause, ou « Retirer ce
+    téléphone » (« Léa devra entrer un nouveau code de départ sur cet appareil. ») ;
   - « Les adultes de Léa » ;
-  - « Plus » (replié) : « Ce que Tom retient » (« Proposer à Léa » ou « Retirer » ; à partir de
-    15 ans, « À partir de 15 ans, Léa décide seule. ») ; « Son prénom et sa classe » ;
-    « Historique » ; « Supprimer son compte ».
-- Proche seulement : « Pour ajouter un appareil, demandez un code de départ à Nadia ou à Karim. » ;
-  « Me retirer des adultes de Léa ».
+  - « Plus » (replié) : « Ce que Tom retient » (avant 15 ans, non proposé : « Tom ne retient
+    rien d'un soir à l'autre. Vous pouvez le proposer à Léa : elle décidera. » avec « Proposer à
+    Léa » ; proposé ou accepté : « Retirer » ; à partir de 15 ans, « À partir de 15 ans, Léa
+    décide seule. ») ; « Son prénom et sa classe » ; « Historique » ; « Supprimer son compte ».
+    Avec un autre parent, la suppression demandée dit ce qu'elle efface et qui l'annule : « Le
+    compte de Léa sera supprimé dans 7 jours : ses devoirs effacés, ses appareils
+    déconnectés. » ; « Karim recevra un e-mail. D'ici là, Karim ou vous pouvez annuler. »
+- Proche seulement : « Léa veut travailler sur votre tablette ou votre ordinateur ? Demandez un
+  code de départ à Nadia ou à Karim : Léa le tapera sur l'écran. » ; « Me retirer des adultes de
+  Léa », avec « Vous ne verrez plus les devoirs de Léa. Nadia ou Karim pourront vous inviter de
+  nouveau. »
 
 **A8. Invitez un adulte pour [prénom]** : construit (`foyer.$studentId_.inviter.tsx`, ses e-mails
-dans `apps/server/src/modules/household/service.ts`), sauf « Léa en sera prévenue », qui attend les
-écrans de l'enfant.
+dans `apps/server/src/modules/household/service.ts`), sauf « Léa en sera prévenue », qui vient avec
+la carte « Depuis ta dernière visite » de la PR 7 : la phrase dit alors « Cet adulte recevra un
+e-mail pour entrer. Karim et Léa en seront prévenus. » Sous le choix, ce que fait chacun : « Un
+parent ou tuteur décide pour Léa, comme vous : ses appareils, ses adultes, son compte. » ; « Un
+proche suit les devoirs de Léa. Il ne change rien à son compte. »
 
 **A9. Votre compte** (par le prénom, en haut de chaque écran de l'adulte) : construit
-(`apps/web/src/routes/foyer.compte.tsx`), la suppression du compte comprise.
+(`apps/web/src/routes/foyer.compte.tsx`), la suppression du compte comprise. Sans le bouton
+« Quitter Catiche », que double « Quitter » de l'en-tête ; deux colonnes à l'ordinateur.
 
 ### L'accessibilité, pour tous les écrans
 
@@ -585,7 +623,9 @@ Les règles de `.claude/rules/design-system.md` (contrastes, 44 px, 320 px), plu
      l'historique de plus de 90 jours et les invitations expirées (fait) ;
   7. l'enfant (C1, C2, E1 à E4, E6, E7 ; E4 dans son état « Avant », dont le bouton ouvre l'aide
      de Tom actuelle, voix corrigée et message de quota compris), la carte « Léa a oublié son
-     code » qu'il envoie (E3), et la navigation.
+     code » qu'il envoie (E3), et la navigation ;
+  8. les retouches des écrans de l'adulte et de la connexion, comparées à leur toile (§ 5,
+     « L'adulte »).
   Avec : Tom au trait, les
   rôles du mode sombre, la lecture aérée, l'inactivité, la politique de confidentialité pour
   l'opposition d'un autre parent, la charte mise à jour. Le résumé de la semaine reste, voix
