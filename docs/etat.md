@@ -137,9 +137,6 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
 - « Qui voit quoi » (E6) dit ce que les parents voient aujourd'hui, le résumé de la semaine
   (`whoSeesWhat`, `apps/web/src/lib/me.ts`) ; l'étape 4, qui remplace ce résumé, y met la phrase
   d'`app-cible.md` § 5, les soirs travaillés et les messages.
-- `student_code.reset_at` n'a plus de lecteur depuis que `codeResetAt` a quitté `GET /api/me/devices`
-  (le changement de code se dit par `GET /api/me/news`, sur `set_at`) : la colonne se retire par
-  une migration, ou sert à l'historique.
 
 - `/invitation` doit nommer l'adulte qui invite et l'enfant avant l'acceptation
   (`app-cible.md` § 5, A3) : la route d'invitation du serveur ne les donne pas encore à la page.
