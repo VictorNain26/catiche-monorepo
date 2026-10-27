@@ -30,7 +30,7 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
 | Encre (`foreground`) | `mist` | Le texte |
 | Eau profonde (`primary`) | `water` | L'action principale, les liens, le focus, le panneau de marque |
 | Jonc (`highlight`) | `reed` | Le surligneur, fil conducteur dans les deux modes : le même trait épais sous la ligne de base, qui ne touche pas les lettres ; jamais en texte ni en bordure. Il se détache du fond comme une marque, à 3:1 dans les deux modes (`packages/tokens/contrast.test.mjs`) |
-| Pelage (`annotation`) | `fur` | Une note, un accent rare |
+| Pelage (`annotation`) | `fur` | Une note, un accent rare ; la pastille de l'initiale d'un prénom (`chip`) |
 
 - Le jonc revient une fois par section : sous le mot qui porte le sens du titre (« organiser »,
   « lui-même »), posé une fois quand le titre apparaît, du geste du haut de page ; et sur les
@@ -87,6 +87,12 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
   sur le fond ; en sombre, la carte se détache par son pas, sans ombre.
 - Une liste pour des éléments semblables, une carte pour un bloc à part qui mène à un détail ; un
   seul bouton principal par écran.
+- Les écrans de l'enfant (C2, E1 à E4) se posent sur une scène et une feuille. La scène (`stage`),
+  dans l'eau claire, porte le titre, Tom et l'action principale, visibles dès le premier écran. La
+  feuille, la carte avec son ombre, porte le reste ; au téléphone, elle chevauche la scène par le
+  bas, arrondie en haut ; à l'ordinateur, la scène se tient à gauche, Tom entier à son pied, et la
+  feuille à droite. Une liste posée sur la feuille n'a pas de feuille à elle : jamais une carte
+  dans une carte (`page.tsx`, `apps/web/src/components/`).
 - Un écran où l'on revient, et des pages qui s'ouvrent depuis lui et se referment par un « ← »
   qui nomme où il ramène (Victor, 2026-10-23 : une navigation comprise par un enfant et par un
   adulte peu habitué aux écrans). Des onglets seulement quand il y a plusieurs destinations
@@ -100,6 +106,9 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
 - Dans l'app, Tom est en 2D au trait, tiré de `tom.blend` par le Line Art de Blender puis fixé par
   une planche de référence (vues, attitudes) ; sur le site, le Tom en 3D, entier et en mouvement
   (`apps/landing/public/tom/`).
+- Jusqu'à sa refonte, menée dans le dépôt `tom-mascotte`, l'app prend l'image provisoire du site
+  (`packages/ui/assets/`) : Tom entier se tient sur la scène de l'enfant, sa tête seule va à côté de
+  ses messages.
 - Sa tête est à côté de chacun de ses messages : l'élève sait qu'il lit Tom, une IA. Hors de la
   séance, son dessin n'a pas de bulle et ne parle pas.
 - Il ne réagit pas à l'élève : ni joie, ni déception, ni célébration. Il constate une étape juste

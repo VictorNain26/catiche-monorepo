@@ -282,10 +282,11 @@ là. » avec « Je suis encore là ». Sur un appareil personnel, rien ne se fer
 
 **C2. Qui fait ses devoirs ?** (l'entrée ; remplace `/profils` et l'écran sans profil).
 - Titre : « Qui fait ses devoirs ? »
-- Les prénoms des enfants de l'appareil, en grandes cartes alignées avec le titre (aujourd'hui,
-  le titre est à gauche et les prénoms au centre). Sous un prénom bloqué : « Bloqué ici. Demande à Nadia ou à Karim. »
-- Deux grands boutons sous les prénoms (seuls, quand l'appareil n'en connaît pas) : « Première fois
-  ici ? J'ai un code de départ » ; « Je suis un adulte ».
+- Les prénoms des enfants de l'appareil, en rangées de liste sur la feuille, chacun avec la
+  pastille de son initiale. Un prénom bloqué ici ou arrêté partout ne s'ouvre pas, et dit dessous :
+  « Noé ne peut pas entrer ici pour l'instant. Demande à un parent : Nadia ou Karim. »
+- Sous les prénoms (seuls, quand l'appareil n'en connaît pas) : le bouton « Première fois ici ?
+  J'ai un code de départ » ; le lien « Je suis un adulte ».
 
 ### L'enfant
 
