@@ -5,8 +5,9 @@ import {
   invitationLine,
   invitationPromise,
   invitedWelcomeSchema,
-  isRecentReset,
+  unknownDevice,
   welcomeSchema,
+  whoSeesWhat,
 } from './me';
 
 describe('accountDeletionWarning', () => {
@@ -98,16 +99,24 @@ describe('the words of an invitation', () => {
   });
 });
 
-describe('isRecentReset', () => {
-  const now = new Date('2026-10-20T12:00:00Z');
-
-  it('tells of a code a parent replaced within two weeks', () => {
-    expect(isRecentReset('2026-10-20T11:59:00Z', now)).toBe(true);
-    expect(isRecentReset('2026-10-07T12:00:00Z', now)).toBe(true);
+describe('the words of « Règle ton espace » (E6)', () => {
+  it('says who sees what, with two parents', () => {
+    expect(whoSeesWhat(['Nadia', 'Karim'])).toBe(
+      'Nadia et Karim voient les soirs où tu as travaillé, et les messages que tu leur envoies. Ils ne lisent jamais tes conversations avec Tom.',
+    );
   });
 
-  it('no longer on the home past two weeks, nor for a code never replaced', () => {
-    expect(isRecentReset('2026-10-05T12:00:00Z', now)).toBe(false);
-    expect(isRecentReset(null, now)).toBe(false);
+  it('says it of a single parent, in the singular', () => {
+    expect(whoSeesWhat(['Nadia'])).toBe(
+      'Nadia voit les soirs où tu as travaillé, et les messages que tu lui envoies. Nadia ne lit jamais tes conversations avec Tom.',
+    );
+    expect(whoSeesWhat([])).toBe(
+      'Tes parents voient les soirs où tu as travaillé, et les messages que tu leur envoies. Ils ne lisent jamais tes conversations avec Tom.',
+    );
+  });
+
+  it('says whom to tell of a device not recognised', () => {
+    expect(unknownDevice(['Nadia', 'Karim'])).toBe('Tu ne reconnais pas l’un d’eux ? Dis-le à Nadia ou à Karim.');
+    expect(unknownDevice(['Nadia'])).toBe('Tu ne reconnais pas l’un d’eux ? Dis-le à Nadia.');
   });
 });

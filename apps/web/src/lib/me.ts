@@ -7,6 +7,8 @@ import { queryOptions } from '@tanstack/react-query';
 import type { InferResponseType } from 'hono/client';
 import { api, isProblem, parseResponse } from './api';
 import { ROLE_LABELS, firstName, householdMessage, newChildSchema, type AdultRole } from './household';
+import { parentWords } from './student';
+import { capitalised } from './words';
 import { ticked, z } from './zod';
 
 /** The adult's declaration of their age, the box's own words. */
@@ -94,14 +96,22 @@ export const meQuery = queryOptions({
   },
 });
 
-/** The devices that hold the signed-in student's profile, the newest first, and when a parent last replaced their code. */
+/** The devices that hold the signed-in student's profile, the newest first. */
 export const ownDevicesQuery = queryOptions({
   queryKey: ['me', 'devices'],
   queryFn: () => parseResponse(api.me.devices.$get()),
 });
 
-const RESET_NOTICE_DAYS = 14;
+/** The first names of the signed-in student's parents, the earliest first; none for anyone else. */
+export const parentsOfMe = (me: Me | null | undefined): readonly string[] => (me?.role === 'student' ? me.parents : []);
 
-/** Whether a parent replaced the student's code within two weeks: their home tells them. */
-export const isRecentReset = (resetAt: string | null, now = new Date()) =>
-  resetAt !== null && now.getTime() - Date.parse(resetAt) <= RESET_NOTICE_DAYS * 24 * 60 * 60_000;
+/** « Qui voit quoi » (E6): what the parents see of the student, and what never. */
+export function whoSeesWhat(parents: readonly string[]) {
+  const { both, many } = parentWords(parents);
+  return many
+    ? `${capitalised(both)} voient les soirs où tu as travaillé, et les messages que tu leur envoies. Ils ne lisent jamais tes conversations avec Tom.`
+    : `${both} voit les soirs où tu as travaillé, et les messages que tu lui envoies. ${both} ne lit jamais tes conversations avec Tom.`;
+}
+
+/** Under « Tes appareils » (E6): whom to tell of a device the student does not recognise. */
+export const unknownDevice = (parents: readonly string[]) => `Tu ne reconnais pas l’un d’eux ? Dis-le ${parentWords(parents).toEither}.`;

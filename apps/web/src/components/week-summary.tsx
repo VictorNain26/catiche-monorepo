@@ -1,6 +1,10 @@
 import { Banner, List, ListItem, Section, Skeleton } from '@repo/ui';
 import { lastTime } from '../lib/memory';
-import { minutesText, questionFor, subjectLabel, type WeekSummary as Week } from '../lib/summary';
+import { STUDENT_FAILED } from '../lib/student';
+import { minutesText, questionFor, sameSummary, subjectLabel, type WeekSummary as Week } from '../lib/summary';
+
+// The guardian's summary names no parent.
+const NO_PARENTS: readonly string[] = [];
 
 /**
  * The summary of the week (`docs/tuteur.md` § 8): the subjects and the time, what resists with the
@@ -12,20 +16,29 @@ export function WeekSummary({
   failed,
   name,
   reader,
+  parents = NO_PARENTS,
 }: {
   week: Week | undefined;
   failed: boolean;
   name: string;
   reader: 'guardian' | 'student';
+  /** For the student: their parents, who read it too. */
+  parents?: readonly string[];
 }) {
   const title = reader === 'guardian' ? 'Sa semaine' : 'Ta semaine';
 
   return (
     <Section title={title}>
       {week ? (
-        <Week week={week} name={name} reader={reader} />
+        <Week week={week} name={name} reader={reader} parents={parents} />
       ) : failed ? (
-        <Banner tone="error" title="Le résumé de la semaine n’a pas pu se charger. Réessayez dans un instant." />
+        reader === 'guardian' ? (
+          <Banner tone="error" title="Le résumé de la semaine n’a pas pu se charger. Réessayez dans un instant." />
+        ) : (
+          <Banner tone="error" title={STUDENT_FAILED.title}>
+            {STUDENT_FAILED.detail}
+          </Banner>
+        )
       ) : (
         <>
           <p className="sr-only">Chargement…</p>
@@ -33,12 +46,12 @@ export function WeekSummary({
           <Skeleton className="h-6 w-2/3" />
         </>
       )}
-      {reader === 'student' && <p className="text-sm text-muted-foreground">Ton parent voit ce même résumé.</p>}
+      {reader === 'student' && <p className="text-sm text-muted-foreground">{sameSummary(parents)}</p>}
     </Section>
   );
 }
 
-function Week({ week, name, reader }: { week: Week; name: string; reader: 'guardian' | 'student' }) {
+function Week({ week, name, reader, parents }: { week: Week; name: string; reader: 'guardian' | 'student'; parents: readonly string[] }) {
   if (week.sessions === 0) {
     return (
       <p className="text-muted-foreground">
@@ -70,7 +83,7 @@ function Week({ week, name, reader }: { week: Week; name: string; reader: 'guard
           ))}
         </List>
       )}
-      {first && <p>{questionFor(reader, name, first.label)}</p>}
+      {first && <p>{questionFor(reader, name, first.label, parents)}</p>}
     </>
   );
 }

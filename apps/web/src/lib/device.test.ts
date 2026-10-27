@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { deviceKind, deviceName, formatDate, formatDay, formatHour, passkeyName } from './device';
+import { deviceKind, deviceName, formatDate, formatDay, formatHour, ownDeviceLine, passkeyName } from './device';
 
 describe('deviceName', () => {
   it('names a phone by its system and browser', () => {
@@ -27,14 +27,56 @@ describe('deviceKind', () => {
   const DESKTOP = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
 
   it('names a phone, a tablet and a computer, each with its own article and agreement', () => {
-    expect(deviceKind(IPHONE)).toEqual({ the: 'le téléphone', this: 'ce téléphone', blocked: 'bloqué' });
-    expect(deviceKind(TABLET)).toEqual({ the: 'la tablette', this: 'cette tablette', blocked: 'bloquée' });
-    expect(deviceKind(DESKTOP)).toEqual({ the: 'l’ordinateur', this: 'cet ordinateur', blocked: 'bloqué' });
+    expect(deviceKind(IPHONE)).toEqual({
+      name: 'Téléphone',
+      the: 'le téléphone',
+      a: 'un téléphone',
+      this: 'ce téléphone',
+      blocked: 'bloqué',
+      shared: 'partagé',
+    });
+    expect(deviceKind(TABLET)).toEqual({
+      name: 'Tablette',
+      the: 'la tablette',
+      a: 'une tablette',
+      this: 'cette tablette',
+      blocked: 'bloquée',
+      shared: 'partagée',
+    });
+    expect(deviceKind(DESKTOP)).toEqual({
+      name: 'Ordinateur',
+      the: 'l’ordinateur',
+      a: 'un ordinateur',
+      this: 'cet ordinateur',
+      blocked: 'bloqué',
+      shared: 'partagé',
+    });
   });
 
   it('says « appareil » when it cannot tell', () => {
-    expect(deviceKind('test-device')).toEqual({ the: 'l’appareil', this: 'cet appareil', blocked: 'bloqué' });
-    expect(deviceKind(null)).toEqual({ the: 'l’appareil', this: 'cet appareil', blocked: 'bloqué' });
+    const device = { name: 'Appareil', the: 'l’appareil', a: 'un appareil', this: 'cet appareil', blocked: 'bloqué', shared: 'partagé' };
+    expect(deviceKind('test-device')).toEqual(device);
+    expect(deviceKind(null)).toEqual(device);
+  });
+});
+
+describe('ownDeviceLine', () => {
+  const TABLET = 'Mozilla/5.0 (Linux; Android 14; SM-X710) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
+  const DESKTOP = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
+
+  it('names a device of the student by its kind and the day it took their profile (E6)', () => {
+    expect(ownDeviceLine({ userAgent: TABLET, shared: false, createdAt: new Date(2026, 9, 26, 18, 0).toISOString() })).toBe(
+      'Tablette, depuis le 26 octobre',
+    );
+  });
+
+  it('says a device shared, agreed with its kind', () => {
+    expect(ownDeviceLine({ userAgent: DESKTOP, shared: true, createdAt: new Date(2026, 9, 2, 18, 0).toISOString() })).toBe(
+      'Ordinateur partagé, depuis le 2 octobre',
+    );
+    expect(ownDeviceLine({ userAgent: TABLET, shared: true, createdAt: new Date(2026, 9, 2, 18, 0).toISOString() })).toBe(
+      'Tablette partagée, depuis le 2 octobre',
+    );
   });
 });
 

@@ -188,7 +188,6 @@ export function ChildDevices({ child, activation }: { child: Student; activation
  * when the child types it. Its text says what follows, before the button.
  */
 export function ForgottenCode({ child, activation }: { child: Student; activation: Activation }) {
-  const { code } = activation;
   if (!activation.childCode.chosen) return null;
   return (
     <Section title={`${child.name} a oublié son code`}>
@@ -202,6 +201,31 @@ export function ForgottenCode({ child, activation }: { child: Student; activatio
         date du changement.
       </p>
       <p className="text-muted-foreground">Ce code arrête aussi un code de départ donné avant, s’il n’a pas encore servi.</p>
+      <ForgottenCodeGesture child={child} activation={activation} label="Obtenir un code de départ" />
+    </Section>
+  );
+}
+
+/**
+ * The starting code after a forgotten one, asked and shown: the recent entry it needs first when
+ * the parent's is too old, then its button again; the code, once given, until the child's device
+ * spends it. On « Gérer » (A7) and on the home's card (A5), by one gesture.
+ */
+export function ForgottenCodeGesture({
+  child,
+  activation,
+  label,
+  primary = false,
+}: {
+  child: Student;
+  activation: Activation;
+  label: string;
+  /** The screen's main button, as on the home's alert card. */
+  primary?: boolean;
+}) {
+  const { code } = activation;
+  return (
+    <>
       {code && (
         <Card className="flex flex-col items-center gap-2 text-center">
           <p>
@@ -224,16 +248,16 @@ export function ForgottenCode({ child, activation }: { child: Student; activatio
       )}
       {!code && (
         <Button
-          variant="outline"
+          variant={primary ? 'default' : 'outline'}
           className="sm:self-start"
           disabled={activation.asking}
           onClick={() => {
             activation.ask('forgotten');
           }}
         >
-          Obtenir un code de départ
+          {label}
         </Button>
       )}
-    </Section>
+    </>
   );
 }

@@ -6,6 +6,7 @@ import {
   MONTHS,
   askParents,
   birthYears,
+  codeAlert,
   decidesWith,
   deletionAsked,
   deletionDay,
@@ -28,6 +29,18 @@ const failure = async (code: string, status: 400 | 404 | 429 | 500) => {
     (error: unknown) => error,
   );
 };
+
+describe('codeAlert', () => {
+  it('says first a code the child said forgotten, whether or not too many tries stopped it', () => {
+    expect(codeAlert('Léa', { codeForgotten: true, codeLocked: false })).toBe('Léa a oublié son code.');
+    expect(codeAlert('Léa', { codeForgotten: true, codeLocked: true })).toBe('Léa a oublié son code.');
+  });
+
+  it('says a code stopped by too many tries, and nothing for a code that works', () => {
+    expect(codeAlert('Léa', { codeForgotten: false, codeLocked: true })).toBe('Le code de Léa ne marche plus.');
+    expect(codeAlert('Léa', { codeForgotten: false, codeLocked: false })).toBeNull();
+  });
+});
 
 describe('householdMessage', () => {
   it('says what to fix for each problem, in French', async () => {

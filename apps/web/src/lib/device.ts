@@ -10,18 +10,21 @@ export function browserName(userAgent: string | null | undefined): string | null
 /** A device as a person names it, from its browser's user agent: « iOS · Safari ». */
 export const deviceName = (userAgent: string | null | undefined) => browserName(userAgent) ?? 'Appareil inconnu';
 
-/** How a sentence names a device, by its kind: « la tablette », « cette tablette », « bloquée ». */
+/** How a sentence names a device, by its kind: « Tablette », « la tablette », « une tablette », « cette tablette », « bloquée », « partagée ». */
 interface DeviceKind {
+  name: string;
   the: string;
+  a: string;
   this: string;
   blocked: string;
+  shared: string;
 }
 
 const KINDS: Record<'mobile' | 'tablet' | 'desktop' | 'unknown', DeviceKind> = {
-  mobile: { the: 'le téléphone', this: 'ce téléphone', blocked: 'bloqué' },
-  tablet: { the: 'la tablette', this: 'cette tablette', blocked: 'bloquée' },
-  desktop: { the: 'l’ordinateur', this: 'cet ordinateur', blocked: 'bloqué' },
-  unknown: { the: 'l’appareil', this: 'cet appareil', blocked: 'bloqué' },
+  mobile: { name: 'Téléphone', the: 'le téléphone', a: 'un téléphone', this: 'ce téléphone', blocked: 'bloqué', shared: 'partagé' },
+  tablet: { name: 'Tablette', the: 'la tablette', a: 'une tablette', this: 'cette tablette', blocked: 'bloquée', shared: 'partagée' },
+  desktop: { name: 'Ordinateur', the: 'l’ordinateur', a: 'un ordinateur', this: 'cet ordinateur', blocked: 'bloqué', shared: 'partagé' },
+  unknown: { name: 'Appareil', the: 'l’appareil', a: 'un appareil', this: 'cet appareil', blocked: 'bloqué', shared: 'partagé' },
 };
 
 /** The kind of device a user agent says, `unknown` when it cannot tell. */
@@ -33,7 +36,11 @@ function kindOf(userAgent: string | null | undefined): keyof typeof KINDS {
 /** A device's kind, from its user agent; « appareil » when it cannot tell (`app-cible.md` § 5, « Les noms »). */
 export const deviceKind = (userAgent: string | null | undefined): DeviceKind => KINDS[kindOf(userAgent)];
 
-const KIND_NAMES: Record<keyof typeof KINDS, string> = { mobile: 'Téléphone', tablet: 'Tablette', desktop: 'Ordinateur', unknown: 'Appareil' };
+/** A device of the student's, as « Tes appareils » lists it (E6): « Ordinateur partagé, depuis le 2 octobre ». */
+export function ownDeviceLine({ userAgent, shared, createdAt }: { userAgent: string | null; shared: boolean; createdAt: string }) {
+  const kind = deviceKind(userAgent);
+  return `${shared ? `${kind.name} ${kind.shared}` : kind.name}, depuis le ${formatDate(createdAt)}`;
+}
 
 /**
  * A passkey as « Vos clés d'accès » lists it (A9), by the user agent that made it: « Téléphone
@@ -41,7 +48,7 @@ const KIND_NAMES: Record<keyof typeof KINDS, string> = { mobile: 'Téléphone', 
  */
 export function passkeyName(userAgent: string | null | undefined, createdAt: string | Date) {
   const system = userAgent ? Bowser.parse(userAgent).os.name : undefined;
-  return `${[KIND_NAMES[kindOf(userAgent)], system].filter(Boolean).join(' ')}, créée le ${formatDate(createdAt)}`;
+  return `${[deviceKind(userAgent).name, system].filter(Boolean).join(' ')}, créée le ${formatDate(createdAt)}`;
 }
 
 const day = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short' });

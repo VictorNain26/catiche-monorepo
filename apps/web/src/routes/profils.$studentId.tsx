@@ -1,24 +1,31 @@
-import { Banner, Button } from '@repo/ui';
+import { Banner, Button, Card } from '@repo/ui';
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
-import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { useState, type ReactNode } from 'react';
+import { Link, Navigate, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
+import { EyeOffIcon } from 'lucide-react';
+import { useState } from 'react';
 import { CodePad } from '../components/code-pad';
-import { BackLink, Page } from '../components/page';
+import { EntryPage } from '../components/page';
 import { authClient } from '../lib/auth';
 import {
   announceProfileChange,
   chooseTokenFor,
   CODE_DIGITS,
+  codeSecret,
+  firstCodeRefusal,
+  forgottenText,
+  forgottenTitle,
   pressKey,
-  profileNote,
   profilesQuery,
+  STUDENT_FAILED,
   studentCodeMessage,
   tabChannel,
+  type CodeMessage,
 } from '../lib/student';
 
 /**
- * One profile of this device: its student types their code, or chooses it the first time, twice,
- * and says whether the device is theirs alone. A profile blocked or without a code says whom to ask.
+ * One profile of this device: its student types their code (E3), or chooses it the first time
+ * (E2), twice, and says whether others use the device. A profile without a code to type nor a
+ * window to choose one waits for a starting code (E1).
  */
 export const Route = createFileRoute('/profils/$studentId')({
   loader: async ({ context, params }) => {
@@ -34,28 +41,16 @@ function Profile() {
   const profile = data.profiles.find(({ id }) => id === studentId);
   if (!profile) return null;
 
-  const back = <BackLink to="/profils">Pas toi ? Changer</BackLink>;
-  if (profile.state === 'ready') return <EnterCode studentId={studentId} name={profile.name} back={back} />;
-  // The code is chosen in the tab the parent's code was typed in, which holds the window's token.
+  // Blocked here or stopped everywhere: E3 says so, its keypad closed, « J'ai oublié mon code » open.
+  if (profile.state === 'ready' || profile.state === 'blocked' || profile.state === 'locked') {
+    return <EnterCode studentId={studentId} name={profile.name} parents={profile.parents} stopped={profile.state !== 'ready'} />;
+  }
+  // The code is chosen in the tab the starting code was typed in, which holds the window's token.
   const token = chooseTokenFor(studentId);
   if (profile.state === 'choose' && token) {
-    return <ChooseCode studentId={studentId} name={profile.name} shared={data.shared} token={token} back={back} />;
+    return <ChooseCode studentId={studentId} parents={profile.parents} shared={data.shared} token={token} />;
   }
-  const state = profile.state === 'choose' ? 'waiting' : profile.state;
-  return (
-    <Page title={profile.name} back={back}>
-      <Banner tone="warning" title={profileNote(state) ?? ''}>
-        {state === 'waiting'
-          ? 'Ton parent obtient dans son espace un code pour cet appareil. Tu choisiras alors ton code.'
-          : state === 'blocked'
-            ? 'Trop d’essais sur cet appareil. Ton parent peut le débloquer depuis son espace.'
-            : 'Trop d’essais : ton code ne marche plus. Ton parent te donne un code pour en choisir un nouveau.'}
-      </Banner>
-      <Button render={<Link to="/activer" />} variant="outline">
-        J’ai un code de départ
-      </Button>
-    </Page>
-  );
+  return <Navigate to="/activer" />;
 }
 
 /** Once a profile is signed in: the other tabs reload, and the app starts afresh on the student's space. */
@@ -67,13 +62,32 @@ function useEntered() {
   };
 }
 
-/** The student's code, typed: sent as the sixth digit arrives. */
-function EnterCode({ studentId, name, back }: { studentId: string; name: string; back: ReactNode }) {
+function Failure({ message }: { message: CodeMessage }) {
+  return (
+    <Banner tone="error" title={message.title}>
+      {message.detail}
+    </Banner>
+  );
+}
+
+const NOT_ME = (
+  <Button render={<Link to="/profils" />} variant="link">
+    Ce n’est pas moi
+  </Button>
+);
+
+/**
+ * E3, the student's code, sent as the sixth digit arrives. Too many tries close the keypad; « J'ai
+ * oublié mon code » tells the parents, and the screen says so, with the way to the starting code
+ * they will give.
+ */
+function EnterCode({ studentId, name, parents, stopped }: { studentId: string; name: string; parents: readonly string[]; stopped: boolean }) {
   const queryClient = useQueryClient();
   const entered = useEntered();
   const [code, setCode] = useState('');
   const [sending, setSending] = useState(false);
-  const [failure, setFailure] = useState<string | null>(null);
+  const [failure, setFailure] = useState<CodeMessage | null>(null);
+  const [forgotten, setForgotten] = useState(false);
 
   const send = async (typed: string) => {
     setSending(true);
@@ -82,44 +96,81 @@ function EnterCode({ studentId, name, back }: { studentId: string; name: string;
     if (!error) return entered();
     setSending(false);
     setCode('');
-    setFailure(studentCodeMessage(error));
-    // Blocked or locked: the screen says whom to ask.
+    setFailure(studentCodeMessage(error, parents));
+    // Blocked or locked: the profile's state closes the keypad.
     if (error.code === 'PROFILE_BLOCKED' || error.code === 'PROFILE_LOCKED') {
       await queryClient.invalidateQueries({ queryKey: profilesQuery.queryKey });
     }
   };
 
+  const forgot = async () => {
+    setSending(true);
+    setFailure(null);
+    const { error } = await authClient.student.forgot({ studentId });
+    setSending(false);
+    if (error) setFailure(STUDENT_FAILED);
+    else setForgotten(true);
+  };
+
+  if (forgotten) {
+    return (
+      <EntryPage title={forgottenTitle(parents)} announce after={NOT_ME}>
+        <p>{forgottenText(parents)}</p>
+        <Button render={<Link to="/activer" />} size="lg" className="lg:self-start">
+          J’ai un code de départ
+        </Button>
+      </EntryPage>
+    );
+  }
+
+  const shown = failure ?? (stopped ? studentCodeMessage({ code: 'PROFILE_BLOCKED', status: 403 }, parents) : null);
   return (
-    <Page title={name} subtitle="Ton code" back={back} wide>
-      <PadLayout aside={failure && <Banner tone="error" focusOnMount title={failure} />}>
+    <EntryPage
+      title={`${name}, tape ton code`}
+      pad={
         <CodePad
-          label="Ton code à 6 chiffres"
+          label="Ton code, 6 chiffres"
           value={code}
-          disabled={sending}
+          disabled={sending || stopped}
           onKey={(key) => {
             const typed = pressKey(code, key);
             setCode(typed);
             if (typed.length === CODE_DIGITS) void send(typed);
           }}
         />
-      </PadLayout>
-    </Page>
+      }
+      after={
+        <div className="flex flex-wrap justify-between gap-x-8 lg:justify-start">
+          {NOT_ME}
+          <Button variant="link" disabled={sending} onClick={() => void forgot()}>
+            J’ai oublié mon code
+          </Button>
+        </div>
+      }
+    >
+      {shown && <Failure message={shown} />}
+    </EntryPage>
   );
 }
+
+// An answer to « Quelqu'un d'autre se sert de cet appareil ? »: a card the whole of which is the button.
+const CHOICE =
+  'group flex min-h-24 flex-col justify-center gap-1 text-left shadow-control transition-colors duration-fast ease-standard hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:bg-disabled disabled:text-disabled-foreground';
 
 type Step = { kind: 'first' } | { kind: 'again'; first: string } | { kind: 'device'; code: string };
 
 /**
- * The first code: chosen, typed again so that a slip does not lock the student out, then whether
- * the device is theirs alone. A device already shared asks nothing.
+ * E2, the first code: chosen, refused at once when too easy, typed again so that a slip does not
+ * lock the student out, then whether others use the device. A device a parent added as shared asks
+ * nothing.
  */
-function ChooseCode({ studentId, name, shared, token, back }: { studentId: string; name: string; shared: boolean; token: string; back: ReactNode }) {
+function ChooseCode({ studentId, parents, shared, token }: { studentId: string; parents: readonly string[]; shared: boolean; token: string }) {
   const queryClient = useQueryClient();
   const entered = useEntered();
   const [step, setStep] = useState<Step>({ kind: 'first' });
   const [code, setCode] = useState('');
   const [sending, setSending] = useState(false);
-  const [failure, setFailure] = useState<string | null>(null);
+  const [failure, setFailure] = useState<CodeMessage | null>(null);
 
   const send = async (chosen: string, ownDevice: boolean) => {
     setSending(true);
@@ -128,8 +179,8 @@ function ChooseCode({ studentId, name, shared, token, back }: { studentId: strin
     if (!error) return entered();
     setSending(false);
     setStep({ kind: 'first' });
-    setFailure(studentCodeMessage(error));
-    // The window closed meanwhile: the screen says whom to ask.
+    setFailure(studentCodeMessage(error, parents));
+    // The window closed meanwhile: the profile now waits for a starting code.
     if (error.code === 'CODE_NOT_EXPECTED') await queryClient.invalidateQueries({ queryKey: profilesQuery.queryKey });
   };
 
@@ -137,56 +188,45 @@ function ChooseCode({ studentId, name, shared, token, back }: { studentId: strin
   const typed = (chosen: string) => {
     setCode('');
     if (step.kind === 'first') {
-      setFailure(null);
-      setStep({ kind: 'again', first: chosen });
+      const refusal = firstCodeRefusal(chosen);
+      setFailure(refusal);
+      if (!refusal) setStep({ kind: 'again', first: chosen });
     } else if (step.kind === 'again' && chosen !== step.first) {
       setStep({ kind: 'first' });
-      setFailure('Les deux codes ne sont pas les mêmes. Recommence.');
+      setFailure({ title: 'Les deux codes sont différents. Recommence.' });
     } else if (step.kind === 'again') {
       if (shared) void send(chosen, false);
       else setStep({ kind: 'device', code: chosen });
     }
   };
 
-  const aside = (
-    <>
-      <p className="text-muted-foreground">
-        Ton code, toi seul le connais : ton parent ne le voit pas. Il voit le résumé de ta semaine, jamais tes conversations avec Tom.
-      </p>
-      <p className="text-muted-foreground">Si tu l’oublies, ton parent te donne un code pour en choisir un nouveau ; tu sauras quand il l’a fait.</p>
-      {failure && <Banner tone="error" focusOnMount title={failure} />}
-    </>
-  );
-
   if (step.kind === 'device') {
     return (
-      <Page title="Cet appareil est à toi seul ?" back={back} announce wide>
-        <PadLayout aside={aside}>
-          <div className="flex w-full max-w-xs flex-col gap-3">
-            <Button disabled={sending} onClick={() => void send(step.code, true)}>
-              Oui, il est à moi
-            </Button>
-            <Button variant="outline" disabled={sending} onClick={() => void send(step.code, false)}>
-              Non, on le partage
-            </Button>
-            <p className="text-sm text-muted-foreground">Sur un appareil partagé, ton profil se ferme après 10 minutes sans rien faire.</p>
-          </div>
-        </PadLayout>
-      </Page>
+      <EntryPage title="Quelqu’un d’autre se sert de cet appareil ?" announce>
+        <div className="flex flex-col gap-3">
+          <Card render={<button type="button" disabled={sending} onClick={() => void send(step.code, false)} />} className={CHOICE}>
+            <span className="text-xl font-bold">Oui, on le partage</span>
+            <span className="text-sm text-muted-foreground group-hover:text-accent-muted-foreground group-disabled:text-disabled-foreground">
+              Catiche se fermera quand tu ne t’en sers plus.
+            </span>
+          </Card>
+          <Card render={<button type="button" disabled={sending} onClick={() => void send(step.code, true)} />} className={CHOICE}>
+            <span className="text-xl font-bold">Non, il est à moi</span>
+          </Card>
+          {failure && <Failure message={failure} />}
+        </div>
+      </EntryPage>
     );
   }
 
   return (
-    <Page
+    <EntryPage
       title={step.kind === 'first' ? 'Choisis ton code' : 'Tape-le encore une fois'}
-      subtitle={step.kind === 'first' ? `${name}, 6 chiffres que toi seul connais. Pas 123456, ni ta date de naissance.` : name}
-      back={back}
+      subtitle={step.kind === 'first' ? '6 chiffres que personne d’autre ne connaît.' : undefined}
       announce={step.kind === 'again'}
-      wide
-    >
-      <PadLayout aside={aside}>
+      pad={
         <CodePad
-          label={step.kind === 'first' ? 'Ton nouveau code à 6 chiffres' : 'Ton nouveau code, encore une fois'}
+          label={step.kind === 'first' ? 'Ton code, 6 chiffres' : 'Ton code, encore une fois'}
           value={code}
           disabled={sending}
           onKey={(key) => {
@@ -195,17 +235,16 @@ function ChooseCode({ studentId, name, shared, token, back }: { studentId: strin
             else setCode(next);
           }}
         />
-      </PadLayout>
-    </Page>
-  );
-}
-
-/** The pad and what goes with it: one column on a phone, side by side on a computer. */
-function PadLayout({ aside, children }: { aside: ReactNode; children: ReactNode }) {
-  return (
-    <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-center lg:gap-12">
-      <div className="flex flex-col gap-3 lg:order-first">{aside}</div>
-      <div className="flex justify-center">{children}</div>
-    </div>
+      }
+    >
+      {failure ? (
+        <Failure message={failure} />
+      ) : (
+        <p className="flex gap-3 rounded-2xl bg-muted p-4 text-sm">
+          <EyeOffIcon aria-hidden="true" nonScalingStroke className="size-6 shrink-0" />
+          <span>{codeSecret(parents)}</span>
+        </p>
+      )}
+    </EntryPage>
   );
 }

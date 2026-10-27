@@ -179,6 +179,15 @@ export const newChildSchema = (now = new Date()) =>
     })
     .transform(({ month, year, ...child }) => ({ ...child, birthMonth: `${year}-${month}` }));
 
+/**
+ * The home's card on the child's code (A5), for a parent: a code the child said forgotten first,
+ * else one too many tries stopped; both ask a starting code. Null for a code that works.
+ */
+export function codeAlert(name: string, { codeForgotten, codeLocked }: Pick<Student['alerts'], 'codeForgotten' | 'codeLocked'>): string | null {
+  if (codeForgotten) return `${name} a oublié son code.`;
+  return codeLocked ? `Le code de ${name} ne marche plus.` : null;
+}
+
 /** The head of « Gérer » for a parent (A7): who decides for the child with them. */
 export const decidesWith = (name: string, parents: readonly string[]) =>
   parents.length === 0 ? `Vous décidez pour ${name}.` : `Vous décidez pour ${name}, avec ${listWords(parents)}.`;
