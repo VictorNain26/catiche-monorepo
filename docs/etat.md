@@ -113,8 +113,8 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
      PR 2 à 6 ont été construites sur les textes seuls, alors qu'une interface se construit
      contre une cible visuelle et s'y compare
      ([best practices de Claude Code](https://code.claude.com/docs/en/best-practices)).
-     Les maquettes de l'enfant sont validées par Victor le 2026-10-27 (`app-cible.md` § 5,
-     « La cible visuelle ») ; restent celles des écrans adultes, avant leurs retouches.
+     Où en sont les maquettes, et les textes à trancher avant la PR 7 : `app-cible.md` § 5,
+     « La cible visuelle ». Les écrans adultes attendent encore les leurs.
   3. **La soirée**, avec le volet IA et le prompt de Tom.
   4. **Le point du soir**, qui remplace le résumé de la semaine.
   5. **Les contrôles gardés d'un soir à l'autre.**
