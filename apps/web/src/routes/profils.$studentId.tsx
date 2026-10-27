@@ -156,15 +156,17 @@ type Step = { kind: 'first' } | { kind: 'again'; first: string } | { kind: 'devi
 /**
  * E2, the first code: chosen, refused at once when too easy, typed again so that a slip does not
  * lock the student out, then whether others use the device. A device a parent added as shared asks
- * nothing.
+ * nothing. Past the window, the keypad closes and the way to a new starting code (E1) opens.
  */
 function ChooseCode({ studentId, parents, shared, token }: { studentId: string; parents: readonly string[]; shared: boolean; token: string }) {
-  const queryClient = useQueryClient();
   const entered = useEntered();
   const [step, setStep] = useState<Step>({ kind: 'first' });
   const [code, setCode] = useState('');
   const [sending, setSending] = useState(false);
   const [failure, setFailure] = useState<CodeMessage | null>(null);
+  // The window closed meanwhile: the profile waits for a new starting code, and the screen says so
+  // until the student goes to type it.
+  const [expired, setExpired] = useState(false);
 
   const send = async (chosen: string, ownDevice: boolean) => {
     setSending(true);
@@ -174,8 +176,7 @@ function ChooseCode({ studentId, parents, shared, token }: { studentId: string; 
     setSending(false);
     setStep({ kind: 'first' });
     setFailure(studentCodeMessage(error, parents));
-    // The window closed meanwhile: the profile now waits for a starting code.
-    if (error.code === 'CODE_NOT_EXPECTED') await queryClient.invalidateQueries({ queryKey: profilesQuery.queryKey });
+    if (error.code === 'CODE_NOT_EXPECTED') setExpired(true);
   };
 
   /** Six digits typed: the next step. */
@@ -222,13 +223,20 @@ function ChooseCode({ studentId, parents, shared, token }: { studentId: string; 
         <CodePad
           label={step.kind === 'first' ? 'Ton code, 6 chiffres' : 'Ton code, encore une fois'}
           value={code}
-          disabled={sending}
+          disabled={sending || expired}
           onKey={(key) => {
             const next = pressKey(code, key);
             if (next.length === CODE_DIGITS) typed(next);
             else setCode(next);
           }}
         />
+      }
+      after={
+        expired ? (
+          <Button render={<Link to="/activer" />} size="lg" className="lg:self-start">
+            J’ai un code de départ
+          </Button>
+        ) : undefined
       }
     >
       {failure ? (
