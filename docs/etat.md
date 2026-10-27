@@ -190,3 +190,7 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
   Le même jour, l'horloge de la base locale a reculé de 2,15 s en 20 s, mesuré par
   `clock_timestamp()` : c'est la cause supposée. S'ils échouent encore, trier par une clé qui ne
   dépend pas de l'horloge, comme l'historique de l'enfant (`child_event.id`).
+- **`the deletion of a child with two parents > is asked: noted, told to the other parent with
+  its day, and the child stays`** (`modules/household/deletion.test.ts`) : vu en échec une fois le
+  2026-10-27, lancé avec tout `household` et `platform/auth` ; repassé seul, puis deux fois avec
+  eux. Cause non trouvée ; s'il échoue encore, garder sa sortie.
