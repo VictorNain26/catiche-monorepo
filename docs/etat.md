@@ -125,6 +125,10 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
 
 ## Technique reporté
 
+- `/invitation` doit nommer l'adulte qui invite et l'enfant avant l'acceptation
+  (`app-cible.md` § 5, A3) : la route d'invitation du serveur ne les donne pas encore à la page.
+  À faire avec la PR 8 de l'étape 2, sans exposer plus que ces deux prénoms à qui tient le lien.
+
 - Une clé d'accès ne se propose pas sur un appareil partagé (`GET /api/me`, `sharedDevice`), mais
   la route d'enregistrement du plugin passkey ne le refuse pas : un appel direct en créerait une.
   Un hook `before` sur `/passkey/generate-register-options`, lisant `isShortSession`
