@@ -1,4 +1,8 @@
 import Bowser from 'bowser';
+import type { InferResponseType } from 'hono/client';
+import type { api } from './api';
+
+type OwnDevice = InferResponseType<typeof api.me.devices.$get, 200>['devices'][number];
 
 /** A device's system and browser, from its user agent: « iOS · Safari »; null when it cannot be read. */
 export function browserName(userAgent: string | null | undefined): string | null {
@@ -37,7 +41,7 @@ function kindOf(userAgent: string | null | undefined): keyof typeof KINDS {
 export const deviceKind = (userAgent: string | null | undefined): DeviceKind => KINDS[kindOf(userAgent)];
 
 /** A device of the student's, as « Tes appareils » lists it (E6): « Ordinateur partagé, depuis le 2 octobre ». */
-export function ownDeviceLine({ userAgent, shared, createdAt }: { userAgent: string | null; shared: boolean; createdAt: string }) {
+export function ownDeviceLine({ userAgent, shared, createdAt }: Pick<OwnDevice, 'userAgent' | 'shared' | 'createdAt'>) {
   const kind = deviceKind(userAgent);
   return `${shared ? `${kind.name} ${kind.shared}` : kind.name}, depuis le ${formatDate(createdAt)}`;
 }
