@@ -44,12 +44,13 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
   contrastes cibles sur le fond, interpolés en OKLCH, par Leonardo (`packages/tokens/scales.mjs`) ;
   le sombre a son échelle à lui, pas une inversion. Les rôles pointent vers les pas, ceux des
   surfaces compris (`card`, `secondary` pour la bulle de l'élève, `muted` et `muted-foreground`
-  pour le texte secondaire) ; seul un rôle fixe déclaré porte une valeur à lui : le noir du voile,
-  et le blanc (`white`), le papier de la carte en clair. En sombre, l'eau profonde est un peu
-  moins claire que le `#79cbc9` de l'essai : chaque pas garde le même contraste dans les deux
-  modes.
-- La bordure (`border`) est au pas 6, le premier des bordures : une carte et une liste se voient
-  sur le fond. Une bordure qui porte un sens, celle d'un champ, est `input`, à 3:1.
+  pour le texte secondaire) ; seul un rôle fixe déclaré porte une valeur à lui, hors des
+  échelles : le voile (`overlay`), et le papier de la carte en clair (`white`) ; leurs valeurs
+  sont dans `theme.css`. En sombre, l'eau profonde est un peu moins claire que le `#79cbc9` de
+  l'essai : chaque pas garde le même contraste dans les deux modes.
+- La bordure (`border`) prend un pas des bordures, assez marqué pour qu'une carte et une liste
+  se voient sur le fond ; son pas est dans `theme.css`. Une bordure qui porte un sens, celle d'un
+  champ, est `input`, à 3:1.
 - Le bouton secondaire est plein, dans l'eau claire (`tonal`) : il se lit comme un bouton sans
   concurrencer l'action principale. Le contour (`outline`) est réservé à ce qui va avec un champ
   (une touche du pavé de code, la photo à côté du message) et au geste grave, celui qui ouvre une
@@ -72,8 +73,8 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
 - Une échelle fixe, du corps au titre ; le corps à 17 px au moins au téléphone ; jamais sous 12 px ;
   jamais de graisse fine ; 45 à 75 caractères par ligne.
 - Le texte secondaire (la ligne sous un titre de liste, le libellé et l'aide d'un champ, le texte
-  d'un bandeau) est `text-sm`, redéfini à 15 px ; un bouton et une saisie gardent la taille du
-  corps.
+  d'un bandeau) est `text-sm` ; sa taille est dans `theme.css`. Un bouton et une saisie gardent
+  la taille du corps.
 - Le titre d'un écran garde la graisse que `base.css` pose aux titres, sans la surcharger.
 - Les chiffres qu'on compare en chiffres tabulaires ; les fractions des maths en `frac`.
 - Le gras pour faire ressortir, jamais l'italique ; le texte de Tom à 18 px au moins, interligne 1,5.
