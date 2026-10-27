@@ -231,6 +231,22 @@ Accueil : une carte par enfant
 
 ## 5. Les écrans
 
+**La cible visuelle** des écrans de l'enfant (C1, C2, E1 à E4, E6, E7), validée par Victor le
+2026-10-27 : [la toile « Catiche — écrans de l'enfant »](https://claude.ai/artifact/Xcu1PanDBVqHFXpcJNaGqF),
+chaque écran au téléphone (390 px) et à l'ordinateur (1280 px), C2 et E4 en sombre, ses
+couleurs et ses tailles compilées depuis `packages/tokens`. La PR 7 s'y compare. Ce qu'elle ne
+montre pas encore : Tom au trait (un cadre marque sa place) et le texte de « Bientôt » sur E4.
+Le test de tâches de la toile (une élève de 5ᵉ, 2026-10-27) laisse des textes à trancher avant
+la PR 7 :
+- « Tout effacer » et « Arrêter » (E7) commencent par la même phrase, « Tom oublie tout » ;
+- « Il ne garde rien de ce que tu écris » (E7) semble contredire les leçons retenues ;
+- E2 se valide par un bouton, E3 au sixième chiffre : un seul geste pour les deux ;
+- E3, après « J'ai oublié mon code », garde son titre « tape ton code » ;
+- « Ton plan reste là » (E4, « Quitter ») n'est pas compris : l'enfant dit « mes devoirs » ;
+- « Un nouvel appareil ouvre ton espace » (E4) inquiète sans dire quoi faire ;
+- « Viser le carré » (E1) ne dit pas de quel carré il s'agit ;
+- « Mes réglages » mène à un écran titré « Règle ton espace ».
+
 **Les voix** : Catiche vouvoie l'adulte et tutoie l'enfant dans les boutons, les erreurs et les
 réglages ; Tom tutoie dans ses bulles, et seulement là. Les boutons de l'enfant parlent à la
 première personne (« Commencer mes devoirs », « Mes réglages »). Hors de la soirée, le dessin de
