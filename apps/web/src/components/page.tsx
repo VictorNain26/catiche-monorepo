@@ -5,7 +5,7 @@ import { ChevronLeftIcon, Settings2Icon, UserRoundIcon, type LucideIcon } from '
 import { useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
 import { meQuery } from '../lib/me';
 import { Quit, StudentQuit } from './sign-out';
-import { TomHead } from './tom';
+import { TomFigure } from './tom';
 
 function HeaderAnchor({ icon: Icon, className, children, ...anchor }: ComponentProps<'a'> & { icon: LucideIcon }) {
   return (
@@ -33,32 +33,96 @@ function Brand({ className }: { className?: string }) {
   return <p className={cn('font-heading text-xl font-extrabold text-primary', className)}>Catiche</p>;
 }
 
+/** A screen reached by a step of a form, not a link: its title takes the focus, so it is read out. */
+function useAnnounce(announce: boolean) {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (announce) headingRef.current?.focus();
+  }, [announce]);
+  return headingRef;
+}
+
+interface StageProps {
+  title: ReactNode;
+  subtitle?: string | undefined;
+  back?: ReactNode;
+  /** The links of the student's space: at the top of the stage on a phone, of the sheet on a computer. */
+  nav?: ReactNode;
+  /** The brand's name above the title on a phone, on the first screen of the app; on a computer, it always heads the stage. */
+  brand?: boolean;
+  announce?: boolean;
+  /** Under the title, on the stage: Tom's sentence and the main action, seen in the first screen. */
+  lead?: ReactNode;
+  children: ReactNode;
+}
+
 /**
- * « Ce soir » (E4), the screen the student comes back to: « Régler mon espace » and « Quitter » at
- * the top, its title, which names them, larger on a computer, with the brand beside the header.
+ * The student's screens (C2, E1 to E4): the stage, in the light water, holds the title, Tom and the
+ * main action; the sheet, the card, holds the rest. On a phone, the sheet overlaps the stage from
+ * below; on a computer, the stage stands on the left, Tom whole at its foot, and the sheet on the right.
  */
-export function StudentPage(page: Omit<PageProps, 'back' | 'action' | 'display'>) {
+function StudentStage({ title, subtitle, back, nav, brand = false, announce = false, lead, children }: StageProps) {
+  const headingRef = useAnnounce(announce);
   return (
-    <Page
-      {...page}
-      display
-      back={<Brand className="hidden lg:block" />}
-      action={
-        <div className="flex flex-wrap items-center justify-end gap-x-6">
-          <HeaderLink to="/espace" icon={Settings2Icon}>
-            Régler mon espace
-          </HeaderLink>
-          <StudentQuit />
-        </div>
-      }
-    />
+    <main className="relative flex min-h-dvh flex-col bg-stage lg:flex-row">
+      {/* A grid on a phone, the title and Tom side by side; a column on a computer, Tom last. */}
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] content-start items-end gap-x-2 gap-y-4 px-4 pt-4 pb-10 text-stage-foreground lg:flex lg:w-5/12 lg:shrink-0 lg:flex-col lg:items-stretch lg:gap-6 lg:px-14 lg:py-10">
+        {nav !== undefined && (
+          <div className="col-span-2 flex flex-wrap items-center justify-end gap-x-6 lg:absolute lg:top-8 lg:right-12 lg:z-20">{nav}</div>
+        )}
+        <Brand className={cn('col-span-2 lg:block', !brand && 'hidden')} />
+        {back !== undefined && <div className="col-span-2 flex min-h-11 items-center">{back}</div>}
+        <h1 ref={headingRef} tabIndex={-1} className="pb-4 text-3xl text-stage-foreground outline-none lg:pt-8 lg:pb-0 lg:text-5xl">
+          {title}
+        </h1>
+        <TomFigure className="size-40 lg:order-last lg:mt-auto lg:size-90 lg:self-end" />
+        {subtitle !== undefined && <p className="col-span-2 text-stage-muted-foreground">{subtitle}</p>}
+        {lead !== undefined && <div className="col-span-2 flex flex-col gap-4 lg:gap-6">{lead}</div>}
+      </div>
+      <div
+        className={cn(
+          'relative z-10 -mt-6 flex flex-1 flex-col rounded-t-2xl bg-card px-4 pt-6 pb-8 text-card-foreground shadow-sheet lg:mt-0 lg:-ml-6 lg:rounded-tr-none lg:rounded-bl-2xl lg:px-12 lg:py-10',
+          nav !== undefined && 'lg:pt-24',
+        )}
+      >
+        <div className="flex w-full max-w-2xl flex-1 flex-col gap-6">{children}</div>
+      </div>
+    </main>
   );
 }
 
 /**
- * The student's way in (C2, E1, E2, E3): one column on a phone; on a computer, the brand's panel on
- * the left, with Tom, and the screen on the right. A screen with a keypad (`pad`) lays it beside its
- * words on a computer, and under them on a phone, before what follows (`after`).
+ * A list laid on the sheet: its lines, without a sheet of their own, which would be a card in a
+ * card; they reach the sheet's edges, so that a line under the pointer fills it.
+ */
+export const SHEET_ROWS = '-mx-4 rounded-none border-0 bg-transparent shadow-none';
+
+/**
+ * « Ce soir » (E4), the screen the student comes back to: « Régler mon espace » and « Quitter » at
+ * the top; on the stage, its title, which names them, Tom and the way into his help (`lead`).
+ */
+export function StudentPage({ title, lead, children }: { title: ReactNode; lead: ReactNode; children: ReactNode }) {
+  return (
+    <StudentStage
+      title={title}
+      lead={lead}
+      nav={
+        <>
+          <HeaderLink to="/espace" icon={Settings2Icon}>
+            Régler mon espace
+          </HeaderLink>
+          <StudentQuit />
+        </>
+      }
+    >
+      {children}
+    </StudentStage>
+  );
+}
+
+/**
+ * The student's way in (C2, E1, E2, E3), on the stage and the sheet: the sheet holds what the screen
+ * asks, then a keypad (`pad`), then what follows (`after`); on a computer, in the sheet's middle.
  */
 export function EntryPage({
   title,
@@ -69,40 +133,16 @@ export function EntryPage({
   pad,
   after,
   children,
-}: {
-  title: ReactNode;
-  subtitle?: string | undefined;
-  back?: ReactNode;
-  /** The brand's name above the title on a phone, on the first screen of the app. */
-  brand?: boolean;
-  announce?: boolean;
-  pad?: ReactNode;
-  after?: ReactNode;
-  children?: ReactNode;
-}) {
+}: Omit<StageProps, 'nav' | 'lead' | 'children'> & { pad?: ReactNode; after?: ReactNode; children?: ReactNode }) {
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md lg:grid lg:max-w-none lg:grid-cols-12 lg:gap-16 lg:p-8">
-      <aside className="hidden flex-col justify-between rounded-2xl bg-panel p-10 text-panel-foreground lg:col-span-5 lg:flex">
-        <Brand className="text-2xl text-panel-foreground" />
-        <TomHead className="size-56 self-center" />
-        <span />
-      </aside>
-      <main
-        className={cn(
-          'flex w-full flex-col gap-6 p-4 lg:col-span-7 lg:justify-center lg:p-0 lg:pr-8',
-          pad === undefined ? 'lg:max-w-xl' : 'lg:grid lg:grid-cols-2 lg:content-center lg:items-center lg:gap-x-12 lg:gap-y-6',
-        )}
-      >
-        <div className="flex flex-col gap-6 lg:col-start-1">
-          {brand && <Brand className="pt-6 lg:hidden" />}
-          <PageHeader title={title} subtitle={subtitle} back={back} announce={announce} display />
-        </div>
+    <StudentStage title={title} subtitle={subtitle} back={back} brand={brand} announce={announce}>
+      <div className="flex flex-col gap-6 lg:my-auto">
         {/* A failure that is not there, or no names yet, leaves no gap. */}
-        {Boolean(children) && <div className="flex flex-col gap-6 lg:col-start-1">{children}</div>}
-        {pad !== undefined && <div className="flex justify-center lg:col-start-2 lg:row-span-3 lg:row-start-1">{pad}</div>}
-        {after !== undefined && <div className="flex flex-col gap-3 lg:col-start-1">{after}</div>}
-      </main>
-    </div>
+        {Boolean(children) && <div className="flex flex-col gap-6">{children}</div>}
+        {pad !== undefined && <div className="flex justify-center">{pad}</div>}
+        {after !== undefined && <div className="flex flex-col gap-3">{after}</div>}
+      </div>
+    </StudentStage>
   );
 }
 
@@ -151,10 +191,7 @@ interface PageProps extends HeaderProps {
 /** A screen's header: the way back, read before the title, and an action of the space on the right, when it has them. */
 function PageHeader({ title, subtitle, back, action, announce = false, display = false }: HeaderProps) {
   const links = back !== undefined || action !== undefined;
-  const headingRef = useRef<HTMLHeadingElement>(null);
-  useEffect(() => {
-    if (announce) headingRef.current?.focus();
-  }, [announce]);
+  const headingRef = useAnnounce(announce);
   return (
     <header className="flex flex-col gap-2 pt-4">
       {links ? (

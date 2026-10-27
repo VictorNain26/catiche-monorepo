@@ -116,7 +116,7 @@
   /* Un contrôle désactivé reste lisible : un fond et un texte à lui, pas une opacité. */
   --color-disabled: var(--mist-3);
   --color-disabled-foreground: var(--mist-11);
-  /* Le panneau de marque, à l'entrée de l'app : l'eau profonde. */
+  /* Le plan profond de la marque, sur le site (le point du soir) : l'eau profonde. */
   --color-panel: var(--water-11);
   --color-panel-foreground: var(--mist-1);
   /* Le carré à viser avec l'appareil photo (A4) : foncé sur clair dans les deux modes, comme un

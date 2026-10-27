@@ -17,6 +17,8 @@ function List({ className, ...props }: React.ComponentProps<'ul'>) {
 }
 
 interface ListItemProps {
+  /** What heads the line, before its words: a first name's initial, an icon. */
+  leading?: React.ReactNode;
   title: React.ReactNode;
   /** What tells this item from the others: a date, a subject. */
   meta?: React.ReactNode;
@@ -26,7 +28,7 @@ interface ListItemProps {
   children?: React.ReactNode;
 }
 
-function ListItem({ title, meta, render, className, children }: ListItemProps) {
+function ListItem({ leading, title, meta, render, className, children }: ListItemProps) {
   const link = render !== undefined;
   const row = useRender({
     defaultTagName: 'div',
@@ -40,6 +42,7 @@ function ListItem({ title, meta, render, className, children }: ListItemProps) {
       ),
       children: (
         <>
+          {leading}
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="font-bold">{title}</span>
             {meta !== undefined && <span className="text-sm text-muted-foreground group-hover:text-accent-muted-foreground">{meta}</span>}
