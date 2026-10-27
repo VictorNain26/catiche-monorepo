@@ -1,5 +1,4 @@
 ---
-description: Client web apps/web — chargé uniquement sur ses fichiers
 paths:
   - "apps/web/**"
 ---

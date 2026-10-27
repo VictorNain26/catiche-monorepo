@@ -1,7 +1,7 @@
 # État
 
 Ce qui reste vrai quelle que soit la direction du produit : les bloquants, les gestes de Victor,
-le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-24 ; ce qui est fait en sort.
+le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui est fait en sort.
 
 ## Bloquants
 
@@ -109,7 +109,9 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-24 ; ce qui 
      écran avec ses textes, le tableau avant / après et le découpage en PR. Ce document porte
      le détail des étapes 2 à 5 ; chaque étape en retire ce qu'elle construit.
   2. **Le socle, sans IA** : le modèle de famille et ses droits, l'entrée de l'adulte et de
-     l'enfant, l'accueil, « Gérer », la navigation, Tom au trait.
+     l'enfant, l'accueil, « Gérer », la navigation, Tom au trait. Le côté adulte est construit
+     (#562 à #568). Reste l'enfant et la navigation, après les maquettes que Victor valide
+     d'abord (`docs/plans/app-cible.md` § 8, « Le design d'abord »).
   3. **La soirée**, avec le volet IA et le prompt de Tom.
   4. **Le point du soir**, qui remplace le résumé de la semaine.
   5. **Les contrôles gardés d'un soir à l'autre.**

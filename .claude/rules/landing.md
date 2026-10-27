@@ -1,5 +1,4 @@
 ---
-description: Landing Astro — chargé uniquement sur apps/landing
 paths:
   - "apps/landing/**"
 ---
@@ -32,7 +31,7 @@ Clever Cloud (`apps/landing/Caddyfile`).
   sourcés ; jamais un avis, un logo ou un compteur inventé ou anticipé.
 - Jamais un cookie non essentiel avant le consentement, ni un bandeau où « Refuser » est moins
   visible qu'« Accepter » ([CNIL](https://www.cnil.fr/en/dark-patterns-cookie-banners-cnil-issues-formal-notice-website-publishers)).
-- Jamais de framework client (React ou autre) : la landing est du HTML statique. Un composant qui
+- La landing est du HTML statique, sans framework client. Un composant qui
   a besoin du navigateur est un élément personnalisé (`customElements.define`) dans le `<script>`
   de son composant, sur l'élément natif quand il existe (`<dialog>` pour le menu, `<details>` pour
   la FAQ). Les classes partagées avec le web viennent de `@repo/ui/classes`.

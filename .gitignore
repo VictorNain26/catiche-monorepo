@@ -41,6 +41,7 @@ lint_report.json
 **/.claude/projects/
 **/.claude/todos/
 **/.claude/credentials.json
+CLAUDE.local.md
 
 # Claude Code worktrees
 .claude/worktrees/

@@ -1,5 +1,4 @@
 ---
-description: Plans de PR et suivi — chargé en ouvrant la doc ou la config
 paths:
   - "docs/**"
   - "CLAUDE.md"
