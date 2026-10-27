@@ -1,7 +1,13 @@
 import * as React from 'react';
+import { cn } from '../lib/utils';
 import { Checkbox } from './checkbox';
 import { Input } from './input';
 import { NativeSelect, NativeSelectOption } from './native-select';
+
+// A field's label, the line that says what it is for, and its error: the same in every field.
+const LABEL = 'text-sm font-bold text-foreground';
+const HINT = 'text-sm text-muted-foreground';
+const ERROR = 'text-sm text-destructive';
 
 type FieldProps = React.ComponentProps<typeof Input> & { label: string; hint?: string; error?: string | undefined };
 
@@ -13,11 +19,11 @@ function Field({ label, hint, error, ...input }: FieldProps) {
   const describedBy = [hint ? hintId : '', error ? errorId : ''].filter(Boolean).join(' ');
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-meta font-bold text-foreground">
+      <label htmlFor={id} className={LABEL}>
         {label}
       </label>
       {hint && (
-        <p id={hintId} className="text-meta text-muted-foreground">
+        <p id={hintId} className={HINT}>
           {hint}
         </p>
       )}
@@ -29,7 +35,7 @@ function Field({ label, hint, error, ...input }: FieldProps) {
         {...input}
       />
       {error && (
-        <p id={errorId} className="text-meta text-destructive">
+        <p id={errorId} className={ERROR}>
           {error}
         </p>
       )}
@@ -50,7 +56,7 @@ function SelectField({ label, options, error, ...select }: SelectFieldProps) {
   const errorId = `${id}-error`;
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-meta font-bold text-foreground">
+      <label htmlFor={id} className={LABEL}>
         {label}
       </label>
       <NativeSelect
@@ -68,7 +74,7 @@ function SelectField({ label, options, error, ...select }: SelectFieldProps) {
         ))}
       </NativeSelect>
       {error && (
-        <p id={errorId} className="text-meta text-destructive">
+        <p id={errorId} className={ERROR}>
           {error}
         </p>
       )}
@@ -89,17 +95,17 @@ function CheckboxField({ label, hint, error, ...checkbox }: CheckboxFieldProps) 
   const describedBy = [hint ? hintId : '', error ? errorId : ''].filter(Boolean).join(' ');
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="flex min-h-11 cursor-pointer items-center gap-3 text-meta font-bold text-foreground">
+      <label htmlFor={id} className={cn('flex min-h-11 cursor-pointer items-center gap-3', LABEL)}>
         <Checkbox id={id} aria-invalid={error ? true : undefined} aria-describedby={describedBy || undefined} {...checkbox} />
         {label}
       </label>
       {hint && (
-        <p id={hintId} className="pl-9 text-meta text-muted-foreground">
+        <p id={hintId} className={cn('pl-9', HINT)}>
           {hint}
         </p>
       )}
       {error && (
-        <p id={errorId} className="pl-9 text-meta text-destructive">
+        <p id={errorId} className={cn('pl-9', ERROR)}>
           {error}
         </p>
       )}
