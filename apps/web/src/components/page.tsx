@@ -163,11 +163,7 @@ function PageHeader({ title, subtitle, back, action, announce = false, display =
           {action}
         </div>
       ) : null}
-      <h1
-        ref={headingRef}
-        tabIndex={-1}
-        className={cn('text-3xl font-bold text-foreground outline-none', !links && 'pt-4', display && 'lg:pt-0 lg:text-5xl')}
-      >
+      <h1 ref={headingRef} tabIndex={-1} className={cn('text-3xl text-foreground outline-none', !links && 'pt-4', display && 'lg:pt-0 lg:text-5xl')}>
         {title}
       </h1>
       {subtitle !== undefined && <p className="text-muted-foreground">{subtitle}</p>}

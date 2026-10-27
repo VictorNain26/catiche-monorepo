@@ -95,7 +95,7 @@ function DeleteAccount({ childNames }: { childNames: readonly string[] }) {
           >
             Supprimer définitivement
           </Button>
-          <Button variant="outline" onClick={deletion.cancel}>
+          <Button variant="tonal" onClick={deletion.cancel}>
             Annuler
           </Button>
         </>
@@ -134,7 +134,7 @@ function FirstName({ name }: { name: string }) {
     <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-4">
       <Field label="Votre prénom" autoComplete="given-name" {...form.register('name')} error={form.formState.errors.name?.message} />
       {rename.error && <Banner tone="error" title={rename.error.message} />}
-      <Button type="submit" variant="outline" disabled={rename.isPending} className="sm:self-start">
+      <Button type="submit" variant="tonal" disabled={rename.isPending} className="sm:self-start">
         Changer mon prénom
       </Button>
     </form>
@@ -199,7 +199,7 @@ function Passkeys({ shared }: { shared: boolean }) {
           >
             Supprimer la clé
           </Button>
-          <Button variant="outline" onClick={removal.cancel}>
+          <Button variant="tonal" onClick={removal.cancel}>
             Annuler
           </Button>
         </>

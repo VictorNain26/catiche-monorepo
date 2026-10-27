@@ -170,13 +170,13 @@ export function ChildDevices({ child, activation }: { child: Student; activation
           >
             Retirer
           </Button>
-          <Button variant="outline" onClick={removal.cancel}>
+          <Button variant="tonal" onClick={removal.cancel}>
             Annuler
           </Button>
         </>
       )}
       {failure && <Banner tone="error" title={householdMessage(failure)} />}
-      <Button render={<Link to="/foyer/$studentId/appareil" params={{ studentId: child.id }} />} variant="outline" className="sm:self-start">
+      <Button render={<Link to="/foyer/$studentId/appareil" params={{ studentId: child.id }} />} variant="tonal" className="sm:self-start">
         Ajouter un appareil
       </Button>
     </Section>
@@ -248,7 +248,7 @@ export function ForgottenCodeGesture({
       )}
       {!code && (
         <Button
-          variant={primary ? 'default' : 'outline'}
+          variant={primary ? 'default' : 'tonal'}
           className="sm:self-start"
           disabled={activation.asking}
           onClick={() => {

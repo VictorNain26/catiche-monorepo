@@ -84,7 +84,7 @@ function Household() {
           </ul>
         </Section>
       )}
-      <Button render={<Link to="/foyer/ajouter" />} variant="outline" className="sm:self-start">
+      <Button render={<Link to="/foyer/ajouter" />} variant="tonal" className="sm:self-start">
         Ajouter un enfant
       </Button>
     </AdultPage>
@@ -132,7 +132,7 @@ function InvitationCard({ invitation }: { invitation: Invitation }) {
         </Button>
         <Button
           type="button"
-          variant="outline"
+          variant="tonal"
           disabled={accept.isPending || decline.isPending}
           onClick={() => {
             decline.mutate();
@@ -250,7 +250,7 @@ function ChildCard({ child }: { child: Student }) {
       )}
       <Button
         render={<Link to="/foyer/$studentId" params={{ studentId: child.id }} />}
-        variant={child.role === 'guardian' ? 'default' : 'outline'}
+        variant={child.role === 'guardian' ? 'default' : 'tonal'}
         className="mt-auto sm:self-start"
       >
         {child.role === 'guardian' ? 'Gérer' : 'Ses devoirs et ses messages'}

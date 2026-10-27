@@ -174,7 +174,7 @@ function OtherDevice({ child, activation }: { child: Student; activation: Return
     },
   });
   const home = (
-    <Button render={<Link to="/foyer" />} variant="outline" className="sm:self-start">
+    <Button render={<Link to="/foyer" />} variant="tonal" className="sm:self-start">
       Aller à l’accueil
     </Button>
   );
@@ -215,7 +215,7 @@ function OtherDevice({ child, activation }: { child: Student; activation: Return
           </Button>
         )}
         <Button
-          variant={code ? 'outline' : 'default'}
+          variant={code ? 'tonal' : 'default'}
           disabled={activation.asking}
           onClick={() => {
             activation.ask('device');

@@ -138,7 +138,7 @@ function Session() {
             Photo prête : elle part avec ton message.
             <Button
               type="button"
-              variant="outline"
+              variant="tonal"
               onClick={() => {
                 setPhoto(null);
               }}

@@ -11,7 +11,7 @@ export function Failure() {
     <div className="flex min-h-dvh lg:items-center lg:justify-center">
       <main className="mx-auto flex w-full max-w-md flex-col gap-6 p-4 pt-8 lg:rounded-2xl lg:border lg:border-border lg:bg-card lg:p-10 lg:text-card-foreground lg:shadow-control">
         <header className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold lg:text-4xl">La page ne s’est pas affichée</h1>
+          <h1 className="text-3xl lg:text-4xl">La page ne s’est pas affichée</h1>
           <p className="text-muted-foreground">Internet a peut-être coupé.</p>
         </header>
         <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-center lg:gap-6">

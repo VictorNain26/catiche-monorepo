@@ -33,7 +33,7 @@ export function SignOut({ label }: { label: string }) {
     <>
       {signOut.error && <Banner tone="error" title={signOut.error.message} />}
       <Button
-        variant="outline"
+        variant="tonal"
         disabled={signOut.isPending}
         onClick={() => {
           signOut.mutate();
@@ -77,7 +77,7 @@ export function StudentQuit() {
       >
         Quitter
       </Button>
-      <AlertDialogClose render={<Button size="lg" variant="outline" />}>Rester</AlertDialogClose>
+      <AlertDialogClose render={<Button size="lg" variant="tonal" />}>Rester</AlertDialogClose>
     </AlertDialog>
   );
 }

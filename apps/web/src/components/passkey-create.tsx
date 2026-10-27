@@ -69,7 +69,7 @@ export function PasskeyCreate({ label, onCreated, secondary = false }: { label: 
         </>
       ) : (
         <Button
-          variant={secondary ? 'outline' : 'default'}
+          variant={secondary ? 'tonal' : 'default'}
           disabled={add.isPending}
           onClick={() => {
             askCode.reset();

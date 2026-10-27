@@ -106,7 +106,7 @@ function LeaveChild({ child }: { child: Student }) {
       >
         Me retirer
       </Button>
-      <Button variant="outline" onClick={leaving.cancel}>
+      <Button variant="tonal" onClick={leaving.cancel}>
         Annuler
       </Button>
     </>
@@ -249,12 +249,12 @@ function ChildAdults({ child }: { child: Student }) {
           >
             Retirer
           </Button>
-          <Button variant="outline" onClick={removal.cancel}>
+          <Button variant="tonal" onClick={removal.cancel}>
             Annuler
           </Button>
         </>
       )}
-      <Button render={<Link to="/foyer/$studentId/inviter" params={{ studentId: child.id }} />} variant="outline" className="sm:self-start">
+      <Button render={<Link to="/foyer/$studentId/inviter" params={{ studentId: child.id }} />} variant="tonal" className="sm:self-start">
         Inviter un adulte
       </Button>
     </Section>
@@ -299,14 +299,15 @@ function Memory({ child }: { child: Student }) {
             >
               Retirer et effacer
             </Button>
-            <Button variant="outline" onClick={withdrawal.cancel}>
+            <Button variant="tonal" onClick={withdrawal.cancel}>
               Annuler
             </Button>
           </>
         ) : (
           <Button
             ref={withdrawal.opener('confirm')}
-            variant="outline"
+            // Withdrawing erases what Tom keeps, a grave gesture; proposing is not.
+            variant={child.memory.proposed ? 'outline' : 'tonal'}
             disabled={propose.isPending}
             onClick={() => {
               if (child.memory.proposed) withdrawal.open('confirm');
@@ -347,7 +348,7 @@ function EditStudent({ child }: { child: Student }) {
       <Field label="Son prénom" autoComplete="off" {...form.register('name')} error={form.formState.errors.name?.message} />
       <SelectField label="Sa classe" options={LEVEL_OPTIONS} {...form.register('level')} error={form.formState.errors.level?.message} />
       {update.error && <Banner tone="error" title={householdMessage(update.error)} />}
-      <Button type="submit" variant="outline" disabled={update.isPending}>
+      <Button type="submit" variant="tonal" disabled={update.isPending}>
         Enregistrer
       </Button>
     </form>
