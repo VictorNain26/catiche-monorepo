@@ -1,5 +1,4 @@
-import tomSrcset from '@repo/ui/assets/tom.png?w=320;720&format=webp&as=srcset';
-import tom from '@repo/ui/assets/tom.png?w=720&format=webp';
+import tom from '@repo/ui/assets/tom.png?w=320;720&format=webp&as=picture';
 import tomHead from '@repo/ui/assets/tom-tete.png';
 import { cn } from '@repo/ui/classes';
 
@@ -16,8 +15,8 @@ export function TomHead({ className }: { className?: string }) {
 export function TomFigure({ className }: { className?: string }) {
   return (
     <img
-      src={tom}
-      srcSet={tomSrcset}
+      src={tom.img.src}
+      srcSet={tom.sources.webp}
       sizes="(min-width: 64rem) 360px, 160px"
       alt=""
       width={768}

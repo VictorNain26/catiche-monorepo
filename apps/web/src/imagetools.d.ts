@@ -1,11 +1,6 @@
-// What vite-imagetools gives an image imported with a query: a srcset, or the URL of a single
-// image (`vite.config.ts`).
-declare module '*&as=srcset' {
-  const srcset: string;
-  export default srcset;
-}
-
-declare module '*&format=webp' {
-  const url: string;
-  export default url;
+// What vite-imagetools gives an image imported in webp with `as=picture`: its srcset, and the
+// largest image (`vite.config.ts`).
+declare module '*&format=webp&as=picture' {
+  const picture: { sources: { webp: string }; img: { src: string; w: number; h: number } };
+  export default picture;
 }
