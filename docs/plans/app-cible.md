@@ -430,7 +430,13 @@ chaque écran ci-dessous.
 **A1. Entrez dans Catiche** et **A2. Ouvrez l'e-mail de Catiche** : construits
 (`apps/web/src/routes/connexion.tsx`, l'e-mail dans `apps/server/src/platform/auth/auth.ts`) ; le
 bouton de l'e-mail mène à `/entrer`, « Entrez dans Catiche » avec le bouton « Entrer »
-(`entrer.tsx`). À l'ordinateur, le panneau de marque de l'entrée de l'enfant (C2). L'échec d'une
+(`entrer.tsx`). En tête, le plan de marque (`panel`) : « Catiche », Tom, puis « Catiche aide votre
+enfant à organiser ses devoirs du soir, avec Tom, une intelligence artificielle. Vous ne lisez pas
+ses échanges avec Tom : votre enfant vous dit où en sont ses devoirs. » ; à l'ordinateur, il se
+tient à gauche (5/12), Tom en pied avec les faits. Sous le champ : « Celle où vous avez reçu votre
+invitation. » Puis les trois faits : « Votre enfant a son espace, protégé par son code »,
+« Hébergé en France », « Données jamais vendues » ; « Tu es élève ? C'est par ici » ; le pied
+« Catiche, par Victor Lenain », « Contact », « Confidentialité ». L'échec d'une
 connexion (`/erreur-connexion`) : « La connexion n'a pas abouti » ; « Recommencez : un nouveau
 code vous sera envoyé. » ; bouton principal « Revenir à la connexion ».
 
@@ -463,20 +469,28 @@ l'ordinateur, sauf : « Lire son message » (étape 4) ; la carte « Léa a oubl
 l'enfant envoie lui-même (PR 7, avec E3), dont tient lieu aujourd'hui « Le code de Léa ne marche
 plus. », après 10 codes faux, avec « Donner un code de départ » qui mène à A7. Le mot « clé d'accès » reste, car la fenêtre du téléphone
 l'emploie ([Google, « Communicating passkeys »](https://developers.google.com/identity/passkeys/ux/communicating-passkeys)).
-- Carte d'alerte, en tête, quand il le faut (parent) : « Léa a oublié son code. » avec « Donner un
-  code de départ », qui l'affiche tout de suite ; « La tablette de Léa est bloquée après 3 codes
-  faux. » avec « Débloquer » ; « Karim a demandé la suppression du compte de Léa. » avec « Voir ».
-- Une carte par enfant : prénom, classe, puis ce soir :
+- Une carte par enfant (`ChildCard`) : la pastille de l'initiale, le prénom, la classe, puis ce
+  soir :
   - « Léa vous dit où en sont ses devoirs, et vous demande un mot à signer. » ; bouton principal
     « Lire son message » ;
-  - ou « Léa a travaillé ce soir. » ;
+  - ou le tag « A travaillé ce soir », sinon « Pas encore ce soir » ;
   - puis la semaine en une ligne : « Cette semaine, Léa a travaillé lundi, mardi et jeudi. » (chez
     vous ou ailleurs, sans durée ni matière) ;
-  - puis « Gérer Léa » (parent) ou « Suivre ses devoirs » (proche ; « Ses devoirs et ses
-    messages » à l'étape 4, quand les messages existent), en bouton secondaire.
-- « Ajouter un enfant » (parent).
-- Un seul bouton principal sur l'écran : celui de la carte d'alerte quand il y en a une, sinon
-  « Lire son message » ; la clé d'accès se propose avec un bouton secondaire.
+  - ses alertes, dans la carte, quand il le faut (parent), chacune sous un tag « À faire » :
+    « Léa a oublié son code. » avec « Donner un code de départ », qui l'affiche tout de suite ;
+    « La tablette de Léa est bloquée après 3 codes faux. » avec « Débloquer » ; « Karim a demandé
+    la suppression du compte de Léa. » avec « Voir » ;
+  - puis, en bas, la ligne entière en lien : « Gérer Léa › » (parent) ou « Suivre ses devoirs › »
+    (proche ; « Ses devoirs et ses messages » à l'étape 4, quand les messages existent).
+- « Vos enfants » et « Ajouter un enfant » (parent).
+- Sur le plan clair, « Ce que vous voyez, et ce que vous ne voyez pas » : « Ce que vous voyez :
+  les soirs où votre enfant a travaillé, et le résumé de sa semaine, dans « Gérer ». » ; « Ce que
+  vous ne voyez pas : ses conversations avec Tom : elles ne vous sont jamais envoyées. » ;
+  « Confidentialité ».
+- Un seul bouton principal par alerte, sinon « Lire son message » ; la clé d'accès se propose en
+  dernier, avec un bouton secondaire, « Plus tard » en lien.
+- À l'ordinateur, les enfants à gauche (2/3), le plan clair puis la clé d'accès à droite ; le pied
+  de page « Hébergé en France · Données jamais vendues », « Contact », « Confidentialité ».
 - Pour un proche qui ne suit qu'un enfant, le titre le nomme : « Suivez les devoirs de Léa ».
 
 **A6. Le message de [prénom]** (le point du soir, reçu).

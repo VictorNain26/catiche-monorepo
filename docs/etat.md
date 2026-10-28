@@ -121,8 +121,9 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
 
   Les bloquants ne freinent pas la construction, seulement l'arrivée du premier élève réel.
 - **Retours du test de tâches sur les écrans de l'enfant (2026-10-28, une élève de 5ᵉ jouée par
-  un lecteur sans contexte, sur la passe visuelle V2)**, hors de son périmètre, pour la PR 8 ou
-  une passe des textes de l'enfant (`app-cible.md` § 5) :
+  un lecteur sans contexte, sur la passe visuelle V2)**, hors de son périmètre et de celui de la
+  PR 8a (le registre de l'adulte), pour la PR 8b ou une passe des textes de l'enfant
+  (`app-cible.md` § 5) :
   1. « Ton code a été changé le [date]. » avec « Vu » fait croire à un piratage : rien ne dit qui
      l'a changé ni pourquoi, et « Vu » ne se lit pas comme un bouton.
   2. Le blocage sonne comme une punition : rien ne dit pourquoi, « ici » est flou, et le seul
@@ -133,6 +134,9 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
   4. « Léa, voici tes devoirs du soir » n'en montre aucun : c'est à elle de les dire à Tom.
   5. Sur C2, « Première fois ici ? J'ai un code de départ » attire plus l'œil que son prénom.
   6. Sur E6, rien ne dit quel appareil est celui-ci, et « Ce que Tom retient » s'y lit deux fois.
+- **Ce que la toile de l'adulte demande au serveur**, que la PR 8a ne crée pas (`app-cible.md`
+  § 5, A3) : les prénoms de l'adulte qui invite et de l'enfant sur `/invitation`, avant
+  l'acceptation ; ceux des parents pour le proche invité (« Nadia et Karim décident pour elle »).
 - **Une famille d'accueil sans délégation ne peut pas ouvrir de compte** : il faut qu'un parent
   ou un tuteur l'ouvre (Victor, 2026-10-23). À revoir si une famille d'accueil le demande.
 
