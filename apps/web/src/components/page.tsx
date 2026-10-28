@@ -72,7 +72,8 @@ function StudentStage({ title, subtitle, back, nav, brand = false, announce = fa
         )}
         <Brand className={cn('col-span-2 lg:block', !brand && 'hidden')} />
         {back !== undefined && <div className="col-span-2 flex min-h-11 items-center">{back}</div>}
-        <h1 ref={headingRef} tabIndex={-1} className="pb-4 text-3xl outline-none lg:pt-8 lg:pb-0 lg:text-5xl">
+        {/* Beside Tom on a phone, a column of some 120 px: a long word breaks, hyphenated in French. */}
+        <h1 ref={headingRef} tabIndex={-1} className="pb-4 text-3xl break-words hyphens-auto outline-none lg:pt-8 lg:pb-0 lg:text-5xl">
           {title}
         </h1>
         <TomFigure className="size-40 lg:order-last lg:mt-auto lg:size-90 lg:self-end" />
@@ -94,9 +95,10 @@ function StudentStage({ title, subtitle, back, nav, brand = false, announce = fa
 
 /**
  * A list laid on the sheet: its lines, without a sheet of their own, which would be a card in a
- * card; they reach the sheet's edges, so that a line under the pointer fills it.
+ * card; they reach past the sheet's margin, so that a line under the pointer fills the column, and
+ * their words keep that margin, aligned with the rest of the sheet.
  */
-export const SHEET_ROWS = '-mx-(--sheet-px) rounded-none border-0 bg-transparent shadow-none';
+export const SHEET_ROWS = '-mx-(--sheet-px) rounded-none border-0 bg-transparent shadow-none *:*:px-(--sheet-px)';
 
 /**
  * « Ce soir » (E4), the screen the student comes back to: « Régler mon espace » and « Quitter » at

@@ -28,7 +28,7 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
 |---|---|---|
 | Brume (`background`) | `mist` | Le fond |
 | Encre (`foreground`) | `mist` | Le texte |
-| Eau profonde (`primary`) | `water` | L'action principale, les liens, le focus, le panneau de marque |
+| Eau profonde (`primary`) | `water` | L'action principale, les liens, le focus, le plan profond de la marque sur le site |
 | Jonc (`highlight`) | `reed` | Le surligneur, fil conducteur dans les deux modes : le même trait épais sous la ligne de base, qui ne touche pas les lettres ; jamais en texte ni en bordure. Il se détache du fond comme une marque, à 3:1 dans les deux modes (`packages/tokens/contrast.test.mjs`) |
 | Pelage (`annotation`) | `fur` | Une note, un accent rare ; la pastille de l'initiale d'un prénom (`chip`) |
 
