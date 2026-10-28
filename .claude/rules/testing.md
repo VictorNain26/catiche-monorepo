@@ -12,7 +12,7 @@ demandent le Postgres de `docker compose` (`DATABASE_URL`).
 
 | Suite | Runner | Commande | Emplacement |
 |-------|--------|----------|-------------|
-| Serveur | Bun, Postgres | `cd apps/server && bun test` | à côté du code, `<fichier>.test.ts` |
+| Serveur | Bun, Postgres | `bun run --cwd apps/server test` | à côté du code, `<fichier>.test.ts` |
 | Web | Bun | `cd apps/web && bun run test` | `apps/web/src/**/<fichier>.test.ts` |
 | Tokens | Bun | `bun run test` | `packages/tokens/contrast.test.mjs` |
 | Landing | Bun | `cd apps/landing && bun run test` | `apps/landing/src/**/<fichier>.test.ts` |
