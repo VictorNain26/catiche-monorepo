@@ -6,8 +6,8 @@ import type { InferRequestType, InferResponseType } from 'hono/client';
 import { ticked, z } from './zod';
 import { api, isProblem, parseResponse } from './api';
 import { FAILED, TOO_MANY_TRIES } from './auth';
-import { formatDate } from './device';
-import { listWords } from './words';
+import { deviceKind, formatDate } from './device';
+import { capitalised, listWords } from './words';
 
 const students = api.household.students;
 
@@ -187,6 +187,37 @@ export function codeAlert(name: string, { codeForgotten, codeLocked }: Pick<Stud
   if (codeForgotten) return `${name} a oublié son code.`;
   return codeLocked ? `Le code de ${name} ne marche plus.` : null;
 }
+
+/** What a parent acts on for a child, in the child's card of the home (A5), with the gesture each asks. */
+export type ChildAlert = { kind: 'deletion'; text: string } | { kind: 'code'; text: string } | { kind: 'device'; text: string; deviceId: string };
+
+/**
+ * A child's alerts, for a parent, in their order: the deletion of their account asked, its author
+ * named, seen on « Gérer »; their code forgotten or stopped, whose starting code replaces every
+ * device blocked; else each blocked device, unblocked by its own request. None for a relative.
+ */
+export function childAlerts({ name, role, deletion, alerts }: Pick<Student, 'name' | 'role' | 'deletion' | 'alerts'>): ChildAlert[] {
+  if (role !== 'guardian') return [];
+  const code = codeAlert(name, alerts);
+  const asked: ChildAlert[] = deletion ? [{ kind: 'deletion', text: deletionAsked(name, deletion.by) }] : [];
+  if (code) return [...asked, { kind: 'code', text: code }];
+  return [
+    ...asked,
+    ...alerts.blockedDevices.map(({ id, userAgent }): ChildAlert => {
+      const kind = deviceKind(userAgent);
+      return { kind: 'device', text: `${capitalised(kind.the)} de ${name} est ${kind.blocked} après 3 codes faux.`, deviceId: id };
+    }),
+  ];
+}
+
+/** The foot of a child's card on the home, the whole line a link to A7. */
+export const childLink = ({ name, role }: Pick<Student, 'name' | 'role'>) => (role === 'guardian' ? `Gérer ${name}` : 'Suivre ses devoirs');
+
+/** The home's title: the one child a relative follows is named (`app-cible.md`, A5). */
+export const homeTitle = (students: readonly Pick<Student, 'name' | 'role'>[]) => {
+  const [only] = students;
+  return students.length === 1 && only?.role === 'relative' ? `Suivez les devoirs de ${only.name}` : 'Suivez les devoirs de vos enfants';
+};
 
 /** Whether the home shows the card on the child's code (`codeAlert`), read from the flags alone. */
 export const hasCodeAlert = ({ codeForgotten, codeLocked }: Pick<Student['alerts'], 'codeForgotten' | 'codeLocked'>) => codeForgotten || codeLocked;

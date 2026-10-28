@@ -38,7 +38,7 @@ export function Brand({ tone = 'primary', className }: { tone?: 'primary' | 'pan
 }
 
 /** The landing's pages an adult's screen leads to, by a plain link: never a call (`CLAUDE.md`). */
-const LANDING = { contact: 'https://catiche.fr/contact', privacy: 'https://catiche.fr/confidentialite' } as const;
+export const LANDING = { contact: 'https://catiche.fr/contact', privacy: 'https://catiche.fr/confidentialite' } as const;
 
 const FOOTER_LINK = cn(buttonVariants({ variant: 'link' }), 'py-0 font-bold');
 

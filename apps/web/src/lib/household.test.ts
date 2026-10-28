@@ -6,12 +6,15 @@ import {
   MONTHS,
   askParents,
   birthYears,
+  childAlerts,
+  childLink,
   codeAlert,
   decidesWith,
   deletionAsked,
   deletionDay,
   deletionWarning,
   hasCodeAlert,
+  homeTitle,
   householdMessage,
   inviteSchema,
   isLevel,
@@ -40,6 +43,71 @@ describe('codeAlert', () => {
   it('says a code stopped by too many tries, and nothing for a code that works', () => {
     expect(codeAlert('Léa', { codeForgotten: false, codeLocked: true })).toBe('Le code de Léa ne marche plus.');
     expect(codeAlert('Léa', { codeForgotten: false, codeLocked: false })).toBeNull();
+  });
+});
+
+describe('childAlerts', () => {
+  const TABLET = 'Mozilla/5.0 (Linux; Android 14; SM-X710) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
+  const PHONE =
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
+  const calm = { codeForgotten: false, codeLocked: false, blockedDevices: [] };
+  const child = (over: Partial<Parameters<typeof childAlerts>[0]> = {}) =>
+    childAlerts({ name: 'Léa', role: 'guardian', deletion: null, alerts: calm, ...over });
+
+  it('has nothing for a parent to act on when all is calm', () => {
+    expect(child()).toEqual([]);
+  });
+
+  it('says each blocked device, by its kind, each with its own id to unblock', () => {
+    const blockedDevices = [
+      { id: 'd1', userAgent: TABLET },
+      { id: 'd2', userAgent: PHONE },
+    ];
+    expect(child({ alerts: { ...calm, blockedDevices } })).toEqual([
+      { kind: 'device', text: 'La tablette de Léa est bloquée après 3 codes faux.', deviceId: 'd1' },
+      { kind: 'device', text: 'Le téléphone de Léa est bloqué après 3 codes faux.', deviceId: 'd2' },
+    ]);
+  });
+
+  it('says the code alone when it is forgotten: the starting code it asks replaces every blocked device', () => {
+    const alerts = { codeForgotten: true, codeLocked: false, blockedDevices: [{ id: 'd1', userAgent: TABLET }] };
+    expect(child({ alerts })).toEqual([{ kind: 'code', text: 'Léa a oublié son code.' }]);
+  });
+
+  it('puts the deletion asked first, then the code, its author named or not', () => {
+    const alerts = { ...calm, codeLocked: true };
+    expect(child({ alerts, deletion: { by: 'Karim', dueAt: '2026-11-04T09:00:00Z' } })).toEqual([
+      { kind: 'deletion', text: 'Karim a demandé la suppression du compte de Léa.' },
+      { kind: 'code', text: 'Le code de Léa ne marche plus.' },
+    ]);
+    expect(child({ deletion: { by: null, dueAt: '2026-11-04T09:00:00Z' } })).toEqual([
+      { kind: 'deletion', text: 'Un adulte a demandé la suppression du compte de Léa.' },
+    ]);
+  });
+
+  it('has nothing for a relative, who acts on none of them', () => {
+    const alerts = { codeForgotten: true, codeLocked: true, blockedDevices: [{ id: 'd1', userAgent: TABLET }] };
+    expect(child({ role: 'relative', alerts, deletion: { by: 'Karim', dueAt: '2026-11-04T09:00:00Z' } })).toEqual([]);
+  });
+});
+
+describe('childLink', () => {
+  it('names the child for a parent, who manages them, and their homework for a relative', () => {
+    expect(childLink({ name: 'Léa', role: 'guardian' })).toBe('Gérer Léa');
+    expect(childLink({ name: 'Léa', role: 'relative' })).toBe('Suivre ses devoirs');
+  });
+});
+
+describe('homeTitle', () => {
+  const lea = { name: 'Léa', role: 'relative' } as const;
+  it('names the one child a relative follows', () => {
+    expect(homeTitle([lea])).toBe('Suivez les devoirs de Léa');
+  });
+
+  it('speaks of the children otherwise: a parent, even of one, or a relative of several', () => {
+    expect(homeTitle([{ name: 'Léa', role: 'guardian' }])).toBe('Suivez les devoirs de vos enfants');
+    expect(homeTitle([lea, { name: 'Noé', role: 'relative' }])).toBe('Suivez les devoirs de vos enfants');
+    expect(homeTitle([])).toBe('Suivez les devoirs de vos enfants');
   });
 });
 
