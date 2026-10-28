@@ -72,7 +72,7 @@ function StudentStage({ title, subtitle, back, nav, brand = false, announce = fa
         )}
         <Brand className={cn('col-span-2 lg:block', !brand && 'hidden')} />
         {back !== undefined && <div className="col-span-2 flex min-h-11 items-center">{back}</div>}
-        <h1 ref={headingRef} tabIndex={-1} className="pb-4 text-3xl text-stage-foreground outline-none lg:pt-8 lg:pb-0 lg:text-5xl">
+        <h1 ref={headingRef} tabIndex={-1} className="pb-4 text-3xl outline-none lg:pt-8 lg:pb-0 lg:text-5xl">
           {title}
         </h1>
         <TomFigure className="size-40 lg:order-last lg:mt-auto lg:size-90 lg:self-end" />
@@ -81,7 +81,8 @@ function StudentStage({ title, subtitle, back, nav, brand = false, announce = fa
       </div>
       <div
         className={cn(
-          'relative z-10 -mt-6 flex flex-1 flex-col rounded-t-2xl bg-card px-4 pt-6 pb-8 text-card-foreground shadow-sheet lg:mt-0 lg:-ml-6 lg:rounded-tr-none lg:rounded-bl-2xl lg:px-12 lg:py-10',
+          // Its side margin in a variable, which the lines laid on it reach past (`SHEET_ROWS`).
+          'relative z-10 -mt-6 flex flex-1 flex-col rounded-t-2xl bg-card px-(--sheet-px) pt-6 pb-8 text-card-foreground shadow-sheet [--sheet-px:--spacing(4)] lg:mt-0 lg:-ml-6 lg:rounded-tr-none lg:rounded-bl-2xl lg:py-10 lg:[--sheet-px:--spacing(12)]',
           nav !== undefined && 'lg:pt-24',
         )}
       >
@@ -95,7 +96,7 @@ function StudentStage({ title, subtitle, back, nav, brand = false, announce = fa
  * A list laid on the sheet: its lines, without a sheet of their own, which would be a card in a
  * card; they reach the sheet's edges, so that a line under the pointer fills it.
  */
-export const SHEET_ROWS = '-mx-4 rounded-none border-0 bg-transparent shadow-none';
+export const SHEET_ROWS = '-mx-(--sheet-px) rounded-none border-0 bg-transparent shadow-none';
 
 /**
  * « Ce soir » (E4), the screen the student comes back to: « Régler mon espace » and « Quitter » at
