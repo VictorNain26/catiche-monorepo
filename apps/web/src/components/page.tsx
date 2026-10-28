@@ -76,7 +76,7 @@ function StudentStage({ title, subtitle, back, nav, brand = false, announce = fa
         <h1 ref={headingRef} tabIndex={-1} className="pb-4 text-3xl break-words hyphens-auto outline-none lg:pt-8 lg:pb-0 lg:text-5xl">
           {title}
         </h1>
-        <TomFigure className="size-40 lg:order-last lg:mt-auto lg:size-90 lg:self-end" />
+        <TomFigure className="size-28 xs:size-40 lg:order-last lg:mt-auto lg:size-90 lg:self-end" />
         {subtitle !== undefined && <p className="col-span-2 text-stage-muted-foreground">{subtitle}</p>}
         {lead !== undefined && <div className="col-span-2 flex flex-col gap-4 lg:gap-6">{lead}</div>}
       </div>

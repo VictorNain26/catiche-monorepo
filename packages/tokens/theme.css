@@ -41,6 +41,10 @@
   --text-sm: 0.9375rem;
   --text-sm--line-height: 1.45;
 
+  /* Le téléphone étroit finit à 360 px : en dessous, Tom rapetisse sur la scène de l'enfant, pour
+   * laisser au titre, à côté, la place d'un mot entier. */
+  --breakpoint-xs: 22.5rem;
+
   /* Deux rayons, les cartes et les bulles puis les boutons et les champs. Deux ombres : celle d'un
    * bouton plein, et celle d'une feuille (une carte, une liste) posée sur le fond, qui la détache
    * sans bordure plus sombre ; en sombre, la feuille se détache par son pas, sans ombre. */

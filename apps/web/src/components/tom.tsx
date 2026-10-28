@@ -10,14 +10,14 @@ export function TomHead({ className }: { className?: string }) {
 /**
  * Tom whole, standing on the student's stage, provisional until his redesign (`docs/charte.md`, « Tom »):
  * decorative, outside a session he says nothing; his size comes from `className`. In webp, at
- * twice the sizes he is shown at, `size-40` and `lg:size-90` (`page.tsx`), as the landing serves him.
+ * twice the sizes he is shown at, `size-28`, `xs:size-40` and `lg:size-90` (`page.tsx`), as the landing serves him.
  */
 export function TomFigure({ className }: { className?: string }) {
   return (
     <img
       src={tom.img.src}
       srcSet={tom.sources.webp}
-      sizes="(min-width: 64rem) 360px, 160px"
+      sizes="(min-width: 64rem) 360px, (min-width: 22.5rem) 160px, 112px"
       alt=""
       width={768}
       height={768}
