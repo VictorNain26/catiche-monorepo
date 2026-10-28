@@ -103,8 +103,14 @@ const TEXT = [
   ['stage-foreground', 'stage'],
   ['stage-muted-foreground', 'stage'],
   ['primary', 'stage'],
-  // The chip of a first name's initial, on « Qui fait ses devoirs ? ».
+  // The chip of a first name's initial, on « Qui fait ses devoirs ? » and the adult's home.
   ['chip-foreground', 'chip'],
+  // The adult's state tags, on a card (docs/charte.md, « Le registre de l'adulte »).
+  ['tag-done-foreground', 'tag-done'],
+  ['tag-todo-foreground', 'tag-todo'],
+  ['tag-neutral-foreground', 'tag-neutral'],
+  // The adult's plane of trust, on the light plane: its second lines.
+  ['muted-foreground', 'tint'],
 ];
 
 // A control's border, the focus ring and each chart series: 3:1
@@ -129,6 +135,8 @@ const MARKS = [
   ['primary', 'border'],
   // The highlighter on the brand's deep plane, under the evening check-in's title (docs/charte.md, "Couleurs").
   ['panel-highlight', 'panel'],
+  // The focus ring of the adult's band, on the deep plane, where the ring's own water would vanish.
+  ['panel-foreground', 'panel'],
   ...[1, 2, 3, 4].flatMap((n) => [
     [`chart-${String(n)}`, 'background'],
     [`chart-${String(n)}`, 'card'],
