@@ -10,7 +10,8 @@ export function TomHead({ className }: { className?: string }) {
 /**
  * Tom whole, standing on the student's stage, provisional until his redesign (`docs/charte.md`, « Tom »):
  * decorative, outside a session he says nothing; his size comes from `className`. In webp, at
- * twice the sizes he is shown at, `size-28`, `xs:size-40` and `lg:size-90` (`page.tsx`), as the landing serves him.
+ * twice the sizes he is shown at, `size-28`, `xs:size-40` and `lg:size-90` (`page.tsx`; `xs:size-32` on the adult's
+ * way in, which the 160 px of `sizes` covers), as the landing serves him.
  */
 export function TomFigure({ className }: { className?: string }) {
   return (

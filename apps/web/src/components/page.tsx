@@ -1,7 +1,7 @@
 import { buttonVariants, cn } from '@repo/ui/classes';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createLink } from '@tanstack/react-router';
-import { ChevronLeftIcon, Settings2Icon, UserRoundIcon, type LucideIcon } from 'lucide-react';
+import { ChevronLeftIcon, LockIcon, MapPinIcon, Settings2Icon, ShieldCheckIcon, UserRoundIcon, type LucideIcon } from 'lucide-react';
 import { useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
 import { meQuery } from '../lib/me';
 import { Quit, StudentQuit } from './sign-out';
@@ -29,7 +29,7 @@ function BackAnchor(props: ComponentProps<'a'>) {
 export const BackLink = createLink(BackAnchor);
 
 /** The brand's name, at the head of a screen: in the brand's water, or white on its deep plane (`panel`). */
-export function Brand({ tone = 'primary', className }: { tone?: 'primary' | 'panel'; className?: string }) {
+function Brand({ tone = 'primary', className }: { tone?: 'primary' | 'panel'; className?: string }) {
   return (
     <span className={cn('block font-heading text-xl font-extrabold', tone === 'primary' ? 'text-primary' : 'text-panel-foreground', className)}>
       Catiche
@@ -43,7 +43,7 @@ export const LANDING = { contact: 'https://catiche.fr/contact', privacy: 'https:
 const FOOTER_LINK = cn(buttonVariants({ variant: 'link' }), 'py-0 font-bold');
 
 /** « Contact » and « Confidentialité », the landing's pages, at the foot of an adult's screen. */
-export function LandingLinks() {
+function LandingLinks() {
   return (
     <>
       <a href={LANDING.contact} className={FOOTER_LINK}>
@@ -225,6 +225,65 @@ export function AdultPage({ withBack = true, back, wide = false, children, ...he
           </p>
         </div>
       </footer>
+    </div>
+  );
+}
+
+/** What reassures an adult before they enter: true, and already public (`docs/charte.md`, « Le registre de l'adulte »). */
+const FACTS = [
+  [LockIcon, 'Votre enfant a son espace, protégé par son code'],
+  [MapPinIcon, 'Hébergé en France'],
+  [ShieldCheckIcon, 'Données jamais vendues'],
+] as const;
+
+/** The facts, each with its icon: in the brand's water on the page, white on the deep plane. */
+function Facts({ tone, className }: { tone: 'primary' | 'panel'; className?: string }) {
+  return (
+    <ul aria-label="Nos engagements" className={cn('flex flex-col', className)}>
+      {FACTS.map(([Icon, fact]) => (
+        <li key={fact} className="flex min-h-11 items-center gap-3 font-bold">
+          <Icon
+            aria-hidden="true"
+            nonScalingStroke
+            className={cn('size-6 shrink-0', tone === 'primary' ? 'text-primary' : 'text-panel-foreground')}
+          />
+          {fact}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * The adult's way in (A1, A2): the brand's deep plane, its name, Tom and what Catiche is, at the top
+ * on a phone; on a computer, on the left (5/12), Tom standing at its foot with the facts. Then the
+ * column: the title, what the step asks, the facts on a phone, and the foot, who publishes Catiche
+ * and the landing's pages.
+ */
+export function AdultEntryPage({ title, announce = false, children }: { title: string; announce?: boolean; children: ReactNode }) {
+  const headingRef = useAnnounce(announce);
+  return (
+    <div className="flex min-h-dvh flex-col lg:flex-row">
+      <header className="flex flex-col gap-4 bg-panel px-4 pt-7 pb-8 text-panel-foreground lg:w-5/12 lg:shrink-0 lg:gap-6 lg:px-14 lg:py-10">
+        <Brand tone="panel" />
+        <TomFigure className="size-28 self-center xs:size-32 lg:order-last lg:mt-auto lg:size-90 lg:self-end" />
+        <p className="text-lg">
+          Catiche aide votre enfant à organiser ses devoirs du soir, avec Tom, une intelligence artificielle. Vous ne lisez pas ses échanges avec Tom
+          : votre enfant vous dit où en sont ses devoirs.
+        </p>
+        <Facts tone="panel" className="hidden lg:flex" />
+      </header>
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pt-7 pb-4 lg:justify-center lg:py-10">
+        <h1 ref={headingRef} tabIndex={-1} className="text-3xl text-foreground outline-none lg:text-5xl">
+          {title}
+        </h1>
+        {children}
+        <Facts tone="primary" className="border-t border-border pt-3 lg:hidden" />
+        <footer className="mt-auto flex flex-wrap items-center gap-x-6 border-t border-border pt-2 text-sm text-muted-foreground lg:mt-0">
+          <p className="py-2">Catiche, par Victor Lenain</p>
+          <LandingLinks />
+        </footer>
+      </main>
     </div>
   );
 }
