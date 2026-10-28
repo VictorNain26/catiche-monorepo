@@ -1,8 +1,6 @@
 import { List, ListItem, Section } from '@repo/ui';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect } from '@tanstack/react-router';
-import { ChevronRightIcon } from 'lucide-react';
-import { CardAction } from '../components/card-action';
 import { BackLink, Page } from '../components/page';
 import { ownDeviceLine } from '../lib/device';
 import { meQuery, ownDevicesQuery, parentsOfMe, unknownDevice, whoSeesWhat } from '../lib/me';
@@ -34,10 +32,9 @@ function Space() {
             <p>{whoSeesWhat(parents)}</p>
           </Section>
           <Section title="Ce que Tom retient" className="gap-2">
-            <CardAction render={<Link to="/memoire" />} className="flex min-h-14 items-center justify-between gap-3">
-              <span className="font-bold text-primary underline underline-offset-4">Ce que Tom retient</span>
-              <ChevronRightIcon aria-hidden="true" nonScalingStroke className="size-6 shrink-0 text-primary" />
-            </CardAction>
+            <List>
+              <ListItem render={<Link to="/memoire" />} title="Ce que Tom retient" />
+            </List>
           </Section>
         </div>
         <Section title="Tes appareils" className="gap-2">

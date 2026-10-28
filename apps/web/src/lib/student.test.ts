@@ -4,6 +4,7 @@ import {
   chooseTokenFor,
   codeSecret,
   firstCodeRefusal,
+  isStopped,
   forgottenText,
   forgottenTitle,
   keepChooseTokens,
@@ -131,18 +132,34 @@ describe('the token of a window to choose a code', () => {
   });
 });
 
+describe('isStopped', () => {
+  it('holds a profile blocked here or stopped everywhere', () => {
+    expect(isStopped('blocked')).toBe(true);
+    expect(isStopped('locked')).toBe(true);
+  });
+
+  it('lets through a profile ready, choosing its code or waiting for a starting code', () => {
+    expect(isStopped('ready')).toBe(false);
+    expect(isStopped('choose')).toBe(false);
+    expect(isStopped('waiting')).toBe(false);
+  });
+});
+
 describe('profileNote', () => {
-  it('says, under a name blocked here or stopped everywhere, whom to ask', () => {
-    expect(profileNote('blocked', TWO)).toBe('Bloqué ici. Demande à Nadia ou à Karim.');
-    expect(profileNote('locked', TWO)).toBe('Bloqué ici. Demande à Nadia ou à Karim.');
-    expect(profileNote('blocked', ONE)).toBe('Bloqué ici. Demande à Nadia.');
-    expect(profileNote('blocked', [])).toBe('Bloqué ici. Demande à tes parents.');
+  it('says, under a name blocked here or stopped everywhere, that it cannot enter, and which parent to ask', () => {
+    expect(profileNote('blocked', 'Noé', TWO)).toBe('Noé ne peut pas entrer ici pour l’instant. Demande à un parent : Nadia ou Karim.');
+    expect(profileNote('locked', 'Noé', TWO)).toBe('Noé ne peut pas entrer ici pour l’instant. Demande à un parent : Nadia ou Karim.');
+  });
+
+  it('names a single parent alone, and none when the server gives no first name', () => {
+    expect(profileNote('blocked', 'Noé', ONE)).toBe('Noé ne peut pas entrer ici pour l’instant. Demande à un parent : Nadia.');
+    expect(profileNote('locked', 'Noé', [])).toBe('Noé ne peut pas entrer ici pour l’instant. Demande à un parent.');
   });
 
   it('says a code to choose, and nothing for a profile ready or waiting for a starting code', () => {
-    expect(profileNote('choose', TWO)).toBe('Choisis ton code');
-    expect(profileNote('ready', TWO)).toBeNull();
-    expect(profileNote('waiting', TWO)).toBeNull();
+    expect(profileNote('choose', 'Léa', TWO)).toBe('Choisis ton code');
+    expect(profileNote('ready', 'Léa', TWO)).toBeNull();
+    expect(profileNote('waiting', 'Léa', TWO)).toBeNull();
   });
 });
 

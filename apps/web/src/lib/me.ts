@@ -105,8 +105,8 @@ export const ownDevicesQuery = queryOptions({
 export const parentsOfMe = (me: Me | null | undefined): readonly string[] => (me?.role === 'student' ? me.parents : []);
 
 /**
- * « Qui voit quoi » (E6): what the parents see of the student today, the week's summary, and what
- * never. Step 4 replaces the summary by the evenings worked and the messages (`app-cible.md` § 5).
+ * « Qui voit quoi » (E6, and on « Ce soir », E4): what the parents see of the student today, the
+ * week's summary, and what never. Step 4 replaces the summary by the evenings worked and the messages (`app-cible.md` § 5).
  */
 export function whoSeesWhat(parents: readonly string[]) {
   const { Both, They, agree } = parentWords(parents);

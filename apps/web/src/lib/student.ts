@@ -106,12 +106,19 @@ export function codeSecret(parents: readonly string[]) {
   return `${Both} ne ${agree('voit', 'voient')} ni ton code, ni tes conversations avec Tom.`;
 }
 
+/** A profile blocked on this device, or its code stopped everywhere: its keypad stays closed (E3). */
+export const isStopped = (state: ProfileState) => state === 'blocked' || state === 'locked';
+
 /**
  * What waits behind a name on « Qui fait ses devoirs ? » (C2): a profile blocked here or stopped
- * everywhere says whom to ask; one waiting for a starting code, nothing, its name leads to it.
+ * everywhere says that its student cannot enter, and names the parents to ask, when the server
+ * gives their first names; one waiting for a starting code, nothing, its name leads to it.
  */
-export function profileNote(state: ProfileState, parents: readonly string[]): string | null {
-  if (state === 'blocked' || state === 'locked') return `Bloqué ici. Demande ${parentWords(parents).toEither}.`;
+export function profileNote(state: ProfileState, name: string, parents: readonly string[]): string | null {
+  if (isStopped(state)) {
+    const ask = parents.length > 0 ? `Demande à un parent : ${parentWords(parents).either}.` : 'Demande à un parent.';
+    return `${name} ne peut pas entrer ici pour l’instant. ${ask}`;
+  }
   return state === 'choose' ? 'Choisis ton code' : null;
 }
 

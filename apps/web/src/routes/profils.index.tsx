@@ -1,10 +1,10 @@
-import { Button } from '@repo/ui';
+import { Button, List, ListItem } from '@repo/ui';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect } from '@tanstack/react-router';
-import { CardAction } from '../components/card-action';
-import { EntryPage } from '../components/page';
+import { LockIcon } from 'lucide-react';
+import { EntryPage, SHEET_ROWS } from '../components/page';
 import { meQuery } from '../lib/me';
-import { profileNote, profilesQuery } from '../lib/student';
+import { isStopped, profileNote, profilesQuery } from '../lib/student';
 
 /**
  * C2, « Qui fait ses devoirs ? », the way in: the profiles a parent's code put on this device, each
@@ -20,9 +20,6 @@ export const Route = createFileRoute('/profils/')({
   component: Profiles,
 });
 
-// The two ways in beside the names: large, as the names are, and side by side on a computer.
-const WAY_IN = 'min-h-14 whitespace-normal text-center';
-
 function Profiles() {
   const { data } = useSuspenseQuery(profilesQuery);
 
@@ -35,33 +32,50 @@ function Profiles() {
         </>
       }
       after={
-        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:gap-6">
-          <Button render={<Link to="/activer" />} variant="tonal" size="lg" className={WAY_IN}>
+        <>
+          <Button render={<Link to="/activer" />} variant="tonal" size="lg" className="min-h-14 w-full whitespace-normal text-center">
             Première fois ici ? J’ai un code de départ
           </Button>
-          <Button render={<Link to="/connexion" />} variant="tonal" size="lg" className={WAY_IN}>
+          <Button render={<Link to="/connexion" />} variant="link" className="self-center">
             Je suis un adulte
           </Button>
-        </div>
+        </>
       }
     >
       {data.profiles.length > 0 && (
-        <ul className="grid grid-cols-2 gap-3 lg:gap-6">
+        <List className={SHEET_ROWS}>
           {data.profiles.map((profile) => {
-            const note = profileNote(profile.state, profile.parents);
+            const note = profileNote(profile.state, profile.name, profile.parents) ?? undefined;
             return (
-              <li key={profile.id}>
-                <CardAction
-                  render={<Link to="/profils/$studentId" params={{ studentId: profile.id }} />}
-                  className="flex h-full min-h-32 flex-col justify-center gap-1 shadow-control lg:min-h-44 lg:p-6"
-                >
-                  <span className="text-2xl font-bold break-words lg:text-3xl">{profile.name}</span>
-                  {note && <span className="text-sm text-muted-foreground group-hover:text-accent-muted-foreground">{note}</span>}
-                </CardAction>
-              </li>
+              <ListItem
+                key={profile.id}
+                className="min-h-18 gap-4"
+                leading={
+                  <span
+                    aria-hidden="true"
+                    className="flex size-12 shrink-0 items-center justify-center self-start rounded-full bg-chip font-heading text-xl font-extrabold text-chip-foreground"
+                  >
+                    {profile.name.charAt(0).toUpperCase()}
+                  </span>
+                }
+                title={<span className="font-heading text-2xl font-extrabold break-words">{profile.name}</span>}
+                // Blocked here or stopped everywhere: the line says whom to ask, and leads to E3, its keypad
+                // closed, « J'ai oublié mon code » open.
+                meta={
+                  isStopped(profile.state) ? (
+                    <span className="flex items-start gap-2">
+                      <LockIcon aria-hidden="true" nonScalingStroke className="mt-0.5 size-5 shrink-0" />
+                      <span>{note}</span>
+                    </span>
+                  ) : (
+                    note
+                  )
+                }
+                render={<Link to="/profils/$studentId" params={{ studentId: profile.id }} />}
+              />
             );
           })}
-        </ul>
+        </List>
       )}
     </EntryPage>
   );

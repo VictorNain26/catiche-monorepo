@@ -1,13 +1,13 @@
-import { Button, Card, Section } from '@repo/ui';
+import { Button, List, ListItem, Section } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { CardAction } from '../components/card-action';
+import { BellIcon, BookmarkIcon, CalendarIcon, UsersRoundIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { MessageBanner } from '../components/message-banner';
-import { StudentPage } from '../components/page';
-import { TomHead } from '../components/tom';
+import { SHEET_ROWS, StudentPage } from '../components/page';
 import { WeekSummary } from '../components/week-summary';
 import { sessionsQuery, startSession, tonightSession } from '../lib/chat';
-import { meQuery, parentsOfMe } from '../lib/me';
+import { meQuery, parentsOfMe, whoSeesWhat } from '../lib/me';
 import { memoryQuery } from '../lib/memory';
 import { markNewsSeen, newsLines, newsQuery } from '../lib/news';
 import { STUDENT_FAILED } from '../lib/student';
@@ -48,29 +48,50 @@ function StudentHome() {
           {me?.name}, voici tes <span className="highlighter">devoirs</span> du soir
         </>
       }
-      wide
+      lead={<Start />}
     >
-      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-12 lg:gap-10">
-        <News parents={parents} />
-        <Start />
-        {memory?.state === 'asked' && (
-          <CardAction render={<Link to="/memoire" />} className="flex min-h-14 flex-col justify-center gap-1 lg:col-span-5 lg:col-start-8 lg:p-5">
-            <span className="font-bold text-primary underline underline-offset-4">Tom peut se souvenir de ce qui était difficile</span>
-            <span className="text-sm text-muted-foreground">Si tu es d’accord, Tom retient les leçons où tu as bloqué.</span>
-          </CardAction>
-        )}
-      </div>
-      <Section title="Bientôt" className="gap-2" titleClassName="text-lg">
-        <p className="rounded-2xl border border-border p-4 text-sm text-muted-foreground">Tes contrôles s’afficheront ici les jours d’avant.</p>
+      <News parents={parents} />
+      {memory?.state === 'asked' && (
+        <List className={SHEET_ROWS}>
+          <ListItem
+            render={<Link to="/memoire" />}
+            className="gap-4"
+            leading={
+              <IconWell>
+                <BookmarkIcon aria-hidden="true" nonScalingStroke className="size-6" />
+              </IconWell>
+            }
+            title="Tom peut se souvenir de ce qui était difficile"
+            meta="Si tu es d’accord, Tom retient les leçons où tu as bloqué."
+          />
+        </List>
+      )}
+      <p className="flex items-start gap-3 border-t border-border pt-4">
+        {/* Who sees what: the parents' figure, not a crossed eye, which a student reads as « Nadia ne voit rien ». */}
+        <UsersRoundIcon aria-hidden="true" nonScalingStroke className="size-6 shrink-0 text-muted-foreground" />
+        <span>{whoSeesWhat(parents)}</span>
+      </p>
+      <Section title="Bientôt" titleClassName="text-lg">
+        <p className="flex items-center gap-4 border-t border-border pt-4 text-sm text-muted-foreground">
+          <IconWell>
+            <CalendarIcon aria-hidden="true" nonScalingStroke className="size-6" />
+          </IconWell>
+          Tes contrôles s’afficheront ici les jours d’avant.
+        </p>
       </Section>
       {me && <WeekSummary week={week.data} failed={week.isError} name={me.name} reader="student" parents={parents} />}
     </StudentPage>
   );
 }
 
+/** An icon in its well of light water, at the head of a block of the sheet. */
+function IconWell({ children }: { children: ReactNode }) {
+  return <span className="flex size-11 shrink-0 items-center justify-center rounded-control bg-tonal text-tonal-foreground">{children}</span>;
+}
+
 /**
  * « Depuis ta dernière visite », when something changed: a status, which takes no focus. « Vu » says
- * no more than what was read; its failure leaves the card, which says so.
+ * no more than what was read; its failure leaves the block, which says so.
  */
 function News({ parents }: { parents: readonly string[] }) {
   const queryClient = useQueryClient();
@@ -85,33 +106,39 @@ function News({ parents }: { parents: readonly string[] }) {
   const lines = news ? newsLines(news, parents) : [];
   if (!news || lines.length === 0) return null;
   return (
-    <Card render={<section aria-labelledby="news-title" />} className="flex flex-col gap-3 lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:p-5">
-      <h2 id="news-title" className="text-lg text-card-foreground">
-        Depuis ta dernière visite
-      </h2>
-      <ul className="flex flex-col gap-2 text-sm">
-        {lines.map((line) => (
-          <li key={line}>{line}</li>
-        ))}
-      </ul>
-      {seen.error && <MessageBanner message={STUDENT_FAILED} />}
-      <Button
-        variant="tonal"
-        className="self-start"
-        disabled={seen.isPending}
-        onClick={() => {
-          seen.mutate(news.readAt);
-        }}
-      >
-        Vu
-      </Button>
-    </Card>
+    // A block framed on the sheet, not a card laid on it: a card in a card.
+    <section aria-labelledby="news-title" className="flex gap-3 rounded-2xl border border-border p-4">
+      <IconWell>
+        <BellIcon aria-hidden="true" nonScalingStroke className="size-6" />
+      </IconWell>
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <h2 id="news-title" className="text-lg text-card-foreground">
+          Depuis ta dernière visite
+        </h2>
+        <ul className="flex flex-col gap-2 text-sm">
+          {lines.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+        {seen.error && <MessageBanner message={STUDENT_FAILED} />}
+        <Button
+          variant="tonal"
+          className="self-start"
+          disabled={seen.isPending}
+          onClick={() => {
+            seen.mutate(news.readAt);
+          }}
+        >
+          Vu
+        </Button>
+      </div>
+    </section>
   );
 }
 
 /**
- * « Avant »: Tom, without a bubble, and the way into his help; a session opened today is taken up
- * again rather than a new one started.
+ * « Avant », on the stage beside Tom, who has no bubble: the way into his help; a session opened
+ * today is taken up again rather than a new one started.
  */
 function Start() {
   const navigate = useNavigate();
@@ -123,33 +150,25 @@ function Start() {
   });
 
   return (
-    <section
-      aria-labelledby="start-title"
-      className="flex flex-col items-center gap-5 pt-2 text-center lg:col-span-7 lg:row-span-2 lg:row-start-1 lg:flex-row lg:items-center lg:gap-8 lg:self-start lg:rounded-2xl lg:border lg:border-border lg:bg-card lg:p-8 lg:text-left lg:text-card-foreground"
-    >
-      <TomHead className="size-40 shrink-0 lg:size-48" />
-      <div className="flex w-full flex-col gap-5 lg:gap-6">
-        <p id="start-title" className="text-lg lg:text-xl">
-          Dis à Tom ce que tu as ce soir. Il t’aide à choisir par où commencer.
-        </p>
-        {tonight ? (
-          <Button render={<Link to="/seance/$sessionId" params={{ sessionId: tonight.id }} />} size="lg" className="w-full lg:w-auto lg:self-start">
-            Reprendre mes devoirs
-          </Button>
-        ) : (
-          <Button
-            size="lg"
-            className="w-full lg:w-auto lg:self-start"
-            disabled={start.isPending}
-            onClick={() => {
-              start.mutate();
-            }}
-          >
-            Commencer mes devoirs
-          </Button>
-        )}
-        {start.error && <MessageBanner message={STUDENT_FAILED} />}
-      </div>
-    </section>
+    <>
+      <p className="text-lg lg:max-w-md lg:text-xl">Dis à Tom ce que tu as ce soir. Il t’aide à choisir par où commencer.</p>
+      {tonight ? (
+        <Button render={<Link to="/seance/$sessionId" params={{ sessionId: tonight.id }} />} size="lg" className="w-full lg:w-auto lg:self-start">
+          Reprendre mes devoirs
+        </Button>
+      ) : (
+        <Button
+          size="lg"
+          className="w-full lg:w-auto lg:self-start"
+          disabled={start.isPending}
+          onClick={() => {
+            start.mutate();
+          }}
+        >
+          Commencer mes devoirs
+        </Button>
+      )}
+      {start.error && <MessageBanner message={STUDENT_FAILED} />}
+    </>
   );
 }

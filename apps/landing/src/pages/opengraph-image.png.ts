@@ -30,7 +30,7 @@ export const GET: APIRoute = async () => {
   const bricolage = await readFile(
     fileURLToPath(import.meta.resolve('@fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-800-normal.woff')),
   );
-  const tom = `data:image/png;base64,${(await readFile('src/assets/tom.png')).toString('base64')}`;
+  const tom = `data:image/png;base64,${(await readFile(fileURLToPath(import.meta.resolve('@repo/ui/assets/tom.png')))).toString('base64')}`;
 
   const svg = await satori(
     node(

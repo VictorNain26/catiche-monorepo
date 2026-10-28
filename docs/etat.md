@@ -120,6 +120,19 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
   5. **Les contrôles gardés d'un soir à l'autre.**
 
   Les bloquants ne freinent pas la construction, seulement l'arrivée du premier élève réel.
+- **Retours du test de tâches sur les écrans de l'enfant (2026-10-28, une élève de 5ᵉ jouée par
+  un lecteur sans contexte, sur la passe visuelle V2)**, hors de son périmètre, pour la PR 8 ou
+  une passe des textes de l'enfant (`app-cible.md` § 5) :
+  1. « Ton code a été changé le [date]. » avec « Vu » fait croire à un piratage : rien ne dit qui
+     l'a changé ni pourquoi, et « Vu » ne se lit pas comme un bouton.
+  2. Le blocage sonne comme une punition : rien ne dit pourquoi, « ici » est flou, et le seul
+     geste ouvert, « J'ai oublié mon code », ne répond pas à son problème.
+  3. Ce que voient les parents revient trois fois sur E4 et E6, à côté de « Pas de séance ces
+     sept derniers jours » : l'élève s'y sent surveillée ; le prénom du parent (« Nadia ») là où
+     elle dirait « ta mère » la gêne.
+  4. « Léa, voici tes devoirs du soir » n'en montre aucun : c'est à elle de les dire à Tom.
+  5. Sur C2, « Première fois ici ? J'ai un code de départ » attire plus l'œil que son prénom.
+  6. Sur E6, rien ne dit quel appareil est celui-ci, et « Ce que Tom retient » s'y lit deux fois.
 - **Une famille d'accueil sans délégation ne peut pas ouvrir de compte** : il faut qu'un parent
   ou un tuteur l'ouvre (Victor, 2026-10-23). À revoir si une famille d'accueil le demande.
 

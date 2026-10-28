@@ -3,6 +3,7 @@ import { lastTime } from '../lib/memory';
 import { STUDENT_FAILED } from '../lib/student';
 import { minutesText, questionFor, sameSummary, subjectLabel, type WeekSummary as Week } from '../lib/summary';
 import { MessageBanner } from './message-banner';
+import { SHEET_ROWS } from './page';
 
 // The guardian's summary names no parent.
 const NO_PARENTS: readonly string[] = [];
@@ -76,7 +77,8 @@ function Week({ week, name, reader, parents }: { week: Week; name: string; reade
       {week.resisting.length === 0 ? (
         <p className="text-muted-foreground">Rien qui résiste ces sept derniers jours.</p>
       ) : (
-        <List>
+        // The student reads it on the sheet of « Ce soir », the parent on a screen of their own.
+        <List className={reader === 'student' ? SHEET_ROWS : undefined}>
           {week.resisting.map((notion) => (
             <ListItem key={notion.notionId} title={notion.label} meta={lastTime(notion)} />
           ))}

@@ -3,6 +3,7 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { imagetools } from 'vite-imagetools';
 import { light } from '@repo/tokens/scales.json';
 
 // Manifest colors can't read CSS variables: the step theme.css's background points at.
@@ -16,6 +17,8 @@ export default defineConfig({
     tailwindcss(),
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),
     react(),
+    // An image imported with a query is resized and converted at build: Tom in webp (`components/tom.tsx`).
+    imagetools(),
     VitePWA({
       // A new version takes over without a prompt. With injectRegister left to 'auto', the
       // registration is a registerSW.js file, never an inline script the server's CSP would block.

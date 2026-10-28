@@ -1,12 +1,11 @@
-import { Button } from '@repo/ui';
+import { Button, List, ListItem } from '@repo/ui';
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, Navigate, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { EyeOffIcon } from 'lucide-react';
 import { useState } from 'react';
-import { CardAction } from '../components/card-action';
 import { CodePad } from '../components/code-pad';
 import { MessageBanner } from '../components/message-banner';
-import { EntryPage } from '../components/page';
+import { EntryPage, SHEET_ROWS } from '../components/page';
 import { authClient } from '../lib/auth';
 import {
   announceProfileChange,
@@ -16,6 +15,7 @@ import {
   firstCodeRefusal,
   forgottenText,
   forgottenTitle,
+  isStopped,
   pressKey,
   profilesQuery,
   STUDENT_FAILED,
@@ -45,8 +45,8 @@ function Profile() {
   if (!profile) return null;
 
   // Blocked here or stopped everywhere: E3 says so, its keypad closed, « J'ai oublié mon code » open.
-  if (profile.state === 'ready' || profile.state === 'blocked' || profile.state === 'locked') {
-    return <EnterCode studentId={studentId} name={profile.name} parents={profile.parents} stopped={profile.state !== 'ready'} />;
+  if (profile.state === 'ready' || isStopped(profile.state)) {
+    return <EnterCode studentId={studentId} name={profile.name} parents={profile.parents} stopped={isStopped(profile.state)} />;
   }
   // The code is chosen in the tab the starting code was typed in, which holds the window's token.
   const token = chooseTokenFor(studentId);
@@ -148,8 +148,9 @@ function EnterCode({ studentId, name, parents, stopped }: { studentId: string; n
   );
 }
 
-// An answer to « Quelqu'un d'autre se sert de cet appareil ? »: a card the whole of which is the button.
-const CHOICE = 'flex min-h-24 flex-col justify-center gap-1 text-left shadow-control';
+// An answer to « Quelqu'un d'autre se sert de cet appareil ? »: a line of the sheet the whole of which
+// is the button, its title as large as a name on C2.
+const CHOICE = 'min-h-18 text-xl';
 
 type Step = { kind: 'first' } | { kind: 'again'; first: string } | { kind: 'device'; code: string };
 
@@ -198,18 +199,20 @@ function ChooseCode({ studentId, parents, shared, token }: { studentId: string; 
   if (step.kind === 'device') {
     return (
       <EntryPage title="Quelqu’un d’autre se sert de cet appareil ?" announce>
-        <div className="flex flex-col gap-3">
-          <CardAction render={<button type="button" disabled={sending} onClick={() => void send(step.code, false)} />} className={CHOICE}>
-            <span className="text-xl font-bold">Oui, on le partage</span>
-            <span className="text-sm text-muted-foreground group-hover:text-accent-muted-foreground group-disabled:text-disabled-foreground">
-              Catiche se fermera quand tu ne t’en sers plus.
-            </span>
-          </CardAction>
-          <CardAction render={<button type="button" disabled={sending} onClick={() => void send(step.code, true)} />} className={CHOICE}>
-            <span className="text-xl font-bold">Non, il est à moi</span>
-          </CardAction>
-          {failure && <MessageBanner message={failure} />}
-        </div>
+        <List className={SHEET_ROWS}>
+          <ListItem
+            render={<button type="button" disabled={sending} onClick={() => void send(step.code, false)} />}
+            className={CHOICE}
+            title="Oui, on le partage"
+            meta="Catiche se fermera quand tu ne t’en sers plus."
+          />
+          <ListItem
+            render={<button type="button" disabled={sending} onClick={() => void send(step.code, true)} />}
+            className={CHOICE}
+            title="Non, il est à moi"
+          />
+        </List>
+        {failure && <MessageBanner message={failure} />}
       </EntryPage>
     );
   }
