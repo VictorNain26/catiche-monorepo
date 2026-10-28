@@ -46,7 +46,8 @@ function Profiles() {
         <List className={SHEET_ROWS}>
           {data.profiles.map((profile) => {
             const note = profileNote(profile.state, profile.name, profile.parents);
-            // Blocked here or stopped everywhere: no way in, the line says whom to ask.
+            // Blocked here or stopped everywhere: the line says whom to ask, and leads to E3, its keypad
+            // closed, « J'ai oublié mon code » open.
             const closed = profile.state === 'blocked' || profile.state === 'locked';
             return (
               <ListItem
@@ -71,7 +72,7 @@ function Profiles() {
                     note
                   )
                 }
-                {...(closed ? {} : { render: <Link to="/profils/$studentId" params={{ studentId: profile.id }} /> })}
+                render={<Link to="/profils/$studentId" params={{ studentId: profile.id }} />}
               />
             );
           })}
