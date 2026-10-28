@@ -1,4 +1,5 @@
-import tom from '@repo/ui/assets/tom.png';
+import tomSrcset from '@repo/ui/assets/tom.png?w=320;720&format=webp&as=srcset';
+import tom from '@repo/ui/assets/tom.png?w=720&format=webp';
 import tomHead from '@repo/ui/assets/tom-tete.png';
 import { cn } from '@repo/ui/classes';
 
@@ -9,8 +10,19 @@ export function TomHead({ className }: { className?: string }) {
 
 /**
  * Tom whole, standing on the student's stage, provisional until his redesign (`docs/charte.md`, « Tom »):
- * decorative, outside a session he says nothing; his size comes from `className`.
+ * decorative, outside a session he says nothing; his size comes from `className`. In webp, at
+ * twice the sizes he is shown at, `size-40` and `lg:size-90` (`page.tsx`), as the landing serves him.
  */
 export function TomFigure({ className }: { className?: string }) {
-  return <img src={tom} alt="" width={768} height={768} className={cn('shrink-0 object-contain', className)} />;
+  return (
+    <img
+      src={tom}
+      srcSet={tomSrcset}
+      sizes="(min-width: 64rem) 360px, 160px"
+      alt=""
+      width={768}
+      height={768}
+      className={cn('shrink-0 object-contain', className)}
+    />
+  );
 }
