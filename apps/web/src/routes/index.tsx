@@ -1,7 +1,7 @@
 import { Button, List, ListItem, Section } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { BellIcon, BookmarkIcon, CalendarIcon, EyeOffIcon } from 'lucide-react';
+import { BellIcon, BookmarkIcon, CalendarIcon, UsersRoundIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { MessageBanner } from '../components/message-banner';
 import { SHEET_ROWS, StudentPage } from '../components/page';
@@ -67,7 +67,8 @@ function StudentHome() {
         </List>
       )}
       <p className="flex items-start gap-3 border-t border-border pt-4">
-        <EyeOffIcon aria-hidden="true" nonScalingStroke className="size-6 shrink-0 text-muted-foreground" />
+        {/* Who sees what: the parents' figure, not a crossed eye, which a student reads as « Nadia ne voit rien ». */}
+        <UsersRoundIcon aria-hidden="true" nonScalingStroke className="size-6 shrink-0 text-muted-foreground" />
         <span>{whoSeesWhat(parents)}</span>
       </p>
       <Section title="Bientôt" titleClassName="text-lg">
