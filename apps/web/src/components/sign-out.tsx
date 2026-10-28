@@ -46,9 +46,9 @@ export function SignOut({ label }: { label: string }) {
 }
 
 /** A button of a screen's header, drawn as its links are; the props of what opens a dialog pass through. */
-function HeaderButton({ icon: Icon, children, ...button }: ComponentProps<'button'> & { icon: LucideIcon }) {
+function HeaderButton({ icon: Icon, children, className, ...button }: ComponentProps<'button'> & { icon: LucideIcon }) {
   return (
-    <button type="button" {...button} className={cn(buttonVariants({ variant: 'link' }), 'gap-1 py-0')}>
+    <button type="button" {...button} className={cn(buttonVariants({ variant: 'link' }), 'gap-1 py-0', className)}>
       <Icon aria-hidden="true" nonScalingStroke className="size-6" />
       {children}
     </button>
@@ -82,12 +82,13 @@ export function StudentQuit() {
   );
 }
 
-/** In the header of the adult's screens. */
-export function Quit() {
+/** In the band of the adult's screens, drawn as the band's links (`className`). */
+export function Quit({ className }: { className?: string }) {
   const signOut = useSignOut({ adult: true });
   return (
     <HeaderButton
       icon={LogOutIcon}
+      className={className}
       disabled={signOut.isPending}
       onClick={() => {
         signOut.mutate();

@@ -1,11 +1,11 @@
 import { buttonVariants, cn } from '@repo/ui/classes';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { createLink } from '@tanstack/react-router';
+import { Link, createLink } from '@tanstack/react-router';
 import { ChevronLeftIcon, Settings2Icon, UserRoundIcon, type LucideIcon } from 'lucide-react';
 import { useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
 import { meQuery } from '../lib/me';
 import { Quit, StudentQuit } from './sign-out';
-import { TomFigure } from './tom';
+import { TomFigure, TomHead } from './tom';
 
 function HeaderAnchor({ icon: Icon, className, children, ...anchor }: ComponentProps<'a'> & { icon: LucideIcon }) {
   return (
@@ -28,9 +28,64 @@ function BackAnchor(props: ComponentProps<'a'>) {
 /** The way back to the screen above; a link of the router's, its params typed by its route. */
 export const BackLink = createLink(BackAnchor);
 
-/** The brand's name, at the head of a screen. */
-function Brand({ className }: { className?: string }) {
-  return <p className={cn('font-heading text-xl font-extrabold text-primary', className)}>Catiche</p>;
+/** The brand's name, at the head of a screen: in the brand's water, or white on its deep plane (`panel`). */
+export function Brand({ tone = 'primary', className }: { tone?: 'primary' | 'panel'; className?: string }) {
+  return (
+    <span className={cn('block font-heading text-xl font-extrabold', tone === 'primary' ? 'text-primary' : 'text-panel-foreground', className)}>
+      Catiche
+    </span>
+  );
+}
+
+/** The landing's pages an adult's screen leads to, by a plain link: never a call (`CLAUDE.md`). */
+const LANDING = { contact: 'https://catiche.fr/contact', privacy: 'https://catiche.fr/confidentialite' } as const;
+
+const FOOTER_LINK = cn(buttonVariants({ variant: 'link' }), 'py-0 font-bold');
+
+/** « Contact » and « Confidentialité », the landing's pages, at the foot of an adult's screen. */
+export function LandingLinks() {
+  return (
+    <>
+      <a href={LANDING.contact} className={FOOTER_LINK}>
+        Contact
+      </a>
+      <a href={LANDING.privacy} className={FOOTER_LINK}>
+        Confidentialité
+      </a>
+    </>
+  );
+}
+
+/** A link or a button of the adult's band: white on the deep plane, its ring white too, where the ring's water would vanish. */
+const BAND_LINK =
+  'px-2 font-bold text-panel-foreground no-underline hover:underline focus-visible:ring-panel-foreground focus-visible:ring-offset-panel';
+
+/**
+ * The band at the top of every adult's screen, on the brand's deep plane: Tom's head and the
+ * brand's name, which lead home; who is signed in, which opens their account; and « Quitter ».
+ */
+function AdultBand() {
+  const { data: me } = useSuspenseQuery(meQuery);
+  return (
+    <header className="bg-panel text-panel-foreground">
+      <div className="mx-auto flex min-h-14 w-full max-w-5xl flex-wrap items-center justify-between gap-x-2 py-1.5 pr-2 pl-4 lg:px-8">
+        <Link
+          to="/foyer"
+          activeOptions={{ exact: true }}
+          className="flex min-h-11 items-center gap-2 rounded-control focus-visible:ring-2 focus-visible:ring-panel-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-panel focus-visible:outline-none"
+        >
+          <TomHead className="size-8 shrink-0" />
+          <Brand tone="panel" />
+        </Link>
+        <nav aria-label="Votre compte" className="ml-auto flex flex-wrap justify-end">
+          <HeaderLink to="/foyer/compte" icon={UserRoundIcon} className={BAND_LINK}>
+            {me?.name} · Votre compte
+          </HeaderLink>
+          <Quit className={BAND_LINK} />
+        </nav>
+      </div>
+    </header>
+  );
 }
 
 /** A screen reached by a step of a form, not a link: its title takes the focus, so it is read out. */
@@ -150,25 +205,27 @@ export function EntryPage({
 }
 
 /**
- * A screen of the adult's, its header the same everywhere: « ← Vos enfants », named by the home's
- * title, except on the home itself, or the way back to a screen below it, named by it; who is
- * signed in, which opens their account; and « Quitter ».
+ * A screen of the adult's: the band at its top; « ← Vos enfants », named by the home's title,
+ * except on the home itself, or the way back to a screen below it, named by it; the title, as large
+ * as the child's; and the foot, which says where the data lives and leads to the landing.
  */
-export function AdultPage({ withBack = true, back, ...page }: Omit<PageProps, 'action'> & { withBack?: boolean }) {
-  const { data: me } = useSuspenseQuery(meQuery);
+export function AdultPage({ withBack = true, back, wide = false, children, ...header }: Omit<PageProps, 'display'> & { withBack?: boolean }) {
   return (
-    <Page
-      {...page}
-      back={back ?? (withBack ? <BackLink to="/foyer">Vos enfants</BackLink> : undefined)}
-      action={
-        <div className="flex flex-wrap items-center justify-end gap-x-4">
-          <HeaderLink to="/foyer/compte" icon={UserRoundIcon}>
-            {me?.name} · Votre compte
-          </HeaderLink>
-          <Quit />
+    <div className="flex min-h-dvh flex-col">
+      <AdultBand />
+      <main className={cn(COLUMN, 'flex-1', wide && WIDE)}>
+        <PageHeader {...header} back={back ?? (withBack ? <BackLink to="/foyer">Vos enfants</BackLink> : undefined)} display />
+        {children}
+      </main>
+      <footer className={cn(COLUMN, 'gap-0 pt-0', wide && WIDE)}>
+        <div className="flex flex-col gap-x-6 border-t border-border pt-2 text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <p className="py-2">Hébergé en France · Données jamais vendues</p>
+          <p className="flex flex-wrap gap-x-6">
+            <LandingLinks />
+          </p>
         </div>
-      }
-    />
+      </footer>
+    </div>
   );
 }
 
@@ -178,10 +235,9 @@ interface HeaderProps {
   /** A line that says more of the title, under it. */
   subtitle?: string | undefined;
   back?: ReactNode;
-  action?: ReactNode;
   /** A screen reached by a step of a form, not a link: its title takes the focus, so it is read out. */
   announce?: boolean;
-  /** A child's screen: its title larger on a computer, as the child's screens draw it. */
+  /** Its title larger on a computer, as the child's and the adult's screens draw it. */
   display?: boolean;
 }
 
@@ -191,19 +247,21 @@ interface PageProps extends HeaderProps {
   children: ReactNode;
 }
 
-/** A screen's header: the way back, read before the title, and an action of the space on the right, when it has them. */
-function PageHeader({ title, subtitle, back, action, announce = false, display = false }: HeaderProps) {
-  const links = back !== undefined || action !== undefined;
+/** The column of a screen, at phone width first; `WIDE`, a screen laid out by its parts on a computer. */
+const COLUMN = 'mx-auto flex w-full max-w-md flex-col gap-6 p-4';
+const WIDE = 'lg:max-w-5xl lg:px-8';
+
+/** A screen's header: the way back, read before the title, when it has one. */
+function PageHeader({ title, subtitle, back, announce = false, display = false }: HeaderProps) {
   const headingRef = useAnnounce(announce);
   return (
     <header className="flex flex-col gap-2 pt-4">
-      {links ? (
-        <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-3">
-          {back ?? <span />}
-          {action}
-        </div>
-      ) : null}
-      <h1 ref={headingRef} tabIndex={-1} className={cn('text-3xl text-foreground outline-none', !links && 'pt-4', display && 'lg:pt-0 lg:text-5xl')}>
+      {back !== undefined && <div className="flex min-h-11 items-center">{back}</div>}
+      <h1
+        ref={headingRef}
+        tabIndex={-1}
+        className={cn('text-3xl text-foreground outline-none', back === undefined && 'pt-4', display && 'lg:pt-0 lg:text-5xl')}
+      >
         {title}
       </h1>
       {subtitle !== undefined && <p className="text-muted-foreground">{subtitle}</p>}
@@ -214,7 +272,7 @@ function PageHeader({ title, subtitle, back, action, announce = false, display =
 /** A screen at phone width first, in one column. */
 export function Page({ wide = false, children, ...header }: PageProps) {
   return (
-    <main className={cn('mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-4', wide && 'lg:max-w-5xl lg:px-8')}>
+    <main className={cn(COLUMN, 'min-h-dvh', wide && WIDE)}>
       <PageHeader {...header} />
       {children}
     </main>
