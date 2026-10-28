@@ -22,4 +22,6 @@ export { Section } from './components/section';
 
 export { Skeleton } from './components/skeleton';
 
+export { Tag } from './components/tag';
+
 export { Toaster, toast } from './components/toaster';
