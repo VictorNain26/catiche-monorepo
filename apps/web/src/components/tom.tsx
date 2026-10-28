@@ -1,10 +1,13 @@
 import tom from '@repo/ui/assets/tom.png?w=320;720&format=webp&as=picture';
-import tomHead from '@repo/ui/assets/tom-tete.png';
+import tomHead from '@repo/ui/assets/tom-tete.png?w=64&format=webp';
 import { cn } from '@repo/ui/classes';
 
-/** Tom's head, beside what he says: decorative, his name is read with it. Its source is 128 px: small sizes only. */
+/**
+ * Tom's head, beside what he says and on the adult's band: decorative, his name is read with it.
+ * Shown at 32 px (`size-8`) wherever it stands, so served in webp at twice that.
+ */
 export function TomHead({ className }: { className?: string }) {
-  return <img src={tomHead} alt="" width={128} height={128} className={className} />;
+  return <img src={tomHead} alt="" width={64} height={64} className={cn('size-8 shrink-0', className)} />;
 }
 
 /**

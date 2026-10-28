@@ -1,14 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Banner, Button, Card, CheckboxField, Section, Skeleton, Tag } from '@repo/ui';
-import { buttonVariants, cn } from '@repo/ui/classes';
+import { Banner, Button, Card, CheckboxField, Skeleton, Tag } from '@repo/ui';
+import { cn, rowLink } from '@repo/ui/classes';
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { CatchBoundary, Link, Navigate, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { CheckIcon, ChevronRightIcon, CircleAlertIcon, ClockIcon, EyeIcon, EyeOffIcon, PlusIcon, type LucideIcon } from 'lucide-react';
+import { ChevronRightIcon, EyeIcon, EyeOffIcon, PlusIcon, type LucideIcon } from 'lucide-react';
 import { Suspense, useId, useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { ForgottenCodeGesture, useActivation, useUnblockDevice } from '../components/child-access';
 import { InitialChip } from '../components/initial-chip';
-import { AdultPage, LANDING } from '../components/page';
+import { AdultPage, IconLine, PrivacyLink } from '../components/page';
 import { PasskeyOffer } from '../components/passkey-offer';
 import {
   GUARDIAN_HINT,
@@ -64,41 +64,50 @@ function Household() {
   const { data: students } = useSuspenseQuery(studentsQuery);
   // Read once: the card stays, to say it is done, or goes by its own « Plus tard ».
   const [offered] = useState(me?.role === 'adult' && me.passkeyOffer);
+  const kidsId = useId();
   const invitations = pendingInvitations(me);
   // The last child gone while the page is open, from another device say: the adding, as on arrival.
   if (students.length === 0 && invitations.length === 0) return <Navigate to="/foyer/ajouter" />;
   // A relative, who adds no child and reads no « Vos enfants » (A5, for a relative).
   const relative = students.length > 0 && students.every(({ role }) => role === 'relative');
 
-  const cards = (
-    <ul className="grid gap-4 lg:grid-cols-2 lg:items-start">
-      {students.map((student) => (
-        <li key={student.id}>
-          <ChildCard child={student} level={relative ? 2 : 3} />
-        </li>
-      ))}
-    </ul>
-  );
+  // « Vos enfants » heads the cards alone, outside the grid: the column beside them starts level with them.
+  const heading = !relative && students.length > 0;
+  const Column = heading ? 'section' : 'div';
 
   return (
     <AdultPage title={homeTitle(students)} withBack={false} wide>
       {invitations.map((invitation) => (
         <InvitationCard key={invitation.id} invitation={invitation} />
       ))}
-      <div className="flex flex-col gap-8 lg:grid lg:grid-cols-3 lg:items-start">
-        <div className="flex flex-col gap-4 lg:col-span-2">
-          {students.length > 0 && (relative ? cards : <Section title="Vos enfants">{cards}</Section>)}
-          {!relative && (
-            <Button render={<Link to="/foyer/ajouter" />} variant="tonal" className="sm:self-start">
-              <PlusIcon aria-hidden="true" nonScalingStroke className="size-6" />
-              Ajouter un enfant
-            </Button>
-          )}
-        </div>
-        {/* On a computer, level with the cards, under the heading of « Vos enfants ». */}
-        <div className={cn('flex flex-col gap-6', !relative && 'lg:pt-10')}>
-          <WhatYouSee />
-          {offered && <PasskeyOffer />}
+      <div className="flex flex-col gap-3">
+        {heading && (
+          <h2 id={kidsId} className="text-xl text-foreground">
+            Vos enfants
+          </h2>
+        )}
+        <div className="flex flex-col gap-8 lg:grid lg:grid-cols-3 lg:items-start">
+          <Column aria-labelledby={heading ? kidsId : undefined} className="flex flex-col gap-4 lg:col-span-2">
+            {students.length > 0 && (
+              <ul className="grid gap-4 lg:grid-cols-2 lg:items-start">
+                {students.map((student) => (
+                  <li key={student.id}>
+                    <ChildCard child={student} level={relative ? 2 : 3} />
+                  </li>
+                ))}
+              </ul>
+            )}
+            {!relative && (
+              <Button render={<Link to="/foyer/ajouter" />} variant="tonal" className="sm:self-start">
+                <PlusIcon aria-hidden="true" nonScalingStroke className="size-6" />
+                Ajouter un enfant
+              </Button>
+            )}
+          </Column>
+          <div className="flex flex-col gap-6">
+            <WhatYouSee />
+            {offered && <PasskeyOffer />}
+          </div>
         </div>
       </div>
     </AdultPage>
@@ -113,28 +122,25 @@ function WhatYouSee() {
       <h2 id={titleId} className="text-xl">
         Ce que vous voyez, et ce que vous ne voyez pas
       </h2>
-      <Fact icon={EyeIcon} title="Ce que vous voyez">
+      <Seen icon={EyeIcon} title="Ce que vous voyez">
         Les soirs où votre enfant a travaillé, et le résumé de sa semaine, dans « Gérer ».
-      </Fact>
-      <Fact icon={EyeOffIcon} title="Ce que vous ne voyez pas">
+      </Seen>
+      <Seen icon={EyeOffIcon} title="Ce que vous ne voyez pas">
         Ses conversations avec Tom : elles ne vous sont jamais envoyées.
-      </Fact>
-      <a href={LANDING.privacy} className={cn(buttonVariants({ variant: 'link' }), 'self-start py-0')}>
-        Confidentialité
-      </a>
+      </Seen>
+      <PrivacyLink className="self-start" />
     </section>
   );
 }
 
-function Fact({ icon: Icon, title, children }: { icon: LucideIcon; title: string; children: ReactNode }) {
+function Seen({ icon, title, children }: { icon: LucideIcon; title: string; children: ReactNode }) {
   return (
-    <div className="flex items-start gap-3">
-      <Icon aria-hidden="true" nonScalingStroke className="size-6 shrink-0 text-primary" />
+    <IconLine icon={icon}>
       <p className="flex flex-col gap-1">
         <span className="font-bold">{title}</span>
         <span className="text-sm text-muted-foreground">{children}</span>
       </p>
-    </div>
+    </IconLine>
   );
 }
 
@@ -202,7 +208,6 @@ function ChildCard({ child, level }: { child: Student; level: 2 | 3 }) {
   const week = useQuery(summaryQuery(child.id));
   const Heading = level === 2 ? 'h2' : 'h3';
   const titleId = useId();
-  const tonight = week.data && tonightTag(week.data.tonight);
   return (
     <Card render={<article aria-labelledby={titleId} />} className="flex flex-col overflow-hidden p-0">
       <div className="flex flex-col gap-4 p-4 lg:p-6">
@@ -219,11 +224,9 @@ function ChildCard({ child, level }: { child: Student; level: 2 | 3 }) {
             <Skeleton className="h-8 w-48" />
             <Skeleton className="h-5 w-3/4" />
           </>
-        ) : week.data && tonight ? (
+        ) : week.data ? (
           <>
-            <Tag tone={tonight.tone} icon={tonight.tone === 'done' ? CheckIcon : ClockIcon}>
-              {tonight.label}
-            </Tag>
+            <TonightTag tonight={week.data.tonight} />
             <p>{eveningsLine(child.name, week.data.days)}</p>
           </>
         ) : (
@@ -232,9 +235,7 @@ function ChildCard({ child, level }: { child: Student; level: 2 | 3 }) {
       </div>
       {childAlerts(child).map((alert) => (
         <div key={alert.kind === 'device' ? alert.deviceId : alert.kind} className="flex flex-col gap-3 border-t border-border p-4 lg:p-6">
-          <Tag tone="todo" icon={CircleAlertIcon}>
-            À faire
-          </Tag>
+          <Tag tone="todo">À faire</Tag>
           <p className="font-bold">{alert.text}</p>
           <AlertGesture child={child} alert={alert} />
         </div>
@@ -242,13 +243,19 @@ function ChildCard({ child, level }: { child: Student; level: 2 | 3 }) {
       <Link
         to="/foyer/$studentId"
         params={{ studentId: child.id }}
-        className="mt-auto flex min-h-14 items-center justify-between gap-2 border-t border-border px-4 font-bold text-primary transition-colors duration-fast ease-standard hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset lg:px-6"
+        className={cn(rowLink, 'mt-auto flex min-h-14 items-center justify-between gap-2 border-t border-border px-4 font-bold text-primary lg:px-6')}
       >
         {childLink(child)}
         <ChevronRightIcon aria-hidden="true" nonScalingStroke className="size-6 shrink-0" />
       </Link>
     </Card>
   );
+}
+
+/** Whether the child worked tonight, as a tag. */
+function TonightTag({ tonight }: { tonight: boolean }) {
+  const { tone, label } = tonightTag(tonight);
+  return <Tag tone={tone}>{label}</Tag>;
 }
 
 /** The gesture an alert asks, the home's main button: « Voir », a starting code, or « Débloquer ». */

@@ -1,3 +1,4 @@
+import { Button } from '@repo/ui';
 import { buttonVariants, cn } from '@repo/ui/classes';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createLink } from '@tanstack/react-router';
@@ -28,37 +29,87 @@ function BackAnchor(props: ComponentProps<'a'>) {
 /** The way back to the screen above; a link of the router's, its params typed by its route. */
 export const BackLink = createLink(BackAnchor);
 
-/** The brand's name, at the head of a screen: in the brand's water, or white on its deep plane (`panel`). */
-function Brand({ tone = 'primary', className }: { tone?: 'primary' | 'panel'; className?: string }) {
-  return (
-    <span className={cn('block font-heading text-xl font-extrabold', tone === 'primary' ? 'text-primary' : 'text-panel-foreground', className)}>
-      Catiche
-    </span>
-  );
+/** The brand's name, at the head of a screen: in the brand's water, unless `className` gives it another ink. */
+function Brand({ className }: { className?: string }) {
+  return <span className={cn('block font-heading text-xl font-extrabold text-primary', className)}>Catiche</span>;
 }
 
 /** The landing's pages an adult's screen leads to, by a plain link: never a call (`CLAUDE.md`). */
-export const LANDING = { contact: 'https://catiche.fr/contact', privacy: 'https://catiche.fr/confidentialite' } as const;
+const LANDING = { contact: 'https://catiche.fr/contact', privacy: 'https://catiche.fr/confidentialite' } as const;
 
 const FOOTER_LINK = cn(buttonVariants({ variant: 'link' }), 'py-0 font-bold');
 
-/** « Contact » and « Confidentialité », the landing's pages, at the foot of an adult's screen. */
-function LandingLinks() {
+/** « Confidentialité », the landing's page: at the foot of an adult's screen, and wherever the adult reads what they see. */
+export function PrivacyLink({ className }: { className?: string }) {
   return (
-    <>
-      <a href={LANDING.contact} className={FOOTER_LINK}>
-        Contact
-      </a>
-      <a href={LANDING.privacy} className={FOOTER_LINK}>
-        Confidentialité
-      </a>
-    </>
+    <a href={LANDING.privacy} className={cn(FOOTER_LINK, className)}>
+      Confidentialité
+    </a>
   );
 }
 
-/** A link or a button of the adult's band: white on the deep plane, its ring white too, where the ring's water would vanish. */
-const BAND_LINK =
-  'px-2 font-bold text-panel-foreground no-underline hover:underline focus-visible:ring-panel-foreground focus-visible:ring-offset-panel';
+/** What the facts say, once: the band's foot repeats two of them (`AdultFoot`). */
+const HOSTED = 'Hébergé en France';
+const NOT_SOLD = 'Données jamais vendues';
+
+/** What reassures an adult before they enter: true, and already public (`docs/charte.md`, « Le registre de l'adulte »). */
+const FACTS = [
+  [LockIcon, 'Votre enfant a son espace, protégé par son code'],
+  [MapPinIcon, HOSTED],
+  [ShieldCheckIcon, NOT_SOLD],
+] as const;
+
+/** A line led by its icon, in the brand's water, or white on its deep plane (`onPanel`): a fact, what the adult sees. */
+export function IconLine({
+  icon: Icon,
+  onPanel = false,
+  className,
+  children,
+}: {
+  icon: LucideIcon;
+  onPanel?: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className={cn('flex items-start gap-3', className)}>
+      <Icon aria-hidden="true" nonScalingStroke className={cn('size-6 shrink-0', onPanel ? 'text-panel-foreground' : 'text-primary')} />
+      {children}
+    </div>
+  );
+}
+
+/** The facts, each a line of a finger's height with its icon. */
+function Facts({ onPanel = false, className }: { onPanel?: boolean; className?: string }) {
+  return (
+    <ul aria-label="Nos engagements" className={cn('flex flex-col', className)}>
+      {FACTS.map(([icon, fact]) => (
+        <li key={fact}>
+          <IconLine icon={icon} onPanel={onPanel} className="min-h-11 items-center font-bold">
+            {fact}
+          </IconLine>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** The foot of an adult's screen: its note, then the landing's « Contact » and « Confidentialité ». */
+function AdultFoot({ note, className }: { note: string; className?: string }) {
+  return (
+    <footer
+      className={cn('flex flex-wrap items-center justify-between gap-x-6 border-t border-border pt-2 text-sm text-muted-foreground', className)}
+    >
+      <p className="py-2">{note}</p>
+      <p className="flex flex-wrap gap-x-6">
+        <a href={LANDING.contact} className={FOOTER_LINK}>
+          Contact
+        </a>
+        <PrivacyLink />
+      </p>
+    </footer>
+  );
+}
 
 /**
  * The band at the top of every adult's screen, on the brand's deep plane: Tom's head and the
@@ -68,20 +119,17 @@ function AdultBand() {
   const { data: me } = useSuspenseQuery(meQuery);
   return (
     <header className="bg-panel text-panel-foreground">
-      <div className="mx-auto flex min-h-14 w-full max-w-5xl flex-wrap items-center justify-between gap-x-2 py-1.5 pr-2 pl-4 lg:px-8">
-        <Link
-          to="/foyer"
-          activeOptions={{ exact: true }}
-          className="flex min-h-11 items-center gap-2 rounded-control focus-visible:ring-2 focus-visible:ring-panel-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-panel focus-visible:outline-none"
-        >
-          <TomHead className="size-8 shrink-0" />
-          <Brand tone="panel" />
-        </Link>
+      <div className="mx-auto flex min-h-14 w-full max-w-5xl flex-wrap items-center justify-between gap-x-2 px-1 py-1.5 lg:px-4">
+        <Button render={<Link to="/foyer" activeOptions={{ exact: true }} />} variant="on-panel" size="sm">
+          <TomHead />
+          <Brand className="text-panel-foreground" />
+        </Button>
         <nav aria-label="Votre compte" className="ml-auto flex flex-wrap justify-end">
-          <HeaderLink to="/foyer/compte" icon={UserRoundIcon} className={BAND_LINK}>
+          <Button render={<Link to="/foyer/compte" />} variant="on-panel" size="sm" className="gap-1">
+            <UserRoundIcon aria-hidden="true" nonScalingStroke className="size-6" />
             {me?.name} · Votre compte
-          </HeaderLink>
-          <Quit className={BAND_LINK} />
+          </Button>
+          <Quit />
         </nav>
       </div>
     </header>
@@ -217,40 +265,10 @@ export function AdultPage({ withBack = true, back, wide = false, children, ...he
         <PageHeader {...header} back={back ?? (withBack ? <BackLink to="/foyer">Vos enfants</BackLink> : undefined)} display />
         {children}
       </main>
-      <footer className={cn(COLUMN, 'gap-0 pt-0', wide && WIDE)}>
-        <div className="flex flex-col gap-x-6 border-t border-border pt-2 text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-          <p className="py-2">Hébergé en France · Données jamais vendues</p>
-          <p className="flex flex-wrap gap-x-6">
-            <LandingLinks />
-          </p>
-        </div>
-      </footer>
+      <div className={cn('mx-auto w-full max-w-md px-4 pb-4', wide && WIDE)}>
+        <AdultFoot note={`${HOSTED} · ${NOT_SOLD}`} />
+      </div>
     </div>
-  );
-}
-
-/** What reassures an adult before they enter: true, and already public (`docs/charte.md`, « Le registre de l'adulte »). */
-const FACTS = [
-  [LockIcon, 'Votre enfant a son espace, protégé par son code'],
-  [MapPinIcon, 'Hébergé en France'],
-  [ShieldCheckIcon, 'Données jamais vendues'],
-] as const;
-
-/** The facts, each with its icon: in the brand's water on the page, white on the deep plane. */
-function Facts({ tone, className }: { tone: 'primary' | 'panel'; className?: string }) {
-  return (
-    <ul aria-label="Nos engagements" className={cn('flex flex-col', className)}>
-      {FACTS.map(([Icon, fact]) => (
-        <li key={fact} className="flex min-h-11 items-center gap-3 font-bold">
-          <Icon
-            aria-hidden="true"
-            nonScalingStroke
-            className={cn('size-6 shrink-0', tone === 'primary' ? 'text-primary' : 'text-panel-foreground')}
-          />
-          {fact}
-        </li>
-      ))}
-    </ul>
   );
 }
 
@@ -261,28 +279,22 @@ function Facts({ tone, className }: { tone: 'primary' | 'panel'; className?: str
  * and the landing's pages.
  */
 export function AdultEntryPage({ title, announce = false, children }: { title: string; announce?: boolean; children: ReactNode }) {
-  const headingRef = useAnnounce(announce);
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">
       <header className="flex flex-col gap-4 bg-panel px-4 pt-7 pb-8 text-panel-foreground lg:w-5/12 lg:shrink-0 lg:gap-6 lg:px-14 lg:py-10">
-        <Brand tone="panel" />
+        <Brand className="text-panel-foreground" />
         <TomFigure className="size-28 self-center xs:size-32 lg:order-last lg:mt-auto lg:size-90 lg:self-end" />
         <p className="text-lg">
           Catiche aide votre enfant à organiser ses devoirs du soir, avec Tom, une intelligence artificielle. Vous ne lisez pas ses échanges avec Tom
           : votre enfant vous dit où en sont ses devoirs.
         </p>
-        <Facts tone="panel" className="hidden lg:flex" />
+        <Facts onPanel className="hidden lg:flex" />
       </header>
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pt-7 pb-4 lg:justify-center lg:py-10">
-        <h1 ref={headingRef} tabIndex={-1} className="text-3xl text-foreground outline-none lg:text-5xl">
-          {title}
-        </h1>
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pb-4 lg:justify-center lg:py-10">
+        <PageHeader title={title} announce={announce} display />
         {children}
-        <Facts tone="primary" className="border-t border-border pt-3 lg:hidden" />
-        <footer className="mt-auto flex flex-wrap items-center gap-x-6 border-t border-border pt-2 text-sm text-muted-foreground lg:mt-0">
-          <p className="py-2">Catiche, par Victor Lenain</p>
-          <LandingLinks />
-        </footer>
+        <Facts className="border-t border-border pt-3 lg:hidden" />
+        <AdultFoot note="Catiche, par Victor Lenain" className="mt-auto justify-start lg:mt-0" />
       </main>
     </div>
   );
