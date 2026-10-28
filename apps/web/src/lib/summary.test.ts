@@ -3,8 +3,8 @@ import { eveningsLine, minutesText, questionFor, sameSummary, subjectLabel, toni
 
 describe('tonightTag', () => {
   it('says the child worked tonight as done, and not yet as neither done nor late', () => {
-    expect(tonightTag(true)).toEqual({ tone: 'done', label: 'A travaillé ce soir' });
-    expect(tonightTag(false)).toEqual({ tone: 'neutral', label: 'Pas encore ce soir' });
+    expect(tonightTag(true)).toEqual({ tone: 'done', children: 'A travaillé ce soir' });
+    expect(tonightTag(false)).toEqual({ tone: 'neutral', children: 'Pas encore ce soir' });
   });
 });
 

@@ -92,9 +92,12 @@ describe('childAlerts', () => {
 });
 
 describe('childLink', () => {
-  it('names the child for a parent, who manages them, and their homework for a relative', () => {
-    expect(childLink({ name: 'Léa', role: 'guardian' })).toBe('Gérer Léa');
-    expect(childLink({ name: 'Léa', role: 'relative' })).toBe('Suivre ses devoirs');
+  it('names the child for a parent, who manages them, in its words and to a screen reader alike', () => {
+    expect(childLink({ name: 'Léa', role: 'guardian' })).toEqual({ label: 'Gérer Léa', name: 'Gérer Léa' });
+  });
+
+  it('says their homework for a relative, and names the child to a screen reader after the words it reads', () => {
+    expect(childLink({ name: 'Léa', role: 'relative' })).toEqual({ label: 'Suivre ses devoirs', name: 'Suivre ses devoirs (Léa)' });
   });
 });
 

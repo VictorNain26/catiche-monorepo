@@ -42,9 +42,9 @@ export function eveningsLine(name: string, days: readonly string[]): string {
   return `Cette semaine, ${name} a travaillé ${listWords(days.map((day) => weekday.format(new Date(`${day}T12:00:00Z`))))}.`;
 }
 
-/** Whether the child worked tonight, on their card of the home (A5): done, or not yet, never late. */
+/** Whether the child worked tonight, on their card of the home (A5), as `Tag`'s props: done, or not yet, never late. */
 export const tonightTag = (tonight: boolean) =>
-  tonight ? ({ tone: 'done', label: 'A travaillé ce soir' } as const) : ({ tone: 'neutral', label: 'Pas encore ce soir' } as const);
+  tonight ? ({ tone: 'done', children: 'A travaillé ce soir' } as const) : ({ tone: 'neutral', children: 'Pas encore ce soir' } as const);
 
 const SUBJECTS: Record<SubjectFamily, string> = {
   mathematiques: 'Maths',

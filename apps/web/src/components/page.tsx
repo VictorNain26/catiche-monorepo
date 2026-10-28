@@ -278,7 +278,18 @@ export function AdultPage({ withBack = true, back, wide = false, children, ...he
  * column: the title, what the step asks, the facts on a phone, and the foot, who publishes Catiche
  * and the landing's pages.
  */
-export function AdultEntryPage({ title, announce = false, children }: { title: string; announce?: boolean; children: ReactNode }) {
+export function AdultEntryPage({
+  title,
+  announce = false,
+  after,
+  children,
+}: {
+  title: string;
+  announce?: boolean;
+  /** Under the facts on a phone, under the form on a computer: the way elsewhere, « Tu es élève ? ». */
+  after?: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">
       <header className="flex flex-col gap-4 bg-panel px-4 pt-7 pb-8 text-panel-foreground lg:w-5/12 lg:shrink-0 lg:gap-6 lg:px-14 lg:py-10">
@@ -290,10 +301,11 @@ export function AdultEntryPage({ title, announce = false, children }: { title: s
         </p>
         <Facts onPanel className="hidden lg:flex" />
       </header>
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pb-4 lg:justify-center lg:py-10">
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 p-4 lg:justify-center lg:py-10">
         <PageHeader title={title} announce={announce} display />
         {children}
         <Facts className="border-t border-border pt-3 lg:hidden" />
+        {after}
         <AdultFoot note="Catiche, par Victor Lenain" className="mt-auto justify-start lg:mt-0" />
       </main>
     </div>
@@ -331,7 +343,9 @@ function PageHeader({ title, subtitle, back, announce = false, display = false }
       <h1
         ref={headingRef}
         tabIndex={-1}
-        className={cn('text-3xl text-foreground outline-none', back === undefined && 'pt-4', display && 'lg:pt-0 lg:text-5xl')}
+        // A display title stands where the way back would, 32 px under the band or the page's top, as on the
+        // screens that have one.
+        className={cn('text-3xl text-foreground outline-none', display ? 'lg:text-5xl' : back === undefined && 'pt-4')}
       >
         {title}
       </h1>

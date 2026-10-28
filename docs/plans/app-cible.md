@@ -481,10 +481,11 @@ l'emploie ([Google, « Communicating passkeys »](https://developers.google.com/
     « La tablette de Léa est bloquée après 3 codes faux. » avec « Débloquer » ; « Karim a demandé
     la suppression du compte de Léa. » avec « Voir » ;
   - puis, en bas, la ligne entière en lien : « Gérer Léa › » (parent) ou « Suivre ses devoirs › »
-    (proche ; « Ses devoirs et ses messages » à l'étape 4, quand les messages existent).
+    (proche, lu « Suivre ses devoirs (Léa) » par un lecteur d'écran ; « Ses devoirs et ses
+    messages » à l'étape 4, quand les messages existent).
 - « Vos enfants » et « Ajouter un enfant » (parent).
 - Sur le plan clair, « Ce que vous voyez, et ce que vous ne voyez pas » : « Ce que vous voyez :
-  les soirs où votre enfant a travaillé, et le résumé de sa semaine, dans « Gérer ». » ; « Ce que
+  les soirs où votre enfant a travaillé, et le résumé de sa semaine. » ; « Ce que
   vous ne voyez pas : ses conversations avec Tom : elles ne vous sont jamais envoyées. » ;
   « Confidentialité ».
 - Un seul bouton principal par alerte, sinon « Lire son message » ; la clé d'accès se propose en

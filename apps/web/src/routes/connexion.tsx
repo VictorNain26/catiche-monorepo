@@ -119,7 +119,14 @@ function EmailStep({
 
   const profiles = device?.profiles.length ?? 0;
   return (
-    <AdultEntryPage title="Entrez dans Catiche">
+    <AdultEntryPage
+      title="Entrez dans Catiche"
+      after={
+        <Button render={<Link to={profiles > 0 ? '/profils' : '/activer'} />} variant="link">
+          Tu es élève ? C’est par ici
+        </Button>
+      }
+    >
       {signedOut && (
         <p role="status" className="font-bold text-foreground">
           Catiche est fermé sur cet appareil. Pour revenir, donnez votre adresse e-mail.
@@ -139,9 +146,6 @@ function EmailStep({
           Recevoir un e-mail pour entrer
         </Button>
       </form>
-      <Button render={<Link to={profiles > 0 ? '/profils' : '/activer'} />} variant="link">
-        Tu es élève ? C’est par ici
-      </Button>
     </AdultEntryPage>
   );
 }

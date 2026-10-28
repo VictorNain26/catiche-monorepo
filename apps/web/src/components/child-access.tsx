@@ -220,21 +220,30 @@ export function ForgottenCodeGesture({
   child: Student;
   activation: Activation;
   label: string;
-  /** The screen's main button, as on the home's alert card. */
+  /**
+   * The screen's main button, in the child's card of the home (A5): the code then shows on the
+   * secondary's ground (`muted-foreground` on it is tested), never a card in a card.
+   */
   primary?: boolean;
 }) {
   const { code } = activation;
+  const shown = code && (
+    <>
+      <p>
+        Sur l’appareil de {child.name}, ouvrez {window.location.origin}/activer et saisissez :
+      </p>
+      <p className="font-mono text-3xl tracking-widest">{formatCode(code.code)}</p>
+      <p className="text-sm text-muted-foreground">Valable jusqu’à {formatHour(code.expiresAt)}, une seule fois.</p>
+    </>
+  );
   return (
     <>
-      {code && (
-        <Card className="flex flex-col items-center gap-2 text-center">
-          <p>
-            Sur l’appareil de {child.name}, ouvrez {window.location.origin}/activer et saisissez :
-          </p>
-          <p className="font-mono text-3xl tracking-widest">{formatCode(code.code)}</p>
-          <p className="text-sm text-muted-foreground">Valable jusqu’à {formatHour(code.expiresAt)}, une seule fois.</p>
-        </Card>
-      )}
+      {shown &&
+        (primary ? (
+          <div className="flex flex-col items-center gap-2 rounded-control bg-secondary p-4 text-center text-secondary-foreground">{shown}</div>
+        ) : (
+          <Card className="flex flex-col items-center gap-2 text-center">{shown}</Card>
+        ))}
       {activation.added && <Banner tone="success" title={`L’appareil de ${child.name} est ajouté.`} />}
       {activation.stale ? (
         <RecentEntry

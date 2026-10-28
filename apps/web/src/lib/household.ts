@@ -210,8 +210,14 @@ export function childAlerts({ name, role, deletion, alerts }: Pick<Student, 'nam
   ];
 }
 
-/** The foot of a child's card on the home, the whole line a link to A7. */
-export const childLink = ({ name, role }: Pick<Student, 'name' | 'role'>) => (role === 'guardian' ? `Gérer ${name}` : 'Suivre ses devoirs');
+/**
+ * The foot of a child's card on the home, the whole line a link to A7: its words (`label`), and its
+ * name to a screen reader, which starts with them and says whose homework a relative follows.
+ */
+export function childLink({ name, role }: Pick<Student, 'name' | 'role'>) {
+  if (role === 'guardian') return { label: `Gérer ${name}`, name: `Gérer ${name}` };
+  return { label: 'Suivre ses devoirs', name: `Suivre ses devoirs (${name})` };
+}
 
 /** The home's title: the one child a relative follows is named (`app-cible.md`, A5). */
 export const homeTitle = (students: readonly Pick<Student, 'name' | 'role'>[]) => {

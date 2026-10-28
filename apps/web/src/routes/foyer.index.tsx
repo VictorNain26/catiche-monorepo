@@ -123,7 +123,7 @@ function WhatYouSee() {
         Ce que vous voyez, et ce que vous ne voyez pas
       </h2>
       <Seen icon={EyeIcon} title="Ce que vous voyez">
-        Les soirs où votre enfant a travaillé, et le résumé de sa semaine, dans « Gérer ».
+        Les soirs où votre enfant a travaillé, et le résumé de sa semaine.
       </Seen>
       <Seen icon={EyeOffIcon} title="Ce que vous ne voyez pas">
         Ses conversations avec Tom : elles ne vous sont jamais envoyées.
@@ -208,6 +208,7 @@ function ChildCard({ child, level }: { child: Student; level: 2 | 3 }) {
   const week = useQuery(summaryQuery(child.id));
   const Heading = level === 2 ? 'h2' : 'h3';
   const titleId = useId();
+  const link = childLink(child);
   return (
     <Card render={<article aria-labelledby={titleId} />} className="flex flex-col overflow-hidden p-0">
       <div className="flex flex-col gap-4 p-4 lg:p-6">
@@ -226,7 +227,7 @@ function ChildCard({ child, level }: { child: Student; level: 2 | 3 }) {
           </>
         ) : week.data ? (
           <>
-            <TonightTag tonight={week.data.tonight} />
+            <Tag {...tonightTag(week.data.tonight)} />
             <p>{eveningsLine(child.name, week.data.days)}</p>
           </>
         ) : (
@@ -243,19 +244,14 @@ function ChildCard({ child, level }: { child: Student; level: 2 | 3 }) {
       <Link
         to="/foyer/$studentId"
         params={{ studentId: child.id }}
+        aria-label={link.name === link.label ? undefined : link.name}
         className={cn(rowLink, 'mt-auto flex min-h-14 items-center justify-between gap-2 border-t border-border px-4 font-bold text-primary lg:px-6')}
       >
-        {childLink(child)}
+        {link.label}
         <ChevronRightIcon aria-hidden="true" nonScalingStroke className="size-6 shrink-0" />
       </Link>
     </Card>
   );
-}
-
-/** Whether the child worked tonight, as a tag. */
-function TonightTag({ tonight }: { tonight: boolean }) {
-  const { tone, label } = tonightTag(tonight);
-  return <Tag tone={tone}>{label}</Tag>;
 }
 
 /** The gesture an alert asks, the home's main button: « Voir », a starting code, or « Débloquer ». */

@@ -96,7 +96,7 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
 - Les écrans de l'adulte ont leur registre, plus tenu, à la manière des services publics
   (Victor, 2026-10-27 : la Direction 1, « simple et compréhensible »), dans `page.tsx` :
   - un bandeau sur le plan profond (`panel`), en haut de chaque écran : la tête de Tom et
-    « Catiche », qui ramènent à l'accueil, puis le compte et « Quitter », en blanc, non soulignés ;
+    « Catiche », qui ramènent à l'accueil, puis le compte et « Quitter », en blanc, soulignés seulement sous le pointeur (le variant `on-panel` des boutons) ;
   - le titre aussi grand que celui de l'enfant ;
   - l'état d'une chose en tag (`Tag`, `packages/ui`) : fait, à faire, ou neutre, toujours avec
     son icône et ses mots, jamais la couleur seule ;
