@@ -4,6 +4,7 @@ import {
   chooseTokenFor,
   codeSecret,
   firstCodeRefusal,
+  isStopped,
   forgottenText,
   forgottenTitle,
   keepChooseTokens,
@@ -128,6 +129,19 @@ describe('the token of a window to choose a code', () => {
     keepChooseTokens({ lea: 'jeton-de-lea' });
     expect(chooseTokenFor('lea')).toBe('jeton-de-lea');
     expect(chooseTokenFor('tom')).toBeUndefined();
+  });
+});
+
+describe('isStopped', () => {
+  it('holds a profile blocked here or stopped everywhere', () => {
+    expect(isStopped('blocked')).toBe(true);
+    expect(isStopped('locked')).toBe(true);
+  });
+
+  it('lets through a profile ready, choosing its code or waiting for a starting code', () => {
+    expect(isStopped('ready')).toBe(false);
+    expect(isStopped('choose')).toBe(false);
+    expect(isStopped('waiting')).toBe(false);
   });
 });
 

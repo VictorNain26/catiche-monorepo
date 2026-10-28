@@ -4,7 +4,7 @@ import { Link, createFileRoute, redirect } from '@tanstack/react-router';
 import { LockIcon } from 'lucide-react';
 import { EntryPage, SHEET_ROWS } from '../components/page';
 import { meQuery } from '../lib/me';
-import { profileNote, profilesQuery } from '../lib/student';
+import { isStopped, profileNote, profilesQuery } from '../lib/student';
 
 /**
  * C2, « Qui fait ses devoirs ? », the way in: the profiles a parent's code put on this device, each
@@ -45,10 +45,7 @@ function Profiles() {
       {data.profiles.length > 0 && (
         <List className={SHEET_ROWS}>
           {data.profiles.map((profile) => {
-            const note = profileNote(profile.state, profile.name, profile.parents);
-            // Blocked here or stopped everywhere: the line says whom to ask, and leads to E3, its keypad
-            // closed, « J'ai oublié mon code » open.
-            const closed = profile.state === 'blocked' || profile.state === 'locked';
+            const note = profileNote(profile.state, profile.name, profile.parents) ?? undefined;
             return (
               <ListItem
                 key={profile.id}
@@ -62,8 +59,10 @@ function Profiles() {
                   </span>
                 }
                 title={<span className="font-heading text-2xl font-extrabold break-words">{profile.name}</span>}
+                // Blocked here or stopped everywhere: the line says whom to ask, and leads to E3, its keypad
+                // closed, « J'ai oublié mon code » open.
                 meta={
-                  note === null ? undefined : closed ? (
+                  isStopped(profile.state) ? (
                     <span className="flex items-start gap-2">
                       <LockIcon aria-hidden="true" nonScalingStroke className="mt-0.5 size-5 shrink-0" />
                       <span>{note}</span>

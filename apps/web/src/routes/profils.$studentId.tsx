@@ -15,6 +15,7 @@ import {
   firstCodeRefusal,
   forgottenText,
   forgottenTitle,
+  isStopped,
   pressKey,
   profilesQuery,
   STUDENT_FAILED,
@@ -44,8 +45,8 @@ function Profile() {
   if (!profile) return null;
 
   // Blocked here or stopped everywhere: E3 says so, its keypad closed, « J'ai oublié mon code » open.
-  if (profile.state === 'ready' || profile.state === 'blocked' || profile.state === 'locked') {
-    return <EnterCode studentId={studentId} name={profile.name} parents={profile.parents} stopped={profile.state !== 'ready'} />;
+  if (profile.state === 'ready' || isStopped(profile.state)) {
+    return <EnterCode studentId={studentId} name={profile.name} parents={profile.parents} stopped={isStopped(profile.state)} />;
   }
   // The code is chosen in the tab the starting code was typed in, which holds the window's token.
   const token = chooseTokenFor(studentId);
