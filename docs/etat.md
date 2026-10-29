@@ -134,6 +134,16 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
   4. « Léa, voici tes devoirs du soir » n'en montre aucun : c'est à elle de les dire à Tom.
   5. Sur C2, « Première fois ici ? J'ai un code de départ » attire plus l'œil que son prénom.
   6. Sur E6, rien ne dit quel appareil est celui-ci, et « Ce que Tom retient » s'y lit deux fois.
+- **Retours du test de tâches sur A1 et A5 (2026-10-29, une mère qui découvre Catiche et une
+  grand-mère proche, jouées par un lecteur sans contexte, sur la PR 8a construite)** : toutes les
+  tâches réussies ; trois textes validés de T1 font hésiter, pour la PR 8b (A7 dit ce que
+  l'adulte voit de la semaine) :
+  1. « le résumé de sa semaine », à côté de « Vous ne lisez pas ses échanges avec Tom », fait
+     croire à un résumé de ses conversations ; il vient bien de ses séances (les matières),
+     d'où une phrase qui dise exactement ce qu'il montre.
+  2. « Donner un code de départ » ne dit pas ce qui suit (Léa en choisit un nouveau).
+  3. Sur A5, rien ne dit que Tom est une intelligence artificielle : une grand-mère y lit un
+     tuteur.
 - **Ce que la toile de l'adulte demande au serveur**, que la PR 8a ne crée pas (`app-cible.md`
   § 5, A3) : les prénoms de l'adulte qui invite et de l'enfant sur `/invitation`, avant
   l'acceptation ; ceux des parents pour le proche invité (« Nadia et Karim décident pour elle »).
