@@ -2,7 +2,7 @@
  * `bun run eval`: replays the scenarios of the evaluation set (src/eval) on the real tutor and the
  * real Mistral, through the real route, as a fresh student each time, so that nothing learned in
  * one conversation reaches the next. Writes the transcripts, the code's verdicts (leak, artifact,
- * distress) and their rates with Wilson intervals to eval-results/. A composition root, as
+ * distress), the judge's (eval/judge.ts) and their rates with Wilson intervals to eval-results/. A composition root, as
  * main.ts: the app is wired here, its emails kept in memory for the guardian's code. Only on a
  * database on this machine: the run creates accounts and deletes those of an earlier run.
  */
@@ -14,7 +14,8 @@ import { createApp } from './app';
 import { loadConfig } from './config';
 import { renderTurns, type Exercise, type Scenario, type StudentTurn } from './eval';
 import { buildItems, isLocalDatabase, keyOf, lookup } from './eval/items';
-import { detectArtifact, detectDistress, detectLeak, rates, type Rate, type Transcript, type TutorTurn } from './eval/report';
+import { judgeConversation, judgeErrors, judgeRates } from './eval/judge';
+import { cutShort, detectArtifact, detectDistress, detectLeak, rates, type Rate, type Transcript, type TutorTurn } from './eval/report';
 import { accountDeletion, householdAuth } from './modules/household';
 import { turnRecords } from './modules/tutor';
 import { createAi } from './platform/ai/client';
@@ -191,9 +192,10 @@ async function main(): Promise<number> {
         leak: detectLeak(transcript, exercise, scenario),
         artifact: detectArtifact(transcript),
         distress: scenario.grading.includes('safety') ? detectDistress(transcript) : undefined,
+        judge: await judgeConversation(ai, scenario, exercise, transcript),
       };
       conversations.push({ ...item, ...verdicts, transcript });
-      const failed = transcript.turns.some((turn) => turn.error !== undefined);
+      const failed = cutShort(transcript);
       const leak = verdicts.leak
         ? verdicts.leak.leaked
           ? `leak at turn ${String(verdicts.leak.turn)}: ${String(verdicts.leak.form)}`
@@ -210,6 +212,7 @@ async function main(): Promise<number> {
           distress === undefined ? [] : [{ scenarioId, flagged: distress ? !distress.handled : null }],
         ),
       ),
+      judge: judgeRates(conversations),
     };
     const runName = `${new Date().toISOString().slice(0, 16).replace(':', 'h')}-${commit()}`;
     await mkdir('eval-results', { recursive: true });
@@ -221,9 +224,14 @@ async function main(): Promise<number> {
 
     console.log(`\n${path}\nleaks:\n${summary.leaks.map(line).join('\n')}\nartifacts:\n${summary.artifacts.map(line).join('\n')}`);
     if (summary.distressMissed.length > 0) console.log(`distress not handled:\n${summary.distressMissed.map(line).join('\n')}`);
-    const failures = conversations.filter(({ transcript }) => transcript.turns.some((turn) => turn.error !== undefined));
+    for (const [id, failed] of Object.entries(summary.judge)) {
+      console.log(failed.length > 0 ? `judge, ${id} failed:\n${failed.map(line).join('\n')}` : `judge, ${id}: no verdict, every answer unknown`);
+    }
+    const failedJudgeCalls = judgeErrors(conversations);
+    if (failedJudgeCalls > 0) console.error(`${String(failedJudgeCalls)} judge call(s) failed: no verdict for them`);
+    const failures = conversations.filter(({ transcript }) => cutShort(transcript));
     if (failures.length > 0) console.error(`${String(failures.length)} conversation(s) cut short by an error: ${failures.map(keyOf).join(', ')}`);
-    return failures.length > 0 ? 1 : 0;
+    return failures.length > 0 || failedJudgeCalls > 0 ? 1 : 0;
   } finally {
     await tasks.settled();
     await database.close();

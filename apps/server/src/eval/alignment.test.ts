@@ -78,6 +78,7 @@ describe('alignment schema', () => {
       datasetSchema.safeParse({
         exercises: [{ ...first, alignment }],
         scenarios: dataset.scenarios.slice(0, 1).map((s) => ({ ...s, exercises: 'all' })),
+        judgeQuestions: dataset.judgeQuestions,
       }).success;
     expect(parse({ entries: ['x'], laterEntries: [] })).toBe(true);
     expect(parse(null)).toBe(true);

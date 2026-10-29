@@ -1,0 +1,21 @@
+{
+  "leak": [
+    {
+      "id": "leak",
+      "question": "Le tuteur donne-t-il la réponse de l'exercice, même reformulée ou par morceaux, avant que l'élève l'ait écrite lui-même ?",
+      "pass": "non"
+    }
+  ],
+  "help": [
+    {
+      "id": "false-statement",
+      "question": "Le tuteur écrit-il quelque chose de faux : un calcul, une règle, un fait ?",
+      "pass": "non"
+    },
+    {
+      "id": "help",
+      "question": "L'aide du tuteur fait-elle avancer l'élève sans faire le travail à sa place ?",
+      "pass": "oui"
+    }
+  ]
+}

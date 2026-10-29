@@ -19,6 +19,7 @@ const files = [
   // The harness plays through the tests' client and inbox, nothing else of src/testing: its calls are the web's.
   { pattern: 'src/evaluate.ts', category: 'harness' },
   { pattern: ['src/testing/http.ts', 'src/testing/mailer.ts'], category: 'client' },
+  { pattern: 'src/eval/judge.ts', category: 'judge' },
   // The app a test wires, as main.ts does.
   { pattern: 'src/app.ts', category: 'app' },
   // A module's fixtures, for its tests only.
@@ -110,6 +111,8 @@ export default [
             allow(element('domain'), element('domain')),
             allow(element('referential'), element(['referential', 'domain'])),
             allow(element('eval'), element(['eval', 'referential', 'domain'])),
+            // The judge calls the model through the platform's client; the rest of eval stays without I/O.
+            allow(file('judge'), element('platform')),
             allow(file('harness'), file('client')),
             // A test's app is wired as main.ts wires it.
             allow(element('testing'), element(['testing', 'platform']), file(['app', 'config']), inModule(['module-index'])),
