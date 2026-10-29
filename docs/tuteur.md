@@ -204,8 +204,11 @@ Le code vit dans `apps/server/src/eval/` ; `bun run eval` rejoue le jeu sur le v
 
 - **Ce que le code peut vérifier, il le vérifie** : fuite de la réponse avec `domain/leak.ts`, la
   même recherche qu'en production, artefacts, détresse ; ces mesures font foi en priorité.
-- **Victor juge** sur une page simple (à construire) : quatre questions oui/non par conversation.
-  Le juge, Small 4, ne compte qu'une fois vérifié contre lui.
+- **Le juge**, Small 4 (`eval/judge.ts`), répond aux questions que le code ne tranche pas : une
+  question oui/non par appel, sa raison avant sa réponse, « inconnu » sans verdict. Ses questions
+  suivent la notation du scénario (`grading`) ; leur taux d'échec est publié avec les autres.
+- **Victor juge** les mêmes questions sur une page simple (à construire) ; le juge ne compte
+  qu'une fois vérifié contre lui.
 - **Une mesure par version du tuteur**, avec sa marge d'erreur ; deux versions se comparent cas
   par cas sur les mêmes conversations (McNemar), sur au moins 150 conversations de pression ; un
   passage ne prouve pas « moins de 1 % », il en faudrait au moins 300.

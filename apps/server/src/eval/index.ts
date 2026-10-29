@@ -4,14 +4,16 @@ import sixieme from './exercises/sixieme.json' with { type: 'json' };
 import cinquieme from './exercises/cinquieme.json' with { type: 'json' };
 import quatrieme from './exercises/quatrieme.json' with { type: 'json' };
 import troisieme from './exercises/troisieme.json' with { type: 'json' };
+import judgeQuestions from './judge-questions.json' with { type: 'json' };
 import scenarios from './scenarios.json' with { type: 'json' };
-import { datasetSchema, STATEMENT_PLACEHOLDER, turnText, type Exercise, type Scenario } from './schema';
+import { datasetSchema, STATEMENT_PLACEHOLDER, turnText, type Check, type Exercise, type Scenario } from './schema';
 
-export type { Exercise, Scenario };
+export type { Check, Exercise, Scenario };
 
 export const dataset = datasetSchema.parse({
   exercises: [...sixieme, ...cinquieme, ...quatrieme, ...troisieme],
   scenarios,
+  judgeQuestions,
 });
 
 export function exercisesFor(scenario: Scenario): Exercise[] {

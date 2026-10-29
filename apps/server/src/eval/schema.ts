@@ -49,6 +49,12 @@ const exerciseSchema = z.strictObject({
   review: z.strictObject({ by: text, at: z.iso.date() }).nullable(),
 });
 
+/**
+ * A yes/no question the judge answers on a conversation, with the answer that passes; a critical
+ * one failed makes the response inappropriate whatever the others.
+ */
+const checkSchema = z.strictObject({ id: text, question: text, pass: z.enum(['oui', 'non']), critical: z.boolean().default(false) });
+
 /** A student message; a spoken one goes through the voice channel, as the microphone sends it. */
 const turnSchema = z.union([text, z.strictObject({ text, inputMode: z.literal('voice') })]);
 
@@ -70,16 +76,29 @@ const scenarioSchema = z.strictObject({
     }),
   grading: z.array(z.enum(['leak', 'help', 'safety'])).min(1),
   expectedBehavior: text,
-  /**
-   * Yes/no questions the judge answers for a safety scenario, with the answer that passes; a
-   * critical one failed makes the response inappropriate whatever the others.
-   */
-  safetyChecks: z.array(z.strictObject({ id: text, question: text, pass: z.enum(['oui', 'non']), critical: z.boolean().default(false) })).default([]),
+  /** The judge's questions for a safety scenario, its own. */
+  safetyChecks: z.array(checkSchema).default([]),
 });
 
+const judgeQuestionsSchema = z.strictObject({ leak: z.array(checkSchema).min(1), help: z.array(checkSchema).min(1) });
+
+/** The judge's questions on a scenario, by its gradings: the grid's, then its own safety checks. */
+export function scenarioQuestions(scenario: z.infer<typeof scenarioSchema>, grid: z.infer<typeof judgeQuestionsSchema>): Check[] {
+  return [
+    ...(scenario.grading.includes('leak') ? grid.leak : []),
+    ...(scenario.grading.includes('help') ? grid.help : []),
+    ...(scenario.grading.includes('safety') ? scenario.safetyChecks : []),
+  ];
+}
+
 export const datasetSchema = z
-  .strictObject({ exercises: z.array(exerciseSchema).min(1), scenarios: z.array(scenarioSchema).min(1) })
-  .superRefine(({ exercises, scenarios }, ctx) => {
+  .strictObject({
+    exercises: z.array(exerciseSchema).min(1),
+    scenarios: z.array(scenarioSchema).min(1),
+    /** The judge's questions for the leak and help gradings, Victor's grid of 2026-10-06. */
+    judgeQuestions: judgeQuestionsSchema,
+  })
+  .superRefine(({ exercises, scenarios, judgeQuestions }, ctx) => {
     const exerciseIds = new Set<string>();
     for (const { id } of exercises) {
       if (exerciseIds.has(id)) ctx.addIssue({ code: 'custom', message: `duplicate exercise id ${id}` });
@@ -94,6 +113,13 @@ export const datasetSchema = z
       if (scenario.grading.includes('safety') !== scenario.safetyChecks.length > 0) {
         ctx.addIssue({ code: 'custom', message: `scenario ${scenario.id}: safety checks go with safety grading, and only there` });
       }
+      // Each question's rate is published under its id, and `critical` names the rate of inappropriate responses.
+      const questionIds = scenarioQuestions(scenario, judgeQuestions).map(({ id }) => id);
+      for (const [index, id] of questionIds.entries()) {
+        if (id === 'critical' || questionIds.indexOf(id) !== index) {
+          ctx.addIssue({ code: 'custom', message: `scenario ${scenario.id}: judge question id ${id} is reserved or asked twice` });
+        }
+      }
       if (scenario.exercises === 'all') continue;
       for (const id of scenario.exercises) {
         if (!exerciseIds.has(id)) {
@@ -105,3 +131,4 @@ export const datasetSchema = z
 
 export type Exercise = z.infer<typeof exerciseSchema>;
 export type Scenario = z.infer<typeof scenarioSchema>;
+export type Check = z.infer<typeof checkSchema>;

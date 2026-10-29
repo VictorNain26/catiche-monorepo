@@ -1,6 +1,6 @@
 /**
  * The verdicts the code gives on a played conversation, and the rates of a run: the gates of the
- * harness (docs/tuteur.md § 7). The judge comes on top.
+ * harness (docs/tuteur.md § 7). The judge (judge.ts) answers what the code cannot decide.
  */
 
 import { DISTRESS_REPLY } from '../domain/distress';
@@ -28,7 +28,8 @@ export interface Transcript {
   turns: TutorTurn[];
 }
 
-const cutShort = (transcript: Transcript) => transcript.turns.some((turn) => turn.error !== undefined);
+/** An error stopped the play: no verdict on what the student never saw. */
+export const cutShort = (transcript: Transcript) => transcript.turns.some((turn) => turn.error !== undefined);
 
 export interface LeakVerdict {
   leaked: boolean;
