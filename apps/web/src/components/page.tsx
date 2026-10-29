@@ -122,12 +122,15 @@ function AdultBand() {
       <div className="mx-auto flex min-h-14 w-full max-w-5xl flex-wrap items-center justify-between gap-x-2 px-1 py-1.5 lg:px-4">
         <Button render={<Link to="/foyer" activeOptions={{ exact: true }} />} variant="on-panel" size="sm">
           <TomHead />
-          <Brand className="text-panel-foreground" />
+          {/* Under 360 px, Tom's head alone is the brand's mark: the name stays read out. */}
+          <Brand className="text-panel-foreground max-xs:sr-only" />
         </Button>
         <nav aria-label="Votre compte" className="ml-auto flex flex-wrap justify-end">
           <Button render={<Link to="/foyer/compte" />} variant="on-panel" size="sm" className="gap-1">
             <UserRoundIcon aria-hidden="true" nonScalingStroke className="size-6" />
-            {me?.name} · Votre compte
+            {me?.name}
+            {/* On a phone, the first name beside the person is the account; its words stay read out. */}
+            <span className="max-sm:sr-only"> · Votre compte</span>
           </Button>
           <Quit />
         </nav>

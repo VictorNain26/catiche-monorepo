@@ -34,7 +34,11 @@ export const buttonVariants = cva(
         icon: 'size-11 rounded-control',
       },
     },
-    compoundVariants: [{ variant: 'link', className: 'h-auto min-h-11 px-0 py-3' }],
+    compoundVariants: [
+      { variant: 'link', className: 'h-auto min-h-11 px-0 py-3' },
+      // The band holds three of them on a 320 px phone: tighter there, the finger's height kept.
+      { variant: 'on-panel', className: 'px-2.5 sm:px-4' },
+    ],
     defaultVariants: {
       variant: 'default',
       size: 'default',
