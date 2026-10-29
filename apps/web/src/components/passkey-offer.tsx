@@ -6,7 +6,7 @@ import { closePasskeyOffer, meQuery } from '../lib/me';
 import { PasskeyCreate } from './passkey-create';
 
 /**
- * The passkey, offered once at the top of the home, from the second entry by email on a device
+ * The passkey, offered once at the foot of the home, from the second entry by email on a device
  * that is not shared (`/api/me`, `passkeyOffer`): told by what it spares, the wait for an email.
  * « Plus tard » puts it away for good; « Votre compte » keeps the making of one.
  */
@@ -29,22 +29,26 @@ export function PasskeyOffer() {
     return <Banner tone="success" title="C’est fait. Sur cet appareil, vous entrez maintenant sans e-mail." focusOnMount />;
   }
   return (
-    <Card render={<section aria-labelledby={titleId} />} className="flex flex-col gap-3">
+    <Card render={<section aria-labelledby={titleId} />} className="flex flex-col gap-3 lg:p-6">
       <h2 id={titleId} className="text-xl text-foreground">
         Entrez sans attendre d’e-mail
       </h2>
-      <p>Créez une clé d’accès : la prochaine fois, vous entrerez avec votre empreinte, votre visage ou le code qui déverrouille cet appareil.</p>
+      <p className="text-sm text-muted-foreground">
+        Créez une clé d’accès : la prochaine fois, vous entrerez avec votre empreinte, votre visage ou le code qui déverrouille cet appareil.
+      </p>
       {later.error && <Banner tone="error" title={FAILED} />}
-      <div className="flex flex-col gap-3 sm:flex-row">
+      {/* A second action: the home's one main button is an alert's. */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <PasskeyCreate
           label="Créer ma clé d’accès"
+          secondary
           onCreated={async () => {
             setState('created');
             await refresh();
           }}
         />
         <Button
-          variant="tonal"
+          variant="link"
           disabled={later.isPending}
           onClick={() => {
             later.mutate();

@@ -21,6 +21,11 @@ export const buttonVariants = cva(
         ghost: 'hover:bg-accent hover:text-accent-foreground active:scale-[0.98]',
         // A way out of the screen, in its words: underlined text, the line's height a finger's.
         link: 'justify-start whitespace-normal text-left font-normal text-primary underline underline-offset-4',
+        // A link or a button on the brand's deep plane (the adult's band): white, underlined under
+        // the pointer, its focus ring white on the plane, where the ring's water would vanish; while
+        // it waits, still white: the disabled ink would vanish there too.
+        'on-panel':
+          'whitespace-normal text-panel-foreground underline-offset-4 ring-offset-panel hover:underline focus-visible:ring-panel-foreground disabled:text-panel-foreground',
       },
       size: {
         default: 'h-11 px-6 rounded-control',
@@ -29,7 +34,11 @@ export const buttonVariants = cva(
         icon: 'size-11 rounded-control',
       },
     },
-    compoundVariants: [{ variant: 'link', className: 'h-auto min-h-11 px-0 py-3' }],
+    compoundVariants: [
+      { variant: 'link', className: 'h-auto min-h-11 px-0 py-3' },
+      // The band holds three of them on a 320 px phone: tighter there, the finger's height kept.
+      { variant: 'on-panel', className: 'px-2.5 sm:px-4' },
+    ],
     defaultVariants: {
       variant: 'default',
       size: 'default',

@@ -106,6 +106,14 @@
   /* La pastille de l'initiale d'un prénom (C2), dans le pelage clair. */
   --color-chip: var(--fur-3);
   --color-chip-foreground: var(--fur-11);
+  /* Les tags d'état de l'adulte, posés sur une carte (charte, « Le registre de l'adulte ») : fait,
+   * à faire, neutre ; une icône et des mots les portent, jamais la couleur seule. */
+  --color-tag-done: var(--green-1);
+  --color-tag-done-foreground: var(--green-11);
+  --color-tag-todo: var(--amber-1);
+  --color-tag-todo-foreground: var(--amber-11);
+  --color-tag-neutral: var(--mist-2);
+  --color-tag-neutral-foreground: var(--mist-11);
   /* La scène de l'enfant, l'eau claire où se tiennent son titre, Tom et l'action principale ; la
    * feuille (la carte, shadow-sheet) la chevauche. */
   --color-stage: var(--water-2);
@@ -239,6 +247,10 @@
     --color-tint: var(--water-3);
     /* La scène, un pas au-dessus du fond : au pas 2, elle s'y confondrait. */
     --color-stage: var(--water-3);
+    /* Les tags, plus haut dans leur échelle : au pas 1, ils se confondraient avec la carte sombre. */
+    --color-tag-done: var(--green-3);
+    --color-tag-todo: var(--amber-3);
+    --color-tag-neutral: var(--mist-5);
     /* L'eau profonde reste distincte du plan clair en sombre aussi (test : panel et tint). */
     --color-panel: var(--water-7);
     --color-panel-foreground: var(--mist-12);

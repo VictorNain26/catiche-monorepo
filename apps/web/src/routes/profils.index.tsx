@@ -2,6 +2,7 @@ import { Button, List, ListItem } from '@repo/ui';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect } from '@tanstack/react-router';
 import { LockIcon } from 'lucide-react';
+import { InitialChip } from '../components/initial-chip';
 import { EntryPage, SHEET_ROWS } from '../components/page';
 import { meQuery } from '../lib/me';
 import { isStopped, profileNote, profilesQuery } from '../lib/student';
@@ -50,14 +51,7 @@ function Profiles() {
               <ListItem
                 key={profile.id}
                 className="min-h-18 gap-4"
-                leading={
-                  <span
-                    aria-hidden="true"
-                    className="flex size-12 shrink-0 items-center justify-center self-start rounded-full bg-chip font-heading text-xl font-extrabold text-chip-foreground"
-                  >
-                    {profile.name.charAt(0).toUpperCase()}
-                  </span>
-                }
+                leading={<InitialChip name={profile.name} className="self-start" />}
                 title={<span className="font-heading text-2xl font-extrabold break-words">{profile.name}</span>}
                 // Blocked here or stopped everywhere: the line says whom to ask, and leads to E3, its keypad
                 // closed, « J'ai oublié mon code » open.

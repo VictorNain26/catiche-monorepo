@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useRender } from '@base-ui/react/use-render';
 import { ChevronRightIcon } from 'lucide-react';
+import { rowLink } from '../lib/row-link';
 import { cn } from '../lib/utils';
 
 /** Things alike, to compare at a glance (sessions, notions, devices): one sheet, a line each. */
@@ -34,12 +35,7 @@ function ListItem({ leading, title, meta, render, className, children }: ListIte
     defaultTagName: 'div',
     render,
     props: {
-      className: cn(
-        'flex min-h-14 items-center gap-3 px-4 py-3',
-        link &&
-          'group w-full text-left transition-colors duration-fast ease-standard hover:bg-accent hover:text-accent-foreground focus-visible:ring-inset focus-visible:ring-offset-0 disabled:pointer-events-none disabled:bg-disabled disabled:text-disabled-foreground',
-        className,
-      ),
+      className: cn('flex min-h-14 items-center gap-3 px-4 py-3', link && rowLink, className),
       children: (
         <>
           {leading}

@@ -1,11 +1,12 @@
+import { Button } from '@repo/ui';
 import { buttonVariants, cn } from '@repo/ui/classes';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { createLink } from '@tanstack/react-router';
-import { ChevronLeftIcon, Settings2Icon, UserRoundIcon, type LucideIcon } from 'lucide-react';
+import { Link, createLink } from '@tanstack/react-router';
+import { ChevronLeftIcon, LockIcon, MapPinIcon, Settings2Icon, ShieldCheckIcon, UserRoundIcon, type LucideIcon } from 'lucide-react';
 import { useEffect, useRef, type ComponentProps, type ReactNode } from 'react';
 import { meQuery } from '../lib/me';
 import { Quit, StudentQuit } from './sign-out';
-import { TomFigure } from './tom';
+import { TomFigure, TomHead } from './tom';
 
 function HeaderAnchor({ icon: Icon, className, children, ...anchor }: ComponentProps<'a'> & { icon: LucideIcon }) {
   return (
@@ -28,9 +29,114 @@ function BackAnchor(props: ComponentProps<'a'>) {
 /** The way back to the screen above; a link of the router's, its params typed by its route. */
 export const BackLink = createLink(BackAnchor);
 
-/** The brand's name, at the head of a screen. */
+/** The brand's name, at the head of a screen: in the brand's water, unless `className` gives it another ink. */
 function Brand({ className }: { className?: string }) {
-  return <p className={cn('font-heading text-xl font-extrabold text-primary', className)}>Catiche</p>;
+  return <span className={cn('block font-heading text-xl font-extrabold text-primary', className)}>Catiche</span>;
+}
+
+/** The landing's pages an adult's screen leads to, by a plain link: never a call (`CLAUDE.md`). */
+const LANDING = { contact: 'https://catiche.fr/contact', privacy: 'https://catiche.fr/confidentialite' } as const;
+
+const FOOTER_LINK = cn(buttonVariants({ variant: 'link' }), 'py-0 font-bold');
+
+/** « Confidentialité », the landing's page: at the foot of an adult's screen, and wherever the adult reads what they see. */
+export function PrivacyLink({ className }: { className?: string }) {
+  return (
+    <a href={LANDING.privacy} className={cn(FOOTER_LINK, className)}>
+      Confidentialité
+    </a>
+  );
+}
+
+/** What the facts say, once: the band's foot repeats two of them (`AdultFoot`). */
+const HOSTED = 'Hébergé en France';
+const NOT_SOLD = 'Données jamais vendues';
+
+/** What reassures an adult before they enter: true, and already public (`docs/charte.md`, « Le registre de l'adulte »). */
+const FACTS = [
+  [LockIcon, 'Votre enfant a son espace, protégé par son code'],
+  [MapPinIcon, HOSTED],
+  [ShieldCheckIcon, NOT_SOLD],
+] as const;
+
+/** A line led by its icon, in the brand's water, or white on its deep plane (`onPanel`): a fact, what the adult sees. */
+export function IconLine({
+  icon: Icon,
+  onPanel = false,
+  className,
+  children,
+}: {
+  icon: LucideIcon;
+  onPanel?: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className={cn('flex items-start gap-3', className)}>
+      <Icon aria-hidden="true" nonScalingStroke className={cn('size-6 shrink-0', onPanel ? 'text-panel-foreground' : 'text-primary')} />
+      {children}
+    </div>
+  );
+}
+
+/** The facts, each a line of a finger's height with its icon. */
+function Facts({ onPanel = false, className }: { onPanel?: boolean; className?: string }) {
+  return (
+    <ul aria-label="Nos engagements" className={cn('flex flex-col', className)}>
+      {FACTS.map(([icon, fact]) => (
+        <li key={fact}>
+          <IconLine icon={icon} onPanel={onPanel} className="min-h-11 items-center font-bold">
+            {fact}
+          </IconLine>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** The foot of an adult's screen: its note, then the landing's « Contact » and « Confidentialité ». */
+function AdultFoot({ note, className }: { note: string; className?: string }) {
+  return (
+    <footer
+      className={cn('flex flex-wrap items-center justify-between gap-x-6 border-t border-border pt-2 text-sm text-muted-foreground', className)}
+    >
+      <p className="py-2">{note}</p>
+      <p className="flex flex-wrap gap-x-6">
+        <a href={LANDING.contact} className={FOOTER_LINK}>
+          Contact
+        </a>
+        <PrivacyLink />
+      </p>
+    </footer>
+  );
+}
+
+/**
+ * The band at the top of every adult's screen, on the brand's deep plane: Tom's head and the
+ * brand's name, which lead home; who is signed in, which opens their account; and « Quitter ».
+ */
+function AdultBand() {
+  const { data: me } = useSuspenseQuery(meQuery);
+  return (
+    <header className="bg-panel text-panel-foreground">
+      <div className="mx-auto flex min-h-14 w-full max-w-5xl flex-wrap items-center justify-between gap-x-2 px-1 py-1.5 lg:px-4">
+        <Button render={<Link to="/foyer" activeOptions={{ exact: true }} />} variant="on-panel" size="sm">
+          <TomHead />
+          {/* Under 360 px, Tom's head alone is the brand's mark: the name stays read out. */}
+          <Brand className="text-panel-foreground max-xs:sr-only" />
+        </Button>
+        <nav aria-label="Votre compte" className="ml-auto flex flex-wrap justify-end">
+          <Button render={<Link to="/foyer/compte" />} variant="on-panel" size="sm" className="gap-1">
+            <UserRoundIcon aria-hidden="true" nonScalingStroke className="size-6" />
+            {me?.name}
+            {/* On a phone, the first name beside the person is the account; its words stay read out. */}
+            <span className="max-sm:sr-only"> · Votre compte</span>
+          </Button>
+          <Quit />
+        </nav>
+      </div>
+    </header>
+  );
 }
 
 /** A screen reached by a step of a form, not a link: its title takes the focus, so it is read out. */
@@ -150,25 +256,62 @@ export function EntryPage({
 }
 
 /**
- * A screen of the adult's, its header the same everywhere: « ← Vos enfants », named by the home's
- * title, except on the home itself, or the way back to a screen below it, named by it; who is
- * signed in, which opens their account; and « Quitter ».
+ * A screen of the adult's: the band at its top; « ← Vos enfants », named by the home's title,
+ * except on the home itself, or the way back to a screen below it, named by it; the title, as large
+ * as the child's; and the foot, which says where the data lives and leads to the landing.
  */
-export function AdultPage({ withBack = true, back, ...page }: Omit<PageProps, 'action'> & { withBack?: boolean }) {
-  const { data: me } = useSuspenseQuery(meQuery);
+export function AdultPage({ withBack = true, back, wide = false, children, ...header }: Omit<PageProps, 'display'> & { withBack?: boolean }) {
   return (
-    <Page
-      {...page}
-      back={back ?? (withBack ? <BackLink to="/foyer">Vos enfants</BackLink> : undefined)}
-      action={
-        <div className="flex flex-wrap items-center justify-end gap-x-4">
-          <HeaderLink to="/foyer/compte" icon={UserRoundIcon}>
-            {me?.name} · Votre compte
-          </HeaderLink>
-          <Quit />
-        </div>
-      }
-    />
+    <div className="flex min-h-dvh flex-col">
+      <AdultBand />
+      <main className={cn(COLUMN, 'flex-1', wide && WIDE)}>
+        <PageHeader {...header} back={back ?? (withBack ? <BackLink to="/foyer">Vos enfants</BackLink> : undefined)} display />
+        {children}
+      </main>
+      <div className={cn('mx-auto w-full max-w-md px-4 pb-4', wide && WIDE)}>
+        <AdultFoot note={`${HOSTED} · ${NOT_SOLD}`} />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The adult's way in (A1, A2): the brand's deep plane, its name, Tom and what Catiche is, at the top
+ * on a phone; on a computer, on the left (5/12), Tom standing at its foot with the facts. Then the
+ * column: the title, what the step asks, the facts on a phone, and the foot, who publishes Catiche
+ * and the landing's pages.
+ */
+export function AdultEntryPage({
+  title,
+  announce = false,
+  after,
+  children,
+}: {
+  title: string;
+  announce?: boolean;
+  /** Under the facts on a phone, under the form on a computer: the way elsewhere, « Tu es élève ? ». */
+  after?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex min-h-dvh flex-col lg:flex-row">
+      <header className="flex flex-col gap-4 bg-panel px-4 pt-7 pb-8 text-panel-foreground lg:w-5/12 lg:shrink-0 lg:gap-6 lg:px-14 lg:py-10">
+        <Brand className="text-panel-foreground" />
+        <TomFigure className="size-28 self-center xs:size-32 lg:order-last lg:mt-auto lg:size-90 lg:self-end" />
+        <p className="text-lg">
+          Catiche aide votre enfant à organiser ses devoirs du soir, avec Tom, une intelligence artificielle. Vous ne lisez pas ses échanges avec Tom
+          : votre enfant vous dit où en sont ses devoirs.
+        </p>
+        <Facts onPanel className="hidden lg:flex" />
+      </header>
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 p-4 lg:justify-center lg:py-10">
+        <PageHeader title={title} announce={announce} display />
+        {children}
+        <Facts className="border-t border-border pt-3 lg:hidden" />
+        {after}
+        <AdultFoot note="Catiche, par Victor Lenain" className="mt-auto justify-start lg:mt-0" />
+      </main>
+    </div>
   );
 }
 
@@ -178,10 +321,9 @@ interface HeaderProps {
   /** A line that says more of the title, under it. */
   subtitle?: string | undefined;
   back?: ReactNode;
-  action?: ReactNode;
   /** A screen reached by a step of a form, not a link: its title takes the focus, so it is read out. */
   announce?: boolean;
-  /** A child's screen: its title larger on a computer, as the child's screens draw it. */
+  /** Its title larger on a computer, as the child's and the adult's screens draw it. */
   display?: boolean;
 }
 
@@ -191,19 +333,23 @@ interface PageProps extends HeaderProps {
   children: ReactNode;
 }
 
-/** A screen's header: the way back, read before the title, and an action of the space on the right, when it has them. */
-function PageHeader({ title, subtitle, back, action, announce = false, display = false }: HeaderProps) {
-  const links = back !== undefined || action !== undefined;
+/** The column of a screen, at phone width first; `WIDE`, a screen laid out by its parts on a computer. */
+const COLUMN = 'mx-auto flex w-full max-w-md flex-col gap-6 p-4';
+const WIDE = 'lg:max-w-5xl lg:px-8';
+
+/** A screen's header: the way back, read before the title, when it has one. */
+function PageHeader({ title, subtitle, back, announce = false, display = false }: HeaderProps) {
   const headingRef = useAnnounce(announce);
   return (
     <header className="flex flex-col gap-2 pt-4">
-      {links ? (
-        <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-3">
-          {back ?? <span />}
-          {action}
-        </div>
-      ) : null}
-      <h1 ref={headingRef} tabIndex={-1} className={cn('text-3xl text-foreground outline-none', !links && 'pt-4', display && 'lg:pt-0 lg:text-5xl')}>
+      {back !== undefined && <div className="flex min-h-11 items-center">{back}</div>}
+      <h1
+        ref={headingRef}
+        tabIndex={-1}
+        // A display title stands where the way back would, 32 px under the band or the page's top, as on the
+        // screens that have one.
+        className={cn('text-3xl text-foreground outline-none', display ? 'lg:text-5xl' : back === undefined && 'pt-4')}
+      >
         {title}
       </h1>
       {subtitle !== undefined && <p className="text-muted-foreground">{subtitle}</p>}
@@ -214,7 +360,7 @@ function PageHeader({ title, subtitle, back, action, announce = false, display =
 /** A screen at phone width first, in one column. */
 export function Page({ wide = false, children, ...header }: PageProps) {
   return (
-    <main className={cn('mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-4', wide && 'lg:max-w-5xl lg:px-8')}>
+    <main className={cn(COLUMN, 'min-h-dvh', wide && WIDE)}>
       <PageHeader {...header} />
       {children}
     </main>

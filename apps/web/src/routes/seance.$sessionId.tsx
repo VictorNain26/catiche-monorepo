@@ -106,7 +106,7 @@ function Session() {
   return (
     <Page title="Séance avec Tom" back={<BackLink to="/">Tes devoirs du soir</BackLink>}>
       <p className="flex items-center gap-3 text-sm text-muted-foreground">
-        <TomHead className="size-8 shrink-0" />
+        <TomHead />
         Tom t’aide à trouver, il ne fait pas à ta place.
       </p>
       <ol aria-label="Conversation" className="flex flex-col gap-5">
@@ -119,7 +119,7 @@ function Session() {
             </li>
           ) : (
             <li key={message.id} className="flex max-w-full gap-3 self-start text-lg leading-relaxed text-foreground">
-              <TomHead className="mt-0.5 size-8 shrink-0" />
+              <TomHead className="mt-0.5" />
               <div className="min-w-0">
                 <span className="sr-only">Tom : </span>
                 <TomText>{textOf(message)}</TomText>

@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from '../lib/zod';
 import { CodeForm, sendCode } from '../components/code-form';
-import { BackLink, Page } from '../components/page';
+import { AdultEntryPage } from '../components/page';
 import { INVALID_EMAIL, authClient, authMessage, hasCode, isCancelled } from '../lib/auth';
 import { handOff } from '../lib/hand-off';
 import { meQuery } from '../lib/me';
@@ -16,7 +16,7 @@ import { announceProfileChange, profilesQuery, tabChannel } from '../lib/student
  * The adult's way in, without a password: a passkey, which the browser offers in the address
  * field, or their address, then the email it receives, whose button lets them in (/entrer) as its
  * code does here. The first entry creates the account, on an invitation (closed beta); /bienvenue
- * then asks its name. Its way back is « Qui fait ses devoirs ? ». On a device that holds profiles,
+ * then asks its name. A student finds their way by « Tu es élève ? ». On a device that holds profiles,
  * the adult's session is the device's: short on a shared one, which a child's code then closes.
  * What the screen before left (`handOff`): the address a spent link gives back, and that the adult
  * just left Catiche, said once.
@@ -51,7 +51,7 @@ function SignIn() {
 
   if (sent) {
     return (
-      <Page title="Ouvrez l’e-mail de Catiche" announce>
+      <AdultEntryPage title="Ouvrez l’e-mail de Catiche" announce>
         <CodeForm email={email} submitLabel="Entrer" onEntered={enter} />
         <Button
           type="button"
@@ -62,7 +62,7 @@ function SignIn() {
         >
           Changer d’adresse
         </Button>
-      </Page>
+      </AdultEntryPage>
     );
   }
   return (
@@ -119,19 +119,23 @@ function EmailStep({
 
   const profiles = device?.profiles.length ?? 0;
   return (
-    <Page title="Entrez dans Catiche" back={<BackLink to="/profils">Qui fait ses devoirs ?</BackLink>}>
+    <AdultEntryPage
+      title="Entrez dans Catiche"
+      after={
+        <Button render={<Link to={profiles > 0 ? '/profils' : '/activer'} />} variant="link">
+          Tu es élève ? C’est par ici
+        </Button>
+      }
+    >
       {signedOut && (
         <p role="status" className="font-bold text-foreground">
           Catiche est fermé sur cet appareil. Pour revenir, donnez votre adresse e-mail.
         </p>
       )}
-      <p className="text-foreground">
-        Catiche aide votre enfant à organiser ses devoirs du soir, avec Tom, une intelligence artificielle. Vous ne lisez pas ses échanges avec Tom :
-        votre enfant vous dit où en sont ses devoirs.
-      </p>
       <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-4">
         <Field
           label="Votre adresse e-mail"
+          hint="Celle où vous avez reçu votre invitation."
           type="email"
           autoComplete="username webauthn"
           {...form.register('email')}
@@ -142,9 +146,6 @@ function EmailStep({
           Recevoir un e-mail pour entrer
         </Button>
       </form>
-      <Button render={<Link to={profiles > 0 ? '/profils' : '/activer'} />} variant="link">
-        Tu es élève ? C’est par ici
-      </Button>
-    </Page>
+    </AdultEntryPage>
   );
 }

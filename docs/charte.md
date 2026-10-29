@@ -28,7 +28,7 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
 |---|---|---|
 | Brume (`background`) | `mist` | Le fond |
 | Encre (`foreground`) | `mist` | Le texte |
-| Eau profonde (`primary`) | `water` | L'action principale, les liens, le focus, le plan profond de la marque sur le site |
+| Eau profonde (`primary`) | `water` | L'action principale, les liens, le focus, le plan profond de la marque (`panel`) sur le site et en tête des écrans de l'adulte |
 | Jonc (`highlight`) | `reed` | Le surligneur, fil conducteur dans les deux modes : le même trait épais sous la ligne de base, qui ne touche pas les lettres ; jamais en texte ni en bordure. Il se détache du fond comme une marque, à 3:1 dans les deux modes (`packages/tokens/contrast.test.mjs`) |
 | Pelage (`annotation`) | `fur` | Une note, un accent rare ; la pastille de l'initiale d'un prénom (`chip`) |
 
@@ -93,6 +93,19 @@ en clair et en sombre, sont dans `packages/tokens/scales.css`.
   bas, arrondie en haut ; à l'ordinateur, la scène se tient à gauche, Tom entier à son pied, et la
   feuille à droite. Une liste posée sur la feuille n'a pas de feuille à elle : jamais une carte
   dans une carte (`page.tsx`, `apps/web/src/components/`).
+- Les écrans de l'adulte ont leur registre, plus tenu, à la manière des services publics
+  (Victor, 2026-10-27 : la Direction 1, « simple et compréhensible »), dans `page.tsx` :
+  - un bandeau sur le plan profond (`panel`), en haut de chaque écran : la tête de Tom et
+    « Catiche », qui ramènent à l'accueil, puis le compte et « Quitter », en blanc, soulignés seulement sous le pointeur (le variant `on-panel` des boutons) ;
+  - le titre aussi grand que celui de l'enfant ;
+  - l'état d'une chose en tag (`Tag`, `packages/ui`) : fait, à faire, ou neutre, toujours avec
+    son icône et ses mots, jamais la couleur seule ;
+  - le plan clair (`tint`) pour ce qui rassure, comme « Ce que vous voyez, et ce que vous ne
+    voyez pas » ;
+  - un pied de page qui dit où vivent les données et mène aux pages « Contact » et
+    « Confidentialité » du site, par un simple lien ;
+  - l'entrée (A1) ouvre sur le plan profond, avec Tom et ce qu'est Catiche ; à l'ordinateur, il
+    se tient à gauche, comme la scène de l'enfant.
 - Un écran où l'on revient, et des pages qui s'ouvrent depuis lui et se referment par un « ← »
   qui nomme où il ramène (Victor, 2026-10-23 : une navigation comprise par un enfant et par un
   adulte peu habitué aux écrans). Des onglets seulement quand il y a plusieurs destinations

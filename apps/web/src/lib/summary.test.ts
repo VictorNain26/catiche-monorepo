@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'bun:test';
-import { eveningsLine, minutesText, questionFor, sameSummary, subjectLabel } from './summary';
+import { eveningsLine, minutesText, questionFor, sameSummary, subjectLabel, tonightTag } from './summary';
+
+describe('tonightTag', () => {
+  it('says the child worked tonight as done, and not yet as neither done nor late', () => {
+    expect(tonightTag(true)).toEqual({ tone: 'done', children: 'A travaillé ce soir' });
+    expect(tonightTag(false)).toEqual({ tone: 'neutral', children: 'Pas encore ce soir' });
+  });
+});
 
 describe('minutesText', () => {
   it('says the time as a parent and a pupil read it, never zero minutes', () => {
