@@ -77,7 +77,7 @@ export function compareVariants(conversations: readonly Pick<Conversation, keyof
   const questionIds = [...new Set(conversations.flatMap(({ judge }) => (judge ?? []).map(({ id }) => id)))];
   return {
     'code:leak': pairedOn(({ leak }) => (leak ? leak.leaked : null)),
-    ...Object.fromEntries(questionIds.map((id) => [id === 'leak' ? 'code:leak' : `judge:${id}`, pairedOn(({ judge }) => failedOn(judge, id))])),
+    ...Object.fromEntries(questionIds.map((id) => [`judge:${id}`, pairedOn(({ judge }) => failedOn(judge, id))])),
   };
 }
 
