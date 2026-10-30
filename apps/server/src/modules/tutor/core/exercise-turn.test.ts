@@ -6,6 +6,7 @@
 import { describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { aiCost } from '../../../platform/ai/schema';
+import { notionsFor } from '../../../referential';
 import { testAi } from '../../../testing/ai';
 import type { TurnAnalysis } from './analysis';
 import type { Diagnosis } from './diagnosis';
@@ -13,7 +14,7 @@ import { drawsSheet, prepareExerciseTurn, type ExerciseState, type ExerciseTurnR
 import type { ExerciseSheet } from './sheet';
 
 const { ai, db, logger, logs, mistral, sent, studentId } = await testAi();
-const deps = { ai, logger };
+const deps = { ai, logger, notions: notionsFor };
 
 const sheet: ExerciseSheet = {
   statement: 'Résous 3x + 5 = 20.',
@@ -182,6 +183,15 @@ describe('prepareExerciseTurn', () => {
     for (const index of [0, 1, 2]) expect(sent(index).body).toMatchObject({ reasoning_effort: 'high', temperature: 0.7 });
     const billed = await db.select().from(aiCost).where(eq(aiCost.studentId, studentId));
     expect(billed.filter((row) => row.operation === 'exercise-sheet')).toHaveLength(3);
+  });
+
+  it('draws the sheet on the programme of the notions it is given, without one for the run without the programme', async () => {
+    mistral.chat.push(...Array.from({ length: 6 }, () => ({ json: draft() })));
+    const brought = request({ current: null, analysis: analysis({ bringsExercise: true }), studentText: 'Résous 3x + 5 = 20.' });
+    await prepareExerciseTurn(deps, brought);
+    await prepareExerciseTurn({ ...deps, notions: () => null }, brought);
+    expect(sent(0).system).toContain('<programme>');
+    expect(sent(3).system).not.toContain('<programme>');
   });
 
   it('keeps the exercise in progress when the draws find no exercise in a message the analysis took for one', async () => {

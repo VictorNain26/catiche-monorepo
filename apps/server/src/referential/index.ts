@@ -66,6 +66,9 @@ export function notionsFor(level: SchoolLevel, subject: SubjectFamily | undefine
   return { entries, later };
 }
 
+/** Where the tutor finds a class's programme: `notionsFor`, or nothing for the run without it (src/evaluate.ts). */
+export type NotionsFor = typeof notionsFor;
+
 const entryById = new Map(programmes.flatMap(({ entries }) => entries.map((entry) => [entry.id, entry] as const)));
 
 /** A notion of the referential, as its programme words it; undefined for an unknown id. */

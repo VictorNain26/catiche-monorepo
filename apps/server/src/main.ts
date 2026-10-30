@@ -16,6 +16,7 @@ import { createBackgroundTasks } from './platform/lifecycle/background';
 import { createLifecycle, shutdown } from './platform/lifecycle/shutdown';
 import { createSweep } from './platform/lifecycle/sweep';
 import { createLogger } from './platform/observability/logger';
+import { notionsFor } from './referential';
 
 // Readiness stays failed this long before the server closes: a few probe intervals of the host,
 // to align with it at the preproduction step. The deadline stays under a host's usual 30 s
@@ -56,7 +57,7 @@ const auth = createAuth(database.db, config, {
 });
 const ai = createAi({ mistral: config.mistral, db: database.db, logger });
 const moderation = createModeration({ mistral: config.mistral, logger });
-const app = createApp({ config, logger, db: database.db, auth, mailer, ai, moderation, lifecycle, background: tasks.run });
+const app = createApp({ config, logger, db: database.db, auth, mailer, ai, moderation, notions: notionsFor, lifecycle, background: tasks.run });
 
 // Bun closes an idle connection after 10 s by default, which would cut a streamed answer.
 const server = Bun.serve({ port: config.port, fetch: app.fetch, idleTimeout: 30 });

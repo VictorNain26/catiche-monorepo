@@ -207,6 +207,10 @@ Le code vit dans `apps/server/src/eval/` ; `bun run eval` rejoue le jeu sur le v
 - **Le juge**, Small 4 (`eval/judge.ts`), répond aux questions que le code ne tranche pas : une
   question oui/non par appel, sa raison avant sa réponse, « inconnu » sans verdict. Ses questions
   suivent la notation du scénario (`grading`) ; leur taux d'échec est publié avec les autres.
+- **Le programme du référentiel se mesure** : `--variant none` prépare la fiche sans lui, et le
+  passage compare les paires des deux variantes (McNemar exact, `eval/stats.ts`), avec son coût.
+  Le programme reste s'il fait mieux sur « notion d'une classe suivante » ou « affirmation
+  fausse » (Victor, 2026-10-28).
 - **Victor juge** les mêmes questions sur une page simple (à construire) ; le juge ne compte
   qu'une fois vérifié contre lui.
 - **Une mesure par version du tuteur**, avec sa marge d'erreur ; deux versions se comparent cas

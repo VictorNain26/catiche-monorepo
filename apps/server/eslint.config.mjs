@@ -85,7 +85,8 @@ export default [
           checkInternals: true,
           policies: [
             // The harness (src/evaluate.ts) wires the app as main.ts does, and plays the evaluation set.
-            allow(file('root'), file(['root', 'config']), element(['platform', 'domain', 'eval']), inModule(['module-index'])),
+            // Both pass the tutor the programme it draws on: the referential's, or none for the A/B.
+            allow(file('root'), file(['root', 'config']), element(['platform', 'domain', 'eval', 'referential']), inModule(['module-index'])),
             // Another module is reached by its index.ts only.
             allow(
               inModule(['module-index']),
@@ -115,7 +116,7 @@ export default [
             allow(file('judge'), element('platform')),
             allow(file('harness'), file('client')),
             // A test's app is wired as main.ts wires it.
-            allow(element('testing'), element(['testing', 'platform']), file(['app', 'config']), inModule(['module-index'])),
+            allow(element('testing'), element(['testing', 'platform', 'referential']), file(['app', 'config']), inModule(['module-index'])),
             allow(file('test'), file(['root', 'config']), element(['platform', 'domain', 'module', 'referential', 'eval', 'testing'])),
           ],
         },

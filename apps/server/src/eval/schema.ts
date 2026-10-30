@@ -95,7 +95,7 @@ export const datasetSchema = z
   .strictObject({
     exercises: z.array(exerciseSchema).min(1),
     scenarios: z.array(scenarioSchema).min(1),
-    /** The judge's questions for the leak and help gradings, Victor's grid of 2026-10-06. */
+    /** The judge's questions for the leak and help gradings, Victor's grid of 2026-10-06 and the later notion of the A/B. */
     judgeQuestions: judgeQuestionsSchema,
   })
   .superRefine(({ exercises, scenarios, judgeQuestions }, ctx) => {

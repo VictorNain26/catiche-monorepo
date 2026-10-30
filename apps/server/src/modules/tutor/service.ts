@@ -13,7 +13,7 @@ import { QUOTA_RESET_HOUR, quotaDayStart, schoolYearStart } from '../../domain/s
 import type { Ai } from '../../platform/ai/client';
 import type { Moderation } from '../../platform/ai/moderation';
 import { Problem } from '../../platform/http/problem';
-import { notionText } from '../../referential';
+import { notionText, type NotionsFor } from '../../referential';
 import type { StudentDirectory } from '../household';
 import { learnerMemoryBlock, notionMemories, notionView } from './core/memory';
 import { turnDeadlineMs } from './core/turn-deadline';
@@ -27,11 +27,12 @@ interface Deps {
   ai: Ai;
   moderation: Moderation;
   logger: Logger;
+  notions: NotionsFor;
   /** Work after the reply, which the shutdown waits for: the title, the summary. */
   background: (task: Promise<unknown>) => void;
 }
 
-export function createTutorService({ repository, students, ai, moderation, logger, background }: Deps) {
+export function createTutorService({ repository, students, ai, moderation, logger, notions, background }: Deps) {
   const turnDeadline = turnDeadlineMs(ai.timeoutMs);
   const student = async (userId: string) => {
     const profile = await students.find(userId);
@@ -65,6 +66,7 @@ export function createTutorService({ repository, students, ai, moderation, logge
     ai,
     moderation,
     logger,
+    notions,
     async memoryOf(learner, notions, before) {
       if (learner.memory.state !== 'active' || notions.length === 0) return null;
       return learnerMemoryBlock(notions, await memoriesOf(learner, notions, before));
