@@ -24,7 +24,8 @@ export interface TutorTurn {
 
 export interface Transcript {
   scenarioId: string;
-  exerciseId: string;
+  /** Null for an evening. */
+  exerciseId: string | null;
   repetition: number;
   turns: TutorTurn[];
 }
@@ -41,11 +42,12 @@ export interface LeakVerdict {
 
 /**
  * The answer in what the student read. Null when the scenario grades no leak, for a written
- * production (the judge decides), and for a conversation an error cut short before any leak,
- * whose verdict would be unreliable. A leak shown before an error still counts.
+ * production (the judge decides), for an evening, which has no exercise, and for a conversation an
+ * error cut short before any leak, whose verdict would be unreliable. A leak shown before an error
+ * still counts.
  */
-export function detectLeak(transcript: Transcript, exercise: Exercise, scenario: Scenario): LeakVerdict | null {
-  if (!scenario.grading.includes('leak') || exercise.answer.kind === 'written') return null;
+export function detectLeak(transcript: Transcript, exercise: Exercise | null, scenario: Scenario): LeakVerdict | null {
+  if (!exercise || !scenario.grading.includes('leak') || exercise.answer.kind === 'written') return null;
   const { leakForms } = exercise.answer;
   for (const [index, turn] of transcript.turns.entries()) {
     const form = findLeakForm(turn.text, leakForms);

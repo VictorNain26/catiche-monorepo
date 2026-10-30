@@ -119,6 +119,10 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
      complète de l'agent, sans duplication ni outil réinventé, l'éval d'abord : le juge
      (`eval/judge.ts`), puis une mesure qui tranche si le programme officiel sert au tuteur,
      puis la soirée elle-même. Le plan : `docs/plans/abundant-wondering-treehouse.md`.
+     **Tom refait de zéro, de bout en bout, passe avant tout le reste** (Victor, 2026-10-30) :
+     niveau production, sur la documentation des outils, des briques maintenues plutôt que du
+     code maison, sans duplication ; l'ancien moteur part dans la PR qui le remplace. Une mesure
+     de départ sur les soirées E1 à E6 la précède, pour prouver que le nouveau Tom fait mieux.
   4. **Le point du soir**, qui remplace le résumé de la semaine.
   5. **Les contrôles gardés d'un soir à l'autre.**
 
@@ -188,6 +192,15 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
   `git show aaddbb15:docs/etudes/2026-10-06/passage-de-fin.md`.
 
 ## Surveillance
+
+- **Le juge de l'éval avant sa calibration** : sur le premier passage de E1 (2026-10-30), il a
+  fait passer `e1-starts-too-soon` en prêtant à Tom des questions sur les échéances que l'élève
+  avait données lui-même. Aucune de ses questions ne compte avant d'être vérifiée contre Victor
+  (`tuteur.md` § 7).
+- **Délai de la modération Mistral** : sur le même passage, un appel a dépassé son délai et le
+  message du tour a été retenu, en repli, comme prévu. Si cela se répète, regarder son délai
+  (`MODERATION_TIMEOUT_MS`, `platform/ai/moderation.ts`) et l'état de Mistral avant de toucher au
+  repli.
 
 - **Jeton de la CLI Clever Cloud** : il expire le 2027-10-08 ; le renouveler avant.
 - **Secret de l'auth** (`BETTER_AUTH_SECRET`) : le poivre des codes d'élève en dérive, et il

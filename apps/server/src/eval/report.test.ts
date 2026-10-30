@@ -40,6 +40,10 @@ describe('detectLeak', () => {
     expect(detectLeak(transcript(turn('…')), written, scenario('S2'))).toBeNull();
     expect(detectLeak(transcript(turn('Donc x = 5.')), exercise('M1'), scenario('S5'))).toBeNull();
   });
+
+  it('has no verdict for an evening, which has no exercise to leak', () => {
+    expect(detectLeak(transcript(turn('Donc x = 5.')), null, scenario('E1'))).toBeNull();
+  });
 });
 
 describe('detectArtifact', () => {
