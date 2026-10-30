@@ -130,6 +130,20 @@ Dans la FAQ du site, la réponse sur le prix dit, après la formule de statut, q
 construit et ce que Tom fait déjà : l'aide sur un exercice, à l'écrit ou en photo (Victor,
 2026-10-22 ; le texte dans `apps/landing/src/components/sections/faq-data.ts`).
 
+**Après la soirée** (Victor, 2026-10-30), dans cet ordre, une fois Tom refait de zéro, la soirée et
+les écrans de l'adulte construits :
+- **Les écrans de l'adulte dans sa langue** : les écrans, les e-mails et le point du soir qu'il
+  reçoit. L'élève reste en français, la langue de son école, de ses cours et de ses contrôles ;
+  l'adulte qui lit mal le français est souvent le plus loin de l'école, et c'est lui que
+  Catiche doit atteindre.
+- **Un guide pour l'adulte** : un assistant qui l'aide à tenir son rôle, soutenir sans
+  contrôler, désamorcer un conflit autour des devoirs, comprendre le point du soir (`methode.md`,
+  « Le rôle de l'adulte au collège »). Il ne voit jamais les conversations de l'enfant et ne
+  sert pas à vérifier son travail.
+- **Apprendre à se servir de l'IA** : une capacité de Tom dès sa refonte, pas un parcours à
+  part. Quand il ne donne pas la réponse, il dit pourquoi ; il apprend à l'élève à poser une
+  question et à vérifier ce qu'une IA répond.
+
 ## Les risques
 
 - **Rien ne prouve qu'une IA remplace l'adulte qui vérifie** : c'est l'hypothèse centrale
