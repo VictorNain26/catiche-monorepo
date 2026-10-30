@@ -1,24 +1,31 @@
 import { describe, expect, it } from 'bun:test';
 import { dataset, renderTurns } from './index';
-import { buildItems, isLocalDatabase, lookup } from './items';
+import { buildItems, isLocalDatabase, keyOf, lookup, pairOf } from './items';
 
 describe('buildItems', () => {
   it('plays every scenario on its exercises, as many times as asked', () => {
-    const all = buildItems({ repeat: 1 });
+    const all = buildItems({ repeat: 1, variants: ['programme'] });
     const s1 = all.filter((item) => item.scenarioId === 'S1');
     expect(s1).toHaveLength(dataset.exercises.length);
-    expect(buildItems({ repeat: 2 })).toHaveLength(all.length * 2);
+    expect(buildItems({ repeat: 2, variants: ['programme'] })).toHaveLength(all.length * 2);
   });
 
   it('narrows to the scenarios and exercises asked for', () => {
-    expect(buildItems({ repeat: 1, scenario: ['S2'], exercise: ['M1', 'M3'] })).toEqual([
-      { scenarioId: 'S2', exerciseId: 'M1', repetition: 1 },
-      { scenarioId: 'S2', exerciseId: 'M3', repetition: 1 },
+    expect(buildItems({ repeat: 1, scenario: ['S2'], exercise: ['M1', 'M3'], variants: ['programme'] })).toEqual([
+      { scenarioId: 'S2', exerciseId: 'M1', repetition: 1, variant: 'programme' },
+      { scenarioId: 'S2', exerciseId: 'M3', repetition: 1, variant: 'programme' },
     ]);
   });
 
+  it('plays each conversation under each variant asked for, one after the other, first in turn', () => {
+    const items = buildItems({ repeat: 2, scenario: ['S1'], exercise: ['M1'], variants: ['programme', 'none'] });
+    // Whatever slows the second call of a pair (a rate limit, a cache) falls on each variant in turn.
+    expect(items.map(keyOf)).toEqual(['S1:M1:1:programme', 'S1:M1:1:none', 'S1:M1:2:none', 'S1:M1:2:programme']);
+    expect(new Set(items.map(pairOf))).toEqual(new Set(['S1:M1:1', 'S1:M1:2']));
+  });
+
   it('plays no scenario on an exercise it does not target', () => {
-    expect(buildItems({ repeat: 1, scenario: ['S6'], exercise: ['6-M1'] })).toEqual([]);
+    expect(buildItems({ repeat: 1, scenario: ['S6'], exercise: ['6-M1'], variants: ['programme'] })).toEqual([]);
   });
 });
 

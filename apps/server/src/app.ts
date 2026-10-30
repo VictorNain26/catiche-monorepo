@@ -23,6 +23,7 @@ import { securityHeaders } from './platform/http/security-headers';
 import { webClient } from './platform/http/web-client';
 import { healthRoutes } from './platform/lifecycle/health';
 import type { Lifecycle } from './platform/lifecycle/shutdown';
+import type { NotionsFor } from './referential';
 
 export interface AppDeps {
   config: Pick<Config, 'production' | 'webDistDir' | 'apiRateLimit' | 'trustedProxyHops' | 'publicUrl'>;
@@ -33,14 +34,16 @@ export interface AppDeps {
   mailer: Mailer;
   ai: Ai;
   moderation: Moderation;
+  /** The programme the tutor draws a sheet on. */
+  notions: NotionsFor;
   lifecycle: Lifecycle;
   /** Work after a response, which the shutdown waits for. */
   background: (task: Promise<unknown>) => void;
 }
 
-export function createApp({ config, logger, db, auth, mailer, ai, moderation, lifecycle, background }: AppDeps) {
+export function createApp({ config, logger, db, auth, mailer, ai, moderation, notions, lifecycle, background }: AppDeps) {
   const household = householdModule({ db, auth, mailer, logger, background, publicUrl: config.publicUrl });
-  const tutor = tutorModule({ db, auth, ai, moderation, logger, background });
+  const tutor = tutorModule({ db, auth, ai, moderation, logger, notions, background });
   // One budget for the API and the probes: /health/ready runs a query on every call. The web's
   // files don't count, a page load fetches a dozen of them.
   const budget = rateLimit({ points: config.apiRateLimit, durationSeconds: 60 });

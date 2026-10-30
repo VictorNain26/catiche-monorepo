@@ -12,6 +12,7 @@ import { findLeakForm } from '../../../domain/leak';
 import type { SchoolLevel } from '../../../domain/levels';
 import type { SubjectFamily } from '../../../domain/subjects';
 import type { Ai } from '../../../platform/ai/client';
+import type { NotionsFor } from '../../../referential';
 import type { TurnAnalysis } from './analysis';
 import { diagnose, type Diagnosis } from './diagnosis';
 import { applyChange, levelChange, topLevel, turnContract, type Hint } from './ladder';
@@ -91,7 +92,10 @@ export function drawsSheet({
   return analysis.bringsExercise && !restated;
 }
 
-export async function prepareExerciseTurn(deps: { ai: Ai; logger: Logger }, request: ExerciseTurnRequest): Promise<ExerciseTurn> {
+export async function prepareExerciseTurn(
+  deps: { ai: Ai; logger: Logger; notions: NotionsFor },
+  request: ExerciseTurnRequest,
+): Promise<ExerciseTurn> {
   const { analysis, current } = request;
   const drawn = drawsSheet(request)
     ? await prepareSheet(deps, { ...request, attachedFilesBlock: request.photoText === null ? null : photoBlock(request.photoText) })

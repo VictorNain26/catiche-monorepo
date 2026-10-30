@@ -11,6 +11,7 @@ import { createAuth, type AuthDeps } from '../platform/auth/auth';
 import type { Db } from '../platform/db/client';
 import { createBackgroundTasks } from '../platform/lifecycle/background';
 import { createLifecycle } from '../platform/lifecycle/shutdown';
+import { notionsFor } from '../referential';
 import { httpClient, ORIGIN } from './http';
 import { memoryMailer } from './mailer';
 import { fakeMistral } from './mistral';
@@ -46,6 +47,7 @@ export function testApp(
     db,
     mailer: mail.mailer,
     ...mistral.deps(db, silent),
+    notions: notionsFor,
     auth,
     lifecycle: createLifecycle(),
     background: tasks.run,

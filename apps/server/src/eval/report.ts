@@ -7,7 +7,8 @@ import { DISTRESS_REPLY } from '../domain/distress';
 import { findLeakForm } from '../domain/leak';
 import { PROMPT_TAG } from '../domain/prompt-tags';
 import type { Exercise, Scenario } from './index';
-import { wilson } from './stats';
+import type { Variant } from './items';
+import { mcnemarExact, wilson } from './stats';
 
 export interface TutorTurn {
   student: string;
@@ -118,4 +119,32 @@ export function rates(rows: readonly { scenarioId: string; flagged: boolean | nu
     add('all', flagged);
   }
   return [...scopes].map(([scope, { flagged, total }]) => ({ scope, flagged, total, rate: flagged / total, ...wilson(flagged, total) }));
+}
+
+/** The A/B of one verdict on the pairs both variants played: what each failed alone. */
+export interface Paired {
+  pairs: number;
+  programmeOnly: number;
+  noneOnly: number;
+  /** Two-sided exact McNemar: the decision rule of the A/B reads it below 0.05. */
+  pValue: number;
+}
+
+/** A pair counts once both variants have a verdict on it. */
+export function paired(rows: readonly { pair: string; variant: Variant; flagged: boolean | null }[]): Paired {
+  const byPair = new Map<string, Partial<Record<Variant, boolean>>>();
+  for (const { pair, variant, flagged } of rows) {
+    if (flagged === null) continue;
+    byPair.set(pair, { ...byPair.get(pair), [variant]: flagged });
+  }
+  let pairs = 0;
+  let programmeOnly = 0;
+  let noneOnly = 0;
+  for (const { programme, none } of byPair.values()) {
+    if (programme === undefined || none === undefined) continue;
+    pairs += 1;
+    if (programme && !none) programmeOnly += 1;
+    if (none && !programme) noneOnly += 1;
+  }
+  return { pairs, programmeOnly, noneOnly, pValue: mcnemarExact(programmeOnly, noneOnly) };
 }

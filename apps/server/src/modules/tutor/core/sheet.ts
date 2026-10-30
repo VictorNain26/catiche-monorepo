@@ -12,7 +12,7 @@ import { LEVEL_SHORT_LABELS, SCHOOL_LEVELS, type SchoolLevel } from '../../../do
 import { schoolYearOf } from '../../../domain/school-calendar';
 import type { SubjectFamily } from '../../../domain/subjects';
 import type { Ai } from '../../../platform/ai/client';
-import { notionsFor, notionText, type Entry, type Notions } from '../../../referential';
+import { notionText, type Entry, type Notions, type NotionsFor } from '../../../referential';
 import { stripPromptTags, wrapUserMessage } from './fences';
 import { photoBlock } from './photo';
 import { promptVersion } from './prompt';
@@ -251,9 +251,12 @@ export type PreparedSheet = (VotedSheet | { sheet: null; uncertain: true; mathCh
  * exercise in what the student sent. Reasoning gets no output cap (Victor's decision,
  * 2026-10-04): the timeout bounds the draws.
  */
-export async function prepareSheet({ ai, logger }: { ai: Ai; logger: Logger }, request: SheetRequest): Promise<PreparedSheet | null> {
+export async function prepareSheet(
+  { ai, logger, notions: notionsOf }: { ai: Ai; logger: Logger; notions: NotionsFor },
+  request: SheetRequest,
+): Promise<PreparedSheet | null> {
   const startTime = performance.now();
-  const notions = notionsFor(request.level, request.subject, schoolYearOf(request.now));
+  const notions = notionsOf(request.level, request.subject, schoolYearOf(request.now));
   const [system, user] = sheetMessages(request.level, notions, request.studentText, request.attachedFilesBlock);
   const draws = await Promise.allSettled(
     Array.from({ length: DRAWS }, () =>

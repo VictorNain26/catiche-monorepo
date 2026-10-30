@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'bun:test';
+import { LEVEL_SHORT_LABELS } from '../domain/levels';
+import { notionText } from '../referential';
 import { testAi } from '../testing/ai';
 import { dataset } from './index';
 import { lookup } from './items';
@@ -16,8 +18,8 @@ const answer = (value: 'oui' | 'non' | 'inconnu') => ({ json: { reason: 'Lu dans
 const helped = transcript(turn('Résous 3x + 5 = 20.', 'Que fais-tu du + 5 ?'));
 
 describe('questionsFor', () => {
-  it('asks a help scenario the leak, a false statement and the help, the grid of judge-questions.json', () => {
-    expect(questionsFor(s2).map(({ id }) => id)).toEqual(['leak', 'false-statement', 'help']);
+  it('asks a help scenario the leak, a false statement, the help and a later notion, the grid of judge-questions.json', () => {
+    expect(questionsFor(s2).map(({ id }) => id)).toEqual(['leak', 'false-statement', 'help', 'later-notion']);
   });
 
   it('asks a safety scenario its own checks', () => {
@@ -51,14 +53,17 @@ describe('unfenced', () => {
 
 describe('judgeConversation', () => {
   it('asks one question per call, the conversation and the reference out of the instructions, and passes on the expected answer', async () => {
-    mistral.chat.push(answer('non'), answer('non'), answer('oui'));
+    mistral.chat.push(answer('non'), answer('non'), answer('oui'), answer('non'));
     const verdicts = await judgeConversation(ai, s2, m1, helped);
 
     expect(verdicts?.map((verdict) => ({ id: verdict.id, passed: 'error' in verdict ? 'error' : verdict.passed }))).toEqual([
       { id: 'leak', passed: true },
       { id: 'false-statement', passed: true },
       { id: 'help', passed: true },
+      { id: 'later-notion', passed: true },
     ]);
+    // What each call was billed, for the cost of the run: the judge's calls have no student.
+    expect(verdicts?.[0]).toMatchObject({ usage: { inputTokens: 1000, outputTokens: 100 } });
     if (m1.answer.kind !== 'short') throw new Error('M1 has a short answer');
     const [leak, falseStatement] = questionsFor(s2);
     expect(sent(0).system).not.toContain('Que fais-tu du + 5 ?');
@@ -72,24 +77,35 @@ describe('judgeConversation', () => {
   });
 
   it('fails a question answered against its pass, and leaves an unknown answer without a verdict', async () => {
-    mistral.chat.push(answer('oui'), answer('inconnu'), answer('non'));
+    mistral.chat.push(answer('oui'), answer('inconnu'), answer('non'), answer('oui'));
     const verdicts = await judgeConversation(ai, s2, m1, transcript(turn('Résous 3x + 5 = 20.', 'Donc x = 5.')));
-    expect(verdicts?.map((verdict) => ('error' in verdict ? 'error' : verdict.passed))).toEqual([false, null, false]);
+    expect(verdicts?.map((verdict) => ('error' in verdict ? 'error' : verdict.passed))).toEqual([false, null, false, false]);
+  });
+
+  it("gives the judge the exercise's class, its programme and the later notions it lists", async () => {
+    const { exercise: m3 } = lookup({ scenarioId: 'S2', exerciseId: 'M3', repetition: 1 });
+    const [later] = m3.alignment?.laterEntries ?? [];
+    if (later === undefined) throw new Error('M3 lists a later notion');
+    mistral.chat.push(answer('non'), answer('non'), answer('oui'), answer('non'));
+    await judgeConversation(ai, s2, m3, transcript(turn(m3.statement, 'Par quoi veux-tu commencer ?')));
+    expect(sent(0).user).toContain(m3.programme.quote);
+    expect(sent(0).user).toContain(notionText(later) ?? later);
+    expect(sent(0).user).toContain(LEVEL_SHORT_LABELS[m3.level]);
   });
 
   it('gives a written production its leak as the judge reads it', async () => {
     const written = dataset.exercises.find((e) => e.answer.kind === 'written');
     if (written?.answer.kind !== 'written') throw new Error('no written exercise');
-    mistral.chat.push(answer('non'), answer('non'), answer('oui'));
+    mistral.chat.push(answer('non'), answer('non'), answer('oui'), answer('non'));
     await judgeConversation(ai, s2, written, transcript(turn(written.statement, 'Par quoi veux-tu commencer ?')));
     expect(sent(0).user).toContain(written.answer.leak);
   });
 
   it('keeps judging after a call that fails, with its error and no verdict', async () => {
-    mistral.chat.push({ status: 500 }, answer('non'), answer('oui'));
+    mistral.chat.push({ status: 500 }, answer('non'), answer('oui'), answer('non'));
     const verdicts = await judgeConversation(ai, s2, m1, helped);
     expect(verdicts?.[0] && 'error' in verdicts[0]).toBe(true);
-    expect(verdicts?.slice(1).map((verdict) => ('error' in verdict ? 'error' : verdict.passed))).toEqual([true, true]);
+    expect(verdicts?.slice(1).map((verdict) => ('error' in verdict ? 'error' : verdict.passed))).toEqual([true, true, true]);
     expect(judgeErrors([{ judge: verdicts }])).toBe(1);
   });
 
@@ -101,7 +117,14 @@ describe('judgeConversation', () => {
 });
 
 describe('judgeRates', () => {
-  const verdict = (id: string, passed: boolean | null, critical = false): Verdict => ({ id, critical, answer: 'oui', passed, reason: '' });
+  const verdict = (id: string, passed: boolean | null, critical = false): Verdict => ({
+    id,
+    critical,
+    answer: 'oui',
+    passed,
+    reason: '',
+    usage: { inputTokens: 0, cachedInputTokens: 0, outputTokens: 0 },
+  });
   const all = (rates: ReturnType<typeof judgeRates>, key: string) => rates[key]?.find(({ scope }) => scope === 'all');
 
   it('gives each question its share of failed conversations, unknown answers left out', () => {

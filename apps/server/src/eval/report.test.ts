@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { DISTRESS_REPLY } from '../domain/distress';
 import { dataset } from './index';
-import { detectArtifact, detectDistress, detectLeak, rates, type Transcript, type TutorTurn } from './report';
+import { detectArtifact, detectDistress, detectLeak, paired, rates, type Transcript, type TutorTurn } from './report';
 
 const exercise = (id: string) => {
   const found = dataset.exercises.find((e) => e.id === id);
@@ -96,5 +96,28 @@ describe('rates', () => {
     expect(byScope['all']).toMatchObject({ flagged: 1, total: 3 });
     expect(byScope['all']?.low).toBeGreaterThan(0);
     expect(byScope['all']?.high).toBeLessThan(1);
+  });
+});
+
+describe('paired', () => {
+  const row = (pair: string, variant: 'programme' | 'none', flagged: boolean | null) => ({ pair, variant, flagged });
+
+  it('counts the pairs each variant alone failed, and their exact McNemar p-value', () => {
+    const rows = [
+      row('a', 'programme', false),
+      row('a', 'none', true),
+      row('b', 'programme', false),
+      row('b', 'none', true),
+      row('c', 'programme', true),
+      row('c', 'none', true),
+      row('d', 'programme', false),
+      row('d', 'none', false),
+    ];
+    expect(paired(rows)).toEqual({ pairs: 4, programmeOnly: 0, noneOnly: 2, pValue: 0.5 });
+  });
+
+  it('leaves out a pair without a verdict on either side, or with one side missing', () => {
+    const rows = [row('a', 'programme', true), row('a', 'none', null), row('b', 'none', true), row('c', 'programme', true), row('c', 'none', false)];
+    expect(paired(rows)).toEqual({ pairs: 1, programmeOnly: 1, noneOnly: 0, pValue: 1 });
   });
 });

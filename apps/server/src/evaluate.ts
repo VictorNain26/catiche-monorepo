@@ -13,12 +13,25 @@ import { like } from 'drizzle-orm';
 import { createApp } from './app';
 import { loadConfig } from './config';
 import { renderTurns, type Exercise, type Scenario, type StudentTurn } from './eval';
-import { buildItems, isLocalDatabase, keyOf, lookup } from './eval/items';
-import { judgeConversation, judgeErrors, judgeRates } from './eval/judge';
-import { cutShort, detectArtifact, detectDistress, detectLeak, rates, type Rate, type Transcript, type TutorTurn } from './eval/report';
+import { z } from 'zod';
+import { buildItems, isLocalDatabase, keyOf, lookup, pairOf, VARIANTS, type Item, type Variant } from './eval/items';
+import { failedOn, judgeConversation, judgeErrors, judgeRates, type Verdict } from './eval/judge';
+import {
+  cutShort,
+  detectArtifact,
+  detectDistress,
+  detectLeak,
+  paired,
+  rates,
+  type Paired,
+  type Rate,
+  type Transcript,
+  type TutorTurn,
+} from './eval/report';
 import { accountDeletion, householdAuth } from './modules/household';
-import { turnRecords } from './modules/tutor';
+import { studentCost, turnRecords } from './modules/tutor';
 import { createAi } from './platform/ai/client';
+import { pricing } from './platform/ai/cost';
 import { createModeration } from './platform/ai/moderation';
 import { createAuth } from './platform/auth/auth';
 import { user } from './platform/auth/schema';
@@ -27,6 +40,7 @@ import { pendingMigrations } from './platform/db/migrations';
 import { createBackgroundTasks } from './platform/lifecycle/background';
 import { createLifecycle } from './platform/lifecycle/shutdown';
 import { createLogger } from './platform/observability/logger';
+import { notionsFor } from './referential';
 import { httpClient } from './testing/http';
 import { memoryMailer } from './testing/mailer';
 
@@ -37,8 +51,34 @@ export interface Harness {
   /** The calls of the web, its emails kept in memory: the run reads the guardian's code there. */
   api: ReturnType<typeof httpClient>;
   records: (sessionId: string) => Promise<{ outcome: string }[]>;
+  /** What a student's AI calls cost, in micro-euros. */
+  cost: (studentId: string) => Promise<number>;
   /** The work after a reply (a session's title and summary), done before the next step. */
   settled: () => Promise<void>;
+}
+
+/** A conversation of the run: played under its variant, with the code's verdicts, the judge's and what both cost. */
+interface Conversation extends Item {
+  leak: ReturnType<typeof detectLeak>;
+  artifact: ReturnType<typeof detectArtifact>;
+  distress: ReturnType<typeof detectDistress> | undefined;
+  judge: Verdict[] | null;
+  cost: { tutorMicroEur: number; judgeMicroEur: number };
+  transcript: Transcript;
+}
+
+/**
+ * The A/B of the variants on their pairs: the code's leak, and each question of the judge, which
+ * has a `leak` of its own: each verdict under the name of who gives it.
+ */
+export function compareVariants(conversations: readonly Pick<Conversation, keyof Item | 'leak' | 'judge'>[]): Record<string, Paired> {
+  const pairedOn = (flagged: (row: (typeof conversations)[number]) => boolean | null) =>
+    paired(conversations.map((row) => ({ pair: pairOf(row), variant: row.variant, flagged: flagged(row) })));
+  const questionIds = [...new Set(conversations.flatMap(({ judge }) => (judge ?? []).map(({ id }) => id)))];
+  return {
+    'code:leak': pairedOn(({ leak }) => (leak ? leak.leaked : null)),
+    ...Object.fromEntries(questionIds.map((id) => [`judge:${id}`, pairedOn(({ judge }) => failedOn(judge, id))])),
+  };
 }
 
 /** A guardian invited and in by the code their address received: their session's cookie. */
@@ -47,9 +87,9 @@ export function signInGuardian(harness: Harness): Promise<string> {
 }
 
 /** A new student of the guardian, at the exercise's level, and their device's session cookie. */
-async function pairedStudent(harness: Harness, guardian: string, exercise: Exercise): Promise<string> {
+async function pairedStudent(harness: Harness, guardian: string, exercise: Exercise): Promise<{ id: string; device: string }> {
   const { id } = await harness.api.student(guardian, { name: 'Élève', level: exercise.level });
-  return harness.api.pair(guardian, id);
+  return { id, device: await harness.api.pair(guardian, id) };
 }
 
 /** One student turn through the route, read from its UI message stream as the web reads it. */
@@ -74,15 +114,18 @@ async function playTurn(harness: Harness, sessionId: string, device: string, stu
   };
 }
 
-/** A scenario played on an exercise by a fresh student, each turn with the record the server stored. */
+/**
+ * A scenario played on an exercise by a fresh student, each turn with the record the server
+ * stored, and what the student's calls cost: the tutor's, its title and summary included.
+ */
 export async function playConversation(
   harness: Harness,
   guardian: string,
   scenario: Scenario,
   exercise: Exercise,
   repetition: number,
-): Promise<Transcript> {
-  const device = await pairedStudent(harness, guardian, exercise);
+): Promise<{ transcript: Transcript; tutorCostMicroEur: number }> {
+  const { id: studentId, device } = await pairedStudent(harness, guardian, exercise);
   const sessionId = await harness.api.session(device);
   const played: Omit<TutorTurn, 'record'>[] = [];
   for (const student of renderTurns(scenario, exercise)) {
@@ -92,7 +135,7 @@ export async function playConversation(
   }
   // One record per turn the server answered, in their order; the play stops at the first refused.
   const records = await harness.records(sessionId);
-  return {
+  const transcript = {
     scenarioId: scenario.id,
     exerciseId: exercise.id,
     repetition,
@@ -101,6 +144,7 @@ export async function playConversation(
       return { ...turn, record: record ? { outcome: record.outcome } : null };
     }),
   };
+  return { transcript, tutorCostMicroEur: await harness.cost(studentId) };
 }
 
 /** Deletes the guardians of earlier runs, their households and students with them: their accounts. */
@@ -118,6 +162,7 @@ export async function removeEvalAccounts(db: Db): Promise<number> {
 const commit = () => Bun.spawnSync(['git', 'describe', '--always', '--dirty', '--exclude=*']).stdout.toString().trim() || 'unknown';
 
 const percent = (value: number) => `${(value * 100).toFixed(1)} %`;
+const euros = (microEur: number) => `${(microEur / 1_000_000).toFixed(2)} €`;
 const line = ({ scope, flagged, total, low, high }: Rate) => `  ${scope}: ${String(flagged)}/${String(total)} [${percent(low)} – ${percent(high)}]`;
 
 async function main(): Promise<number> {
@@ -126,6 +171,7 @@ async function main(): Promise<number> {
       scenario: { type: 'string', multiple: true },
       exercise: { type: 'string', multiple: true },
       repeat: { type: 'string', default: '1' },
+      variant: { type: 'string', multiple: true, default: ['programme'] },
     },
   });
   const repeat = Number(values.repeat);
@@ -133,6 +179,12 @@ async function main(): Promise<number> {
     console.error('--repeat: a whole number from 1 to 10');
     return 1;
   }
+  const parsedVariants = z.array(z.enum(VARIANTS)).safeParse(values.variant);
+  if (!parsedVariants.success) {
+    console.error(`--variant: ${VARIANTS.join(' or ')}`);
+    return 1;
+  }
+  const variants = [...new Set(parsedVariants.data)];
   const config = loadConfig(Bun.env);
   if (!isLocalDatabase(config.databaseUrl)) {
     console.error('eval only runs against a database on this machine: it creates and deletes accounts.');
@@ -142,7 +194,7 @@ async function main(): Promise<number> {
     console.error('eval plays the real tutor: MISTRAL_API_KEY is required.');
     return 1;
   }
-  const items = buildItems({ repeat, scenario: values.scenario, exercise: values.exercise });
+  const items = buildItems({ repeat, scenario: values.scenario, exercise: values.exercise, variants });
   if (items.length === 0) {
     console.error('no conversation matches the filters');
     return 1;
@@ -165,36 +217,46 @@ async function main(): Promise<number> {
     });
     const ai = createAi({ mistral: config.mistral, db: database.db, logger });
     const moderation = createModeration({ mistral: config.mistral, logger });
-    const app = createApp({
-      config,
-      logger,
-      db: database.db,
-      auth,
-      mailer: inbox.mailer,
-      ai,
-      moderation,
-      lifecycle: createLifecycle(),
-      background: tasks.run,
-    });
-    const harness: Harness = {
-      api: httpClient(app, inbox, { db: database.db, auth }, config.publicUrl),
-      records: turnRecords(database.db),
-      settled: tasks.settled,
+    // One app per variant on the same base: `none` draws the sheets without the programme.
+    const harnessOf = (variant: Variant): Harness => {
+      const app = createApp({
+        config,
+        logger,
+        db: database.db,
+        auth,
+        mailer: inbox.mailer,
+        ai,
+        moderation,
+        notions: variant === 'none' ? () => null : notionsFor,
+        lifecycle: createLifecycle(),
+        background: tasks.run,
+      });
+      return {
+        api: httpClient(app, inbox, { db: database.db, auth }, config.publicUrl),
+        records: turnRecords(database.db),
+        cost: studentCost(database.db),
+        settled: tasks.settled,
+      };
     };
+    // Building an app calls no model: both are built, whatever the run plays.
+    const harnesses: Record<Variant, Harness> = { programme: harnessOf('programme'), none: harnessOf('none') };
+    const costOf = pricing(config.mistral.model, config.mistral.euEndpoint);
 
     console.log(`removed ${String(await removeEvalAccounts(database.db))} account(s) of an earlier run`);
-    const guardian = await signInGuardian(harness);
-    const conversations = [];
+    const guardian = await signInGuardian(harnesses.programme);
+    const conversations: Conversation[] = [];
     for (const [index, item] of items.entries()) {
       const { scenario, exercise } = lookup(item);
-      const transcript = await playConversation(harness, guardian, scenario, exercise, item.repetition);
+      const { transcript, tutorCostMicroEur } = await playConversation(harnesses[item.variant], guardian, scenario, exercise, item.repetition);
+      const judge = await judgeConversation(ai, scenario, exercise, transcript);
+      const judgeMicroEur = (judge ?? []).reduce((sum, verdict) => sum + ('usage' in verdict ? costOf(verdict.usage) : 0), 0);
       const verdicts = {
         leak: detectLeak(transcript, exercise, scenario),
         artifact: detectArtifact(transcript),
         distress: scenario.grading.includes('safety') ? detectDistress(transcript) : undefined,
-        judge: await judgeConversation(ai, scenario, exercise, transcript),
+        judge,
       };
-      conversations.push({ ...item, ...verdicts, transcript });
+      conversations.push({ ...item, ...verdicts, cost: { tutorMicroEur: tutorCostMicroEur, judgeMicroEur }, transcript });
       const failed = cutShort(transcript);
       const leak = verdicts.leak
         ? verdicts.leak.leaked
@@ -204,28 +266,48 @@ async function main(): Promise<number> {
       console.log(`${String(index + 1)}/${String(items.length)} ${keyOf(item)} ${leak}${failed ? ' (error)' : ''}`);
     }
 
-    const summary = {
-      leaks: rates(conversations.map(({ scenarioId, leak }) => ({ scenarioId, flagged: leak ? leak.leaked : null }))),
-      artifacts: rates(conversations.map(({ scenarioId, artifact }) => ({ scenarioId, flagged: artifact ? artifact.found : null }))),
+    const summarize = (rows: readonly Conversation[]) => ({
+      leaks: rates(rows.map(({ scenarioId, leak }) => ({ scenarioId, flagged: leak ? leak.leaked : null }))),
+      artifacts: rates(rows.map(({ scenarioId, artifact }) => ({ scenarioId, flagged: artifact ? artifact.found : null }))),
       distressMissed: rates(
-        conversations.flatMap(({ scenarioId, distress }) =>
-          distress === undefined ? [] : [{ scenarioId, flagged: distress ? !distress.handled : null }],
-        ),
+        rows.flatMap(({ scenarioId, distress }) => (distress === undefined ? [] : [{ scenarioId, flagged: distress ? !distress.handled : null }])),
       ),
-      judge: judgeRates(conversations),
-    };
+      judge: judgeRates(rows),
+      cost: {
+        tutorMicroEur: rows.reduce((sum, { cost }) => sum + cost.tutorMicroEur, 0),
+        judgeMicroEur: rows.reduce((sum, { cost }) => sum + cost.judgeMicroEur, 0),
+      },
+    });
+    const byVariant = Object.fromEntries(variants.map((variant) => [variant, summarize(conversations.filter((row) => row.variant === variant))]));
+    const comparison = variants.length === VARIANTS.length ? compareVariants(conversations) : null;
     const runName = `${new Date().toISOString().slice(0, 16).replace(':', 'h')}-${commit()}`;
     await mkdir('eval-results', { recursive: true });
     const path = `eval-results/${runName}.json`;
     await Bun.write(
       path,
-      JSON.stringify({ runName, model: config.mistral.model, conversations: items.length, summary, results: conversations }, null, 2),
+      JSON.stringify(
+        { runName, model: config.mistral.model, conversations: items.length, summary: { byVariant, paired: comparison }, results: conversations },
+        null,
+        2,
+      ),
     );
 
-    console.log(`\n${path}\nleaks:\n${summary.leaks.map(line).join('\n')}\nartifacts:\n${summary.artifacts.map(line).join('\n')}`);
-    if (summary.distressMissed.length > 0) console.log(`distress not handled:\n${summary.distressMissed.map(line).join('\n')}`);
-    for (const [id, failed] of Object.entries(summary.judge)) {
-      console.log(failed.length > 0 ? `judge, ${id} failed:\n${failed.map(line).join('\n')}` : `judge, ${id}: no verdict, every answer unknown`);
+    console.log(`\n${path}`);
+    for (const [variant, summary] of Object.entries(byVariant)) {
+      console.log(`\n== ${variant}\nleaks:\n${summary.leaks.map(line).join('\n')}\nartifacts:\n${summary.artifacts.map(line).join('\n')}`);
+      if (summary.distressMissed.length > 0) console.log(`distress not handled:\n${summary.distressMissed.map(line).join('\n')}`);
+      for (const [id, failed] of Object.entries(summary.judge)) {
+        console.log(failed.length > 0 ? `judge, ${id} failed:\n${failed.map(line).join('\n')}` : `judge, ${id}: no verdict, every answer unknown`);
+      }
+      console.log(`cost: tutor ${euros(summary.cost.tutorMicroEur)}, judge ${euros(summary.cost.judgeMicroEur)}`);
+    }
+    if (comparison) {
+      console.log('\n== programme against none (pairs failed by one only, exact McNemar)');
+      for (const [id, { pairs, programmeOnly, noneOnly, pValue }] of Object.entries(comparison)) {
+        console.log(
+          `  ${id}: ${String(pairs)} pairs, programme only ${String(programmeOnly)}, none only ${String(noneOnly)}, p = ${pValue.toFixed(3)}`,
+        );
+      }
     }
     const failedJudgeCalls = judgeErrors(conversations);
     if (failedJudgeCalls > 0) console.error(`${String(failedJudgeCalls)} judge call(s) failed: no verdict for them`);

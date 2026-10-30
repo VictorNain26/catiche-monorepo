@@ -66,9 +66,10 @@ Migrations : `.claude/rules/database-migrations.md` ; stack locale : skill `dev-
 
 Harnais d'évaluation : `cd apps/server && bun run eval [--scenario S2] [--exercise M1] [--repeat 2]` rejoue
 le jeu de `src/eval` sur le vrai tuteur et le vrai Mistral, sur la base locale seulement, et écrit
-transcriptions, verdicts et taux avec leur intervalle de Wilson dans `eval-results/`. Il est payant :
-environ 0,5 € et 2 h pour le jeu entier, et demande Mistral en paiement à l'usage (le mode
-gratuit plafonne le débit).
+transcriptions, verdicts du code et du juge, et taux avec leur intervalle de Wilson dans
+`eval-results/`. `--variant programme --variant none` joue chaque conversation avec et sans le
+programme du référentiel, et compare les paires (McNemar exact). Il est payant : le passage
+affiche son coût, tuteur et juge, par variante.
 
 ## Git
 

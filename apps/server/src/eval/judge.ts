@@ -1,13 +1,16 @@
 /**
  * The judge: Small 4 answers the yes/no questions of a played conversation that the code cannot
  * decide (docs/tuteur.md § 7), one question per call, its reason written before its answer. The
- * questions are data: Victor's grid of 2026-10-06 for the leak and help gradings
- * (judge-questions.json), a safety scenario's own checks. A verdict counts once checked against
- * Victor's own.
+ * questions are data: Victor's grid of 2026-10-06 for the leak and help gradings, with the later
+ * notion the A/B of the programme reads (judge-questions.json), a safety scenario's own checks. A
+ * verdict counts once checked against Victor's own.
  */
 
 import { z } from 'zod';
+import { LEVEL_SHORT_LABELS } from '../domain/levels';
 import type { Ai } from '../platform/ai/client';
+import type { Usage } from '../platform/ai/cost';
+import { notionText } from '../referential';
 import { dataset, type Check, type Exercise, type Scenario } from './index';
 import { cutShort, rates, type Rate, type Transcript } from './report';
 import { scenarioQuestions } from './schema';
@@ -20,6 +23,8 @@ export type Verdict =
       /** Null for an unknown answer: no verdict. */
       passed: boolean | null;
       reason: string;
+      /** What the call was billed: the judge has no student, `ai_cost` does not hold it. */
+      usage: Usage;
     }
   /** The call failed: no verdict either. */
   | { id: string; critical: boolean; error: string };
@@ -43,6 +48,9 @@ function reference(exercise: Exercise): string {
       ? [`Réponse de l'exercice : ${answer.text}`]
       : [`Ce qui reviendrait à donner la réponse : ${answer.leak}`, `Éléments attendus de l'élève : ${answer.expectedElements.join(' ; ')}`];
   if (exercise.studentError) lines.push(`Erreur de l'élève dans l'énoncé : ${exercise.studentError}`);
+  lines.push(`Classe : ${LEVEL_SHORT_LABELS[exercise.level]}`, `Programme de la classe pour cet exercice : ${exercise.programme.quote}`);
+  const later = (exercise.alignment?.laterEntries ?? []).map((id) => notionText(id) ?? id);
+  if (later.length > 0) lines.push(`Notions d'une classe suivante, par exemple : ${later.join(' ; ')}`);
   return [`Énoncé : ${exercise.statement}`, ...lines].join('\n');
 }
 
@@ -73,7 +81,7 @@ export async function judgeConversation(ai: Ai, scenario: Scenario, exercise: Ex
   const verdicts: Verdict[] = [];
   for (const { id, question, pass, critical } of questionsFor(scenario)) {
     try {
-      const { object } = await ai.generateStructured({
+      const { object, usage } = await ai.generateStructured({
         operation: 'eval-judge',
         owner: null,
         system: SYSTEM,
@@ -83,7 +91,7 @@ export async function judgeConversation(ai: Ai, scenario: Scenario, exercise: Ex
         schema: answerSchema,
         schemaName: 'verdict',
       });
-      verdicts.push({ id, critical, ...object, passed: object.answer === 'inconnu' ? null : object.answer === pass });
+      verdicts.push({ id, critical, ...object, passed: object.answer === 'inconnu' ? null : object.answer === pass, usage });
     } catch (caught) {
       verdicts.push({ id, critical, error: caught instanceof Error ? caught.message : String(caught) });
     }
@@ -92,6 +100,16 @@ export async function judgeConversation(ai: Ai, scenario: Scenario, exercise: Ex
 }
 
 const passedOf = (verdict: Verdict) => ('error' in verdict ? null : verdict.passed);
+const failedOf = (verdict: Verdict) => {
+  const passed = passedOf(verdict);
+  return passed === null ? null : !passed;
+};
+
+/** Whether a conversation failed one question: null without a verdict on it. */
+export function failedOn(judge: readonly Verdict[] | null, id: string): boolean | null {
+  const verdict = judge?.find((candidate) => candidate.id === id);
+  return verdict ? failedOf(verdict) : null;
+}
 
 /**
  * Per question, the share of conversations that failed it, by scenario and over the run; and,
@@ -107,10 +125,7 @@ export function judgeRates(rows: readonly { scenarioId: string; judge: readonly 
     byQuestion.set(key, list);
   };
   for (const { scenarioId, judge } of rows) {
-    for (const verdict of judge ?? []) {
-      const passed = passedOf(verdict);
-      add(verdict.id, { scenarioId, flagged: passed === null ? null : !passed });
-    }
+    for (const verdict of judge ?? []) add(verdict.id, { scenarioId, flagged: failedOf(verdict) });
     const critical = (judge ?? []).filter((verdict) => verdict.critical).map(passedOf);
     if (critical.length > 0) add('critical', { scenarioId, flagged: critical.includes(false) ? true : critical.includes(null) ? null : false });
   }

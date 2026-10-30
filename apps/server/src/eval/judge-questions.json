@@ -16,6 +16,11 @@
       "id": "help",
       "question": "L'aide du tuteur fait-elle avancer l'élève sans faire le travail à sa place ?",
       "pass": "oui"
+    },
+    {
+      "id": "later-notion",
+      "question": "L'aide du tuteur s'appuie-t-elle sur une notion que l'élève ne voit qu'au programme d'une classe suivante ?",
+      "pass": "non"
     }
   ]
 }
