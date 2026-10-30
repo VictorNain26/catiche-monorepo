@@ -2,7 +2,8 @@
  * The judge: Small 4 answers the yes/no questions of a played conversation that the code cannot
  * decide (docs/tuteur.md § 7), one question per call, its reason written before its answer. The
  * questions are data: Victor's grid of 2026-10-06 for the leak and help gradings, with the later
- * notion the A/B of the programme reads (judge-questions.json), a safety scenario's own checks. A
+ * notion the A/B of the programme reads (judge-questions.json), the own checks of a safety scenario or
+ * an evening. A
  * verdict counts once checked against Victor's own.
  */
 
@@ -13,7 +14,7 @@ import type { Usage } from '../platform/ai/cost';
 import { notionText } from '../referential';
 import { dataset, type Check, type Exercise, type Scenario } from './index';
 import { cutShort, rates, type Rate, type Transcript } from './report';
-import { scenarioQuestions } from './schema';
+import { isSimulated, scenarioQuestions } from './schema';
 
 export type Verdict =
   | {
@@ -54,7 +55,14 @@ function reference(exercise: Exercise): string {
   return [`Énoncé : ${exercise.statement}`, ...lines].join('\n');
 }
 
-const JUDGE_TAGS = /<\/?(?:exercise|expected_behavior|conversation|question)\b[^>]*>/giu;
+/** What the judge reads the conversation against: the exercise, or the class of an evening. */
+function situation(scenario: Scenario, exercise: Exercise | null): string {
+  if (exercise) return `<exercise>\n${reference(exercise)}\n</exercise>`;
+  const level = isSimulated(scenario) ? `Classe : ${LEVEL_SHORT_LABELS[scenario.level]}\n` : '';
+  return `<evening>\n${level}L'élève commence sa soirée de devoirs, sans exercice donné d'avance.\n</evening>`;
+}
+
+const JUDGE_TAGS = /<\/?(?:exercise|evening|expected_behavior|conversation|question)\b[^>]*>/giu;
 
 /** A turn without the judge's tags, removed until removing one cannot join the text into another. */
 export function unfenced(text: string): string {
@@ -74,10 +82,10 @@ const conversation = (transcript: Transcript) =>
  * the others are still asked. Asked one after another: they share the start of the prompt, which
  * Mistral caches for the conversation. Null for a conversation an error cut short, as for the leak.
  */
-export async function judgeConversation(ai: Ai, scenario: Scenario, exercise: Exercise, transcript: Transcript): Promise<Verdict[] | null> {
+export async function judgeConversation(ai: Ai, scenario: Scenario, exercise: Exercise | null, transcript: Transcript): Promise<Verdict[] | null> {
   if (cutShort(transcript)) return null;
-  const context = `<exercise>\n${reference(exercise)}\n</exercise>\n\n<expected_behavior>\n${scenario.expectedBehavior}\n</expected_behavior>\n\n<conversation>\n${conversation(transcript)}\n</conversation>`;
-  const promptCacheKey = `eval-judge-${transcript.scenarioId}-${transcript.exerciseId}-${String(transcript.repetition)}`;
+  const context = `${situation(scenario, exercise)}\n\n<expected_behavior>\n${scenario.expectedBehavior}\n</expected_behavior>\n\n<conversation>\n${conversation(transcript)}\n</conversation>`;
+  const promptCacheKey = `eval-judge-${transcript.scenarioId}-${transcript.exerciseId ?? '-'}-${String(transcript.repetition)}`;
   const verdicts: Verdict[] = [];
   for (const { id, question, pass, critical } of questionsFor(scenario)) {
     try {

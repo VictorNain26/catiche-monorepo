@@ -12,6 +12,7 @@ const { ai, mistral, sent } = await testAi();
 
 const { scenario: s2, exercise: m1 } = lookup({ scenarioId: 'S2', exerciseId: 'M1', repetition: 1 });
 const { scenario: s5 } = lookup({ scenarioId: 'S5', exerciseId: 'M1', repetition: 1 });
+const { scenario: e1 } = lookup({ scenarioId: 'E1', exerciseId: null, repetition: 1 });
 const turn = (student: string, text: string, rest: Partial<TutorTurn> = {}): TutorTurn => ({ student, text, durationMs: 1, record: null, ...rest });
 const transcript = (...turns: TutorTurn[]): Transcript => ({ scenarioId: 'S2', exerciseId: 'M1', repetition: 1, turns });
 const answer = (value: 'oui' | 'non' | 'inconnu') => ({ json: { reason: 'Lu dans la conversation.', answer: value } });
@@ -23,13 +24,17 @@ describe('questionsFor', () => {
   });
 
   it('asks a safety scenario its own checks', () => {
-    expect(questionsFor(s5).map(({ id }) => id)).toEqual(s5.safetyChecks.map(({ id }) => id));
+    expect(questionsFor(s5).map(({ id }) => id)).toEqual(s5.checks.map(({ id }) => id));
+  });
+
+  it('asks an evening its own checks', () => {
+    expect(questionsFor(e1).map(({ id }) => id)).toEqual(e1.checks.map(({ id }) => id));
   });
 });
 
 describe('judge question ids', () => {
-  const parse = (safetyChecks: { id: string; question: string; pass: 'oui' | 'non' }[]) =>
-    datasetSchema.safeParse({ ...dataset, scenarios: [{ ...s5, safetyChecks }] }).success;
+  const parse = (checks: { id: string; question: string; pass: 'oui' | 'non' }[]) =>
+    datasetSchema.safeParse({ ...dataset, scenarios: [{ ...s5, checks }] }).success;
 
   it('rejects an id asked twice on a scenario, or the id of the rate of inappropriate responses', () => {
     expect(parse([{ id: 'a', question: '?', pass: 'oui' }])).toBe(true);
@@ -99,6 +104,16 @@ describe('judgeConversation', () => {
     mistral.chat.push(answer('non'), answer('non'), answer('oui'), answer('non'));
     await judgeConversation(ai, s2, written, transcript(turn(written.statement, 'Par quoi veux-tu commencer ?')));
     expect(sent(0).user).toContain(written.answer.leak);
+  });
+
+  it('gives the judge of an evening its class, without an exercise', async () => {
+    mistral.chat.push(...e1.checks.map(() => answer('oui')));
+    const evening = { scenarioId: 'E1', exerciseId: null, repetition: 1, turns: [turn("j'ai maths et histoire ce soir", "C'est pour quand ?")] };
+    const verdicts = await judgeConversation(ai, e1, null, evening);
+    expect(verdicts?.map(({ id }) => id)).toEqual(e1.checks.map(({ id }) => id));
+    expect(sent(0).user).toContain(LEVEL_SHORT_LABELS[e1.level]);
+    expect(sent(0).user).toContain(e1.expectedBehavior);
+    expect(sent(0).user).not.toContain('<exercise>');
   });
 
   it('keeps judging after a call that fails, with its error and no verdict', async () => {

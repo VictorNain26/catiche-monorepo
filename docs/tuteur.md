@@ -211,6 +211,10 @@ Le code vit dans `apps/server/src/eval/` ; `bun run eval` rejoue le jeu sur le v
   passage compare les paires des deux variantes (McNemar exact, `eval/stats.ts`), avec son coût.
   Le programme reste s'il fait mieux sur « notion d'une classe suivante » ou « affirmation
   fausse » (Victor, 2026-10-28).
+- **La soirée se joue avec un élève simulé** (`eval/student.ts`), Small 4 dans le rôle du
+  collégien. Ses scénarios (E1 à E6) suivent les gestes de `docs/methode.md`, sans exercice, et
+  leurs questions sont les leurs. Ce sont des évals de capacité : le tuteur actuel aide sur un
+  exercice, pas sur la soirée, et y part bas.
 - **Victor juge** les mêmes questions sur une page simple (à construire) ; le juge ne compte
   qu'une fois vérifié contre lui.
 - **Une mesure par version du tuteur**, avec sa marge d'erreur ; deux versions se comparent cas

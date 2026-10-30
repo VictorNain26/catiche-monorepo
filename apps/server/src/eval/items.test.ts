@@ -27,6 +27,29 @@ describe('buildItems', () => {
   it('plays no scenario on an exercise it does not target', () => {
     expect(buildItems({ repeat: 1, scenario: ['S6'], exercise: ['6-M1'], variants: ['programme'] })).toEqual([]);
   });
+
+  it('plays an evening once per repetition, without an exercise, and leaves it out of a run narrowed to exercises', () => {
+    const items = buildItems({ repeat: 2, scenario: ['E1'], variants: ['programme'] });
+    expect(items).toEqual([
+      { scenarioId: 'E1', exerciseId: null, repetition: 1, variant: 'programme' },
+      { scenarioId: 'E1', exerciseId: null, repetition: 2, variant: 'programme' },
+    ]);
+    expect(items.map(pairOf)).toEqual(['E1:-:1', 'E1:-:2']);
+    expect(buildItems({ repeat: 1, scenario: ['E1'], exercise: ['M1'], variants: ['programme'] })).toEqual([]);
+  });
+});
+
+describe('lookup', () => {
+  it('finds an evening at its class, without an exercise', () => {
+    const { scenario, exercise } = lookup({ scenarioId: 'E1', exerciseId: null, repetition: 1 });
+    expect(scenario.level).toBe('cinquieme');
+    expect(exercise).toBeNull();
+  });
+
+  it('refuses an item whose exercise does not match its scenario', () => {
+    expect(() => lookup({ scenarioId: 'S2', exerciseId: null, repetition: 1 })).toThrow();
+    expect(() => lookup({ scenarioId: 'E1', exerciseId: 'M1', repetition: 1 })).toThrow();
+  });
 });
 
 describe('renderTurns', () => {

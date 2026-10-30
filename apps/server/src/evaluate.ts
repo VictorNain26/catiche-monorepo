@@ -1,7 +1,8 @@
 /**
  * `bun run eval`: replays the scenarios of the evaluation set (src/eval) on the real tutor and the
  * real Mistral, through the real route, as a fresh student each time, so that nothing learned in
- * one conversation reaches the next. Writes the transcripts, the code's verdicts (leak, artifact,
+ * one conversation reaches the next, its messages written in advance or by a simulated student
+ * (eval/student.ts). Writes the transcripts, the code's verdicts (leak, artifact,
  * distress), the judge's (eval/judge.ts) and their rates with Wilson intervals to eval-results/. A composition root, as
  * main.ts: the app is wired here, its emails kept in memory for the guardian's code. Only on a
  * database on this machine: the run creates accounts and deletes those of an earlier run.
@@ -12,7 +13,8 @@ import { parseArgs } from 'node:util';
 import { like } from 'drizzle-orm';
 import { createApp } from './app';
 import { loadConfig } from './config';
-import { renderTurns, type Exercise, type Scenario, type StudentTurn } from './eval';
+import type { SchoolLevel } from './domain/levels';
+import { renderTurns, type StudentTurn } from './eval';
 import { z } from 'zod';
 import { buildItems, isLocalDatabase, keyOf, lookup, pairOf, VARIANTS, type Item, type Variant } from './eval/items';
 import { failedOn, judgeConversation, judgeErrors, judgeRates, type Verdict } from './eval/judge';
@@ -28,6 +30,7 @@ import {
   type Transcript,
   type TutorTurn,
 } from './eval/report';
+import { scriptedStudent, simulatedStudent, type Student } from './eval/student';
 import { accountDeletion, householdAuth } from './modules/household';
 import { studentCost, turnRecords } from './modules/tutor';
 import { createAi } from './platform/ai/client';
@@ -63,7 +66,7 @@ interface Conversation extends Item {
   artifact: ReturnType<typeof detectArtifact>;
   distress: ReturnType<typeof detectDistress> | undefined;
   judge: Verdict[] | null;
-  cost: { tutorMicroEur: number; judgeMicroEur: number };
+  cost: { tutorMicroEur: number; studentMicroEur: number; judgeMicroEur: number };
   transcript: Transcript;
 }
 
@@ -86,9 +89,9 @@ export function signInGuardian(harness: Harness): Promise<string> {
   return harness.api.guardian(`guardian-${crypto.randomUUID().slice(0, 8)}${EVAL_DOMAIN}`);
 }
 
-/** A new student of the guardian, at the exercise's level, and their device's session cookie. */
-async function pairedStudent(harness: Harness, guardian: string, exercise: Exercise): Promise<{ id: string; device: string }> {
-  const { id } = await harness.api.student(guardian, { name: 'Élève', level: exercise.level });
+/** A new student of the guardian, at the conversation's class, and their device's session cookie. */
+async function pairedStudent(harness: Harness, guardian: string, level: SchoolLevel): Promise<{ id: string; device: string }> {
+  const { id } = await harness.api.student(guardian, { name: 'Élève', level });
   return { id, device: await harness.api.pair(guardian, id) };
 }
 
@@ -114,30 +117,40 @@ async function playTurn(harness: Harness, sessionId: string, device: string, stu
   };
 }
 
+/** The student's next message; a failed simulated student cuts the conversation short, with its error. */
+async function nextOf(student: Student, played: readonly Omit<TutorTurn, 'record'>[]): Promise<StudentTurn | { error: string } | null> {
+  try {
+    return await student.next(played);
+  } catch (caught) {
+    return { error: `student: ${caught instanceof Error ? caught.message : String(caught)}` };
+  }
+}
+
 /**
- * A scenario played on an exercise by a fresh student, each turn with the record the server
- * stored, and what the student's calls cost: the tutor's, its title and summary included.
+ * A conversation played at a class by a fresh student, each message from `student` after Tom's
+ * last reply, each turn with the record the server stored, and what the student's calls cost: the
+ * tutor's, its title and summary included.
  */
 export async function playConversation(
   harness: Harness,
   guardian: string,
-  scenario: Scenario,
-  exercise: Exercise,
-  repetition: number,
+  { scenarioId, exerciseId, repetition }: Pick<Item, 'scenarioId' | 'exerciseId' | 'repetition'>,
+  level: SchoolLevel,
+  student: Student,
 ): Promise<{ transcript: Transcript; tutorCostMicroEur: number }> {
-  const { id: studentId, device } = await pairedStudent(harness, guardian, exercise);
+  const { id: studentId, device } = await pairedStudent(harness, guardian, level);
   const sessionId = await harness.api.session(device);
   const played: Omit<TutorTurn, 'record'>[] = [];
-  for (const student of renderTurns(scenario, exercise)) {
-    const turn = await playTurn(harness, sessionId, device, student);
+  for (let said = await nextOf(student, played); said !== null; said = await nextOf(student, played)) {
+    const turn = 'error' in said ? { student: '', text: '', durationMs: 0, error: said.error } : await playTurn(harness, sessionId, device, said);
     played.push(turn);
     if (turn.error !== undefined) break;
   }
   // One record per turn the server answered, in their order; the play stops at the first refused.
   const records = await harness.records(sessionId);
   const transcript = {
-    scenarioId: scenario.id,
-    exerciseId: exercise.id,
+    scenarioId,
+    exerciseId,
     repetition,
     turns: played.map((turn, index) => {
       const record = records[index];
@@ -246,17 +259,24 @@ async function main(): Promise<number> {
     const guardian = await signInGuardian(harnesses.programme);
     const conversations: Conversation[] = [];
     for (const [index, item] of items.entries()) {
-      const { scenario, exercise } = lookup(item);
-      const { transcript, tutorCostMicroEur } = await playConversation(harnesses[item.variant], guardian, scenario, exercise, item.repetition);
+      const played = lookup(item);
+      const { scenario, exercise } = played;
+      const student =
+        played.exercise === null
+          ? simulatedStudent(ai, played.scenario, `eval-student-${keyOf(item)}`)
+          : scriptedStudent(renderTurns(played.scenario, played.exercise));
+      const level = played.exercise === null ? played.scenario.level : played.exercise.level;
+      const { transcript, tutorCostMicroEur } = await playConversation(harnesses[item.variant], guardian, item, level, student);
       const judge = await judgeConversation(ai, scenario, exercise, transcript);
       const judgeMicroEur = (judge ?? []).reduce((sum, verdict) => sum + ('usage' in verdict ? costOf(verdict.usage) : 0), 0);
+      const studentMicroEur = costOf(student.usage());
       const verdicts = {
         leak: detectLeak(transcript, exercise, scenario),
         artifact: detectArtifact(transcript),
         distress: scenario.grading.includes('safety') ? detectDistress(transcript) : undefined,
         judge,
       };
-      conversations.push({ ...item, ...verdicts, cost: { tutorMicroEur: tutorCostMicroEur, judgeMicroEur }, transcript });
+      conversations.push({ ...item, ...verdicts, cost: { tutorMicroEur: tutorCostMicroEur, studentMicroEur, judgeMicroEur }, transcript });
       const failed = cutShort(transcript);
       const leak = verdicts.leak
         ? verdicts.leak.leaked
@@ -275,6 +295,7 @@ async function main(): Promise<number> {
       judge: judgeRates(rows),
       cost: {
         tutorMicroEur: rows.reduce((sum, { cost }) => sum + cost.tutorMicroEur, 0),
+        studentMicroEur: rows.reduce((sum, { cost }) => sum + cost.studentMicroEur, 0),
         judgeMicroEur: rows.reduce((sum, { cost }) => sum + cost.judgeMicroEur, 0),
       },
     });
@@ -299,7 +320,9 @@ async function main(): Promise<number> {
       for (const [id, failed] of Object.entries(summary.judge)) {
         console.log(failed.length > 0 ? `judge, ${id} failed:\n${failed.map(line).join('\n')}` : `judge, ${id}: no verdict, every answer unknown`);
       }
-      console.log(`cost: tutor ${euros(summary.cost.tutorMicroEur)}, judge ${euros(summary.cost.judgeMicroEur)}`);
+      console.log(
+        `cost: tutor ${euros(summary.cost.tutorMicroEur)}, simulated student ${euros(summary.cost.studentMicroEur)}, judge ${euros(summary.cost.judgeMicroEur)}`,
+      );
     }
     if (comparison) {
       console.log('\n== programme against none (pairs failed by one only, exact McNemar)');

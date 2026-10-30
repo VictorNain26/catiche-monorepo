@@ -62,11 +62,20 @@ export function turnText(turn: z.infer<typeof turnSchema>): string {
   return typeof turn === 'string' ? turn : turn.text;
 }
 
-const scenarioSchema = z.strictObject({
+const scenarioFields = {
   id: text,
-  origin: z.enum(['protocol-2026-10-01', 'agent-md-9']),
+  origin: z.enum(['protocol-2026-10-01', 'agent-md-9', 'methode-2026-10-20']),
   name: text,
   description: text,
+  grading: z.array(z.enum(['leak', 'help', 'safety', 'evening'])).min(1),
+  expectedBehavior: text,
+  /** The judge's questions of a safety scenario or an evening, its own. */
+  checks: z.array(checkSchema).default([]),
+};
+
+/** An exercise played with turns written in advance. */
+const writtenScenarioSchema = z.strictObject({
+  ...scenarioFields,
   exercises: z.union([z.literal('all'), z.array(text).min(1)]),
   turns: z
     .array(turnSchema)
@@ -74,20 +83,30 @@ const scenarioSchema = z.strictObject({
     .refine(([first]) => first !== undefined && turnText(first).includes(STATEMENT_PLACEHOLDER), {
       message: `the first turn must contain ${STATEMENT_PLACEHOLDER}`,
     }),
-  grading: z.array(z.enum(['leak', 'help', 'safety'])).min(1),
-  expectedBehavior: text,
-  /** The judge's questions for a safety scenario, its own. */
-  safetyChecks: z.array(checkSchema).default([]),
 });
+
+/** An evening at a class, without an exercise: a simulated student (student.ts) writes each message. */
+const simulatedScenarioSchema = z.strictObject({
+  ...scenarioFields,
+  level: schoolLevelSchema,
+  student: z.strictObject({ persona: text, goal: text, maxTurns: z.number().int().min(1).max(12) }),
+});
+
+const scenarioSchema = z.union([writtenScenarioSchema, simulatedScenarioSchema]);
 
 const judgeQuestionsSchema = z.strictObject({ leak: z.array(checkSchema).min(1), help: z.array(checkSchema).min(1) });
 
-/** The judge's questions on a scenario, by its gradings: the grid's, then its own safety checks. */
-export function scenarioQuestions(scenario: z.infer<typeof scenarioSchema>, grid: z.infer<typeof judgeQuestionsSchema>): Check[] {
+const OWN_CHECKS = ['safety', 'evening'] as const;
+const hasOwnChecks = (scenario: Scenario) => OWN_CHECKS.some((grading) => scenario.grading.includes(grading));
+
+export const isSimulated = (scenario: Scenario): scenario is SimulatedScenario => 'student' in scenario;
+
+/** The judge's questions on a scenario, by its gradings: the grid's, then its own checks. */
+export function scenarioQuestions(scenario: Scenario, grid: z.infer<typeof judgeQuestionsSchema>): Check[] {
   return [
     ...(scenario.grading.includes('leak') ? grid.leak : []),
     ...(scenario.grading.includes('help') ? grid.help : []),
-    ...(scenario.grading.includes('safety') ? scenario.safetyChecks : []),
+    ...(hasOwnChecks(scenario) ? scenario.checks : []),
   ];
 }
 
@@ -110,8 +129,12 @@ export const datasetSchema = z
         ctx.addIssue({ code: 'custom', message: `duplicate scenario id ${scenario.id}` });
       }
       scenarioIds.add(scenario.id);
-      if (scenario.grading.includes('safety') !== scenario.safetyChecks.length > 0) {
-        ctx.addIssue({ code: 'custom', message: `scenario ${scenario.id}: safety checks go with safety grading, and only there` });
+      if (hasOwnChecks(scenario) !== scenario.checks.length > 0) {
+        ctx.addIssue({ code: 'custom', message: `scenario ${scenario.id}: own checks go with the safety or evening grading, and only there` });
+      }
+      // The grid of the leak and the help reads an exercise, which an evening does not have.
+      if (isSimulated(scenario) && (scenario.grading.includes('leak') || scenario.grading.includes('help'))) {
+        ctx.addIssue({ code: 'custom', message: `scenario ${scenario.id}: an evening grades neither the leak nor the help` });
       }
       // Each question's rate is published under its id, and `critical` names the rate of inappropriate responses.
       const questionIds = scenarioQuestions(scenario, judgeQuestions).map(({ id }) => id);
@@ -120,7 +143,7 @@ export const datasetSchema = z
           ctx.addIssue({ code: 'custom', message: `scenario ${scenario.id}: judge question id ${id} is reserved or asked twice` });
         }
       }
-      if (scenario.exercises === 'all') continue;
+      if (isSimulated(scenario) || scenario.exercises === 'all') continue;
       for (const id of scenario.exercises) {
         if (!exerciseIds.has(id)) {
           ctx.addIssue({ code: 'custom', message: `scenario ${scenario.id} targets unknown exercise ${id}` });
@@ -131,4 +154,6 @@ export const datasetSchema = z
 
 export type Exercise = z.infer<typeof exerciseSchema>;
 export type Scenario = z.infer<typeof scenarioSchema>;
+export type WrittenScenario = z.infer<typeof writtenScenarioSchema>;
+export type SimulatedScenario = z.infer<typeof simulatedScenarioSchema>;
 export type Check = z.infer<typeof checkSchema>;
