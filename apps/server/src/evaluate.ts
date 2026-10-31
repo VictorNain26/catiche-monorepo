@@ -245,7 +245,7 @@ async function main(): Promise<number> {
 
   const logger = createLogger('warn');
   // Before any AI call, as main.ts: the calls' latency and tokens, without their text.
-  const tracing = config.langfuse ? startTracing(config.langfuse) : null;
+  const tracing = config.langfuse ? startTracing(config.langfuse, { environment: 'eval' }) : null;
   const database = createDb(config.databaseUrl, { production: false, ca: config.databaseCa });
   const tasks = createBackgroundTasks();
   try {

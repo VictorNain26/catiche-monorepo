@@ -235,7 +235,7 @@ Le code vit dans `apps/server/src/eval/` ; `bun run eval` rejoue le jeu sur le v
 - **Non-régression** : un garde-fou en CI sur les changements du tuteur, centré sur la fuite
   (à construire).
 - **Données de test seulement** : les conversations sont synthétiques, et seul le harnais en
-  envoie le texte à Langfuse, dans un projet d'éval à part ; en production, ni entrées ni
+  envoie le texte à Langfuse, sous l'environnement `eval` du projet ; en production, ni entrées ni
   sorties dans les traces, et aucun span en erreur exporté (`platform/observability/tracing.ts`).
 
 ## 8. Élève et parents

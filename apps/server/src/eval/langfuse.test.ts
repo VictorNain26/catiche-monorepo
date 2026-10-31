@@ -66,7 +66,10 @@ const page = (data: unknown[], number: number, totalPages: number) => ({
 
 describe('traced', () => {
   const exporter = new InMemorySpanExporter();
-  const tracing = startTracing({ publicKey: 'pk-lf-test', secretKey: 'sk-lf-test', baseUrl: 'http://127.0.0.1:9' }, { exporter });
+  const tracing = startTracing(
+    { publicKey: 'pk-lf-test', secretKey: 'sk-lf-test', baseUrl: 'http://127.0.0.1:9' },
+    { environment: 'eval', exporter },
+  );
   afterAll(() => tracing.shutdown());
 
   it('sends a conversation of the run with its text, as the trace the scores are attached to', async () => {
