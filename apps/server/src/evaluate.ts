@@ -6,18 +6,24 @@
  * distress), the judge's (eval/judge.ts) and their rates with Wilson intervals to eval-results/. A composition root, as
  * main.ts: the app is wired here, its emails kept in memory for the guardian's code. Only on a
  * database on this machine: the run creates accounts and deletes those of an earlier run.
+ *
+ * With Langfuse's keys, the run is traced as main.ts traces, and each conversation is sent with
+ * its text and the judge's verdicts as scores (eval/langfuse.ts); `--annotate` puts them in
+ * Victor's annotation queues, and `--agreement` alone prints the judge's agreement with him.
  */
 
 import { mkdir } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
+import { LangfuseClient } from '@langfuse/client';
 import { like } from 'drizzle-orm';
 import { createApp } from './app';
 import { loadConfig } from './config';
 import type { SchoolLevel } from './domain/levels';
-import { renderTurns, type StudentTurn } from './eval';
+import { dataset, renderTurns, type Check, type StudentTurn } from './eval';
 import { z } from 'zod';
 import { buildItems, isLocalDatabase, keyOf, lookup, pairOf, VARIANTS, type Item, type Variant } from './eval/items';
-import { failedOn, judgeConversation, judgeErrors, judgeRates, type Verdict } from './eval/judge';
+import { failedOn, judgeConversation, judgeErrors, judgeRates, questionsFor, type Verdict } from './eval/judge';
+import { annotate, conversationTrace, KAPPA_THRESHOLD, readAgreement, scoreConfigs, sendVerdicts, traced } from './eval/langfuse';
 import {
   cutShort,
   detectArtifact,
@@ -43,6 +49,7 @@ import { pendingMigrations } from './platform/db/migrations';
 import { createBackgroundTasks } from './platform/lifecycle/background';
 import { createLifecycle } from './platform/lifecycle/shutdown';
 import { createLogger } from './platform/observability/logger';
+import { startTracing } from './platform/observability/tracing';
 import { notionsFor } from './referential';
 import { httpClient } from './testing/http';
 import { memoryMailer } from './testing/mailer';
@@ -68,6 +75,8 @@ interface Conversation extends Item {
   judge: Verdict[] | null;
   cost: { tutorMicroEur: number; studentMicroEur: number; judgeMicroEur: number };
   transcript: Transcript;
+  /** Its trace in Langfuse, null without Langfuse's keys. */
+  traceId: string | null;
 }
 
 /**
@@ -178,6 +187,19 @@ const percent = (value: number) => `${(value * 100).toFixed(1)} %`;
 const euros = (microEur: number) => `${(microEur / 1_000_000).toFixed(2)} €`;
 const line = ({ scope, flagged, total, low, high }: Rate) => `  ${scope}: ${String(flagged)}/${String(total)} [${percent(low)} – ${percent(high)}]`;
 
+/** Each question of the set once, by its id: the scenarios share the grid's. */
+const uniqueQuestions = (questions: readonly Check[]) => [...new Map(questions.map((question) => [question.id, question])).values()];
+
+/** The judge against Victor, per question of the set, from the scores Langfuse holds. */
+async function printAgreement(langfuse: LangfuseClient): Promise<number> {
+  const ids = uniqueQuestions(dataset.scenarios.flatMap(questionsFor)).map(({ id }) => id);
+  console.log(`== judge against Victor (Cohen's κ; a question counts from κ ≥ ${String(KAPPA_THRESHOLD)})`);
+  for (const [id, { pairs, kappa, validated }] of Object.entries(await readAgreement(langfuse, ids))) {
+    console.log(`  ${id}: ${String(pairs)} pair(s), ${kappa === null ? 'no κ' : `κ = ${kappa.toFixed(2)}`}${validated ? ', validated' : ''}`);
+  }
+  return 0;
+}
+
 async function main(): Promise<number> {
   const { values } = parseArgs({
     options: {
@@ -185,6 +207,8 @@ async function main(): Promise<number> {
       exercise: { type: 'string', multiple: true },
       repeat: { type: 'string', default: '1' },
       variant: { type: 'string', multiple: true, default: ['programme'] },
+      annotate: { type: 'boolean', default: false },
+      agreement: { type: 'boolean', default: false },
     },
   });
   const repeat = Number(values.repeat);
@@ -199,6 +223,12 @@ async function main(): Promise<number> {
   }
   const variants = [...new Set(parsedVariants.data)];
   const config = loadConfig(Bun.env);
+  const langfuse = config.langfuse ? new LangfuseClient({ ...config.langfuse }) : null;
+  if ((values.agreement || values.annotate) && !langfuse) {
+    console.error('--agreement and --annotate use Langfuse: LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY are required.');
+    return 1;
+  }
+  if (values.agreement && langfuse) return printAgreement(langfuse);
   if (!isLocalDatabase(config.databaseUrl)) {
     console.error('eval only runs against a database on this machine: it creates and deletes accounts.');
     return 1;
@@ -214,6 +244,8 @@ async function main(): Promise<number> {
   }
 
   const logger = createLogger('warn');
+  // Before any AI call, as main.ts: the calls' latency and tokens, without their text.
+  const tracing = config.langfuse ? startTracing(config.langfuse) : null;
   const database = createDb(config.databaseUrl, { production: false, ca: config.databaseCa });
   const tasks = createBackgroundTasks();
   try {
@@ -255,6 +287,11 @@ async function main(): Promise<number> {
     const harnesses: Record<Variant, Harness> = { programme: harnessOf('programme'), none: harnessOf('none') };
     const costOf = pricing(config.mistral.model, config.mistral.euEndpoint);
 
+    const runName = `${new Date().toISOString().slice(0, 16).replace(':', 'h')}-${commit()}`;
+    // The score config of each question asked, Victor's and the judge's, before the first score.
+    const configs = langfuse ? await scoreConfigs(langfuse, uniqueQuestions(items.flatMap((item) => questionsFor(lookup(item).scenario)))) : null;
+    const langfuseErrors: string[] = [];
+
     console.log(`removed ${String(await removeEvalAccounts(database.db))} account(s) of an earlier run`);
     const guardian = await signInGuardian(harnesses.programme);
     const conversations: Conversation[] = [];
@@ -266,8 +303,28 @@ async function main(): Promise<number> {
           ? simulatedStudent(ai, played.scenario, `eval-student-${keyOf(item)}`)
           : scriptedStudent(renderTurns(played.scenario, played.exercise));
       const level = played.exercise === null ? played.scenario.level : played.exercise.level;
-      const { transcript, tutorCostMicroEur } = await playConversation(harnesses[item.variant], guardian, item, level, student);
-      const judge = await judgeConversation(ai, scenario, exercise, transcript);
+      const play = async () => {
+        const conversation = await playConversation(harnesses[item.variant], guardian, item, level, student);
+        return { ...conversation, judge: await judgeConversation(ai, scenario, exercise, conversation.transcript) };
+      };
+      const {
+        traceId,
+        result: { transcript, tutorCostMicroEur, judge },
+      } = langfuse
+        ? await traced(keyOf(item), async (record) => {
+            const result = await play();
+            record({
+              ...conversationTrace(scenario, exercise, result.transcript),
+              metadata: { runName, scenarioId: item.scenarioId, variant: item.variant },
+            });
+            return result;
+          })
+        : { traceId: null, result: await play() };
+      if (langfuse && configs && traceId !== null && judge) {
+        await sendVerdicts(langfuse, traceId, judge, configs).catch((caught: unknown) => {
+          langfuseErrors.push(`${keyOf(item)}: ${caught instanceof Error ? caught.message : String(caught)}`);
+        });
+      }
       const judgeMicroEur = (judge ?? []).reduce((sum, verdict) => sum + ('usage' in verdict ? costOf(verdict.usage) : 0), 0);
       const studentMicroEur = costOf(student.usage());
       const verdicts = {
@@ -276,7 +333,7 @@ async function main(): Promise<number> {
         distress: scenario.grading.includes('safety') ? detectDistress(transcript) : undefined,
         judge,
       };
-      conversations.push({ ...item, ...verdicts, cost: { tutorMicroEur: tutorCostMicroEur, studentMicroEur, judgeMicroEur }, transcript });
+      conversations.push({ ...item, ...verdicts, cost: { tutorMicroEur: tutorCostMicroEur, studentMicroEur, judgeMicroEur }, transcript, traceId });
       const failed = cutShort(transcript);
       const leak = verdicts.leak
         ? verdicts.leak.leaked
@@ -301,7 +358,6 @@ async function main(): Promise<number> {
     });
     const byVariant = Object.fromEntries(variants.map((variant) => [variant, summarize(conversations.filter((row) => row.variant === variant))]));
     const comparison = variants.length === VARIANTS.length ? compareVariants(conversations) : null;
-    const runName = `${new Date().toISOString().slice(0, 16).replace(':', 'h')}-${commit()}`;
     await mkdir('eval-results', { recursive: true });
     const path = `eval-results/${runName}.json`;
     await Bun.write(
@@ -332,14 +388,32 @@ async function main(): Promise<number> {
         );
       }
     }
+    if (values.annotate && langfuse && configs && tracing) {
+      // The traces sent first: each item of a queue names one.
+      await tracing.flush();
+      const byScenario = new Map<string, { scenarioId: string; name: string; questions: Check[]; traceIds: string[] }>();
+      for (const { scenarioId, traceId, judge, ...row } of conversations) {
+        // A conversation an error cut short has no verdict to check.
+        if (traceId === null || judge === null) continue;
+        const { scenario } = lookup({ scenarioId, ...row });
+        const entry = byScenario.get(scenarioId) ?? { scenarioId, name: scenario.name, questions: questionsFor(scenario), traceIds: [] };
+        entry.traceIds.push(traceId);
+        byScenario.set(scenarioId, entry);
+      }
+      const queues = await annotate(langfuse, runName, [...byScenario.values()], configs);
+      console.log(`\nannotation queues in Langfuse: ${queues.join(', ')}`);
+    }
     const failedJudgeCalls = judgeErrors(conversations);
     if (failedJudgeCalls > 0) console.error(`${String(failedJudgeCalls)} judge call(s) failed: no verdict for them`);
     const failures = conversations.filter(({ transcript }) => cutShort(transcript));
     if (failures.length > 0) console.error(`${String(failures.length)} conversation(s) cut short by an error: ${failures.map(keyOf).join(', ')}`);
-    return failures.length > 0 || failedJudgeCalls > 0 ? 1 : 0;
+    if (langfuseErrors.length > 0) console.error(`verdicts not sent to Langfuse:\n  ${langfuseErrors.join('\n  ')}`);
+    return failures.length > 0 || failedJudgeCalls > 0 || langfuseErrors.length > 0 ? 1 : 0;
   } finally {
     await tasks.settled();
     await database.close();
+    // Spans leave in batches: what is left goes before the process exits.
+    await tracing?.shutdown();
   }
 }
 

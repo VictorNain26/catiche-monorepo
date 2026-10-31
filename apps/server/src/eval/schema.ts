@@ -124,7 +124,15 @@ export const datasetSchema = z
       exerciseIds.add(id);
     }
     const scenarioIds = new Set<string>();
+    // Langfuse holds a question under its id, its wording as the description (langfuse.ts).
+    const wordings = new Map<string, string>();
     for (const scenario of scenarios) {
+      for (const { id, question } of scenarioQuestions(scenario, judgeQuestions)) {
+        if ((wordings.get(id) ?? question) !== question) {
+          ctx.addIssue({ code: 'custom', message: `judge question id ${id} has two wordings` });
+        }
+        wordings.set(id, question);
+      }
       if (scenarioIds.has(scenario.id)) {
         ctx.addIssue({ code: 'custom', message: `duplicate scenario id ${scenario.id}` });
       }

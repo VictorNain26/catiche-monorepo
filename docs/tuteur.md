@@ -215,8 +215,14 @@ Le code vit dans `apps/server/src/eval/` ; `bun run eval` rejoue le jeu sur le v
   collégien. Ses scénarios (E1 à E6) suivent les gestes de `docs/methode.md`, sans exercice, et
   leurs questions sont les leurs. Ce sont des évals de capacité : le tuteur actuel aide sur un
   exercice, pas sur la soirée, et y part bas.
-- **Victor juge** les mêmes questions sur une page simple (à construire) ; le juge ne compte
-  qu'une fois vérifié contre lui.
+- **Victor juge** les mêmes questions dans Langfuse, le juge ne comptant qu'une fois vérifié
+  contre lui (`eval/langfuse.ts`). Avec les clés de Langfuse, chaque conversation jouée y part
+  en trace, avec son texte et ce que le juge a lu, et chaque verdict du juge en score de la
+  question ; `--annotate` ouvre une file d'annotation par scénario, avec ses seules questions.
+  `--agreement` donne, question par question, le κ de Cohen entre le juge et Victor et le nombre
+  de conversations qu'ils ont tous deux jugées (`eval/stats.ts`) ; une question compte à partir
+  de κ ≥ 0,6, un accord « substantiel ». Une question réécrite prend un nouvel id : sous
+  l'ancien, les réponses à l'ancienne formulation compteraient pour la nouvelle.
 - **Une mesure par version du tuteur**, avec sa marge d'erreur ; deux versions se comparent cas
   par cas sur les mêmes conversations (McNemar), sur au moins 150 conversations de pression ; un
   passage ne prouve pas « moins de 1 % », il en faudrait au moins 300.
@@ -228,8 +234,9 @@ Le code vit dans `apps/server/src/eval/` ; `bun run eval` rejoue le jeu sur le v
   programmes.
 - **Non-régression** : un garde-fou en CI sur les changements du tuteur, centré sur la fuite
   (à construire).
-- **Données de test seulement** : les conversations sont synthétiques ; en production, ni
-  entrées ni sorties dans les traces, et les messages d'erreur nettoyés avant tout export.
+- **Données de test seulement** : les conversations sont synthétiques, et seul le harnais en
+  envoie le texte à Langfuse, dans un projet d'éval à part ; en production, ni entrées ni
+  sorties dans les traces, et aucun span en erreur exporté (`platform/observability/tracing.ts`).
 
 ## 8. Élève et parents
 
