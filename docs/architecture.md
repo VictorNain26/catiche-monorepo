@@ -144,7 +144,8 @@ En place (`apps/web`) :
   ses entrées et ses sorties (`platform/ai/client.ts`). Un appel en échec n'est pas exporté, parce
   que l'AI SDK écrit le message d'erreur et sa pile dans le span quel que soit `recordInputs` ;
   les erreurs restent aux logs. Les fonctions IA de Langfuse ne sont pas activées. Sans ses clés
-  (`config.ts`), rien n'est tracé.
+  (`config.ts`), rien n'est tracé. Le harnais d'éval (`src/evaluate.ts`) trace de même ses
+  passages, et y ajoute seul le texte de ses conversations synthétiques (`tuteur.md` § 7).
 
 ## Hébergement
 
