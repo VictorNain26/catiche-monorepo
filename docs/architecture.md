@@ -134,14 +134,17 @@ En place (`apps/web`) :
 
 ## Observabilité
 
-- **En place** : logs pino avec le `requestId` de chaque requête et un sérialiseur d'erreurs en
-  liste blanche (aucun texte d'élève). Les erreurs iront à Bugsink, auto-hébergé chez Clever Cloud,
-  juste avant la première vraie famille ; les traces OpenTelemetry attendent un besoin mesuré.
-- **À tenir dès leur retour** : l'AI SDK écrit le message d'erreur dans le span quel que soit
-  `recordInputs`, et une erreur de validation y met la sortie du modèle ; les messages d'erreur
-  se réécrivent avant tout export.
-- **Cible** : traces et métriques sans identifiant ni texte, logs avec `trace_id`, rétentions
-  courtes, accès réservé.
+- **Logs** : pino avec le `requestId` de chaque requête et un sérialiseur d'erreurs en liste
+  blanche (aucun texte d'élève). Les erreurs iront à Bugsink, auto-hébergé chez Clever Cloud,
+  juste avant la première vraie famille.
+- **Traces des appels IA** (`platform/observability/tracing.ts`) : la télémétrie de l'AI SDK vers
+  Langfuse Cloud, région UE, hébergée par AWS en Irlande
+  ([langfuse.com/security/data-regions](https://langfuse.com/security/data-regions)). Elles
+  portent le modèle, les tokens, la durée et l'opération, jamais un texte : chaque appel coupe
+  ses entrées et ses sorties (`platform/ai/client.ts`). Un appel en échec n'est pas exporté, parce
+  que l'AI SDK écrit le message d'erreur et sa pile dans le span quel que soit `recordInputs` ;
+  les erreurs restent aux logs. Les fonctions IA de Langfuse ne sont pas activées. Sans ses clés
+  (`config.ts`), rien n'est tracé.
 
 ## Hébergement
 

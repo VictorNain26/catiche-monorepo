@@ -57,6 +57,10 @@ const fields = z.object({
   // (platform/ai/moderation.ts); 0 retries turns its retries off too.
   MISTRAL_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
   MISTRAL_RETRY_ATTEMPTS: z.coerce.number().int().min(0).max(5).default(2),
+  // Langfuse Cloud, EU region (langfuse.com/security/data-regions): without its keys, nothing is traced.
+  LANGFUSE_PUBLIC_KEY: z.string().optional(),
+  LANGFUSE_SECRET_KEY: z.string().optional(),
+  LANGFUSE_BASE_URL: z.url({ protocol: /^https?$/ }).default('https://cloud.langfuse.com'),
 });
 
 const databaseFields = fields.pick({ NODE_ENV: true, DATABASE_URL: true, DATABASE_CA: true });
@@ -64,6 +68,7 @@ const databaseFields = fields.pick({ NODE_ENV: true, DATABASE_URL: true, DATABAS
 // Zod skips a refinement once a field has failed: these checks run apart, so that one error
 // names every variable at fault.
 const MAIL = ['SCW_ACCESS_KEY', 'SCW_SECRET_KEY', 'SCW_DEFAULT_PROJECT_ID', 'MAIL_FROM'] as const;
+const LANGFUSE = ['LANGFUSE_PUBLIC_KEY', 'LANGFUSE_SECRET_KEY'] as const;
 const REQUIRED_IN_PRODUCTION = ['BETTER_AUTH_URL', 'WEB_DIST_DIR', 'MISTRAL_API_KEY', ...MAIL] as const;
 
 type Environment = Record<string, string | undefined>;
@@ -95,6 +100,14 @@ export interface Config {
   readonly webDistDir: string | undefined;
   readonly mail: { accessKey: string; secretKey: string; projectId: string; from: string } | undefined;
   readonly mistral: MistralConfig;
+  /** Absent without its keys: the AI calls are not traced. */
+  readonly langfuse: LangfuseConfig | undefined;
+}
+
+export interface LangfuseConfig {
+  readonly publicKey: string;
+  readonly secretKey: string;
+  readonly baseUrl: string;
 }
 
 export interface MistralConfig {
@@ -111,11 +124,13 @@ export interface MistralConfig {
 /** Parses the environment, or throws with every invalid variable named. */
 export function loadConfig(environment: Environment): Config {
   const env = parse(fields, environment, REQUIRED_IN_PRODUCTION);
-  // The mail settings go together: with one missing, nothing would be sent, silently.
-  const set = MAIL.filter((key) => env[key] !== undefined);
-  if (set.length > 0 && set.length < MAIL.length) {
-    const missing = MAIL.filter((key) => env[key] === undefined);
-    throw new Error(`Invalid environment:\n  ${missing.map((key) => `${key}: requis avec ${set.join(', ')}`).join('\n  ')}`);
+  // The mail settings go together, as Langfuse's keys: with one missing, nothing would be sent, silently.
+  for (const group of [MAIL, LANGFUSE]) {
+    const set = group.filter((key) => env[key] !== undefined);
+    if (set.length > 0 && set.length < group.length) {
+      const missing = group.filter((key) => env[key] === undefined);
+      throw new Error(`Invalid environment:\n  ${missing.map((key) => `${key}: requis avec ${set.join(', ')}`).join('\n  ')}`);
+    }
   }
   // A student's text never leaves the EU in production.
   if (env.NODE_ENV === 'production' && env.MISTRAL_SERVER_URL !== MISTRAL_EU) {
@@ -144,6 +159,10 @@ export function loadConfig(environment: Environment): Config {
       timeoutMs: env.MISTRAL_TIMEOUT_MS,
       retryAttempts: env.MISTRAL_RETRY_ATTEMPTS,
     },
+    langfuse:
+      env.LANGFUSE_PUBLIC_KEY && env.LANGFUSE_SECRET_KEY
+        ? { publicKey: env.LANGFUSE_PUBLIC_KEY, secretKey: env.LANGFUSE_SECRET_KEY, baseUrl: env.LANGFUSE_BASE_URL }
+        : undefined,
   });
 }
 
