@@ -16,6 +16,7 @@ import { createBackgroundTasks } from './platform/lifecycle/background';
 import { createLifecycle, shutdown } from './platform/lifecycle/shutdown';
 import { createSweep } from './platform/lifecycle/sweep';
 import { createLogger } from './platform/observability/logger';
+import { startTracing } from './platform/observability/tracing';
 import { notionsFor } from './referential';
 
 // Readiness stays failed this long before the server closes: a few probe intervals of the host,
@@ -26,6 +27,8 @@ const SHUTDOWN_DEADLINE_MS = 25_000;
 
 const config = loadConfig(Bun.env);
 const logger = createLogger(config.logLevel);
+// Before any AI call: Langfuse documents its setup at startup.
+const tracing = config.langfuse ? startTracing(config.langfuse) : null;
 
 // A fatal error goes through pino and its content-free serializer, never Bun's own printer,
 // which copies every field of an error (a database error's detail holds row values).
@@ -77,8 +80,8 @@ for (const signal of ['SIGTERM', 'SIGINT'] as const) {
       lifecycle,
       stopServer: () => server.stop(),
       // The sweep's pass under way, the background tasks (emails, a session's title and summary),
-      // then the database they use.
-      close: [sweep.stop, tasks.settled, database.close],
+      // then the database they use, and the traces left to send.
+      close: [sweep.stop, tasks.settled, database.close, ...(tracing ? [tracing.shutdown] : [])],
       logger,
       drainMs: DRAIN_MS,
       deadlineMs: SHUTDOWN_DEADLINE_MS,

@@ -1,0 +1,9 @@
+{
+  "path": ["apps/server/src", "apps/web/src", "apps/landing/src", "packages"],
+  "format": ["typescript", "tsx"],
+  "minLines": 5,
+  "minTokens": 50,
+  "ignore": ["**/node_modules/**", "**/dist/**", "**/routeTree.gen.ts"],
+  "reporters": ["console"],
+  "threshold": 0.7
+}

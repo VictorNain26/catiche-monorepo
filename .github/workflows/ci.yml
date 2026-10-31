@@ -45,6 +45,8 @@ jobs:
       # knip reads the server's declarations, which a PR that does not affect it has not built.
       - run: bunx --no-install turbo run build:types --filter=@repo/server
       - run: bunx --no-install knip --treat-config-hints-as-errors
+      # Duplication above the ratchet of .jscpd.json fails; a PR that removes clones lowers it.
+      - run: bunx --no-install jscpd
       - run: bunx --no-install sherif
       # The image builds the server and the web; the landing builds here, so that a PR sees the
       # build its deployment would run.

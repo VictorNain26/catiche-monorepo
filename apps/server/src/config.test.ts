@@ -57,6 +57,7 @@ describe('loadConfig', () => {
         timeoutMs: 30_000,
         retryAttempts: 2,
       },
+      langfuse: undefined,
     });
   });
 
@@ -73,6 +74,15 @@ describe('loadConfig', () => {
 
   it('takes the API budget of a client address from the environment', () => {
     expect(loadConfig({ ...BASE, API_RATE_LIMIT: '10000' }).apiRateLimit).toBe(10_000);
+  });
+
+  it('traces to Langfuse Cloud, EU region, only with both its keys', () => {
+    expect(loadConfig(BASE).langfuse).toBeUndefined();
+    expect(loadConfig({ ...BASE, LANGFUSE_PUBLIC_KEY: 'pk-lf-1', LANGFUSE_SECRET_KEY: 'sk-lf-1' }).langfuse).toEqual({
+      publicKey: 'pk-lf-1',
+      secretKey: 'sk-lf-1',
+      baseUrl: 'https://cloud.langfuse.com',
+    });
   });
 
   it('returns a frozen object', () => {
@@ -103,6 +113,8 @@ describe('loadConfig', () => {
     [{ ...BASE, ...MAIL, SCW_DEFAULT_PROJECT_ID: 'not-a-uuid' }, 'SCW_DEFAULT_PROJECT_ID'],
     [{ ...BASE, ...MAIL, MAIL_FROM: 'tom' }, 'MAIL_FROM'],
     [{ ...BASE, SCW_ACCESS_KEY: 'SCWACCESSKEY' }, 'SCW_SECRET_KEY: requis avec SCW_ACCESS_KEY'],
+    [{ ...BASE, LANGFUSE_PUBLIC_KEY: 'pk-lf-1' }, 'LANGFUSE_SECRET_KEY: requis avec LANGFUSE_PUBLIC_KEY'],
+    [{ ...BASE, LANGFUSE_PUBLIC_KEY: 'pk-lf-1', LANGFUSE_SECRET_KEY: 'sk-lf-1', LANGFUSE_BASE_URL: 'cloud.langfuse.com' }, 'LANGFUSE_BASE_URL'],
     [{ ...PRODUCTION, MISTRAL_API_KEY: undefined }, 'MISTRAL_API_KEY'],
     [{ ...PRODUCTION, MISTRAL_SERVER_URL: 'https://api.mistral.ai' }, 'MISTRAL_SERVER_URL: https://api.eu.mistral.ai requis en production'],
     [{ ...BASE, MISTRAL_MODEL: 'mistral-small-latest' }, 'MISTRAL_MODEL'],

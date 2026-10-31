@@ -17,6 +17,11 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
 - **Comptes à fermer** : le projet Vercel et l'application GitHub Vercel (son check échoue sur
   chaque PR), l'organisation Sentry `home-drx`, le projet Langfuse « tomai » ; vérifier que Koyeb
   ne facture plus rien.
+- **Langfuse Cloud, région UE** (`cloud.langfuse.com`) : un projet `catiche` en offre Hobby, et
+  ses clés dans l'environnement du serveur, en local puis chez Clever Cloud (`config.ts`).
+  Accepter le DPA, conclu avec ClickHouse, qui a racheté Langfuse en 2026
+  ([DPA](https://clickhouse.com/legal/agreements/data-processing-addendum)). Ne jamais activer
+  ses fonctions IA, qui passent par AWS Bedrock.
 - **Double authentification** : celle d'OVH, qui tient le domaine ; chez Scaleway, ce qui reste
   (moyen de paiement, vérification d'identité, double authentification).
 - **Scaleway** : lire et valider les nouvelles « Specific Conditions Services » que la console
@@ -192,6 +197,12 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
   `git show aaddbb15:docs/etudes/2026-10-06/passage-de-fin.md`.
 
 ## Surveillance
+
+- **OpenTelemetry 3 et Langfuse** : les traces tournent sur `@opentelemetry/sdk-trace` 3, alors
+  que `@langfuse/otel` déclare encore la ligne 2 (`core` et `sdk-trace-base` en `^2.0.1`, lu le
+  2026-10-31) ; la 2.12 n'est qu'un renvoi vers la 3. Aligner quand Langfuse déclare la 3.
+- **La duplication** : le cliquet de `.jscpd.json` (0,7 %, 0,61 % mesuré le 2026-10-31) descend
+  avec chaque PR qui retire des clones.
 
 - **Le juge de l'éval avant sa calibration** : sur le premier passage de E1 (2026-10-30), il a
   fait passer `e1-starts-too-soon` en prêtant à Tom des questions sur les échéances que l'élève

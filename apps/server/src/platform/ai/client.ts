@@ -114,6 +114,8 @@ export function createAi({ mistral, db, logger }: { mistral: MistralConfig; db: 
       ...(reasoning === 'high' || call.maxOutputTokens === undefined ? {} : { maxOutputTokens: call.maxOutputTokens }),
       maxRetries: mistral.retryAttempts,
       abortSignal,
+      // Traced without any text: no prompt, no student's words, no reply (observability/tracing.ts).
+      telemetry: { recordInputs: false, recordOutputs: false, functionId: call.operation },
       providerOptions: {
         mistral: {
           reasoningEffort: reasoning,
