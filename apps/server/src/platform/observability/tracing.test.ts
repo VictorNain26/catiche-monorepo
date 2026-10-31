@@ -34,6 +34,10 @@ describe('startTracing', () => {
     const failure: unknown = await ai.generateText(call).catch((error: unknown) => error);
     expect(failure).toBeInstanceOf(Error);
 
-    expect((await exported()).filter((span) => span.status.code === SpanStatusCode.ERROR)).toEqual([]);
+    const spans = await exported();
+    expect(spans.filter((span) => span.status.code === SpanStatusCode.ERROR)).toEqual([]);
+    // Nor does a span of the call that did not fail itself carry the error.
+    expect(spans.flatMap((span) => span.events).filter((event) => event.name === 'exception')).toEqual([]);
+    expect(JSON.stringify(spans.map(({ attributes, status }) => ({ attributes, status })))).not.toContain('Internal Server Error');
   });
 });
