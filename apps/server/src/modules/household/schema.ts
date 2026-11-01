@@ -10,11 +10,9 @@ import { bigint, check, date, index, integer, jsonb, pgEnum, pgTable, primaryKey
 import { ADULT_ROLES } from '../../domain/adult-roles';
 import { CHILD_EVENT_KINDS, type ChildEventDetail } from '../../domain/child-events';
 import { SCHOOL_LEVELS } from '../../domain/levels';
-import { MEMORY_ANSWERS } from '../../domain/memory-consent';
 import { user } from '../../platform/auth/schema';
 
 export const schoolLevel = pgEnum('school_level', SCHOOL_LEVELS);
-export const memoryAnswer = pgEnum('memory_answer', MEMORY_ANSWERS);
 
 export const adultRole = pgEnum('adult_role', ADULT_ROLES);
 export const childEventKind = pgEnum('child_event_kind', CHILD_EVENT_KINDS);
@@ -114,12 +112,6 @@ export const studentProfile = pgTable(
     level: schoolLevel('level').notNull(),
     // The first day of the month: the day of birth is not collected.
     birthMonth: date('birth_month', { mode: 'string' }).notNull(),
-    // The learner memory (domain/memory-consent.ts): the parent's proposal, the child's answer, and
-    // the last exercise the memory leaves out, set with the answer or a reset: the position the
-    // exercises had reached then. A position, not a date: the clock can step back, an identity cannot.
-    memoryProposedAt: timestamp('memory_proposed_at', { withTimezone: true }),
-    memoryAnswer: memoryAnswer('memory_answer'),
-    memoryResetAfter: bigint('memory_reset_after', { mode: 'number' }),
     // The deletion a parent asked while another parent follows the student, done 7 days later
     // (domain/student-deletion.ts); who asked it, null once they left Catiche.
     deletionRequestedAt: timestamp('deletion_requested_at', { withTimezone: true }),

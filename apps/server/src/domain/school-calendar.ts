@@ -56,6 +56,3 @@ export function schoolYearOf(date: Date): number {
   const { year, month } = parisParts(date);
   return month >= 9 ? year : year - 1;
 }
-
-/** The first of September that opened the school year of `now`, at midnight in Paris. */
-export const schoolYearStart = (now: Date) => parisTime(schoolYearOf(now), 9, 1, 0);

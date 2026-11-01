@@ -1,7 +1,7 @@
 /**
  * The version of everything the writer may receive besides the conversation itself: the system
  * prompt of each class, the subject blocks, the voice marker, the turn's instructions, the
- * contract at each level, the regeneration's and the learner memory's. A turn records it: an edit of any of them makes
+ * contract at each level, the regeneration's. A turn records it: an edit of any of them makes
  * a new version, so that measures never mix two prompts.
  */
 
@@ -11,7 +11,6 @@ import { SUBJECT_FAMILIES } from '../../../domain/subjects';
 import { turnInstruction } from './analysis';
 import { VOICE_MARKER } from './assembler';
 import { LADDER, turnContract } from './ladder';
-import { learnerMemoryBlock } from './memory';
 import { regenerationInstruction } from './output-check';
 import { promptVersion, studentBlock, subjectBlock, systemPrompt } from './prompt';
 import type { ExerciseSheet } from './sheet';
@@ -73,6 +72,5 @@ export const TURN_PROMPT_VERSION = promptVersion(
       ),
     ),
     regenerationInstruction([{ kind: 'answer' }, { kind: 'tag' }, { kind: 'equality', quote: 'q' }, { kind: 'moderation', categories: [] }]),
-    learnerMemoryBlock(['n'], [{ notionId: 'n', label: 'l', worked: 1, lastHintLevel: 0, lastSolved: true, frequentError: 'careless' }]),
   ].join('\n'),
 );

@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { programmeFor } from '../../../referential';
-import type { PastExercise } from './memory';
 import { weekStart, weekSummary, type WeekMessage } from './week-summary';
-
-const [first, second] = programmeFor('quatrieme', 'mathematiques', 2026)?.entries ?? [];
-if (!first || !second) throw new Error('the referential has no maths for the quatrième');
 
 const T0 = Date.parse('2026-10-05T17:00:00Z');
 const minutes = (n: number) => n * 60_000;
@@ -12,17 +7,8 @@ const minutes = (n: number) => n * 60_000;
 const NOW = new Date(T0 + minutes(60));
 
 /** A session's messages, `at` in minutes after T0; the session opened with its first message unless `startedAt` says otherwise. */
-const session = (sessionId: string, subject: WeekMessage['subject'], at: number[], startedAt = at[0] ?? 0): WeekMessage[] =>
-  at.map((offset) => ({ sessionId, subject, startedAt: new Date(T0 + minutes(startedAt)), at: new Date(T0 + minutes(offset)) }));
-
-const exercise = (overrides: Partial<PastExercise>): PastExercise => ({
-  position: 10,
-  entries: [first.id],
-  hintLevel: 0,
-  solved: true,
-  errorTypes: [],
-  ...overrides,
-});
+const session = (sessionId: string, at: number[], startedAt = at[0] ?? 0): WeekMessage[] =>
+  at.map((offset) => ({ sessionId, startedAt: new Date(T0 + minutes(startedAt)), at: new Date(T0 + minutes(offset)) }));
 
 describe('weekStart', () => {
   it('is seven days before now', () => {
@@ -32,67 +18,47 @@ describe('weekStart', () => {
 
 describe('weekSummary, the time', () => {
   it('adds the gaps between messages, a gap past ten minutes counted as a pause', () => {
-    const summary = weekSummary(session('a', 'mathematiques', [0, 3, 8, 30, 32]), [], new Map(), NOW);
+    const summary = weekSummary(session('a', [0, 3, 8, 30, 32]), NOW);
     expect(summary.minutes).toBe(10);
   });
 
   it('counts a gap of ten minutes exactly, not a second more', () => {
-    const at = (ms: number) => ({ sessionId: 'a', subject: 'francais' as const, startedAt: new Date(T0), at: new Date(T0 + ms) });
-    expect(weekSummary([at(0), at(minutes(10))], [], new Map(), NOW).minutes).toBe(10);
-    expect(weekSummary([at(0), at(minutes(10) + 1000)], [], new Map(), NOW).minutes).toBe(0);
+    const at = (ms: number) => ({ sessionId: 'a', startedAt: new Date(T0), at: new Date(T0 + ms) });
+    expect(weekSummary([at(0), at(minutes(10))], NOW).minutes).toBe(10);
+    expect(weekSummary([at(0), at(minutes(10) + 1000)], NOW).minutes).toBe(0);
   });
 
   it('counts the first message from the opening of the session, written while the reply is awaited', () => {
-    expect(weekSummary(session('a', 'mathematiques', [6, 6], 0), [], new Map(), NOW).minutes).toBe(5);
+    expect(weekSummary(session('a', [6, 6], 0), NOW).minutes).toBe(5);
   });
 
   it('counts a session opened long before its first message from that message only', () => {
-    expect(weekSummary(session('a', 'mathematiques', [30, 36], 0), [], new Map(), NOW).minutes).toBe(5);
+    expect(weekSummary(session('a', [30, 36], 0), NOW).minutes).toBe(5);
   });
 
   it('never adds a gap between two sessions', () => {
-    const summary = weekSummary([...session('a', 'mathematiques', [0]), ...session('b', 'mathematiques', [2])], [], new Map(), NOW);
+    const summary = weekSummary([...session('a', [0]), ...session('b', [2])], NOW);
     expect(summary).toMatchObject({ minutes: 0, sessions: 2 });
   });
 
-  it('rounds each subject to the nearest five minutes', () => {
-    const summary = weekSummary([...session('a', 'mathematiques', [0, 7]), ...session('b', 'francais', [0, 8])], [], new Map(), NOW);
-    expect(summary.subjects).toEqual([
-      { subject: 'francais', minutes: 10 },
-      { subject: 'mathematiques', minutes: 5 },
-    ]);
-  });
-
-  it('rounds the total time itself, not the sum of rounded subjects', () => {
-    const subjects = ['mathematiques', 'francais', 'langues', 'sciences'] as const;
+  it('rounds the total time to the nearest five minutes', () => {
     const summary = weekSummary(
-      subjects.flatMap((subject) => session(subject, subject, [0, 2])),
-      [],
-      new Map(),
+      ['a', 'b', 'c', 'd'].flatMap((id) => session(id, [0, 2])),
       NOW,
     );
-    expect(summary.subjects.map(({ minutes: spent }) => spent)).toEqual([0, 0, 0, 0]);
     expect(summary.minutes).toBe(10);
   });
 
-  it('puts a session without a subject under general, and keeps a subject worked under a minute', () => {
-    const summary = weekSummary([...session('a', null, [0, 6]), ...session('b', 'langues', [0])], [], new Map(), NOW);
-    expect(summary.subjects).toEqual([
-      { subject: 'general', minutes: 5 },
-      { subject: 'langues', minutes: 0 },
-    ]);
-  });
-
   it('says nothing of a week without a session', () => {
-    expect(weekSummary([], [], new Map(), NOW)).toEqual({ minutes: 0, sessions: 0, subjects: [], resisting: [], days: [], tonight: false });
+    expect(weekSummary([], NOW)).toEqual({ minutes: 0, sessions: 0, days: [], tonight: false });
   });
 });
 
 describe('weekSummary, the evenings', () => {
   /** A message written at `iso`, alone in its session. */
-  const at = (iso: string): WeekMessage => ({ sessionId: iso, subject: 'mathematiques', startedAt: new Date(iso), at: new Date(iso) });
+  const at = (iso: string): WeekMessage => ({ sessionId: iso, startedAt: new Date(iso), at: new Date(iso) });
   const evenings = (now: string, ...messages: string[]) => {
-    const { days, tonight } = weekSummary(messages.map(at), [], new Map(), new Date(now));
+    const { days, tonight } = weekSummary(messages.map(at), new Date(now));
     return { days, tonight };
   };
 
@@ -131,43 +97,5 @@ describe('weekSummary, the evenings', () => {
   it('keeps seven days, today included: the same weekday a week ago is out', () => {
     // Thursday 8 January at 22:00 in Paris, within the seven days of hours before Thursday 15 at 21:00.
     expect(evenings('2026-01-15T20:00:00Z', '2026-01-08T21:00:00Z', '2026-01-09T08:00:00Z')).toEqual({ days: ['2026-01-09'], tonight: false });
-  });
-});
-
-describe('weekSummary, what resists', () => {
-  it('keeps a notion whose last exercise is not solved after some help, or solved with help up to an intermediate step', () => {
-    const summary = weekSummary(
-      [],
-      [exercise({ position: 10, entries: [first.id], hintLevel: 1, solved: false }), exercise({ position: 11, entries: [second.id], hintLevel: 3 })],
-      new Map(),
-      NOW,
-    );
-    expect(summary.resisting.map(({ notionId, lastSolved, lastHelp }) => [notionId, lastSolved, lastHelp])).toEqual([
-      [first.id, false, 'avec un rappel de la règle'],
-      [second.id, true, 'avec une étape faite ensemble'],
-    ]);
-  });
-
-  it('leaves out an exercise brought and left without any help: nothing says it resisted', () => {
-    expect(weekSummary([], [exercise({ hintLevel: 0, solved: false })], new Map(), NOW).resisting).toEqual([]);
-  });
-
-  it('leaves out a notion solved with a targeted hint at most', () => {
-    expect(weekSummary([], [exercise({ hintLevel: 2 })], new Map(), NOW).resisting).toEqual([]);
-  });
-
-  it('reads the last exercise of the notion: one that resisted, then one solved alone, no longer resists', () => {
-    const summary = weekSummary([], [exercise({ position: 10, solved: false, hintLevel: 4 }), exercise({ position: 12 })], new Map(), NOW);
-    expect(summary.resisting).toEqual([]);
-  });
-
-  it('names the error to watch, seen twice', () => {
-    const [notion] = weekSummary([], [exercise({ hintLevel: 1, solved: false, errorTypes: ['careless', 'careless'] })], new Map(), NOW).resisting;
-    expect(notion?.watch).toBe("les erreurs d'inattention");
-  });
-
-  it('leaves out the exercises up to the notion the student marked as understood', () => {
-    const summary = weekSummary([], [exercise({ position: 10, hintLevel: 1, solved: false })], new Map([[first.id, 10]]), NOW);
-    expect(summary.resisting).toEqual([]);
   });
 });

@@ -5,7 +5,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { bigint, boolean, index, integer, jsonb, pgEnum, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import { bigint, boolean, index, integer, jsonb, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 import { DECIDED_BY, DIAGNOSIS_ERROR_TYPES, VERDICTS } from '../../domain/diagnosis';
 import { DISTRESS_SOURCES } from '../../domain/distress';
 import { MATH_CHECKS } from '../../domain/exercise-math';
@@ -153,17 +153,4 @@ export const distressEvent = pgTable(
     uniqueIndex('distress_event_session_id_idx').on(table.sessionId),
     index('distress_event_student_id_created_at_idx').on(table.studentId, table.createdAt),
   ],
-);
-
-/** A notion the student marked as understood: the learner memory counts only its exercises after `afterPosition`. */
-export const learnerNotionReset = pgTable(
-  'learner_notion_reset',
-  {
-    studentId: text('student_id')
-      .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
-    notionId: text('notion_id').notNull(),
-    afterPosition: bigint('after_position', { mode: 'number' }).notNull(),
-  },
-  (table) => [primaryKey({ columns: [table.studentId, table.notionId] })],
 );

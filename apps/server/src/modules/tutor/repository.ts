@@ -3,7 +3,7 @@
  * `ownSession`, a clause of the query itself: another student's session is simply not found.
  */
 
-import { and, asc, count, desc, eq, exists, getTableName, gt, gte, isNotNull, isNull, lt, notExists, or, sql, sum } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gt, gte, isNotNull, isNull, lt, notExists, or, sql, sum } from 'drizzle-orm';
 import type { DistressSource } from '../../domain/distress';
 import type { MathCheck } from '../../domain/exercise-math';
 import type { SubjectFamily } from '../../domain/subjects';
@@ -12,9 +12,8 @@ import { aiCost } from '../../platform/ai/schema';
 import type { Db } from '../../platform/db/client';
 import type { ExerciseChange, ExerciseState } from './core/exercise-turn';
 import type { Hint } from './core/ladder';
-import type { PastExercise } from './core/memory';
 import type { WeekMessage } from './core/week-summary';
-import { distressEvent, exercise, learnerNotionReset, message, studySession, turnRecord } from './schema';
+import { distressEvent, exercise, message, studySession, turnRecord } from './schema';
 
 /** The tutor's last messages on an exercise that the contract lists, so as not to repeat them. */
 const KEPT_HINTS = 4;
@@ -54,14 +53,6 @@ const ownSession = (studentId: string, sessionId: string) => and(eq(studySession
 /** The session's messages after the position `after`, all of them when it is null: those a summary has not covered. */
 const afterSummary = (sessionId: string, after: number | null) =>
   and(eq(message.sessionId, sessionId), after === null ? undefined : gt(message.position, after));
-
-/**
- * The last exercise position handed out, committed or not: a reset leaves out every exercise begun
- * before it, the one a turn is still writing too. Positions only grow, where the clock can step
- * back and count an exercise forgotten, or forget a later one.
- * https://www.postgresql.org/docs/current/view-pg-sequences.html
- */
-const allocatedPosition = sql<number>`coalesce((select last_value from pg_sequences where quote_ident(schemaname) || '.' || quote_ident(sequencename) = pg_get_serial_sequence(${getTableName(exercise)}, ${exercise.position.name})), 0)`;
 
 const sessionColumns = {
   id: studySession.id,
@@ -161,73 +152,12 @@ export function createTutorRepository(db: Db) {
     },
 
     /**
-     * The student's exercises since `since`, begun then (`by: 'start'`) or with a turn then
-     * (`by: 'turn'`), after the position `after`, before the one at `before` (all of them when
-     * null), on one of `notions` (any when null), oldest first, with their notions and the error
-     * types of their turns: what the learner memory and the summary of the week read. Through the
-     * student's own sessions only.
-     */
-    async pastExercises(
-      studentId: string,
-      { since, after, by }: { since: Date; after: number; by: 'start' | 'turn' },
-      before: number | null,
-      notions: readonly string[] | null,
-    ): Promise<PastExercise[]> {
-      const entries = sql`(${exercise.sheet} -> 'entries')`;
-      const rows = await db
-        .select({
-          position: exercise.position,
-          entries: sql<string[]>`coalesce(${entries}, '[]'::jsonb)`,
-          hintLevel: exercise.hintLevel,
-          solvedAt: exercise.solvedAt,
-          // As text: an array of the enum is parsed only by a connection that saw the type when it opened.
-          errorTypes: sql<
-            string[]
-          >`coalesce((select array_agg(${turnRecord.errorType}::text) from ${turnRecord} where ${turnRecord.exerciseId} = ${exercise.id} and ${turnRecord.errorType} is not null), '{}')`,
-        })
-        .from(exercise)
-        .innerJoin(studySession, eq(studySession.id, exercise.sessionId))
-        .where(
-          and(
-            eq(studySession.studentId, studentId),
-            by === 'start'
-              ? gte(exercise.createdAt, since)
-              : exists(
-                  db
-                    .select({ one: sql`1` })
-                    .from(turnRecord)
-                    .where(and(eq(turnRecord.exerciseId, exercise.id), gte(turnRecord.createdAt, since))),
-                ),
-            gt(exercise.position, after),
-            isNotNull(exercise.sheet),
-            ...(before === null ? [] : [lt(exercise.position, before)]),
-            ...(notions === null
-              ? []
-              : [
-                  sql`${entries} ?| array[${sql.join(
-                    notions.map((notion) => sql`${notion}`),
-                    sql`, `,
-                  )}]::text[]`,
-                ]),
-          ),
-        )
-        .orderBy(asc(exercise.position));
-      return rows.map(({ position, entries: notionIds, hintLevel, solvedAt, errorTypes }) => ({
-        position,
-        entries: notionIds,
-        hintLevel,
-        solved: solvedAt !== null,
-        errorTypes,
-      }));
-    },
-
-    /**
-     * The times of the student's messages since `since`, with their session's subject and opening,
-     * grouped by session, in their order; none from the distress that closed a session on.
+     * The times of the student's messages since `since`, with their session's opening, grouped by
+     * session, in their order; none from the distress that closed a session on.
      */
     async messagesSince(studentId: string, since: Date): Promise<WeekMessage[]> {
       return db
-        .select({ sessionId: message.sessionId, subject: studySession.subject, startedAt: studySession.createdAt, at: message.createdAt })
+        .select({ sessionId: message.sessionId, startedAt: studySession.createdAt, at: message.createdAt })
         .from(message)
         .innerJoin(studySession, eq(studySession.id, message.sessionId))
         .where(
@@ -238,30 +168,6 @@ export function createTutorRepository(db: Db) {
           ),
         )
         .orderBy(asc(message.sessionId), asc(message.position));
-    },
-
-    /** The notions the student marked as understood, and the last exercise each mark covers. */
-    async notionResets(studentId: string) {
-      const rows = await db
-        .select({ notionId: learnerNotionReset.notionId, afterPosition: learnerNotionReset.afterPosition })
-        .from(learnerNotionReset)
-        .where(eq(learnerNotionReset.studentId, studentId));
-      return new Map(rows.map(({ notionId, afterPosition }) => [notionId, afterPosition]));
-    },
-
-    /** The last exercise position handed out, which a reset of the memory keeps. */
-    async allocatedPosition(): Promise<number> {
-      // last_value is a bigint, which postgres.js reads as a string.
-      const [row] = await db.execute<{ position: string }>(sql`select ${allocatedPosition} as position`);
-      return Number(row?.position ?? 0);
-    },
-
-    /** No exercise begun before now counts for this notion. */
-    async resetNotion(studentId: string, notionId: string) {
-      await db
-        .insert(learnerNotionReset)
-        .values({ studentId, notionId, afterPosition: allocatedPosition })
-        .onConflictDoUpdate({ target: [learnerNotionReset.studentId, learnerNotionReset.notionId], set: { afterPosition: allocatedPosition } });
     },
 
     /**

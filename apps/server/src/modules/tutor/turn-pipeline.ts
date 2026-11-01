@@ -76,8 +76,6 @@ interface Deps {
   logger: Logger;
   /** The programme the sheet is drawn on, as core/ takes it. */
   notions: Parameters<typeof prepareExerciseTurn>[0]['notions'];
-  /** The learner memory of the exercise's notions, from the exercises before `before`; null while it is not active. */
-  memoryOf: (learner: Student, notions: readonly string[], before: number | null) => Promise<string | null>;
 }
 
 const analysisRecord = ({ error, ...analysis }: TurnAnalysis) => (error === undefined ? analysis : null);
@@ -93,7 +91,7 @@ export const moderateInput = (
     return null;
   });
 
-export function createTurnPipeline({ repository, ai, moderation, logger, notions, memoryOf }: Deps) {
+export function createTurnPipeline({ repository, ai, moderation, logger, notions }: Deps) {
   const fixed = { model: ai.model, promptVersion: TURN_PROMPT_VERSION, newExercise: false, findings: [] };
   const fixedReply = (sent: Sent) => ({ ...sent, tutorText: DISTRESS_REPLY, replay: null });
 
@@ -212,8 +210,6 @@ export function createTurnPipeline({ repository, ai, moderation, logger, notions
       },
     );
     const { exercise, diagnosis, contract, change, hintLevel } = exerciseTurn;
-    // From the exercises before this one: the same block at every turn of it, in the cache.
-    const memory = exercise?.sheet ? await memoryOf(learner, exercise.sheet.entries, exerciseTurn.isNew ? null : (current?.position ?? null)) : null;
 
     const system = systemPrompt(learner.level);
     const instruction = contract ?? turnInstruction(analysis);
@@ -230,7 +226,7 @@ export function createTurnPipeline({ repository, ai, moderation, logger, notions
       assembleChatPrompt({
         systemPrompt: system,
         studentBlock: studentBlock(learner.name),
-        exerciseBlock: exercise?.sheet ? exerciseBlock(exercise.sheet, memory) : null,
+        exerciseBlock: exercise?.sheet ? exerciseBlock(exercise.sheet, null) : null,
         conversationSummary: session.summary,
         history: window,
         subjectBlock: subjectBlock(subject),

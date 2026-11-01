@@ -82,27 +82,16 @@ const yesterday = [4, 6, 26].map((offset) => parisDay(ago(1, offset)));
 await mathsSession(asLea, 1, [4, 6, 26]);
 
 describe('the summary of the week', () => {
-  it('gives the student the subjects, the time spent and what resists, of the last seven days only', async () => {
+  it('gives the student the time spent and the evenings, of the last seven days only', async () => {
     const res = await summaryOf(asLea);
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({
       minutes: 5,
       sessions: 1,
-      subjects: [{ subject: 'mathematiques', minutes: 5 }],
-      resisting: [{ notionId: notion.id, label: notion.text, worked: 1, lastSolved: false, lastHelp: 'avec un rappel de la règle', watch: null }],
       // The days in Paris the student wrote to Tom: yesterday's, and not the one eight days ago.
       days: [...new Set(yesterday)],
       tonight: false,
     });
-  });
-
-  it('keeps an exercise begun before the week and worked again in it', async () => {
-    const zoe = await api.student(guardian, { name: 'Zoé', level: 'quatrieme', birthMonth: birthMonthAged(13) });
-    const asZoe = await api.pair(guardian, zoe.id);
-    const sessionId = await mathsSession(asZoe, 8, [0]);
-    const begun = await repository.currentExercise(zoe.id, sessionId);
-    await at(sessionId, ago(1), () => repository.saveTurn(sessionId, turn({ exerciseId: begun?.id ?? null })));
-    expect(await (await summaryOf(asZoe)).json()).toMatchObject({ sessions: 1, resisting: [{ notionId: notion.id, worked: 1 }] });
   });
 
   it('counts no time past a distress, whose messages all get the fixed reply', async () => {
@@ -114,7 +103,7 @@ describe('the summary of the week', () => {
     for (const offset of [10, 15, 20]) {
       await at(sessionId, ago(1, offset), () => repository.saveTurn(sessionId, turn({ exchange: fixed, record: record({ outcome: 'closed' }) })));
     }
-    expect(await (await summaryOf(asMax)).json()).toMatchObject({ minutes: 5, subjects: [{ subject: 'mathematiques', minutes: 5 }] });
+    expect(await (await summaryOf(asMax)).json()).toMatchObject({ minutes: 5 });
   });
 
   it('gives their guardian the same summary', async () => {
@@ -132,7 +121,7 @@ describe('the summary of the week', () => {
   });
 
   it('gives a student with no session this week an empty summary', async () => {
-    expect(await (await summaryOf(asNoe)).json()).toEqual({ minutes: 0, sessions: 0, subjects: [], resisting: [], days: [], tonight: false });
+    expect(await (await summaryOf(asNoe)).json()).toEqual({ minutes: 0, sessions: 0, days: [], tonight: false });
   });
 
   it('refuses another guardian, a student asking for another, and a guardian asking as a student', async () => {

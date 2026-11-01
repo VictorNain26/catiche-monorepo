@@ -7,7 +7,7 @@ import type { Auth } from '../../platform/auth/auth';
 import type { Db } from '../../platform/db/client';
 import { studentDirectory } from '../household';
 import { createTutorRepository } from './repository';
-import { memoryRoutes, summaryRoutes, tutorRoutes } from './routes';
+import { summaryRoutes, tutorRoutes } from './routes';
 import { createTutorService } from './service';
 
 export type { TurnStep } from './turn-pipeline';
@@ -32,7 +32,7 @@ export function tutorModule({ db, auth, ai, moderation, logger, notions, backgro
     notions,
     background,
   });
-  return { routes: tutorRoutes({ auth, service, logger }), memory: memoryRoutes({ auth, service }), summary: summaryRoutes({ auth, service }) };
+  return { routes: tutorRoutes({ auth, service, logger }), summary: summaryRoutes({ auth, service }) };
 }
 
 /** What a student's AI calls cost, in micro-euros, for the harness: a fresh student plays each conversation. */

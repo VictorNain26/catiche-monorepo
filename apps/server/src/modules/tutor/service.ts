@@ -7,19 +7,17 @@
 
 import type { Logger } from 'pino';
 import { detectDistress } from '../../domain/distress';
-import type { MemoryAnswer } from '../../domain/memory-consent';
 import { DAILY_BUDGET_MICRO_EUR } from '../../domain/quota';
-import { QUOTA_RESET_HOUR, quotaDayStart, schoolYearStart } from '../../domain/school-calendar';
+import { QUOTA_RESET_HOUR, quotaDayStart } from '../../domain/school-calendar';
 import type { Ai } from '../../platform/ai/client';
 import type { Moderation } from '../../platform/ai/moderation';
 import { Problem } from '../../platform/http/problem';
-import { notionText, type NotionsFor } from '../../referential';
+import type { NotionsFor } from '../../referential';
 import type { StudentDirectory } from '../household';
-import { learnerMemoryBlock, notionMemories, notionView } from './core/memory';
 import { turnDeadlineMs } from './core/turn-deadline';
 import { weekStart, weekSummary } from './core/week-summary';
 import type { TutorRepository } from './repository';
-import { createTurnPipeline, moderateInput, type OpenTurn, type Student, type TurnInput, type TurnReply, type TurnStep } from './turn-pipeline';
+import { createTurnPipeline, moderateInput, type OpenTurn, type TurnInput, type TurnReply, type TurnStep } from './turn-pipeline';
 
 interface Deps {
   repository: TutorRepository;
@@ -40,65 +38,15 @@ export function createTutorService({ repository, students, ai, moderation, logge
     return profile;
   };
 
-  /** What the student's exercises before `before` say of `notions` (of every notion when null): what Tom reads, what the student sees. */
-  async function memoriesOf(learner: Student, notions: readonly string[] | null, before: number | null) {
-    const [past, resets] = await Promise.all([
-      repository.pastExercises(learner.id, { since: schoolYearStart(new Date()), after: learner.memory.resetAfter, by: 'start' }, before, notions),
-      repository.notionResets(learner.id),
-    ]);
-    return notionMemories(past, resets);
-  }
-
   /** The student's summary of the week: the same for them and for their guardian. */
   async function summaryOf(studentId: string) {
     const now = new Date();
-    const since = weekStart(now);
-    const [messages, exercises, resets] = await Promise.all([
-      repository.messagesSince(studentId, since),
-      repository.pastExercises(studentId, { since, after: 0, by: 'turn' }, null, null),
-      repository.notionResets(studentId),
-    ]);
-    return weekSummary(messages, exercises, resets, now);
+    return weekSummary(await repository.messagesSince(studentId, weekStart(now)), now);
   }
 
-  const turn = createTurnPipeline({
-    repository,
-    ai,
-    moderation,
-    logger,
-    notions,
-    async memoryOf(learner, notions, before) {
-      if (learner.memory.state !== 'active' || notions.length === 0) return null;
-      return learnerMemoryBlock(notions, await memoriesOf(learner, notions, before));
-    },
-  });
+  const turn = createTurnPipeline({ repository, ai, moderation, logger, notions });
 
   return {
-    /** What Tom keeps of the student, notion by notion, and whether they may say yes or no to it. */
-    async memory(userId: string) {
-      const learner = await student(userId);
-      const { state, mayAnswer } = learner.memory;
-      return { state, mayAnswer, notions: state === 'active' ? (await memoriesOf(learner, null, null)).map(notionView) : [] };
-    },
-
-    async answerMemory(userId: string, answer: MemoryAnswer) {
-      const learner = await student(userId);
-      if (!learner.memory.mayAnswer) throw new Problem('FORBIDDEN');
-      // Accepted or declined, the memory starts afresh with the answer: no exercise begun before counts.
-      await students.answerMemory(learner.id, answer, await repository.allocatedPosition());
-    },
-
-    async resetMemory(userId: string) {
-      await students.resetMemory((await student(userId)).id, await repository.allocatedPosition());
-    },
-
-    /** The student understood a notion: its earlier exercises no longer count. */
-    async resetNotion(userId: string, notionId: string) {
-      const learner = await student(userId);
-      if (!notionText(notionId)) throw new Problem('NOT_FOUND');
-      await repository.resetNotion(learner.id, notionId);
-    },
-
     /** The signed-in student's summary of the week. */
     async summary(userId: string) {
       return summaryOf((await student(userId)).id);

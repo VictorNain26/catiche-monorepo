@@ -1,6 +1,6 @@
 /**
  * A student's age, counted one way for all: the bounds of admission, which the web shares
- * (`@repo/server/student-age`), and the memory consent (`memory-consent.ts`). This file imports
+ * (`@repo/server/student-age`). This file imports
  * nothing, so that the web's bundle takes it whole.
  */
 
