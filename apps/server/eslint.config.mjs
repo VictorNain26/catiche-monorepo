@@ -138,6 +138,11 @@ export default [
             "BinaryExpression[operator='-'][right.type='Identifier'][right.name=/^[a-z]/] > CallExpression.left[callee.object.name='Date'][callee.property.name='now']",
           message: 'Une durée se mesure sur une horloge monotone : performance.now(), pas Date.now().',
         },
+        {
+          // /v1/conversations stores the conversation on Mistral's side: outside zero data retention.
+          selector: "MemberExpression[property.name='conversation']",
+          message: 'mistral.conversation() est hors zéro rétention : appeler le modèle par mistral() (docs/tuteur.md § 2).',
+        },
       ],
     },
   },
