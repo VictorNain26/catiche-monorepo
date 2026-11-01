@@ -5,13 +5,14 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { bigint, boolean, index, integer, jsonb, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import { bigint, boolean, date, index, integer, jsonb, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 import { DECIDED_BY, DIAGNOSIS_ERROR_TYPES, VERDICTS } from '../../domain/diagnosis';
 import { DISTRESS_SOURCES } from '../../domain/distress';
 import { MATH_CHECKS } from '../../domain/exercise-math';
 import { REASONING_EFFORTS } from '../../domain/reasoning-effort';
-import { SUBJECT_FAMILIES } from '../../domain/subjects';
+import { EVENING_SUBJECTS, SUBJECT_FAMILIES } from '../../domain/subjects';
 import { user } from '../../platform/auth/schema';
+import { EVENING_PHASES, HOMEWORK_STATES } from './core/evening';
 import type { Hint } from './core/ladder';
 import type { ExerciseSheet } from './core/sheet';
 
@@ -135,6 +136,65 @@ export const turnRecord = pgTable(
     // The learner memory reads the error types of each exercise.
     index('turn_record_exercise_id_idx').on(table.exerciseId),
   ],
+);
+
+export const eveningPhase = pgEnum('evening_phase', EVENING_PHASES);
+export const homeworkState = pgEnum('homework_state', HOMEWORK_STATES);
+export const schoolSubject = pgEnum('school_subject', EVENING_SUBJECTS);
+
+/** A student's evening of homework, one per day (`eveningDay`), and the step of it Tom is at. */
+export const evening = pgTable(
+  'evening',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    studentId: text('student_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    day: date('day', { mode: 'string' }).notNull(),
+    phase: eveningPhase('phase').notNull().default('note'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex('evening_student_id_day_idx').on(table.studentId, table.day)],
+);
+
+/**
+ * A homework the student noted, in their words. Planned for an evening at its rank in that
+ * evening's order; unplanned, both null. It outlives its evening (`SET NULL`): what is left to do
+ * comes back the next evening.
+ */
+export const homework = pgTable(
+  'homework',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    studentId: text('student_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    subject: schoolSubject('subject').notNull(),
+    task: text('task').notNull(),
+    /** Null until the student says when it is due. */
+    dueOn: date('due_on', { mode: 'string' }),
+    eveningId: uuid('evening_id').references(() => evening.id, { onDelete: 'set null' }),
+    rank: integer('rank'),
+    state: homeworkState('state').notNull().default('todo'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('homework_student_id_state_idx').on(table.studentId, table.state), index('homework_evening_id_idx').on(table.eveningId)],
+);
+
+/** A test the student announced, once per subject and day. */
+export const upcomingTest = pgTable(
+  'upcoming_test',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    studentId: text('student_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    subject: schoolSubject('subject').notNull(),
+    day: date('day', { mode: 'string' }).notNull(),
+    topic: text('topic'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex('upcoming_test_student_id_subject_day_idx').on(table.studentId, table.subject, table.day)],
 );
 
 export const distressEvent = pgTable(

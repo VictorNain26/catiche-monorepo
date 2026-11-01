@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { quotaDayStart, schoolYearOf } from './school-calendar';
+import { eveningDay, quotaDayStart, schoolYearOf } from './school-calendar';
 
 const start = (iso: string) => quotaDayStart(new Date(iso)).toISOString();
 
@@ -29,6 +29,16 @@ describe('quotaDayStart', () => {
     expect(start('2026-10-25T01:30:00Z')).toBe('2026-10-24T02:00:00.000Z');
     // The clocks go forward on 28 March 2027.
     expect(start('2027-03-28T12:00:00Z')).toBe('2027-03-28T02:00:00.000Z');
+  });
+});
+
+describe('eveningDay', () => {
+  it('names the evening after its day in Paris, an evening past midnight still the day before until 4 a.m.', () => {
+    // 1:00 a.m. then 5:00 a.m. in Paris on 8 October, summer time.
+    expect(eveningDay(new Date('2026-10-07T23:00:00Z'))).toBe('2026-10-07');
+    expect(eveningDay(new Date('2026-10-08T03:00:00Z'))).toBe('2026-10-08');
+    // 6 p.m. in Paris, winter time.
+    expect(eveningDay(new Date('2026-12-15T17:00:00Z'))).toBe('2026-12-15');
   });
 });
 
