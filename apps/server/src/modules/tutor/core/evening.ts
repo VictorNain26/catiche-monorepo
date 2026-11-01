@@ -13,7 +13,7 @@ export type EveningPhase = (typeof EVENING_PHASES)[number];
 export const HOMEWORK_STATES = ['todo', 'done'] as const;
 export type HomeworkState = (typeof HOMEWORK_STATES)[number];
 
-export const TOOL_NAMES = ['note_homework', 'update_homework', 'reorder', 'note_test', 'finish_step', 'programme', 'calculate'] as const;
+const TOOL_NAMES = ['note_homework', 'update_homework', 'reorder', 'note_test', 'finish_step', 'programme', 'calculate'] as const;
 export type ToolName = (typeof TOOL_NAMES)[number];
 
 /**

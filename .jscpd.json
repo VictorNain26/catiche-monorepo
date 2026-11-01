@@ -5,5 +5,5 @@
   "minTokens": 50,
   "ignore": ["**/node_modules/**", "**/dist/**", "**/routeTree.gen.ts"],
   "reporters": ["console"],
-  "threshold": 0.7
+  "threshold": 0.5
 }

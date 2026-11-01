@@ -11,8 +11,8 @@ import { renderTurns } from './eval';
 import { lookup } from './eval/items';
 import { scriptedStudent, type Student } from './eval/student';
 import { compareVariants, playConversation, removeEvalAccounts, signInGuardian, type Harness } from './evaluate';
-import { studentCost, turnRecords } from './modules/tutor';
-import { analysis } from './modules/tutor/testing';
+import { DISCLOSURE } from './modules/tutor/core/instructions';
+import { studentCost, turnOutcomes } from './modules/tutor';
 import { pricing } from './platform/ai/cost';
 import { user } from './platform/auth/schema';
 import { testApp } from './testing/app';
@@ -20,7 +20,7 @@ import { testDatabase } from './testing/database';
 
 const { db } = await testDatabase();
 const { api, mistral, tasks } = testApp(db);
-const harness: Harness = { api, records: turnRecords(db), cost: studentCost(db), settled: tasks.settled };
+const harness: Harness = { api, outcomes: turnOutcomes(db), cost: studentCost(db), settled: tasks.settled };
 
 beforeEach(() => {
   mistral.chat.length = 0;
@@ -38,27 +38,27 @@ describe('playConversation', () => {
   it('plays each turn of a scenario as a fresh student, with what the student read and the record of the turn', async () => {
     const guardian = await signInGuardian(harness);
     const { item, scenario, exercise, level, student } = written('S2');
-    mistral.chat.push(analysis(), { text: 'Que fais-tu du + 5 ?' });
+    mistral.chat.push({ text: 'Je suis Tom, une intelligence artificielle. Que fais-tu du + 5 ?' });
 
     const { transcript, tutorCostMicroEur } = await playConversation(harness, guardian, item, level, student);
     expect(transcript).toMatchObject({ scenarioId: 'S2', exerciseId: 'M1', repetition: 1 });
     expect(transcript.turns).toHaveLength(1);
     expect(transcript.turns[0]).toMatchObject({
       student: renderTurns(scenario, exercise)[0]?.text,
-      text: 'Que fais-tu du + 5 ?',
+      text: 'Je suis Tom, une intelligence artificielle. Que fais-tu du + 5 ?',
       record: { outcome: 'passed' },
     });
     expect(transcript.turns[0]?.error).toBeUndefined();
-    // The analysis and the reply, billed to the conversation's own student.
-    expect(tutorCostMicroEur).toBe(2 * pricing('mistral-small-2603', false)({ inputTokens: 1000, cachedInputTokens: 0, outputTokens: 100 }));
+    // Tom's one step, billed to the conversation's own student.
+    expect(tutorCostMicroEur).toBe(pricing('mistral-small-2603', false)({ inputTokens: 1000, cachedInputTokens: 0, outputTokens: 100 }));
   });
 
   it('records the fixed reply to a distress', async () => {
     const guardian = await signInGuardian(harness);
     const { item, level, student } = written('S5');
-    // The calls in their order: the first turn, the session's title after it, the second turn; the
-    // last message says the distress in words the rules catch (domain/distress.ts), no model asked.
-    mistral.chat.push(analysis(), { text: 'Que fais-tu du + 5 ?' }, { text: 'Équations' }, analysis(), { text: 'Tu as déjà trouvé une étape.' });
+    // One reply a turn before the last, whose message says the distress in words the rules catch
+    // (domain/distress.ts), no model asked.
+    mistral.chat.push({ text: 'Que fais-tu du + 5 ?' }, { text: 'Tu as déjà trouvé une étape.' });
 
     const { transcript } = await playConversation(harness, guardian, item, level, student);
     expect(transcript.turns.at(-1)).toMatchObject({ text: DISTRESS_REPLY, record: { outcome: 'distress' } });
@@ -67,7 +67,7 @@ describe('playConversation', () => {
   it('stops at a turn the route refuses, with its error', async () => {
     const guardian = await signInGuardian(harness);
     const { item, level, student } = written('S3');
-    mistral.chat.push(analysis(), { status: 500 });
+    mistral.chat.push({ status: 500 });
 
     const { transcript } = await playConversation(harness, guardian, item, level, student);
     expect(transcript.turns).toHaveLength(1);
@@ -86,15 +86,16 @@ describe('playConversation', () => {
       },
       usage: () => ({ inputTokens: 0, cachedInputTokens: 0, outputTokens: 0 }),
     };
-    mistral.chat.push(analysis(), { text: "C'est pour quand ?" }, { text: 'Soirée' }, analysis(), { text: 'Commence par les maths.' });
+    mistral.chat.push({ text: "C'est pour quand ?" }, { text: 'Commence par les maths.' });
 
     const { transcript } = await playConversation(harness, guardian, { scenarioId: 'E1', exerciseId: null, repetition: 1 }, 'cinquieme', student);
     expect(transcript).toMatchObject({ scenarioId: 'E1', exerciseId: null });
+    const first = `${DISCLOSURE}\n\nC'est pour quand ?`;
     expect(transcript.turns.map(({ student: said, text }) => [said, text])).toEqual([
-      ["j'ai maths et histoire ce soir", "C'est pour quand ?"],
+      ["j'ai maths et histoire ce soir", first],
       ['pour jeudi', 'Commence par les maths.'],
     ]);
-    expect(heard).toEqual(['', "C'est pour quand ?", 'Commence par les maths.']);
+    expect(heard).toEqual(['', first, 'Commence par les maths.']);
   });
 
   it('cuts the conversation short when the simulated student fails, with its error', async () => {

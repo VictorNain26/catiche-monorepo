@@ -7,7 +7,7 @@ import mathematiquesAttendus3e from './texts/mathematiques-attendus-3e-2019.json
 import francaisAttendus4e from './texts/francais-attendus-4e-2019.json' with { type: 'json' };
 import francaisAttendus3e from './texts/francais-attendus-3e-2019.json' with { type: 'json' };
 import { SCHOOL_LEVELS, type SchoolLevel } from '../domain/levels';
-import type { SubjectFamily } from '../domain/subjects';
+import type { SubjectSlug } from '../domain/subjects';
 import { textFileSchema, type Entry, type TextFile } from './schema';
 import { PROGRAMME_SOURCES, type ProgrammeSource } from './sources';
 
@@ -58,7 +58,7 @@ export interface Notions {
  * The programme of the class and of the later college classes for a subject, or null without a
  * referential: a subject other than mathematics and French.
  */
-export function notionsFor(level: SchoolLevel, subject: SubjectFamily | undefined, schoolYear: number): Notions | null {
+export function notionsFor(level: SchoolLevel, subject: SubjectSlug | undefined, schoolYear: number): Notions | null {
   if (subject !== 'mathematiques' && subject !== 'francais') return null;
   const entries = programmeFor(level, subject, schoolYear)?.entries ?? [];
   if (entries.length === 0) return null;
@@ -66,7 +66,7 @@ export function notionsFor(level: SchoolLevel, subject: SubjectFamily | undefine
   return { entries, later };
 }
 
-/** Where the tutor finds a class's programme: `notionsFor`, or nothing for the run without it (src/evaluate.ts). */
+/** Where Tom finds a class's programme: `notionsFor`, or nothing for the run without it (src/evaluate.ts). */
 export type NotionsFor = typeof notionsFor;
 
 const entryById = new Map(programmes.flatMap(({ entries }) => entries.map((entry) => [entry.id, entry] as const)));

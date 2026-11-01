@@ -79,7 +79,7 @@ for (const signal of ['SIGTERM', 'SIGINT'] as const) {
     void shutdown({
       lifecycle,
       stopServer: () => server.stop(),
-      // The sweep's pass under way, the background tasks (emails, a session's title and summary),
+      // The sweep's pass under way, the background tasks (emails),
       // then the database they use, and the traces left to send.
       close: [sweep.stop, tasks.settled, database.close, ...(tracing ? [tracing.shutdown] : [])],
       logger,

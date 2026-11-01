@@ -7,6 +7,8 @@
 import { LEVEL_SHORT_LABELS, type SchoolLevel } from '../../../domain/levels';
 import type { Entry, NotionsFor } from '../../../referential';
 
+export type { NotionsFor };
+
 const themeOf = ({ domain, subtheme }: Entry) => (subtheme ? `${domain} › ${subtheme}` : domain);
 
 interface Lookup {
