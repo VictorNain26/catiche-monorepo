@@ -1,15 +1,19 @@
 /**
  * Mistral calls that are not streamed, through the AI SDK and its Mistral provider: plain text,
- * and output validated by a Zod schema (Mistral's `json_schema`, strict). Each call is written to
- * `ai_cost` for its student, an answer outside the schema too: it was billed all the same.
+ * output validated by a Zod schema (Mistral's `json_schema`, strict), and a loop of the model and
+ * its tools. Each call, each step of a loop, is written to `ai_cost` for its student, an answer
+ * outside the schema too: it was billed all the same.
  */
 
 import { createMistral, type MistralLanguageModelChatOptions } from '@ai-sdk/mistral';
 import {
   generateText as generate,
+  isStepCount,
   NoObjectGeneratedError,
   Output,
+  ToolLoopAgent,
   TypeValidationError,
+  type ToolSet,
   type LanguageModelUsage,
   type AssistantModelMessage,
   type ModelMessage,
@@ -45,6 +49,30 @@ export interface TextCall {
   timeoutMs?: number;
 }
 
+/**
+ * A loop of the model and its tools (`ToolLoopAgent` of the AI SDK): the model calls the tools it
+ * is offered, reads what they answer, and ends on words. Its last step offers no tool, so that no
+ * limit of steps ends it without a reply.
+ */
+export interface AgentCall<TOOLS extends ToolSet> {
+  operation: string;
+  owner: Owner;
+  instructions: string;
+  messages: ModelMessage[];
+  tools: TOOLS;
+  maxSteps: number;
+  /** The tools the model may call at a step, read again at each: a tool may change what the next allows. */
+  activeTools: (step: number) => (keyof TOOLS & string)[] | Promise<(keyof TOOLS & string)[]>;
+  promptCacheKey?: string;
+}
+
+/** What the loop ends on: the reply, the reasoning behind it, and what each tool answered on the way. */
+export interface AgentReply {
+  text: string;
+  reasoning: string | null;
+  toolResults: { toolName: string; output: unknown }[];
+}
+
 interface StructuredCall<T> extends TextCall {
   schema: z.ZodType<T>;
   schemaName: string;
@@ -62,6 +90,8 @@ export interface Ai {
   /** The text, and the response messages as the model produced them, reasoning included, for a later turn to replay. */
   generateText: (call: TextCall) => Promise<{ text: string; responseMessages: ResponseMessage[] }>;
   generateStructured: <T>(call: StructuredCall<T>) => Promise<{ object: T; usage: Usage }>;
+  /** Reasons at each step; each step billed once done, those before a step that fails too. */
+  runAgent: <TOOLS extends ToolSet>(call: AgentCall<TOOLS>) => Promise<AgentReply>;
 }
 
 function usageOf(usage: LanguageModelUsage | undefined): Usage {
@@ -88,7 +118,7 @@ export function createAi({ mistral, db, logger }: { mistral: MistralConfig; db: 
   const costOf = pricing(mistral.model, mistral.euEndpoint);
 
   /** A failed write is logged, never thrown: the student already has the answer. */
-  async function record(call: TextCall, usage: Usage): Promise<void> {
+  async function record(call: Pick<TextCall, 'operation' | 'owner'>, usage: Usage): Promise<void> {
     if (!call.owner) return;
     try {
       await insertCost(db, {
@@ -134,6 +164,39 @@ export function createAi({ mistral, db, logger }: { mistral: MistralConfig; db: 
       const result = await generate({ ...settings(call, AbortSignal.timeout(deadline(call))), messages: call.messages });
       await record(call, usageOf(result.usage));
       return { text: result.text, responseMessages: result.responseMessages };
+    },
+
+    async runAgent<TOOLS extends ToolSet>(call: AgentCall<TOOLS>): Promise<AgentReply> {
+      const last = call.maxSteps - 1;
+      // Over the plain ToolSet: the tools' types serve the caller, the loop only runs them.
+      const agent = new ToolLoopAgent<never, ToolSet>({
+        model,
+        instructions: call.instructions,
+        tools: call.tools,
+        // The writes of a step run in the order the model wrote them.
+        toolCallConcurrency: 1,
+        stopWhen: isStepCount(call.maxSteps),
+        prepareStep: async ({ stepNumber }) => ({ activeTools: stepNumber >= last ? [] : await call.activeTools(stepNumber) }),
+        maxRetries: mistral.retryAttempts,
+        // Traced without any text: no instruction, no student's words, no tool's input or output, no reply.
+        telemetry: { recordInputs: false, recordOutputs: false, functionId: call.operation },
+        providerOptions: {
+          mistral: {
+            reasoningEffort: 'high',
+            ...(call.promptCacheKey === undefined ? {} : { promptCacheKey: call.promptCacheKey }),
+          } satisfies MistralLanguageModelChatOptions,
+        },
+      });
+      const result = await agent.generate({
+        messages: call.messages,
+        timeout: { stepMs: mistral.timeoutMs, totalMs: call.maxSteps * mistral.timeoutMs },
+        onStepEnd: (step) => record(call, usageOf(step.usage)),
+      });
+      return {
+        text: result.text,
+        reasoning: result.finalStep.reasoningText ?? null,
+        toolResults: result.steps.flatMap((step) => step.toolResults.map(({ toolName, output }) => ({ toolName, output: output as unknown }))),
+      };
     },
 
     async generateStructured<T>(call: StructuredCall<T>) {

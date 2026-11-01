@@ -18,7 +18,16 @@ interface WireUsage {
   num_cached_tokens: number;
 }
 
-type ChatReply = { text: string; usage?: Partial<WireUsage> } | { json: unknown; usage?: Partial<WireUsage> } | { status: number } | 'hang';
+/** A tool the model calls, by its name, with its input. */
+interface ToolCall {
+  name: string;
+  input: unknown;
+}
+
+/** An answer: its text, or the tools it calls; its reasoning before, as a reasoning model sends it. */
+type Answer = ({ text: string } | { json: unknown } | { toolCalls: ToolCall[] }) & { reasoning?: string; usage?: Partial<WireUsage> };
+
+type ChatReply = Answer | { status: number } | 'hang';
 
 type ModerationReply = { flagged?: string[] } | { status: number } | 'hang';
 
@@ -33,8 +42,10 @@ function error(status: number, message: string): Response {
   return Response.json({ object: 'error', message }, { status });
 }
 
-function completion(reply: { text: string; usage?: Partial<WireUsage> } | { json: unknown; usage?: Partial<WireUsage> }): Response {
+function completion(reply: Answer): Response {
   const usage = { ...DEFAULT_USAGE, ...reply.usage };
+  const text = 'text' in reply ? reply.text : 'json' in reply ? JSON.stringify(reply.json) : '';
+  const toolCalls = 'toolCalls' in reply ? reply.toolCalls : [];
   return Response.json({
     id: crypto.randomUUID(),
     object: 'chat.completion',
@@ -43,8 +54,25 @@ function completion(reply: { text: string; usage?: Partial<WireUsage> } | { json
     choices: [
       {
         index: 0,
-        message: { role: 'assistant', content: 'text' in reply ? reply.text : JSON.stringify(reply.json) },
-        finish_reason: 'stop',
+        message: {
+          role: 'assistant',
+          // Mistral's shape for a reasoning model: the thinking, then the text, in parts.
+          content:
+            reply.reasoning === undefined
+              ? text
+              : [
+                  { type: 'thinking', thinking: [{ type: 'text', text: reply.reasoning }] },
+                  { type: 'text', text },
+                ],
+          ...(toolCalls.length > 0 && {
+            tool_calls: toolCalls.map(({ name, input }) => ({
+              id: crypto.randomUUID().slice(0, 9),
+              type: 'function',
+              function: { name, arguments: JSON.stringify(input) },
+            })),
+          }),
+        },
+        finish_reason: toolCalls.length > 0 ? 'tool_calls' : 'stop',
       },
     ],
     usage: { ...usage, total_tokens: usage.prompt_tokens + usage.completion_tokens },

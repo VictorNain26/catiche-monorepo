@@ -10,7 +10,8 @@ import { z } from 'zod';
 import { testDatabase } from '../../testing/database';
 import { fakeMistral } from '../../testing/mistral';
 import { user } from '../auth/schema';
-import { createAi, type TextCall } from './client';
+import { tool } from 'ai';
+import { createAi, type AgentCall, type TextCall } from './client';
 import { aiCost } from './schema';
 
 const { db } = await testDatabase();
@@ -135,6 +136,82 @@ describe('generateText', () => {
     mistral.chat.push({ status: 400 });
     expect(await failure(ai.generateText(call()))).toBeInstanceOf(Error);
     expect(await costs()).toEqual([]);
+  });
+});
+
+describe('runAgent', () => {
+  const ai = createAi({ mistral: mistral.config(), db, logger });
+  const noted: unknown[] = [];
+  beforeEach(() => {
+    noted.length = 0;
+  });
+  const tools = {
+    note: tool({
+      description: 'Note a homework.',
+      inputSchema: z.object({ task: z.string() }),
+      execute: ({ task }) => {
+        noted.push(task);
+        return `noté : ${task}`;
+      },
+    }),
+    calculate: tool({ description: 'Calculate.', inputSchema: z.object({ expression: z.string() }), execute: () => '4' }),
+  };
+  const agentCall = (overrides: Partial<AgentCall<typeof tools>> = {}): AgentCall<typeof tools> => ({
+    operation: 'tom',
+    owner: { studentId: STUDENT },
+    instructions: 'Tu es Tom.',
+    messages: [{ role: 'user', content: 'J’ai les exercices 3 et 4' }],
+    tools,
+    maxSteps: 3,
+    activeTools: () => ['note'],
+    ...overrides,
+  });
+  const sentTools = (index: number) => ((sentBody(index)['tools'] ?? []) as { function: { name: string } }[]).map((t) => t.function.name);
+
+  it('runs the tools the model calls, then answers in words, each step billed under the operation', async () => {
+    mistral.chat.push(
+      { toolCalls: [{ name: 'note', input: { task: 'exercices 3 et 4' } }] },
+      { text: 'Pour quand ?', reasoning: 'Il manque la date.' },
+    );
+    const reply = await ai.runAgent(agentCall());
+    expect(reply).toMatchObject({ text: 'Pour quand ?', reasoning: 'Il manque la date.' });
+    expect(noted).toEqual(['exercices 3 et 4']);
+    expect(await costs()).toMatchObject([{ operation: 'tom' }, { operation: 'tom' }]);
+    // The second step reads what the tool answered.
+    expect(JSON.stringify(sentBody(1)['messages'])).toContain('noté : exercices 3 et 4');
+  });
+
+  it('reasons, with the instructions first and the cache key', async () => {
+    mistral.chat.push({ text: 'Bonsoir' });
+    await ai.runAgent(agentCall({ promptCacheKey: 'session-1' }));
+    expect(sentBody()).toMatchObject({
+      messages: [{ role: 'system', content: 'Tu es Tom.' }, { role: 'user' }],
+      reasoning_effort: 'high',
+      prompt_cache_key: 'session-1',
+    });
+  });
+
+  it('offers at each step the tools it allows, and none at the last, which answers in words', async () => {
+    mistral.chat.push(
+      { toolCalls: [{ name: 'note', input: { task: 'a' } }] },
+      { toolCalls: [{ name: 'calculate', input: { expression: '2+2' } }] },
+      { text: 'Voilà.' },
+    );
+    const reply = await ai.runAgent(agentCall({ activeTools: (step) => (step === 0 ? ['note'] : ['note', 'calculate']) }));
+    expect([sentTools(0), sentTools(1), sentTools(2)]).toEqual([['note'], ['note', 'calculate'], []]);
+    expect(reply.text).toBe('Voilà.');
+  });
+
+  it('gives what each tool answered, for the turn to check the reply against', async () => {
+    mistral.chat.push({ toolCalls: [{ name: 'calculate', input: { expression: '2+2' } }] }, { text: 'Et ensuite ?' });
+    const reply = await ai.runAgent(agentCall({ activeTools: () => ['calculate'] }));
+    expect(reply.toolResults).toEqual([{ toolName: 'calculate', output: '4' }]);
+  });
+
+  it('bills the steps done when a later one fails', async () => {
+    mistral.chat.push({ toolCalls: [{ name: 'note', input: { task: 'a' } }] }, { status: 500 });
+    expect(await failure(ai.runAgent(agentCall()))).toBeInstanceOf(Error);
+    expect(await costs()).toHaveLength(1);
   });
 });
 
