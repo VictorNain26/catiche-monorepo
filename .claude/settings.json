@@ -40,5 +40,18 @@
       "bun run --cwd apps/server db:migrate",
       "bun run --cwd apps/server test"
     ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -e .stop_hook_active >/dev/null && exit 0; cd \"$CLAUDE_PROJECT_DIR\" && { bun run typecheck && bun run lint; } 1>&2 || exit 2",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
   }
 }
