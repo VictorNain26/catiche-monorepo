@@ -25,7 +25,7 @@
     "better-auth": "^1.7.12",
     "bowser": "2.14.1",
     "hono": "^4.13.14",
-    "katex": "^0.19.0",
+    "katex": "^0.19.1",
     "lucide-react": "^1.47.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
