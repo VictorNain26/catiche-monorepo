@@ -96,7 +96,7 @@
         "better-auth": "^1.7.14",
         "bowser": "2.14.1",
         "hono": "^4.13.14",
-        "katex": "^0.19.0",
+        "katex": "^0.19.1",
         "lucide-react": "^1.47.0",
         "react": "^19.3.0",
         "react-dom": "^19.3.0",
@@ -190,7 +190,7 @@
     "@tailwindcss/node": {
       "source-map-js": "^1.2.2",
     },
-    "katex": "^0.19.0",
+    "katex": "^0.19.1",
     "postcss": {
       "source-map-js": "^1.2.2",
     },
@@ -1761,7 +1761,7 @@
 
     "jsonpointer": ["jsonpointer@5.0.1", "", {}, "sha512-p/nXbhSEcu3pZRdkW1OfJhpsVtW1gd4Wa1fnQc9YLiTfAjn0312eMKimbdIQzuZl9aa9xUGaRlP9T/CJE/ditQ=="],
 
-    "katex": ["katex@0.19.0", "", { "dependencies": { "commander": "^15.0.0" }, "bin": { "katex": "cli.js" } }, "sha512-v6Tznz3zJ7u3niRCoDTsumM2+HA2XXcCu+WAacCeHD2z3p9A9Ks987o5FzfTGBN0e8A0vjEgIDvLbICrXpdw/Q=="],
+    "katex": ["katex@0.19.1", "", { "dependencies": { "commander": "^15.0.0" }, "bin": { "katex": "cli.js" } }, "sha512-jG8uKntjSEcm2EpQOh0XturpPuuC9r3Sq5HLHdsFdWZT27E672SF19QEi+of0/YeOy15lDgRhKvr5614uRrEfA=="],
 
     "keyv": ["keyv@5.6.0", "", { "dependencies": { "@keyv/serialize": "1.1.1" } }, "sha512-CYDD3SOtsHtyXeEORYRx2qBtpDJFjRTGXUtmNEMGyzYOKj1TE3tycdlho7kA1Ufx9OYWZzg52QFBGALTirzDSw=="],
 
