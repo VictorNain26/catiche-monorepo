@@ -49,15 +49,14 @@ const birthMonth = z
 // The adult's declarations, timestamped, on which the parental consent rests (CNIL): each one is a
 // box they tick, never a value the server assumes.
 const declaredGuardian = z.literal(true, 'la déclaration d’autorité parentale');
-// The memory is proposed from the child's page (the patch), never while adding them.
 const newStudent = z.object({ name, level: schoolLevelSchema, birthMonth, declaredGuardian });
 const guardianDeclaration = z.object({ declaredGuardian });
 const adultDeclaration = z.object({ adult: z.literal(true, 'la déclaration de majorité') });
 // The moment the news were read (`GET /api/me/news`), which « Vu » says no more than.
 const newsSeen = z.object({ readAt: z.iso.datetime({ offset: true }) });
 const studentPatch = z
-  .object({ name: name.optional(), level: schoolLevelSchema.optional(), memoryProposed: z.boolean().optional() })
-  .refine((patch) => patch.name !== undefined || patch.level !== undefined || patch.memoryProposed !== undefined, 'au moins un champ');
+  .object({ name: name.optional(), level: schoolLevelSchema.optional() })
+  .refine((patch) => patch.name !== undefined || patch.level !== undefined, 'au moins un champ');
 
 // A new device of the child's, or a code they forgot.
 const activationRequest = z.object({ reason: z.enum(['device', 'forgotten']) });

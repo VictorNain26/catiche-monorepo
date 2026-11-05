@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { quotaDayStart, schoolYearOf, schoolYearStart } from './school-calendar';
+import { eveningDay, quotaDayStart, schoolYearOf } from './school-calendar';
 
 const start = (iso: string) => quotaDayStart(new Date(iso)).toISOString();
 
@@ -32,6 +32,16 @@ describe('quotaDayStart', () => {
   });
 });
 
+describe('eveningDay', () => {
+  it('names the evening after its day in Paris, an evening past midnight still the day before until 4 a.m.', () => {
+    // 1:00 a.m. then 5:00 a.m. in Paris on 8 October, summer time.
+    expect(eveningDay(new Date('2026-10-07T23:00:00Z'))).toBe('2026-10-07');
+    expect(eveningDay(new Date('2026-10-08T03:00:00Z'))).toBe('2026-10-08');
+    // 6 p.m. in Paris, winter time.
+    expect(eveningDay(new Date('2026-12-15T17:00:00Z'))).toBe('2026-12-15');
+  });
+});
+
 describe('schoolYearOf', () => {
   it('names a school year after the September that opens it', () => {
     expect(schoolYearOf(new Date('2026-10-04'))).toBe(2026);
@@ -40,14 +50,5 @@ describe('schoolYearOf', () => {
     // The night of 1 September in Paris is still 31 August in UTC.
     expect(schoolYearOf(new Date('2026-08-31T22:30:00Z'))).toBe(2026);
     expect(schoolYearOf(new Date('2026-08-31T21:30:00Z'))).toBe(2025);
-  });
-});
-
-describe('schoolYearStart', () => {
-  it('opens the school year at midnight in Paris on 1 September, read in summer or in winter', () => {
-    expect(schoolYearStart(new Date('2026-10-04T12:00:00Z')).toISOString()).toBe('2026-08-31T22:00:00.000Z');
-    expect(schoolYearStart(new Date('2027-01-15T12:00:00Z')).toISOString()).toBe('2026-08-31T22:00:00.000Z');
-    // The last minute of August in Paris still belongs to the year before.
-    expect(schoolYearStart(new Date('2026-08-31T21:59:00Z')).toISOString()).toBe('2025-08-31T22:00:00.000Z');
   });
 });

@@ -6,7 +6,6 @@ import { api, parseResponse } from './api';
 import { listWords, parentWords } from './words';
 
 export type WeekSummary = InferResponseType<typeof api.summary.$get, 200>;
-type SubjectFamily = WeekSummary['subjects'][number]['subject'];
 
 /** The signed-in student's own summary. */
 export const ownSummaryQuery = queryOptions({
@@ -45,28 +44,6 @@ export function eveningsLine(name: string, days: readonly string[]): string {
 /** Whether the child worked tonight, on their card of the home (A5), as `Tag`'s props: done, or not yet, never late. */
 export const tonightTag = (tonight: boolean) =>
   tonight ? ({ tone: 'done', children: 'A travaillé ce soir' } as const) : ({ tone: 'neutral', children: 'Pas encore ce soir' } as const);
-
-const SUBJECTS: Record<SubjectFamily, string> = {
-  mathematiques: 'Maths',
-  francais: 'Français',
-  langues: 'Langues',
-  sciences: 'Sciences',
-  'histoire-geo': 'Histoire-géo',
-  general: 'Autre',
-};
-
-export const subjectLabel = (subject: SubjectFamily) => SUBJECTS[subject];
-
-/**
- * A question for the parent, from a notion that resists: the child shows, the parent listens,
- * nothing to know of the subject. Said to the parent,
- * or to the child, their parents named, never the adult's sentence to a pupil.
- */
-export function questionFor(reader: 'guardian' | 'student', name: string, notion: string, parents: readonly string[]): string {
-  if (reader === 'guardian') return `Demandez à ${name} de vous montrer un exercice sur « ${notion} », et où ça coince.`;
-  const { Both, agree } = parentWords(parents);
-  return `${Both} ${agree('peut te demander de lui', 'peuvent te demander de leur')} montrer un exercice sur « ${notion} », et où ça coince.`;
-}
 
 /** Under the child's own summary: who reads it too. */
 export function sameSummary(parents: readonly string[]) {

@@ -31,25 +31,16 @@ export const messagesQuery = (sessionId: string) =>
   });
 
 /** A stored message as useChat shows it. */
-export const toUIMessage = ({ id, role, text, photo }: StoredMessage): ChatMessage => ({
-  id,
-  role: role === 'student' ? 'user' : 'assistant',
-  parts: [{ type: 'text', text }],
-  metadata: { photo },
-});
+export const toUIMessage = ({ id, role, text }: StoredMessage): ChatMessage => ({ id, role, parts: [{ type: 'text', text }] });
 
 /** The text a message carries, its parts joined. */
 export const textOf = (message: UIMessage | undefined) => (message?.parts ?? []).map((part) => (part.type === 'text' ? part.text : '')).join('');
 
-/**
- * A message of the session, and whether the student sent a photo with it; the server streams the
- * step of the turn as a transient part.
- */
-export type ChatMessage = UIMessage<{ photo: boolean }, { step: TurnStep }>;
+/** A message of the session; the server streams the step of the turn as a transient part. */
+export type ChatMessage = UIMessage<never, { step: TurnStep }>;
 
 const WAITING: Record<TurnStep, string> = {
   reading: 'Tom lit ton message…',
-  exercise: 'Tom prépare ton exercice, ça prend quelques secondes…',
   writing: 'Tom écrit sa réponse…',
 };
 
@@ -74,7 +65,8 @@ export function chatMessage(error: Error): string {
   if (isProblem(error, 'QUOTA_EXCEEDED')) return 'Tom a assez répondu pour aujourd’hui. Il répondra de nouveau demain.';
   if (isProblem(error, 'TURN_IN_PROGRESS')) return 'Tom répond encore. Attends sa réponse.';
   if (isProblem(error, 'RATE_LIMITED')) return 'Trop de messages d’un coup. Attends une minute.';
-  if (isProblem(error, 'INVALID_REQUEST')) return 'Ton message est vide ou trop long. Écris ta question en quelques phrases.';
-  if (isProblem(error, 'PAYLOAD_TOO_LARGE')) return 'La photo est trop lourde. Reprends-la, ou recopie l’énoncé.';
+  if (isProblem(error, 'INVALID_REQUEST') || isProblem(error, 'PAYLOAD_TOO_LARGE')) {
+    return 'Ton message est vide ou trop long. Écris ta question en quelques phrases.';
+  }
   return 'Tom n’a pas pu répondre. Réessaie dans un instant.';
 }

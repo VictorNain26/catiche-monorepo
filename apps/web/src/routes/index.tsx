@@ -1,14 +1,13 @@
-import { Button, List, ListItem, Section } from '@repo/ui';
+import { Button, Section } from '@repo/ui';
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { BellIcon, BookmarkIcon, CalendarIcon, UsersRoundIcon } from 'lucide-react';
+import { BellIcon, CalendarIcon, UsersRoundIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { MessageBanner } from '../components/message-banner';
-import { SHEET_ROWS, StudentPage } from '../components/page';
+import { StudentPage } from '../components/page';
 import { WeekSummary } from '../components/week-summary';
 import { sessionsQuery, startSession, tonightSession } from '../lib/chat';
 import { meQuery, parentsOfMe, whoSeesWhat } from '../lib/me';
-import { memoryQuery } from '../lib/memory';
 import { markNewsSeen, newsLines, newsQuery } from '../lib/news';
 import { STUDENT_FAILED } from '../lib/student';
 import { ownSummaryQuery } from '../lib/summary';
@@ -16,7 +15,7 @@ import { ownSummaryQuery } from '../lib/summary';
 /**
  * The home: « Qui fait ses devoirs ? » for a visitor, the household for an adult, and for a student
  * E4, « Ce soir », the screen they come back to: what changed since their last visit, Tom's help to
- * start or take up their homework, the memory Tom offers, and their week.
+ * start or take up their homework, and their week.
  */
 export const Route = createFileRoute('/')({
   beforeLoad: async ({ context }) => {
@@ -25,9 +24,8 @@ export const Route = createFileRoute('/')({
     if (me.role === 'adult') throw redirect({ to: '/foyer' });
   },
   loader: ({ context }) => {
-    // Started, not awaited: the memory, the news and the week are each optional, a failure of one leaves the rest.
+    // Started, not awaited: the news and the week are each optional, a failure of one leaves the rest.
     const { queryClient } = context;
-    void queryClient.query(memoryQuery).catch(() => undefined);
     void queryClient.query(newsQuery).catch(() => undefined);
     void queryClient.query(ownSummaryQuery).catch(() => undefined);
     return queryClient.query(sessionsQuery);
@@ -38,7 +36,6 @@ export const Route = createFileRoute('/')({
 function StudentHome() {
   const { data: me } = useSuspenseQuery(meQuery);
   const parents = parentsOfMe(me);
-  const { data: memory } = useQuery(memoryQuery);
   const week = useQuery(ownSummaryQuery);
 
   return (
@@ -51,21 +48,6 @@ function StudentHome() {
       lead={<Start />}
     >
       <News parents={parents} />
-      {memory?.state === 'asked' && (
-        <List className={SHEET_ROWS}>
-          <ListItem
-            render={<Link to="/memoire" />}
-            className="gap-4"
-            leading={
-              <IconWell>
-                <BookmarkIcon aria-hidden="true" nonScalingStroke className="size-6" />
-              </IconWell>
-            }
-            title="Tom peut se souvenir de ce qui était difficile"
-            meta="Si tu es d’accord, Tom retient les leçons où tu as bloqué."
-          />
-        </List>
-      )}
       <p className="flex items-start gap-3 border-t border-border pt-4">
         {/* Who sees what: the parents' figure, not a crossed eye, which a student reads as « Nadia ne voit rien ». */}
         <UsersRoundIcon aria-hidden="true" nonScalingStroke className="size-6 shrink-0 text-muted-foreground" />

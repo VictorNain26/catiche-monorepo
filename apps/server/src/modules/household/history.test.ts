@@ -90,23 +90,6 @@ describe('the history of a child', () => {
     ]);
   });
 
-  it('keeps the memory proposed and withdrawn, once each', async () => {
-    const { nadia, karim, lea } = await family('memoire');
-    const before = (await history(nadia, lea.id)).length;
-    for (const [cookie, memoryProposed] of [
-      [nadia, true],
-      [karim, true],
-      [karim, false],
-      [nadia, false],
-    ] as const) {
-      expect((await patch(cookie, lea.id, { memoryProposed })).status).toBe(200);
-    }
-    expect(await linesSince(nadia, lea.id, before)).toEqual([
-      { kind: 'memory_proposed', actor: 'Nadia', subject: null, detail: {} },
-      { kind: 'memory_withdrawn', actor: 'Karim', subject: null, detail: {} },
-    ]);
-  });
-
   it('keeps the starting codes, and a device unblocked or removed with its browser', async () => {
     const { nadia, karim, lea } = await family('appareils');
     const before = (await history(nadia, lea.id)).length;
@@ -219,26 +202,12 @@ describe('the other parents', () => {
     return mail.sent.slice(before).map(({ to, subject, text }) => ({ to, subject, text }));
   };
 
-  it('are told the memory withdrawn, never its author nor a relative', async () => {
-    const { nadia, lea, karimEmail } = await family('mail-memoire');
-    await patch(nadia, lea.id, { memoryProposed: true });
-    const sent = await sentDuring(() => patch(nadia, lea.id, { memoryProposed: false }));
-    expect(sent.map(({ to }) => to)).toEqual([karimEmail]);
-    expect(sent[0]?.subject).toBe('Nadia a retiré ce que Tom retient de Léa');
-    expect(sent[0]?.text).toContain('Nadia a retiré ce que Tom retient de Léa.');
-  });
-
   it('are told a starting code for a forgotten code, and not one for a device', async () => {
     const { nadia, lea, karimEmail } = await family('mail-code');
     expect(await sentDuring(() => api.activationCode(nadia, lea.id, 'device'))).toEqual([]);
     const sent = await sentDuring(() => api.activationCode(nadia, lea.id, 'forgotten'));
     expect(sent.map(({ to }) => to)).toEqual([karimEmail]);
     expect(sent[0]?.text).toContain('Nadia a demandé un code de départ pour Léa, qui a oublié son code.');
-  });
-
-  it('are not told a memory proposed', async () => {
-    const { nadia, lea } = await family('mail-propose');
-    expect(await sentDuring(() => patch(nadia, lea.id, { memoryProposed: true }))).toEqual([]);
   });
 });
 

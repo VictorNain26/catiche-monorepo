@@ -34,7 +34,7 @@ export interface AppDeps {
   mailer: Mailer;
   ai: Ai;
   moderation: Moderation;
-  /** The programme the tutor draws a sheet on. */
+  /** The programme Tom reads (`programme` tool). */
   notions: NotionsFor;
   lifecycle: Lifecycle;
   /** Work after a response, which the shutdown waits for. */
@@ -43,7 +43,7 @@ export interface AppDeps {
 
 export function createApp({ config, logger, db, auth, mailer, ai, moderation, notions, lifecycle, background }: AppDeps) {
   const household = householdModule({ db, auth, mailer, logger, background, publicUrl: config.publicUrl });
-  const tutor = tutorModule({ db, auth, ai, moderation, logger, notions, background });
+  const tutor = tutorModule({ db, auth, ai, moderation, logger, notions });
   // One budget for the API and the probes: /health/ready runs a query on every call. The web's
   // files don't count, a page load fetches a dozen of them.
   const budget = rateLimit({ points: config.apiRateLimit, durationSeconds: 60 });
@@ -78,7 +78,6 @@ export function createApp({ config, logger, db, auth, mailer, ai, moderation, no
     .route('/api/me', household.me)
     .route('/api/household', household.routes)
     .route('/api/sessions', tutor.routes)
-    .route('/api/memory', tutor.memory)
     .route('/api/summary', tutor.summary)
     .route('/health', healthRoutes({ db, lifecycle, logger }))
     .onError(problemHandler(logger))

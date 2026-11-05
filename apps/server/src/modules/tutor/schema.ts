@@ -1,27 +1,17 @@
 /**
- * The tutor's tables. A session belongs to its student; its messages, its exercises and the
- * distress that closed it follow. The distress event outlives the session (`SET NULL`), for the
- * human review that follows it, and keeps no score (Victor's decision 7, 2026-10-06).
+ * The tutor's tables. A session belongs to its student, its messages and the distress that closed
+ * it follow; the evening, its homework and the tests to come belong to the student. The distress
+ * event outlives the session (`SET NULL`), for the human review that follows it, and keeps no
+ * score (Victor's decision 7, 2026-10-06).
  */
 
-import { sql } from 'drizzle-orm';
-import { bigint, boolean, index, integer, jsonb, pgEnum, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
-import { DECIDED_BY, DIAGNOSIS_ERROR_TYPES, VERDICTS } from '../../domain/diagnosis';
+import { bigint, date, index, integer, jsonb, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 import { DISTRESS_SOURCES } from '../../domain/distress';
-import { MATH_CHECKS } from '../../domain/exercise-math';
-import { REASONING_EFFORTS } from '../../domain/reasoning-effort';
-import { SUBJECT_FAMILIES } from '../../domain/subjects';
+import { EVENING_SUBJECTS } from '../../domain/subjects';
 import { user } from '../../platform/auth/schema';
-import type { Hint } from './core/ladder';
-import type { ExerciseSheet } from './core/sheet';
+import { EVENING_PHASES, HOMEWORK_STATES } from './core/evening';
+import type { TomMessage } from './core/message';
 
-export const subjectFamily = pgEnum('subject_family', SUBJECT_FAMILIES);
-export const diagnosisVerdict = pgEnum('diagnosis_verdict', VERDICTS);
-export const diagnosisErrorType = pgEnum('diagnosis_error_type', DIAGNOSIS_ERROR_TYPES);
-export const decidedBy = pgEnum('decided_by', DECIDED_BY);
-export const reasoningEffort = pgEnum('reasoning_effort', REASONING_EFFORTS);
-export const messageRole = pgEnum('message_role', ['student', 'tutor']);
-export const mathCheck = pgEnum('math_check', MATH_CHECKS);
 export const distressSource = pgEnum('distress_source', DISTRESS_SOURCES);
 
 export const studySession = pgTable(
@@ -31,13 +21,6 @@ export const studySession = pgTable(
     studentId: text('student_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
-    title: text('title'),
-    /** The summary of the messages up to `summaryUntil`, which the tutor reads first; out of the student's sight. */
-    summary: text('summary'),
-    /** The position of the last message the summary covers. */
-    summaryUntil: bigint('summary_until', { mode: 'number' }),
-    /** The subject of the first turn that names one: the next turns fall back on it. */
-    subject: subjectFamily('subject'),
     /** Set by a distress: every later message gets the fixed reply. */
     closedAt: timestamp('closed_at', { withTimezone: true }),
     /** One turn at a time: set when a turn starts, cleared when it ends; a stale one is taken over. */
@@ -50,6 +33,7 @@ export const studySession = pgTable(
 export const message = pgTable(
   'message',
   {
+    /** The UIMessage's id. */
     id: uuid('id').primaryKey().defaultRandom(),
     // The order of the conversation: a turn writes its two messages in one transaction, where
     // now() is the same for both.
@@ -57,84 +41,70 @@ export const message = pgTable(
     sessionId: uuid('session_id')
       .notNull()
       .references(() => studySession.id, { onDelete: 'cascade' }),
-    role: messageRole('role').notNull(),
-    /** What the student wrote, or what they read: the checked text. */
-    text: text('text').notNull(),
-    /** The text of the photo the student sent with the message (core/photo.ts); the photo itself is never kept. */
-    photoText: text('photo_text'),
-    /** The tutor's response messages as the model produced them, replayed by the next turns; never sent to the client. */
-    modelMessages: jsonb('model_messages'),
+    /** The UIMessage without its id (`core/message.ts`): Tom's reasoning in it never reaches the client. */
+    content: jsonb('content').$type<Omit<TomMessage, 'id'>>().notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [index('message_session_id_position_idx').on(table.sessionId, table.position)],
 );
 
-/** Each exercise the student brings, its sheet out of their sight; the session's last one is in progress. */
-export const exercise = pgTable(
-  'exercise',
+export const eveningPhase = pgEnum('evening_phase', EVENING_PHASES);
+export const homeworkState = pgEnum('homework_state', HOMEWORK_STATES);
+export const schoolSubject = pgEnum('school_subject', EVENING_SUBJECTS);
+
+/** A student's evening of homework, one per day (`eveningDay`), and the step of it Tom is at. */
+export const evening = pgTable(
+  'evening',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    // The last one written is in progress: created_at would tie within a transaction.
-    position: bigint('position', { mode: 'number' }).generatedAlwaysAsIdentity(),
-    sessionId: uuid('session_id')
+    studentId: text('student_id')
       .notNull()
-      .references(() => studySession.id, { onDelete: 'cascade' }),
-    /** Null when every draw failed: the help then stays low. */
-    sheet: jsonb('sheet').$type<ExerciseSheet>(),
-    uncertain: boolean('uncertain').notNull(),
-    drawnForms: jsonb('drawn_forms').$type<string[]>().notNull(),
-    mathCheck: mathCheck('math_check').notNull(),
-    promptVersion: text('prompt_version').notNull(),
-    hintLevel: integer('hint_level').notNull().default(0),
-    stepsDone: integer('steps_done').notNull().default(0),
-    stuckTurns: integer('stuck_turns').notNull().default(0),
-    hints: jsonb('hints')
-      .$type<Hint[]>()
-      .notNull()
-      .default(sql`'[]'::jsonb`),
-    solvedAt: timestamp('solved_at', { withTimezone: true }),
+      .references(() => user.id, { onDelete: 'cascade' }),
+    day: date('day', { mode: 'string' }).notNull(),
+    phase: eveningPhase('phase').notNull().default('note'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index('exercise_session_id_position_idx').on(table.sessionId, table.position)],
+  (table) => [uniqueIndex('evening_student_id_day_idx').on(table.studentId, table.day)],
 );
 
-export const turnOutcome = pgEnum('turn_outcome', ['passed', 'regenerated', 'fallback', 'distress', 'closed']);
-
 /**
- * What the code decided at each turn, to explain a reply and compare prompt versions: no word of
- * the student nor of the tutor, only the decisions and the versions.
+ * A homework the student noted, in their words. Planned for an evening at its rank in that
+ * evening's order; unplanned, both null. It outlives its evening (`SET NULL`): what is left to do
+ * comes back the next evening.
  */
-export const turnRecord = pgTable(
-  'turn_record',
+export const homework = pgTable(
+  'homework',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    sessionId: uuid('session_id')
+    studentId: text('student_id')
       .notNull()
-      .references(() => studySession.id, { onDelete: 'cascade' }),
-    /** The analysis' booleans and subject; null when it failed. */
-    analysis: jsonb('analysis').$type<Record<string, boolean | string>>(),
-    /** The categories moderation recorded on the student's message; null when it could not answer. */
-    inputFlagged: jsonb('input_flagged').$type<string[]>(),
-    exerciseId: uuid('exercise_id').references(() => exercise.id, { onDelete: 'set null' }),
-    newExercise: boolean('new_exercise').notNull(),
-    hintLevel: integer('hint_level'),
-    verdict: diagnosisVerdict('verdict'),
-    /** The diagnosis' error type, which the learner memory counts. */
-    errorType: diagnosisErrorType('error_type'),
-    decidedBy: decidedBy('decided_by'),
-    reasoningEffort: reasoningEffort('reasoning_effort'),
-    model: text('model').notNull(),
-    promptVersion: text('prompt_version').notNull(),
-    /** What the check held back from the first text. */
-    findings: jsonb('findings').$type<string[]>().notNull(),
-    outcome: turnOutcome('outcome').notNull(),
+      .references(() => user.id, { onDelete: 'cascade' }),
+    subject: schoolSubject('subject').notNull(),
+    task: text('task').notNull(),
+    /** Null until the student says when it is due. */
+    dueOn: date('due_on', { mode: 'string' }),
+    eveningId: uuid('evening_id').references(() => evening.id, { onDelete: 'set null' }),
+    rank: integer('rank'),
+    state: homeworkState('state').notNull().default('todo'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
-    index('turn_record_session_id_created_at_idx').on(table.sessionId, table.createdAt),
-    // The learner memory reads the error types of each exercise.
-    index('turn_record_exercise_id_idx').on(table.exerciseId),
-  ],
+  (table) => [index('homework_student_id_state_idx').on(table.studentId, table.state), index('homework_evening_id_idx').on(table.eveningId)],
+);
+
+/** A test the student announced, once per subject and day. */
+export const upcomingTest = pgTable(
+  'upcoming_test',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    studentId: text('student_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    subject: schoolSubject('subject').notNull(),
+    day: date('day', { mode: 'string' }).notNull(),
+    topic: text('topic'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex('upcoming_test_student_id_subject_day_idx').on(table.studentId, table.subject, table.day)],
 );
 
 export const distressEvent = pgTable(
@@ -153,17 +123,4 @@ export const distressEvent = pgTable(
     uniqueIndex('distress_event_session_id_idx').on(table.sessionId),
     index('distress_event_student_id_created_at_idx').on(table.studentId, table.createdAt),
   ],
-);
-
-/** A notion the student marked as understood: the learner memory counts only its exercises after `afterPosition`. */
-export const learnerNotionReset = pgTable(
-  'learner_notion_reset',
-  {
-    studentId: text('student_id')
-      .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
-    notionId: text('notion_id').notNull(),
-    afterPosition: bigint('after_position', { mode: 'number' }).notNull(),
-  },
-  (table) => [primaryKey({ columns: [table.studentId, table.notionId] })],
 );

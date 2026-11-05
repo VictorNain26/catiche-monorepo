@@ -22,7 +22,7 @@ describe('chatMessage', () => {
       'Ton message est vide ou trop long. Écris ta question en quelques phrases.',
     );
     expect(chatMessage(refused(413, JSON.stringify({ code: 'PAYLOAD_TOO_LARGE' })))).toBe(
-      'La photo est trop lourde. Reprends-la, ou recopie l’énoncé.',
+      'Ton message est vide ou trop long. Écris ta question en quelques phrases.',
     );
   });
 
@@ -55,27 +55,27 @@ describe('tonightSession', () => {
 });
 
 describe('toUIMessage and textOf', () => {
-  it('shows the student as the user and Tom as the assistant, the text kept, and whether a photo came', () => {
-    const student = toUIMessage({ id: 'm1', role: 'student', text: 'Je bloque', photo: true, createdAt: '2026-10-07T18:00:00.000Z' });
-    expect(student).toEqual({ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'Je bloque' }], metadata: { photo: true } });
-    expect(toUIMessage({ id: 'm2', role: 'tutor', text: 'Où ?', photo: false, createdAt: '2026-10-07T18:00:01.000Z' }).role).toBe('assistant');
+  it('shows a stored message as useChat does, its text in one part', () => {
+    const student = toUIMessage({ id: 'm1', role: 'user', text: 'Je bloque', createdAt: '2026-10-07T18:00:00.000Z' });
+    expect(student).toEqual({ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'Je bloque' }] });
+    expect(toUIMessage({ id: 'm2', role: 'assistant', text: 'Où ?', createdAt: '2026-10-07T18:00:01.000Z' }).role).toBe('assistant');
     expect(textOf(student)).toBe('Je bloque');
     expect(textOf(undefined)).toBe('');
   });
 });
 
 describe('waitingText', () => {
-  it('says what Tom does while the student waits, the long draw of a new exercise included', () => {
+  it('says what Tom does while the student waits', () => {
     expect(waitingText(null)).toBe('Tom lit ton message…');
     expect(waitingText('reading')).toBe('Tom lit ton message…');
-    expect(waitingText('exercise')).toBe('Tom prépare ton exercice, ça prend quelques secondes…');
     expect(waitingText('writing')).toBe('Tom écrit sa réponse…');
   });
 });
 
 describe('isTurnStep', () => {
   it('takes only a step the web knows: a value the server adds later shows nothing wrong', () => {
-    expect(isTurnStep('exercise')).toBe(true);
+    expect(isTurnStep('writing')).toBe(true);
+    expect(isTurnStep('exercise')).toBe(false);
     expect(isTurnStep('checking')).toBe(false);
     expect(isTurnStep('toString')).toBe(false);
     expect(isTurnStep(3)).toBe(false);

@@ -13,7 +13,7 @@ import type { Db } from '../../platform/db/client';
 import { keyedBudget } from '../../platform/http/rate-limit';
 import { createHouseholdRepository } from './repository';
 import { householdRoutes, meRoutes, studentAuthGuard } from './routes';
-import { INVITATIONS_PER_DAY, createHouseholdService, learnerMemory, sendEach, type MemoryAnswer } from './service';
+import { INVITATIONS_PER_DAY, createHouseholdService, sendEach } from './service';
 
 export type { AdultRole } from './service';
 
@@ -58,9 +58,8 @@ export function householdModule({ db, auth, mailer, logger, background, publicUr
 }
 
 /**
- * The signed-in student's profile, for the tutor: their learner memory's state and last reset
- * with it; null for anyone who is not a student. The tutor records the student's answer here,
- * and asks whether a guardian may read a student's summary.
+ * The signed-in student's profile, for the tutor; null for anyone who is not a student. The tutor
+ * also asks whether an adult may read a student's summary.
  */
 export function studentDirectory(db: Db) {
   const repository = createHouseholdRepository(db);
@@ -68,11 +67,9 @@ export function studentDirectory(db: Db) {
     async find(userId: string) {
       const profile = await repository.findProfile(userId);
       if (!profile) return null;
-      const { birthMonth, memoryProposedAt, memoryAnswer, memoryResetAfter, ...student } = profile;
-      return { ...student, memory: learnerMemory({ birthMonth, memoryProposedAt, memoryAnswer, memoryResetAfter }, new Date()) };
+      const { id, name, level } = profile;
+      return { id, name, level };
     },
-    answerMemory: (studentId: string, answer: MemoryAnswer, afterPosition: number) => repository.answerMemory(studentId, answer, afterPosition),
-    resetMemory: (studentId: string, afterPosition: number) => repository.resetMemory(studentId, afterPosition),
     /** Whether the adult is linked to the student, as a parent or a relative: they read the student's week. */
     follows: async (adultId: string, studentId: string) => (await repository.findStudent(adultId, studentId)) !== undefined,
   };

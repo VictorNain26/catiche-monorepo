@@ -234,11 +234,3 @@ export const decidesWith = (name: string, parents: readonly string[]) =>
 
 /** For a relative, who adds no device (`app-cible.md`, question tranchée 3): the parents to ask. */
 export const askParents = (parents: readonly string[]) => `Pour ajouter un appareil, demandez un code de départ à ${listWords(parents, ' ou à ')}.`;
-
-/** What the guardian reads of the learner memory of their child. */
-export function memoryStatus({ name, memory }: Pick<Student, 'name' | 'memory'>): string {
-  if (memory.state === 'active') return `${name} l’a acceptée : Tom retient les notions de ses exercices et ce qui a résisté.`;
-  if (memory.decidesAlone) return `À partir de 15 ans, c’est ${name} qui décide${memory.state === 'asked' ? ' : la question lui est posée' : ''}.`;
-  if (memory.state === 'asked') return `Proposée : ${name} répondra à sa prochaine visite.`;
-  return memory.proposed ? `${name} l’a refusée.` : 'Pas proposée : Tom ne retient rien d’une séance à l’autre.';
-}

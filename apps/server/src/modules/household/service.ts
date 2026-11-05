@@ -8,10 +8,9 @@
 import { createPlaceholderEmail } from '@better-auth/core/utils/email';
 import { generateId } from '@better-auth/core/utils/id';
 import type { SchoolLevel } from '../../domain/levels';
-import { memoryConsent, type MemoryAnswer } from '../../domain/memory-consent';
 import { deletionDue, frenchDay } from '../../domain/student-deletion';
 
-export type { AdultRole, MemoryAnswer };
+export type { AdultRole };
 import type { AdultRole } from '../../domain/adult-roles';
 import { invitationEmail, invitationExpiry, type InvitationLetter } from '../../platform/auth/invitation';
 import type { ActivationReason } from '../../platform/auth/student-sign-in';
@@ -73,36 +72,13 @@ export async function sendEach(send: Mailer, addresses: readonly string[], email
 
 type StudentRow = NonNullable<Awaited<ReturnType<HouseholdRepository['findStudent']>>>;
 
-/** The student's learner memory as the tutor reads it; the child answers once the parent proposed it, or alone from 15. */
-export function learnerMemory(
-  profile: { birthMonth: string; memoryProposedAt: Date | null; memoryAnswer: MemoryAnswer | null; memoryResetAfter: number | null },
-  now: Date,
-) {
-  const { state, mayAnswer } = memoryConsent(
-    { birthMonth: profile.birthMonth, proposedAt: profile.memoryProposedAt, answer: profile.memoryAnswer },
-    now,
-  );
-  return { state, mayAnswer, resetAfter: profile.memoryResetAfter ?? 0 };
-}
-
 // The date column holds the first day of the month; the API speaks in YYYY-MM. A deletion asked
 // says who asked it, null once they left Catiche, and the day it is done.
-const toStudent = <Row extends StudentRow>({
-  birthMonth,
-  memoryProposedAt,
-  memoryAnswer,
-  deletionRequestedAt,
-  deletionRequestedBy,
-  ...student
-}: Row) => {
-  const { state, decidesAlone } = memoryConsent({ birthMonth, proposedAt: memoryProposedAt, answer: memoryAnswer }, new Date());
-  return {
-    ...student,
-    birthMonth: birthMonth.slice(0, 7),
-    memory: { proposed: memoryProposedAt !== null, state, decidesAlone },
-    deletion: deletionRequestedAt === null ? null : { by: deletionRequestedBy, dueAt: deletionDue(deletionRequestedAt) },
-  };
-};
+const toStudent = <Row extends StudentRow>({ birthMonth, deletionRequestedAt, deletionRequestedBy, ...student }: Row) => ({
+  ...student,
+  birthMonth: birthMonth.slice(0, 7),
+  deletion: deletionRequestedAt === null ? null : { by: deletionRequestedBy, dueAt: deletionDue(deletionRequestedAt) },
+});
 
 export function createHouseholdService({ repository, sharedDevice, inviteAddress, revokeAddress, spendInvitation, send, later, publicUrl }: Deps) {
   const found = async (adultId: string, studentId: string) => {
@@ -225,21 +201,8 @@ export function createHouseholdService({ repository, sharedDevice, inviteAddress
       return toStudent(created);
     },
 
-    async updateStudent(
-      adultId: string,
-      studentId: string,
-      patch: { name?: string | undefined; level?: SchoolLevel | undefined; memoryProposed?: boolean | undefined },
-    ) {
-      // From 15 the child decides alone: the guardian neither proposes nor erases it.
-      if (patch.memoryProposed !== undefined) {
-        await managed(adultId, studentId);
-        if ((await found(adultId, studentId)).memory.decidesAlone) throw new Problem('FORBIDDEN');
-      }
-      const gestures = await repository.updateStudent(adultId, studentId, patch);
-      if (!gestures) throw new Problem('NOT_FOUND');
-      if (gestures.includes('memory_withdrawn')) {
-        tellOtherParents(adultId, studentId, (adult, student) => `${adult} a retiré ce que Tom retient de ${student}`);
-      }
+    async updateStudent(adultId: string, studentId: string, patch: { name?: string | undefined; level?: SchoolLevel | undefined }) {
+      if (!(await repository.updateStudent(adultId, studentId, patch))) throw new Problem('NOT_FOUND');
       return found(adultId, studentId);
     },
 
