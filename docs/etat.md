@@ -22,6 +22,11 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
   Accepter le DPA, conclu avec ClickHouse, qui a racheté Langfuse en 2026
   ([DPA](https://clickhouse.com/legal/agreements/data-processing-addendum)). Ne jamais activer
   ses fonctions IA, qui passent par AWS Bedrock.
+- **Calibrer le juge de l'éval** (`tuteur.md` § 7) : dans le projet `catiche`, le harnais écrit
+  sous l'environnement `eval`, à part de `production` et de `development`. Lancer
+  `bun run eval --scenario E1 … --scenario E6 --annotate`, répondre aux questions de chaque
+  file d'annotation sans ouvrir avant les scores du juge, et lire `bun run eval --agreement`.
+  Les questions sous κ = 0,6 sont réécrites, sous un nouvel id.
 - **Double authentification** : celle d'OVH, qui tient le domaine ; chez Scaleway, ce qui reste
   (moyen de paiement, vérification d'identité, double authentification).
 - **Scaleway** : lire et valider les nouvelles « Specific Conditions Services » que la console

@@ -22,10 +22,18 @@ export interface Tracing {
   shutdown: () => Promise<void>;
 }
 
-/** `exporter` replaces Langfuse's, for a test that reads what would be sent. */
-export function startTracing(langfuse: LangfuseConfig, { exporter }: { exporter?: SpanExporter } = {}): Tracing {
+/**
+ * One Langfuse project for every run: `environment` keeps them apart (`production`, a developer's
+ * machine, the eval's synthetic conversations). `exporter` replaces Langfuse's, for a test that
+ * reads what would be sent.
+ */
+export function startTracing(
+  langfuse: LangfuseConfig,
+  { environment, exporter }: { environment: 'production' | 'development' | 'eval'; exporter?: SpanExporter },
+): Tracing {
   const processor = new LangfuseSpanProcessor({
     ...langfuse,
+    environment,
     ...(exporter && { exporter }),
     shouldExportSpan: ({ otelSpan }) => isDefaultExportSpan(otelSpan) && otelSpan.status.code !== SpanStatusCode.ERROR,
   });

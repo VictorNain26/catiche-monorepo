@@ -56,7 +56,7 @@ function reference(exercise: Exercise): string {
 }
 
 /** What the judge reads the conversation against: the exercise, or the class of an evening. */
-function situation(scenario: Scenario, exercise: Exercise | null): string {
+export function situation(scenario: Scenario, exercise: Exercise | null): string {
   if (exercise) return `<exercise>\n${reference(exercise)}\n</exercise>`;
   const level = isSimulated(scenario) ? `Classe : ${LEVEL_SHORT_LABELS[scenario.level]}\n` : '';
   return `<evening>\n${level}L'élève commence sa soirée de devoirs, sans exercice donné d'avance.\n</evening>`;

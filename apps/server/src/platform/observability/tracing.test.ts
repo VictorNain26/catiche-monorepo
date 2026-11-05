@@ -6,7 +6,7 @@ import { startTracing } from './tracing';
 
 const { ai, mistral } = await testAi();
 const exporter = new InMemorySpanExporter();
-const tracing = startTracing({ publicKey: 'pk-lf-test', secretKey: 'sk-lf-test', baseUrl: 'http://127.0.0.1:9' }, { exporter });
+const tracing = startTracing({ publicKey: 'pk-lf-test', secretKey: 'sk-lf-test', baseUrl: 'http://127.0.0.1:9' }, { environment: 'eval', exporter });
 afterAll(() => tracing.shutdown());
 beforeEach(() => {
   exporter.reset();
@@ -25,6 +25,8 @@ describe('startTracing', () => {
 
     const spans = await exported();
     expect(spans.some((span) => span.attributes['gen_ai.request.model'] === 'mistral-small-2603')).toBe(true);
+    // One Langfuse project: the environment keeps production apart from the eval's runs.
+    expect(spans.every((span) => span.attributes['langfuse.environment'] === 'eval')).toBe(true);
     const sent = JSON.stringify(spans.map(({ name, attributes, events, status }) => ({ name, attributes, events, status })));
     for (const text of ['Consigne du tuteur', 'Message de Léa', 'Réponse de Tom']) expect(sent).not.toContain(text);
   });

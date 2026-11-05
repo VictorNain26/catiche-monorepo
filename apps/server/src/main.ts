@@ -28,7 +28,7 @@ const SHUTDOWN_DEADLINE_MS = 25_000;
 const config = loadConfig(Bun.env);
 const logger = createLogger(config.logLevel);
 // Before any AI call: Langfuse documents its setup at startup.
-const tracing = config.langfuse ? startTracing(config.langfuse) : null;
+const tracing = config.langfuse ? startTracing(config.langfuse, { environment: config.production ? 'production' : 'development' }) : null;
 
 // A fatal error goes through pino and its content-free serializer, never Bun's own printer,
 // which copies every field of an error (a database error's detail holds row values).

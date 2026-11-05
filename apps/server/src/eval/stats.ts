@@ -33,3 +33,26 @@ export function mcnemarExact(b: number, c: number): number {
   }
   return Math.min(1, (2 * tail) / 2 ** n);
 }
+
+/**
+ * Cohen's κ of two raters' answers on the same items: their observed agreement beyond the one
+ * chance gives, (pₒ − pₑ) / (1 − pₑ), each category of either rater counted (Cohen, « A
+ * Coefficient of Agreement for Nominal Scales », Educational and Psychological Measurement,
+ * 1960). Null without a pair, and when chance explains every agreement (pₑ = 1): both raters
+ * gave the one same answer to all.
+ */
+export function cohenKappa(pairs: readonly (readonly [string, string])[]): number | null {
+  const n = pairs.length;
+  if (n === 0) return null;
+  const first = new Map<string, number>();
+  const second = new Map<string, number>();
+  let agreed = 0;
+  for (const [a, b] of pairs) {
+    if (a === b) agreed += 1;
+    first.set(a, (first.get(a) ?? 0) + 1);
+    second.set(b, (second.get(b) ?? 0) + 1);
+  }
+  let chance = 0;
+  for (const [category, count] of first) chance += (count / n) * ((second.get(category) ?? 0) / n);
+  return chance === 1 ? null : (agreed / n - chance) / (1 - chance);
+}

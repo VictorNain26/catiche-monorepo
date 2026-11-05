@@ -69,7 +69,10 @@ le jeu de `src/eval` sur le vrai tuteur et le vrai Mistral, sur la base locale s
 transcriptions, verdicts du code et du juge, et taux avec leur intervalle de Wilson dans
 `eval-results/`. `--variant programme --variant none` joue chaque conversation avec et sans le
 programme du référentiel, et compare les paires (McNemar exact). Il est payant : le passage
-affiche son coût, tuteur et juge, par variante.
+affiche son coût, tuteur et juge, par variante. Avec les clés de Langfuse, le passage y envoie
+ses conversations et les verdicts du juge ; `--annotate` les met dans des files d'annotation,
+et `bun run eval --agreement`, seul, donne l'accord du juge avec l'annotation
+(`docs/tuteur.md` § 7).
 
 ## Git
 

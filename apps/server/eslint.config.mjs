@@ -112,7 +112,8 @@ export default [
             allow(element('domain'), element('domain')),
             allow(element('referential'), element(['referential', 'domain'])),
             allow(element('eval'), element(['eval', 'referential', 'domain'])),
-            // The judge and the simulated student call the model through the platform's client; the rest of eval stays without I/O.
+            // The judge and the simulated student call the model through the platform's client; eval/langfuse.ts reaches
+            // Langfuse by its own SDK; the rest of eval stays without I/O.
             allow(file('eval-model'), element('platform')),
             allow(file('harness'), file('client')),
             // A test's app is wired as main.ts wires it.

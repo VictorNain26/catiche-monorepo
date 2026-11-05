@@ -36,4 +36,10 @@ describe('scenario forms', () => {
     expect(parses({ ...evening, checks: [] })).toBe(false);
     expect(parses({ ...s2, checks: evening.checks })).toBe(false);
   });
+
+  it('keeps one wording per question id across the scenarios: Langfuse holds each question under its id (langfuse.ts)', () => {
+    const scenarios = (question: string) => [evening, { ...evening, id: 'E10', checks: [{ ...evening.checks[0], question }] }];
+    expect(datasetSchema.safeParse({ ...dataset, scenarios: scenarios('Tom demande-t-il pour quand ?') }).success).toBe(true);
+    expect(datasetSchema.safeParse({ ...dataset, scenarios: scenarios('Tom demande-t-il la matière ?') }).success).toBe(false);
+  });
 });
