@@ -247,7 +247,14 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
   waiting; to no one else` (`modules/household/adults.test.ts`) : Karim, entré avant Monique,
   venait après elle ; la liste suit `guardianship.created_at`. Le même jour, l'horloge de la base locale a reculé de 2,15 s en 20 s, mesuré par
   `clock_timestamp()` : c'est la cause supposée. S'ils échouent encore, trier par une clé qui ne
-  dépend pas de l'horloge, comme l'historique de l'enfant (`child_event.id`).
+  dépend pas de l'horloge, comme l'historique de l'enfant (`child_event.id`). Le 2026-11-05, le
+  même ordre a échoué dans `the parents of a child` (`modules/household/listing.test.ts:41`), une
+  fois sur trois pre-push du même code.
+- **`at the same time > lets a child choose their code while a parent removes the device`**
+  (`modules/household/history.test.ts:255`) : en échec dans la CI de `main` au merge de #593
+  (2026-11-05) et une fois sur trois pre-push du même code. Le choix du code répond 500 :
+  l'insertion de sa session viole `session_device_id_device_id_fk`, l'appareil supprimé entre-temps.
+  Une course réelle, à corriger en PR à part, test vu en échec en répétition avant le correctif.
 - **`the deletion of a child with two parents > is asked: noted, told to the other parent with
   its day, and the child stays`** (`modules/household/deletion.test.ts`) : vu en échec une fois le
   2026-10-27, lancé avec tout `household` et `platform/auth` ; repassé seul, puis deux fois avec
