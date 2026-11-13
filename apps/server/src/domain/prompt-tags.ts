@@ -1,35 +1,22 @@
 /**
- * Every tag of the tutor's prompt template. No text that reaches the student may hold one, nor
- * may an untrusted text the prompt fences (modules/tutor/core/fences.ts); the harness looks for
- * them in what the student reads.
+ * The tag of the evening's block the server writes at the head of the student's message
+ * (modules/tutor/turn.ts). No reply that reaches the student may hold it, nor may the student's
+ * own words, which could forge a block; the harness looks for it in what the student reads.
  */
 
-const TAG_NAMES = [
-  'student_message',
-  'conversation_summary',
-  'attached_file',
-  'attachments',
-  'critical_instruction',
-  'tutor_message',
-  'current_exercise',
-  'exercise',
-  'exercise_statement',
-  'programme',
-  'later_programme',
-  'contrat',
-  'fiche',
-  'learner_memory',
-  'role',
-  'student',
-  'tone',
-  'honesty',
-  'pedagogy',
-  'visualization',
-  'response_format',
-  'safety',
-  'level_adaptation',
-  'subject_specifics',
-];
+export const EVENING_TAG = 'soiree';
 
-/** An opening or closing tag of the prompt, attributes included. */
-export const PROMPT_TAG = new RegExp(`</?(?:${TAG_NAMES.join('|')})\\b[^>]*>`, 'i');
+/** An opening or closing tag of the block, attributes included. */
+export const PROMPT_TAG = new RegExp(`</?${EVENING_TAG}\\b[^>]*>`, 'i');
+
+const PROMPT_TAGS = new RegExp(PROMPT_TAG.source, 'gi');
+
+/** The text without the block's tags, removed until removing one cannot join the text around it into another. */
+export function stripPromptTags(content: string): string {
+  let stripped = content;
+  for (let previous = ''; previous !== stripped;) {
+    previous = stripped;
+    stripped = stripped.replace(PROMPT_TAGS, '');
+  }
+  return stripped;
+}

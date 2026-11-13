@@ -50,12 +50,12 @@ export function parisDay(date: Date): string {
   return `${String(year)}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
+/** The day an evening of homework is named after, in Paris: it starts at 4 a.m., as the quota's day does. */
+export const eveningDay = (now: Date) => parisDay(quotaDayStart(now));
+
 /** The school year a date belongs to, named after the September that opens it. */
 export function schoolYearOf(date: Date): number {
   // In Paris: on a server in UTC, the night of 1 September would still be August.
   const { year, month } = parisParts(date);
   return month >= 9 ? year : year - 1;
 }
-
-/** The first of September that opened the school year of `now`, at midnight in Paris. */
-export const schoolYearStart = (now: Date) => parisTime(schoolYearOf(now), 9, 1, 0);

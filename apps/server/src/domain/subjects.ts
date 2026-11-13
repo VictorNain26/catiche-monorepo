@@ -14,10 +14,7 @@ export const SUBJECT_SLUGS = [
 
 export type SubjectSlug = (typeof SUBJECT_SLUGS)[number];
 
-/**
- * The families the tutor's instructions group the subjects into; the turn analysis picks one,
- * `general` when the message is off subject or cannot tell.
- */
-export const SUBJECT_FAMILIES = ['mathematiques', 'francais', 'langues', 'sciences', 'histoire-geo', 'general'] as const;
+/** The subject of a homework or a test the student notes: a subject of the collège, or another (EPS, arts, latin…). */
+export const EVENING_SUBJECTS = [...SUBJECT_SLUGS, 'autre'] as const;
 
-export type SubjectFamily = (typeof SUBJECT_FAMILIES)[number];
+export type EveningSubject = (typeof EVENING_SUBJECTS)[number];

@@ -10,8 +10,7 @@ import { CHILD_AGES, addStudent, householdMessage, newChildSchema, studentsQuery
 
 /**
  * The adding of the next child, on one screen, as the adult's first screen asks the first
- * (`/bienvenue`); then where the child works in the evening (A4). The memory of Tom is proposed
- * from there, never while adding.
+ * (`/bienvenue`); then where the child works in the evening (A4).
  */
 export const Route = createFileRoute('/foyer/ajouter')({
   // The household's redirect has just read the list: the cache serves it.

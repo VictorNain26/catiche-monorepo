@@ -18,7 +18,6 @@ import {
   householdMessage,
   inviteSchema,
   isLevel,
-  memoryStatus,
   newChildSchema,
   roleChoices,
 } from './household';
@@ -154,9 +153,8 @@ describe('newChildSchema', () => {
   const now = new Date('2026-06-15T12:00:00Z');
   const child = (month: string, year: string) => ({ name: '  Léa ', level: 'sixieme', month, year, declaredGuardian: true });
 
-  // The memory is proposed later, from the child's page: never while adding them.
   it('gives the server a trimmed first name, a level, the month the two menus make and the declaration, nothing else', () => {
-    expect(newChildSchema(now).parse({ ...child('03', '2014'), memoryProposed: true })).toEqual({
+    expect(newChildSchema(now).parse({ ...child('03', '2014'), extra: true })).toEqual({
       name: 'Léa',
       level: 'sixieme',
       birthMonth: '2014-03',
@@ -252,25 +250,6 @@ describe('roleChoices', () => {
       ['guardian', 'Parent ou tuteur de Léa'],
       ['relative', 'Un proche : beau-parent, grand-parent, assistante familiale…'],
     ]);
-  });
-});
-
-describe('memoryStatus', () => {
-  const status = (memory: { proposed: boolean; state: 'off' | 'asked' | 'active'; decidesAlone: boolean }) => memoryStatus({ name: 'Léa', memory });
-
-  it('says what the guardian has done and what the child answered, before 15', () => {
-    expect(status({ proposed: false, state: 'off', decidesAlone: false })).toBe('Pas proposée : Tom ne retient rien d’une séance à l’autre.');
-    expect(status({ proposed: true, state: 'asked', decidesAlone: false })).toBe('Proposée : Léa répondra à sa prochaine visite.');
-    expect(status({ proposed: true, state: 'active', decidesAlone: false })).toStartWith('Léa l’a acceptée');
-    expect(status({ proposed: true, state: 'off', decidesAlone: false })).toBe('Léa l’a refusée.');
-  });
-
-  it('from 15, says the child decides, in words that fit a girl as a boy, and whether it is active', () => {
-    expect(status({ proposed: false, state: 'asked', decidesAlone: true })).toBe(
-      'À partir de 15 ans, c’est Léa qui décide : la question lui est posée.',
-    );
-    expect(status({ proposed: false, state: 'off', decidesAlone: true })).toBe('À partir de 15 ans, c’est Léa qui décide.');
-    expect(status({ proposed: false, state: 'active', decidesAlone: true })).toStartWith('Léa l’a acceptée');
   });
 });
 

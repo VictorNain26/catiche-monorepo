@@ -18,7 +18,7 @@ export interface TutorTurn {
   text: string;
   durationMs: number;
   error?: string;
-  /** The turn's record as the server stored it (modules/tutor/schema.ts, turn_record), null when none was. */
+  /** How the server says the turn ended (the metadata of Tom's message, modules/tutor/core/message.ts), null when it stored none. */
   record: { outcome: string } | null;
 }
 

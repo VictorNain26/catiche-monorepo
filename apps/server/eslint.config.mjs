@@ -29,8 +29,8 @@ const files = [
   { pattern: 'src/modules/*/index.ts', category: 'module-index' },
   { pattern: 'src/modules/*/routes.ts', category: 'routes' },
   { pattern: 'src/modules/*/service.ts', category: 'service' },
-  // The tutor's turn, which the service opens and runs: the repository, core/ and the platform, not the referential.
-  { pattern: 'src/modules/*/turn-pipeline.ts', category: 'pipeline' },
+  // Tom and his turn, which the service opens and runs: the repository, core/ and the platform, not the referential.
+  { pattern: ['src/modules/*/turn.ts', 'src/modules/*/agent.ts'], category: 'pipeline' },
   { pattern: 'src/modules/*/repository.ts', category: 'repository' },
   // A repository too long for one file keeps its parts in repository/, which only it imports.
   { pattern: 'src/modules/*/repository/*.ts', category: 'repository-part' },
@@ -102,7 +102,12 @@ export default [
               inModule(['module-index']),
               element(['platform', 'domain', 'referential']),
             ),
-            allow(inModule(['pipeline']), sameModule(['repository', 'core']), inModule(['module-index']), element(['platform', 'domain'])),
+            allow(
+              inModule(['pipeline']),
+              sameModule(['pipeline', 'repository', 'core']),
+              inModule(['module-index']),
+              element(['platform', 'domain']),
+            ),
             allow(inModule(['core']), sameModule(['core']), element(['platform', 'domain', 'referential'])),
             // The tables store the shapes core/ decides.
             allow(inModule(['repository', 'repository-part']), sameModule(['repository-part', 'schema', 'core']), element(['platform', 'domain'])),
@@ -137,6 +142,11 @@ export default [
           selector:
             "BinaryExpression[operator='-'][right.type='Identifier'][right.name=/^[a-z]/] > CallExpression.left[callee.object.name='Date'][callee.property.name='now']",
           message: 'Une durée se mesure sur une horloge monotone : performance.now(), pas Date.now().',
+        },
+        {
+          // /v1/conversations stores the conversation on Mistral's side: outside zero data retention.
+          selector: "MemberExpression[property.name='conversation']",
+          message: 'mistral.conversation() est hors zéro rétention : appeler le modèle par mistral() (docs/tuteur.md § 2).',
         },
       ],
     },

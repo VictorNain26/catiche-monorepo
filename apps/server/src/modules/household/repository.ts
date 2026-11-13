@@ -9,7 +9,6 @@ import { and, desc, eq, gt, gte, inArray, isNotNull, isNull, ne, notExists, type
 import { alias } from 'drizzle-orm/pg-core';
 import { HISTORY_DAYS } from '../../domain/child-events';
 import type { SchoolLevel } from '../../domain/levels';
-import type { MemoryAnswer } from '../../domain/memory-consent';
 import { device, deviceProfile, passkey, session, studentCode, user } from '../../platform/auth/schema';
 import { CODE_TRIES, DEVICE_TRIES } from '../../platform/auth/student-devices';
 import { createActivationCode, type ActivationReason } from '../../platform/auth/student-sign-in';
@@ -79,8 +78,6 @@ export function createHouseholdRepository(db: Db) {
     name: user.name,
     level: studentProfile.level,
     birthMonth: studentProfile.birthMonth,
-    memoryProposedAt: studentProfile.memoryProposedAt,
-    memoryAnswer: studentProfile.memoryAnswer,
   };
 
   /**
@@ -115,7 +112,7 @@ export function createHouseholdRepository(db: Db) {
     /** A student's own profile; undefined for anyone who is not a student, and for a student whose deletion is due. */
     async findProfile(studentId: string) {
       const [student] = await db
-        .select({ ...studentColumns, memoryResetAfter: studentProfile.memoryResetAfter })
+        .select(studentColumns)
         .from(user)
         .innerJoin(studentProfile, eq(studentProfile.userId, user.id))
         .where(and(eq(user.id, studentId), alive(user.id)));
@@ -255,27 +252,19 @@ export function createHouseholdRepository(db: Db) {
      * The gestures the patch makes, in the history with it: a value saved unchanged makes none.
      * Undefined when the adult is not a parent of the student.
      */
-    async updateStudent(
-      adultId: string,
-      studentId: string,
-      patch: { name?: string | undefined; level?: SchoolLevel | undefined; memoryProposed?: boolean | undefined },
-    ) {
+    async updateStudent(adultId: string, studentId: string, patch: { name?: string | undefined; level?: SchoolLevel | undefined }) {
       return db.transaction(async (tx) => {
         await lockFor(tx, adultId, studentId);
         const [current] = await tx
-          .select({ name: user.name, level: studentProfile.level, proposedAt: studentProfile.memoryProposedAt })
+          .select({ name: user.name, level: studentProfile.level })
           .from(user)
           .innerJoin(studentProfile, eq(studentProfile.userId, user.id))
           .where(and(eq(user.id, studentId), inArray(user.id, managedBy(adultId))))
           .for('update');
         if (!current) return undefined;
-        const proposed = current.proposedAt !== null;
         const gestures: Gesture[] = [];
         if (patch.name !== undefined && patch.name !== current.name) gestures.push({ kind: 'name_changed', detail: { name: patch.name } });
         if (patch.level !== undefined && patch.level !== current.level) gestures.push({ kind: 'level_changed', detail: { level: patch.level } });
-        if (patch.memoryProposed !== undefined && patch.memoryProposed !== proposed) {
-          gestures.push({ kind: patch.memoryProposed ? 'memory_proposed' : 'memory_withdrawn' });
-        }
         await tx
           .update(user)
           .set({ updatedAt: new Date(), ...(patch.name === undefined ? {} : { name: patch.name }) })
@@ -286,13 +275,6 @@ export function createHouseholdRepository(db: Db) {
           .set({
             updatedAt: now,
             ...(patch.level === undefined ? {} : { level: patch.level }),
-            // Withdrawn, the child's answer goes with it: proposed again, it is asked again, and the
-            // acceptance starts the memory afresh.
-            ...(patch.memoryProposed === undefined
-              ? {}
-              : patch.memoryProposed
-                ? { memoryProposedAt: sql`coalesce(${studentProfile.memoryProposedAt}, now())` }
-                : { memoryProposedAt: null, memoryAnswer: null }),
           })
           .where(eq(studentProfile.userId, studentId));
         await record(tx, studentId, adultId, gestures);
@@ -429,22 +411,6 @@ export function createHouseholdRepository(db: Db) {
           );
         return true;
       });
-    },
-
-    /**
-     * The student's answer to the learner memory, which starts afresh with it either way, in one
-     * statement: accepted, no exercise up to `afterPosition` counts; declined, what it kept is gone.
-     */
-    async answerMemory(studentId: string, answer: MemoryAnswer, afterPosition: number) {
-      await db
-        .update(studentProfile)
-        .set({ memoryAnswer: answer, memoryResetAfter: afterPosition, updatedAt: new Date() })
-        .where(eq(studentProfile.userId, studentId));
-    },
-
-    /** The learner memory starts afresh: no exercise up to `afterPosition` counts. */
-    async resetMemory(studentId: string, afterPosition: number) {
-      await db.update(studentProfile).set({ memoryResetAfter: afterPosition, updatedAt: new Date() }).where(eq(studentProfile.userId, studentId));
     },
   };
 }

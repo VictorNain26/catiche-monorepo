@@ -10,7 +10,7 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
 | Clause des mineurs de Mistral (§ 2.2(c), version du 2026-09-25) : deux interdictions, les données personnelles d'un enfant sous l'âge du consentement numérique (15 ans en France), et l'usage par un mineur sans consentement parental. Le consentement du parent lève la seconde, pas la première prise à la lettre | Aucun utilisateur réel de moins de 15 ans | Réponse écrite de Mistral, demandée le 2026-10-11 (ticket « legal request/GDPR ») |
 | Zero Data Retention non accordé | Mistral peut garder textes et audio d'élèves | Ouvert seulement en paiement à l'usage ([centre d'aide](https://help.mistral.ai/en/articles/347612-can-i-activate-zero-data-retention-zdr)) ; recevabilité demandée dans le même ticket |
 | La marque TOM ([FR 4873204](https://data.inpi.fr/marques/FR4873204)), classes 9, 41 et 42 | Tout nom de produit bâti sur Tom, et peut-être Tom comme mascotte | Avis d'un conseil en propriété industrielle |
-| Mistral en mode gratuit : 100 000 tokens par minute, une fiche d'exercice en prend environ 78 000 | Le harnais et deux élèves dans la même minute voient la fiche échouer | Le paiement à l'usage avec un plafond, puis relire Admin › Limites |
+| Mistral en mode gratuit : 100 000 tokens par minute ; un tour de Tom renvoie ses consignes, ses outils et l'historique à chacune de ses étapes (`MAX_STEPS`, `modules/tutor/core/turn-deadline.ts`) | Le harnais et plusieurs élèves dans la même minute peuvent dépasser le plafond | Le paiement à l'usage avec un plafond, puis relire Admin › Limites |
 
 ## À faire par Victor
 
@@ -131,8 +131,12 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
      puis la soirée elle-même. Le plan : `docs/plans/abundant-wondering-treehouse.md`.
      **Tom refait de zéro, de bout en bout, passe avant tout le reste** (Victor, 2026-10-30) :
      niveau production, sur la documentation des outils, des briques maintenues plutôt que du
-     code maison, sans duplication ; l'ancien moteur part dans la PR qui le remplace. Une mesure
-     de départ sur les soirées E1 à E6 la précède, pour prouver que le nouveau Tom fait mieux.
+     code maison, sans duplication ; l'ancien moteur part dans la PR qui le remplace. Le plan :
+     `docs/plans/eager-greeting-feigenbaum.md`. Construit (R3) : Tom en boucle d'outils sur les
+     tables de la soirée (`tuteur.md` §§ 2 à 5), l'ancien pipeline, la photo et la mémoire
+     d'apprentissage retirés. Reste : la mesure E1 à E6, k = 3, contre les seuils du plan ; puis
+     R4 (l'aide sur le contenu en outils, la mémoire) et R5 (la photo et la voix) ; les écrans de
+     la soirée viennent avec les étapes 4 et 5.
   4. **Le point du soir**, qui remplace le résumé de la semaine.
   5. **Les contrôles gardés d'un soir à l'autre.**
 
@@ -237,18 +241,20 @@ le technique reporté et ce qu'on surveille. Mis à jour le 2026-10-27 ; ce qui 
 - **`@hono/bun`** : adoption faible ; la revérifier avant Hono v5.
 - **Catalogs Bun** : les remettre quand renovatebot/renovate#42909 est fusionnée.
 - **Bun.SQL** : écarté pour ses bugs de corruption ouverts ; réévaluer quand ils sont fermés.
-- **Deux tests qui comparent des dates d'écriture**, vus en échec une fois chacun dans un
-  pre-push du 2026-10-24, sous forte charge, et pas reproduits ensuite (0 sur 80 et 0 sur 40,
-  lancés seuls) :
-  - `the adults of a child > lists, to a parent, the other adults and the invitations still
-    waiting; to no one else` (`modules/household/adults.test.ts`) : Karim, entré avant Monique,
-    venait après elle ; la liste suit `guardianship.created_at` ;
-  - `a turn > prepares the sheet of a new exercise, holds back a reply that gives its answer,
-    then follows the proposal` (`modules/tutor/turn.test.ts`) : la dernière ligne de `records`,
-    triée par `turn_record.created_at`, était celle du premier tour.
-  Le même jour, l'horloge de la base locale a reculé de 2,15 s en 20 s, mesuré par
+- **Un test qui compare des dates d'écriture**, vu en échec une fois dans un pre-push du
+  2026-10-24, sous forte charge, et pas reproduit ensuite (0 sur 80, lancé seul) :
+  `the adults of a child > lists, to a parent, the other adults and the invitations still
+  waiting; to no one else` (`modules/household/adults.test.ts`) : Karim, entré avant Monique,
+  venait après elle ; la liste suit `guardianship.created_at`. Le même jour, l'horloge de la base locale a reculé de 2,15 s en 20 s, mesuré par
   `clock_timestamp()` : c'est la cause supposée. S'ils échouent encore, trier par une clé qui ne
-  dépend pas de l'horloge, comme l'historique de l'enfant (`child_event.id`).
+  dépend pas de l'horloge, comme l'historique de l'enfant (`child_event.id`). Le 2026-11-05, le
+  même ordre a échoué dans `the parents of a child` (`modules/household/listing.test.ts:41`), une
+  fois sur trois pre-push du même code.
+- **`at the same time > lets a child choose their code while a parent removes the device`**
+  (`modules/household/history.test.ts:255`) : en échec dans la CI de `main` au merge de #593
+  (2026-11-05) et une fois sur trois pre-push du même code. Le choix du code répond 500 :
+  l'insertion de sa session viole `session_device_id_device_id_fk`, l'appareil supprimé entre-temps.
+  Une course réelle, à corriger en PR à part, test vu en échec en répétition avant le correctif.
 - **`the deletion of a child with two parents > is asked: noted, told to the other parent with
   its day, and the child stays`** (`modules/household/deletion.test.ts`) : vu en échec une fois le
   2026-10-27, lancé avec tout `household` et `platform/auth` ; repassé seul, puis deux fois avec

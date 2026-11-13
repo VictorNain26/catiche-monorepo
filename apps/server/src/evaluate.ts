@@ -38,7 +38,7 @@ import {
 } from './eval/report';
 import { scriptedStudent, simulatedStudent, type Student } from './eval/student';
 import { accountDeletion, householdAuth } from './modules/household';
-import { studentCost, turnRecords } from './modules/tutor';
+import { studentCost, turnOutcomes } from './modules/tutor';
 import { createAi } from './platform/ai/client';
 import { pricing } from './platform/ai/cost';
 import { createModeration } from './platform/ai/moderation';
@@ -60,10 +60,11 @@ const EVAL_DOMAIN = '@eval.test';
 export interface Harness {
   /** The calls of the web, its emails kept in memory: the run reads the guardian's code there. */
   api: ReturnType<typeof httpClient>;
-  records: (sessionId: string) => Promise<{ outcome: string }[]>;
+  /** How each of Tom's replies of a session ended, in their order. */
+  outcomes: (sessionId: string) => Promise<string[]>;
   /** What a student's AI calls cost, in micro-euros. */
   cost: (studentId: string) => Promise<number>;
-  /** The work after a reply (a session's title and summary), done before the next step. */
+  /** The work after a request (an email), done before the next step. */
   settled: () => Promise<void>;
 }
 
@@ -110,7 +111,7 @@ async function playTurn(harness: Harness, sessionId: string, device: string, stu
   let text = '';
   let error: string | undefined;
   try {
-    const turn = await harness.api.turn(device, sessionId, { text: student.text, ...(student.inputMode && { inputMode: student.inputMode }) });
+    const turn = await harness.api.turn(device, sessionId, { text: student.text });
     text = turn.reply;
     error = turn.status === 200 ? turn.error : `turn: HTTP ${String(turn.status)} ${turn.body}`;
   } catch (caught) {
@@ -137,8 +138,7 @@ async function nextOf(student: Student, played: readonly Omit<TutorTurn, 'record
 
 /**
  * A conversation played at a class by a fresh student, each message from `student` after Tom's
- * last reply, each turn with the record the server stored, and what the student's calls cost: the
- * tutor's, its title and summary included.
+ * last reply, each turn with how the server says it ended, and what the student's calls cost.
  */
 export async function playConversation(
   harness: Harness,
@@ -155,15 +155,15 @@ export async function playConversation(
     played.push(turn);
     if (turn.error !== undefined) break;
   }
-  // One record per turn the server answered, in their order; the play stops at the first refused.
-  const records = await harness.records(sessionId);
+  // One outcome per turn the server answered, in their order; the play stops at the first refused.
+  const outcomes = await harness.outcomes(sessionId);
   const transcript = {
     scenarioId,
     exerciseId,
     repetition,
     turns: played.map((turn, index) => {
-      const record = records[index];
-      return { ...turn, record: record ? { outcome: record.outcome } : null };
+      const outcome = outcomes[index];
+      return { ...turn, record: outcome ? { outcome } : null };
     }),
   };
   return { transcript, tutorCostMicroEur: await harness.cost(studentId) };
@@ -278,7 +278,7 @@ async function main(): Promise<number> {
       });
       return {
         api: httpClient(app, inbox, { db: database.db, auth }, config.publicUrl),
-        records: turnRecords(database.db),
+        outcomes: turnOutcomes(database.db),
         cost: studentCost(database.db),
         settled: tasks.settled,
       };

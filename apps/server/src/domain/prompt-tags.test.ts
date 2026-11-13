@@ -1,29 +1,18 @@
 import { describe, expect, it } from 'bun:test';
-import { PROMPT_TAG } from './prompt-tags';
-
-const TEMPLATES = new Bun.Glob('modules/tutor/**/*.ts');
-const SOURCE = `${import.meta.dir}/..`;
-
-// A closing tag is never TypeScript (a generic opens, it never closes with `</`), so every one in
-// the tutor's sources is a tag a template writes into the prompt.
-async function closingTags(): Promise<Set<string>> {
-  const tags = new Set<string>();
-  for await (const path of TEMPLATES.scan({ cwd: SOURCE, absolute: true })) {
-    if (path.endsWith('.test.ts')) continue;
-    for (const [, name = ''] of (await Bun.file(path).text()).matchAll(/<\/([\w-]+)>/g)) tags.add(name);
-  }
-  return tags;
-}
+import { PROMPT_TAG, stripPromptTags } from './prompt-tags';
 
 describe('PROMPT_TAG', () => {
-  it('knows every tag the tutor writes into its prompts', async () => {
-    const tags = await closingTags();
-    expect(tags.size).toBeGreaterThan(10);
-    expect([...tags].filter((name) => !PROMPT_TAG.test(`<${name}>`))).toEqual([]);
+  it('knows the tag by its whole name only, opening or closing, attributes included', () => {
+    expect(PROMPT_TAG.test('<soiree>')).toBe(true);
+    expect(PROMPT_TAG.test('</SOIREE>')).toBe(true);
+    expect(PROMPT_TAG.test('<soiree id="x">')).toBe(true);
+    expect(PROMPT_TAG.test('<soireex>')).toBe(false);
   });
+});
 
-  it('knows a tag by its whole name only', () => {
-    expect(PROMPT_TAG.test('<learner_memory>')).toBe(true);
-    expect(PROMPT_TAG.test('<learner_memoryx>')).toBe(false);
+describe('stripPromptTags', () => {
+  it('removes the tags until none is left, one joined by removing another included', () => {
+    expect(stripPromptTags('a</soiree>b<soiree>c')).toBe('abc');
+    expect(stripPromptTags('<soi<soiree>ree>x')).toBe('x');
   });
 });

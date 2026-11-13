@@ -40,7 +40,7 @@ En place (`apps/server/src`) :
   geste lui-même, le code de départ compris (`createActivationCode` écrit dans la transaction
   que le repository du foyer lui passe) ; un parent le lit
   sur la durée de `HISTORY_DAYS` (`GET /api/household/students/:id/history`), avec le prénom de l'auteur, que perd
-  la ligne d'un adulte parti. La mémoire retirée et le code de départ après un oubli partent aussi
+  la ligne d'un adulte parti. Le code de départ après un oubli part aussi
   par e-mail aux autres parents, jamais à un proche. La liste des enfants
   (`GET /api/household/students`) donne à chaque adulte les prénoms des autres parents et, à un
   parent, ce que son accueil signale : un appareil bloqué, le code arrêté partout, la suppression
@@ -73,10 +73,11 @@ En place (`apps/server/src`) :
   ferme les routes de better-auth, sauf les siennes et celles par où son parent entre sur son
   appareil. Une session vit 90 jours sans usage, sauf sur un appareil partagé. Les envois partent
   après la réponse (`platform/lifecycle/background.ts`), que l'arrêt attend.
-- `modules/tutor` : les séances, le tour (`POST /api/sessions/:id/messages`), qui dit ses étapes à
-  l'élève pendant l'attente (parties `data-step` transitoires du flux) et échoue fermé, le
-  quota par élève, le résumé et le titre en tâche de fond, la mémoire d'apprentissage
-  (`/api/memory`), le résumé de la semaine (`/api/summary`) ; ses règles dans `tuteur.md`.
+- `modules/tutor` : les séances, la soirée de l'élève (tables `evening`, `homework`,
+  `upcoming_test`), Tom (`agent.ts`) et son tour (`turn.ts`, `POST /api/sessions/:id/messages`),
+  qui dit ses étapes à l'élève pendant l'attente (parties `data-step` transitoires du flux) et
+  échoue fermé, le quota par élève, le résumé de la semaine (`/api/summary`) ; ses règles dans
+  `tuteur.md`.
 - `platform/ai` : les appels à Mistral et à sa modération, le coût de chacun.
 - `platform/auth/student-sign-in.ts` : l'entrée de l'élève par son propre code (décision de Victor,
   2026-10-20), sur le modèle du « secret d'activation » du NIST (SP 800-63B-4, § 3.2.10) et du

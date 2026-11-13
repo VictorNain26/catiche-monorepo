@@ -8,7 +8,6 @@ import { DeleteStudent, DeletionAsked } from '../components/child-deletion';
 import { ChildHistory } from '../components/child-history';
 import { AdultPage } from '../components/page';
 import { WeekSummary } from '../components/week-summary';
-import { isProblem } from '../lib/api';
 import { useConfirmation } from '../lib/confirmation';
 import { formatDay } from '../lib/device';
 import { historyQuery } from '../lib/history';
@@ -23,7 +22,6 @@ import {
   askParents,
   decidesWith,
   householdMessage,
-  memoryStatus,
   removeAdult,
   studentDevicesQuery,
   studentSchema,
@@ -36,8 +34,7 @@ import {
 /**
  * « Gérer [prénom] » (A7). For a parent: who decides with them; until a device holds the child's
  * profile, the page opens on their devices, with the way to add one (A4); then their week; their
- * devices; their forgotten code; their adults; and, folded under « Plus », their memory, their name
- * and class, the history and their account, whose deletion asked shows at the top. Two columns on a computer. For a relative: the week,
+ * devices; their forgotten code; their adults; and, folded under « Plus », their name and class, the history and their account, whose deletion asked shows at the top. Two columns on a computer. For a relative: the week,
  * whom to ask for a device, and their way out.
  */
 export const Route = createFileRoute('/foyer/$studentId')({
@@ -144,9 +141,6 @@ function ParentView({ child }: { child: Student }) {
           <ChildAdults child={child} />
           <Fold title="Plus">
             <div className="flex flex-col gap-6">
-              <Section title="Ce que Tom retient" level={3}>
-                <Memory child={child} />
-              </Section>
               <Section title="Son prénom et sa classe" level={3}>
                 <EditStudent child={child} />
               </Section>
@@ -258,66 +252,6 @@ function ChildAdults({ child }: { child: Student }) {
         Inviter un adulte
       </Button>
     </Section>
-  );
-}
-
-function Memory({ child }: { child: Student }) {
-  const queryClient = useQueryClient();
-  const withdrawal = useConfirmation();
-  const propose = useMutation({
-    mutationFn: (memoryProposed: boolean) => updateStudent(child.id, { memoryProposed }),
-    onSuccess: () => {
-      withdrawal.close();
-      return queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey });
-    },
-    // Refused, the child may have turned 15 meanwhile: the page reads it again.
-    onError: () => queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey }),
-  });
-
-  return (
-    <>
-      <p className="text-muted-foreground">{memoryStatus(child)}</p>
-      {propose.error && (
-        <Banner
-          tone="error"
-          title={isProblem(propose.error, 'FORBIDDEN') ? `À partir de 15 ans, c’est ${child.name} qui décide.` : householdMessage(propose.error)}
-        />
-      )}
-      {!child.memory.decidesAlone &&
-        (withdrawal.confirming ? (
-          <>
-            <Banner
-              tone="warning"
-              focusOnMount
-              title={`Tom oubliera ce qu’il retient de ${child.name}, et lui reposera la question si vous la proposez de nouveau.`}
-            />
-            <Button
-              disabled={propose.isPending}
-              onClick={() => {
-                propose.mutate(false);
-              }}
-            >
-              Retirer et effacer
-            </Button>
-            <Button variant="tonal" onClick={withdrawal.cancel}>
-              Annuler
-            </Button>
-          </>
-        ) : (
-          <Button
-            ref={withdrawal.opener('confirm')}
-            // Withdrawing erases what Tom keeps, a grave gesture; proposing is not.
-            variant={child.memory.proposed ? 'outline' : 'tonal'}
-            disabled={propose.isPending}
-            onClick={() => {
-              if (child.memory.proposed) withdrawal.open('confirm');
-              else propose.mutate(true);
-            }}
-          >
-            {child.memory.proposed ? 'Retirer' : `Proposer à ${child.name}`}
-          </Button>
-        ))}
-    </>
   );
 }
 

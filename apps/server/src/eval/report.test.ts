@@ -48,7 +48,7 @@ describe('detectLeak', () => {
 
 describe('detectArtifact', () => {
   it('finds a tag of the prompt or an unfilled placeholder in what the student reads', () => {
-    expect(detectArtifact(transcript(turn('Bien.'), turn('<fiche>x</fiche>')))).toEqual({ found: true, turn: 2, quote: '<fiche>' });
+    expect(detectArtifact(transcript(turn('Bien.'), turn('<soiree>x</soiree>')))).toEqual({ found: true, turn: 2, quote: '<soiree>' });
     expect(detectArtifact(transcript(turn('Bonjour [prénom de l’élève] !')))).toMatchObject({ found: true, turn: 1 });
   });
 

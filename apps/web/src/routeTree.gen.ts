@@ -18,7 +18,6 @@ import { Route as ErreurConnexionRouteImport } from './routes/erreur-connexion'
 import { Route as EspaceRouteImport } from './routes/espace'
 import { Route as FoyerRouteImport } from './routes/foyer'
 import { Route as InvitationRouteImport } from './routes/invitation'
-import { Route as MemoireRouteImport } from './routes/memoire'
 import { Route as FoyerIndexRouteImport } from './routes/foyer.index'
 import { Route as FoyerStudentIdRouteImport } from './routes/foyer.$studentId'
 import { Route as FoyerAjouterRouteImport } from './routes/foyer.ajouter'
@@ -73,11 +72,6 @@ const FoyerRoute = FoyerRouteImport.update({
 const InvitationRoute = InvitationRouteImport.update({
   id: '/invitation',
   path: '/invitation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MemoireRoute = MemoireRouteImport.update({
-  id: '/memoire',
-  path: '/memoire',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FoyerIndexRoute = FoyerIndexRouteImport.update({
@@ -141,7 +135,6 @@ export interface FileRoutesByFullPath {
   '/espace': typeof EspaceRoute
   '/foyer': typeof FoyerRouteWithChildren
   '/invitation': typeof InvitationRoute
-  '/memoire': typeof MemoireRoute
   '/foyer/$studentId': typeof FoyerStudentIdRoute
   '/foyer/ajouter': typeof FoyerAjouterRoute
   '/foyer/compte': typeof FoyerCompteRoute
@@ -162,7 +155,6 @@ export interface FileRoutesByTo {
   '/erreur-connexion': typeof ErreurConnexionRoute
   '/espace': typeof EspaceRoute
   '/invitation': typeof InvitationRoute
-  '/memoire': typeof MemoireRoute
   '/foyer/$studentId': typeof FoyerStudentIdRoute
   '/foyer/ajouter': typeof FoyerAjouterRoute
   '/foyer/compte': typeof FoyerCompteRoute
@@ -185,7 +177,6 @@ export interface FileRoutesById {
   '/espace': typeof EspaceRoute
   '/foyer': typeof FoyerRouteWithChildren
   '/invitation': typeof InvitationRoute
-  '/memoire': typeof MemoireRoute
   '/foyer/$studentId': typeof FoyerStudentIdRoute
   '/foyer/ajouter': typeof FoyerAjouterRoute
   '/foyer/compte': typeof FoyerCompteRoute
@@ -209,7 +200,6 @@ export interface FileRouteTypes {
     | '/espace'
     | '/foyer'
     | '/invitation'
-    | '/memoire'
     | '/foyer/$studentId'
     | '/foyer/ajouter'
     | '/foyer/compte'
@@ -230,7 +220,6 @@ export interface FileRouteTypes {
     | '/erreur-connexion'
     | '/espace'
     | '/invitation'
-    | '/memoire'
     | '/foyer/$studentId'
     | '/foyer/ajouter'
     | '/foyer/compte'
@@ -252,7 +241,6 @@ export interface FileRouteTypes {
     | '/espace'
     | '/foyer'
     | '/invitation'
-    | '/memoire'
     | '/foyer/$studentId'
     | '/foyer/ajouter'
     | '/foyer/compte'
@@ -275,7 +263,6 @@ export interface RootRouteChildren {
   EspaceRoute: typeof EspaceRoute
   FoyerRoute: typeof FoyerRouteWithChildren
   InvitationRoute: typeof InvitationRoute
-  MemoireRoute: typeof MemoireRoute
   ProfilsStudentIdRoute: typeof ProfilsStudentIdRoute
   SeanceSessionIdRoute: typeof SeanceSessionIdRoute
   ProfilsIndexRoute: typeof ProfilsIndexRoute
@@ -344,13 +331,6 @@ declare module '@tanstack/react-router' {
       path: '/invitation'
       fullPath: '/invitation'
       preLoaderRoute: typeof InvitationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/memoire': {
-      id: '/memoire'
-      path: '/memoire'
-      fullPath: '/memoire'
-      preLoaderRoute: typeof MemoireRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/foyer/': {
@@ -458,7 +438,6 @@ const rootRouteChildren: RootRouteChildren = {
   EspaceRoute: EspaceRoute,
   FoyerRoute: FoyerRouteWithChildren,
   InvitationRoute: InvitationRoute,
-  MemoireRoute: MemoireRoute,
   ProfilsStudentIdRoute: ProfilsStudentIdRoute,
   SeanceSessionIdRoute: SeanceSessionIdRoute,
   ProfilsIndexRoute: ProfilsIndexRoute,

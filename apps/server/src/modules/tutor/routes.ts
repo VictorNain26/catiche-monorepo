@@ -9,34 +9,33 @@ import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import type { Logger } from 'pino';
 import { z } from 'zod';
-import { MEMORY_ANSWERS } from '../../domain/memory-consent';
 import type { Auth } from '../../platform/auth/auth';
 import { requireSession, type SessionEnv } from '../../platform/auth/session';
 import { Problem } from '../../platform/http/problem';
 import { jsonBody, uuidParam } from '../../platform/http/validate';
-import { sanitize } from './core/fences';
-import { PHOTO_MEDIA_TYPES } from './core/photo';
 import type { TutorService } from './service';
-
-const tooLarge = (): never => {
-  throw new Problem('PAYLOAD_TOO_LARGE', 'La photo dépasse 3 Mo.');
-};
 
 // The calls of a turn can leave the connection silent past Bun's idle timeout (30 s, main.ts).
 const KEEP_ALIVE_MS = 10_000;
 const MAX_CHARS = 4000;
+// Four bytes a character at most, and the JSON around: past it, 413 before any parsing.
+const MAX_BODY_BYTES = 4 * MAX_CHARS + 1024;
 
-// The web sends a photo cut to 1 600 px in JPEG, well under this: past it, 413 before any parsing.
-const MAX_BODY_BYTES = 3 * 1024 * 1024;
+const tooLarge = (): never => {
+  throw new Problem('PAYLOAD_TOO_LARGE', 'Le message dépasse 4 000 caractères.');
+};
 
-const turnBody = z
-  .object({
-    text: z.string().transform(sanitize).pipe(z.string().trim().max(MAX_CHARS)).default(''),
-    inputMode: z.enum(['text', 'voice']).default('text'),
-    /** A photo of the homework, read by the model and never kept (core/photo.ts). */
-    image: z.object({ mediaType: z.enum(PHOTO_MEDIA_TYPES), data: z.base64() }).optional(),
-  })
-  .refine((body) => body.text !== '' || body.image !== undefined, 'un message ou une photo');
+/** The text without NUL, the C0 controls and DEL, which Postgres' jsonb refuses: tabs and line breaks stay. */
+function sanitize(text: string): string {
+  return Array.from(text)
+    .filter((char) => {
+      const code = char.codePointAt(0) ?? 0;
+      return code === 0x09 || code === 0x0a || code === 0x0d || (code >= 0x20 && code !== 0x7f);
+    })
+    .join('');
+}
+
+const turnBody = z.object({ text: z.string().transform(sanitize).pipe(z.string().trim().min(1).max(MAX_CHARS)) });
 
 export function tutorRoutes({ auth, service, logger }: { auth: Auth; service: TutorService; logger: Logger }) {
   return new Hono<SessionEnv>()
@@ -44,9 +43,8 @@ export function tutorRoutes({ auth, service, logger }: { auth: Auth; service: Tu
     .post('/', async (c) => c.json(await service.startSession(c.var.userId), 201))
     .get('/', async (c) => c.json(await service.listSessions(c.var.userId)))
     .get('/:id/messages', uuidParam('id'), async (c) => c.json(await service.listMessages(c.var.userId, c.req.valid('param').id)))
-    .post('/:id/messages', bodyLimit({ maxSize: MAX_BODY_BYTES, onError: () => tooLarge() }), uuidParam('id'), jsonBody(turnBody), async (c) => {
-      const { image, ...message } = c.req.valid('json');
-      const input = { ...message, ...(image && { image: { mediaType: image.mediaType, data: Uint8Array.from(Buffer.from(image.data, 'base64')) } }) };
+    .post('/:id/messages', bodyLimit({ maxSize: MAX_BODY_BYTES, onError: tooLarge }), uuidParam('id'), jsonBody(turnBody), async (c) => {
+      const { text: input } = c.req.valid('json');
       const opened = await service.openTurn(c.var.userId, c.req.valid('param').id, input);
       return createUIMessageStreamResponse({
         keepAliveMs: KEEP_ALIVE_MS,
@@ -67,30 +65,6 @@ export function tutorRoutes({ auth, service, logger }: { auth: Auth; service: Tu
           },
         }),
       });
-    });
-}
-
-const memoryAnswer = z.object({ answer: z.enum(MEMORY_ANSWERS) });
-
-/**
- * /api/memory: what Tom keeps of the signed-in student (`docs/tuteur.md` § 5),
- * their answer to it, and its erasure, all of it or one notion understood.
- */
-export function memoryRoutes({ auth, service }: { auth: Auth; service: TutorService }) {
-  return new Hono<SessionEnv>()
-    .use(requireSession(auth))
-    .get('/', async (c) => c.json(await service.memory(c.var.userId)))
-    .post('/answer', jsonBody(memoryAnswer), async (c) => {
-      await service.answerMemory(c.var.userId, c.req.valid('json').answer);
-      return c.json(await service.memory(c.var.userId));
-    })
-    .delete('/', async (c) => {
-      await service.resetMemory(c.var.userId);
-      return c.body(null, 204);
-    })
-    .delete('/notions/:notionId', async (c) => {
-      await service.resetNotion(c.var.userId, c.req.param('notionId'));
-      return c.body(null, 204);
     });
 }
 
