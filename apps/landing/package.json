@@ -13,11 +13,11 @@
     "test": "bun test src"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.7.4",
+    "@astrojs/sitemap": "^3.7.6",
     "@lucide/astro": "^1.52.0",
     "@repo/tokens": "workspace:*",
     "@repo/ui": "workspace:*",
-    "astro": "^7.4.11"
+    "astro": "^7.4.13"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
