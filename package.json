@@ -30,9 +30,9 @@
   },
   "engines": {
     "node": ">=24",
-    "bun": ">=1.4.4"
+    "bun": ">=1.4.5"
   },
-  "packageManager": "bun@1.4.4",
+  "packageManager": "bun@1.4.5",
   "workspaces": [
     "apps/*",
     "packages/*"

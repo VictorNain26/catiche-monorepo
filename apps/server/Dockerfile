@@ -6,7 +6,7 @@
 # bundler has no plugin for @tanstack/router-plugin nor vite-plugin-pwa; bun only installs.
 FROM node:24-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20 AS web
 
-COPY --from=oven/bun:1.4.4-slim@sha256:1846adf22496bd711036aae8be147e57bdebbaea2e5264e3e0b5af1db187d9a4 /usr/local/bin/bun /usr/local/bin/bun
+COPY --from=oven/bun:1.4.5-slim@sha256:b780593f3e10918cbdaec3d5a08d52224b9198069a65eb47812085c2ec007643 /usr/local/bin/bun /usr/local/bin/bun
 
 WORKDIR /app
 COPY package.json bun.lock bunfig.toml ./
@@ -29,7 +29,7 @@ WORKDIR /app/apps/web
 RUN bun run build && test -f dist/index.html -a -f dist/sw.js
 
 # Stage 2: the server's bundles. The CI typechecks and lints; this stage only builds.
-FROM oven/bun:1.4.4-slim@sha256:1846adf22496bd711036aae8be147e57bdebbaea2e5264e3e0b5af1db187d9a4 AS build
+FROM oven/bun:1.4.5-slim@sha256:b780593f3e10918cbdaec3d5a08d52224b9198069a65eb47812085c2ec007643 AS build
 
 WORKDIR /app
 COPY package.json bun.lock bunfig.toml ./
@@ -47,7 +47,7 @@ ENV NODE_ENV=production
 RUN bun run build && test -f dist/main.js -a -f dist/migrate.js -a -f dist/invite.js
 
 # Stage 3: production.
-FROM oven/bun:1.4.4-slim@sha256:1846adf22496bd711036aae8be147e57bdebbaea2e5264e3e0b5af1db187d9a4 AS production
+FROM oven/bun:1.4.5-slim@sha256:b780593f3e10918cbdaec3d5a08d52224b9198069a65eb47812085c2ec007643 AS production
 
 ENV NODE_ENV=production
 ENV WEB_DIST_DIR=/app/apps/web/dist
